@@ -1,0 +1,41 @@
+import React, { ReactNode } from 'react';
+import {
+	DialogBody,
+	DialogCloseTrigger,
+	DialogContent,
+	DialogRoot,
+	DialogTrigger,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+
+type ConditionalValue<T> = T | { base?: T; sm?: T; md?: T; lg?: T; xl?: T };
+
+interface Props {
+	trigger: ReactNode;
+	children: JSX.Element;
+	title: string;
+	size?: ConditionalValue<'lg' | 'sm' | 'md' | 'xl' | 'xs' | 'cover' | 'full' | undefined>;
+}
+
+export default function CenteredModal({ trigger, children, title, size = 'lg' }: Props) {
+	return (
+		<DialogRoot
+			placement='center'
+			motionPreset='slide-in-bottom'
+			size={size}
+			scrollBehavior='inside'
+		>
+			<DialogTrigger asChild>{trigger}</DialogTrigger>
+			<DialogContent bg='bg.tertiary' minWidth='350px'>
+				<DialogHeader>
+					<DialogTitle fontWeight='medium' borderBottom='1px solid' borderColor='border' pb={2}>
+						{title}
+					</DialogTitle>
+				</DialogHeader>
+				<DialogBody>{children}</DialogBody>
+				<DialogCloseTrigger borderColor={{ _hover: 'border' }} />
+			</DialogContent>
+		</DialogRoot>
+	);
+}

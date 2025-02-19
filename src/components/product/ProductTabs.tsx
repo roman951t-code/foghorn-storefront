@@ -1,0 +1,55 @@
+import { Tabs, Flex } from '@chakra-ui/react';
+import { useTranslations } from 'next-intl';
+import AboutTab from './AboutTab';
+import CharacteristicsTab from './CharacteristicsTab';
+import FeedbackTab from './FeedbackTab';
+
+export default function ProductTabs() {
+	const t = useTranslations('Products');
+
+	const items = [
+		{
+			title: t('about'),
+			content: <AboutTab />,
+		},
+		{
+			title: t('characteristics'),
+			content: <CharacteristicsTab />,
+		},
+		{
+			title: t('feedback'),
+			content: <FeedbackTab />,
+		},
+	];
+
+	return (
+		<Flex mt='4'>
+			<Tabs.Root mt='4' defaultValue={t('about')} width='full' colorPalette='orange' fitted>
+				<Tabs.List mb='4'>
+					{items.map((item, index) => (
+						<Tabs.Trigger key={index} value={item.title} fontSize='md'>
+							{item.title}
+						</Tabs.Trigger>
+					))}
+				</Tabs.List>
+				{items.map((item, index) => (
+					<Tabs.Content
+						key={index}
+						value={item.title}
+						inset='0'
+						_open={{
+							animationName: 'fade-in, scale-in',
+							animationDuration: '300ms',
+						}}
+						_closed={{
+							animationName: 'fade-out, scale-out',
+							animationDuration: '120ms',
+						}}
+					>
+						{item.content}
+					</Tabs.Content>
+				))}
+			</Tabs.Root>
+		</Flex>
+	);
+}

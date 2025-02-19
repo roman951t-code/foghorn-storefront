@@ -1,0 +1,93 @@
+import { FiTrash2, FiShoppingCart } from 'react-icons/fi';
+import { IconButton, Image, Stack, Flex, Button, Icon, Stat } from '@chakra-ui/react';
+import { useTranslations } from 'next-intl';
+import { EmptyState } from '@/components/ui/empty-state';
+import CartOrderCard from '../../reusable/cards/CartOrderCard';
+import CenteredModal from '../../dialogs/CenteredModal';
+
+const emptyCart = '/assets/images/emptyCart.png';
+
+const CartBtn = () => (
+	<IconButton
+		aria-label='Cart'
+		size='md'
+		variant='ghost'
+		color='main.lightOnly'
+		rounded='full'
+		colorPalette='green'
+		bg={{ _hover: 'colorPalette.600' }}
+	>
+		<FiShoppingCart />
+	</IconButton>
+);
+
+export default function Cart() {
+	const headT = useTranslations('Header');
+	const prodT = useTranslations('Products');
+
+	const isCartEmpty = false;
+
+	return (
+		<CenteredModal title={headT('cart')} trigger={<CartBtn />} size={isCartEmpty ? 'md' : 'lg'}>
+			{isCartEmpty ? (
+				<Stack direction='column'>
+					<Image
+						src={emptyCart}
+						fit='cover'
+						alt='empty cart'
+						width='200px'
+						margin='20px auto 20px 25%'
+					/>
+					<EmptyState
+						paddingBlock='0'
+						paddingBottom={8}
+						title={headT('emptyCart')}
+						description={headT('emptyCartDescr')}
+					/>
+				</Stack>
+			) : (
+				<>
+					<Flex align='center' py={3} justifyContent='space-between'>
+						<Flex justifyContent='flex-start' gap={6} direction='column'>
+							<Stat.Root>
+								<Stat.Label fontSize='mdg'>{prodT('totalAmount')}</Stat.Label>
+								<Stat.ValueText w='124px' fontSize='3xl'>
+									55 699 ₴
+								</Stat.ValueText>
+							</Stat.Root>
+							<Button
+								bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+								color='black'
+								variant='solid'
+							>
+								{headT('order')}
+							</Button>
+						</Flex>
+						<IconButton
+							size='lg'
+							aria-label='Cart'
+							variant='ghost'
+							rounded='full'
+							colorPalette='gray'
+							color='colorPalette.500'
+							transition='all 0.2s ease-in-out'
+							_hover={{
+								bg: 'colorPalette.500',
+								color: 'main.lightOnly',
+							}}
+						>
+							<Icon fontSize='26px'>
+								<FiTrash2 />
+							</Icon>
+						</IconButton>
+					</Flex>
+					<Stack direction='column' overflowY='auto' gap={4} my={4} maxHeight='650px'>
+						<CartOrderCard />
+						<CartOrderCard />
+						<CartOrderCard />
+					</Stack>
+				</>
+			)}
+		</CenteredModal>
+	);
+}
