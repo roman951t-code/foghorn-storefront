@@ -1,4 +1,4 @@
-import { Flex, Heading, Card, VStack, Text } from '@chakra-ui/react';
+import { Flex, Card, VStack, Text } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { Radio, RadioGroup } from '@/components/ui/radio';
 

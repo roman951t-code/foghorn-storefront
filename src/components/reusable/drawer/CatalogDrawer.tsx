@@ -39,6 +39,7 @@ export default function CatalogDrawer() {
 					value={category.name.toLowerCase()}
 					borderBottom='1px dotted'
 					borderBottomColor='border.dark'
+					mb='4'
 				>
 					<AccordionItemTrigger fontWeight='medium' textStyle='2xl' color='main'>
 						{category.name}

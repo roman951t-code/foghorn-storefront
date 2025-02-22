@@ -54,7 +54,7 @@ export default function Header() {
 					mx='auto'
 					width='100%'
 					maxWidth='1312px'
-					gap={4}
+					gap={{ base: 0, sm: 4 }}
 				>
 					<CatalogBtn hideBelow='sm' fullText={false} />
 					<SearchInput placeholder={t('search')} />

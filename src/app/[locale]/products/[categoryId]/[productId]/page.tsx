@@ -6,11 +6,15 @@ import ProductsSection from '@/components/pages/main/ProductsSection';
 import SubscribeSection from '@/components/pages/main/SubscribeSection';
 import ProductTabs from '@/components/product/ProductTabs';
 
-export default function ProductDetail() {
+interface Props {
+	params: { category: string; subcategory: string; productId: string };
+}
+
+export default function ProductDetail({ params }: Props) {
 	const t = useTranslations('Products');
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>
-			<Breadcrumbs />
+			<Breadcrumbs {...params} />
 			{/* <Flex hideBelow='md' mt='4'>
 				<CatalogBtn fullText />
 			</Flex> */}

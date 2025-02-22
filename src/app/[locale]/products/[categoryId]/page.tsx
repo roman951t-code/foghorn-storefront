@@ -8,18 +8,20 @@ import ProductsGrid from '@/components/pages/products/ProductsGrid';
 import FiltersSidebar from '@/components/pages/products/FiltersSidebar';
 import ProductsSection from '@/components/pages/main/ProductsSection';
 
-export default function Products() {
+interface Props {
+	params: { category: string; subcategory: string };
+}
+
+export default function Subcategory({ params }: Props) {
 	const t = useTranslations('Products');
+	const { subcategory = 'Технika' } = params;
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<Breadcrumbs />
+			<Breadcrumbs {...params} />
 			<Heading as='h1' size='4xl' fontWeight='medium'>
-				Меблі та техніка
+				{subcategory}
 			</Heading>
-			<Flex hideFrom='lg' justifyContent='space-between'>
-				<Box>
-					<CatalogBtn hideBelow='md' fullText />
-				</Box>
+			<Flex hideFrom='lg' justifyContent='flex-end'>
 				<FiltersSidebar />
 			</Flex>
 

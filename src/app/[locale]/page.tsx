@@ -12,16 +12,16 @@ export default function Main() {
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} direction='column'>
-			{/* <Box hideFrom='sm' mb='24px'>
+			<Box hideFrom='sm' mb='24px'>
 				<CatalogBtn fullText />
 			</Box>
 			<CatalogPanel />
-			<ProductsSection title={t('popular')} />
+			{/*<ProductsSection title={t('popular')} />
 			<ProductsSection title={t('new')} />
 			<ProductsSection title={t('discount')} />
 			<ProductsSection title={t('promotional')} />
 			<ProductsSection title={t('viewed')} /> */}
-			<SubscribeSection />
+			{/* <SubscribeSection /> */}
 		</Flex>
 	);
 }

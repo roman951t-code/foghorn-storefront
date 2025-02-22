@@ -132,6 +132,7 @@ export default function CategoriesPanel() {
 				))}
 			</VStack>
 			<Promo />
+
 			<CategoryDetails category={activeCategory} />
 		</Flex>
 	);
