@@ -101,7 +101,9 @@ const config = defineConfig({
 		form: {
 			width: '100%',
 		},
-
+		svg: {
+			display: 'inline',
+		},
 		'.chakra-card__root .chakra-button svg': {
 			height: '22px !important',
 			width: '22px !important',
@@ -152,6 +154,12 @@ const config = defineConfig({
 		},
 		'.thumbsSlider .swiper-pagination': {
 			bottom: '0 !important',
+		},
+		'.chakra-tabs__trigger:is([aria-selected=true], [data-selected])[data-orientation=vertical]': {
+			textDecoration: 'underline',
+			textUnderlineOffset: '4px !important',
+			'--mix-textDecorationColor': 'color-mix(in srgb, currentColor 40%, transparent)',
+			textDecorationColor: 'var(--mix-textDecorationColor, currentColor) !important',
 		},
 	},
 });

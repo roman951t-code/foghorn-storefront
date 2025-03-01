@@ -24,7 +24,15 @@ export default function ProductTabs() {
 
 	return (
 		<Flex mt='4'>
-			<Tabs.Root mt='4' defaultValue={t('about')} width='full' colorPalette='orange' fitted>
+			<Tabs.Root
+				mt='4'
+				defaultValue={t('about')}
+				width='full'
+				colorPalette='orange'
+				lazyMount
+				unmountOnExit
+				fitted
+			>
 				<Tabs.List mb='4'>
 					{items.map((item, index) => (
 						<Tabs.Trigger key={index} value={item.title} fontSize='md'>
