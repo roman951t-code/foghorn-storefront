@@ -12,38 +12,38 @@ export default function UserLinks() {
 
 	return (
 		<Stack gap={6}>
-			<LocaleNavLink href='#' text='Роман Онищенко'>
-				<Icon size='md'>
+			<LocaleNavLink href='/cabinet' text='Роман Онищенко'>
+				<Icon size='md' mr='2'>
 					<LuUserRoundCog />
 				</Icon>
 			</LocaleNavLink>
 
-			<LocaleNavLink href='#' text={t('myOrders')}>
-				<Icon size='md'>
+			<LocaleNavLink href='/cabinet/orders' text={t('myOrders')}>
+				<Icon size='md' mr='2'>
 					<AiOutlineUnorderedList />
 				</Icon>
 			</LocaleNavLink>
 
-			<LocaleNavLink href='#' text={t('myFeedback')}>
-				<Icon size='md'>
+			<LocaleNavLink href='/cabinet/feedback' text={t('myFeedback')}>
+				<Icon size='md' mr='2'>
 					<LuMessageSquareMore />
 				</Icon>
 			</LocaleNavLink>
 
-			<LocaleNavLink href='#' text={t('wishList')}>
-				<Icon size='md'>
+			<LocaleNavLink href='/cabinet/wishlist' text={t('wishList')}>
+				<Icon size='md' mr='2'>
 					<FiHeart />
 				</Icon>
 			</LocaleNavLink>
 
-			<LocaleNavLink href='#' text={t('reviewedProducts')}>
-				<Icon size='md'>
+			<LocaleNavLink href='/cabinet/reviewed' text={t('reviewedProducts')}>
+				<Icon size='md' mr='2'>
 					<FiEye />
 				</Icon>
 			</LocaleNavLink>
 
-			<LocaleNavLink href='#' text={t('chat')}>
-				<Icon size='md'>
+			<LocaleNavLink href='/cabinet/chat' text={t('chat')}>
+				<Icon size='md' mr='2'>
 					<GrChatOption />
 				</Icon>
 			</LocaleNavLink>

@@ -19,7 +19,7 @@ export default function CheckoutSteps() {
 			<AccordionRoot collapsible multiple defaultValue={['payment']} variant='plain'>
 				<AccordionItem mb='3' value='contacts' borderBottomColor='border.light'>
 					<AccordionItemTrigger>
-						<Heading as='h2' size='3xl' fontWeight='normal'>
+						<Heading as='h2' size='2xl' fontWeight='normal'>
 							{authT('contacts')}
 						</Heading>
 					</AccordionItemTrigger>
@@ -29,7 +29,7 @@ export default function CheckoutSteps() {
 				</AccordionItem>
 				<AccordionItem mb='3' value='shipment' borderBottomColor='border.light'>
 					<AccordionItemTrigger>
-						<Heading as='h2' size='3xl' fontWeight='normal'>
+						<Heading as='h2' size='2xl' fontWeight='normal'>
 							{t('shipment')}
 						</Heading>
 					</AccordionItemTrigger>
@@ -37,7 +37,7 @@ export default function CheckoutSteps() {
 				</AccordionItem>
 				<AccordionItem mb='3' value='payment' borderBottomColor='border.light'>
 					<AccordionItemTrigger>
-						<Heading as='h2' size='3xl' fontWeight='normal'>
+						<Heading as='h2' size='2xl' fontWeight='normal'>
 							{t('payment')}
 						</Heading>
 					</AccordionItemTrigger>

@@ -32,7 +32,7 @@ export default function CabinetLayout({ children, params }: Props) {
 			lazyMount
 			variant='line'
 		>
-			<Tabs.List mb='4' minW='214px' gap='2'>
+			<Tabs.List mb='4' minW='214px' gap='2' hideBelow='md'>
 				<Tabs.Trigger
 					pl='12px'
 					value='main'
@@ -112,12 +112,24 @@ export default function CabinetLayout({ children, params }: Props) {
 					{t('chat')}
 				</Tabs.Trigger>
 			</Tabs.List>
-			<Tabs.Content value='main'>{children}</Tabs.Content>
-			<Tabs.Content value={t('myOrders')}>{children}</Tabs.Content>
-			<Tabs.Content value={t('myFeedback')}>{children}</Tabs.Content>
-			<Tabs.Content value={t('wishList')}>{children}</Tabs.Content>
-			<Tabs.Content value={t('reviewedProducts')}>{children}</Tabs.Content>
-			<Tabs.Content value={t('chat')}>{children}</Tabs.Content>
+			<Tabs.Content w='full' pr='4' value='main'>
+				{children}
+			</Tabs.Content>
+			<Tabs.Content w='full' value={t('myOrders')}>
+				{children}
+			</Tabs.Content>
+			<Tabs.Content w='full' value={t('myFeedback')}>
+				{children}
+			</Tabs.Content>
+			<Tabs.Content w='full' value={t('wishList')}>
+				{children}
+			</Tabs.Content>
+			<Tabs.Content w='full' value={t('reviewedProducts')}>
+				{children}
+			</Tabs.Content>
+			<Tabs.Content w='full' value={t('chat')}>
+				{children}
+			</Tabs.Content>
 		</Tabs.Root>
 	);
 }

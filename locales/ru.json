@@ -30,6 +30,8 @@
 		"logOut": "Выйти",
 		"authToOrder": "Войдите для оформления заказа",
 		"contacts": "Контактные данные",
+		"deliveryAddress": "Адрес доставки",
+		"personalData": "Личные данные",
 		"yourContacts": "Ваши контактные данные",
 		"lastname": "Фамилия",
 		"phone": "Мобильный телефон"

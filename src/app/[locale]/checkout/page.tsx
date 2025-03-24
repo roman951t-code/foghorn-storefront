@@ -5,7 +5,7 @@ import OrderInfo from '@/components/pages/checkout/OrderInfo';
 export default function Checkout() {
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<Heading as='h1' size='4xl' fontWeight='medium'>
+			<Heading as='h1' size='4xl' fontWeight='normal'>
 				Оформлення замовлення
 			</Heading>
 			<Group justifyContent='space-between' align='flex-start' gap='4'>

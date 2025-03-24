@@ -19,7 +19,7 @@ const config = defineConfig({
 					primary: {
 						value: {
 							base: 'linear-gradient(90deg, rgba(234,236,238, 1) 0%, rgba(240,242,244,1) 25%, rgba(244,246, 248, 1) 50%, rgba(240,242,244,1) 75%, rgba(234,236,238, 1) 100%)',
-							_dark: '#101010',
+							_dark: '#111',
 						},
 					},
 					secondary: {
@@ -160,6 +160,17 @@ const config = defineConfig({
 			textUnderlineOffset: '4px !important',
 			'--mix-textDecorationColor': 'color-mix(in srgb, currentColor 40%, transparent)',
 			textDecorationColor: 'var(--mix-textDecorationColor, currentColor) !important',
+		},
+		'.localeLink': {
+			color: 'var(--chakra-colors-color-palette-fg) !important',
+			textDecoration: 'none',
+			textUnderlineOffset: '3px !important',
+			'--mix-textDecorationColor': 'color-mix(in srgb, currentColor 40%, transparent)',
+			textDecorationColor: 'var(--mix-textDecorationColor, currentColor) !important',
+			transition: 'all 0.2s ease-in-out',
+			_hover: {
+				textDecoration: 'underline',
+			},
 		},
 	},
 });

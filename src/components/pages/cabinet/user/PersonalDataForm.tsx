@@ -1,6 +1,6 @@
 'use client';
-
-import { Button, Input, SimpleGrid } from '@chakra-ui/react';
+import { SimpleGrid } from '@chakra-ui/react';
+import EditableInput from '@/components/reusable/inputs/EditableInput';
 import { Field } from '@/components/ui/field';
 import { useForm } from 'react-hook-form';
 
@@ -12,15 +12,20 @@ interface FormValues {
 }
 
 interface Props {
-	submitText: string;
 	emailLabel: string;
 	phoneLabel: string;
 	firstNameLabel: string;
 	lastNameLabel: string;
 }
 
-export default function ContactForm({
-	submitText,
+const initialValues = {
+	email: 'test@mail.com',
+	phone: '099-230-44-52',
+	firstName: 'Roman',
+	lastName: 'Onyshchenko',
+};
+
+export default function PersonalDataForm({
 	emailLabel,
 	phoneLabel,
 	firstNameLabel,
@@ -29,10 +34,16 @@ export default function ContactForm({
 	const {
 		register,
 		handleSubmit,
+		setValue,
 		formState: { errors, isSubmitting },
 	} = useForm<FormValues>({
+		defaultValues: initialValues,
 		mode: 'onSubmit',
 	});
+
+	const handleEditableSubmit = (field: keyof FormValues, value: string) => {
+		setValue(field, value);
+	};
 
 	const onSubmit = handleSubmit(async (data) => {
 		try {
@@ -50,26 +61,19 @@ export default function ContactForm({
 				gap='4'
 				w='100%'
 				my='4'
+				px='1'
 			>
 				<Field label={emailLabel} invalid={!!errors.email} errorText={errors.email?.message}>
-					<Input
-						{...register('email', {
-							pattern: {
-								value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-								message: 'Invalid email address',
-							},
-						})}
+					<EditableInput
+						defaultValue={initialValues.email}
+						onSubmit={(value) => handleEditableSubmit('email', value)}
 					/>
 				</Field>
 
 				<Field label={phoneLabel} invalid={!!errors.phone} errorText={errors.phone?.message}>
-					<Input
-						{...register('phone', {
-							pattern: {
-								value: /^\+?[0-9]{10,15}$/,
-								message: 'Invalid phone number',
-							},
-						})}
+					<EditableInput
+						defaultValue={initialValues.phone}
+						onSubmit={(value) => handleEditableSubmit('phone', value)}
 					/>
 				</Field>
 
@@ -78,10 +82,9 @@ export default function ContactForm({
 					invalid={!!errors.firstName}
 					errorText={errors.firstName?.message}
 				>
-					<Input
-						{...register('firstName', {
-							minLength: { value: 2, message: 'First name must be at least 2 characters' },
-						})}
+					<EditableInput
+						defaultValue={initialValues.firstName}
+						onSubmit={(value) => handleEditableSubmit('firstName', value)}
 					/>
 				</Field>
 
@@ -90,22 +93,12 @@ export default function ContactForm({
 					invalid={!!errors.lastName}
 					errorText={errors.lastName?.message}
 				>
-					<Input
-						{...register('lastName', {
-							minLength: { value: 2, message: 'Last name must be at least 2 characters' },
-						})}
+					<EditableInput
+						defaultValue={initialValues.lastName}
+						onSubmit={(value) => handleEditableSubmit('lastName', value)}
 					/>
 				</Field>
 			</SimpleGrid>
-			<Button
-				w='full'
-				bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-				color='black'
-				variant='solid'
-				mt='4'
-			>
-				{submitText}
-			</Button>
 		</form>
 	);
 }
