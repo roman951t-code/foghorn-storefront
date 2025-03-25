@@ -14,7 +14,9 @@ interface Props {
 
 export default function Subcategory({ params }: Props) {
 	const t = useTranslations('Products');
+	const sidebarT = useTranslations('Sidebar');
 	const { subcategory = 'Технika' } = params;
+
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
 			<Breadcrumbs {...params} />
@@ -22,10 +24,10 @@ export default function Subcategory({ params }: Props) {
 				{subcategory}
 			</Heading>
 			<Flex hideFrom='lg' justifyContent='flex-end'>
-				<FiltersSidebar />
+				<FiltersSidebar btnText={sidebarT('filters')} />
 			</Flex>
 
-			<Group justifyContent='space-between' align='flex-start'>
+			<Group justifyContent='space-between' align='flex-start' gap='3'>
 				<Box
 					as='aside'
 					w='20%'

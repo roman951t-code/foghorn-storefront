@@ -39,6 +39,7 @@ export default function CabinetLayout({ children, params }: Props) {
 					color='main'
 					fontWeight='normal'
 					fontSize='md'
+					textAlign='left'
 					onClick={() => handleNavigation('/cabinet')}
 				>
 					<Icon size='md'>
@@ -51,6 +52,7 @@ export default function CabinetLayout({ children, params }: Props) {
 					value={t('myOrders')}
 					color='main'
 					fontWeight='normal'
+					textAlign='left'
 					fontSize='md'
 					onClick={() => handleNavigation('/cabinet/orders')}
 				>
@@ -64,6 +66,7 @@ export default function CabinetLayout({ children, params }: Props) {
 					value={t('myFeedback')}
 					color='main'
 					fontWeight='normal'
+					textAlign='left'
 					fontSize='md'
 					onClick={() => handleNavigation('/cabinet/feedback')}
 				>
@@ -76,6 +79,7 @@ export default function CabinetLayout({ children, params }: Props) {
 					pl='12px'
 					value={t('wishList')}
 					fontWeight='normal'
+					textAlign='left'
 					color='main'
 					fontSize='md'
 					onClick={() => handleNavigation('/cabinet/wishlist')}
@@ -89,6 +93,7 @@ export default function CabinetLayout({ children, params }: Props) {
 					pl='12px'
 					value={t('reviewedProducts')}
 					color='main'
+					textAlign='left'
 					fontWeight='normal'
 					fontSize='md'
 					onClick={() => handleNavigation('/cabinet/reviewed')}
@@ -103,6 +108,7 @@ export default function CabinetLayout({ children, params }: Props) {
 					value={t('chat')}
 					color='main'
 					fontWeight='normal'
+					textAlign='left'
 					fontSize='md'
 					onClick={() => handleNavigation('/cabinet/chat')}
 				>

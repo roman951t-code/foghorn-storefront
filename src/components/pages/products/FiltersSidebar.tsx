@@ -10,7 +10,11 @@ import {
 import QuickFilters from './QuickFilters';
 import Filters from './Filters';
 
-export default function FiltersSidebar() {
+interface Props {
+	btnText: string;
+}
+
+export default function FiltersSidebar({ btnText }: Props) {
 	return (
 		<DrawerRoot placement='end'>
 			<DrawerBackdrop />
@@ -25,7 +29,7 @@ export default function FiltersSidebar() {
 					alignSelf='flex-end'
 					hideFrom='lg'
 				>
-					Фільтри
+					{btnText}
 				</Button>
 			</DrawerTrigger>
 			<DrawerContent bg='bg.tertiary' w='280px'>

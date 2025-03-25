@@ -1,5 +1,14 @@
-import { Text } from '@chakra-ui/react';
+import { VStack, Heading } from '@chakra-ui/react';
+import { useTranslations } from 'next-intl';
 
 export default function Chat() {
-	return <Text>Chat</Text>;
+	const t = useTranslations('Sidebar');
+
+	return (
+		<VStack mt='4' w='100%'>
+			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
+				{t('chat')}
+			</Heading>
+		</VStack>
+	);
 }
