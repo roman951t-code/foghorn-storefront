@@ -1,5 +1,5 @@
 'use client';
-import { Tabs, Icon } from '@chakra-ui/react';
+import { Tabs, Icon, Box } from '@chakra-ui/react';
 import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { FiHeart, FiEye } from 'react-icons/fi';
@@ -26,98 +26,100 @@ export default function CabinetLayout({ children, params }: Props) {
 		<Tabs.Root
 			mt='4'
 			defaultValue='main'
-			width='full'
 			colorPalette='orange'
 			orientation='vertical'
 			lazyMount
 			variant='line'
 		>
-			<Tabs.List mb='4' minW='214px' gap='2' hideBelow='md'>
-				<Tabs.Trigger
-					pl='12px'
-					value='main'
-					color='main'
-					fontWeight='normal'
-					fontSize='md'
-					textAlign='left'
-					onClick={() => handleNavigation('/cabinet')}
-				>
-					<Icon size='md'>
-						<LuUserRoundCog />
-					</Icon>
-					Роман Онищенко
-				</Tabs.Trigger>
-				<Tabs.Trigger
-					pl='12px'
-					value={t('myOrders')}
-					color='main'
-					fontWeight='normal'
-					textAlign='left'
-					fontSize='md'
-					onClick={() => handleNavigation('/cabinet/orders')}
-				>
-					<Icon size='md'>
-						<AiOutlineUnorderedList />
-					</Icon>
-					{t('myOrders')}
-				</Tabs.Trigger>
-				<Tabs.Trigger
-					pl='12px'
-					value={t('myFeedback')}
-					color='main'
-					fontWeight='normal'
-					textAlign='left'
-					fontSize='md'
-					onClick={() => handleNavigation('/cabinet/feedback')}
-				>
-					<Icon size='md'>
-						<LuMessageSquareMore />
-					</Icon>
-					{t('myFeedback')}
-				</Tabs.Trigger>
-				<Tabs.Trigger
-					pl='12px'
-					value={t('wishList')}
-					fontWeight='normal'
-					textAlign='left'
-					color='main'
-					fontSize='md'
-					onClick={() => handleNavigation('/cabinet/wishlist')}
-				>
-					<Icon size='md'>
-						<FiHeart />
-					</Icon>
-					{t('wishList')}
-				</Tabs.Trigger>
-				<Tabs.Trigger
-					pl='12px'
-					value={t('reviewedProducts')}
-					color='main'
-					textAlign='left'
-					fontWeight='normal'
-					fontSize='md'
-					onClick={() => handleNavigation('/cabinet/reviewed')}
-				>
-					<Icon size='md'>
-						<FiEye />
-					</Icon>
-					{t('reviewedProducts')}
-				</Tabs.Trigger>
-				<Tabs.Trigger
-					pl='12px'
-					value={t('chat')}
-					color='main'
-					fontWeight='normal'
-					textAlign='left'
-					fontSize='md'
-					onClick={() => handleNavigation('/cabinet/chat')}
-				>
-					<Icon size='md'>
-						<GrChatOption />
-					</Icon>
-					{t('chat')}
-				</Tabs.Trigger>
-			</Tabs.List>
+			<Box position='sticky' top='74px' h='100%'>
+				<Tabs.List mb='4' minW='214px' gap='2' hideBelow='md'>
+					<Tabs.Trigger
+						pl='12px'
+						value='main'
+						color='main'
+						fontWeight='normal'
+						fontSize='15px'
+						textAlign='left'
+						onClick={() => handleNavigation('/cabinet')}
+					>
+						<Icon size='md'>
+							<LuUserRoundCog />
+						</Icon>
+						Роман Онищенко
+					</Tabs.Trigger>
+					<Tabs.Trigger
+						pl='12px'
+						value={t('myOrders')}
+						color='main'
+						fontWeight='normal'
+						textAlign='left'
+						fontSize='15px'
+						onClick={() => handleNavigation('/cabinet/orders')}
+					>
+						<Icon size='md'>
+							<AiOutlineUnorderedList />
+						</Icon>
+						{t('myOrders')}
+					</Tabs.Trigger>
+					<Tabs.Trigger
+						pl='12px'
+						value={t('myFeedback')}
+						color='main'
+						fontWeight='normal'
+						textAlign='left'
+						fontSize='15px'
+						onClick={() => handleNavigation('/cabinet/feedback')}
+					>
+						<Icon size='md'>
+							<LuMessageSquareMore />
+						</Icon>
+						{t('myFeedback')}
+					</Tabs.Trigger>
+					<Tabs.Trigger
+						pl='12px'
+						value={t('wishList')}
+						fontWeight='normal'
+						textAlign='left'
+						color='main'
+						fontSize='15px'
+						onClick={() => handleNavigation('/cabinet/wishlist')}
+					>
+						<Icon size='md'>
+							<FiHeart />
+						</Icon>
+						{t('wishList')}
+					</Tabs.Trigger>
+					<Tabs.Trigger
+						pl='12px'
+						value={t('reviewedProducts')}
+						color='main'
+						textAlign='left'
+						fontWeight='normal'
+						fontSize='15px'
+						onClick={() => handleNavigation('/cabinet/reviewed')}
+					>
+						<Icon size='md'>
+							<FiEye />
+						</Icon>
+						{t('reviewedProducts')}
+					</Tabs.Trigger>
+					<Tabs.Trigger
+						pl='12px'
+						value={t('chat')}
+						color='main'
+						fontWeight='normal'
+						textAlign='left'
+						fontSize='15px'
+						onClick={() => handleNavigation('/cabinet/chat')}
+					>
+						<Icon size='md'>
+							<GrChatOption />
+						</Icon>
+						{t('chat')}
+					</Tabs.Trigger>
+				</Tabs.List>
+			</Box>
+
 			<Tabs.Content w='full' pr='4' value='main'>
 				{children}
 			</Tabs.Content>

@@ -76,7 +76,7 @@ export default function Cart() {
 								color: 'main.lightOnly',
 							}}
 						>
-							<Icon fontSize='26px'>
+							<Icon size='lg'>
 								<FiTrash2 />
 							</Icon>
 						</IconButton>

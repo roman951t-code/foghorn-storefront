@@ -7,7 +7,7 @@ export default function Reviewed() {
 	const genT = useTranslations('General');
 
 	return (
-		<VStack mt='4' w='100%'>
+		<VStack mt='4' w='100%' pr='2'>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
 				{t('reviewedProducts')}
 			</Heading>

@@ -57,20 +57,31 @@ export default function PersonalDataForm({
 		<form onSubmit={onSubmit}>
 			<SimpleGrid
 				className='productsSlider'
-				columns={{ base: 1, sm: 2, md: 1, lg: 2 }}
+				columns={{ base: 2, md: 1, lg: 2 }}
 				gap='4'
 				w='100%'
 				my='4'
 				px='1'
+				css={{ '--field-label-width': '150px' }}
 			>
-				<Field label={emailLabel} invalid={!!errors.email} errorText={errors.email?.message}>
+				<Field
+					orientation={{ base: 'vertical', md: 'horizontal' }}
+					label={emailLabel}
+					invalid={!!errors.email}
+					errorText={errors.email?.message}
+				>
 					<EditableInput
 						defaultValue={initialValues.email}
 						onSubmit={(value) => handleEditableSubmit('email', value)}
 					/>
 				</Field>
 
-				<Field label={phoneLabel} invalid={!!errors.phone} errorText={errors.phone?.message}>
+				<Field
+					orientation={{ base: 'vertical', md: 'horizontal' }}
+					label={phoneLabel}
+					invalid={!!errors.phone}
+					errorText={errors.phone?.message}
+				>
 					<EditableInput
 						defaultValue={initialValues.phone}
 						onSubmit={(value) => handleEditableSubmit('phone', value)}
@@ -78,6 +89,7 @@ export default function PersonalDataForm({
 				</Field>
 
 				<Field
+					orientation={{ base: 'vertical', md: 'horizontal' }}
 					label={firstNameLabel}
 					invalid={!!errors.firstName}
 					errorText={errors.firstName?.message}
@@ -89,6 +101,7 @@ export default function PersonalDataForm({
 				</Field>
 
 				<Field
+					orientation={{ base: 'vertical', md: 'horizontal' }}
 					label={lastNameLabel}
 					invalid={!!errors.lastName}
 					errorText={errors.lastName?.message}

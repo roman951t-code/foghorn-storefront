@@ -23,7 +23,7 @@ export default function Checkout() {
 					position='sticky'
 					top='74px'
 				>
-					{/* <OrderInfo /> */}
+					<OrderInfo />
 				</Box>
 			</Group>
 		</Flex>
