@@ -62,8 +62,8 @@ export default function FeedbackModal() {
 			title={prodT('leaveFeedback')}
 			trigger={
 				<Button
-					size='lg'
-					w='230px'
+					size='md'
+					w='210px'
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'
 					variant='solid'

@@ -2,6 +2,7 @@ import { Card, Text, Flex, Stack, Heading, Separator } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { Rating } from '@/components/ui/rating';
 import FeedbackModal from './FeedbackModal';
+
 export default function FeedbackTab() {
 	const t = useTranslations('Products');
 	return (
@@ -17,7 +18,7 @@ export default function FeedbackTab() {
 				<Card.Header p='4'>
 					<Flex justifyContent='space-between' alignItems='center'>
 						<Stack>
-							<Heading size='md'> Загалом відгуків: 5</Heading>
+							<Heading size='md'> {t('feedbackTotal')}: 5</Heading>
 							<Rating colorPalette='orange' readOnly size='xs' defaultValue={5} />
 						</Stack>
 						<FeedbackModal />

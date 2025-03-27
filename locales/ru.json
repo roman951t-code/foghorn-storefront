@@ -87,6 +87,7 @@
 		"productsInCart": "Товаров в корзине",
 		"orderSum": "Сумма заказа",
 		"discountSum": "Скидка",
-		"acceptOrder": "Подтверждаю заказ"
+		"acceptOrder": "Подтверждаю заказ",
+		"feedbackTotal": "Всего отзывов"
 	}
 }

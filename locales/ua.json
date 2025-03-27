@@ -87,6 +87,7 @@
 		"productsInCart": "Товарів у кошику",
 		"orderSum": "Сума завмовлення",
 		"discountSum": "Знижка",
-		"acceptOrder": "Підтверджую замовлення"
+		"acceptOrder": "Підтверджую замовлення",
+		"feedbackTotal": "Загалом відгуків"
 	}
 }
