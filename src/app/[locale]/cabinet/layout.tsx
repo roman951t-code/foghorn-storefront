@@ -120,7 +120,7 @@ export default function CabinetLayout({ children, params }: Props) {
 				</Tabs.List>
 			</Box>
 
-			<Tabs.Content w='full' pr='4' value='main'>
+			<Tabs.Content w='full' value='main'>
 				{children}
 			</Tabs.Content>
 			<Tabs.Content w='full' value={t('myOrders')}>

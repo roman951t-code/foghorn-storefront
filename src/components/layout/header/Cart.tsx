@@ -1,5 +1,15 @@
 import { FiTrash2, FiShoppingCart } from 'react-icons/fi';
-import { IconButton, Image, Stack, Flex, Button, Icon, Stat } from '@chakra-ui/react';
+import {
+	IconButton,
+	Image,
+	Stack,
+	Flex,
+	Button,
+	Icon,
+	Stat,
+	Float,
+	Circle,
+} from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { EmptyState } from '@/components/ui/empty-state';
 import CartOrderCard from '../../reusable/cards/CartOrderCard';
@@ -12,11 +22,17 @@ const CartBtn = () => (
 		aria-label='Cart'
 		size='md'
 		variant='ghost'
+		position='relative'
 		color='main.lightOnly'
 		rounded='full'
 		colorPalette='green'
 		bg={{ _hover: 'colorPalette.600' }}
 	>
+		<Float offset='0.5'>
+			<Circle size='4.5' bg='bg.accent' color='black' fontSize='xs' fontWeight='semibold'>
+				5
+			</Circle>
+		</Float>
 		<FiShoppingCart />
 	</IconButton>
 );
@@ -64,8 +80,7 @@ export default function Cart() {
 							</Button>
 						</Flex>
 						<IconButton
-							size='lg'
-							aria-label='Cart'
+							aria-label='Trash'
 							variant='ghost'
 							rounded='full'
 							colorPalette='gray'
@@ -81,7 +96,7 @@ export default function Cart() {
 							</Icon>
 						</IconButton>
 					</Flex>
-					<Stack direction='column' overflowY='auto' gap={4} my={4} maxHeight='650px'>
+					<Stack direction='column' overflowY='auto' gap={4} mt={4} maxHeight='650px'>
 						<CartOrderCard />
 						<CartOrderCard />
 						<CartOrderCard />

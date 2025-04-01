@@ -10,11 +10,12 @@ export default function EditableInput({ defaultValue, onSubmit }: Props) {
 		<Editable.Root defaultValue={defaultValue} onSubmit={onSubmit}>
 			<Editable.Preview textStyle='md' />
 			<Editable.Input
+				maxW='300px'
 				rounded='md'
-				fontSize='sm'
+				fontSize='md'
 				color='text'
 				bg='bg'
-				_placeholder={{ fontSize: 'sm' }}
+				_placeholder={{ fontSize: 'md' }}
 				_focus={{
 					border: '1px solid',
 					borderColor: 'main',

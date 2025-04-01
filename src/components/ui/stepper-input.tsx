@@ -14,7 +14,7 @@ export const StepperInput = React.forwardRef<HTMLDivElement, StepperInputProps>(
 				{label && <NumberInput.Label>{label}</NumberInput.Label>}
 				<HStack gap='1'>
 					<DecrementTrigger />
-					<NumberInput.ValueText textAlign='center' fontSize='lg' minW='3ch' />
+					<NumberInput.ValueText textAlign='center' fontSize='md' minW='3ch' />
 					<IncrementTrigger />
 				</HStack>
 			</NumberInput.Root>
@@ -26,7 +26,7 @@ const DecrementTrigger = React.forwardRef<HTMLButtonElement, NumberInput.Decreme
 	function DecrementTrigger(props, ref) {
 		return (
 			<NumberInput.DecrementTrigger {...props} asChild ref={ref}>
-				<IconButton variant='outline' size='sm'>
+				<IconButton variant='outline' size='xs'>
 					<LuMinus />
 				</IconButton>
 			</NumberInput.DecrementTrigger>
@@ -38,7 +38,7 @@ const IncrementTrigger = React.forwardRef<HTMLButtonElement, NumberInput.Increme
 	function IncrementTrigger(props, ref) {
 		return (
 			<NumberInput.IncrementTrigger {...props} asChild ref={ref}>
-				<IconButton variant='outline' size='sm'>
+				<IconButton variant='outline' size='xs'>
 					<LuPlus />
 				</IconButton>
 			</NumberInput.IncrementTrigger>

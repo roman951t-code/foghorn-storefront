@@ -57,12 +57,12 @@ export default function PersonalDataForm({
 		<form onSubmit={onSubmit}>
 			<SimpleGrid
 				className='productsSlider'
-				columns={{ base: 2, md: 1, lg: 2 }}
+				columns={{ base: 2, md: 1 }}
 				gap='4'
 				w='100%'
 				my='4'
 				px='1'
-				css={{ '--field-label-width': '150px' }}
+				css={{ '--field-label-width': '160px' }}
 			>
 				<Field
 					orientation={{ base: 'vertical', md: 'horizontal' }}

@@ -21,6 +21,8 @@ interface Props {
 export default function CenteredModal({ trigger, children, title, size = 'lg' }: Props) {
 	return (
 		<DialogRoot
+			unmountOnExit
+			lazyMount
 			placement='center'
 			motionPreset='slide-in-bottom'
 			size={size}
@@ -29,7 +31,14 @@ export default function CenteredModal({ trigger, children, title, size = 'lg' }:
 			<DialogTrigger asChild>{trigger}</DialogTrigger>
 			<DialogContent bg='bg.tertiary' minWidth='350px'>
 				<DialogHeader>
-					<DialogTitle fontWeight='medium' borderBottom='1px solid' borderColor='border' pb={2}>
+					<DialogTitle
+						fontSize='xl'
+						w='100%'
+						fontWeight='medium'
+						borderBottom='1px solid'
+						borderColor='border'
+						pb={2}
+					>
 						{title}
 					</DialogTitle>
 				</DialogHeader>

@@ -4,12 +4,13 @@ import { IoShareSocialOutline } from 'react-icons/io5';
 import WishList from '@/components/pages/cabinet/wishlist/WishList';
 import ProductsFilter from '@/components/pages/cabinet/wishlist/ProductsFilter';
 import { FiTrash2 } from 'react-icons/fi';
+import Pagination from '@/components/reusable/Pagination';
 
 export default function Wishlist() {
 	const t = useTranslations('Sidebar');
 
 	return (
-		<VStack mt='4' w='100%' pr='2'>
+		<VStack mt='4' w='100%' pr='3'>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
 				{t('wishList')}
 			</Heading>
@@ -60,8 +61,8 @@ export default function Wishlist() {
 					<ProductsFilter />
 				</VStack>
 			</HStack>
-
 			<WishList />
+			<Pagination />
 		</VStack>
 	);
 }

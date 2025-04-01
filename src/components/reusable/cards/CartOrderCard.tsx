@@ -20,9 +20,10 @@ export default function CartOrderCard() {
 				justifyContent='space-between'
 				direction={{ base: 'column', sm: 'row' }}
 				p={3}
+				pl={{ base: 3, sm: 0 }}
 			>
 				<Flex>
-					<Image w='140px' height='auto' src={img1} alt='Product photo' objectFit='contain' />
+					<Image w='130px' height='auto' src={img1} alt='Product photo' objectFit='contain' />
 					<Flex direction='column' gap={3} p={2}>
 						<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
 							<Link
@@ -51,10 +52,10 @@ export default function CartOrderCard() {
 					direction={{ base: 'row', sm: 'column' }}
 					justifyContent='space-between'
 					alignItems={{ base: 'center', sm: 'flex-end' }}
-					h={{ base: 'auto', sm: '180px' }}
+					h={{ base: 'auto', sm: '140px' }}
 					w={{ base: '100%', sm: 'auto' }}
 				>
-					<Group>
+					<Group mt={{ base: '3', sm: 0 }}>
 						<IconButton
 							aria-label='Favourite'
 							variant='ghost'
@@ -70,7 +71,7 @@ export default function CartOrderCard() {
 							<FiHeart />
 						</IconButton>
 						<IconButton
-							aria-label='Cart'
+							aria-label='Trash'
 							variant='ghost'
 							rounded='full'
 							colorPalette='gray'
@@ -84,7 +85,7 @@ export default function CartOrderCard() {
 							<FiTrash2 />
 						</IconButton>
 					</Group>
-					<StepperInput defaultValue='1' min={1} size='sm' />
+					<StepperInput defaultValue='1' min={1} size='xs' />
 				</Flex>
 			</Flex>
 		</Card.Root>

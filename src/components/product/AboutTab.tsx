@@ -48,7 +48,7 @@ export default function AboutTab() {
 						<HStack>
 							<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
 								<Tag.Label>{t('productIsPresent')}</Tag.Label>
-								<Tag.EndElement>
+								<Tag.EndElement mt='-3' ml='2'>
 									<HiCheck />
 								</Tag.EndElement>
 							</Tag.Root>
