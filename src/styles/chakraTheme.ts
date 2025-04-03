@@ -172,6 +172,39 @@ const config = defineConfig({
 				textDecoration: 'underline',
 			},
 		},
+		'.rce-container-input': {
+			backgroundColor: 'transparent !important',
+			minWidth: 'initial !important',
+			width: '100%',
+		},
+		'.rce-input': {
+			color: 'var(--chakra-colors-fg) !important',
+			paddingLeft: '12px !important',
+			borderStartEndRadius: '0 !important',
+			borderEndEndRadius: '0 !important',
+		},
+		'.rce-button': {
+			backgroundColor: 'var(--chakra-colors-bg-accent) !important',
+			color: 'var(--chakra-colors-black) !important',
+			fontSize: '14px !important',
+			fontWeight: '500 !important',
+			borderStartStartRadius: '0 !important',
+			borderEndStartRadius: '0 !important',
+		},
+		'.rce-mbox': {
+			backgroundColor: 'var(--chakra-colors-bg) !important',
+			padding: '14px !important',
+			minWidth: '260px !important',
+		},
+		'.rce-mbox-left-notch, .rce-mbox-right-notch': {
+			fill: 'var(--chakra-colors-bg) !important',
+		},
+		'.rce-container-mbox': {
+			overflow: 'initial !important',
+		},
+		'.rce-mbox-text, .rce-mbox-title, .rce-mbox-time': {
+			fontSize: '14px !important',
+		},
 	},
 });
 

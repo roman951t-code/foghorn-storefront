@@ -1,5 +1,6 @@
 import { VStack, Heading } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
+import ChatCard from '@/components/reusable/cards/ChatCard';
 
 export default function Chat() {
 	const t = useTranslations('Sidebar');
@@ -9,6 +10,9 @@ export default function Chat() {
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
 				{t('chat')}
 			</Heading>
+			<VStack mt='6' w='100%'>
+				<ChatCard />
+			</VStack>
 		</VStack>
 	);
 }
