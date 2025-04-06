@@ -61,14 +61,7 @@ export default function FeedbackModal() {
 		<CenteredModal
 			title={prodT('leaveFeedback')}
 			trigger={
-				<Button
-					size='md'
-					w='210px'
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-					color='black'
-					variant='solid'
-					textAlign='center'
-				>
+				<Button bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }} color='main' variant='solid'>
 					<VscFeedback /> {prodT('leaveFeedback')}
 				</Button>
 			}

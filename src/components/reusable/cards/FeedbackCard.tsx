@@ -142,6 +142,7 @@ export default function FullCheckoutCard({ feedback }: Props) {
 								<HStack
 									justifyContent={{ base: 'center', md: 'flex-end' }}
 									mt={{ base: '3', md: 0 }}
+									ml={{ base: 0, md: 2 }}
 								>
 									<FeedbackModal />
 								</HStack>

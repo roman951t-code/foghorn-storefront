@@ -1,8 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Text, Card, Tag, Separator, Flex, Accordion } from '@chakra-ui/react';
+import {
+	Text,
+	Card,
+	Tag,
+	Separator,
+	Flex,
+	Accordion,
+	Button as ChakraBtn,
+	Icon,
+} from '@chakra-ui/react';
 import { MessageBox, Input, Button } from 'react-chat-elements';
+import { IoMdAttach } from 'react-icons/io';
 import 'react-chat-elements/dist/main.css';
 
 const items = [
@@ -20,14 +30,14 @@ export default function ChatCard() {
 			position: 'left',
 			type: 'text',
 			text: 'Hello! How can I assist you?',
-			title: 'Store Support',
+			title: 'Підтримка',
 			date: new Date(),
 		},
 		{
 			position: 'right',
 			type: 'text',
 			text: 'I have a question about a product.',
-			title: 'You',
+			title: 'Ви',
 			date: new Date(),
 		},
 	]);
@@ -85,7 +95,13 @@ export default function ChatCard() {
 											<MessageBox key={index} {...msg} />
 										))}
 									</Flex>
-									<Flex px='4' pb='4'>
+									<Flex px='4' pb='4' alignItems='center'>
+										<ChakraBtn colorPalette='yellow' size='sm' color='main'>
+											<Icon size='lg'>
+												<IoMdAttach />
+											</Icon>
+										</ChakraBtn>
+
 										<Input
 											placeholder='Введіть ваше питання...'
 											value={newMessage}

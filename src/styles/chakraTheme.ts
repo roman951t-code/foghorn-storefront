@@ -194,7 +194,7 @@ const config = defineConfig({
 		'.rce-mbox': {
 			backgroundColor: 'var(--chakra-colors-bg) !important',
 			padding: '14px !important',
-			minWidth: '260px !important',
+			minWidth: '240px !important',
 		},
 		'.rce-mbox-left-notch, .rce-mbox-right-notch': {
 			fill: 'var(--chakra-colors-bg) !important',

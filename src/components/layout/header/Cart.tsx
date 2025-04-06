@@ -66,7 +66,7 @@ export default function Cart() {
 					<Flex align='center' py={3} justifyContent='space-between'>
 						<Flex justifyContent='flex-start' gap={6} direction='column'>
 							<Stat.Root>
-								<Stat.Label fontSize='mdg'>{prodT('totalAmount')}</Stat.Label>
+								<Stat.Label fontSize='sm'>{prodT('totalAmount')}</Stat.Label>
 								<Stat.ValueText w='124px' fontSize='3xl'>
 									55 699 ₴
 								</Stat.ValueText>

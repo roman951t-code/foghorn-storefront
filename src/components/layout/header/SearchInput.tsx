@@ -16,7 +16,6 @@ export default function SearchInput({ placeholder, hideBelow }: Props) {
 				variant='subtle'
 				fontSize='sm'
 				minWidth='284px'
-				color='text'
 				bg='bg'
 				_placeholder={{ fontSize: 'sm' }}
 				_focus={{
