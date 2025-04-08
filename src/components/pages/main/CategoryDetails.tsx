@@ -32,7 +32,7 @@ export default function CategoryDetails({ category }) {
 			>
 				{category.subcategories.map((subcategory) => (
 					<Box key={subcategory.title} minW='175px' maxW='32%'>
-						<Text fontWeight='semibold' textStyle='lg' mb={2}>
+						<Text fontWeight='semibold' textStyle='lg' mb={4}>
 							{subcategory.title}
 						</Text>
 						<VStack align='start'>
@@ -56,7 +56,10 @@ export default function CategoryDetails({ category }) {
 								transition='color 0.25s ease-in-out'
 								textWrap='wrap'
 								wordBreak='break-all'
-								color='main.accent'
+								color='link'
+								mt='3'
+								textDecoration='underline'
+								textUnderlineOffset='4px'
 								_focus={{ outline: 'none' }}
 							>
 								{t('seeAll')}
@@ -69,19 +72,18 @@ export default function CategoryDetails({ category }) {
 				justify='space-between'
 				flexDirection='column'
 				align='center'
-				bg='bg.dark'
+				bg='bg.light'
 				height='100%'
 				maxW='380px'
 				minW='280px'
 				position='absolute'
+				boxShadow='sm'
 				right={0}
-				border='1px dotted'
-				borderColor='gray.500'
+				border='none'
 				top={0}
 				zIndex={10}
 				p={4}
 				hideBelow='lg'
-				boxShadow='inset'
 				_after={{
 					content: `""`,
 					position: 'absolute',
@@ -96,7 +98,14 @@ export default function CategoryDetails({ category }) {
 					zIndex: -1,
 				}}
 			>
-				<Heading color='main.lightOnly' size='2xl' fontWeight='medium'>
+				<Heading
+					color='main'
+					size='2xl'
+					fontWeight='medium'
+					borderBottom='1px solid'
+					pb='1'
+					borderBottomColor='main'
+				>
 					{category.name}
 				</Heading>
 				<Button

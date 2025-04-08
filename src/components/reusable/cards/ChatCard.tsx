@@ -24,7 +24,7 @@ const items = [
 	},
 ];
 
-export default function ChatCard() {
+export default function ChatCard({ sendText, productNumText, inputPlaceholder }) {
 	const [messages, setMessages] = useState([
 		{
 			position: 'left',
@@ -76,7 +76,7 @@ export default function ChatCard() {
 						<Accordion.ItemTrigger w='100%' p='0'>
 							<Flex justifyContent='space-between' w='100%'>
 								<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
-									<Tag.Label>Номер товару: 65719</Tag.Label>
+									<Tag.Label>№ {productNumText}: 65719</Tag.Label>
 								</Tag.Root>
 								<Text color='main.disabled' textStyle='sm'>
 									12.02.2024
@@ -103,12 +103,12 @@ export default function ChatCard() {
 										</ChakraBtn>
 
 										<Input
-											placeholder='Введіть ваше питання...'
+											placeholder={`${inputPlaceholder}...`}
 											value={newMessage}
 											onChange={(e) => setNewMessage(e.target.value)}
 											onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
 										/>
-										<Button text='Надіслати' onClick={sendMessage} />
+										<Button text={sendText} onClick={sendMessage} />
 									</Flex>
 								</Flex>
 							</Accordion.ItemBody>

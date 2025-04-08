@@ -69,10 +69,13 @@ export default function CatalogDrawer() {
 										<Link
 											fontSize='md'
 											variant='plain'
-											transition='color 0.2s ease-in-out'
+											transition='color 0.25s ease-in-out'
 											textWrap='wrap'
 											wordBreak='break-all'
-											color='main.accent'
+											color='link'
+											mt='3'
+											textDecoration='underline'
+											textUnderlineOffset='4px'
 											_focus={{ outline: 'none' }}
 										>
 											{t('seeAll')}

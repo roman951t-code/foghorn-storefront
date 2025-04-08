@@ -83,6 +83,14 @@ const config = defineConfig({
 						},
 					},
 				},
+				link: {
+					DEFAULT: {
+						value: {
+							base: 'rgb(91,90,129)',
+							_dark: '{colors.gray.50}',
+						},
+					},
+				},
 			},
 		},
 	},

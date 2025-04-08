@@ -17,6 +17,7 @@ import {
 	Accordion,
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
+import FeedbackModal from '@/components/product/FeedbackModal';
 
 const img1 = '/assets/images/temp/1.webp';
 const img2 = '/assets/images/temp/2.webp';
@@ -32,6 +33,8 @@ const items = [
 
 export default function OrderCard() {
 	const t = useTranslations('Products');
+	const genT = useTranslations('General');
+
 	return (
 		<Accordion.Root collapsible defaultValue={['b']} multiple>
 			{items.map((item, index) => (
@@ -60,8 +63,8 @@ export default function OrderCard() {
 										</Stat.ValueText>
 									</Stat.Root>
 									<Text textStyle='sm' fontWeight='normal'>
-										<Highlight query='3' styles={{ fontWeight: 'semibold' }}>
-											Кількість товарів: 3
+										<Highlight query='3' styles={{ fontWeight: 'bold' }}>
+											{`${t('numOfProducts')}: 3`}
 										</Highlight>
 									</Text>
 								</VStack>
@@ -71,16 +74,16 @@ export default function OrderCard() {
 									<Image w='100px' h='auto' src={img1} alt='Product photo' objectFit='contain' />
 								</HStack>
 								<VStack
-									gap='3'
+									gap='4'
 									mt={{ base: 4, sm: 0 }}
 									justifyContent='center'
 									alignItems={{ base: 'flex-start', sm: 'flex-end' }}
 								>
 									<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
-										<Tag.Label>№ замовлення: 65719</Tag.Label>
+										<Tag.Label>№ {t('order')}: 65719</Tag.Label>
 									</Tag.Root>
 									<Text color='main' textStyle='sm'>
-										від 12.02.2024
+										{genT('from')} 12.02.2024
 									</Text>
 								</VStack>
 							</Flex>
@@ -105,15 +108,9 @@ export default function OrderCard() {
 										border='1px solid '
 										borderColor='border'
 									>
-										Залишити відгук
+										{t('repeatOrder')}
 									</Button>
-									<Button
-										bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-										color='main'
-										variant='solid'
-									>
-										Повторити замовлення
-									</Button>
+									<FeedbackModal />
 								</Flex>
 								<Stack gap='4' maxH='500px' overflowY='auto'>
 									<Separator color='border.dark' />
@@ -156,7 +153,7 @@ export default function OrderCard() {
 													variant='solid'
 													color='main.lightOnly'
 													bg='main.tertiary'
-													marginLeft='8px'
+													marginLeft='12px'
 												>
 													-150 ₴
 												</Badge>
@@ -164,7 +161,7 @@ export default function OrderCard() {
 										</Flex>
 										<Stat.Root alignSelf='flex-end' color='main'>
 											<Stat.ValueText textStyle='md' minW='42px'>
-												x 2шт
+												{`x 2${genT('units')}`}
 											</Stat.ValueText>
 										</Stat.Root>
 									</Flex>
@@ -208,7 +205,7 @@ export default function OrderCard() {
 													variant='solid'
 													color='main.lightOnly'
 													bg='main.tertiary'
-													marginLeft='8px'
+													marginLeft='12px'
 												>
 													-150 ₴
 												</Badge>

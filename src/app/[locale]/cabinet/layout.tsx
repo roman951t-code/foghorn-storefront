@@ -3,11 +3,12 @@ import { Tabs, Icon, Box } from '@chakra-ui/react';
 import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { FiHeart, FiEye } from 'react-icons/fi';
-import { AiOutlineUnorderedList } from 'react-icons/ai';
-import { LuMessageSquareMore } from 'react-icons/lu';
-import { GrChatOption } from 'react-icons/gr';
 import { LuUserRoundCog } from 'react-icons/lu';
 import { useRouter } from '@/i18n/routing';
+import { LuListChecks } from 'react-icons/lu';
+import { IoChatboxEllipsesOutline } from 'react-icons/io5';
+
+import { VscFeedback } from 'react-icons/vsc';
 
 interface Props {
 	children: ReactNode;
@@ -28,7 +29,6 @@ export default function CabinetLayout({ children, params }: Props) {
 			defaultValue='main'
 			colorPalette='orange'
 			orientation='vertical'
-			lazyMount
 			variant='line'
 		>
 			<Box position='sticky' top='74px' h='100%'>
@@ -57,7 +57,7 @@ export default function CabinetLayout({ children, params }: Props) {
 						onClick={() => handleNavigation('/cabinet/orders')}
 					>
 						<Icon size='md'>
-							<AiOutlineUnorderedList />
+							<LuListChecks />
 						</Icon>
 						{t('myOrders')}
 					</Tabs.Trigger>
@@ -71,7 +71,7 @@ export default function CabinetLayout({ children, params }: Props) {
 						onClick={() => handleNavigation('/cabinet/feedback')}
 					>
 						<Icon size='md'>
-							<LuMessageSquareMore />
+							<VscFeedback />
 						</Icon>
 						{t('myFeedback')}
 					</Tabs.Trigger>
@@ -113,7 +113,7 @@ export default function CabinetLayout({ children, params }: Props) {
 						onClick={() => handleNavigation('/cabinet/chat')}
 					>
 						<Icon size='md'>
-							<GrChatOption />
+							<IoChatboxEllipsesOutline />
 						</Icon>
 						{t('chat')}
 					</Tabs.Trigger>

@@ -10,7 +10,10 @@
 		"close": "Закрити",
 		"send": "Надіслати",
 		"save": "Зберегти",
-		"clear": "Очистити"
+		"from": "від",
+		"clear": "Очистити",
+		"units": "шт",
+		"enterYourQuestion": "Введіть Ваше питання"
 	},
 	"Header": {
 		"search": "Я шукаю",
@@ -88,6 +91,11 @@
 		"orderSum": "Сума завмовлення",
 		"discountSum": "Знижка",
 		"acceptOrder": "Підтверджую замовлення",
-		"feedbackTotal": "Загалом відгуків"
+		"feedbackTotal": "Загалом відгуків",
+		"numOfProducts": "Кількість товарів",
+		"order": "замовлення",
+		"repeatOrder": "Повторити замовлення",
+		"totalProducts": "Всього товарів",
+		"product": "товару"
 	}
 }

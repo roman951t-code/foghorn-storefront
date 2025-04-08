@@ -6,29 +6,17 @@ import '@/styles/swiper.css';
 
 export default function ViewedProducts() {
 	return (
-		<>
-			{/* <EmptyState.Root>
-            <EmptyState.Content>
-                <EmptyState.Indicator>
-                    <HiColorSwatch />
-                </EmptyState.Indicator>
-                <VStack textAlign='center'>
-                    <EmptyState.Title>No results found</EmptyState.Title>
-                </VStack>
-            </EmptyState.Content>
-        </EmptyState.Root> */}
-			<SimpleGrid
-				my='4'
-				className='productsSlider'
-				columns={{ base: 1, sm: 2, md: 3, xl: 4 }}
-				gap='2'
-			>
-				{new Array(9).fill(null).map((_, index) => (
-					<Box key={index}>
-						<ProductCard isSliderEnabled />
-					</Box>
-				))}
-			</SimpleGrid>
-		</>
+		<SimpleGrid
+			my='4'
+			className='productsSlider'
+			columns={{ base: 1, sm: 2, md: 3, xl: 4 }}
+			gap='2'
+		>
+			{new Array(9).fill(null).map((_, index) => (
+				<Box key={index}>
+					<ProductCard isSliderEnabled />
+				</Box>
+			))}
+		</SimpleGrid>
 	);
 }

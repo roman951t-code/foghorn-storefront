@@ -1,3 +1,5 @@
+'use client';
+
 import { IconButton, Image, Separator } from '@chakra-ui/react';
 import { FiMenu } from 'react-icons/fi';
 import {
@@ -10,6 +12,7 @@ import {
 	DrawerRoot,
 	DrawerTrigger,
 } from '@/components/ui/drawer';
+import { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import CatalogBtn from '../../reusable/buttons/CatalogBtn';
 import MediaContacts from '../../reusable/links/MediaContacts';
@@ -28,8 +31,14 @@ const Logo = () => {
 };
 
 export default function SidePanel() {
+	const [open, setOpen] = useState(false);
+
+	const onClose = () => {
+		setOpen(false);
+	};
+
 	return (
-		<DrawerRoot placement='start'>
+		<DrawerRoot placement='start' open={open} onOpenChange={(e) => setOpen(e.open)}>
 			<DrawerBackdrop />
 			<DrawerTrigger asChild>
 				<IconButton
@@ -58,9 +67,9 @@ export default function SidePanel() {
 					<Separator borderColor='border.light' my='5' />
 					<LogoutSection />
 					<Separator borderColor='border.light' my='5' />
-					<UserLinks />
+					<UserLinks onClose={onClose} />
 					<Separator borderColor='border.light' my='5' />
-					<CollapsibleLinks />
+					<CollapsibleLinks onClose={onClose} />
 				</DrawerBody>
 				<DrawerFooter bg='bg.secondary'>
 					<MediaContacts />

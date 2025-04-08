@@ -9,6 +9,10 @@ import {
 	Stat,
 	Float,
 	Circle,
+	VStack,
+	Separator,
+	Highlight,
+	Text,
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -65,12 +69,19 @@ export default function Cart() {
 				<>
 					<Flex align='center' py={3} justifyContent='space-between'>
 						<Flex justifyContent='flex-start' gap={6} direction='column'>
-							<Stat.Root>
-								<Stat.Label fontSize='sm'>{prodT('totalAmount')}</Stat.Label>
-								<Stat.ValueText w='124px' fontSize='3xl'>
-									55 699 ₴
-								</Stat.ValueText>
-							</Stat.Root>
+							<VStack gap='3' alignItems='flex-start'>
+								<Stat.Root>
+									<Stat.Label fontSize='sm'>{prodT('totalAmount')}</Stat.Label>
+									<Stat.ValueText w='124px' fontSize='3xl'>
+										55 699 ₴
+									</Stat.ValueText>
+								</Stat.Root>
+								<Text textStyle='sm' fontWeight='normal'>
+									<Highlight query='3' styles={{ fontWeight: 'bold' }}>
+										{`${prodT('numOfProducts')}: 3`}
+									</Highlight>
+								</Text>
+							</VStack>
 							<Button
 								bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 								color='black'

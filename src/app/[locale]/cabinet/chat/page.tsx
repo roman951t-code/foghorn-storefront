@@ -4,14 +4,20 @@ import ChatCard from '@/components/reusable/cards/ChatCard';
 
 export default function Chat() {
 	const t = useTranslations('Sidebar');
+	const genT = useTranslations('General');
+	const prodT = useTranslations('Products');
 
 	return (
-		<VStack mt='4' w='100%' pr='3'>
+		<VStack w='100%' pr='3'>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
 				{t('chat')}
 			</Heading>
 			<VStack mt='6' w='100%'>
-				<ChatCard />
+				<ChatCard
+					productNumText={prodT('product')}
+					sendText={genT('send')}
+					inputPlaceholder={genT('enterYourQuestion')}
+				/>
 			</VStack>
 		</VStack>
 	);

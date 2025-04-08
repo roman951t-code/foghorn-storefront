@@ -5,35 +5,39 @@ import {
 	AccordionRoot,
 } from '@/components/ui/accordion';
 import { useTranslations } from 'next-intl';
-import SidebarLink from './SidebarLink';
+import LocaleNavLink from '@/components/reusable/links/LocaleNavLink';
 
-export default function CollapsibleLinks() {
+export default function CollapsibleLinks({ onClose }) {
 	const t = useTranslations('Sidebar');
+
+	const handleClick = () => {
+		if (onClose) onClose();
+	};
 
 	return (
 		<AccordionRoot multiple defaultValue={['info']}>
 			<AccordionItem value='info' borderBottomColor='border.light'>
 				<AccordionItemTrigger>{t('info')}</AccordionItemTrigger>
 				<AccordionItemContent>
-					<SidebarLink href='#'>{t('aboutUs')}</SidebarLink>
+					<LocaleNavLink href='/aboutUs' text={t('aboutUs')} onClick={handleClick} />
 				</AccordionItemContent>
 				<AccordionItemContent>
-					<SidebarLink href='#'>{t('publicOffer')}</SidebarLink>
+					<LocaleNavLink href='/publicOffer' text={t('publicOffer')} onClick={handleClick} />
 				</AccordionItemContent>
 				<AccordionItemContent>
-					<SidebarLink href='#'>{t('faq')}</SidebarLink>
+					<LocaleNavLink href='/faq' text={t('faq')} onClick={handleClick} />
 				</AccordionItemContent>
 			</AccordionItem>
 			<AccordionItem value='clients' borderBottomColor='border.light'>
 				<AccordionItemTrigger>{t('clients')}</AccordionItemTrigger>
 				<AccordionItemContent>
-					<SidebarLink href='#'>{t('shippingTerms')}</SidebarLink>
+					<LocaleNavLink href='/shippingTerms' text={t('shippingTerms')} onClick={handleClick} />
 				</AccordionItemContent>
 				<AccordionItemContent>
-					<SidebarLink href='#'>{t('guarantee')}</SidebarLink>
+					<LocaleNavLink href='/guarantee' text={t('guarantee')} onClick={handleClick} />
 				</AccordionItemContent>
 				<AccordionItemContent>
-					<SidebarLink href='#'>{t('returnRefund')}</SidebarLink>
+					<LocaleNavLink href='/returnRefund' text={t('returnRefund')} onClick={handleClick} />
 				</AccordionItemContent>
 			</AccordionItem>
 		</AccordionRoot>

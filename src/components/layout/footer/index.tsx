@@ -34,7 +34,7 @@ export default function Footer() {
 				<Group>
 					<Text color='main.lightOnly'>{t('design')}</Text>
 					<Link href='#' variant='underline' color='main.secondary' _focus={{ outline: 'none' }}>
-						FullStack
+						Foghorn
 					</Link>
 				</Group>
 			</Flex>

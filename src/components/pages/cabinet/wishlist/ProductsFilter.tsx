@@ -27,7 +27,7 @@ export default function ProductsFilter() {
 			<Select.Positioner>
 				<Select.Content width='240px'>
 					{options.items.map((option) => (
-						<Select.Item item={option} key={option.value} fontSize='sm'>
+						<Select.Item item={option} key={option.value} fontSize='md'>
 							{option.label}
 							<Select.ItemIndicator />
 						</Select.Item>

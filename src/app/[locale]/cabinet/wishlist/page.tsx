@@ -8,9 +8,11 @@ import Pagination from '@/components/reusable/Pagination';
 
 export default function Wishlist() {
 	const t = useTranslations('Sidebar');
+	const prodT = useTranslations('Products');
+	const genT = useTranslations('General');
 
 	return (
-		<VStack mt='4' w='100%' pr='3'>
+		<VStack pr='3'>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
 				{t('wishList')}
 			</Heading>
@@ -18,7 +20,7 @@ export default function Wishlist() {
 			<HStack w='100%' mt='6' justifyContent='space-between' alignItems='flex-start'>
 				<Text>
 					<Highlight query='100 шт' styles={{ fontWeight: 'semibold' }}>
-						{`Всього товарів: 100 шт`}
+						{`${prodT('totalProducts')}: 100 ${genT('units')}`}
 					</Highlight>
 				</Text>
 				<VStack mt='-4'>

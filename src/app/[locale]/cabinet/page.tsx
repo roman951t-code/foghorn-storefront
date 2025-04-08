@@ -6,7 +6,7 @@ export default function Cabinet() {
 	const authT = useTranslations('Auth');
 
 	return (
-		<VStack mt='4' w='100%'>
+		<VStack w='100%'>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
 				{authT('personalData')}
 			</Heading>

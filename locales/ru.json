@@ -10,7 +10,10 @@
 		"close": "Закрыть",
 		"send": "Отправить",
 		"save": "Сохранить",
-		"clear": "Очистить"
+		"from": "от",
+		"clear": "Очистить",
+		"units": "шт",
+		"enterYourQuestion": "Введите Ваш вопрос"
 	},
 	"Header": {
 		"search": "Я ищу",
@@ -88,6 +91,11 @@
 		"orderSum": "Сумма заказа",
 		"discountSum": "Скидка",
 		"acceptOrder": "Подтверждаю заказ",
-		"feedbackTotal": "Всего отзывов"
+		"feedbackTotal": "Всего отзывов",
+		"numOfProducts": "Количество товаров",
+		"order": "заказа",
+		"repeatOrder": "Повторить заказ",
+		"totalProducts": "Всего товаров",
+		"product": "товара"
 	}
 }
