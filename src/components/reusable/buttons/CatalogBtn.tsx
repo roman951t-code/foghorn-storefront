@@ -62,7 +62,8 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 					)}
 				</DrawerTrigger>
 				<DrawerContent
-					offset={{ base: '0', sm: '8' }}
+					w={{ base: '96%', xl: '77%' }}
+					m='auto'
 					maxHeight='96%'
 					bg='bg.tertiary'
 					rounded='md'

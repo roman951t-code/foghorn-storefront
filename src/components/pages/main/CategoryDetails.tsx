@@ -41,10 +41,9 @@ export default function CategoryDetails({ category }) {
 									key={link}
 									fontSize='md'
 									variant='plain'
-									transition='all 0.25s ease-in-out'
 									textWrap='wrap'
 									wordBreak='break-all'
-									_hover={{ color: 'main.accent', textDecoration: 'none' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									{link}

@@ -8,7 +8,7 @@ export default function Chat() {
 	const prodT = useTranslations('Products');
 
 	return (
-		<VStack w='100%' pr='3'>
+		<VStack w='100%'>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
 				{t('chat')}
 			</Heading>

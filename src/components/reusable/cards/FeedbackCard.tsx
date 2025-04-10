@@ -100,8 +100,7 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 								aria-label='Cart'
 								variant='ghost'
 								rounded='full'
-								colorPalette='gray'
-								color='colorPalette.500'
+								color='main.disabled'
 								transition='all 0.2s ease-in-out'
 								_hover={{
 									bg: 'colorPalette.500',

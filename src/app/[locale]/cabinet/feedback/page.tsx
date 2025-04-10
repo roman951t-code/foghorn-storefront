@@ -7,7 +7,7 @@ export default function Feedback() {
 	const t = useTranslations('Sidebar');
 
 	return (
-		<VStack w='100%' pr='3'>
+		<VStack w='100%'>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%' mb='4'>
 				{t('myFeedback')}
 			</Heading>

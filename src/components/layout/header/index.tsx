@@ -28,7 +28,7 @@ export default function Header() {
 					align='center'
 					mx='auto'
 					width='100%'
-					maxWidth='1312px'
+					maxWidth='1444px'
 					pt='4px'
 					pb='8px'
 					borderBottom={{ smToMd: '1px solid' }}
@@ -53,7 +53,7 @@ export default function Header() {
 					align='center'
 					mx='auto'
 					width='100%'
-					maxWidth='1312px'
+					maxWidth='1444px'
 					gap={{ base: 0, sm: 4 }}
 				>
 					<CatalogBtn hideBelow='sm' fullText={false} />

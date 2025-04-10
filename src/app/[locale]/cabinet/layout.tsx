@@ -25,21 +25,19 @@ export default function CabinetLayout({ children, params }: Props) {
 
 	return (
 		<Tabs.Root
-			mt='4'
 			defaultValue='main'
 			colorPalette='orange'
 			orientation='vertical'
 			variant='line'
+			px='3'
 		>
-			<Box position='sticky' top='74px' h='100%'>
-				<Tabs.List mb='4' minW='214px' gap='2' hideBelow='md'>
+			<Box position='sticky' top='74px' h='100%' rounded='sm'>
+				<Tabs.List mb='4' minW='220px' gap='2' hideBelow='md' bg='bg.tertiary' pb='2'>
 					<Tabs.Trigger
-						pl='12px'
 						value='main'
 						color='main'
 						fontWeight='normal'
 						fontSize='15px'
-						textAlign='left'
 						onClick={() => handleNavigation('/cabinet')}
 					>
 						<Icon size='md'>
@@ -48,11 +46,9 @@ export default function CabinetLayout({ children, params }: Props) {
 						Роман Онищенко
 					</Tabs.Trigger>
 					<Tabs.Trigger
-						pl='12px'
 						value={t('myOrders')}
 						color='main'
 						fontWeight='normal'
-						textAlign='left'
 						fontSize='15px'
 						onClick={() => handleNavigation('/cabinet/orders')}
 					>
@@ -62,11 +58,9 @@ export default function CabinetLayout({ children, params }: Props) {
 						{t('myOrders')}
 					</Tabs.Trigger>
 					<Tabs.Trigger
-						pl='12px'
 						value={t('myFeedback')}
 						color='main'
 						fontWeight='normal'
-						textAlign='left'
 						fontSize='15px'
 						onClick={() => handleNavigation('/cabinet/feedback')}
 					>
@@ -76,11 +70,9 @@ export default function CabinetLayout({ children, params }: Props) {
 						{t('myFeedback')}
 					</Tabs.Trigger>
 					<Tabs.Trigger
-						pl='12px'
 						value={t('wishList')}
-						fontWeight='normal'
-						textAlign='left'
 						color='main'
+						fontWeight='normal'
 						fontSize='15px'
 						onClick={() => handleNavigation('/cabinet/wishlist')}
 					>
@@ -90,10 +82,8 @@ export default function CabinetLayout({ children, params }: Props) {
 						{t('wishList')}
 					</Tabs.Trigger>
 					<Tabs.Trigger
-						pl='12px'
 						value={t('reviewedProducts')}
 						color='main'
-						textAlign='left'
 						fontWeight='normal'
 						fontSize='15px'
 						onClick={() => handleNavigation('/cabinet/reviewed')}
@@ -104,11 +94,9 @@ export default function CabinetLayout({ children, params }: Props) {
 						{t('reviewedProducts')}
 					</Tabs.Trigger>
 					<Tabs.Trigger
-						pl='12px'
 						value={t('chat')}
 						color='main'
 						fontWeight='normal'
-						textAlign='left'
 						fontSize='15px'
 						onClick={() => handleNavigation('/cabinet/chat')}
 					>

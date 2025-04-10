@@ -30,26 +30,23 @@ const config = defineConfig({
 					},
 					tertiary: {
 						value: {
-							base: 'rgba(244,246,248, 1)',
-							_dark: '#1F202C',
-						},
-					},
-					dark: {
-						value: {
-							base: 'rgba(91,90,129,1)',
+							base: 'rgb(244,246,248)',
 							_dark: '#1F202C',
 						},
 					},
 					accent: {
 						value: '{colors.yellow.400}',
 					},
+					dark: {
+						value: {
+							base: 'rgb(244,246,248)',
+							_dark: '#1F202C',
+						},
+					},
 				},
 				bgHover: {
 					DEFAULT: {
-						value: {
-							base: 'white',
-							_dark: 'rgba(234,236,238, 1)',
-						},
+						value: 'rgb(234,236,238)',
 					},
 					accent: {
 						value: '{colors.yellow.500}',
@@ -86,8 +83,8 @@ const config = defineConfig({
 				link: {
 					DEFAULT: {
 						value: {
-							base: 'rgb(91,90,129)',
-							_dark: '{colors.gray.50}',
+							base: '#3e3c78',
+							_dark: '{colors.orange.400}',
 						},
 					},
 				},
@@ -212,6 +209,13 @@ const config = defineConfig({
 		},
 		'.rce-mbox-text, .rce-mbox-title, .rce-mbox-time': {
 			fontSize: '14px !important',
+		},
+		'.rce-mbox-title': {
+			fontSize: '16px !important',
+			color: 'var(--chakra-colors-main-accent) !important',
+		},
+		'.rce-mbox-time': {
+			color: 'var(--chakra-colors-fg-muted) !important',
 		},
 	},
 });

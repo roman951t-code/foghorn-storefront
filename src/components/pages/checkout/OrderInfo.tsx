@@ -50,20 +50,19 @@ export default function OrderInfo() {
 				</Text>
 
 				<Text>
-					<Highlight query='12 ₴' styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}>
+					<Highlight query='187 ₴' styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}>
 						{`${t('discountSum')}: 187 ₴`}
 					</Highlight>
 				</Text>
 
 				<Stat.Root my='3'>
-					<Stat.Label fontSize='mdg'>{t('totalAmount')}</Stat.Label>
+					<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
 					<Stat.ValueText w='124px' fontSize='3xl'>
 						55 699 ₴
 					</Stat.ValueText>
 				</Stat.Root>
 				<Button
 					w='100%'
-					maxW='270px'
 					type='submit'
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'

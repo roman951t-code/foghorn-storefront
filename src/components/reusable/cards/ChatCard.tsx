@@ -24,7 +24,13 @@ const items = [
 	},
 ];
 
-export default function ChatCard({ sendText, productNumText, inputPlaceholder }) {
+interface Props {
+	sendText: string;
+	productNumText: string;
+	inputPlaceholder: string;
+}
+
+export default function ChatCard({ sendText, productNumText, inputPlaceholder }: Props) {
 	const [messages, setMessages] = useState([
 		{
 			position: 'left',
@@ -96,7 +102,7 @@ export default function ChatCard({ sendText, productNumText, inputPlaceholder })
 										))}
 									</Flex>
 									<Flex px='4' pb='4' alignItems='center'>
-										<ChakraBtn colorPalette='yellow' size='sm' color='main'>
+										<ChakraBtn colorPalette='yellow' size='sm'>
 											<Icon size='lg'>
 												<IoMdAttach />
 											</Icon>

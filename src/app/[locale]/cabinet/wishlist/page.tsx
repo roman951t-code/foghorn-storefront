@@ -12,7 +12,7 @@ export default function Wishlist() {
 	const genT = useTranslations('General');
 
 	return (
-		<VStack pr='3'>
+		<VStack>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
 				{t('wishList')}
 			</Heading>
@@ -48,7 +48,7 @@ export default function Wishlist() {
 							variant='ghost'
 							rounded='full'
 							colorPalette='gray'
-							color='colorPalette.500'
+							color='main.disabled'
 							transition='all 0.2s ease-in-out'
 							_hover={{
 								bg: 'colorPalette.500',

@@ -14,7 +14,7 @@ export default function Footer() {
 				justify={'center'}
 				ml='-8px'
 				width='100%'
-				maxWidth='1312px'
+				maxWidth='1444px'
 			>
 				<MediaContacts />
 			</Flex>
@@ -25,7 +25,7 @@ export default function Footer() {
 				minHeight='60px'
 				width='100%'
 				flexWrap='wrap'
-				maxWidth='1312px'
+				maxWidth='1444px'
 			>
 				<Text mr={{ base: '12px', mdTo2xl: '0' }} color='main.lightOnly'>
 					© 2025 Prosperity.com

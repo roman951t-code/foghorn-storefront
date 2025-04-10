@@ -65,7 +65,7 @@ export default function ProductCard({ isSliderEnabled = false }) {
 						_focus={{ outline: 'none' }}
 						transition='all .15s ease-in-out'
 						textDecorationColor='main'
-						_hover={{ color: 'main.accent' }}
+						_hover={{ color: 'link' }}
 					>
 						iPhone 16 Pro Max 256 GB Desert Titanium
 					</Link>

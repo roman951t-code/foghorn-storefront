@@ -5,7 +5,7 @@ import {
 	AccordionRoot,
 } from '@/components/ui/accordion';
 import { useTranslations } from 'next-intl';
-import { Box, VStack, Flex, Text, Link } from '@chakra-ui/react';
+import { Box, VStack, Flex, Text, Link, Heading } from '@chakra-ui/react';
 
 const categories = [
 	{
@@ -41,14 +41,16 @@ export default function CatalogDrawer() {
 					borderBottomColor='border.dark'
 					mb='4'
 				>
-					<AccordionItemTrigger fontWeight='medium' textStyle='2xl' color='main'>
-						{category.name}
+					<AccordionItemTrigger>
+						<Heading fontWeight='semibold' textStyle='2xl' color='main' borderBottom='1px solid'>
+							{category.name}
+						</Heading>
 					</AccordionItemTrigger>
 					<AccordionItemContent>
 						<Flex wrap='wrap' gap={4} justify='flex-start' position='relative' w='100%'>
 							{category.subcategories.map((subcategory) => (
 								<Box key={subcategory.title} minW='175px'>
-									<Text fontWeight='normal' textStyle='xl' mb={4}>
+									<Text fontWeight='medium' textStyle='xl' mb={4}>
 										{subcategory.title}
 									</Text>
 									<VStack align='start' gap={4}>
@@ -57,10 +59,10 @@ export default function CatalogDrawer() {
 												key={link}
 												fontSize='md'
 												variant='plain'
-												transition='all 0.2s ease-in-out'
+												w='100%'
 												textWrap='wrap'
 												wordBreak='break-all'
-												_hover={{ color: 'main.accent', textDecoration: 'none' }}
+												_hover={{ color: 'link' }}
 												_focus={{ outline: 'none' }}
 											>
 												{link}
@@ -73,7 +75,8 @@ export default function CatalogDrawer() {
 											textWrap='wrap'
 											wordBreak='break-all'
 											color='link'
-											mt='3'
+											mt={2}
+											mb={4}
 											textDecoration='underline'
 											textUnderlineOffset='4px'
 											_focus={{ outline: 'none' }}

@@ -125,7 +125,7 @@ export default function CategoriesPanel() {
 						<Text fontSize='16px' fontWeight='medium'>
 							{category.name}
 						</Text>
-						<Icon fontSize='26px' color='main.accent'>
+						<Icon fontSize='22px' color='main'>
 							<BsChevronRight />
 						</Icon>
 					</HStack>

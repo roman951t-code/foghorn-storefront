@@ -20,9 +20,11 @@ export default function Breadcrumbs({ category, subcategory, productId }: Props)
 				fullText={false}
 				trigger={
 					<BreadcrumbLink
+						fontSize='15px'
 						transition='all .15s ease-in-out'
 						textDecorationColor='main'
-						_hover={{ color: 'main.accent', cursor: 'pointer' }}
+						color='link'
+						_hover={{ color: 'main', cursor: 'pointer' }}
 						_focus={{ outline: 'none' }}
 					>
 						<LuHouse /> {t('catalogShort')}
@@ -33,9 +35,11 @@ export default function Breadcrumbs({ category, subcategory, productId }: Props)
 			{category && (
 				<BreadcrumbLink
 					href={`/catalog/${category}`}
+					fontSize='15px'
 					transition='all .15s ease-in-out'
 					textDecorationColor='main'
-					_hover={{ color: 'main.accent' }}
+					color='link'
+					_hover={{ color: 'main', cursor: 'pointer' }}
 					_focus={{ outline: 'none' }}
 				>
 					<GiClothes /> {category}
