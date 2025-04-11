@@ -1,21 +1,15 @@
 'use client';
-import { SimpleGrid } from '@chakra-ui/react';
+import { Flex, Stack } from '@chakra-ui/react';
 import EditableInput from '@/components/reusable/inputs/EditableInput';
 import { Field } from '@/components/ui/field';
 import { useForm } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 
 interface FormValues {
 	email: string;
 	phone: string;
 	firstName: string;
 	lastName: string;
-}
-
-interface Props {
-	emailLabel: string;
-	phoneLabel: string;
-	firstNameLabel: string;
-	lastNameLabel: string;
 }
 
 const initialValues = {
@@ -25,12 +19,7 @@ const initialValues = {
 	lastName: 'Onyshchenko',
 };
 
-export default function PersonalDataForm({
-	emailLabel,
-	phoneLabel,
-	firstNameLabel,
-	lastNameLabel,
-}: Props) {
+export default function PersonalDataForm() {
 	const {
 		register,
 		handleSubmit,
@@ -40,6 +29,8 @@ export default function PersonalDataForm({
 		defaultValues: initialValues,
 		mode: 'onSubmit',
 	});
+
+	const authT = useTranslations('Auth');
 
 	const handleEditableSubmit = (field: keyof FormValues, value: string) => {
 		setValue(field, value);
@@ -55,63 +46,74 @@ export default function PersonalDataForm({
 
 	return (
 		<form onSubmit={onSubmit}>
-			<SimpleGrid
+			<Flex
 				className='productsSlider'
-				columns={{ base: 2, md: 1 }}
 				gap='4'
-				w='100%'
 				my='4'
 				px='1'
-				css={{ '--field-label-width': '160px' }}
+				flexDirection='row'
+				alignItems='center'
+				justifyContent='space-between'
+				flexWrap='wrap'
+				w={{ base: '100%', xl: '75%' }}
+				css={{ '--field-label-width': '150px' }}
 			>
-				<Field
-					orientation={{ base: 'vertical', md: 'horizontal' }}
-					label={emailLabel}
-					invalid={!!errors.email}
-					errorText={errors.email?.message}
-				>
-					<EditableInput
-						defaultValue={initialValues.email}
-						onSubmit={(value) => handleEditableSubmit('email', value)}
-					/>
-				</Field>
+				<Stack gap='4'>
+					<Field
+						minW='200px'
+						orientation='vertical'
+						label={authT('name')}
+						invalid={!!errors.firstName}
+						errorText={errors.firstName?.message}
+					>
+						<EditableInput
+							defaultValue={initialValues.firstName}
+							onSubmit={(value) => handleEditableSubmit('firstName', value)}
+						/>
+					</Field>
 
-				<Field
-					orientation={{ base: 'vertical', md: 'horizontal' }}
-					label={phoneLabel}
-					invalid={!!errors.phone}
-					errorText={errors.phone?.message}
-				>
-					<EditableInput
-						defaultValue={initialValues.phone}
-						onSubmit={(value) => handleEditableSubmit('phone', value)}
-					/>
-				</Field>
+					<Field
+						minW='200px'
+						orientation='vertical'
+						label={authT('email')}
+						invalid={!!errors.email}
+						errorText={errors.email?.message}
+					>
+						<EditableInput
+							defaultValue={initialValues.email}
+							onSubmit={(value) => handleEditableSubmit('email', value)}
+						/>
+					</Field>
+				</Stack>
 
-				<Field
-					orientation={{ base: 'vertical', md: 'horizontal' }}
-					label={firstNameLabel}
-					invalid={!!errors.firstName}
-					errorText={errors.firstName?.message}
-				>
-					<EditableInput
-						defaultValue={initialValues.firstName}
-						onSubmit={(value) => handleEditableSubmit('firstName', value)}
-					/>
-				</Field>
+				<Stack gap='4'>
+					<Field
+						minW='200px'
+						orientation='vertical'
+						label={authT('phone')}
+						invalid={!!errors.phone}
+						errorText={errors.phone?.message}
+					>
+						<EditableInput
+							defaultValue={initialValues.phone}
+							onSubmit={(value) => handleEditableSubmit('phone', value)}
+						/>
+					</Field>
 
-				<Field
-					orientation={{ base: 'vertical', md: 'horizontal' }}
-					label={lastNameLabel}
-					invalid={!!errors.lastName}
-					errorText={errors.lastName?.message}
-				>
-					<EditableInput
-						defaultValue={initialValues.lastName}
-						onSubmit={(value) => handleEditableSubmit('lastName', value)}
-					/>
-				</Field>
-			</SimpleGrid>
+					<Field
+						minW='200px'
+						orientation='vertical'
+						label={authT('lastname')}
+						invalid={!!errors.lastName}
+						errorText={errors.lastName?.message}
+					>
+						<EditableInput
+							defaultValue={initialValues.lastName}
+							onSubmit={(value) => handleEditableSubmit('lastName', value)}
+						/>
+					</Field>
+				</Stack>
+			</Flex>
 		</form>
 	);
 }

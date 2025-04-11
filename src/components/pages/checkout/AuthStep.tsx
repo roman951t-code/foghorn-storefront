@@ -1,10 +1,9 @@
-import { Button, Flex, Heading, Card } from '@chakra-ui/react';
+import { Button, Flex, Heading, Card, VStack } from '@chakra-ui/react';
 import Auth from '@/components/layout/header/Auth';
 import { useTranslations } from 'next-intl';
-import ContactForm from './ContactForm';
+import PersonalDataForm from '@/components/pages/cabinet/user/PersonalDataForm';
 
 export default function AuthStep() {
-	const genT = useTranslations('General');
 	const authT = useTranslations('Auth');
 
 	return (
@@ -34,18 +33,13 @@ export default function AuthStep() {
 					/>
 				</Flex>
 			</Card.Header>
-			<Flex mt='8' gap='4' direction='column' alignItems='center'>
-				<Heading as='h4' size='md'>
+
+			<VStack w='100%' mt='8' gap='4' direction='column'>
+				<Heading as='h4' size='md' w='100%' textAlign='left'>
 					{authT('yourContacts')}
 				</Heading>
-				<ContactForm
-					submitText={genT('save')}
-					emailLabel={authT('email')}
-					phoneLabel={authT('phone')}
-					firstNameLabel={authT('name')}
-					lastNameLabel={authT('lastname')}
-				/>
-			</Flex>
+				<PersonalDataForm />
+			</VStack>
 		</Card.Root>
 	);
 }

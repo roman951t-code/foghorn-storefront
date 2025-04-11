@@ -109,11 +109,6 @@ const config = defineConfig({
 		svg: {
 			display: 'inline',
 		},
-		'.chakra-card__root .chakra-button svg': {
-			height: '22px !important',
-			width: '22px !important',
-		},
-
 		'.productsSlider .swiper-button-prev:after, .productsSlider .swiper-button-next:after': {
 			color: 'var(--chakra-colors-fg)',
 		},

@@ -8,9 +8,11 @@ interface Props {
 export default function EditableInput({ defaultValue, onSubmit }: Props) {
 	return (
 		<Editable.Root defaultValue={defaultValue} onSubmit={onSubmit}>
-			<Editable.Preview textStyle='md' />
+			<Editable.Preview textStyle='md' minW='110px' />
 			<Editable.Input
-				maxW='300px'
+				textAlign='left'
+				minW='180px'
+				maxW='220px'
 				rounded='md'
 				fontSize='md'
 				color='text'
@@ -24,7 +26,7 @@ export default function EditableInput({ defaultValue, onSubmit }: Props) {
 			/>
 			<Editable.Control>
 				<Editable.EditTrigger asChild>
-					<IconButton variant='ghost' size='sm' color='main' bg='bg' rounded='full' ml='2'>
+					<IconButton variant='ghost' size='xs' color='main' bg='bg' rounded='full' ml='2'>
 						<LuPencilLine />
 					</IconButton>
 				</Editable.EditTrigger>

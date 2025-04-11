@@ -10,12 +10,7 @@ export default function Cabinet() {
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
 				{authT('personalData')}
 			</Heading>
-			<PersonalDataForm
-				emailLabel={authT('email')}
-				phoneLabel={authT('phone')}
-				firstNameLabel={authT('name')}
-				lastNameLabel={authT('lastname')}
-			/>
+			<PersonalDataForm />
 		</VStack>
 	);
 }

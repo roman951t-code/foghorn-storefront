@@ -6,6 +6,7 @@ import {
 	AccordionRoot,
 } from '@/components/ui/accordion';
 import { useTranslations } from 'next-intl';
+
 import AuthStep from './AuthStep';
 import ShipmentStep from './ShipmentStep';
 import PaymentStep from './PaymentStep';
