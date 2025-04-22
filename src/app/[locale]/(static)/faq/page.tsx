@@ -13,7 +13,7 @@ export default function FAQ() {
 				{t('faq')}
 			</Heading>
 
-			<List.Root gap='6'>
+			<List.Root gap='6' pl='4'>
 				{faqs.map((item, index) => (
 					<List.Item key={index}>
 						<Heading as='h3' size='md'>

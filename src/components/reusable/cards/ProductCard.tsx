@@ -21,7 +21,7 @@ export default function ProductCard({ isSliderEnabled = false }) {
 				borderColor: 'main.accent',
 			}}
 		>
-			<Flex direction='column' gap={2} p={4}>
+			<Flex direction='column' gap={2} p={4} pt='2.5'>
 				<Flex align='center' justifyContent='space-between'>
 					<IconButton
 						aria-label='Cart'
@@ -57,7 +57,7 @@ export default function ProductCard({ isSliderEnabled = false }) {
 				) : (
 					<Image margin='auto' width='140px' height='auto' src={img1} alt='Product photo' />
 				)}
-				<Card.Title fontWeight='medium' fontSize='md' lineHeight='20px' mt='12px' w='100%'>
+				<Card.Title fontWeight='medium' fontSize='md' lineHeight='22px' mt='1' w='100%'>
 					<Link
 						href='#'
 						color='main'
@@ -74,12 +74,12 @@ export default function ProductCard({ isSliderEnabled = false }) {
 					55 699 ₴
 				</Text>
 				<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
-					59 709 ₴{' '}
+					59 709 ₴
 					<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='12px'>
 						- 150₴
 					</Badge>
 				</Text>
-				<HStack gap='4'>
+				<HStack gap='4' mt='2'>
 					<Rating colorPalette='orange' readOnly size='xs' defaultValue={5} />
 					<Link
 						href='#'

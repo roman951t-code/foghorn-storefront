@@ -4,7 +4,7 @@ const config = defineConfig({
 	strictTokens: false,
 	theme: {
 		breakpoints: {
-			xs: '420px',
+			xs: '430px',
 			sm: '560px',
 			md: '768px',
 			lg: '960px',
@@ -190,6 +190,7 @@ const config = defineConfig({
 			fontWeight: '500 !important',
 			borderStartStartRadius: '0 !important',
 			borderEndStartRadius: '0 !important',
+			width: '120px',
 		},
 		'.rce-mbox': {
 			backgroundColor: 'var(--chakra-colors-bg) !important',
@@ -211,6 +212,10 @@ const config = defineConfig({
 		},
 		'.rce-mbox-time': {
 			color: 'var(--chakra-colors-fg-muted) !important',
+		},
+		'.tabLink': {
+			height: '100%',
+			width: '100%',
 		},
 	},
 });

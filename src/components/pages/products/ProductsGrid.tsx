@@ -16,7 +16,11 @@ export default function ProductsGrid() {
 				</VStack>
 			</EmptyState.Content>
 		</EmptyState.Root> */}
-			<SimpleGrid className='productsSlider' columns={{ base: 1, sm: 2, md: 3, xl: 4 }} gap='2'>
+			<SimpleGrid
+				className='productsSlider'
+				columns={{ base: 1, xs: 2, md: 3, xl: 4 } as any}
+				gap='2'
+			>
 				{new Array(9).fill(null).map((_, index) => (
 					<Box key={index}>
 						<ProductCard isSliderEnabled />

@@ -27,13 +27,14 @@ export default function AboutTab() {
 	return (
 		<VStack gap='8'>
 			<Group
-				align={{ base: 'center', md: 'flex-start' }}
-				flexDirection={{ base: 'column', md: 'row' }}
+				align={{ base: 'center', lg: 'flex-start' }}
+				flexDirection={{ base: 'column', lg: 'row' }}
 				gap='8'
 			>
 				<Box
-					maxW={{ base: '90vw', md: '580px' }}
-					w={{ base: '100%', md: '55%' }}
+					maxW={{ base: '90vw', md: '86vw', lg: '600px' }}
+					minW='340px'
+					w='100%'
 					bg='bg.tertiary'
 					pb='4'
 					rounded='md'
@@ -41,10 +42,16 @@ export default function AboutTab() {
 					<ProductThumbsSlider />
 				</Box>
 				<VStack gap='2' alignItems='flex-start'>
-					<Heading as='h1' size='3xl' fontWeight='medium'>
+					<Heading as='h1' size={{ base: '2xl', sm: '3xl' }} fontWeight='medium'>
 						Смартфон Samsung Galaxy S25 Ultra 12/512GB Titanium Whitesilver (SM-S938BZSGEUC)
 					</Heading>
-					<Flex w='100%' justifyContent='space-between' align-items='center'>
+					<Flex
+						w='100%'
+						justifyContent='space-between'
+						align-items='center'
+						flexWrap='wrap'
+						gap='2'
+					>
 						<HStack>
 							<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
 								<Tag.Label>{t('productIsPresent')}</Tag.Label>
@@ -83,10 +90,10 @@ export default function AboutTab() {
 							>
 								<FiShoppingCart /> {t('buy')}
 							</Button>
-							<Stat.ValueText w='124px' fontSize='3xl'>
+							<Stat.ValueText w={{ base: '90%', xs: '124px' } as any} fontSize='3xl'>
 								55 699 ₴
 							</Stat.ValueText>
-							<Badge colorPalette='gray' gap='0'>
+							<Badge colorPalette='gray'>
 								<Box
 									as='span'
 									color='main.disabled'

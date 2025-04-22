@@ -30,18 +30,6 @@ export default function ProductsSlider() {
 		setIsClient(true);
 	}, []);
 
-	if (!isClient) {
-		return (
-			<Box w='100%' overflow='hidden'>
-				<Flex gap={2} wrap='nowrap'>
-					{Array.from({ length: 5 }).map((_, index) => (
-						<ProductCard key={index} />
-					))}
-				</Flex>
-			</Box>
-		);
-	}
-
 	return (
 		<Swiper
 			loop
@@ -54,7 +42,7 @@ export default function ProductsSlider() {
 		>
 			{Array.from({ length: 12 }).map((_, index) => (
 				<SwiperSlide key={index}>
-					<ProductCard isSliderEnabled />
+					<ProductCard isSliderEnabled={isClient} />
 				</SwiperSlide>
 			))}
 		</Swiper>

@@ -9,7 +9,7 @@ export default function ViewedProducts() {
 		<SimpleGrid
 			my='4'
 			className='productsSlider'
-			columns={{ base: 1, sm: 2, md: 3, xl: 4 }}
+			columns={{ base: 1, sm: 2, lg: 3, xl: 4 }}
 			gap='2'
 		>
 			{new Array(9).fill(null).map((_, index) => (

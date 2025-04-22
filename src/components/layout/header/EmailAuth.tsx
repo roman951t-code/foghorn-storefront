@@ -16,6 +16,7 @@ interface Props {
 	passLabel: string;
 	emailRequired: string;
 	passRequired: string;
+	onSubmit: (data: { email: string; password: string }) => void;
 }
 
 export default function EmailAuth({
@@ -24,6 +25,7 @@ export default function EmailAuth({
 	passLabel,
 	emailRequired,
 	passRequired,
+	onSubmit,
 }: Props) {
 	const {
 		register,
@@ -33,16 +35,16 @@ export default function EmailAuth({
 		mode: 'onSubmit',
 	});
 
-	const onSubmit = handleSubmit(async (data) => {
+	const onAuth = handleSubmit(async (data) => {
 		try {
-			console.log('Form Submitted:', data);
+			onSubmit(data);
 		} catch (error) {
 			console.error('Submission failed:', error);
 		}
 	});
 
 	return (
-		<form onSubmit={onSubmit}>
+		<form onSubmit={onAuth}>
 			<Stack gap='6' align='flex-start' maxW='sm'>
 				<Field label={emailLabel} invalid={!!errors.email} errorText={errors.email?.message}>
 					<Input
@@ -67,6 +69,7 @@ export default function EmailAuth({
 
 				<Button
 					w='100%'
+					loading={isSubmitting}
 					type='submit'
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'

@@ -21,7 +21,7 @@ export default function Category() {
 					bg='bg.tertiary'
 					transition='all 0.25s ease-in-out'
 					_hover={{
-						borderColor: 'main.accent',
+						borderColor: 'link',
 						cursor: 'pointer',
 					}}
 				>
@@ -43,7 +43,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -55,7 +55,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -67,7 +67,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -79,7 +79,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -113,7 +113,7 @@ export default function Category() {
 					bg='bg.tertiary'
 					transition='all 0.25s ease-in-out'
 					_hover={{
-						borderColor: 'main.accent',
+						borderColor: 'link',
 						cursor: 'pointer',
 					}}
 				>
@@ -135,7 +135,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -147,7 +147,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -159,7 +159,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -171,7 +171,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -205,7 +205,7 @@ export default function Category() {
 					bg='bg.tertiary'
 					transition='all 0.25s ease-in-out'
 					_hover={{
-						borderColor: 'main.accent',
+						borderColor: 'link',
 						cursor: 'pointer',
 					}}
 				>
@@ -227,7 +227,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -239,7 +239,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -251,7 +251,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -263,7 +263,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -297,7 +297,7 @@ export default function Category() {
 					bg='bg.tertiary'
 					transition='all 0.25s ease-in-out'
 					_hover={{
-						borderColor: 'main.accent',
+						borderColor: 'link',
 						cursor: 'pointer',
 					}}
 				>
@@ -319,7 +319,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -331,7 +331,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -343,7 +343,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -355,7 +355,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -389,7 +389,7 @@ export default function Category() {
 					bg='bg.tertiary'
 					transition='all 0.25s ease-in-out'
 					_hover={{
-						borderColor: 'main.accent',
+						borderColor: 'link',
 						cursor: 'pointer',
 					}}
 				>
@@ -411,7 +411,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -423,7 +423,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -435,7 +435,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -447,7 +447,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -481,7 +481,7 @@ export default function Category() {
 					bg='bg.tertiary'
 					transition='all 0.25s ease-in-out'
 					_hover={{
-						borderColor: 'main.accent',
+						borderColor: 'link',
 						cursor: 'pointer',
 					}}
 				>
@@ -503,7 +503,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -515,7 +515,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -527,7 +527,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -539,7 +539,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -573,7 +573,7 @@ export default function Category() {
 					bg='bg.tertiary'
 					transition='all 0.25s ease-in-out'
 					_hover={{
-						borderColor: 'main.accent',
+						borderColor: 'link',
 						cursor: 'pointer',
 					}}
 				>
@@ -595,7 +595,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -607,7 +607,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -619,7 +619,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -631,7 +631,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -665,7 +665,7 @@ export default function Category() {
 					bg='bg.tertiary'
 					transition='all 0.25s ease-in-out'
 					_hover={{
-						borderColor: 'main.accent',
+						borderColor: 'link',
 						cursor: 'pointer',
 					}}
 				>
@@ -687,7 +687,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -699,7 +699,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -711,7 +711,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -723,7 +723,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -757,7 +757,7 @@ export default function Category() {
 					bg='bg.tertiary'
 					transition='all 0.25s ease-in-out'
 					_hover={{
-						borderColor: 'main.accent',
+						borderColor: 'link',
 						cursor: 'pointer',
 					}}
 				>
@@ -779,7 +779,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -791,7 +791,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -803,7 +803,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -815,7 +815,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -849,7 +849,7 @@ export default function Category() {
 					bg='bg.tertiary'
 					transition='all 0.25s ease-in-out'
 					_hover={{
-						borderColor: 'main.accent',
+						borderColor: 'link',
 						cursor: 'pointer',
 					}}
 				>
@@ -871,7 +871,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -883,7 +883,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -895,7 +895,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія
@@ -907,7 +907,7 @@ export default function Category() {
 									textDecoration='underline'
 									transition='all .15s ease-in-out'
 									textDecorationColor='main'
-									_hover={{ color: 'main.accent' }}
+									_hover={{ color: 'link' }}
 									_focus={{ outline: 'none' }}
 								>
 									Підкатегорія

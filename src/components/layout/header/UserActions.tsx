@@ -1,12 +1,28 @@
 import { FiHeart } from 'react-icons/fi';
 import { IconButton, Float, Circle } from '@chakra-ui/react';
+import { FiUser } from 'react-icons/fi';
+
 import Auth from './Auth';
 import Cart from './Cart';
+
+const AuthBtn = () => (
+	<IconButton
+		aria-label='Account'
+		size='md'
+		variant='ghost'
+		color='main.lightOnly'
+		rounded='full'
+		colorPalette='blue'
+		bg={{ _hover: 'colorPalette.400' }}
+	>
+		<FiUser />
+	</IconButton>
+);
 
 export default function UserActions() {
 	return (
 		<>
-			<Auth />
+			<Auth trigger={<AuthBtn />} />
 
 			<IconButton
 				position='relative'

@@ -102,8 +102,8 @@ export default function ChatCard({ sendText, productNumText, inputPlaceholder }:
 										))}
 									</Flex>
 									<Flex px='4' pb='4' alignItems='center'>
-										<ChakraBtn colorPalette='yellow' size='sm'>
-											<Icon size='lg'>
+										<ChakraBtn colorPalette='yellow' size='md'>
+											<Icon fontSize='30px'>
 												<IoMdAttach />
 											</Icon>
 										</ChakraBtn>

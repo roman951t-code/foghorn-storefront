@@ -1,5 +1,5 @@
 'use client';
-import { Flex, Stack } from '@chakra-ui/react';
+import { HStack, Stack } from '@chakra-ui/react';
 import EditableInput from '@/components/reusable/inputs/EditableInput';
 import { Field } from '@/components/ui/field';
 import { useForm } from 'react-hook-form';
@@ -46,21 +46,18 @@ export default function PersonalDataForm() {
 
 	return (
 		<form onSubmit={onSubmit}>
-			<Flex
-				className='productsSlider'
-				gap='4'
+			<HStack
+				gap={{ base: '6' }}
 				my='4'
 				px='1'
 				flexDirection='row'
 				alignItems='center'
-				justifyContent='space-between'
 				flexWrap='wrap'
-				w={{ base: '100%', xl: '75%' }}
 				css={{ '--field-label-width': '150px' }}
 			>
 				<Stack gap='4'>
 					<Field
-						minW='200px'
+						minW='264px'
 						orientation='vertical'
 						label={authT('name')}
 						invalid={!!errors.firstName}
@@ -73,7 +70,7 @@ export default function PersonalDataForm() {
 					</Field>
 
 					<Field
-						minW='200px'
+						minW='264px'
 						orientation='vertical'
 						label={authT('email')}
 						invalid={!!errors.email}
@@ -88,7 +85,7 @@ export default function PersonalDataForm() {
 
 				<Stack gap='4'>
 					<Field
-						minW='200px'
+						minW='264px'
 						orientation='vertical'
 						label={authT('phone')}
 						invalid={!!errors.phone}
@@ -101,7 +98,7 @@ export default function PersonalDataForm() {
 					</Field>
 
 					<Field
-						minW='200px'
+						minW='264px'
 						orientation='vertical'
 						label={authT('lastname')}
 						invalid={!!errors.lastName}
@@ -113,7 +110,7 @@ export default function PersonalDataForm() {
 						/>
 					</Field>
 				</Stack>
-			</Flex>
+			</HStack>
 		</form>
 	);
 }

@@ -24,7 +24,7 @@ export default function Breadcrumbs({ category, subcategory, productId }: Props)
 						transition='all .15s ease-in-out'
 						textDecorationColor='main'
 						color='link'
-						_hover={{ color: 'main', cursor: 'pointer' }}
+						_hover={{ cursor: 'pointer' }}
 						_focus={{ outline: 'none' }}
 					>
 						<LuHouse /> {t('catalogShort')}

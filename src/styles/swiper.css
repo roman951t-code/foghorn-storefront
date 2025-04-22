@@ -71,6 +71,7 @@
 
 .thumbsSlider {
 	width: 100%;
+	min-height: 370px;
 }
 
 .thumbsSlider2 {
