@@ -94,7 +94,8 @@ export default function CategoriesPanel() {
 		>
 			<VStack
 				bg='bg.tertiary'
-				width={{ base: '25%', mdToLg: '30%' }}
+				width={{ base: '25%', mdToLg: '32%' }}
+				maxWidth='330px'
 				align='stretch'
 				gap='0'
 				boxShadow='sm'

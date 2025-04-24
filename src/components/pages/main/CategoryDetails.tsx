@@ -16,7 +16,7 @@ export default function CategoryDetails({ category }) {
 			rounded='sm'
 			boxShadow='sm'
 			height='100%'
-			width={{ base: '74%', mdToLg: '69%' }}
+			width={{ base: '74%', mdToLg: '66%', xl: '75%' }}
 			position='absolute'
 			right={0}
 			top={0}

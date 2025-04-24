@@ -35,7 +35,6 @@ export default function SubscribeSection() {
 					size='md'
 					variant='outline'
 					fontSize='sm'
-					bg='bg'
 					minWidth='280px'
 					maxWidth='340px'
 					flex='1 1 0'

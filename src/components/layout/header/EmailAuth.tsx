@@ -4,6 +4,7 @@ import { Button, Input, Stack } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
 import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 
 interface FormValues {
 	email: string;
@@ -11,22 +12,10 @@ interface FormValues {
 }
 
 interface Props {
-	submitText: string;
-	emailLabel: string;
-	passLabel: string;
-	emailRequired: string;
-	passRequired: string;
-	onSubmit: (data: { email: string; password: string }) => void;
+	onSubmit: (data) => void;
 }
 
-export default function EmailAuth({
-	submitText,
-	emailLabel,
-	passLabel,
-	emailRequired,
-	passRequired,
-	onSubmit,
-}: Props) {
+export default function EmailAuth({ onSubmit }: Props) {
 	const {
 		register,
 		handleSubmit,
@@ -35,34 +24,36 @@ export default function EmailAuth({
 		mode: 'onSubmit',
 	});
 
-	const onAuth = handleSubmit(async (data) => {
-		try {
-			onSubmit(data);
-		} catch (error) {
-			console.error('Submission failed:', error);
-		}
-	});
+	const t = useTranslations('Auth');
 
 	return (
-		<form onSubmit={onAuth}>
+		<form onSubmit={handleSubmit(onSubmit)}>
 			<Stack gap='6' align='flex-start' maxW='sm'>
-				<Field label={emailLabel} invalid={!!errors.email} errorText={errors.email?.message}>
+				<Field label={t('email')} invalid={!!errors.email} errorText={errors.email?.message}>
 					<Input
 						{...register('email', {
-							required: emailRequired,
+							required: t('emailRequired'),
 							pattern: {
 								value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-								message: 'Invalid email address',
+								message: t('wrongEmail'),
 							},
 						})}
 					/>
 				</Field>
 
-				<Field label={passLabel} invalid={!!errors.password} errorText={errors.password?.message}>
+				<Field
+					label={t('password')}
+					invalid={!!errors.password}
+					errorText={errors.password?.message}
+				>
 					<PasswordInput
 						{...register('password', {
-							required: passRequired,
-							minLength: { value: 6, message: 'Password must be at least 6 characters' },
+							required: t('passRequired'),
+							minLength: { value: 8, message: t('wrongPassLength') },
+							pattern: {
+								value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+								message: t('wrongPassFormat'),
+							},
 						})}
 					/>
 				</Field>
@@ -75,7 +66,7 @@ export default function EmailAuth({
 					color='black'
 					variant='solid'
 				>
-					{submitText}
+					{t('continue')}
 				</Button>
 			</Stack>
 		</form>
