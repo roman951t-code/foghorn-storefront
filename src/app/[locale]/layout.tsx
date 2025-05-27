@@ -8,7 +8,6 @@ import Footer from '@/components/layout/footer';
 import ToTop from '@/components/reusable/buttons/ToTop';
 import AuthProvider from '@/components/providers/AuthProvider';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 
@@ -24,7 +23,6 @@ export default async function Layout({ children, params }: Props) {
 		notFound();
 	}
 
-	const messages = await getMessages();
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<head>
@@ -32,7 +30,7 @@ export default async function Layout({ children, params }: Props) {
 				<meta name='description' content='A simple online store' />
 			</head>
 			<body>
-				<NextIntlClientProvider messages={messages}>
+				<NextIntlClientProvider messages={null}>
 					<ChakraUIProvider>
 						<ColorModeProvider>
 							<AuthProvider>

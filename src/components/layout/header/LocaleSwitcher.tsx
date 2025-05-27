@@ -22,7 +22,6 @@ export default function LocaleSwitcher() {
 			items={['UA', 'RU']}
 			size='xs'
 			mx='6px'
-			height='28px'
 			hideBelow='xs'
 			onValueChange={changeLocale}
 		/>

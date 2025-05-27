@@ -10,11 +10,13 @@ interface Props {
 	params: { category: string; subcategory: string; productId: string };
 }
 
-export default function ProductDetail({ params }: Props) {
+export default async function ProductDetail({ params }: Props) {
+	const { category, subcategory = 'Технika' } = params;
+
 	const t = useTranslations('Products');
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>
-			<Breadcrumbs {...params} />
+			<Breadcrumbs category={category} subcategory={subcategory} />
 			{/* <Flex hideBelow='md' mt='4'>
 				<CatalogBtn fullText />
 			</Flex> */}

@@ -12,14 +12,14 @@ interface Props {
 	params: { category: string; subcategory: string };
 }
 
-export default function Subcategory({ params }: Props) {
+export default async function Subcategory({ params }: Props) {
 	const t = useTranslations('Products');
 	const sidebarT = useTranslations('Sidebar');
-	const { subcategory = 'Технika' } = params;
+	const { category, subcategory = 'Технika' } = params;
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<Breadcrumbs {...params} />
+			<Breadcrumbs category={category} subcategory={subcategory} />
 			<Heading as='h1' size='4xl' fontWeight='medium'>
 				{subcategory}
 			</Heading>

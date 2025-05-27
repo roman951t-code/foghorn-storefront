@@ -20,6 +20,7 @@ import {
 } from '@chakra-ui/react';
 import { Rating } from '@/components/ui/rating';
 import { HiCheck } from 'react-icons/hi';
+import { FaShare } from 'react-icons/fa';
 
 export default function AboutTab() {
 	const t = useTranslations('Products');
@@ -59,6 +60,21 @@ export default function AboutTab() {
 									<HiCheck />
 								</Tag.EndElement>
 							</Tag.Root>
+
+							<IconButton
+								aria-label='Favourite'
+								variant='ghost'
+								rounded='full'
+								colorPalette='gray'
+								color='colorPalette.700'
+								transition='all 0.2s ease-in-out'
+								_hover={{
+									bg: 'colorPalette.600',
+									color: 'main.lightOnly',
+								}}
+							>
+								<FaShare />
+							</IconButton>
 							<IconButton
 								aria-label='Favourite'
 								variant='ghost'

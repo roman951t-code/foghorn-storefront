@@ -26,8 +26,10 @@ export default function Footer() {
 				width='100%'
 				flexWrap='wrap'
 				maxWidth='1444px'
+				my={{ base: 4, md: 0 }}
+				gap={2}
 			>
-				<Text mr={{ base: '12px', mdTo2xl: '0' }} color='main.lightOnly'>
+				<Text mr={{ base: '12px', md: '0' }} color='main.lightOnly'>
 					© 2025 Prosperity.com
 				</Text>
 				<MediaContacts hideBelow='md' />

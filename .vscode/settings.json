@@ -1,0 +1,11 @@
+{
+	"typescript.preferences.importModuleSpecifier": "shortest",
+	"javascript.preferences.importModuleSpecifier": "shortest",
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"typescript.enablePromptUseWorkspaceTsdk": true,
+	"typescript.suggest.autoImports": true,
+	"javascript.suggest.autoImports": true,
+
+	"typescript.suggest.paths": false,
+	"javascript.suggest.paths": false
+}

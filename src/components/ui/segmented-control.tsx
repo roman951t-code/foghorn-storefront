@@ -30,7 +30,12 @@ export const SegmentedControl = React.forwardRef<HTMLDivElement, SegmentedContro
 				<SegmentGroup.Indicator />
 				<For each={data}>
 					{(item) => (
-						<SegmentGroup.Item key={item.value} value={item.value} disabled={item.disabled}>
+						<SegmentGroup.Item
+							key={item.value}
+							value={item.value}
+							disabled={item.disabled}
+							height='28px'
+						>
 							<Box cursor='pointer'>
 								<SegmentGroup.ItemText>{item.label}</SegmentGroup.ItemText>
 								<SegmentGroup.ItemHiddenInput />
