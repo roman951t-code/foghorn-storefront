@@ -16,8 +16,8 @@ import {
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { EmptyState } from '@/components/ui/empty-state';
-import CartOrderCard from '../../reusable/cards/CartOrderCard';
-import CenteredModal from '../../dialogs/CenteredModal';
+import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
+import CenteredModal from '@/components/dialogs/CenteredModal';
 
 const emptyCart = '/assets/images/emptyCart.png';
 

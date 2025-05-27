@@ -1,7 +1,7 @@
 'use client';
 
 import { ButtonGroup, IconButton, Pagination as ChakraPagination } from '@chakra-ui/react';
-import { LuChevronRight } from 'react-icons/lu';
+import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 
 export default function Pagination() {
 	return (

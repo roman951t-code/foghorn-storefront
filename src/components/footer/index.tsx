@@ -1,6 +1,6 @@
 import { Box, Flex, Text, Link, Group } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import MediaContacts from '../../reusable/links/MediaContacts';
+import MediaContacts from '@/components/reusable/links/MediaContacts';
 
 export default function Footer() {
 	const t = useTranslations('General');

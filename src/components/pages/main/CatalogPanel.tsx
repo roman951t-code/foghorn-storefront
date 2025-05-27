@@ -5,6 +5,11 @@ import { BsChevronRight } from 'react-icons/bs';
 import CatalogBtn from '../../reusable/buttons/CatalogBtn';
 import CategoryDetails from './CategoryDetails';
 import Promo from './Promo';
+import type { I18nData } from '@/types/i18n';
+
+interface Props {
+	i18nData: I18nData;
+}
 
 const categories = [
 	{
@@ -72,7 +77,7 @@ const categories = [
 	},
 ];
 
-export default function CategoriesPanel() {
+export default function CatalogPanel({ i18nData }: Props) {
 	const [activeCategory, setActiveCategory] = useState(null);
 
 	const handleMouseEnter = (category) => {
@@ -134,7 +139,7 @@ export default function CategoriesPanel() {
 			</VStack>
 			<Promo />
 
-			<CategoryDetails category={activeCategory} />
+			<CategoryDetails category={activeCategory} i18nData={i18nData} />
 		</Flex>
 	);
 }

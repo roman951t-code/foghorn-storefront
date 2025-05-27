@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import Sidebar from '../sidebar';
 import LocaleSwitcher from './LocaleSwitcher';
 import SearchInput from './SearchInput';
-import CatalogBtn from '../../reusable/buttons/CatalogBtn';
+import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import UserActions from './UserActions';
 import Logo from './Logo';
 

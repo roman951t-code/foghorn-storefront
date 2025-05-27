@@ -2,6 +2,7 @@ import { Tabs, Box } from '@chakra-ui/react';
 import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import TabsList from '@/components/pages/cabinet/TabsHeaders';
+import { extractI18nData } from '@/utils/i18nUtils';
 
 interface Props {
 	children: ReactNode;
@@ -10,6 +11,16 @@ interface Props {
 
 export default function CabinetLayout({ children }: Props) {
 	const t = useTranslations('Sidebar');
+
+	const i18nData = extractI18nData(t, [
+		'myOrders',
+		'myFeedback',
+		'wishList',
+		'reviewedProducts',
+		'chat',
+		'authorize',
+		'logOut',
+	]);
 
 	return (
 		<Tabs.Root
@@ -20,7 +31,7 @@ export default function CabinetLayout({ children }: Props) {
 			px='3'
 		>
 			<Box position='sticky' top='74px' h='100%' rounded='sm'>
-				<TabsList />
+				<TabsList i18nData={i18nData} />
 			</Box>
 
 			<Tabs.Content w='full' value='main'>

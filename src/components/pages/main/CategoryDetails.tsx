@@ -1,13 +1,16 @@
 import React from 'react';
 import { Box, Flex, Text, VStack, Link, Heading, Button } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
+import type { I18nData } from '@/types/i18n';
 
-export default function CategoryDetails({ category }) {
+interface Props {
+	i18nData: I18nData;
+	category: unknown;
+}
+
+export default function CategoryDetails({ category, i18nData }: Props) {
 	if (!category) {
 		return null;
 	}
-
-	const t = useTranslations('General');
 
 	return (
 		<Box
@@ -61,7 +64,7 @@ export default function CategoryDetails({ category }) {
 								textUnderlineOffset='4px'
 								_focus={{ outline: 'none' }}
 							>
-								{t('seeAll')}
+								{i18nData.seeAll}
 							</Link>
 						</VStack>
 					</Box>
@@ -114,7 +117,7 @@ export default function CategoryDetails({ category }) {
 					mb='1'
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 				>
-					{t('seeCategory')}
+					{i18nData.seeCategory}
 				</Button>
 			</Flex>
 		</Box>

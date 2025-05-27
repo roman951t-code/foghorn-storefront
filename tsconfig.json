@@ -25,7 +25,9 @@
 			"@/components/*": ["components/*"],
 			"@/assets/*": ["assets/*"],
 			"@/i18n/*": ["i18n/*"],
-			"@/data/*": ["data/*"]
+			"@/data/*": ["data/*"],
+			"@/types/*": ["types/*"],
+			"@/utils/*": ["utils/*"]
 		}
 	},
 	"include": [

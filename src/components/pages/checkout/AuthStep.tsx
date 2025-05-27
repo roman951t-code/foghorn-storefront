@@ -1,10 +1,29 @@
 import { Button, Flex, Heading, Card, VStack } from '@chakra-ui/react';
-import Auth from '@/components/layout/header/Auth';
+import Auth from '@/components/header/Auth';
 import { useTranslations } from 'next-intl';
 import PersonalDataForm from '@/components/pages/cabinet/user/PersonalDataForm';
+import { extractI18nData } from '@/utils/i18nUtils';
 
 export default function AuthStep() {
-	const authT = useTranslations('Auth');
+	const t = useTranslations('Auth');
+
+	const i18nData = extractI18nData(t, [
+		'name',
+		'phone',
+		'lastname',
+		'authorize',
+		'continueWith',
+		'logOut',
+		'email',
+		'emailRequired',
+		'wrongEmail',
+		'password',
+		'passRequired',
+		'wrongPassLength',
+		'continue',
+		'restorePass',
+		'getTemporaryPass',
+	]);
 
 	return (
 		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' textAlign='center' p='4'>
@@ -16,9 +35,10 @@ export default function AuthStep() {
 					justifyContent={{ base: 'center', sm: 'space-between' }}
 				>
 					<Heading as='h4' size='md'>
-						{authT('authToOrder')}
+						{t('authToOrder')}
 					</Heading>
 					<Auth
+						i18nData={i18nData}
 						trigger={
 							<Button
 								w='220px'
@@ -27,7 +47,7 @@ export default function AuthStep() {
 								color='black'
 								variant='solid'
 							>
-								{authT('authorize')}
+								{t('authorize')}
 							</Button>
 						}
 					/>
@@ -36,9 +56,9 @@ export default function AuthStep() {
 
 			<VStack w='100%' mt='8' gap='4' direction='column'>
 				<Heading as='h4' size='md' w='100%' textAlign='left'>
-					{authT('yourContacts')}
+					{t('yourContacts')}
 				</Heading>
-				<PersonalDataForm />
+				<PersonalDataForm i18nData={i18nData} />
 			</VStack>
 		</Card.Root>
 	);

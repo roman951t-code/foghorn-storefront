@@ -1,5 +1,4 @@
 'use client';
-
 import {
 	Box,
 	Button,
@@ -11,10 +10,14 @@ import {
 	Textarea,
 } from '@chakra-ui/react';
 import { VscFeedback } from 'react-icons/vsc';
-import { useTranslations } from 'next-intl';
 import { Field } from '@/components/ui/field';
-import CenteredModal from '../dialogs/CenteredModal';
+import CenteredModal from '@/components/dialogs/CenteredModal';
 import { useForm } from 'react-hook-form';
+import type { I18nData } from '@/types/i18n';
+
+interface Props {
+	i18nData: I18nData;
+}
 
 const emojiMap: Record<number, string> = {
 	1: '🙁',
@@ -31,11 +34,7 @@ interface FormValues {
 	rating: number;
 }
 
-export default function FeedbackModal() {
-	const authT = useTranslations('Auth');
-	const genT = useTranslations('General');
-	const prodT = useTranslations('Products');
-
+export default function FeedbackModal({ i18nData }: Props) {
 	const {
 		register,
 		handleSubmit,
@@ -59,14 +58,14 @@ export default function FeedbackModal() {
 
 	return (
 		<CenteredModal
-			title={prodT('leaveFeedback')}
+			title={i18nData.leaveFeedback}
 			trigger={
 				<Button
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='main.darkOnly'
 					variant='solid'
 				>
-					<VscFeedback /> {prodT('leaveFeedback')}
+					<VscFeedback /> {i18nData.leaveFeedback}
 				</Button>
 			}
 			size='md'
@@ -75,7 +74,7 @@ export default function FeedbackModal() {
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<Center flexDirection='column' gap='4' mb='6'>
 						<Heading size='3xl' fontWeight='normal'>
-							{prodT('rate')}
+							{i18nData.rate}
 						</Heading>
 						<RatingGroup.Root
 							defaultValue={5}
@@ -101,11 +100,11 @@ export default function FeedbackModal() {
 
 					<Fieldset.Root size='lg' maxW='md'>
 						<Fieldset.Content gap='6'>
-							<Field label={authT('name')} required errorText={errors.name?.message}>
-								<Input {...register('name', { required: authT('name') + ' is required' })} />
+							<Field label={i18nData.name} required errorText={errors.name?.message}>
+								<Input {...register('name', { required: i18nData.name + ' is required' })} />
 							</Field>
 
-							<Field label={authT('email')} errorText={errors.email?.message}>
+							<Field label={i18nData.email} errorText={errors.email?.message}>
 								<Input
 									{...register('email', {
 										pattern: {
@@ -117,11 +116,11 @@ export default function FeedbackModal() {
 								/>
 							</Field>
 
-							<Field label={prodT('myRate')} required errorText={errors.feedback?.message}>
+							<Field label={i18nData.myRate} required errorText={errors.feedback?.message}>
 								<Textarea
 									minH='100px'
 									maxH='300px'
-									{...register('feedback', { required: prodT('myRate') + ' is required' })}
+									{...register('feedback', { required: i18nData.myRate + ' is required' })}
 								/>
 							</Field>
 						</Fieldset.Content>
@@ -134,7 +133,7 @@ export default function FeedbackModal() {
 							color='black'
 							variant='solid'
 						>
-							{genT('send')}
+							{i18nData.send}
 						</Button>
 					</Fieldset.Root>
 				</form>

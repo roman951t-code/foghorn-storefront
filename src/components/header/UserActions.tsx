@@ -1,6 +1,8 @@
 import { FiHeart } from 'react-icons/fi';
 import { IconButton, Float, Circle } from '@chakra-ui/react';
 import { FiUser } from 'react-icons/fi';
+import { useTranslations } from 'next-intl';
+import { extractI18nData } from '@/utils/i18nUtils';
 
 import Auth from './Auth';
 import Cart from './Cart';
@@ -20,9 +22,26 @@ const AuthBtn = () => (
 );
 
 export default function UserActions() {
+	const t = useTranslations('Auth');
+
+	const i18nData = extractI18nData(t, [
+		'authorize',
+		'continueWith',
+		'logOut',
+		'email',
+		'emailRequired',
+		'wrongEmail',
+		'password',
+		'passRequired',
+		'wrongPassLength',
+		'continue',
+		'restorePass',
+		'getTemporaryPass',
+	]);
+
 	return (
 		<>
-			<Auth trigger={<AuthBtn />} />
+			<Auth trigger={<AuthBtn />} i18nData={i18nData} />
 
 			<IconButton
 				position='relative'

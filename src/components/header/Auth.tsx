@@ -1,25 +1,31 @@
 'use client';
+import React, { JSX } from 'react';
 import { Box, Button, Stack, Icon } from '@chakra-ui/react';
 import { FaFacebook } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
-import { useTranslations } from 'next-intl';
-import CenteredModal from '../../dialogs/CenteredModal';
+import CenteredModal from '@/components/dialogs/CenteredModal';
 import EmailAuth from './EmailAuth';
 import { signIn, signOut, useSession } from 'next-auth/react';
+import type { I18nData } from '@/types/i18n';
 
-export default function Auth({ trigger }: { trigger?: JSX.Element }) {
-	const t = useTranslations('Auth');
+interface Props {
+	i18nData: I18nData;
+	trigger?: JSX.Element;
+}
+
+export default function Auth({ i18nData, trigger }: Props) {
 	const { data: session } = useSession();
 
 	return (
-		<CenteredModal title={t('authorize')} trigger={trigger} size='md'>
+		<CenteredModal title={i18nData.authorize} trigger={trigger} size='md'>
 			<Box maxW='400px' p={4} borderRadius='lg' mx='auto'>
 				{!session ? (
 					<>
 						<EmailAuth
-							onSubmit={({ email, password }) => {
+							onSubmitAction={({ email, password }) => {
 								signIn('credentials', { email, password, redirect: false });
 							}}
+							i18nData={i18nData}
 						/>
 
 						<Stack gap={4} marginTop={12}>
@@ -32,7 +38,7 @@ export default function Auth({ trigger }: { trigger?: JSX.Element }) {
 								<Icon size='md'>
 									<FcGoogle />
 								</Icon>
-								{t('continueWith')} Google
+								{i18nData.continueWith} Google
 							</Button>
 							<Button
 								gap='12px'
@@ -43,14 +49,14 @@ export default function Auth({ trigger }: { trigger?: JSX.Element }) {
 								<Icon color='blue.500' size='md'>
 									<FaFacebook />
 								</Icon>
-								{t('continueWith')} Facebook
+								{i18nData.continueWith} Facebook
 							</Button>
 						</Stack>
 					</>
 				) : (
 					<Stack>
 						<Box textAlign='center'>Logged in as {session.user?.email}</Box>
-						<Button onClick={() => signOut()}>{t('logOut')}</Button>
+						<Button onClick={() => signOut()}>{i18nData.logOut}</Button>
 					</Stack>
 				)}
 			</Box>

@@ -11,6 +11,12 @@ export default function Wishlist() {
 	const prodT = useTranslations('Products');
 	const genT = useTranslations('General');
 
+	const i18nData = {
+		new: prodT('new'),
+		expensiveToCheap: prodT('expensiveToCheap'),
+		cheapToExpensive: prodT('cheapToExpensive'),
+	};
+
 	return (
 		<VStack>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
@@ -60,7 +66,7 @@ export default function Wishlist() {
 							</Icon>
 						</IconButton>
 					</HStack>
-					<ProductsFilter />
+					<ProductsFilter i18nData={i18nData} />
 				</VStack>
 			</HStack>
 			<WishList />

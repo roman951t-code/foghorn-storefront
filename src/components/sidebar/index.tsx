@@ -15,8 +15,8 @@ import {
 import { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { useSession } from 'next-auth/react';
-import CatalogBtn from '../../reusable/buttons/CatalogBtn';
-import MediaContacts from '../../reusable/links/MediaContacts';
+import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
+import MediaContacts from '@/components/reusable/links/MediaContacts';
 import CollapsibleLinks from './CollapsibleLinks';
 import UserLinks from './UserLinks';
 import { LogoutSection, AuthorizeSection } from './AuthorizeSection';

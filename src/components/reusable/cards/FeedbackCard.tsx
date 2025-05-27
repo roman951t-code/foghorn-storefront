@@ -12,6 +12,7 @@ import {
 	Heading,
 	Accordion,
 } from '@chakra-ui/react';
+import { useTranslations } from 'next-intl';
 import FeedbackModal from '@/components/product/FeedbackModal';
 import { Rating } from '@/components/ui/rating';
 import { FiTrash2 } from 'react-icons/fi';
@@ -125,6 +126,19 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 }
 
 function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
+	const authT = useTranslations('Auth');
+	const genT = useTranslations('General');
+	const prodT = useTranslations('Products');
+
+	const i18nData = {
+		name: authT('name'),
+		email: authT('email'),
+		rate: prodT('rate'),
+		leaveFeedback: prodT('leaveFeedback'),
+		myRate: prodT('myRate'),
+		send: genT('send'),
+	};
+
 	return (
 		<Card.Root
 			minWidth='200px'
@@ -175,7 +189,7 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 									-150 ₴
 								</Badge>
 							</Text>
-							<FeedbackModal />
+							<FeedbackModal i18nData={i18nData} />
 						</Stack>
 					</Stack>
 				</Flex>

@@ -3,7 +3,7 @@ import { HStack, Stack } from '@chakra-ui/react';
 import EditableInput from '@/components/reusable/inputs/EditableInput';
 import { Field } from '@/components/ui/field';
 import { useForm } from 'react-hook-form';
-import { useTranslations } from 'next-intl';
+import type { I18nData } from '@/types/i18n';
 
 interface FormValues {
 	email: string;
@@ -19,7 +19,11 @@ const initialValues = {
 	lastName: 'Onyshchenko',
 };
 
-export default function PersonalDataForm() {
+interface Props {
+	i18nData: I18nData;
+}
+
+export default function PersonalDataForm({ i18nData }: Props) {
 	const {
 		register,
 		handleSubmit,
@@ -29,8 +33,6 @@ export default function PersonalDataForm() {
 		defaultValues: initialValues,
 		mode: 'onSubmit',
 	});
-
-	const authT = useTranslations('Auth');
 
 	const handleEditableSubmit = (field: keyof FormValues, value: string) => {
 		setValue(field, value);
@@ -59,7 +61,7 @@ export default function PersonalDataForm() {
 					<Field
 						minW='264px'
 						orientation='vertical'
-						label={authT('name')}
+						label={i18nData.name}
 						invalid={!!errors.firstName}
 						errorText={errors.firstName?.message}
 					>
@@ -72,7 +74,7 @@ export default function PersonalDataForm() {
 					<Field
 						minW='264px'
 						orientation='vertical'
-						label={authT('email')}
+						label={i18nData.email}
 						invalid={!!errors.email}
 						errorText={errors.email?.message}
 					>
@@ -87,7 +89,7 @@ export default function PersonalDataForm() {
 					<Field
 						minW='264px'
 						orientation='vertical'
-						label={authT('phone')}
+						label={i18nData.phone}
 						invalid={!!errors.phone}
 						errorText={errors.phone?.message}
 					>
@@ -100,7 +102,7 @@ export default function PersonalDataForm() {
 					<Field
 						minW='264px'
 						orientation='vertical'
-						label={authT('lastname')}
+						label={i18nData.lastname}
 						invalid={!!errors.lastName}
 						errorText={errors.lastName?.message}
 					>

@@ -3,13 +3,14 @@ import { ReactNode } from 'react';
 import { ColorModeProvider } from '@/components/ui/color-mode';
 import ChakraUIProvider from '@/components/providers/ChakraUIProvider';
 import { Box } from '@chakra-ui/react';
-import Header from '@/components/layout/header';
-import Footer from '@/components/layout/footer';
+import Header from '@/components/header';
+import Footer from '@/components/footer';
 import ToTop from '@/components/reusable/buttons/ToTop';
 import AuthProvider from '@/components/providers/AuthProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { loadClientMessages } from '@/utils/i18nUtils';
 
 interface Props {
 	children: ReactNode;
@@ -23,6 +24,8 @@ export default async function Layout({ children, params }: Props) {
 		notFound();
 	}
 
+	const messages = await loadClientMessages(['Sidebar', 'Auth', 'General']);
+
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<head>
@@ -30,7 +33,7 @@ export default async function Layout({ children, params }: Props) {
 				<meta name='description' content='A simple online store' />
 			</head>
 			<body>
-				<NextIntlClientProvider messages={null}>
+				<NextIntlClientProvider messages={messages}>
 					<ChakraUIProvider>
 						<ColorModeProvider>
 							<AuthProvider>

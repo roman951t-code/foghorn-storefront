@@ -1,15 +1,17 @@
 'use client';
-import { useTranslations } from 'next-intl';
 import { Select, createListCollection } from '@chakra-ui/react';
+import type { I18nData } from '@/types/i18n';
 
-export default function ProductsFilter() {
-	const t = useTranslations('Products');
+interface Props {
+	i18nData: I18nData;
+}
 
+export default function ProductsFilter({ i18nData }: Props) {
 	const options = createListCollection({
 		items: [
-			{ label: t('new'), value: 'new' },
-			{ label: t('expensiveToCheap'), value: 'expensiveToCheap' },
-			{ label: t('cheapToExpensive'), value: 'cheapToExpensive' },
+			{ label: i18nData.new, value: 'new' },
+			{ label: i18nData.expensiveToCheap, value: 'expensiveToCheap' },
+			{ label: i18nData.cheapToExpensive, value: 'cheapToExpensive' },
 		],
 	});
 

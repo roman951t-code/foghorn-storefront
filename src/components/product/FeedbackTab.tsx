@@ -4,7 +4,19 @@ import { Rating } from '@/components/ui/rating';
 import FeedbackModal from './FeedbackModal';
 
 export default function FeedbackTab() {
-	const t = useTranslations('Products');
+	const authT = useTranslations('Auth');
+	const genT = useTranslations('General');
+	const prodT = useTranslations('Products');
+
+	const i18nData = {
+		name: authT('name'),
+		email: authT('email'),
+		rate: prodT('rate'),
+		leaveFeedback: prodT('leaveFeedback'),
+		myRate: prodT('myRate'),
+		send: genT('send'),
+	};
+
 	return (
 		<Stack gap='4'>
 			<Card.Root
@@ -18,10 +30,10 @@ export default function FeedbackTab() {
 				<Card.Header p='4'>
 					<Flex justifyContent='space-between' alignItems='center'>
 						<Stack>
-							<Heading size='md'> {t('feedbackTotal')}: 5</Heading>
+							<Heading size='md'> {prodT('feedbackTotal')}: 5</Heading>
 							<Rating colorPalette='orange' readOnly size='xs' defaultValue={5} />
 						</Stack>
-						<FeedbackModal />
+						<FeedbackModal i18nData={i18nData} />
 					</Flex>
 
 					<Stack></Stack>

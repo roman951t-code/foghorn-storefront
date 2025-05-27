@@ -1,4 +1,5 @@
 import { Button, HStack } from '@chakra-ui/react';
+import { JSX } from 'react';
 import { useTranslations } from 'next-intl';
 import {
 	DrawerActionTrigger,
@@ -11,7 +12,7 @@ import {
 	DrawerRoot,
 	DrawerTrigger,
 } from '@/components/ui/drawer';
-import CatalogDrawer from '../../reusable/drawer/CatalogDrawer';
+import CatalogDrawer from '@/components/reusable/drawer/CatalogDrawer';
 
 interface Props {
 	fullText: boolean;
@@ -22,7 +23,9 @@ interface Props {
 
 export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: Props) {
 	const t = useTranslations('General');
-	const text = fullText ? t('catalogFull') : t('catalogShort');
+	const catalogFull = t('catalogFull');
+	const catalogShort = t('catalogShort');
+	const text = fullText ? catalogFull : catalogShort;
 
 	return (
 		<HStack wrap='wrap'>

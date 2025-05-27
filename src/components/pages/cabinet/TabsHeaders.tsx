@@ -1,15 +1,18 @@
 'use client';
 import { Tabs, Icon } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
 import { FiHeart, FiEye } from 'react-icons/fi';
 import { LuUserRoundCog } from 'react-icons/lu';
 import { useRouter } from '@/i18n/routing';
 import { LuListChecks } from 'react-icons/lu';
 import { IoChatboxEllipsesOutline } from 'react-icons/io5';
 import { VscFeedback } from 'react-icons/vsc';
+import type { I18nData } from '@/types/i18n';
 
-export default function TabsList() {
-	const t = useTranslations('Sidebar');
+interface Props {
+	i18nData: I18nData;
+}
+
+export default function TabsList({ i18nData }: Props) {
 	const router = useRouter();
 
 	const handleNavigation = (href: string) => {
@@ -31,7 +34,7 @@ export default function TabsList() {
 				Роман Онищенко
 			</Tabs.Trigger>
 			<Tabs.Trigger
-				value={t('myOrders')}
+				value={i18nData.myOrders}
 				color='main'
 				fontWeight='normal'
 				fontSize='15px'
@@ -40,10 +43,10 @@ export default function TabsList() {
 				<Icon size='md'>
 					<LuListChecks />
 				</Icon>
-				{t('myOrders')}
+				{i18nData.myOrders}
 			</Tabs.Trigger>
 			<Tabs.Trigger
-				value={t('myFeedback')}
+				value={i18nData.myFeedback}
 				color='main'
 				fontWeight='normal'
 				fontSize='15px'
@@ -52,10 +55,10 @@ export default function TabsList() {
 				<Icon size='md'>
 					<VscFeedback />
 				</Icon>
-				{t('myFeedback')}
+				{i18nData.myFeedback}
 			</Tabs.Trigger>
 			<Tabs.Trigger
-				value={t('wishList')}
+				value={i18nData.wishList}
 				color='main'
 				fontWeight='normal'
 				fontSize='15px'
@@ -64,10 +67,10 @@ export default function TabsList() {
 				<Icon size='md'>
 					<FiHeart />
 				</Icon>
-				{t('wishList')}
+				{i18nData.wishList}
 			</Tabs.Trigger>
 			<Tabs.Trigger
-				value={t('reviewedProducts')}
+				value={i18nData.reviewedProducts}
 				color='main'
 				fontWeight='normal'
 				fontSize='15px'
@@ -76,10 +79,10 @@ export default function TabsList() {
 				<Icon size='md'>
 					<FiEye />
 				</Icon>
-				{t('reviewedProducts')}
+				{i18nData.reviewedProducts}
 			</Tabs.Trigger>
 			<Tabs.Trigger
-				value={t('chat')}
+				value={i18nData.chat}
 				color='main'
 				fontWeight='normal'
 				fontSize='15px'
@@ -88,7 +91,7 @@ export default function TabsList() {
 				<Icon size='md'>
 					<IoChatboxEllipsesOutline />
 				</Icon>
-				{t('chat')}
+				{i18nData.chat}
 			</Tabs.Trigger>
 		</Tabs.List>
 	);

@@ -32,8 +32,18 @@ const items = [
 ];
 
 export default function OrderCard() {
-	const t = useTranslations('Products');
+	const authT = useTranslations('Auth');
 	const genT = useTranslations('General');
+	const prodT = useTranslations('Products');
+
+	const i18nData = {
+		name: authT('name'),
+		email: authT('email'),
+		rate: prodT('rate'),
+		leaveFeedback: prodT('leaveFeedback'),
+		myRate: prodT('myRate'),
+		send: genT('send'),
+	};
 
 	return (
 		<Accordion.Root collapsible defaultValue={['b']} multiple>
@@ -57,14 +67,14 @@ export default function OrderCard() {
 							>
 								<VStack gap='3' alignItems='flex-start'>
 									<Stat.Root>
-										<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
+										<Stat.Label fontSize='sm'>{prodT('totalAmount')}</Stat.Label>
 										<Stat.ValueText w='124px' fontSize='3xl'>
 											55 699 ₴
 										</Stat.ValueText>
 									</Stat.Root>
 									<Text textStyle='sm' fontWeight='normal'>
 										<Highlight query='3' styles={{ fontWeight: 'bold' }}>
-											{`${t('numOfProducts')}: 3`}
+											{`${prodT('numOfProducts')}: 3`}
 										</Highlight>
 									</Text>
 								</VStack>
@@ -80,7 +90,7 @@ export default function OrderCard() {
 									alignItems={{ base: 'flex-start', sm: 'flex-end' }}
 								>
 									<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
-										<Tag.Label>№ {t('order')}: 65719</Tag.Label>
+										<Tag.Label>№ {prodT('order')}: 65719</Tag.Label>
 									</Tag.Root>
 									<Text color='main' textStyle='sm'>
 										{genT('from')} 12.02.2024
@@ -108,9 +118,9 @@ export default function OrderCard() {
 										border='1px solid '
 										borderColor='border'
 									>
-										{t('repeatOrder')}
+										{prodT('repeatOrder')}
 									</Button>
-									<FeedbackModal />
+									<FeedbackModal i18nData={i18nData} />
 								</Flex>
 								<Stack gap='4' maxH='500px' overflowY='auto'>
 									<Separator color='border.dark' />
