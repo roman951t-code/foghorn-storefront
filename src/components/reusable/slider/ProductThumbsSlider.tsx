@@ -3,7 +3,9 @@
 import React, { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Image, Box, useBreakpointValue } from '@chakra-ui/react';
+import NextImage from 'next/image';
 import ImageModal from './ImageModal';
+
 import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
@@ -52,7 +54,9 @@ export default function ProductThumbsSlider() {
 			>
 				{images.map((src, index) => (
 					<SwiperSlide key={index} onClick={() => setSelectedImage(src)}>
-						<Image src={src} alt={`Product photo ${index + 1}`} cursor='pointer' />
+						<Image asChild cursor='pointer'>
+							<NextImage src={src} alt={`Product photo ${index + 1}`} />
+						</Image>
 					</SwiperSlide>
 				))}
 			</Swiper>
@@ -70,7 +74,9 @@ export default function ProductThumbsSlider() {
 				>
 					{images.map((src, index) => (
 						<SwiperSlide key={index}>
-							<Image src={src} alt={`Product photo ${index + 1}`} cursor='pointer' />
+							<Image asChild cursor='pointer'>
+								<NextImage src={src} alt={`Product photo ${index + 1}`} />
+							</Image>
 						</SwiperSlide>
 					))}
 				</Swiper>

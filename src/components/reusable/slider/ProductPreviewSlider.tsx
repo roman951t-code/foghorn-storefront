@@ -1,7 +1,8 @@
 'use client';
 import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Image, Link } from '@chakra-ui/react';
+import { Link } from '@chakra-ui/react';
+import Image from 'next/image';
 
 import 'swiper/css';
 import 'swiper/css/effect-flip';
@@ -24,17 +25,41 @@ export default function ProductPreviewSlider() {
 			>
 				<SwiperSlide>
 					<Link href='#' variant='plain' _focus={{ outline: 'none' }}>
-						<Image margin='auto' width='140px' height='auto' src={img1} alt='Product photo' />
+						<Image
+							style={{
+								width: '140',
+								height: 'auto',
+								margin: 'auto',
+							}}
+							src={img1}
+							alt='Product photo'
+						/>
 					</Link>
 				</SwiperSlide>
 				<SwiperSlide>
 					<Link href='#' variant='plain' _focus={{ outline: 'none' }}>
-						<Image margin='auto' width='140px' height='auto' src={img2} alt='Product photo' />
+						<Image
+							style={{
+								width: '140',
+								height: 'auto',
+								margin: 'auto',
+							}}
+							src={img2}
+							alt='Product photo'
+						/>
 					</Link>
 				</SwiperSlide>
 				<SwiperSlide>
 					<Link href='#' variant='plain' _focus={{ outline: 'none' }}>
-						<Image margin='auto' width='140px' height='auto' src={img3} alt='Product photo' />
+						<Image
+							style={{
+								width: '140',
+								height: 'auto',
+								margin: 'auto',
+							}}
+							src={img3}
+							alt='Product photo'
+						/>
 					</Link>
 				</SwiperSlide>
 			</Swiper>

@@ -1,6 +1,17 @@
 import { Flex, Group, Box, Heading } from '@chakra-ui/react';
 import CheckoutSteps from '@/components/pages/checkout/CheckoutSteps';
 import OrderInfo from '@/components/pages/checkout/OrderInfo';
+import { type Metadata } from 'next';
+import { getLocalizedMetadata } from '@/utils/i18nUtils';
+
+type Params = {
+	params: { locale: string };
+};
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+	const { locale } = await params;
+	return getLocalizedMetadata(locale, 'checkout');
+}
 
 export default function Checkout() {
 	return (

@@ -14,7 +14,7 @@ export default function Footer() {
 				justify={'center'}
 				ml='-8px'
 				width='100%'
-				maxWidth='1444px'
+				maxW='1444px'
 			>
 				<MediaContacts />
 			</Flex>
@@ -25,8 +25,8 @@ export default function Footer() {
 				minHeight='60px'
 				width='100%'
 				flexWrap='wrap'
-				maxWidth='1444px'
-				my={{ base: 4, md: 0 }}
+				maxW='1444px'
+				my={{ base: 4, sm: 0 }}
 				gap={2}
 			>
 				<Text mr={{ base: '12px', md: '0' }} color='main.lightOnly'>

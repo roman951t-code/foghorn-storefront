@@ -1,21 +1,40 @@
 'use client';
-import { Image, useBreakpointValue } from '@chakra-ui/react';
+import { useBreakpointValue, Flex } from '@chakra-ui/react';
 import { Link } from '@/i18n/routing';
+import Image from 'next/image';
 
 const logoBig = '/assets/images/logoBig.webp';
 const logoSmall = '/assets/images/logoSmall.webp';
 
 export default function Logo() {
-	const logoSrc = useBreakpointValue({
-		base: logoSmall,
-		sm: logoBig,
-		md: logoSmall,
-		lg: logoBig,
-	});
+	const logoSrc =
+		useBreakpointValue({
+			base: logoSmall,
+			sm: logoBig,
+			md: logoSmall,
+			lg: logoBig,
+		}) || logoBig;
+
+	const logoWidth =
+		useBreakpointValue({
+			base: 36,
+			sm: 170,
+			md: 36,
+			lg: 170,
+		}) || 170;
+
+	const logoHeight = 36;
 
 	return (
 		<Link href='/'>
-			<Image src={logoSrc} fit='cover' minWidth='36px' h='36px' alt='logo' />
+			<Image
+				src={logoSrc}
+				alt='logo'
+				width={logoWidth}
+				height={logoHeight}
+				style={{ width: `${logoWidth}px`, height: '36px' }}
+				priority
+			/>
 		</Link>
 	);
 }

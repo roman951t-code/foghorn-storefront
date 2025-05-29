@@ -1,7 +1,6 @@
 import { FiTrash2, FiShoppingCart } from 'react-icons/fi';
 import {
 	IconButton,
-	Image,
 	Stack,
 	Flex,
 	Button,
@@ -10,7 +9,6 @@ import {
 	Float,
 	Circle,
 	VStack,
-	Separator,
 	Highlight,
 	Text,
 } from '@chakra-ui/react';
@@ -18,6 +16,7 @@ import { useTranslations } from 'next-intl';
 import { EmptyState } from '@/components/ui/empty-state';
 import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
 import CenteredModal from '@/components/dialogs/CenteredModal';
+import Image from 'next/image';
 
 const emptyCart = '/assets/images/emptyCart.png';
 
@@ -53,10 +52,13 @@ export default function Cart() {
 				<Stack direction='column'>
 					<Image
 						src={emptyCart}
-						fit='cover'
 						alt='empty cart'
-						width='200px'
-						margin='20px auto 20px 25%'
+						style={{
+							margin: '20px auto 20px 25%',
+							objectFit: 'cover',
+							width: '200px',
+							height: 'auto',
+						}}
 					/>
 					<EmptyState
 						paddingBlock='0'

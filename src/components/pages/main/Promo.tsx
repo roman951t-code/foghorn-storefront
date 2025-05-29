@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Image, Flex } from '@chakra-ui/react';
+import { Flex, Image } from '@chakra-ui/react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
+import NextImage from 'next/image';
+
 import 'swiper/css';
 import '@/styles/swiper.css';
 
@@ -35,14 +37,9 @@ export default function Promo() {
 				alignItems={'center'}
 			>
 				{images.map((src, index) => (
-					<Image
-						key={index}
-						maxWidth='479px'
-						h='500px'
-						rounded='md'
-						src={src}
-						alt={`Carousel ${index + 1}`}
-					/>
+					<Image asChild key={index} h='500px' position='relative' maxW='479px' borderRadius='2'>
+						<NextImage src={src} alt={`Carousel ${index + 1}`} fill />
+					</Image>
 				))}
 			</Flex>
 		);
@@ -59,7 +56,15 @@ export default function Promo() {
 		>
 			{images.map((src, index) => (
 				<SwiperSlide key={index}>
-					<Image w='479px' h='500px' rounded='md' src={src} alt={`Carousel ${index + 1}`} />
+					<Flex position='relative' height='500px' width='100%'>
+						<NextImage
+							src={src}
+							alt={`Carousel ${index + 1}`}
+							fill
+							sizes='(max-width: 768px) 100vw, 480px'
+							style={{ objectFit: 'cover', borderRadius: '8px' }}
+						/>
+					</Flex>
 				</SwiperSlide>
 			))}
 		</Swiper>

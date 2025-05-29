@@ -2,13 +2,15 @@ import React from 'react';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { Rating } from '@/components/ui/rating';
 import { useTranslations } from 'next-intl';
-import { IconButton, Text, Flex, HStack, Card, Badge, Link, Image } from '@chakra-ui/react';
+import { IconButton, Text, Flex, HStack, Card, Badge, Link } from '@chakra-ui/react';
+import Image from 'next/image';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
 
 const img1 = '/assets/images/temp/1.webp';
 
 export default function ProductCard({ isSliderEnabled = false }) {
 	const t = useTranslations('Products');
+
 	return (
 		<Card.Root
 			minWidth='200px'
@@ -55,7 +57,15 @@ export default function ProductCard({ isSliderEnabled = false }) {
 				{isSliderEnabled ? (
 					<ProductPreviewSlider />
 				) : (
-					<Image margin='auto' width='140px' height='auto' src={img1} alt='Product photo' />
+					<Image
+						style={{
+							width: '140px',
+							height: 'auto',
+							margin: 'auto',
+						}}
+						src={img1}
+						alt='Product photo'
+					/>
 				)}
 				<Card.Title fontWeight='medium' fontSize='md' lineHeight='22px' mt='1' w='100%'>
 					<Link

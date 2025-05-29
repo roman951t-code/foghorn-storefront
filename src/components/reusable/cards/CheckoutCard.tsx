@@ -1,17 +1,7 @@
 import React from 'react';
-import {
-	Text,
-	VStack,
-	Card,
-	Badge,
-	Link,
-	Image,
-	Separator,
-	Flex,
-	Group,
-	Stat,
-} from '@chakra-ui/react';
+import { Text, VStack, Card, Badge, Link, Separator, Flex, Group, Stat } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 const img1 = '/assets/images/temp/1.webp';
 
@@ -32,7 +22,13 @@ export function SidebarCheckoutCard() {
 				</Link>
 			</Card.Title>
 			<Group p='0'>
-				<Image ml='-2' w='108px' height='auto' src={img1} alt='Product photo' objectFit='contain' />
+				<Image
+					style={{ marginLeft: '-2', width: '108px', height: 'auto' }}
+					width='108'
+					src={img1}
+					alt='Product photo'
+					objectFit='contain'
+				/>
 
 				<VStack alignItems='flex-start'>
 					<Text color='main' fontSize='xl'>

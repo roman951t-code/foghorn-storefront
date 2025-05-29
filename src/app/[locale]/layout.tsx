@@ -1,10 +1,12 @@
 // src/app/layout.tsx
 import { ReactNode } from 'react';
+import pick from 'lodash.pick';
 import { ColorModeProvider } from '@/components/ui/color-mode';
 import ChakraUIProvider from '@/components/providers/ChakraUIProvider';
 import { Box } from '@chakra-ui/react';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import { hasLocale } from 'next-intl';
 import ToTop from '@/components/reusable/buttons/ToTop';
 import AuthProvider from '@/components/providers/AuthProvider';
 import { NextIntlClientProvider } from 'next-intl';
@@ -19,23 +21,19 @@ interface Props {
 
 export default async function Layout({ children, params }: Props) {
 	const { locale } = await params;
-
-	if (!routing.locales.includes(locale)) {
+	if (!hasLocale(routing.locales, locale)) {
 		notFound();
 	}
 
-	const messages = await loadClientMessages(['Sidebar', 'Auth', 'General']);
+	const messages = await loadClientMessages(['Sidebar', 'Auth', 'General', 'Error']);
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
-			<head>
-				<title>Online Store</title>
-				<meta name='description' content='A simple online store' />
-			</head>
+			<head />
 			<body>
 				<NextIntlClientProvider messages={messages}>
-					<ChakraUIProvider>
-						<ColorModeProvider>
+					<ColorModeProvider>
+						<ChakraUIProvider>
 							<AuthProvider>
 								<Box
 									display='flex'
@@ -53,8 +51,8 @@ export default async function Layout({ children, params }: Props) {
 									<Footer />
 								</Box>
 							</AuthProvider>
-						</ColorModeProvider>
-					</ChakraUIProvider>
+						</ChakraUIProvider>
+					</ColorModeProvider>
 				</NextIntlClientProvider>
 			</body>
 		</html>

@@ -1,6 +1,6 @@
 'use client';
 
-import { IconButton, Image, Separator } from '@chakra-ui/react';
+import { IconButton, Separator } from '@chakra-ui/react';
 import { FiMenu } from 'react-icons/fi';
 import {
 	DrawerBackdrop,
@@ -19,6 +19,7 @@ import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import MediaContacts from '@/components/reusable/links/MediaContacts';
 import CollapsibleLinks from './CollapsibleLinks';
 import UserLinks from './UserLinks';
+import Image from 'next/image';
 import { LogoutSection, AuthorizeSection } from './AuthorizeSection';
 
 const logoBig = '/assets/images/logoBig.webp';
@@ -26,7 +27,7 @@ const logoBig = '/assets/images/logoBig.webp';
 const Logo = () => {
 	return (
 		<Link href='/'>
-			<Image src={logoBig} fit='cover' minWidth='36px' h='36px' alt='logo' />
+			<Image src={logoBig} objectFit='cover' width='170' height='36' alt='logo' />
 		</Link>
 	);
 };

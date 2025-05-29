@@ -11,13 +11,13 @@ import {
 	Separator,
 	Highlight,
 	Flex,
-	Image,
 	HStack,
 	Stat,
 	Accordion,
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import FeedbackModal from '@/components/product/FeedbackModal';
+import Image from 'next/image';
 
 const img1 = '/assets/images/temp/1.webp';
 const img2 = '/assets/images/temp/2.webp';
@@ -79,9 +79,43 @@ export default function OrderCard() {
 									</Text>
 								</VStack>
 								<HStack gap='1' display={{ base: 'none', lg: 'flex' }}>
-									<Image w='100px' h='auto' src={img1} alt='Product photo' objectFit='contain' />
-									<Image w='100px' h='auto' src={img2} alt='Product photo' objectFit='contain' />
-									<Image w='100px' h='auto' src={img1} alt='Product photo' objectFit='contain' />
+									<Image
+										style={{
+											width: '100px',
+											height: 'auto',
+										}}
+										src={img1}
+										alt='Product photo'
+										objectFit='contain'
+									/>
+
+									<Image
+										style={{
+											width: '100px',
+											height: 'auto',
+										}}
+										src={img1}
+										alt='Product photo'
+										objectFit='contain'
+									/>
+									<Image
+										style={{
+											width: '100px',
+											height: 'auto',
+										}}
+										src={img2}
+										alt='Product photo'
+										objectFit='contain'
+									/>
+									<Image
+										style={{
+											width: '100px',
+											height: 'auto',
+										}}
+										src={img1}
+										alt='Product photo'
+										objectFit='contain'
+									/>
 								</HStack>
 								<VStack
 									gap='4'
@@ -126,13 +160,15 @@ export default function OrderCard() {
 									<Separator color='border.dark' />
 									<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
 										<Image
-											w='110px'
-											height='auto'
+											style={{
+												width: '110px',
+												height: 'auto',
+												marginLeft: '-3px',
+												marginBottom: '(max-width: 768px) -3px, (max-width: 1200px) 0, 0',
+											}}
 											src={img1}
 											alt='Product photo'
 											objectFit='contain'
-											ml='-3'
-											mb={{ base: '3', md: 0 }}
 										/>
 										<Flex direction='column' gap={2} w='100%'>
 											<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
@@ -178,13 +214,15 @@ export default function OrderCard() {
 									<Separator color='border.dark' />
 									<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
 										<Image
-											w='110px'
-											height='auto'
+											style={{
+												width: '110px',
+												height: 'auto',
+												marginLeft: '-3px',
+												marginBottom: '(max-width: 768px) -3px, (max-width: 1200px) 0, 0',
+											}}
 											src={img1}
 											alt='Product photo'
 											objectFit='contain'
-											ml='-3'
-											mb={{ base: '3', md: 0 }}
 										/>
 										<Flex direction='column' gap={2} w='100%'>
 											<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>

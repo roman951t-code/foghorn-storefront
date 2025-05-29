@@ -5,7 +5,6 @@ import {
 	Card,
 	Badge,
 	Link,
-	Image,
 	Separator,
 	Flex,
 	IconButton,
@@ -16,6 +15,7 @@ import { useTranslations } from 'next-intl';
 import FeedbackModal from '@/components/product/FeedbackModal';
 import { Rating } from '@/components/ui/rating';
 import { FiTrash2 } from 'react-icons/fi';
+import Image from 'next/image';
 
 const img1 = '/assets/images/temp/1.webp';
 
@@ -47,13 +47,15 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 				<Accordion.ItemTrigger w='100%' p='0'>
 					<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
 						<Image
-							w='110px'
-							height='auto'
+							style={{
+								marginLeft: '-3',
+								marginBottom: '(max-width: 768px) 3px, (max-width: 1200px) 0, 0',
+								width: '110px',
+								height: 'auto',
+							}}
 							src={img1}
 							alt='Product photo'
 							objectFit='contain'
-							ml='-3'
-							mb={{ base: '3', md: 0 }}
 						/>
 						<Flex direction='column' gap={2} w='100%'>
 							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
@@ -152,13 +154,17 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 			<Accordion.Item value={item.name} borderBottom='none'>
 				<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
 					<Image
-						w='110px'
-						height='auto'
+						style={{
+							marginLeft: '-3',
+							marginBottom: '(max-width: 768px) 3px, (max-width: 1200px) 0, 0',
+							width: '110px',
+							height: 'auto',
+						}}
 						src={img1}
 						alt='Product photo'
 						objectFit='contain'
-						mb={{ base: '3', md: 0 }}
 					/>
+
 					<Stack direction='column' gap={2} w='100%'>
 						<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
 							<Link

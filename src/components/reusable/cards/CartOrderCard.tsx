@@ -1,7 +1,8 @@
 import React from 'react';
 import { FiTrash2, FiHeart } from 'react-icons/fi';
-import { IconButton, Text, Flex, Card, Badge, Image, Group, Link } from '@chakra-ui/react';
+import { IconButton, Text, Flex, Card, Badge, Group, Link } from '@chakra-ui/react';
 import { StepperInput } from '@/components/ui/stepper-input';
+import Image from 'next/image';
 
 const img1 = '/assets/images/temp/1.webp';
 
@@ -23,7 +24,14 @@ export default function CartOrderCard() {
 				pl={{ base: 3, sm: 0 }}
 			>
 				<Flex>
-					<Image w='130px' height='auto' src={img1} alt='Product photo' objectFit='contain' />
+					<Image
+						objectFit='contain'
+						src={img1}
+						alt='Product photo'
+						width='130'
+						height='20'
+						style={{ objectFit: 'contain' }}
+					/>
 					<Flex direction='column' gap={3} p={2}>
 						<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
 							<Link

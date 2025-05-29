@@ -2,6 +2,17 @@ import { VStack, Heading } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import PersonalDataForm from '@/components/pages/cabinet/user/PersonalDataForm';
 import { extractI18nData } from '@/utils/i18nUtils';
+import { type Metadata } from 'next';
+import { getLocalizedMetadata } from '@/utils/i18nUtils';
+
+type Params = {
+	params: { locale: string };
+};
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+	const { locale } = await params;
+	return getLocalizedMetadata(locale, 'cabinet');
+}
 
 export default function Cabinet() {
 	const t = useTranslations('Auth');
