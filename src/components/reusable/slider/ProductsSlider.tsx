@@ -1,8 +1,7 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-import { Box, Flex } from '@chakra-ui/react';
 import ProductCard from '../cards/ProductCard';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -24,12 +23,6 @@ const breakpoints = {
 };
 
 export default function ProductsSlider() {
-	const [isClient, setIsClient] = useState(false);
-
-	useEffect(() => {
-		setIsClient(true);
-	}, []);
-
 	return (
 		<Swiper
 			loop
@@ -42,7 +35,7 @@ export default function ProductsSlider() {
 		>
 			{Array.from({ length: 12 }).map((_, index) => (
 				<SwiperSlide key={index}>
-					<ProductCard isSliderEnabled={isClient} />
+					<ProductCard />
 				</SwiperSlide>
 			))}
 		</Swiper>

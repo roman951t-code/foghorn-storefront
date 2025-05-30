@@ -25,7 +25,6 @@ export default function CartOrderCard() {
 			>
 				<Flex>
 					<Image
-						objectFit='contain'
 						src={img1}
 						alt='Product photo'
 						width='130'

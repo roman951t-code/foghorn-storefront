@@ -5,7 +5,6 @@ import SubscribeSection from '@/components/pages/main/SubscribeSection';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import { useTranslations } from 'next-intl';
 import { extractI18nData, getLocalizedMetadata } from '@/utils/i18nUtils';
-import { getTranslations } from 'next-intl/server';
 import { type Metadata } from 'next';
 
 type Params = {
@@ -19,6 +18,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default function Main() {
 	const genT = useTranslations('General');
+	const prodT = useTranslations('Products');
 
 	const i18nData = extractI18nData(genT, ['seeCategory', 'seeAll']);
 
@@ -28,11 +28,11 @@ export default function Main() {
 				<CatalogBtn fullText />
 			</Box>
 			<CatalogPanel i18nData={i18nData} />
-			{/* <ProductsSection title={t('popular')} />
-			<ProductsSection title={t('new')} />
-			<ProductsSection title={t('discount')} />
-			<ProductsSection title={t('promotional')} />
-			<ProductsSection title={t('viewed')} /> */}
+			<ProductsSection title={prodT('popular')} />
+			<ProductsSection title={prodT('new')} />
+			<ProductsSection title={prodT('discount')} />
+			<ProductsSection title={prodT('promotional')} />
+			<ProductsSection title={prodT('viewed')} />
 			<SubscribeSection />
 		</Flex>
 	);

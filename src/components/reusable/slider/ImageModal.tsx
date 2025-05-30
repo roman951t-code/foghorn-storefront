@@ -1,5 +1,5 @@
 import { DialogBody, DialogCloseTrigger, DialogContent, DialogRoot } from '@/components/ui/dialog';
-import Image from 'next/image';
+import { Image } from '@chakra-ui/react';
 
 interface Props {
 	image: string | null;
@@ -18,13 +18,11 @@ export default function ImageModal({ image, resetModal }: Props) {
 				<DialogBody>
 					{image && (
 						<Image
-							style={{
-								height: '100%',
-								margin: 'auto',
-								maxHeight: '90vh',
-								marginLeft: 'auto',
-								marginRight: 'auto',
-							}}
+							height='100%'
+							margin='auto'
+							maxHeight='90vh'
+							marginLeft='auto'
+							marginRight='auto'
 							src={image}
 							alt='Expanded product photo'
 							objectFit='contain'

@@ -35,8 +35,6 @@ export default function FeedbackTab() {
 						</Stack>
 						<FeedbackModal i18nData={i18nData} />
 					</Flex>
-
-					<Stack></Stack>
 				</Card.Header>
 			</Card.Root>
 

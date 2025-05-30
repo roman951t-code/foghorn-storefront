@@ -2,13 +2,13 @@
 import { ReactNode } from 'react';
 import pick from 'lodash.pick';
 import { ColorModeProvider } from '@/components/ui/color-mode';
-import ChakraUIProvider from '@/components/providers/ChakraUIProvider';
+import ChakraUIProvider from 'app/providers/ChakraUIProvider';
 import { Box } from '@chakra-ui/react';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { hasLocale } from 'next-intl';
 import ToTop from '@/components/reusable/buttons/ToTop';
-import AuthProvider from '@/components/providers/AuthProvider';
+import AuthProvider from 'app/providers/AuthProvider';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
@@ -25,7 +25,7 @@ export default async function Layout({ children, params }: Props) {
 		notFound();
 	}
 
-	const messages = await loadClientMessages(['Sidebar', 'Auth', 'General', 'Error']);
+	const messages = await loadClientMessages(['Sidebar', 'Products', 'Auth', 'General', 'Error']);
 
 	return (
 		<html lang={locale} suppressHydrationWarning>

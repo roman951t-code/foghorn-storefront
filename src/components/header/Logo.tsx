@@ -1,5 +1,5 @@
 'use client';
-import { useBreakpointValue, Flex } from '@chakra-ui/react';
+import { useBreakpointValue } from '@chakra-ui/react';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 
@@ -32,7 +32,7 @@ export default function Logo() {
 				alt='logo'
 				width={logoWidth}
 				height={logoHeight}
-				style={{ width: `${logoWidth}px`, height: '36px' }}
+				style={{ width: 'auto' }}
 				priority
 			/>
 		</Link>

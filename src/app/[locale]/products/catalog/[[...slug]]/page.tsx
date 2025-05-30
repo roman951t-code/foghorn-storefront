@@ -1,6 +1,17 @@
 import Breadcrumbs from '@/components/reusable/links/Breadcrumbs';
 import { Flex, Heading, Button, Card, HStack, Badge, Link } from '@chakra-ui/react';
+import { type Metadata } from 'next';
+import { getLocalizedMetadata } from '@/utils/i18nUtils';
 import Image from 'next/image';
+
+type Params = {
+	params: { locale: string };
+};
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+	const { locale } = await params;
+	return getLocalizedMetadata(locale, 'catalog');
+}
 
 export default function Category() {
 	return (
@@ -97,8 +108,8 @@ export default function Category() {
 						</Button>
 					</Card.Footer>
 					<Image
-						height='180'
-						width='200'
+						height='186'
+						width='316'
 						src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80'
 						alt='Green double couch with wooden legs'
 					/>
@@ -190,8 +201,8 @@ export default function Category() {
 						</Button>
 					</Card.Footer>
 					<Image
-						height='180'
-						width='200'
+						height='186'
+						width='316'
 						src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80'
 						alt='Green double couch with wooden legs'
 					/>
@@ -283,8 +294,8 @@ export default function Category() {
 						</Button>
 					</Card.Footer>
 					<Image
-						height='180'
-						width='200'
+						height='186'
+						width='316'
 						src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80'
 						alt='Green double couch with wooden legs'
 					/>
@@ -376,8 +387,8 @@ export default function Category() {
 						</Button>
 					</Card.Footer>
 					<Image
-						height='180'
-						width='200'
+						height='186'
+						width='316'
 						src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80'
 						alt='Green double couch with wooden legs'
 					/>
@@ -469,8 +480,8 @@ export default function Category() {
 						</Button>
 					</Card.Footer>
 					<Image
-						height='180'
-						width='200'
+						height='186'
+						width='316'
 						src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80'
 						alt='Green double couch with wooden legs'
 					/>
@@ -562,8 +573,8 @@ export default function Category() {
 						</Button>
 					</Card.Footer>
 					<Image
-						height='180'
-						width='200'
+						height='186'
+						width='316'
 						src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80'
 						alt='Green double couch with wooden legs'
 					/>
@@ -655,8 +666,8 @@ export default function Category() {
 						</Button>
 					</Card.Footer>
 					<Image
-						height='180'
-						width='200'
+						height='186'
+						width='316'
 						src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80'
 						alt='Green double couch with wooden legs'
 					/>
@@ -748,8 +759,8 @@ export default function Category() {
 						</Button>
 					</Card.Footer>
 					<Image
-						height='180'
-						width='200'
+						height='186'
+						width='316'
 						src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80'
 						alt='Green double couch with wooden legs'
 					/>
@@ -841,8 +852,8 @@ export default function Category() {
 						</Button>
 					</Card.Footer>
 					<Image
-						height='180'
-						width='200'
+						height='186'
+						width='316'
 						src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80'
 						alt='Green double couch with wooden legs'
 					/>
@@ -934,8 +945,8 @@ export default function Category() {
 						</Button>
 					</Card.Footer>
 					<Image
-						height='180'
-						width='200'
+						height='186'
+						width='316'
 						src='https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80'
 						alt='Green double couch with wooden legs'
 					/>

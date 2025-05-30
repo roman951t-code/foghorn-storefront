@@ -2,10 +2,9 @@
 
 import React, { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Image, Box, useBreakpointValue } from '@chakra-ui/react';
-import NextImage from 'next/image';
+import { Box, useBreakpointValue } from '@chakra-ui/react';
+import Image from 'next/image';
 import ImageModal from './ImageModal';
-
 import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
@@ -23,7 +22,7 @@ const images = [
 ];
 
 export default function ProductThumbsSlider() {
-	const [thumbsSwiper, setThumbsSwiper] = useState(null);
+	const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
 	const isSmallScreen = useBreakpointValue({ base: true, md: false });
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -42,6 +41,7 @@ export default function ProductThumbsSlider() {
 
 	return (
 		<>
+			{/* Main Image Slider */}
 			<Swiper
 				loop
 				zoom
@@ -54,14 +54,25 @@ export default function ProductThumbsSlider() {
 			>
 				{images.map((src, index) => (
 					<SwiperSlide key={index} onClick={() => setSelectedImage(src)}>
-						<Image asChild cursor='pointer'>
-							<NextImage src={src} alt={`Product photo ${index + 1}`} />
-						</Image>
+						<Box
+							position='relative'
+							width='100%'
+							height={{ base: '400px', md: '700px' }}
+							cursor='pointer'
+						>
+							<Image
+								src={src}
+								alt={`Product photo ${index + 1}`}
+								fill
+								style={{ objectFit: 'contain' }}
+								sizes='(max-width: 768px) 100vw, 50vw'
+							/>
+						</Box>
 					</SwiperSlide>
 				))}
 			</Swiper>
 
-			<Box hideBelow='md'>
+			<Box hideBelow='md' mt={4}>
 				<Swiper
 					onSwiper={setThumbsSwiper}
 					loop={true}
@@ -74,13 +85,21 @@ export default function ProductThumbsSlider() {
 				>
 					{images.map((src, index) => (
 						<SwiperSlide key={index}>
-							<Image asChild cursor='pointer'>
-								<NextImage src={src} alt={`Product photo ${index + 1}`} />
-							</Image>
+							<Box position='relative' width='100%' height='100px' cursor='pointer'>
+								<Image
+									src={src}
+									alt={`Product thumbnail ${index + 1}`}
+									fill
+									style={{ objectFit: 'contain' }}
+									sizes='(max-width: 768px) 25vw, 10vw'
+								/>
+							</Box>
 						</SwiperSlide>
 					))}
 				</Swiper>
 			</Box>
+
+			{/* Fullscreen Modal Viewer */}
 			<ImageModal image={selectedImage} resetModal={resetImage} />
 		</>
 	);

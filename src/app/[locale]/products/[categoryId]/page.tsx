@@ -12,7 +12,7 @@ interface Props {
 	params: { category: string; subcategory: string };
 }
 
-export default async function Subcategory({ params }: Props) {
+export default function Subcategory({ params }: Props) {
 	const t = useTranslations('Products');
 	const sidebarT = useTranslations('Sidebar');
 	const { category, subcategory = 'Технika' } = params;

@@ -14,7 +14,7 @@ export default function ViewedProducts() {
 		>
 			{new Array(9).fill(null).map((_, index) => (
 				<Box key={index}>
-					<ProductCard isSliderEnabled />
+					<ProductCard />
 				</Box>
 			))}
 		</SimpleGrid>

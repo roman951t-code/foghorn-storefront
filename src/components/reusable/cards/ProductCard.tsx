@@ -2,13 +2,14 @@ import React from 'react';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { Rating } from '@/components/ui/rating';
 import { useTranslations } from 'next-intl';
-import { IconButton, Text, Flex, HStack, Card, Badge, Link } from '@chakra-ui/react';
-import Image from 'next/image';
+import { IconButton, Text, Flex, HStack, Card, Badge, Link, Box } from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
+import '@/styles/swiper.css';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import '@/styles/swiper.css';
 
-const img1 = '/assets/images/temp/1.webp';
-
-export default function ProductCard({ isSliderEnabled = false }) {
+export default function ProductCard() {
 	const t = useTranslations('Products');
 
 	return (
@@ -54,19 +55,7 @@ export default function ProductCard({ isSliderEnabled = false }) {
 						<FiHeart />
 					</IconButton>
 				</Flex>
-				{isSliderEnabled ? (
-					<ProductPreviewSlider />
-				) : (
-					<Image
-						style={{
-							width: '140px',
-							height: 'auto',
-							margin: 'auto',
-						}}
-						src={img1}
-						alt='Product photo'
-					/>
-				)}
+				<ProductPreviewSlider />
 				<Card.Title fontWeight='medium' fontSize='md' lineHeight='22px' mt='1' w='100%'>
 					<Link
 						href='#'

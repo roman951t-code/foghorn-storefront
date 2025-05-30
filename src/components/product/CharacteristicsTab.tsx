@@ -1,6 +1,6 @@
 import { DataList } from '@chakra-ui/react';
 import { Flex, Box } from '@chakra-ui/react';
-import ProductCard from '../reusable/cards/ProductCard';
+import ProductCard from '@/components/reusable/cards/ProductCard';
 
 export default function CharacteristicsTab() {
 	return (
@@ -25,7 +25,7 @@ export default function CharacteristicsTab() {
 					</DataList.Item>
 				))}
 			</DataList.Root>
-			<Box hideBelow='md'>
+			<Box hideBelow='md' maxW='250px' className='productsSlider'>
 				<ProductCard />
 			</Box>
 		</Flex>

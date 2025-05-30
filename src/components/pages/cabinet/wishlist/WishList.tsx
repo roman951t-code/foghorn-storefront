@@ -25,7 +25,7 @@ export default function WishList() {
 			>
 				{new Array(9).fill(null).map((_, index) => (
 					<Box key={index}>
-						<ProductCard isSliderEnabled />
+						<ProductCard />
 					</Box>
 				))}
 			</SimpleGrid>

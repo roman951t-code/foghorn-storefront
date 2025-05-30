@@ -23,11 +23,11 @@ export function SidebarCheckoutCard() {
 			</Card.Title>
 			<Group p='0'>
 				<Image
-					style={{ marginLeft: '-2', width: '108px', height: 'auto' }}
+					style={{ marginLeft: '-4px' }}
 					width='108'
+					height='108'
 					src={img1}
 					alt='Product photo'
-					objectFit='contain'
 				/>
 
 				<VStack alignItems='flex-start'>
@@ -70,12 +70,11 @@ export function FullCheckoutCard() {
 				pl={0}
 			>
 				<Image
-					ml='-2'
-					maxW='120px'
-					height='auto'
+					style={{ marginLeft: '-4px' }}
+					width='120'
+					height='120'
 					src={img1}
 					alt='Product photo'
-					objectFit='contain'
 				/>
 				<Flex direction='column' gap={3} p={2}>
 					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>

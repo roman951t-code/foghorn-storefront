@@ -71,7 +71,7 @@
 
 .thumbsSlider {
 	width: 100%;
-	min-height: 370px;
+	min-height: 270px;
 }
 
 .thumbsSlider2 {
@@ -80,8 +80,8 @@
 }
 
 .thumbsSlider2 .swiper-slide {
-	width: 25%;
-	height: 100%;
+	max-height: 100%;
+	margin: 0 auto;
 	opacity: 0.4;
 }
 

@@ -23,7 +23,7 @@ export default function ProductsGrid() {
 			>
 				{new Array(9).fill(null).map((_, index) => (
 					<Box key={index}>
-						<ProductCard isSliderEnabled />
+						<ProductCard />
 					</Box>
 				))}
 			</SimpleGrid>

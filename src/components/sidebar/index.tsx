@@ -23,11 +23,19 @@ import Image from 'next/image';
 import { LogoutSection, AuthorizeSection } from './AuthorizeSection';
 
 const logoBig = '/assets/images/logoBig.webp';
+const logoHeight = 36;
+const logoWidth = 170;
 
 const Logo = () => {
 	return (
 		<Link href='/'>
-			<Image src={logoBig} objectFit='cover' width='170' height='36' alt='logo' />
+			<Image
+				src={logoBig}
+				width={logoWidth}
+				height={logoHeight}
+				style={{ width: 'auto', height: 'auto' }}
+				alt='logo'
+			/>
 		</Link>
 	);
 };
