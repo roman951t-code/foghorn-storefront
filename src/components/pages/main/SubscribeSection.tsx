@@ -41,7 +41,7 @@ export default function SubscribeSection() {
 					transition='all .15s ease-in-out'
 					_placeholder={{ fontSize: 'sm' }}
 					_focus={{
-						border: '2px solid',
+						border: '1px solid',
 						borderColor: 'main.secondary',
 						outline: 'none',
 					}}

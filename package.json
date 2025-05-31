@@ -8,6 +8,9 @@
 		"start": "next start",
 		"lint": "next lint"
 	},
+	"prisma": {
+		"seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+	},
 	"dependencies": {
 		"@chakra-ui/react": "^3.19.1",
 		"@emotion/react": "^11.14.0",
@@ -33,12 +36,13 @@
 	},
 	"devDependencies": {
 		"@tanstack/eslint-plugin-query": "^5.78.0",
-		"@types/node": "^22.15.21",
+		"@types/node": "^22.15.29",
 		"@types/react": "^19.1.5",
 		"@types/react-dom": "^19.1.5",
 		"eslint": "^9.27.0",
 		"eslint-config-next": "15.4.0-canary.51",
-		"postcss": "^8",
+		"prisma": "^6.8.2",
+		"ts-node": "^10.9.2",
 		"typescript": "^5.8.3"
 	}
 }

@@ -7,6 +7,7 @@ import Filters from '@/components/pages/products/Filters';
 import ProductsGrid from '@/components/pages/products/ProductsGrid';
 import FiltersSidebar from '@/components/pages/products/FiltersSidebar';
 import ProductsSection from '@/components/pages/main/ProductsSection';
+import FiltersTags from '@/components/pages/products/FiltersTags';
 
 interface Props {
 	params: { category: string; subcategory: string };
@@ -26,6 +27,7 @@ export default function Subcategory({ params }: Props) {
 			<Flex hideFrom='lg' justifyContent='flex-end'>
 				<FiltersSidebar btnText={sidebarT('filters')} />
 			</Flex>
+			<FiltersTags />
 
 			<Group justifyContent='space-between' align='flex-start' gap='3'>
 				<Box

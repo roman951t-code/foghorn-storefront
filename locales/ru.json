@@ -13,7 +13,8 @@
 		"from": "от",
 		"clear": "Очистить",
 		"units": "шт",
-		"enterYourQuestion": "Введите Ваш вопрос"
+		"enterYourQuestion": "Введите Ваш вопрос",
+		"resultsNotFound": "Результатов не найдено"
 	},
 	"Header": {
 		"search": "Я ищу",

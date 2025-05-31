@@ -9,6 +9,7 @@ import UserActions from './UserActions';
 import Logo from './Logo';
 
 export default function Header() {
+	const genT = useTranslations('General');
 	const t = useTranslations('Header');
 
 	return (
@@ -39,7 +40,11 @@ export default function Header() {
 						<Sidebar />
 						<Logo />
 					</Flex>
-					<SearchInput hideBelow='md' placeholder={t('search')} />
+					<SearchInput
+						hideBelow='md'
+						placeholder={t('search')}
+						notFound={genT('resultsNotFound')}
+					/>
 					<Flex align='center' gap={3}>
 						<UserActions />
 						<LocaleSwitcher />
@@ -57,7 +62,7 @@ export default function Header() {
 					gap={{ base: 0, sm: 4 }}
 				>
 					<CatalogBtn hideBelow='sm' fullText={false} />
-					<SearchInput placeholder={t('search')} />
+					<SearchInput placeholder={t('search')} notFound={genT('resultsNotFound')} />
 				</Flex>
 			</Stack>
 		</Box>

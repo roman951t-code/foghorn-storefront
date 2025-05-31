@@ -9,6 +9,12 @@ interface Props {
 	params: { category: string; subcategory: string; productId: string };
 }
 
+export const metadata = {
+	openGraph: {
+		images: ['/ua/products/123/888/opengraph-image'],
+	},
+};
+
 export default function ProductDetail({ params }: Props) {
 	const { category, subcategory = 'Технika' } = params;
 
