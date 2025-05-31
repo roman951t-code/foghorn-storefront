@@ -12,11 +12,12 @@ export default function ProductsSection({ title, ...restProps }: Props) {
 				<Link
 					fontSize='28px'
 					variant='underline'
+					textDecorationColor='main'
 					textUnderlineOffset='12px'
 					transition='all 0.15s ease-in-out'
 					textWrap='wrap'
 					wordBreak='break-all'
-					_hover={{ color: 'link' }}
+					_hover={{ textDecorationColor: 'main.accent', textDecorationThickness: '2px' }}
 					_focus={{ outline: 'none' }}
 				>
 					{title}

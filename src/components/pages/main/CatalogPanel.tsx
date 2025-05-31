@@ -90,17 +90,17 @@ export default function CatalogPanel({ i18nData }: Props) {
 
 	return (
 		<Flex
-			position='relative'
 			w='100%'
 			h='500px'
+			position='relative'
 			rounded='md'
-			gap={4}
+			gap={2}
 			onMouseLeave={handleMouseLeave}
 		>
 			<VStack
 				bg='bg.tertiary'
-				width={{ base: '25%', mdToLg: '32%' }}
-				maxWidth='330px'
+				minW='300px'
+				w='300px'
 				align='stretch'
 				gap='0'
 				boxShadow='sm'

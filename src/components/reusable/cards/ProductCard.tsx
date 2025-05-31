@@ -4,10 +4,8 @@ import { Rating } from '@/components/ui/rating';
 import { useTranslations } from 'next-intl';
 import { IconButton, Text, Flex, HStack, Card, Badge, Link, Box } from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
-import '@/styles/swiper.css';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import '@/styles/swiper.css';
 
 export default function ProductCard() {
 	const t = useTranslations('Products');

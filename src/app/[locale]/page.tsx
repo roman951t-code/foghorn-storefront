@@ -29,10 +29,10 @@ export default function Main() {
 			</Box>
 			<CatalogPanel i18nData={i18nData} />
 			<ProductsSection title={prodT('popular')} />
-			<ProductsSection title={prodT('new')} />
+			{/* <ProductsSection title={prodT('new')} />
 			<ProductsSection title={prodT('discount')} />
 			<ProductsSection title={prodT('promotional')} />
-			<ProductsSection title={prodT('viewed')} />
+			<ProductsSection title={prodT('viewed')} /> */}
 			<SubscribeSection />
 		</Flex>
 	);

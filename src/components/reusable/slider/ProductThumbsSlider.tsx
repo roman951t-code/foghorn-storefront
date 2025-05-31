@@ -10,7 +10,6 @@ import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
 import 'swiper/css/pagination';
-import '@/styles/swiper.css';
 
 import { FreeMode, Navigation, Thumbs, Pagination } from 'swiper/modules';
 

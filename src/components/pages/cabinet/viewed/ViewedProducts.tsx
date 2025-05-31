@@ -2,7 +2,6 @@ import { EmptyState, List, VStack } from '@chakra-ui/react';
 import { HiColorSwatch } from 'react-icons/hi';
 import { SimpleGrid, Box } from '@chakra-ui/react';
 import ProductCard from '@/components/reusable/cards/ProductCard';
-import '@/styles/swiper.css';
 
 export default function ViewedProducts() {
 	return (

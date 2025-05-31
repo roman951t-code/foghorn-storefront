@@ -7,7 +7,6 @@ import { Autoplay } from 'swiper/modules';
 import NextImage from 'next/image';
 
 import 'swiper/css';
-import '@/styles/swiper.css';
 
 const carousel1 = '/assets/images/carousel1.webp';
 const carousel2 = '/assets/images/carousel2.webp';

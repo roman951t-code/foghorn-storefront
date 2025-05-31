@@ -13,17 +13,13 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 	}
 
 	return (
-		<Box
+		<Flex
 			bg='bg.tertiary'
 			overflowY='auto'
 			rounded='sm'
 			boxShadow='sm'
 			height='100%'
-			width={{ base: '74%', mdToLg: '66%', xl: '75%' }}
-			position='absolute'
-			right={0}
-			top={0}
-			zIndex={10}
+			w='100%'
 			p={5}
 		>
 			<Flex
@@ -120,6 +116,6 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					{i18nData.seeCategory}
 				</Button>
 			</Flex>
-		</Box>
+		</Flex>
 	);
 }
