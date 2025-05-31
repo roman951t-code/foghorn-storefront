@@ -62,11 +62,11 @@ export default function AboutTab() {
 							</Tag.Root>
 
 							<IconButton
-								aria-label='Favourite'
+								aria-label='Share'
 								variant='ghost'
 								rounded='full'
 								colorPalette='gray'
-								color='colorPalette.700'
+								color='main.disabled'
 								transition='all 0.2s ease-in-out'
 								_hover={{
 									bg: 'colorPalette.600',

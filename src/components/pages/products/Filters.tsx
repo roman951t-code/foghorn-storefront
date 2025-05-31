@@ -17,16 +17,16 @@ export default function Filters() {
 						<Fieldset.Root>
 							<CheckboxGroup defaultValue={['react']} name='framework'>
 								<Fieldset.Content colorPalette='orange' w='100%'>
-									<Checkbox variant='outline' value='react'>
+									<Checkbox variant='outline' value='react' _hover={{ cursor: 'pointer' }}>
 										Чорний
 									</Checkbox>
-									<Checkbox variant='outline' value='svelte'>
+									<Checkbox variant='outline' value='svelte' _hover={{ cursor: 'pointer' }}>
 										Зелений
 									</Checkbox>
-									<Checkbox variant='outline' value='vue'>
+									<Checkbox variant='outline' value='vue' _hover={{ cursor: 'pointer' }}>
 										Синій
 									</Checkbox>
-									<Checkbox variant='outline' value='angular'>
+									<Checkbox variant='outline' value='angular' _hover={{ cursor: 'pointer' }}>
 										Жовтий
 									</Checkbox>
 								</Fieldset.Content>
@@ -41,16 +41,16 @@ export default function Filters() {
 						<Fieldset.Root>
 							<CheckboxGroup defaultValue={['react']} name='framework'>
 								<Fieldset.Content colorPalette='orange' w='100%'>
-									<Checkbox variant='outline' value='react'>
+									<Checkbox variant='outline' value='react' _hover={{ cursor: 'pointer' }}>
 										Чорний
 									</Checkbox>
-									<Checkbox variant='outline' value='svelte'>
+									<Checkbox variant='outline' value='svelte' _hover={{ cursor: 'pointer' }}>
 										Зелений
 									</Checkbox>
-									<Checkbox variant='outline' value='vue'>
+									<Checkbox variant='outline' value='vue' _hover={{ cursor: 'pointer' }}>
 										Синій
 									</Checkbox>
-									<Checkbox variant='outline' value='angular'>
+									<Checkbox variant='outline' value='angular' _hover={{ cursor: 'pointer' }}>
 										Жовтий
 									</Checkbox>
 								</Fieldset.Content>
@@ -65,13 +65,13 @@ export default function Filters() {
 						<Fieldset.Root>
 							<CheckboxGroup defaultValue={['react']} name='framework'>
 								<Fieldset.Content colorPalette='orange' w='100%'>
-									<Checkbox variant='outline' value='react'>
+									<Checkbox variant='outline' value='react' _hover={{ cursor: 'pointer' }}>
 										Чорний
 									</Checkbox>
-									<Checkbox variant='outline' value='svelte'>
+									<Checkbox variant='outline' value='svelte' _hover={{ cursor: 'pointer' }}>
 										Зелений
 									</Checkbox>
-									<Checkbox variant='outline' value='vue'>
+									<Checkbox variant='outline' value='vue' _hover={{ cursor: 'pointer' }}>
 										Синій
 									</Checkbox>
 								</Fieldset.Content>

@@ -37,6 +37,9 @@ export default function UserActions() {
 		'continue',
 		'restorePass',
 		'getTemporaryPass',
+		'notSecure',
+		'middleSecure',
+		'secure',
 	]);
 
 	return (

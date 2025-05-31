@@ -7,15 +7,15 @@ export default function QuickFilters() {
 	const t = useTranslations('Products');
 	return (
 		<Flex flexDirection='column' gap='6'>
-			<RadioGroup variant='outline' defaultValue='react' spaceX='4' colorPalette='orange'>
+			<RadioGroup variant='outline' defaultValue='react' spaceX='4' colorPalette='orange' w='100%'>
 				<VStack gap='4' alignItems='flex-start'>
-					<Radio w='100%' value='3'>
+					<Radio w='100%' value='3' _hover={{ cursor: 'pointer' }}>
 						{t('new')}
 					</Radio>
-					<Radio w='100%' value='1'>
+					<Radio w='100%' value='1' _hover={{ cursor: 'pointer' }}>
 						{t('expensiveToCheap')}
 					</Radio>
-					<Radio w='100%' value='2'>
+					<Radio w='100%' value='2' _hover={{ cursor: 'pointer' }}>
 						{t('cheapToExpensive')}
 					</Radio>
 				</VStack>

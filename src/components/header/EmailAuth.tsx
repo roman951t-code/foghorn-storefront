@@ -2,7 +2,7 @@
 
 import { Button, Input, Stack } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
-import { PasswordInput } from '@/components/ui/password-input';
+import { PasswordInput, PasswordStrengthMeter } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import type { I18nData } from '@/types/i18n';
@@ -63,6 +63,7 @@ export default function EmailAuth({ onSubmitAction, i18nData }: EmailAuthProps) 
 									},
 								})}
 							/>
+							<PasswordStrengthMeter i18nData={i18nData} mt='1' w='100%' value={3} />
 						</Field>
 
 						<Button

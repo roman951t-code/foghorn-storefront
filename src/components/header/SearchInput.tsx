@@ -61,6 +61,7 @@ export default function SearchInput({ placeholder, hideBelow, notFound }: Props)
 		<Group flex='1' hideBelow={hideBelow} px={{ base: '0px', md: '20px' }} attached>
 			<Combobox.Root
 				openOnClick
+				variant='subtle'
 				collection={collection}
 				onInputValueChange={(e) => filter(e.inputValue)}
 				openOnChange={(e) => e.inputValue.length > 2}
@@ -69,7 +70,6 @@ export default function SearchInput({ placeholder, hideBelow, notFound }: Props)
 			>
 				<Combobox.Control roundedLeft='md' fontSize='sm' minWidth='284px' bg='bg'>
 					<Combobox.Input
-						h='42px'
 						fontSize='md'
 						roundedRight='0'
 						placeholder={placeholder}
