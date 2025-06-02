@@ -11,6 +11,8 @@ import {
 	Heading,
 	Box,
 	Accordion,
+	LinkBox,
+	LinkOverlay,
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import FeedbackModal from '@/components/product/FeedbackModal';
@@ -48,7 +50,13 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 				<Accordion.ItemTrigger w='100%' p='0'>
 					<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
 						<Box ml='-8px' mr='1' mb={{ base: '12px', md: '0' }}>
-							<Image width={120} height={110} src={img1} alt='Product photo' />
+							<Image
+								width={124}
+								height={110}
+								style={{ minWidth: '100px' }}
+								src={img1}
+								alt='Product photo'
+							/>
 						</Box>
 						<Flex direction='column' gap={2} w='100%'>
 							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
@@ -145,44 +153,65 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 			mb='4'
 		>
 			<Accordion.Item value={item.name} borderBottom='none'>
-				<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
-					<Box ml='-8px' mr='1' mb={{ base: '12px', md: '0' }}>
-						<Image width={120} height={110} src={img1} alt='Product photo' />
+				<Flex
+					alignItems='center'
+					direction={{ base: 'column', sm: 'row', md: 'column', lg: 'row' }}
+					w='100%'
+				>
+					<Box ml='-8px' mr='1' mb={{ base: '12px', sm: '0', md: '12px', lg: '0' }}>
+						<Image
+							width={110}
+							height={110}
+							style={{ minWidth: '100px' }}
+							src={img1}
+							alt='Product photo'
+						/>
 					</Box>
-
-					<Stack direction='column' gap={2} w='100%'>
-						<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
-							<Link
-								href='#'
-								textDecoration='underline'
-								transition='all .15s ease-in-out'
-								textDecorationColor='main'
-								color='main'
-								_hover={{ color: 'main.accent' }}
-								_focus={{ outline: 'none' }}
-							>
-								Велотренажер Gymtek XB1400 до 150 кг магнітний домашній синій
-							</Link>
-						</Card.Title>
-						<Stack direction={{ base: 'column', sm: 'row' }} justifyContent='space-between' mt={2}>
-							<Text color='main' fontSize='xl' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
-								55 699 ₴
-								<Text
-									as='span'
-									color='main.disabled'
-									fontSize='sm'
-									textDecoration='line-through'
-									marginLeft='8px'
-								>
-									59 709 ₴
+					<LinkBox>
+						<Stack direction='column' gap={2} w='100%'>
+							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
+								<LinkOverlay asChild>
+									<Link
+										href='#'
+										textDecoration='underline'
+										transition='all .15s ease-in-out'
+										textDecorationColor='main'
+										color='main'
+										_hover={{ color: 'main.accent' }}
+										_focus={{ outline: 'none' }}
+									>
+										Велотренажер Gymtek XB1400 до 150 кг магнітний домашній синій
+									</Link>
+								</LinkOverlay>
+							</Card.Title>
+							<Stack direction={{ base: 'column', sm: 'row' }} justifyContent='space-between'>
+								<Text color='main' fontSize='xl' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
+									55 699 ₴
+									<Text
+										as='span'
+										color='main.disabled'
+										fontSize='sm'
+										textDecoration='line-through'
+										marginLeft='8px'
+									>
+										59 709 ₴
+									</Text>
+									<Badge
+										variant='solid'
+										color='main.lightOnly'
+										bg='main.tertiary'
+										marginLeft='12px'
+									>
+										-150 ₴
+									</Badge>
 								</Text>
-								<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='12px'>
-									-150 ₴
-								</Badge>
-							</Text>
-							<FeedbackModal i18nData={i18nData} />
+							</Stack>
 						</Stack>
-					</Stack>
+					</LinkBox>
+
+					<Flex alignSelf='flex-end' flex={1} justifyContent='flex-end'>
+						<FeedbackModal i18nData={i18nData} />
+					</Flex>
 				</Flex>
 			</Accordion.Item>
 		</Card.Root>

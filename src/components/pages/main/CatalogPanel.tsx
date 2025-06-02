@@ -98,7 +98,6 @@ export default function CatalogPanel({ i18nData }: Props) {
 			onMouseLeave={handleMouseLeave}
 		>
 			<VStack
-				bg='bg.tertiary'
 				minW='300px'
 				w='300px'
 				align='stretch'

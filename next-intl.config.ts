@@ -3,7 +3,7 @@ export default {
 	defaultLocale: 'en',
 	localePrefix: 'as-needed',
 	messages: {
-		uk: () => import('./locales/ua.json'),
+		ua: () => import('./locales/ua.json'),
 		ru: () => import('./locales/ru.json'),
 	},
 };

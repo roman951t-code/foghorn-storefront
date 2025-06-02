@@ -2,10 +2,21 @@ import React from 'react';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { Rating } from '@/components/ui/rating';
 import { useTranslations } from 'next-intl';
-import { IconButton, Text, Flex, HStack, Card, Badge, Link, Box } from '@chakra-ui/react';
+import {
+	IconButton,
+	Text,
+	Flex,
+	HStack,
+	Card,
+	Badge,
+	Link,
+	LinkBox,
+	LinkOverlay,
+} from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import '@/styles/swiper.css';
 
 export default function ProductCard() {
 	const t = useTranslations('Products');
@@ -54,28 +65,34 @@ export default function ProductCard() {
 					</IconButton>
 				</Flex>
 				<ProductPreviewSlider />
-				<Card.Title fontWeight='medium' fontSize='md' lineHeight='22px' mt='1' w='100%'>
-					<Link
-						href='#'
-						color='main'
-						variant='underline'
-						_focus={{ outline: 'none' }}
-						transition='all .15s ease-in-out'
-						textDecorationColor='main'
-						_hover={{ color: 'link' }}
-					>
-						iPhone 16 Pro Max 256 GB Desert Titanium
-					</Link>
-				</Card.Title>
-				<Text color='main' fontSize='2xl'>
-					55 699 ₴
-				</Text>
-				<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
-					59 709 ₴
-					<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='12px'>
-						- 150₴
-					</Badge>
-				</Text>
+
+				<LinkBox>
+					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='1' w='100%'>
+						<LinkOverlay asChild>
+							<Link
+								href='#'
+								color='main'
+								variant='underline'
+								_focus={{ outline: 'none' }}
+								transition='all .15s ease-in-out'
+								textDecorationColor='main'
+								_hover={{ color: 'link' }}
+							>
+								iPhone 16 Pro Max 256 GB Desert Titanium
+							</Link>
+						</LinkOverlay>
+					</Card.Title>
+					<Text color='main' fontSize='2xl' mt='2'>
+						55 699 ₴
+					</Text>
+					<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
+						59 709 ₴
+						<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='12px'>
+							- 150₴
+						</Badge>
+					</Text>
+				</LinkBox>
+
 				<HStack gap='4' mt='2'>
 					<Rating colorPalette='orange' readOnly size='xs' defaultValue={5} />
 					<Link

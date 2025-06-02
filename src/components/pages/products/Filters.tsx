@@ -16,17 +16,17 @@ export default function Filters() {
 					<AccordionItemContent>
 						<Fieldset.Root>
 							<CheckboxGroup defaultValue={['react']} name='framework'>
-								<Fieldset.Content colorPalette='orange' w='100%'>
-									<Checkbox variant='outline' value='react' _hover={{ cursor: 'pointer' }}>
+								<Fieldset.Content colorPalette='gray' w='100%'>
+									<Checkbox value='react' _hover={{ cursor: 'pointer' }}>
 										Чорний
 									</Checkbox>
-									<Checkbox variant='outline' value='svelte' _hover={{ cursor: 'pointer' }}>
+									<Checkbox value='svelte' _hover={{ cursor: 'pointer' }}>
 										Зелений
 									</Checkbox>
-									<Checkbox variant='outline' value='vue' _hover={{ cursor: 'pointer' }}>
+									<Checkbox value='vue' _hover={{ cursor: 'pointer' }}>
 										Синій
 									</Checkbox>
-									<Checkbox variant='outline' value='angular' _hover={{ cursor: 'pointer' }}>
+									<Checkbox value='angular' _hover={{ cursor: 'pointer' }}>
 										Жовтий
 									</Checkbox>
 								</Fieldset.Content>
@@ -40,17 +40,17 @@ export default function Filters() {
 					<AccordionItemContent>
 						<Fieldset.Root>
 							<CheckboxGroup defaultValue={['react']} name='framework'>
-								<Fieldset.Content colorPalette='orange' w='100%'>
-									<Checkbox variant='outline' value='react' _hover={{ cursor: 'pointer' }}>
+								<Fieldset.Content colorPalette='gray' w='100%'>
+									<Checkbox value='react' _hover={{ cursor: 'pointer' }}>
 										Чорний
 									</Checkbox>
-									<Checkbox variant='outline' value='svelte' _hover={{ cursor: 'pointer' }}>
+									<Checkbox value='svelte' _hover={{ cursor: 'pointer' }}>
 										Зелений
 									</Checkbox>
-									<Checkbox variant='outline' value='vue' _hover={{ cursor: 'pointer' }}>
+									<Checkbox value='vue' _hover={{ cursor: 'pointer' }}>
 										Синій
 									</Checkbox>
-									<Checkbox variant='outline' value='angular' _hover={{ cursor: 'pointer' }}>
+									<Checkbox value='angular' _hover={{ cursor: 'pointer' }}>
 										Жовтий
 									</Checkbox>
 								</Fieldset.Content>
@@ -64,14 +64,14 @@ export default function Filters() {
 					<AccordionItemContent>
 						<Fieldset.Root>
 							<CheckboxGroup defaultValue={['react']} name='framework'>
-								<Fieldset.Content colorPalette='orange' w='100%'>
-									<Checkbox variant='outline' value='react' _hover={{ cursor: 'pointer' }}>
+								<Fieldset.Content colorPalette='gray' w='100%'>
+									<Checkbox value='react' _hover={{ cursor: 'pointer' }}>
 										Чорний
 									</Checkbox>
-									<Checkbox variant='outline' value='svelte' _hover={{ cursor: 'pointer' }}>
+									<Checkbox value='svelte' _hover={{ cursor: 'pointer' }}>
 										Зелений
 									</Checkbox>
-									<Checkbox variant='outline' value='vue' _hover={{ cursor: 'pointer' }}>
+									<Checkbox value='vue' _hover={{ cursor: 'pointer' }}>
 										Синій
 									</Checkbox>
 								</Fieldset.Content>

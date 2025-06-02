@@ -134,10 +134,13 @@ const config = defineConfig({
 		'.ReactModal__Content': {
 			backgroundColor: 'var(--chakra-colors-bg-tertiary) !important',
 		},
-		'.chakra-radio-group__item > span:first-of-type:not(.chakra-radio-group__itemText)': {
+		'.chakra-radio-group__item > span:first-of-type:not(.chakra-radio-group__itemText)[data-state="unchecked"]':
+			{
+				color: 'var(--chakra-colors-fg) !important',
+			},
+		'.chakra-checkbox__control[data-state="unchecked"]': {
 			color: 'var(--chakra-colors-fg) !important',
 		},
-		'.chakra-checkbox__control': { color: 'var(--chakra-colors-fg) !important' },
 		'.thumbsSlider .swiper-pagination-bullet': {
 			width: '20px !important',
 			height: '20px !important',

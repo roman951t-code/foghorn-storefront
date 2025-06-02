@@ -4,26 +4,30 @@ import { useTranslations } from 'next-intl';
 import PersonalDataForm from '@/components/pages/cabinet/user/PersonalDataForm';
 import { extractI18nData } from '@/utils/i18nUtils';
 
+const localizedData = [
+	'name',
+	'phone',
+	'lastname',
+	'authorize',
+	'continueWith',
+	'logOut',
+	'email',
+	'emailRequired',
+	'wrongEmail',
+	'password',
+	'passRequired',
+	'wrongPassLength',
+	'continue',
+	'rememberPass',
+	'restorePass',
+	'getTemporaryPass',
+	'acceptTerms',
+];
+
 export default function AuthStep() {
 	const t = useTranslations('Auth');
 
-	const i18nData = extractI18nData(t, [
-		'name',
-		'phone',
-		'lastname',
-		'authorize',
-		'continueWith',
-		'logOut',
-		'email',
-		'emailRequired',
-		'wrongEmail',
-		'password',
-		'passRequired',
-		'wrongPassLength',
-		'continue',
-		'restorePass',
-		'getTemporaryPass',
-	]);
+	const i18nData = extractI18nData(t, localizedData);
 
 	return (
 		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' textAlign='center' p='4'>

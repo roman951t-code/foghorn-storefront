@@ -25,6 +25,9 @@ export default function UserActions() {
 	const t = useTranslations('Auth');
 
 	const i18nData = extractI18nData(t, [
+		'name',
+		'phone',
+		'lastname',
 		'authorize',
 		'continueWith',
 		'logOut',
@@ -35,11 +38,10 @@ export default function UserActions() {
 		'passRequired',
 		'wrongPassLength',
 		'continue',
+		'rememberPass',
 		'restorePass',
 		'getTemporaryPass',
-		'notSecure',
-		'middleSecure',
-		'secure',
+		'acceptTerms',
 	]);
 
 	return (

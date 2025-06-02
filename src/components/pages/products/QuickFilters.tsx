@@ -7,7 +7,7 @@ export default function QuickFilters() {
 	const t = useTranslations('Products');
 	return (
 		<Flex flexDirection='column' gap='6'>
-			<RadioGroup variant='outline' defaultValue='react' spaceX='4' colorPalette='orange' w='100%'>
+			<RadioGroup defaultValue='react' spaceX='4' colorPalette='gray' w='100%'>
 				<VStack gap='4' alignItems='flex-start'>
 					<Radio w='100%' value='3' _hover={{ cursor: 'pointer' }}>
 						{t('new')}

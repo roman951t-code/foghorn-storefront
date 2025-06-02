@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Input, Stack } from '@chakra-ui/react';
+import { Button, Input, Stack, Checkbox } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
 import { PasswordInput, PasswordStrengthMeter } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
@@ -66,6 +66,20 @@ export default function EmailAuth({ onSubmitAction, i18nData }: EmailAuthProps) 
 							<PasswordStrengthMeter i18nData={i18nData} mt='1' w='100%' value={3} />
 						</Field>
 
+						<Checkbox.Root
+							css={{
+								'& .chakra-checkbox__control[data-state="unchecked"]': {
+									color: 'var(--chakra-colors-fg) !important',
+								},
+							}}
+							colorPalette='gray'
+							_hover={{ cursor: 'pointer' }}
+						>
+							<Checkbox.HiddenInput />
+							<Checkbox.Control _hover={{ cursor: 'pointer' }} />
+							<Checkbox.Label>{i18nData.acceptTerms}</Checkbox.Label>
+						</Checkbox.Root>
+
 						<Button
 							w='100%'
 							disabled={isSubmitting}
@@ -95,18 +109,32 @@ export default function EmailAuth({ onSubmitAction, i18nData }: EmailAuthProps) 
 				)}
 
 				{isRestorePassOpen && (
-					<Button
-						w='100%'
-						disabled={isSubmitting}
-						type='submit'
-						mt='-2'
-						bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-						color='black'
-						variant='solid'
-						onClick={() => setRestorePassOpen(false)}
-					>
-						{i18nData.getTemporaryPass}
-					</Button>
+					<>
+						<Button
+							w='100%'
+							disabled={isSubmitting}
+							type='submit'
+							mt='-2'
+							bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+							color='black'
+							variant='solid'
+							onClick={() => setRestorePassOpen(false)}
+						>
+							{i18nData.getTemporaryPass}
+						</Button>
+						<Button
+							w='100%'
+							mt='-2'
+							colorPalette='gray'
+							color='main'
+							variant='outline'
+							border='1px solid'
+							borderColor='border'
+							onClick={() => setRestorePassOpen(false)}
+						>
+							{i18nData.rememberPass}
+						</Button>
+					</>
 				)}
 			</Stack>
 		</form>

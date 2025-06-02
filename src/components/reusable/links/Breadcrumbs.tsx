@@ -15,7 +15,7 @@ export default function Breadcrumbs({ category, subcategory, productId }: Props)
 	const t = useTranslations('General');
 
 	return (
-		<BreadcrumbRoot variant='underline' separator={<HiOutlineSlash />}>
+		<BreadcrumbRoot variant='underline' separator={<HiOutlineSlash />} size='lg'>
 			<CatalogBtn
 				fullText={false}
 				trigger={

@@ -15,6 +15,8 @@ import {
 	Stat,
 	Accordion,
 	Box,
+	LinkBox,
+	LinkOverlay,
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import FeedbackModal from '@/components/product/FeedbackModal';
@@ -126,98 +128,109 @@ export default function OrderCard() {
 								</Flex>
 								<Stack gap='4' maxH='500px' overflowY='auto'>
 									<Separator color='border.dark' />
-									<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
-										<Box ml='-8px' mr='1' mb={{ base: '12px', md: '0' }}>
-											<Image width={120} height={110} src={img1} alt='Product photo' />
-										</Box>
+									<LinkBox>
+										<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
+											<Box ml='-8px' mr='1' mb={{ base: '12px', md: '0' }}>
+												<Image width={120} height={110} src={img1} alt='Product photo' />
+											</Box>
 
-										<Flex direction='column' gap={2} w='100%'>
-											<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
-												<Link
-													href='#'
-													textDecoration='underline'
-													transition='all .15s ease-in-out'
-													textDecorationColor='main'
-													color='main'
-													_hover={{ color: 'main.accent' }}
-													_focus={{ outline: 'none' }}
-												>
-													Велотренажер Gymtek XB1400 до 150 кг магнітний домашній синій
-												</Link>
-											</Card.Title>
-											<Text color='main' fontSize='xl'>
-												55 699 ₴
-												<Text
-													as='span'
-													color='main.disabled'
-													fontSize='sm'
-													textDecoration='line-through'
-													marginLeft='8px'
-												>
-													59 709 ₴
+											<Flex direction='column' gap={2} w='100%'>
+												<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
+													<LinkOverlay asChild>
+														<Link
+															href='#'
+															textDecoration='underline'
+															transition='all .15s ease-in-out'
+															textDecorationColor='main'
+															color='main'
+															_hover={{ color: 'main.accent' }}
+															_focus={{ outline: 'none' }}
+														>
+															Велотренажер Gymtek XB1400 до 150 кг магнітний домашній синій
+														</Link>
+													</LinkOverlay>
+												</Card.Title>
+												<Text color='main' fontSize='xl'>
+													55 699 ₴
+													<Text
+														as='span'
+														color='main.disabled'
+														fontSize='sm'
+														textDecoration='line-through'
+														marginLeft='8px'
+													>
+														59 709 ₴
+													</Text>
+													<Badge
+														variant='solid'
+														color='main.lightOnly'
+														bg='main.tertiary'
+														marginLeft='12px'
+													>
+														-150 ₴
+													</Badge>
 												</Text>
-												<Badge
-													variant='solid'
-													color='main.lightOnly'
-													bg='main.tertiary'
-													marginLeft='12px'
-												>
-													-150 ₴
-												</Badge>
-											</Text>
+											</Flex>
+											<Stat.Root alignSelf='flex-end' color='main'>
+												<Stat.ValueText textStyle='md' minW='42px'>
+													{`x 2${genT('units')}`}
+												</Stat.ValueText>
+											</Stat.Root>
 										</Flex>
-										<Stat.Root alignSelf='flex-end' color='main'>
-											<Stat.ValueText textStyle='md' minW='42px'>
-												{`x 2${genT('units')}`}
-											</Stat.ValueText>
-										</Stat.Root>
-									</Flex>
+									</LinkBox>
+
 									<Separator color='border.dark' />
-									<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
-										<Box ml='-8px' mr='1' mb={{ base: '12px', md: '0' }}>
-											<Image width={120} height={110} src={img1} alt='Product photo' />
-										</Box>
-										<Flex direction='column' gap={2} w='100%'>
-											<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
-												<Link
-													href='#'
-													textDecoration='underline'
-													transition='all .15s ease-in-out'
-													textDecorationColor='main'
-													color='main'
-													_hover={{ color: 'main.accent' }}
-													_focus={{ outline: 'none' }}
-												>
-													Велотренажер Gymtek XB1400 до 150 кг магнітний домашній синій
-												</Link>
-											</Card.Title>
-											<Text color='main' fontSize='xl'>
-												55 699 ₴
-												<Text
-													as='span'
-													color='main.disabled'
-													fontSize='sm'
-													textDecoration='line-through'
-													marginLeft='8px'
-												>
-													59 709 ₴
+
+									<LinkBox>
+										<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
+											<Box ml='-8px' mr='1' mb={{ base: '12px', md: '0' }}>
+												<Image width={120} height={110} src={img1} alt='Product photo' />
+											</Box>
+
+											<Flex direction='column' gap={2} w='100%'>
+												<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
+													<LinkOverlay asChild>
+														<Link
+															href='#'
+															textDecoration='underline'
+															transition='all .15s ease-in-out'
+															textDecorationColor='main'
+															color='main'
+															_hover={{ color: 'main.accent' }}
+															_focus={{ outline: 'none' }}
+														>
+															Велотренажер Gymtek XB1400 до 150 кг магнітний домашній синій
+														</Link>
+													</LinkOverlay>
+												</Card.Title>
+												<Text color='main' fontSize='xl'>
+													55 699 ₴
+													<Text
+														as='span'
+														color='main.disabled'
+														fontSize='sm'
+														textDecoration='line-through'
+														marginLeft='8px'
+													>
+														59 709 ₴
+													</Text>
+													<Badge
+														variant='solid'
+														color='main.lightOnly'
+														bg='main.tertiary'
+														marginLeft='12px'
+													>
+														-150 ₴
+													</Badge>
 												</Text>
-												<Badge
-													variant='solid'
-													color='main.lightOnly'
-													bg='main.tertiary'
-													marginLeft='12px'
-												>
-													-150 ₴
-												</Badge>
-											</Text>
+											</Flex>
+											<Stat.Root alignSelf='flex-end' color='main'>
+												<Stat.ValueText textStyle='md' minW='42px'>
+													{`x 2${genT('units')}`}
+												</Stat.ValueText>
+											</Stat.Root>
 										</Flex>
-										<Stat.Root alignSelf='flex-end' color='main'>
-											<Stat.ValueText textStyle='md' minW='42px'>
-												x 2шт
-											</Stat.ValueText>
-										</Stat.Root>
-									</Flex>
+									</LinkBox>
 								</Stack>
 							</Accordion.ItemBody>
 						</Accordion.ItemContent>
