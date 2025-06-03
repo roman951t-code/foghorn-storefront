@@ -17,6 +17,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import Image from 'next/image';
+import { MdOutlineShoppingCartCheckout } from 'react-icons/md';
 
 const emptyCart = '/assets/images/emptyCart.png';
 
@@ -89,6 +90,7 @@ export default function Cart() {
 								color='black'
 								variant='solid'
 							>
+								<MdOutlineShoppingCartCheckout />
 								{headT('order')}
 							</Button>
 						</Flex>

@@ -3,6 +3,7 @@ import Auth from '@/components/header/Auth';
 import { useTranslations } from 'next-intl';
 import PersonalDataForm from '@/components/pages/cabinet/user/PersonalDataForm';
 import { extractI18nData } from '@/utils/i18nUtils';
+import { FiUserCheck } from 'react-icons/fi';
 
 const localizedData = [
 	'name',
@@ -51,6 +52,7 @@ export default function AuthStep() {
 								color='black'
 								variant='solid'
 							>
+								<FiUserCheck />
 								{t('authorize')}
 							</Button>
 						}

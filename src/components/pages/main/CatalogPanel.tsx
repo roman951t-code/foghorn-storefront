@@ -17,6 +17,8 @@ const categories = [
 		subcategories: [
 			{ title: 'Mobiles', links: ['iPhone', 'Samsung', 'OnePlus'] },
 			{ title: 'Laptops', links: ['MacBook', 'Dell', 'HP'] },
+			{ title: 'Kitchen', links: ['Refrigerators', 'Microwaves', 'Ovens'] },
+			{ title: 'Living Room', links: ['Televisions', 'Speakers', 'Sofas'] },
 		],
 	},
 	{
@@ -78,7 +80,15 @@ const categories = [
 ];
 
 export default function CatalogPanel({ i18nData }: Props) {
-	const [activeCategory, setActiveCategory] = useState(null);
+	const [activeCategory, setActiveCategory] = useState({
+		name: 'Electronics',
+		subcategories: [
+			{ title: 'Mobiles', links: ['iPhone', 'Samsung', 'OnePlus'] },
+			{ title: 'Laptops', links: ['MacBook', 'Dell', 'HP'] },
+			{ title: 'Kitchen', links: ['Refrigerators', 'Microwaves', 'Ovens'] },
+			{ title: 'Living Room', links: ['Televisions', 'Speakers', 'Sofas'] },
+		],
+	});
 
 	const handleMouseEnter = (category) => {
 		setActiveCategory(category);

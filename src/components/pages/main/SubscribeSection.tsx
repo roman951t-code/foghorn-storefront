@@ -1,5 +1,6 @@
 import { Heading, Flex, Input, Button } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
+import { IoMailOutline } from 'react-icons/io5';
 
 export default function SubscribeSection() {
 	const genT = useTranslations('General');
@@ -31,10 +32,11 @@ export default function SubscribeSection() {
 			>
 				<Input
 					rounded='md'
+					type='email'
 					placeholder={authT('email')}
 					size='md'
+					fontSize='md'
 					variant='outline'
-					fontSize='sm'
 					minWidth='280px'
 					maxWidth='340px'
 					flex='1 1 0'
@@ -56,6 +58,7 @@ export default function SubscribeSection() {
 					w={{ base: '100%', md: 'auto' }}
 					flexShrink={0}
 				>
+					<IoMailOutline />
 					{genT('subscribe')}
 				</Button>
 			</Flex>

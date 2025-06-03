@@ -16,10 +16,10 @@ import {
 	Stack,
 	Separator,
 	Stat,
+	Status,
 	Button,
 } from '@chakra-ui/react';
 import { Rating } from '@/components/ui/rating';
-import { HiCheck } from 'react-icons/hi';
 import { FaShare } from 'react-icons/fa';
 
 export default function AboutTab() {
@@ -51,15 +51,14 @@ export default function AboutTab() {
 						justifyContent='space-between'
 						align-items='center'
 						flexWrap='wrap'
+						mt='2'
 						gap='2'
 					>
 						<HStack>
-							<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
-								<Tag.Label>{t('productIsPresent')}</Tag.Label>
-								<Tag.EndElement mt='-3' ml='2'>
-									<HiCheck />
-								</Tag.EndElement>
-							</Tag.Root>
+							<Status.Root size={'lg'} colorPalette='green' mr='4'>
+								<Status.Indicator />
+								{t('productIsPresent')}
+							</Status.Root>
 
 							<IconButton
 								aria-label='Share'
@@ -75,6 +74,7 @@ export default function AboutTab() {
 							>
 								<FaShare />
 							</IconButton>
+
 							<IconButton
 								aria-label='Favourite'
 								variant='ghost'
@@ -98,7 +98,7 @@ export default function AboutTab() {
 					<Stat.Root my='3'>
 						<Flex flexWrap='wrap' alignItems='center' gap='4'>
 							<Button
-								size='lg'
+								size='md'
 								w='200px'
 								bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 								color='black'

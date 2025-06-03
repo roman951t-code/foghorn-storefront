@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { SidebarCheckoutCard, FullCheckoutCard } from '@/components/reusable/cards/CheckoutCard';
+import { IoMdCheckmarkCircleOutline } from 'react-icons/io';
 
 export default function OrderInfo() {
 	const t = useTranslations('Products');
@@ -70,6 +71,7 @@ export default function OrderInfo() {
 					variant='solid'
 					m={{ base: 'initial', md: 'auto' }}
 				>
+					<IoMdCheckmarkCircleOutline />
 					{t('acceptOrder')}
 				</Button>
 			</VStack>
@@ -94,6 +96,7 @@ export default function OrderInfo() {
 						variant='solid'
 						m={{ base: 'initial', md: 'auto' }}
 					>
+						<IoMdCheckmarkCircleOutline />
 						{t('acceptOrder')}
 					</Button>
 				</VStack>

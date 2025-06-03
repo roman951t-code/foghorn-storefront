@@ -7,7 +7,7 @@ export default function ShipmentStep() {
 
 	return (
 		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' textAlign='center' p='4'>
-			<RadioGroup w='100%' variant='outline' defaultValue='1' colorPalette='orange'>
+			<RadioGroup w='100%' defaultValue='1' colorPalette='gray'>
 				<VStack gap='8' alignItems='space-between'>
 					<Flex justifyContent='space-between' alignItems='center'>
 						<Radio value='1'>Нова Пошта</Radio>

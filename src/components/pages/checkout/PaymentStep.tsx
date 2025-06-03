@@ -7,7 +7,7 @@ export default function PaymentStep() {
 
 	return (
 		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' textAlign='center' p='4'>
-			<RadioGroup w='100%' variant='outline' defaultValue='1' colorPalette='orange'>
+			<RadioGroup w='100%' defaultValue='1' colorPalette='gray'>
 				<VStack gap='8' alignItems='space-between'>
 					<Radio value='1'>Готівкою</Radio>
 					<Radio value='2'>Онлайн банкінг</Radio>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Flex, Text, VStack, Link, Heading, Button } from '@chakra-ui/react';
+import { Box, Flex, Text, VStack, Link, Heading, Button, Separator } from '@chakra-ui/react';
 import type { I18nData } from '@/types/i18n';
 
 interface Props {
@@ -29,48 +29,62 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				position='relative'
 				w={{ base: '100%', lg: '75%' }}
 			>
-				{category.subcategories.map((subcategory) => (
-					<Box key={subcategory.title} minW='175px' maxW='32%'>
-						<Text fontWeight='semibold' textStyle='lg' mb={4}>
-							{subcategory.title}
-						</Text>
-						<VStack align='start'>
-							{subcategory.links.map((link) => (
+				{category.subcategories.map((subcategory, index) => (
+					<React.Fragment key={subcategory.title}>
+						<Box minW='175px' maxW='32%'>
+							<Text fontWeight='semibold' textStyle='lg' mb={4}>
+								{subcategory.title}
+							</Text>
+							<VStack align='start'>
+								{subcategory.links.map((link) => (
+									<Link
+										key={link}
+										fontSize='md'
+										variant='plain'
+										textWrap='wrap'
+										wordBreak='break-all'
+										_hover={{ color: 'link' }}
+										_focus={{ outline: 'none' }}
+									>
+										{link}
+									</Link>
+								))}
 								<Link
-									key={link}
 									fontSize='md'
 									variant='plain'
+									transition='color 0.25s ease-in-out'
 									textWrap='wrap'
 									wordBreak='break-all'
-									_hover={{ color: 'link' }}
+									color='link'
+									mt='3'
+									textDecoration='underline'
+									textUnderlineOffset='4px'
 									_focus={{ outline: 'none' }}
 								>
-									{link}
+									{i18nData.seeAll}
 								</Link>
-							))}
-							<Link
-								fontSize='md'
-								variant='plain'
-								transition='color 0.25s ease-in-out'
-								textWrap='wrap'
-								wordBreak='break-all'
-								color='link'
-								mt='3'
-								textDecoration='underline'
-								textUnderlineOffset='4px'
-								_focus={{ outline: 'none' }}
-							>
-								{i18nData.seeAll}
-							</Link>
-						</VStack>
-					</Box>
+							</VStack>
+						</Box>
+
+						{index < category.subcategories.length - 1 && (
+							<Separator
+								orientation='vertical'
+								height='auto'
+								color='gray.400'
+								size='xs'
+								variant='dotted'
+								position='relative'
+								left='-32px'
+							/>
+						)}
+					</React.Fragment>
 				))}
 			</Flex>
 			<Flex
 				justify='space-between'
 				flexDirection='column'
 				align='center'
-				bg='bg.light'
+				bgColor='bg.tertiary'
 				height='100%'
 				maxW='380px'
 				minW='280px'
@@ -81,7 +95,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				top={0}
 				zIndex={10}
 				p={4}
-				hideBelow='lg'
+				hideBelow='xl'
 				_after={{
 					content: `""`,
 					position: 'absolute',

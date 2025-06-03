@@ -19,6 +19,7 @@ import {
 	LinkOverlay,
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
+import { BsArrowRepeat } from 'react-icons/bs';
 import FeedbackModal from '@/components/product/FeedbackModal';
 import Image from 'next/image';
 
@@ -64,11 +65,12 @@ export default function OrderCard() {
 					<Accordion.Item value={item.name} borderBottom='none'>
 						<Accordion.ItemTrigger w='100%' p='0'>
 							<Flex
-								direction={{ base: 'column', sm: 'row' }}
+								direction={{ base: 'column', xs: 'row' }}
 								justifyContent='space-between'
 								w='100%'
+								gap='3'
 							>
-								<VStack gap='3' alignItems='flex-start'>
+								<VStack gap='3' alignItems='flex-start' minW='140px'>
 									<Stat.Root>
 										<Stat.Label fontSize='sm'>{prodT('totalAmount')}</Stat.Label>
 										<Stat.ValueText w='124px' fontSize='3xl'>
@@ -81,7 +83,12 @@ export default function OrderCard() {
 										</Highlight>
 									</Text>
 								</VStack>
-								<HStack gap='1' display={{ base: 'none', lg: 'flex' }}>
+								<HStack
+									gap='1'
+									display={{ base: 'none', lg: 'flex' }}
+									maxW='440px'
+									overflow='hidden'
+								>
 									<Image width={110} height={110} src={img1} alt='Product photo' />
 									<Image width={110} height={110} src={img1} alt='Product photo' />
 									<Image width={110} height={110} src={img2} alt='Product photo' />
@@ -93,7 +100,7 @@ export default function OrderCard() {
 									justifyContent='center'
 									alignItems={{ base: 'flex-start', sm: 'flex-end' }}
 								>
-									<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
+									<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray' w='170px'>
 										<Tag.Label>№ {prodT('order')}: 65719</Tag.Label>
 									</Tag.Root>
 									<Text color='main' textStyle='sm'>
@@ -122,6 +129,7 @@ export default function OrderCard() {
 										border='1px solid '
 										borderColor='border'
 									>
+										<BsArrowRepeat />
 										{prodT('repeatOrder')}
 									</Button>
 									<FeedbackModal i18nData={i18nData} />

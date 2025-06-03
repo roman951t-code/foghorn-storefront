@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/drawer';
 import QuickFilters from './QuickFilters';
 import Filters from './Filters';
+import { IoFilter } from 'react-icons/io5';
 
 interface Props {
 	btnText: string;
@@ -29,6 +30,7 @@ export default function FiltersSidebar({ btnText }: Props) {
 					alignSelf='flex-end'
 					hideFrom='lg'
 				>
+					<IoFilter />
 					{btnText}
 				</Button>
 			</DrawerTrigger>
