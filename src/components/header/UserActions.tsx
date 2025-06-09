@@ -4,7 +4,7 @@ import { FiUser } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { extractI18nData } from '@/utils/i18nUtils';
 
-import Auth from './Auth';
+import Auth from '../auth/Auth';
 import Cart from './Cart';
 
 const AuthBtn = () => (
@@ -21,28 +21,36 @@ const AuthBtn = () => (
 	</IconButton>
 );
 
+const localizedData = [
+	'name',
+	'phone',
+	'lastname',
+	'authorize',
+	'continueWith',
+	'logOut',
+	'email',
+	'emailRequired',
+	'wrongEmail',
+	'password',
+	'passRequired',
+	'wrongPassLength',
+	'continue',
+	'rememberPass',
+	'restorePass',
+	'getTemporaryPass',
+	'acceptTerms',
+	'signUp',
+	'phoneNumber',
+	'backToLogin',
+	'register',
+	'continueWithEmail',
+	'continueWithPhone',
+];
+
 export default function UserActions() {
 	const t = useTranslations('Auth');
 
-	const i18nData = extractI18nData(t, [
-		'name',
-		'phone',
-		'lastname',
-		'authorize',
-		'continueWith',
-		'logOut',
-		'email',
-		'emailRequired',
-		'wrongEmail',
-		'password',
-		'passRequired',
-		'wrongPassLength',
-		'continue',
-		'rememberPass',
-		'restorePass',
-		'getTemporaryPass',
-		'acceptTerms',
-	]);
+	const i18nData = extractI18nData(t, localizedData);
 
 	return (
 		<>

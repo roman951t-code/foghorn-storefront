@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Flex, Text, VStack, HStack, Icon } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
-import CatalogBtn from '../../reusable/buttons/CatalogBtn';
+import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import CategoryDetails from './CategoryDetails';
 import Promo from './Promo';
 import type { I18nData } from '@/types/i18n';
@@ -80,15 +80,7 @@ const categories = [
 ];
 
 export default function CatalogPanel({ i18nData }: Props) {
-	const [activeCategory, setActiveCategory] = useState({
-		name: 'Electronics',
-		subcategories: [
-			{ title: 'Mobiles', links: ['iPhone', 'Samsung', 'OnePlus'] },
-			{ title: 'Laptops', links: ['MacBook', 'Dell', 'HP'] },
-			{ title: 'Kitchen', links: ['Refrigerators', 'Microwaves', 'Ovens'] },
-			{ title: 'Living Room', links: ['Televisions', 'Speakers', 'Sofas'] },
-		],
-	});
+	const [activeCategory, setActiveCategory] = useState(null);
 
 	const handleMouseEnter = (category) => {
 		setActiveCategory(category);
@@ -127,7 +119,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 						px={4}
 						py={3}
 						h='54px'
-						borderBottom='1px solid'
+						borderTop='1px solid'
 						borderColor={{ base: 'gray.200', _dark: 'gray.500' }}
 						transition='background 0.25s ease-in-out'
 						_hover={{
@@ -140,7 +132,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 						<Text fontSize='16px' fontWeight='medium'>
 							{category.name}
 						</Text>
-						<Icon fontSize='22px' color='main'>
+						<Icon fontSize='20px' color='main'>
 							<BsChevronRight />
 						</Icon>
 					</HStack>

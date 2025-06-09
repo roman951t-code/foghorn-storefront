@@ -1,5 +1,5 @@
 import { Button, Flex, Heading, Card, VStack } from '@chakra-ui/react';
-import Auth from '@/components/header/Auth';
+import Auth from '@/components/auth/Auth';
 import { useTranslations } from 'next-intl';
 import PersonalDataForm from '@/components/pages/cabinet/user/PersonalDataForm';
 import { extractI18nData } from '@/utils/i18nUtils';
@@ -23,6 +23,12 @@ const localizedData = [
 	'restorePass',
 	'getTemporaryPass',
 	'acceptTerms',
+	'signUp',
+	'phoneNumber',
+	'backToLogin',
+	'register',
+	'continueWithEmail',
+	'continueWithPhone',
 ];
 
 export default function AuthStep() {

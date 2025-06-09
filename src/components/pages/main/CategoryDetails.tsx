@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, Flex, Text, VStack, Link, Heading, Button, Separator } from '@chakra-ui/react';
+import { Box, Flex, Text, VStack, Link, Heading, Button } from '@chakra-ui/react';
 import type { I18nData } from '@/types/i18n';
+import { BsChevronRight } from 'react-icons/bs';
 
 interface Props {
 	i18nData: I18nData;
@@ -65,18 +66,6 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 								</Link>
 							</VStack>
 						</Box>
-
-						{index < category.subcategories.length - 1 && (
-							<Separator
-								orientation='vertical'
-								height='auto'
-								color='gray.400'
-								size='xs'
-								variant='dotted'
-								position='relative'
-								left='-32px'
-							/>
-						)}
 					</React.Fragment>
 				))}
 			</Flex>
@@ -128,6 +117,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 				>
 					{i18nData.seeCategory}
+					<BsChevronRight />
 				</Button>
 			</Flex>
 		</Flex>
