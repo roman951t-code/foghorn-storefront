@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Button, Stack, Icon, CheckboxCard } from '@chakra-ui/react';
+import { Button, Stack, Icon, CheckboxCard, Link as ChakraLink } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import EmailAuth from './EmailAuth';
 import { signIn } from 'next-auth/react';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdArrowBack, IoMdPhonePortrait } from 'react-icons/io';
+import { Link } from '@/i18n/routing';
 import PhoneAuth from './PhoneAuth';
 
 interface Props {
@@ -91,7 +92,21 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 			>
 				<CheckboxCard.HiddenInput />
 				<CheckboxCard.Control>
-					<CheckboxCard.Label>{i18nData.acceptTerms}</CheckboxCard.Label>
+					<CheckboxCard.Label>
+						<Link href='/terms' target='blank'>
+							<ChakraLink
+								as='span'
+								textDecoration='underline'
+								textUnderlineOffset='3px'
+								transition='all .15s ease-in-out'
+								textDecorationColor='main'
+								_hover={{ color: 'link' }}
+								_focus={{ outline: 'none' }}
+							>
+								{i18nData.acceptTerms}
+							</ChakraLink>
+						</Link>
+					</CheckboxCard.Label>
 					<CheckboxCard.Indicator />
 				</CheckboxCard.Control>
 			</CheckboxCard.Root>

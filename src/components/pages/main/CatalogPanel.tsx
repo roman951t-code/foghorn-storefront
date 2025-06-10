@@ -91,14 +91,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 	};
 
 	return (
-		<Flex
-			w='100%'
-			h='500px'
-			position='relative'
-			rounded='md'
-			gap={2}
-			onMouseLeave={handleMouseLeave}
-		>
+		<Flex h='500px' position='relative' rounded='md' gap={2} onMouseLeave={handleMouseLeave}>
 			<VStack
 				minW='300px'
 				w='300px'
@@ -108,6 +101,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 				rounded='md'
 				hideBelow='md'
 				overflow='hidden'
+				mr='2'
 			>
 				<CatalogBtn fullText />
 				{categories.map((category) => (
@@ -138,8 +132,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 					</HStack>
 				))}
 			</VStack>
-			<Promo />
-
+			{!activeCategory && <Promo />}
 			<CategoryDetails category={activeCategory} i18nData={i18nData} />
 		</Flex>
 	);

@@ -5,7 +5,7 @@ import {
 	AccordionRoot,
 } from '@/components/ui/accordion';
 import { useTranslations } from 'next-intl';
-import LocaleNavLink from '@/components/reusable/links/LocaleNavLink';
+import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 
 export default function CollapsibleLinks({ onClose }) {
 	const t = useTranslations('Sidebar');
@@ -19,25 +19,40 @@ export default function CollapsibleLinks({ onClose }) {
 			<AccordionItem value='info' borderBottomColor='border.light'>
 				<AccordionItemTrigger>{t('info')}</AccordionItemTrigger>
 				<AccordionItemContent>
-					<LocaleNavLink href='/aboutUs' text={t('aboutUs')} onClick={handleClick} />
+					<LocaleNavLink href='/aboutUs'>{t('aboutUs')}</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
-					<LocaleNavLink href='/publicOffer' text={t('publicOffer')} onClick={handleClick} />
+					<LocaleNavLink href='/publicOffer' onClick={handleClick}>
+						{t('publicOffer')}
+					</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
-					<LocaleNavLink href='/faq' text={t('faq')} onClick={handleClick} />
+					<LocaleNavLink href='/faq' onClick={handleClick}>
+						{t('faq')}
+					</LocaleNavLink>
 				</AccordionItemContent>
 			</AccordionItem>
 			<AccordionItem value='clients' borderBottomColor='border.light'>
 				<AccordionItemTrigger>{t('clients')}</AccordionItemTrigger>
 				<AccordionItemContent>
-					<LocaleNavLink href='/shippingTerms' text={t('shippingTerms')} onClick={handleClick} />
+					<LocaleNavLink href='/shippingTerms' onClick={handleClick}>
+						{t('shippingTerms')}
+					</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
-					<LocaleNavLink href='/guarantee' text={t('guarantee')} onClick={handleClick} />
+					<LocaleNavLink href='/guarantee' onClick={handleClick}>
+						{t('guarantee')}
+					</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
-					<LocaleNavLink href='/returnRefund' text={t('returnRefund')} onClick={handleClick} />
+					<LocaleNavLink href='/returnRefund' onClick={handleClick}>
+						{t('returnRefund')}
+					</LocaleNavLink>
+				</AccordionItemContent>
+				<AccordionItemContent>
+					<LocaleNavLink href='/terms' onClick={handleClick}>
+						{t('terms')}
+					</LocaleNavLink>
 				</AccordionItemContent>
 			</AccordionItem>
 		</AccordionRoot>

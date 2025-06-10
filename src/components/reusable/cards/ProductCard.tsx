@@ -17,6 +17,7 @@ import ProductPreviewSlider from '../slider/ProductPreviewSlider';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
+import { LocaleNavLink } from '../links/LocaleNavLink';
 
 export default function ProductCard() {
 	const t = useTranslations('Products');
@@ -68,19 +69,14 @@ export default function ProductCard() {
 
 				<LinkBox>
 					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='1' w='100%'>
-						<LinkOverlay asChild>
-							<Link
-								href='#'
-								color='main'
-								variant='underline'
-								_focus={{ outline: 'none' }}
-								transition='all .15s ease-in-out'
-								textDecorationColor='main'
-								_hover={{ color: 'link' }}
-							>
-								iPhone 16 Pro Max 256 GB Desert Titanium
-							</Link>
-						</LinkOverlay>
+						<LocaleNavLink
+							href='/products/1/1'
+							textDecorationColor='main'
+							color='main'
+							variant='underline'
+						>
+							iPhone 16 Pro Max 256 GB Desert Titanium
+						</LocaleNavLink>
 					</Card.Title>
 					<Text color='main' fontSize='2xl' mt='2'>
 						55 699 ₴
@@ -95,15 +91,9 @@ export default function ProductCard() {
 
 				<HStack gap='4' mt='2'>
 					<Rating colorPalette='orange' readOnly size='xs' defaultValue={5} />
-					<Link
-						href='#'
-						variant='underline'
-						fontSize='sm'
-						color='main'
-						_focus={{ outline: 'none' }}
-					>
+					<LocaleNavLink href='/cabinet/feedback' variant='underline' fontSize='sm' color='main'>
 						{t('feedback')} (3)
-					</Link>
+					</LocaleNavLink>
 				</HStack>
 			</Flex>
 		</Card.Root>

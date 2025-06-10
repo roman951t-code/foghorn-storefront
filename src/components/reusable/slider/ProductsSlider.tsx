@@ -1,7 +1,9 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
+import { HStack } from '@chakra-ui/react';
+import LoadingSkeleton from '../Skeleton';
 import ProductCard from '../cards/ProductCard';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -14,16 +16,35 @@ const breakpoints = {
 	630: {
 		slidesPerView: 3,
 	},
-	890: {
+	840: {
 		slidesPerView: 4,
 	},
-
-	1100: {
+	1120: {
+		slidesPerView: 5,
+	},
+	1220: {
 		slidesPerView: 6,
 	},
 };
 
 export default function ProductsSlider() {
+	const [isClient, setIsClient] = useState(false);
+
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
+
+	if (!isClient) {
+		return (
+			<HStack gap='4' mt='8' justifyContent='space-between' overflow='hidden'>
+				<LoadingSkeleton />
+				<LoadingSkeleton />
+				<LoadingSkeleton />
+				<LoadingSkeleton />
+			</HStack>
+		);
+	}
+
 	return (
 		<Swiper
 			loop

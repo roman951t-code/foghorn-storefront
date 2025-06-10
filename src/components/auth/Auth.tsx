@@ -16,6 +16,10 @@ export default function Auth({ i18nData, trigger }: Props) {
 	const { data: session } = useSession();
 	const [showSignup, setShowSignup] = useState(false);
 
+	const toggleSignup = () => {
+		setShowSignup((prevState) => !prevState);
+	};
+
 	return (
 		<CenteredModal
 			title={showSignup ? i18nData.register : i18nData.authorize}
@@ -26,9 +30,9 @@ export default function Auth({ i18nData, trigger }: Props) {
 				{!session && (
 					<>
 						{showSignup ? (
-							<Signup i18nData={i18nData} backToLogin={() => setShowSignup(false)} />
+							<Signup i18nData={i18nData} backToLogin={toggleSignup} />
 						) : (
-							<Login i18nData={i18nData} moveToSignup={() => setShowSignup(true)} />
+							<Login i18nData={i18nData} moveToSignup={toggleSignup} />
 						)}
 					</>
 				)}

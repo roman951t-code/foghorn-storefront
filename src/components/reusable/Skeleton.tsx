@@ -7,7 +7,7 @@ export default function LoadingSkeleton() {
 				<SkeletonCircle size='10' />
 				<SkeletonText noOfLines={2} />
 			</HStack>
-			<Skeleton height='200px' />
+			<Skeleton height='220px' />
 		</Stack>
 	);
 }

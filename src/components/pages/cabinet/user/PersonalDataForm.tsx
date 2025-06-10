@@ -49,7 +49,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	return (
 		<form onSubmit={onSubmit}>
 			<HStack
-				gap={{ base: '6' }}
+				gap='6'
 				my='4'
 				px='1'
 				flexDirection='row'

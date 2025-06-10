@@ -1,11 +1,11 @@
 import { Stack, Icon } from '@chakra-ui/react';
-import { FiHeart, FiEye } from 'react-icons/fi';
-import { LuListChecks } from 'react-icons/lu';
-import { IoChatboxEllipsesOutline } from 'react-icons/io5';
+import { FiHeart } from 'react-icons/fi';
+import { IoBagCheckOutline, IoChatboxEllipsesOutline } from 'react-icons/io5';
 import { useTranslations } from 'next-intl';
 import { LuUserRoundCog } from 'react-icons/lu';
-import LocaleNavLink from '@/components/reusable/links/LocaleNavLink';
+import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 import { VscFeedback } from 'react-icons/vsc';
+import { BsEmojiSunglasses } from 'react-icons/bs';
 
 export default function UserLinks({ onClose }) {
 	const t = useTranslations('Sidebar');
@@ -15,41 +15,47 @@ export default function UserLinks({ onClose }) {
 	};
 
 	return (
-		<Stack gap={6}>
-			<LocaleNavLink href='/cabinet' text='Роман Онищенко' onClick={handleClose}>
+		<Stack gap='6' w='fit-content'>
+			<LocaleNavLink href='/cabinet' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
 					<LuUserRoundCog />
 				</Icon>
+				{'Роман Онищенко'}
 			</LocaleNavLink>
 
-			<LocaleNavLink href='/cabinet/orders' text={t('myOrders')} onClick={handleClose}>
+			<LocaleNavLink href='/cabinet/orders' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
-					<LuListChecks />
+					<IoBagCheckOutline />
 				</Icon>
+				{t('myOrders')}
 			</LocaleNavLink>
 
-			<LocaleNavLink href='/cabinet/feedback' text={t('myFeedback')} onClick={handleClose}>
+			<LocaleNavLink href='/cabinet/feedback' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
 					<VscFeedback />
 				</Icon>
+				{t('myFeedback')}
 			</LocaleNavLink>
 
-			<LocaleNavLink href='/cabinet/wishlist' text={t('wishList')} onClick={handleClose}>
+			<LocaleNavLink href='/cabinet/wishlist' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
 					<FiHeart />
 				</Icon>
+				{t('wishList')}
 			</LocaleNavLink>
 
-			<LocaleNavLink href='/cabinet/reviewed' text={t('reviewedProducts')} onClick={handleClose}>
+			<LocaleNavLink href='/cabinet/reviewed' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
-					<FiEye />
+					<BsEmojiSunglasses />
 				</Icon>
+				{t('reviewedProducts')}
 			</LocaleNavLink>
 
-			<LocaleNavLink href='/cabinet/chat' text={t('chat')} onClick={handleClose}>
+			<LocaleNavLink href='/cabinet/chat' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
 					<IoChatboxEllipsesOutline />
 				</Icon>
+				{t('chat')}
 			</LocaleNavLink>
 		</Stack>
 	);

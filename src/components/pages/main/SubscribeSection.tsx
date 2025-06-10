@@ -14,17 +14,18 @@ export default function SubscribeSection() {
 			p={4}
 			rounded='md'
 			boxShadow='sm'
-			gap='4'
+			gapX='8'
+			gapY='4'
 			flexWrap='wrap'
 			alignItems='center'
-			justifyContent={{ base: 'center', xl: 'space-between' }}
+			justifyContent={{ base: 'center', '2xl': 'space-between' }}
 		>
-			<Heading color='main' fontWeight='normal' size='lg' minWidth='260px'>
+			<Heading color='main' fontWeight='normal' size='lg' minW='260px'>
 				{genT('subscribeInfo')}
 			</Heading>
 
 			<Flex
-				gap='12px'
+				gap='4'
 				alignItems='center'
 				justifyContent={{ base: 'center', md: 'flex-end' }}
 				minWidth='280px'
@@ -43,8 +44,6 @@ export default function SubscribeSection() {
 					transition='all .15s ease-in-out'
 					_placeholder={{ fontSize: 'sm' }}
 					_focus={{
-						border: '1px solid',
-						borderColor: 'main.secondary',
 						outline: 'none',
 					}}
 				/>

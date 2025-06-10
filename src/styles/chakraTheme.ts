@@ -43,6 +43,18 @@ const config = defineConfig({
 							_dark: '#1F202C',
 						},
 					},
+					catalogPanel: {
+						value: {
+							base: 'rgb(244,246,248)',
+							_dark: 'colors.yellow.400',
+						},
+					},
+					button: {
+						value: {
+							base: '{colors.yellow.400}',
+							_dark: 'white',
+						},
+					},
 				},
 				bgHover: {
 					DEFAULT: {
@@ -50,6 +62,12 @@ const config = defineConfig({
 					},
 					accent: {
 						value: '{colors.yellow.500}',
+					},
+					button: {
+						value: {
+							base: '{colors.yellow.500}',
+							_dark: '{colors.gray.100}',
+						},
 					},
 				},
 				main: {
@@ -163,17 +181,6 @@ const config = defineConfig({
 			textUnderlineOffset: '4px !important',
 			'--mix-textDecorationColor': 'color-mix(in srgb, currentColor 40%, transparent)',
 			textDecorationColor: 'var(--mix-textDecorationColor, currentColor) !important',
-		},
-		'.localeLink': {
-			color: 'var(--chakra-colors-color-palette-fg) !important',
-			textDecoration: 'none',
-			textUnderlineOffset: '3px !important',
-			'--mix-textDecorationColor': 'color-mix(in srgb, currentColor 40%, transparent)',
-			textDecorationColor: 'var(--mix-textDecorationColor, currentColor) !important',
-			transition: 'all 0.2s ease-in-out',
-			_hover: {
-				textDecoration: 'underline',
-			},
 		},
 		'.rce-container-input': {
 			backgroundColor: 'transparent !important',

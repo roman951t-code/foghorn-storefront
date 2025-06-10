@@ -38,6 +38,9 @@ export default function EmailAuth({
 			<Stack gap='6' align='flex-start'>
 				<Field label={i18nData.email} invalid={!!errors.email} errorText={errors.email?.message}>
 					<Input
+						_focus={{
+							outline: 'none',
+						}}
 						fontSize='md'
 						{...register('email', {
 							required: i18nData.emailRequired,
@@ -57,6 +60,9 @@ export default function EmailAuth({
 							errorText={errors.password?.message}
 						>
 							<PasswordInput
+								_focus={{
+									outline: 'none',
+								}}
 								fontSize='md'
 								{...register('password', {
 									required: i18nData.passRequired,

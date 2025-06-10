@@ -3,9 +3,10 @@ import { Tabs, Icon } from '@chakra-ui/react';
 import { FiHeart, FiEye } from 'react-icons/fi';
 import { LuUserRoundCog } from 'react-icons/lu';
 import { useRouter } from '@/i18n/routing';
-import { LuListChecks } from 'react-icons/lu';
+import { IoBagCheckOutline } from 'react-icons/io5';
 import { IoChatboxEllipsesOutline } from 'react-icons/io5';
 import { VscFeedback } from 'react-icons/vsc';
+import { BsEmojiSunglasses } from 'react-icons/bs';
 import type { I18nData } from '@/types/i18n';
 
 interface Props {
@@ -41,7 +42,7 @@ export default function TabsList({ i18nData }: Props) {
 				onClick={() => handleNavigation('/cabinet/orders')}
 			>
 				<Icon size='md'>
-					<LuListChecks />
+					<IoBagCheckOutline />
 				</Icon>
 				{i18nData.myOrders}
 			</Tabs.Trigger>
@@ -77,7 +78,7 @@ export default function TabsList({ i18nData }: Props) {
 				onClick={() => handleNavigation('/cabinet/reviewed')}
 			>
 				<Icon size='md'>
-					<FiEye />
+					<BsEmojiSunglasses />
 				</Icon>
 				{i18nData.reviewedProducts}
 			</Tabs.Trigger>

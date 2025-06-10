@@ -1,10 +1,11 @@
 import { useTranslations } from 'next-intl';
-import { EmptyState, VStack, AbsoluteCenter, Link as ChakraLink } from '@chakra-ui/react';
+import { EmptyState, VStack, AbsoluteCenter } from '@chakra-ui/react';
 import { HiColorSwatch } from 'react-icons/hi';
-import { Link } from '@/i18n/routing';
+import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 
 export default function NotFoundPage() {
 	const t = useTranslations('NotFoundPage');
+
 	return (
 		<AbsoluteCenter>
 			<EmptyState.Root>
@@ -14,18 +15,9 @@ export default function NotFoundPage() {
 					</EmptyState.Indicator>
 					<VStack textAlign='center'>
 						<EmptyState.Title>{t('title')}</EmptyState.Title>
-
-						<Link href='/'>
-							<ChakraLink
-								as='span'
-								transition='all .15s ease-in-out'
-								textDecorationColor='main'
-								_hover={{ color: 'link' }}
-								_focus={{ outline: 'none' }}
-							>
-								{t('hint')}
-							</ChakraLink>
-						</Link>
+						<LocaleNavLink href='/' textDecoration='underline' textUnderlineOffset='3px'>
+							{t('hint')}
+						</LocaleNavLink>
 					</VStack>
 				</EmptyState.Content>
 			</EmptyState.Root>

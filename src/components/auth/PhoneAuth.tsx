@@ -37,17 +37,54 @@ export default function PhoneAuth({
 				invalid={!!errors.email}
 				errorText={errors.email?.message}
 			>
-				<Input placeholder='(+38 0) ' ref={withMask('(+38 0) 000000000')} fontSize='md' />
+				<Input
+					_focus={{
+						outline: 'none',
+					}}
+					placeholder='(+38 0) '
+					ref={withMask('(+38 0) 000000000')}
+					fontSize='md'
+				/>
 			</Field>
 			<PinInput.Root otp mt='4' justifyContent='center'>
 				<PinInput.HiddenInput />
 				<PinInput.Control w='100%' justifyContent='center'>
-					<PinInput.Input index={0} />
-					<PinInput.Input index={1} />
-					<PinInput.Input index={2} />
-					<PinInput.Input index={3} />
-					<PinInput.Input index={4} />
-					<PinInput.Input index={5} />
+					<PinInput.Input
+						_focus={{
+							outline: 'none',
+						}}
+						index={0}
+					/>
+					<PinInput.Input
+						_focus={{
+							outline: 'none',
+						}}
+						index={1}
+					/>
+					<PinInput.Input
+						_focus={{
+							outline: 'none',
+						}}
+						index={2}
+					/>
+					<PinInput.Input
+						_focus={{
+							outline: 'none',
+						}}
+						index={3}
+					/>
+					<PinInput.Input
+						_focus={{
+							outline: 'none',
+						}}
+						index={4}
+					/>
+					<PinInput.Input
+						_focus={{
+							outline: 'none',
+						}}
+						index={5}
+					/>
 				</PinInput.Control>
 			</PinInput.Root>
 			<Button

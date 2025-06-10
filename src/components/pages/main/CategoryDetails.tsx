@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, Flex, Text, VStack, Link, Heading, Button } from '@chakra-ui/react';
+import { Box, Flex, Text, VStack, Heading } from '@chakra-ui/react';
 import type { I18nData } from '@/types/i18n';
 import { BsChevronRight } from 'react-icons/bs';
+import { LocaleNavLink, LocaleNavButton } from '@/components/reusable/links/LocaleNavLink';
 
 interface Props {
 	i18nData: I18nData;
@@ -14,15 +15,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 	}
 
 	return (
-		<Flex
-			bg='bg.tertiary'
-			overflowY='auto'
-			rounded='sm'
-			boxShadow='sm'
-			height='100%'
-			w='100%'
-			p={5}
-		>
+		<Flex bg='bg.tertiary' overflowY='auto' rounded='sm' boxShadow='sm' w='100%' p={4}>
 			<Flex
 				wrap='wrap'
 				gap={4}
@@ -38,8 +31,9 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 							</Text>
 							<VStack align='start'>
 								{subcategory.links.map((link) => (
-									<Link
+									<LocaleNavLink
 										key={link}
+										href='/products/123'
 										fontSize='md'
 										variant='plain'
 										textWrap='wrap'
@@ -48,9 +42,10 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 										_focus={{ outline: 'none' }}
 									>
 										{link}
-									</Link>
+									</LocaleNavLink>
 								))}
-								<Link
+								<LocaleNavLink
+									href='/products/123'
 									fontSize='md'
 									variant='plain'
 									transition='color 0.25s ease-in-out'
@@ -63,7 +58,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 									_focus={{ outline: 'none' }}
 								>
 									{i18nData.seeAll}
-								</Link>
+								</LocaleNavLink>
 							</VStack>
 						</Box>
 					</React.Fragment>
@@ -73,7 +68,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				justify='space-between'
 				flexDirection='column'
 				align='center'
-				bgColor='bg.tertiary'
+				bgColor='bg.catalogPanel'
 				height='100%'
 				maxW='380px'
 				minW='280px'
@@ -100,25 +95,18 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				}}
 			>
 				<Heading
-					color='main'
+					color='main.darkOnly'
 					size='2xl'
 					fontWeight='medium'
 					borderBottom='1px solid'
 					pb='1'
-					borderBottomColor='main'
 				>
 					{category.name}
 				</Heading>
-				<Button
-					color='main.darkOnly'
-					variant='solid'
-					width='100%'
-					mb='1'
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-				>
+				<LocaleNavButton href='/products/123'>
 					{i18nData.seeCategory}
 					<BsChevronRight />
-				</Button>
+				</LocaleNavButton>
 			</Flex>
 		</Flex>
 	);

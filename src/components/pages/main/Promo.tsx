@@ -1,17 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Flex, Image } from '@chakra-ui/react';
+import { Box, Flex, HStack } from '@chakra-ui/react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import NextImage from 'next/image';
+import LoadingSkeleton from '@/components/reusable/Skeleton';
 
 import 'swiper/css';
 
 const carousel1 = '/assets/images/carousel1.webp';
 const carousel2 = '/assets/images/carousel2.webp';
 
-const images = [carousel1, carousel2, carousel1];
+const images = [carousel1, carousel2, carousel1, carousel2];
 
 const breakpoints = {
 	690: { slidesPerView: 2 },
@@ -28,27 +29,19 @@ export default function Promo() {
 
 	if (!isClient) {
 		return (
-			<Flex
-				gap={4}
-				w={{ base: '100%', md: '75%' }}
-				overflow='hidden'
-				wrap='nowrap'
-				alignItems={'center'}
-			>
-				{images.map((src, index) => (
-					<Image asChild key={index} h='500px' position='relative' maxW='479px' borderRadius='2'>
-						<NextImage src={src} alt={`Carousel ${index + 1}`} fill />
-					</Image>
-				))}
-			</Flex>
+			<HStack gap='4' px='4' justifyContent='space-between' overflow='hidden'>
+				<LoadingSkeleton />
+				<LoadingSkeleton />
+				<LoadingSkeleton />
+			</HStack>
 		);
 	}
 
 	return (
 		<Swiper
-			slidesPerView={1}
+			loop={true}
+			// autoplay={{ delay: 3000 }}
 			spaceBetween={10}
-			loop
 			breakpoints={breakpoints}
 			modules={[Autoplay]}
 			className='promoSlider'

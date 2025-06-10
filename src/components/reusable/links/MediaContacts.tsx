@@ -1,5 +1,3 @@
-'use client';
-
 import { Flex, IconButton, Link } from '@chakra-ui/react';
 import { AiFillInstagram } from 'react-icons/ai';
 import { FaViber, FaTelegramPlane, FaFacebookSquare } from 'react-icons/fa';
