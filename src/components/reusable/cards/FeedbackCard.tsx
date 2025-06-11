@@ -19,6 +19,7 @@ import FeedbackModal from '@/components/product/FeedbackModal';
 import { Rating } from '@/components/ui/rating';
 import { FiTrash2 } from 'react-icons/fi';
 import Image from 'next/image';
+import { LocaleNavLink } from '../links/LocaleNavLink';
 
 const img1 = '/assets/images/temp/1.webp';
 
@@ -60,17 +61,14 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 						</Box>
 						<Flex direction='column' gap={2} w='100%'>
 							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
-								<Link
-									href='#'
+								<LocaleNavLink
+									href='/products/1/1'
 									textDecoration='underline'
-									transition='all .15s ease-in-out'
-									textDecorationColor='main'
+									fontSize='md'
 									color='main'
-									_hover={{ color: 'main.accent' }}
-									_focus={{ outline: 'none' }}
 								>
 									Велотренажер Gymtek XB1400 до 150 кг магнітний домашній синій
-								</Link>
+								</LocaleNavLink>
 							</Card.Title>
 							<Text color='main' fontSize='xl' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
 								55 699 ₴
@@ -167,47 +165,35 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 							alt='Product photo'
 						/>
 					</Box>
-					<LinkBox>
-						<Stack direction='column' gap={2} w='100%'>
-							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
-								<LinkOverlay asChild>
-									<Link
-										href='#'
-										textDecoration='underline'
-										transition='all .15s ease-in-out'
-										textDecorationColor='main'
-										color='main'
-										_hover={{ color: 'main.accent' }}
-										_focus={{ outline: 'none' }}
-									>
-										Велотренажер Gymtek XB1400 до 150 кг магнітний домашній синій
-									</Link>
-								</LinkOverlay>
-							</Card.Title>
-							<Stack direction={{ base: 'column', sm: 'row' }} justifyContent='space-between'>
-								<Text color='main' fontSize='xl' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
-									55 699 ₴
-									<Text
-										as='span'
-										color='main.disabled'
-										fontSize='sm'
-										textDecoration='line-through'
-										marginLeft='8px'
-									>
-										59 709 ₴
-									</Text>
-									<Badge
-										variant='solid'
-										color='main.lightOnly'
-										bg='main.tertiary'
-										marginLeft='12px'
-									>
-										-150 ₴
-									</Badge>
+					<Stack direction='column' gap={2} w='100%'>
+						<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
+							<LocaleNavLink
+								href='/products/1/1'
+								textDecoration='underline'
+								fontSize='md'
+								color='main'
+							>
+								Велотренажер Gymtek XB1400 до 150 кг магнітний домашній синій
+							</LocaleNavLink>
+						</Card.Title>
+						<Stack direction={{ base: 'column', sm: 'row' }} justifyContent='space-between'>
+							<Text color='main' fontSize='xl' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
+								55 699 ₴
+								<Text
+									as='span'
+									color='main.disabled'
+									fontSize='sm'
+									textDecoration='line-through'
+									marginLeft='8px'
+								>
+									59 709 ₴
 								</Text>
-							</Stack>
+								<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='12px'>
+									-150 ₴
+								</Badge>
+							</Text>
 						</Stack>
-					</LinkBox>
+					</Stack>
 
 					<Flex alignSelf='flex-end' flex={1} justifyContent='flex-end'>
 						<FeedbackModal i18nData={i18nData} />

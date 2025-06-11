@@ -34,7 +34,7 @@ export default function AboutTab() {
 			>
 				<Box
 					maxW={{ base: '90vw', md: '86vw', lg: '600px' }}
-					minW='340px'
+					minW={{ base: '340px', md: '440px', lg: '500px' }}
 					w='100%'
 					bg='bg.tertiary'
 					pb='4'
@@ -91,7 +91,7 @@ export default function AboutTab() {
 							</IconButton>
 						</HStack>
 
-						<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
+						<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray' mr='1'>
 							<Tag.Label>{t('productCode')}: 65719</Tag.Label>
 						</Tag.Root>
 					</Flex>
@@ -115,7 +115,7 @@ export default function AboutTab() {
 									color='main.disabled'
 									fontSize='sm'
 									textDecoration='line-through'
-									marginLeft='8px'
+									marginLeft='1'
 								>
 									59 709 ₴
 									<Badge

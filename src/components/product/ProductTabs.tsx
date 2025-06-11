@@ -23,41 +23,39 @@ export default function ProductTabs() {
 	];
 
 	return (
-		<Flex mt='4'>
-			<Tabs.Root
-				mt='4'
-				defaultValue={t('about')}
-				width='full'
-				colorPalette='orange'
-				lazyMount
-				unmountOnExit
-				fitted
-			>
-				<Tabs.List mb='4'>
-					{items.map((item, index) => (
-						<Tabs.Trigger key={index} value={item.title} fontSize='md'>
-							{item.title}
-						</Tabs.Trigger>
-					))}
-				</Tabs.List>
+		<Tabs.Root
+			mt='8'
+			defaultValue={t('about')}
+			width='full'
+			colorPalette='orange'
+			lazyMount
+			unmountOnExit
+			fitted
+		>
+			<Tabs.List mb='4'>
 				{items.map((item, index) => (
-					<Tabs.Content
-						key={index}
-						value={item.title}
-						inset='0'
-						_open={{
-							animationName: 'fade-in, scale-in',
-							animationDuration: '300ms',
-						}}
-						_closed={{
-							animationName: 'fade-out, scale-out',
-							animationDuration: '120ms',
-						}}
-					>
-						{item.content}
-					</Tabs.Content>
+					<Tabs.Trigger key={index} value={item.title} fontSize='md'>
+						{item.title}
+					</Tabs.Trigger>
 				))}
-			</Tabs.Root>
-		</Flex>
+			</Tabs.List>
+			{items.map((item, index) => (
+				<Tabs.Content
+					key={index}
+					value={item.title}
+					inset='0'
+					_open={{
+						animationName: 'fade-in, scale-in',
+						animationDuration: '300ms',
+					}}
+					_closed={{
+						animationName: 'fade-out, scale-out',
+						animationDuration: '120ms',
+					}}
+				>
+					{item.content}
+				</Tabs.Content>
+			))}
+		</Tabs.Root>
 	);
 }

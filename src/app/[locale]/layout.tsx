@@ -41,7 +41,6 @@ export default async function Layout({ children, params }: Props) {
 									minHeight='100vh'
 									gap='6'
 									bg='bg.primary'
-									overflow='hidden'
 								>
 									<Header />
 									<Box as='main' maxWidth='1444px' flex='1' mx='auto' width='100%'>

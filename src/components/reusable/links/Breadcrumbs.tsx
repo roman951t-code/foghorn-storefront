@@ -1,5 +1,4 @@
 import { BreadcrumbCurrentLink, BreadcrumbLink, BreadcrumbRoot } from '@/components/ui/breadcrumb';
-import { LuHouse } from 'react-icons/lu';
 import { GiClothes } from 'react-icons/gi';
 import { HiOutlineSlash } from 'react-icons/hi2';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
@@ -27,7 +26,7 @@ export default function Breadcrumbs({ category, subcategory, productId }: Props)
 						_hover={{ cursor: 'pointer' }}
 						_focus={{ outline: 'none' }}
 					>
-						<LuHouse /> {t('catalogShort')}
+						{t('catalogShort')}
 					</BreadcrumbLink>
 				}
 			/>

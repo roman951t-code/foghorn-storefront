@@ -17,7 +17,6 @@ export function LocaleNavLink({ href, children, ...props }: Props) {
 				textDecorationColor='main'
 				_hover={{ color: 'link' }}
 				_focus={{ outline: 'none' }}
-				fontSize='15px'
 				{...props}
 			>
 				{children}
@@ -33,7 +32,6 @@ export function LocaleNavButton({ href, children, ...props }: Props) {
 				bg='bg.button'
 				color='black'
 				variant='solid'
-				width='100%'
 				_hover={{
 					bg: 'bgHover.button',
 				}}

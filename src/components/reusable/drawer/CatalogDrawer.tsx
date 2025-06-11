@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/accordion';
 import { useTranslations } from 'next-intl';
 import { Box, VStack, Flex, Text, Link, Heading } from '@chakra-ui/react';
+import { LocaleNavLink } from '../links/LocaleNavLink';
 
 const categories = [
 	{
@@ -55,34 +56,34 @@ export default function CatalogDrawer() {
 									</Text>
 									<VStack align='start' gap={4}>
 										{subcategory.links.map((link) => (
-											<Link
+											<LocaleNavLink
 												key={link}
+												href='/products/123'
 												fontSize='md'
 												variant='plain'
-												w='100%'
 												textWrap='wrap'
 												wordBreak='break-all'
 												_hover={{ color: 'link' }}
 												_focus={{ outline: 'none' }}
 											>
 												{link}
-											</Link>
+											</LocaleNavLink>
 										))}
-										<Link
+										<LocaleNavLink
+											href='/products/123'
 											fontSize='md'
 											variant='plain'
 											transition='color 0.25s ease-in-out'
 											textWrap='wrap'
 											wordBreak='break-all'
 											color='link'
-											mt={2}
-											mb={4}
+											mt='3'
 											textDecoration='underline'
 											textUnderlineOffset='4px'
 											_focus={{ outline: 'none' }}
 										>
 											{t('seeAll')}
-										</Link>
+										</LocaleNavLink>
 									</VStack>
 								</Box>
 							))}
