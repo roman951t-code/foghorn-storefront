@@ -17,7 +17,8 @@
 		"@formatjs/intl-localematcher": "^0.6.1",
 		"@hookform/resolvers": "^5.0.1",
 		"@next/bundle-analyzer": "^15.3.3",
-		"@prisma/client": "^6.8.2",
+		"@prisma/adapter-pg": "^6.9.0",
+		"@prisma/client": "^6.9.0",
 		"@types/lodash.pick": "^4.4.9",
 		"axios": "^1.9.0",
 		"lodash.pick": "^4.4.0",
@@ -38,12 +39,12 @@
 	},
 	"devDependencies": {
 		"@tanstack/eslint-plugin-query": "^5.78.0",
-		"@types/node": "^22.15.29",
+		"@types/node": "^22.15.31",
 		"@types/react": "^19.1.5",
 		"@types/react-dom": "^19.1.5",
 		"eslint": "^9.27.0",
 		"eslint-config-next": "15.4.0-canary.51",
-		"prisma": "^6.8.2",
+		"prisma": "^6.9.0",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.8.3"
 	}
