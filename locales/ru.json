@@ -55,7 +55,10 @@
 		"backToLogin": "Назад к авторизации",
 		"register": "Зарегистрироваться",
 		"continueWithEmail": "Продолжить с Email",
-		"continueWithPhone": "Продолжить с номером телефона"
+		"continueWithPhone": "Продолжить с номером телефона",
+		"phoneConfirmation": "Подтверждение телефона",
+		"confirmPhone": "Подтвердить телефон",
+		"activationCodeSent": "отправлено SMS с кодом активации. Для завершения регистрации, введите его в поле ниже."
 	},
 	"Main": {
 		"title": "Главная"

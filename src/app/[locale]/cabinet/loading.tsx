@@ -1,4 +1,4 @@
-import LoadingSkeleton from '@/components/reusable/Skeleton';
+import { LoadingSkeleton } from '@/components/reusable/Skeleton';
 import { HStack } from '@chakra-ui/react';
 
 export default function Loading() {

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Flex, HStack } from '@chakra-ui/react';
+import { Flex, HStack, useBreakpointValue } from '@chakra-ui/react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import NextImage from 'next/image';
-import LoadingSkeleton from '@/components/reusable/Skeleton';
+import { LoadingPromoSkeleton } from '@/components/reusable/Skeleton';
 
 import 'swiper/css';
 
@@ -27,12 +27,20 @@ export default function Promo() {
 		setIsClient(true);
 	}, []);
 
+	const skeletonCount =
+		useBreakpointValue({
+			base: 1,
+			sm: 2,
+			md: 1,
+			lg: 2,
+		}) ?? 4;
+
 	if (!isClient) {
 		return (
-			<HStack gap='4' px='4' justifyContent='space-between' overflow='hidden'>
-				<LoadingSkeleton />
-				<LoadingSkeleton />
-				<LoadingSkeleton />
+			<HStack gap='4' mt='8' overflowX='auto' overflowY='hidden' w='100%'>
+				{Array.from({ length: skeletonCount }).map((_, i) => (
+					<LoadingPromoSkeleton key={i} />
+				))}
 			</HStack>
 		);
 	}

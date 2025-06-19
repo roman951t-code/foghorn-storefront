@@ -34,7 +34,11 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 			{isEmailAuth && (
 				<EmailAuth
 					onSubmitAction={({ email, password }) =>
-						signIn('credentials', { email, password, redirect: false })
+						signIn('email-credentials', {
+							email,
+							password,
+							redirect: false,
+						})
 					}
 					i18nData={i18nData}
 					disabled={!termsAccepted}

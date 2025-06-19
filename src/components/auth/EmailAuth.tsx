@@ -33,8 +33,26 @@ export default function EmailAuth({
 
 	const [isRestorePassOpen, setRestorePassOpen] = useState(false);
 
+	const handleSignup = async (formData: FormValues) => {
+		onSubmitAction(formData);
+
+		const { email, password } = formData;
+		const response = await fetch('/api/auth/signup', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ email, password }),
+		});
+
+		if (response.ok) {
+			console.log('Email confirmation sent successfully.');
+		} else {
+			console.error('Failed to send email confirmation.');
+		}
+	};
 	return (
-		<form onSubmit={handleSubmit(onSubmitAction)}>
+		<form onSubmit={handleSubmit(handleSignup)}>
 			<Stack gap='6' align='flex-start'>
 				<Field label={i18nData.email} invalid={!!errors.email} errorText={errors.email?.message}>
 					<Input
@@ -66,20 +84,21 @@ export default function EmailAuth({
 								fontSize='md'
 								{...register('password', {
 									required: i18nData.passRequired,
-									minLength: {
-										value: 8,
-										message: i18nData.wrongPassLength,
-									},
-									pattern: {
-										value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$/,
-										message: i18nData.wrongPassFormat,
-									},
+									// minLength: {
+									// 	value: 8,
+									// 	message: i18nData.wrongPassLength,
+									// },
+									// pattern: {
+									// 	value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+									// 	message: i18nData.wrongPassFormat,
+									// },
 								})}
 							/>
 							{isSignup && <PasswordStrengthMeter i18nData={i18nData} mt='1' w='100%' value={3} />}
 						</Field>
 
 						<Button
+							id='emailSubmitButton'
 							mt='2'
 							w='100%'
 							loading={isSubmitting}

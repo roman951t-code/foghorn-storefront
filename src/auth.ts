@@ -21,15 +21,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 			},
 			async authorize(credentials) {
 				const { email, password } = credentials ?? {};
+				const user = await prisma.user.findUnique({ where: { email } });
 
-				if (email === 'user@example.com' && password === 'password') {
-					return {
-						id: '1',
-						name: 'Demo Email User',
-						email,
-					};
+				if (!user) return null;
+
+				// Check email verification
+				if (!user.emailVerified) {
+					throw new Error('Please verify your email before logging in.');
 				}
-				return null;
+
+				// Check password (add bcrypt check if hashed)
+				if (user.password !== password) {
+					return null;
+				}
+
+				return {
+					id: user.id,
+					name: user.name,
+					email: user.email,
+				};
 			},
 		}),
 

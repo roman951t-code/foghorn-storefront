@@ -1,8 +1,9 @@
-import { Button, Input, PinInput } from '@chakra-ui/react';
+import { Button, Fieldset, Input, PinInput, Stack } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
 import { withMask } from 'use-mask-input';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
+import { useState } from 'react';
 
 interface FormValues {
 	email: string;
@@ -30,8 +31,54 @@ export default function PhoneAuth({
 		mode: 'onSubmit',
 	});
 
-	return (
-		<form onSubmit={handleSubmit(onSubmitAction)}>
+	const [isSubmitted, setSubmitted] = useState(false);
+
+	const handlePhoneSubmit = (formData: FormValues) => {
+		onSubmitAction(formData);
+		setSubmitted(true);
+	};
+
+	return isSubmitted ? (
+		<Fieldset.Root size='lg' maxW='md'>
+			<Stack>
+				<Fieldset.Legend fontSize='md'>{i18nData.phoneConfirmation}</Fieldset.Legend>
+				<Fieldset.HelperText fontSize='15px'>
+					На номер 0992304351 {i18nData.activationCodeSent}
+				</Fieldset.HelperText>
+			</Stack>
+
+			<Fieldset.Content>
+				<PinInput.Root otp my='2' justifyContent='center'>
+					<PinInput.HiddenInput />
+					<PinInput.Control w='100%' justifyContent='center'>
+						{Array.from({ length: 6 }).map((_, i) => (
+							<PinInput.Input
+								key={i}
+								_focus={{
+									outline: 'none',
+								}}
+								index={i}
+							/>
+						))}
+					</PinInput.Control>
+				</PinInput.Root>
+			</Fieldset.Content>
+
+			<Button
+				mt='8'
+				w='100%'
+				loading={isSubmitting}
+				disabled={disabled && isSignup}
+				type='submit'
+				bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+				color='black'
+				variant='solid'
+			>
+				{i18nData.confirmPhone}
+			</Button>
+		</Fieldset.Root>
+	) : (
+		<form onSubmit={handleSubmit(handlePhoneSubmit)}>
 			<Field
 				label={i18nData.phoneNumber}
 				invalid={!!errors.email}
@@ -46,47 +93,7 @@ export default function PhoneAuth({
 					fontSize='md'
 				/>
 			</Field>
-			<PinInput.Root otp mt='4' justifyContent='center'>
-				<PinInput.HiddenInput />
-				<PinInput.Control w='100%' justifyContent='center'>
-					<PinInput.Input
-						_focus={{
-							outline: 'none',
-						}}
-						index={0}
-					/>
-					<PinInput.Input
-						_focus={{
-							outline: 'none',
-						}}
-						index={1}
-					/>
-					<PinInput.Input
-						_focus={{
-							outline: 'none',
-						}}
-						index={2}
-					/>
-					<PinInput.Input
-						_focus={{
-							outline: 'none',
-						}}
-						index={3}
-					/>
-					<PinInput.Input
-						_focus={{
-							outline: 'none',
-						}}
-						index={4}
-					/>
-					<PinInput.Input
-						_focus={{
-							outline: 'none',
-						}}
-						index={5}
-					/>
-				</PinInput.Control>
-			</PinInput.Root>
+
 			<Button
 				mt='8'
 				w='100%'

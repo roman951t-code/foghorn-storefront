@@ -1,27 +1,44 @@
-import { Resend } from 'resend';
-import { EmailTemplate } from '@/components/auth/EmailTemplate';
-import { prisma } from '@/lib/prisma';
+export const runtime = 'nodejs';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { sendVerificationEmail } from '@/lib/emailVerification';
+import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
-	const body = await req.json();
-	const { email, password } = body;
-
 	try {
-		const { data, error } = await resend.emails.send({
-			from: 'Acme <onboarding@resend.dev>',
-			to: [email],
-			subject: 'Hello world',
-			react: await EmailTemplate({ firstName: 'John' }),
-		});
+		const body = await req.json();
+		const { email, password } = body;
 
-		if (error) {
-			return Response.json({ error }, { status: 500 });
+		if (!email || !password) {
+			return NextResponse.json({ error: 'Missing email or password' }, { status: 400 });
 		}
 
-		return Response.json(data);
+		const existingUser = await prisma.user.findUnique({ where: { email } });
+		if (existingUser) {
+			return NextResponse.json({ error: 'User already exists' }, { status: 409 });
+		}
+
+		// Hash password
+		const hashedPassword = await bcrypt.hash(password, 10);
+
+		// Create user with emailVerified: null
+		const user = await prisma.user.create({
+			data: {
+				email,
+				password: hashedPassword,
+				emailVerified: null,
+			},
+		});
+
+		// Send verification email
+		await sendVerificationEmail(email, user.id);
+
+		return NextResponse.json({
+			message: 'User created. Please check your email to verify your account.',
+		});
 	} catch (error) {
-		return Response.json({ error }, { status: 500 });
+		console.error('Registration error:', error);
+		return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
 	}
 }

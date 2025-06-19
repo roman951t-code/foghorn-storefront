@@ -45,6 +45,9 @@ const localizedData = [
 	'register',
 	'continueWithEmail',
 	'continueWithPhone',
+	'phoneConfirmation',
+	'confirmPhone',
+	'activationCodeSent',
 ];
 
 export default function UserActions() {

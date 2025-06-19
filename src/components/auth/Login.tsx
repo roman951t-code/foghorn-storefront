@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Stack, Icon } from '@chakra-ui/react';
+import { Button, Stack } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import EmailAuth from './EmailAuth';
 import { signIn, useSession } from 'next-auth/react';
@@ -27,7 +27,7 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 			{isEmailAuth && (
 				<EmailAuth
 					onSubmitAction={({ email, password }) =>
-						signIn('credentials', { email, password, redirect: false })
+						signIn('email-credentials', { email, password, redirect: false })
 					}
 					i18nData={i18nData}
 				/>

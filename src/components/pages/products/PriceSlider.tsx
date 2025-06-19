@@ -11,10 +11,10 @@ export default function PriceSlider({ title }: Props) {
 	return (
 		<>
 			<Text>{title} ₴</Text>
-			<Flex justifyContent='space-between' gap='3'>
-				<Flex gap='3'>
-					<Input minW='66px' _focus={{ outline: 'none' }} />
-					<Input minW='66px' _focus={{ outline: 'none' }} />
+			<Flex justifyContent='space-between' alignItems='center' gap='3'>
+				<Flex gap='2'>
+					<Input fontSize='md' h='38px' minW='66px' _focus={{ outline: 'none' }} />
+					<Input fontSize='md' h='38px' minW='66px' _focus={{ outline: 'none' }} />
 				</Flex>
 
 				<IconButton
@@ -22,6 +22,7 @@ export default function PriceSlider({ title }: Props) {
 					rounded='md'
 					size='md'
 					color='main.darkOnly'
+					h='40px'
 					width='44px'
 					alignSelf='flex-end'
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}

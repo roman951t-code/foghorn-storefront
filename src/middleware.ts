@@ -7,4 +7,4 @@ export const config = {
 	matcher: ['/', '/(ua|ru)/:path*'],
 };
 
-export { auth as middleware } from './auth';
+// export { auth as middleware } from './auth';

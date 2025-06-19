@@ -55,7 +55,10 @@
 		"backToLogin": "Назад до авторизації",
 		"register": "Зареєструватись",
 		"continueWithEmail": "Продовжити з Email",
-		"continueWithPhone": "Продовжити з номером телефону"
+		"continueWithPhone": "Продовжити з номером телефону",
+		"phoneConfirmation": "Підтвердження телефону",
+		"confirmPhone": "Підтвердити телефон",
+		"activationCodeSent": "надіслано SMS із кодом активації. Для завершення реєстрації, будь ласка, введіть його в поле нижче."
 	},
 	"Main": {
 		"title": "Головна"
