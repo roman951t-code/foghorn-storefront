@@ -3,7 +3,6 @@ import {
 	IconButton,
 	Stack,
 	Flex,
-	Button,
 	Icon,
 	Stat,
 	Float,
@@ -18,6 +17,7 @@ import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import Image from 'next/image';
 import { MdOutlineShoppingCartCheckout } from 'react-icons/md';
+import { LocaleNavButton } from '../reusable/links/LocaleNavLink';
 
 const emptyCart = '/assets/images/emptyCart.png';
 
@@ -85,14 +85,10 @@ export default function Cart() {
 									</Highlight>
 								</Text>
 							</VStack>
-							<Button
-								bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-								color='black'
-								variant='solid'
-							>
+							<LocaleNavButton href='/checkout'>
 								<MdOutlineShoppingCartCheckout />
 								{headT('order')}
-							</Button>
+							</LocaleNavButton>
 						</Flex>
 						<IconButton
 							aria-label='Trash'

@@ -1,4 +1,5 @@
 import { sendVerificationEmail } from '@/lib/emailVerification';
+import { prisma } from '@/lib/prisma';
 
 const user = await prisma.user.create({
 	data: {

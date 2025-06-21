@@ -4,6 +4,7 @@ import { PasswordInput, PasswordStrengthMeter } from '@/components/ui/password-i
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import type { I18nData } from '@/types/i18n';
+import ResetPass from './ResetPass';
 
 interface FormValues {
 	email: string;
@@ -36,21 +37,26 @@ export default function EmailAuth({
 	const handleSignup = async (formData: FormValues) => {
 		onSubmitAction(formData);
 
-		const { email, password } = formData;
-		const response = await fetch('/api/auth/signup', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ email, password }),
-		});
+		// const { email, password } = formData;
+		// const response = await fetch('/api/auth/signup', {
+		// 	method: 'POST',
+		// 	headers: {
+		// 		'Content-Type': 'application/json',
+		// 	},
+		// 	body: JSON.stringify({ email, password }),
+		// });
 
-		if (response.ok) {
-			console.log('Email confirmation sent successfully.');
-		} else {
-			console.error('Failed to send email confirmation.');
-		}
+		// if (response.ok) {
+		// 	console.log('Email confirmation sent successfully.');
+		// } else {
+		// 	console.error('Failed to send email confirmation.');
+		// }
 	};
+
+	if (isRestorePassOpen) {
+		return <ResetPass i18nData={i18nData} onCloseAction={() => setRestorePassOpen(false)} />;
+	}
+
 	return (
 		<form onSubmit={handleSubmit(handleSignup)}>
 			<Stack gap='6' align='flex-start'>
@@ -126,35 +132,6 @@ export default function EmailAuth({
 					>
 						{i18nData.restorePass}
 					</Button>
-				)}
-
-				{isRestorePassOpen && (
-					<>
-						<Button
-							w='100%'
-							disabled={isSubmitting}
-							type='submit'
-							mt='-2'
-							bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-							color='black'
-							variant='solid'
-							onClick={() => setRestorePassOpen(false)}
-						>
-							{i18nData.getTemporaryPass}
-						</Button>
-						<Button
-							w='100%'
-							mt='-2'
-							colorPalette='gray'
-							color='main'
-							variant='outline'
-							border='1px solid'
-							borderColor='border'
-							onClick={() => setRestorePassOpen(false)}
-						>
-							{i18nData.rememberPass}
-						</Button>
-					</>
 				)}
 			</Stack>
 		</form>
