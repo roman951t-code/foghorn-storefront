@@ -31,20 +31,7 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 					isSignup
 				/>
 			)}
-			{isEmailAuth && (
-				<EmailAuth
-					onSubmitAction={({ email, password }) =>
-						signIn('email-credentials', {
-							email,
-							password,
-							redirect: false,
-						})
-					}
-					i18nData={i18nData}
-					disabled={!termsAccepted}
-					isSignup
-				/>
-			)}
+			{isEmailAuth && <EmailAuth i18nData={i18nData} disabled={!termsAccepted} isSignup />}
 
 			<Stack gap={4} mt={12}>
 				<Button

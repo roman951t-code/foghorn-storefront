@@ -27,6 +27,8 @@
 			"@/i18n/*": ["i18n/*"],
 			"@/data/*": ["data/*"],
 			"@/types/*": ["types/*"],
+			"@/actions/*": ["actions/*"],
+			"@/schemas/*": ["schemas/*"],
 			"@/utils/*": ["utils/*"],
 			"@/lib/*": ["lib/*"]
 		}

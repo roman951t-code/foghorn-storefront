@@ -1,43 +1,46 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { Button, Fieldset, Input, PinInput, Highlight } from '@chakra-ui/react';
+
+import React, { useEffect, useMemo, useState } from 'react';
+import { Button, Fieldset, Input, PinInput, Highlight, Text } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
 import { useHookFormMask } from 'use-mask-input';
 import { useForm } from 'react-hook-form';
+import { createPhoneSchema } from '@/schemas/phoneSchema';
 import type { I18nData } from '@/types/i18n';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useActionState } from 'react';
+import { registerPhoneAction } from '@/actions/registerPhoneAction';
 
 interface FormValues {
 	phone: string;
 }
 
-interface EmailAuthProps {
-	onSubmitAction: (data: FormValues) => void;
+interface PhoneAuthProps {
 	i18nData: I18nData;
 	disabled: boolean;
 	isSignup?: boolean;
 }
 
-export default function PhoneAuth({
-	onSubmitAction,
-	i18nData,
-	disabled,
-	isSignup = false,
-}: EmailAuthProps) {
+export default function PhoneAuth({ i18nData, disabled, isSignup = false }: PhoneAuthProps) {
+	const schema = useMemo(() => createPhoneSchema(i18nData), [i18nData]);
+
+	const [formError, action] = useActionState(registerPhoneAction, undefined);
+
 	const {
 		register,
 		handleSubmit,
 		formState: { errors, isSubmitting },
-	} = useForm<FormValues>({ mode: 'onSubmit' });
-	const registerWithMask = useHookFormMask(register);
+	} = useForm<FormValues>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 
+	const registerWithMask = useHookFormMask(register);
 	const [isSubmitted, setSubmitted] = useState(false);
 	const [timer, setTimer] = useState(0);
 
-	const handlePhoneSubmit = (formData: FormValues) => {
-		onSubmitAction(formData);
-		setSubmitted(true);
-		setTimer(120);
-	};
+	// const handlePhoneSubmit = (formData: FormValues) => {
+	// 	action(formData);
+	// 	setSubmitted(true);
+	// 	setTimer(120);
+	// };
 
 	useEffect(() => {
 		if (!isSubmitted || timer <= 0) return;
@@ -70,11 +73,11 @@ export default function PhoneAuth({
 			<Fieldset.Root size='lg'>
 				<Fieldset.Legend fontSize='md'>{i18nData.phoneConfirmation}</Fieldset.Legend>
 				<Fieldset.HelperText fontSize='15px'>
-					На номер
+					{i18nData.activationCodeSentPrefix}
 					<Highlight query='0992304351' styles={{ fontWeight: 'semibold', mx: 1.5 }}>
 						0992304351
 					</Highlight>
-					{i18nData.activationCodeSent}
+					{i18nData.activationCodeSentSuffix}
 				</Fieldset.HelperText>
 
 				<Fieldset.Content>
@@ -119,25 +122,31 @@ export default function PhoneAuth({
 						borderColor='border'
 						onClick={() => {
 							setTimer(120);
-							onSubmitAction({ phone: '' });
+							action({ phone: '' });
 						}}
 					>
 						{i18nData.resendCode}
 					</Button>
+				)}
+
+				{formError?.message && (
+					<Text fontSize='sm' color='red.500'>
+						{formError.message}
+					</Text>
 				)}
 			</Fieldset.Root>
 		);
 	}
 
 	return (
-		<form onSubmit={handleSubmit(handlePhoneSubmit)}>
+		<form action={action}>
 			<Field
 				label={i18nData.phoneNumber}
 				invalid={!!errors.phone}
 				errorText={errors.phone?.message}
 			>
 				<Input
-					{...registerWithMask('phone', ['(+38 0) 000000000', '(+38 0) 000000000'], {
+					{...registerWithMask('phone', ['(+38 0) 000000000'], {
 						required: i18nData.phoneRequired,
 					})}
 					_focus={{ outline: 'none' }}
@@ -158,6 +167,12 @@ export default function PhoneAuth({
 			>
 				{i18nData.continue}
 			</Button>
+
+			{formError?.message && (
+				<Text fontSize='sm' color='red.500'>
+					{formError.message}
+				</Text>
+			)}
 		</form>
 	);
 }

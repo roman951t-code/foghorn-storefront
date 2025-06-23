@@ -13,6 +13,7 @@ model User {
   name          String?
   email         String          @unique
   emailVerified DateTime?
+  hashedPassword String
   image         String?
   phone         String?         @unique
   accounts      Account[]

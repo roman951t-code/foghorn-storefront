@@ -11,6 +11,7 @@ async function main() {
 		create: {
 			email: 'john.doe@example.com',
 			name: 'John Doe',
+			hashedPassword: '123',
 			image: 'https://randomuser.me/api/portraits/men/1.jpg',
 			phone: '+1234567890',
 			emailVerified: new Date(),
