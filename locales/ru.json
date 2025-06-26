@@ -37,13 +37,15 @@
 		"phoneRequired": "Номер телефона обязателен",
 		"invalidPhone": "Неверный формат номера телефона",
 		"userExists": "Такой пользователь уже есть",
-		"useRegisterFail": "Не удалось зарегистрировать пользователя"
+		"useRegisterFail": "Не удалось зарегистрировать пользователя",
+		"passwordsNotMatch": "Пароли не совпадают"
 	},
 	"Auth": {
 		"authorize": "Авторизоваться",
 		"name": "Имя",
 		"email": "Электронный адрес",
 		"password": "Пароль",
+		"confirmPassword": "Пароль ещё раз",
 		"continue": "Продолжить",
 		"continueWith": "Продолжить с",
 		"logOut": "Выйти",

@@ -37,29 +37,6 @@ async function main() {
 		},
 	});
 
-	// === 3. Create Session ===
-	await prisma.session.create({
-		data: {
-			userId: user.id,
-			sessionToken: 'dev-session-token',
-			expires: add(new Date(), { days: 7 }), // Expires in 7 days
-		},
-	});
-
-	// === 4. Optional: WebAuthn Authenticator ===
-	await prisma.authenticator.create({
-		data: {
-			userId: user.id,
-			providerAccountId: 'google-oauth2|1234567890',
-			credentialID: 'credential-id-123',
-			credentialPublicKey: 'public-key-abc',
-			counter: 1,
-			credentialDeviceType: 'singleDevice',
-			credentialBackedUp: false,
-			transports: 'usb,nfc',
-		},
-	});
-
 	// === 5. Product Categories ===
 	const smartphoneCategory = await prisma.productCategory.upsert({
 		where: { slug: 'smartphones' },
@@ -130,15 +107,6 @@ async function main() {
 					},
 				],
 			},
-		},
-	});
-
-	// === 8. VerificationToken (simulated email login) ===
-	await prisma.verificationToken.create({
-		data: {
-			identifier: user.email,
-			token: 'verification-token-123',
-			expires: add(new Date(), { hours: 1 }),
 		},
 	});
 

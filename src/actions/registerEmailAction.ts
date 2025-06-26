@@ -2,28 +2,19 @@
 
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { getEmailSchema } from '@/schemas/emailSchema';
-import { signIn } from 'next-auth/react';
+import { getEmailSignUpSchema } from '@/schemas/emailSignUpSchema';
 import { getTranslations } from 'next-intl/server';
+import { signIn } from '@/lib/auth';
 
 export async function registerEmailAction(
 	prevState: unknown,
-	formData: FormData
+	formData: unknown
 ): Promise<{ message?: string } | undefined> {
 	const t = await getTranslations('Validation');
 
-	// check if formData is a FormData type
+	const authSchema = await getEmailSignUpSchema();
+	const validatedFormData = authSchema.safeParse(formData);
 
-	if (!(formData instanceof FormData)) {
-		return { message: t('invalidFormData') };
-	}
-
-	// convert formData to a plain object
-	const formDataEntries = Object.fromEntries(formData.entries());
-
-	// validation
-	const authSchema = await getEmailSchema();
-	const validatedFormData = authSchema.safeParse(formDataEntries);
 	if (!validatedFormData.success) {
 		return { message: t('invalidFormData') };
 	}
@@ -37,7 +28,7 @@ export async function registerEmailAction(
 			return { message: t('userExists') };
 		}
 
-		await prisma.user.create({
+		const user = await prisma.user.create({
 			data: {
 				email,
 				hashedPassword,
@@ -45,15 +36,24 @@ export async function registerEmailAction(
 			},
 		});
 
-		// Skip email verification in dev
-		// await sendVerificationEmail(email, user.id);
-	} catch {
+		if (!user) return { message: t('useRegisterFail') };
+
+		await prisma.account.create({
+			data: {
+				userId: user.id,
+				type: 'credentials',
+				provider: 'credentials',
+				providerAccountId: email,
+			},
+		});
+	} catch (e) {
 		return { message: t('useRegisterFail') };
 	}
+	const callbackUrl = '/ua';
 
-	signIn('email-credentials', {
+	await signIn('email-credentials', {
 		email,
 		password,
-		redirect: false,
+		callbackUrl,
 	});
 }

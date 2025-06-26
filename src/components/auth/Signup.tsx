@@ -32,7 +32,37 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 				/>
 			)}
 			{isEmailAuth && <EmailAuth i18nData={i18nData} disabled={!termsAccepted} isSignup />}
-
+			<CheckboxCard.Root
+				onChange={() => setTermsAccepted(!termsAccepted)}
+				css={{
+					'& svg[data-state="unchecked"]': {
+						color: 'var(--chakra-colors-fg) !important',
+					},
+				}}
+				mt='6'
+				colorPalette='gray'
+				_hover={{ cursor: 'pointer' }}
+			>
+				<CheckboxCard.HiddenInput />
+				<CheckboxCard.Control>
+					<CheckboxCard.Label>
+						<Link href='/terms' target='blank'>
+							<ChakraLink
+								as='span'
+								textDecoration='underline'
+								textUnderlineOffset='3px'
+								transition='all .15s ease-in-out'
+								textDecorationColor='main'
+								_hover={{ color: 'link' }}
+								_focus={{ outline: 'none' }}
+							>
+								{i18nData.acceptTerms}
+							</ChakraLink>
+						</Link>
+					</CheckboxCard.Label>
+					<CheckboxCard.Indicator />
+				</CheckboxCard.Control>
+			</CheckboxCard.Root>
 			<Stack gap={4} mt={12}>
 				<Button
 					disabled={!termsAccepted}
@@ -70,37 +100,6 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 				)}
 			</Stack>
 
-			<CheckboxCard.Root
-				onChange={() => setTermsAccepted(!termsAccepted)}
-				css={{
-					'& svg[data-state="unchecked"]': {
-						color: 'var(--chakra-colors-fg) !important',
-					},
-				}}
-				mt='8'
-				colorPalette='gray'
-				_hover={{ cursor: 'pointer' }}
-			>
-				<CheckboxCard.HiddenInput />
-				<CheckboxCard.Control>
-					<CheckboxCard.Label>
-						<Link href='/terms' target='blank'>
-							<ChakraLink
-								as='span'
-								textDecoration='underline'
-								textUnderlineOffset='3px'
-								transition='all .15s ease-in-out'
-								textDecorationColor='main'
-								_hover={{ color: 'link' }}
-								_focus={{ outline: 'none' }}
-							>
-								{i18nData.acceptTerms}
-							</ChakraLink>
-						</Link>
-					</CheckboxCard.Label>
-					<CheckboxCard.Indicator />
-				</CheckboxCard.Control>
-			</CheckboxCard.Root>
 			<Button
 				mt={12}
 				w='100%'

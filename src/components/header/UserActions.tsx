@@ -3,6 +3,7 @@ import { IconButton, Float, Circle } from '@chakra-ui/react';
 import { FiUser } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { extractI18nData } from '@/utils/i18nUtils';
+import { authLocData, validLocData } from '@/data/localized';
 
 import Auth from '../auth/Auth';
 import Cart from './Cart';
@@ -21,37 +22,17 @@ const AuthBtn = () => (
 	</IconButton>
 );
 
-const localizedData = [
-	'name',
-	'phone',
-	'lastname',
-	'authorize',
-	'continueWith',
-	'logOut',
-	'email',
-	'password',
-	'continue',
-	'rememberPass',
-	'restorePass',
-	'getTemporaryPass',
-	'acceptTerms',
-	'signUp',
-	'phoneNumber',
-	'backToLogin',
-	'register',
-	'continueWithEmail',
-	'continueWithPhone',
-	'resendAfter',
-	'resendCode',
-	'phoneConfirmation',
-	'confirmPhone',
-	'activationCodeSent',
-];
-
 export default function UserActions() {
-	const t = useTranslations('Auth');
+	const authT = useTranslations('Auth');
+	const validT = useTranslations('Validation');
 
-	const i18nData = extractI18nData(t, localizedData);
+	const authI18nData = extractI18nData(authT, authLocData);
+	const validI18nData = extractI18nData(validT, validLocData);
+
+	const i18nData = {
+		...authI18nData,
+		...validI18nData,
+	};
 
 	return (
 		<>

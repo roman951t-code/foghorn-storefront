@@ -3,7 +3,7 @@
 import { getPhoneSchema } from '@/schemas/phoneSchema';
 import { getTranslations } from 'next-intl/server';
 
-export async function verifyPhoneAction(
+export async function registerPhoneAction(
 	_prevState: unknown,
 	formData: FormData
 ): Promise<{ message?: string } | undefined> {

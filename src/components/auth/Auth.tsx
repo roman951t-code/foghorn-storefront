@@ -13,9 +13,9 @@ interface Props {
 }
 
 export default function Auth({ i18nData, trigger }: Props) {
-	const { data: session } = useSession();
+	const { data: session, status } = useSession();
 	const [showSignup, setShowSignup] = useState(false);
-
+	console.log('status', status);
 	const toggleSignup = () => {
 		setShowSignup((prevState) => !prevState);
 	};

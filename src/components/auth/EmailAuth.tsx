@@ -1,13 +1,14 @@
 'use client';
 
-import { useActionState } from 'react';
-import { Button, Input, Stack, Text, Field } from '@chakra-ui/react';
+import { startTransition, useActionState } from 'react';
+import { Button, Input, Stack, Field, Fieldset } from '@chakra-ui/react';
 import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerEmailAction } from '@/actions/registerEmailAction';
-import { createEmailSchema } from '@/schemas/emailSchema';
+import { createEmailSignUpSchema } from '@/schemas/emailSignUpSchema';
+import { createEmailSignInSchema } from '@/schemas/emailSignInSchema';
 import type { I18nData } from '@/types/i18n';
 import ResetPass from './ResetPass';
 
@@ -17,15 +18,25 @@ interface EmailAuthProps {
 	isSignup?: boolean;
 }
 
+type FormValues = {
+	email: string;
+	password: string;
+	confirmPassword?: string;
+};
+
 export default function EmailAuth({ i18nData, disabled, isSignup = false }: EmailAuthProps) {
-	const schema = useMemo(() => createEmailSchema(i18nData), [i18nData]);
+	const schema = useMemo(
+		() => (isSignup ? createEmailSignUpSchema(i18nData) : createEmailSignInSchema(i18nData)),
+		[i18nData]
+	);
 
-	const [formError, formAction] = useActionState(registerEmailAction, undefined);
-
+	const [formError, formAction, isPending] = useActionState(registerEmailAction, undefined);
 	const {
 		register,
-		formState: { errors, isSubmitting },
-	} = useForm({
+		trigger,
+		getValues,
+		formState: { errors },
+	} = useForm<FormValues>({
 		mode: 'onSubmit',
 		resolver: zodResolver(schema),
 	});
@@ -37,40 +48,65 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 	}
 
 	return (
-		<form action={formAction}>
-			<Stack gap='6' align='flex-start'>
-				<Field.Root required invalid={!!errors.email}>
-					<Field.Label>
-						<Field.RequiredIndicator />
-					</Field.Label>
-					<Input fontSize='md' {...register('email')} name='email' />
-					<Field.ErrorText>{errors.email?.message}</Field.ErrorText>
-				</Field.Root>
+		<form
+			action={async () => {
+				const result = await trigger();
+				if (!result) return;
 
-				<Field.Root required invalid={!!errors.password}>
-					<Field.Label>
-						<Field.RequiredIndicator />
-					</Field.Label>
-					<PasswordInput fontSize='md' {...register('password')} name='password' />
-					<Field.ErrorText>{errors.password?.message}</Field.ErrorText>
-				</Field.Root>
+				const formData = getValues();
+
+				startTransition(() => {
+					formAction(formData);
+				});
+			}}
+		>
+			<Stack gap='6' align='flex-start'>
+				<Fieldset.Root size='lg' invalid>
+					<Fieldset.Content>
+						<Field.Root required invalid={!!errors.email}>
+							<Field.Label>
+								{i18nData.email}
+								<Field.RequiredIndicator />
+							</Field.Label>
+							<Input fontSize='md' {...register('email')} />
+							<Field.ErrorText>{errors.email?.message}</Field.ErrorText>
+						</Field.Root>
+
+						<Field.Root required invalid={!!errors.password}>
+							<Field.Label>
+								{i18nData.password}
+								<Field.RequiredIndicator />
+							</Field.Label>
+							<PasswordInput fontSize='md' {...register('password')} />
+							<Field.ErrorText>{errors.password?.message}</Field.ErrorText>
+						</Field.Root>
+
+						{isSignup && (
+							<Field.Root required={isSignup} invalid={!!errors.confirmPassword}>
+								<Field.Label>
+									{i18nData.confirmPassword}
+									<Field.RequiredIndicator />
+								</Field.Label>
+								<PasswordInput fontSize='md' {...register('confirmPassword')} />
+								<Field.ErrorText>
+									<Field.ErrorText>{errors.confirmPassword?.message}</Field.ErrorText>
+								</Field.ErrorText>
+							</Field.Root>
+						)}
+					</Fieldset.Content>
+					<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
+				</Fieldset.Root>
 
 				<Button
-					id='emailSubmitButton'
-					mt='2'
 					w='100%'
 					type='submit'
-					loading={isSubmitting}
+					loading={isPending}
 					disabled={disabled && isSignup}
+					color='black'
+					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 				>
 					{i18nData.continue}
 				</Button>
-
-				{formError?.message && (
-					<Text fontSize='sm' color='red.500'>
-						{formError.message}
-					</Text>
-				)}
 
 				{!isSignup && (
 					<Button

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { getTranslations } from 'next-intl/server';
 import type { I18nData } from '@/types/i18n';
 
-export const emailSchemaShape = (t: {
+export const emailSignInSchemaShape = (t: {
 	emailRequired: string;
 	emailMaxLength: string;
 	wrongEmail: string;
@@ -30,13 +30,13 @@ export const emailSchemaShape = (t: {
 			.regex(/_/, { message: t.passwordUnderscore }),
 	});
 
-export const createEmailSchema = (t: I18nData) =>
-	emailSchemaShape(t as Parameters<typeof emailSchemaShape>[0]);
+export const createEmailSignInSchema = (t: I18nData) =>
+	emailSignInSchemaShape(t as Parameters<typeof emailSignInSchemaShape>[0]);
 
 export async function getEmailSchema() {
 	const t = await getTranslations('Validation');
 
-	return emailSchemaShape({
+	return emailSignInSchemaShape({
 		emailRequired: t('emailRequired'),
 		emailMaxLength: t('emailMaxLength'),
 		wrongEmail: t('wrongEmail'),

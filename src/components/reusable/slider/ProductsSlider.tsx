@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-import { HStack, useBreakpointValue } from '@chakra-ui/react';
+import { HStack } from '@chakra-ui/react';
 import { LoadingSkeleton } from '../Skeleton';
 import ProductCard from '../cards/ProductCard';
 import 'swiper/css';
@@ -19,15 +19,6 @@ const breakpoints = {
 
 export default function ProductsSlider() {
 	const [isClient, setIsClient] = useState(false);
-	const skeletonCount =
-		useBreakpointValue({
-			base: 1,
-			sm: 2,
-			md: 3,
-			lg: 4,
-			xl: 5,
-			'2xl': 6,
-		}) ?? 4;
 
 	useEffect(() => {
 		setIsClient(true);
@@ -36,7 +27,7 @@ export default function ProductsSlider() {
 	if (!isClient) {
 		return (
 			<HStack gap='4' mt='8' overflowX='auto'>
-				{Array.from({ length: skeletonCount }).map((_, i) => (
+				{Array.from({ length: 2 }).map((_, i) => (
 					<LoadingSkeleton key={i} />
 				))}
 			</HStack>

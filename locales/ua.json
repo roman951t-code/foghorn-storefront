@@ -39,12 +39,14 @@
 		"invalidFormData": "Недійсні дані форми.",
 		"smsSendFailed": "Не вдалося надіслати код підтвердження.",
 		"userExists": "Такий користувач вже є",
-		"useRegisterFail": "Не вдалося зареєструвати користувача"
+		"useRegisterFail": "Не вдалося зареєструвати користувача",
+		"passwordsNotMatch": "Паролі не збігаються"
 	},
 	"Auth": {
 		"email": "Електронна адреса",
 		"name": "Ім'я",
 		"password": "Пароль",
+		"confirmPassword": "Пароль ще раз",
 		"continue": "Продовжити",
 		"continueWith": "Продовжити з",
 		"authorize": "Авторизуватись",
