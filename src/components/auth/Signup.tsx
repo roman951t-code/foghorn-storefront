@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Stack, Icon, CheckboxCard, Link as ChakraLink } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import EmailAuth from './EmailAuth';
-import { signIn } from 'next-auth/react';
+// import { signIn } from 'next-auth/react';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdArrowBack, IoMdPhonePortrait } from 'react-icons/io';

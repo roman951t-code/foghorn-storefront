@@ -8,7 +8,7 @@ interface Props {
 	i18nData: I18nData;
 }
 
-export default function PhoneConfirmation({ i18nData }: Props) {
+export default function EmailConfirmation({ i18nData }: Props) {
 	const [timer, setTimer] = useState(0);
 
 	useEffect(() => {
@@ -39,13 +39,13 @@ export default function PhoneConfirmation({ i18nData }: Props) {
 
 	return (
 		<Fieldset.Root size='lg'>
-			<Fieldset.Legend fontSize='17px'>{i18nData.phoneConfirmation}</Fieldset.Legend>
+			<Fieldset.Legend fontSize='17px'>{i18nData.emailConfirmation}</Fieldset.Legend>
 			<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mt='4'>
-				На номер
-				<Highlight query='+380-99-230-4351' styles={{ fontWeight: 'semibold', mx: 1.5 }}>
-					+380-99-230-4351
+				На пошту
+				<Highlight query='roman951t@gmail.com' styles={{ fontWeight: 'semibold', mx: 1.5 }}>
+					roman951t@gmail.com
 				</Highlight>
-				<Text color='fg.muted'>{i18nData.activationCodeSent}</Text>
+				<Text color='fg.muted'>{i18nData.activationEmailCodeSent}</Text>
 				{i18nData.activationCodeSentSuffix}
 			</Fieldset.HelperText>
 
@@ -68,7 +68,7 @@ export default function PhoneConfirmation({ i18nData }: Props) {
 				color='black'
 				variant='solid'
 			>
-				{i18nData.confirmPhone}
+				{i18nData.confirmEmail}
 			</Button>
 
 			{timer > 0 ? (
@@ -89,7 +89,7 @@ export default function PhoneConfirmation({ i18nData }: Props) {
 					borderColor='border'
 					onClick={() => {
 						setTimer(120);
-						action({ phone: '' });
+						// action({ phone: '' });
 					}}
 				>
 					{i18nData.resendCode}

@@ -23,8 +23,11 @@ export const authLocData = [
 	'resendAfter',
 	'resendCode',
 	'phoneConfirmation',
+	'emailConfirmation',
 	'confirmPhone',
+	'confirmEmail',
 	'activationCodeSent',
+	'activationEmailCodeSent',
 ];
 
 export const validLocData = [

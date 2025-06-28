@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Box, Button } from '@chakra-ui/react';
 import CenteredModal from '@/components/dialogs/CenteredModal';
-import { signIn, signOut, useSession } from 'next-auth/react';
+// import { signIn, signOut, useSession } from 'next-auth/react';
 import type { I18nData } from '@/types/i18n';
 import Login from './Login';
 import Signup from './Signup';
@@ -13,9 +13,10 @@ interface Props {
 }
 
 export default function Auth({ i18nData, trigger }: Props) {
-	const { data: session, status } = useSession();
+	// const { data: session, status } = useSession();
+	const session = false;
 	const [showSignup, setShowSignup] = useState(false);
-	console.log('status', status);
+
 	const toggleSignup = () => {
 		setShowSignup((prevState) => !prevState);
 	};
@@ -40,8 +41,8 @@ export default function Auth({ i18nData, trigger }: Props) {
 
 				{session && (
 					<>
-						<Box textAlign='center'>Logged in as {session?.user?.email}</Box>
-						<Button onClick={() => signOut()}>{i18nData.logOut}</Button>
+						<Box textAlign='center'>Logged in as Example@com</Box>
+						<Button onClick={() => false}>{i18nData.logOut}</Button>
 					</>
 				)}
 			</Box>

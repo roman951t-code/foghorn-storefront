@@ -27,6 +27,7 @@ export default function OrderInfo() {
 			border='1px solid'
 			borderColor='border.dark'
 			bg='bg.tertiary'
+			mt='8'
 		>
 			<Heading as='h3' size='2xl' fontWeight='medium' textAlign='center'>
 				{t('yourOrder')}
@@ -57,7 +58,7 @@ export default function OrderInfo() {
 					</Highlight>
 				</Text>
 
-				<Stat.Root my='3'>
+				<Stat.Root mt='4'>
 					<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
 					<Stat.ValueText w='124px' fontSize='3xl'>
 						55 699 ₴
@@ -82,8 +83,8 @@ export default function OrderInfo() {
 				alignItems='flex-start'
 				direction={{ base: 'column', sm: 'row' }}
 			>
-				<VStack alignItems='flex-start' order={{ base: 2, sm: 1 }}>
-					<Stat.Root mb='2'>
+				<VStack alignItems='flex-start' order={{ base: 2, sm: 1 }} gap='6'>
+					<Stat.Root mt={{ base: 2, sm: 0 }}>
 						<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
 						<Stat.ValueText w='124px' fontSize='3xl'>
 							55 699 ₴
@@ -100,7 +101,11 @@ export default function OrderInfo() {
 						{t('acceptOrder')}
 					</Button>
 				</VStack>
-				<VStack alignItems={{ base: 'flex-start', sm: 'flex-end' }} order={{ base: 1, sm: 2 }}>
+				<VStack
+					alignItems={{ base: 'flex-start', sm: 'flex-end' }}
+					order={{ base: 1, sm: 2 }}
+					gap='4'
+				>
 					<Text>
 						<Highlight query='1 шт' styles={{ fontWeight: 'semibold' }}>
 							{`${t('productsInCart')}: 1 шт`}

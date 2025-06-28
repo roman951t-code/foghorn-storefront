@@ -11,6 +11,7 @@ import { createEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema
 import { createEmailSignInSchema } from 'formValidationSchemas/emailSignInSchema';
 import type { I18nData } from '@/types/i18n';
 import ResetPass from './ResetPass';
+import EmailConfirmation from './EmailConfirmation';
 
 interface EmailAuthProps {
 	i18nData: I18nData;
@@ -47,21 +48,29 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 
 	const [isRestorePassOpen, setRestorePassOpen] = useState(false);
 
+	const [isSubmitted, setSubmitted] = useState(false);
+
 	if (isRestorePassOpen) {
 		return <ResetPass i18nData={i18nData} onCloseAction={() => setRestorePassOpen(false)} />;
+	}
+
+	if (isSubmitted) {
+		return <EmailConfirmation i18nData={i18nData} />;
 	}
 
 	return (
 		<form
 			action={async () => {
-				const result = await trigger();
-				if (!result) return;
+				// const result = await trigger();
+				// if (!result) return;
 
-				const formData = getValues();
+				// const formData = getValues();
 
-				startTransition(() => {
-					formAction(formData);
-				});
+				// startTransition(() => {
+				// 	formAction(formData);
+				// });
+
+				setSubmitted(true);
 			}}
 		>
 			<Stack gap='4' align='flex-start'>

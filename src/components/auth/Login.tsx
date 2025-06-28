@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Stack } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import EmailAuth from './EmailAuth';
-import { signIn, useSession } from 'next-auth/react';
+// import { signIn, useSession } from 'next-auth/react';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdPhonePortrait } from 'react-icons/io';
@@ -26,15 +26,16 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 			)}
 			{isEmailAuth && (
 				<EmailAuth
-					onSubmitAction={({ email, password }) =>
-						signIn('email-credentials', { email, password, redirect: false })
+					onSubmitAction={
+						({ email, password }) => false
+						// signIn('email-credentials', { email, password, redirect: false })
 					}
 					i18nData={i18nData}
 				/>
 			)}
 
 			<Stack gap={4} mt={12}>
-				<Button gap='12px' variant='outline' borderColor='main' onClick={() => signIn('google')}>
+				<Button gap='12px' variant='outline' borderColor='main' onClick={() => false}>
 					<FcGoogle />
 					{i18nData.continueWith} Google
 				</Button>
