@@ -22,6 +22,7 @@ export default function Auth({ i18nData, trigger }: Props) {
 
 	return (
 		<CenteredModal
+			closeOnInteractOutside={false}
 			title={showSignup ? i18nData.register : i18nData.authorize}
 			trigger={trigger}
 			size='md'

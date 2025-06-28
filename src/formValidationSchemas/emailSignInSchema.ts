@@ -4,7 +4,7 @@ import type { I18nData } from '@/types/i18n';
 
 export const emailSignInSchemaShape = (t: {
 	emailRequired: string;
-	emailMaxLength: string;
+	inputMaxLength: string;
 	wrongEmail: string;
 	passwordRequired: string;
 	passwordMin: string;
@@ -17,7 +17,7 @@ export const emailSignInSchemaShape = (t: {
 	z.object({
 		email: z
 			.string({ required_error: t.emailRequired })
-			.max(60, { message: t.emailMaxLength })
+			.max(60, { message: t.inputMaxLength })
 			.email({ message: t.wrongEmail }),
 
 		password: z
@@ -38,7 +38,7 @@ export async function getEmailSchema() {
 
 	return emailSignInSchemaShape({
 		emailRequired: t('emailRequired'),
-		emailMaxLength: t('emailMaxLength'),
+		inputMaxLength: t('inputMaxLength'),
 		wrongEmail: t('wrongEmail'),
 		passwordRequired: t('passwordRequired'),
 		passwordMin: t('passwordMin'),

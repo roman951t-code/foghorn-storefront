@@ -14,7 +14,7 @@ const breakpoints = {
 	630: { slidesPerView: 3 },
 	840: { slidesPerView: 4 },
 	1120: { slidesPerView: 5 },
-	1220: { slidesPerView: 6 },
+	1260: { slidesPerView: 6 },
 };
 
 export default function ProductsSlider() {

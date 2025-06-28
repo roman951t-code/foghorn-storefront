@@ -26,7 +26,8 @@
 	"Validation": {
 		"wrongEmail": "Невірна електронна адреса",
 		"emailRequired": "Електронна адреса обов'язкова",
-		"emailMaxLength": "Максимум 60 символів",
+		"inputMaxLength": "Максимум 60 символів",
+		"nameMinLength": "Мінімум 2 символи",
 		"passwordRequired": "Пароль обов'язковий",
 		"passwordMin": "Пароль має містити мінімум 8 символів",
 		"passwordMax": "Пароль може містити максимум 12 символів",
@@ -35,12 +36,13 @@
 		"passwordAlphabetic": "Пароль має містити літери",
 		"passwordUnderscore": "Пароль має містити символ підкреслення (_)",
 		"phoneRequired": "Номер телефону обов'язковий",
-		"invalidPhone": "Неправильний формат номера телефону",
 		"invalidFormData": "Недійсні дані форми.",
 		"smsSendFailed": "Не вдалося надіслати код підтвердження.",
 		"userExists": "Такий користувач вже є",
 		"useRegisterFail": "Не вдалося зареєструвати користувача",
-		"passwordsNotMatch": "Паролі не збігаються"
+		"passwordsNotMatch": "Паролі не збігаються",
+		"firstNameRequired": "Ім'я обов'язкове",
+		"invalidPhone": "Невірний формат номера. Приклад: +380501234567"
 	},
 	"Auth": {
 		"email": "Електронна адреса",
@@ -64,7 +66,8 @@
 		"notSecure": "Ненадійний",
 		"secure": "Надійний",
 		"middleSecure": "Середній",
-		"acceptTerms": "Прийняти умови та положення",
+		"accept": "Прийняти",
+		"acceptTerms": "Положення та Умови",
 		"signUp": "Реєстрація",
 		"phoneNumber": "Номер телефону",
 		"backToLogin": "Назад до авторизації",

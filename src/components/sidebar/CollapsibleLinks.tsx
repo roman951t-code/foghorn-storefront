@@ -19,10 +19,10 @@ export default function CollapsibleLinks({ onClose }) {
 			<AccordionItem value='info' borderBottomColor='border.light'>
 				<AccordionItemTrigger>{t('info')}</AccordionItemTrigger>
 				<AccordionItemContent>
-					<LocaleNavLink href='/aboutUs'>{t('aboutUs')}</LocaleNavLink>
+					<LocaleNavLink href='/about-us'>{t('aboutUs')}</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
-					<LocaleNavLink href='/publicOffer' onClick={handleClick}>
+					<LocaleNavLink href='/public-offer' onClick={handleClick}>
 						{t('publicOffer')}
 					</LocaleNavLink>
 				</AccordionItemContent>
@@ -35,7 +35,7 @@ export default function CollapsibleLinks({ onClose }) {
 			<AccordionItem value='clients' borderBottomColor='border.light'>
 				<AccordionItemTrigger>{t('clients')}</AccordionItemTrigger>
 				<AccordionItemContent>
-					<LocaleNavLink href='/shippingTerms' onClick={handleClick}>
+					<LocaleNavLink href='/shipping-terms' onClick={handleClick}>
 						{t('shippingTerms')}
 					</LocaleNavLink>
 				</AccordionItemContent>
@@ -45,7 +45,7 @@ export default function CollapsibleLinks({ onClose }) {
 					</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
-					<LocaleNavLink href='/returnRefund' onClick={handleClick}>
+					<LocaleNavLink href='/return-refund' onClick={handleClick}>
 						{t('returnRefund')}
 					</LocaleNavLink>
 				</AccordionItemContent>

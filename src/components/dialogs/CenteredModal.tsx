@@ -15,10 +15,17 @@ interface Props {
 	trigger: ReactNode;
 	children: JSX.Element;
 	title: string;
+	closeOnInteractOutside?: boolean;
 	size?: ConditionalValue<'lg' | 'sm' | 'md' | 'xl' | 'xs' | 'cover' | 'full' | undefined>;
 }
 
-export default function CenteredModal({ trigger, children, title, size = 'lg' }: Props) {
+export default function CenteredModal({
+	trigger,
+	children,
+	title,
+	size = 'lg',
+	closeOnInteractOutside = false,
+}: Props) {
 	return (
 		<DialogRoot
 			unmountOnExit
@@ -27,6 +34,7 @@ export default function CenteredModal({ trigger, children, title, size = 'lg' }:
 			motionPreset='slide-in-bottom'
 			size={size}
 			scrollBehavior='inside'
+			closeOnInteractOutside={closeOnInteractOutside}
 		>
 			<DialogTrigger asChild>{trigger}</DialogTrigger>
 			<DialogContent bg='bg.tertiary' minWidth='350px'>

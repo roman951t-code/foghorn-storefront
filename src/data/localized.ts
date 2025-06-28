@@ -11,6 +11,7 @@ export const authLocData = [
 	'rememberPass',
 	'restorePass',
 	'getTemporaryPass',
+	'accept',
 	'acceptTerms',
 	'signUp',
 	'phoneNumber',
@@ -29,7 +30,7 @@ export const authLocData = [
 export const validLocData = [
 	'wrongEmail',
 	'emailRequired',
-	'emailMaxLength',
+	'inputMaxLength',
 	'passwordRequired',
 	'passwordMin',
 	'passwordMax',
@@ -44,4 +45,5 @@ export const validLocData = [
 	'userExists',
 	'useRegisterFail',
 	'passwordsNotMatch',
+	'nameMinLength',
 ];

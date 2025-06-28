@@ -7,8 +7,8 @@ import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerEmailAction } from '@/actions/registerEmailAction';
-import { createEmailSignUpSchema } from '@/schemas/emailSignUpSchema';
-import { createEmailSignInSchema } from '@/schemas/emailSignInSchema';
+import { createEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
+import { createEmailSignInSchema } from 'formValidationSchemas/emailSignInSchema';
 import type { I18nData } from '@/types/i18n';
 import ResetPass from './ResetPass';
 
@@ -19,10 +19,14 @@ interface EmailAuthProps {
 }
 
 type FormValues = {
+	firstName?: string;
+	lastName?: string;
 	email: string;
 	password: string;
 	confirmPassword?: string;
 };
+
+const MAX_CHARACTERS = 60;
 
 export default function EmailAuth({ i18nData, disabled, isSignup = false }: EmailAuthProps) {
 	const schema = useMemo(
@@ -60,15 +64,34 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 				});
 			}}
 		>
-			<Stack gap='6' align='flex-start'>
+			<Stack gap='4' align='flex-start'>
 				<Fieldset.Root size='lg' invalid>
 					<Fieldset.Content>
+						{isSignup && (
+							<>
+								<Field.Root required={isSignup} invalid={!!errors.firstName}>
+									<Field.Label>
+										{i18nData.name}
+										<Field.RequiredIndicator />
+									</Field.Label>
+									<Input fontSize='md' {...register('firstName')} maxLength={MAX_CHARACTERS} />
+									<Field.ErrorText>{errors.firstName?.message}</Field.ErrorText>
+								</Field.Root>
+
+								<Field.Root invalid={!!errors.lastName}>
+									<Field.Label>{i18nData.lastname}</Field.Label>
+									<Input fontSize='md' {...register('lastName')} maxLength={MAX_CHARACTERS} />
+									<Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
+								</Field.Root>
+							</>
+						)}
+
 						<Field.Root required invalid={!!errors.email}>
 							<Field.Label>
 								{i18nData.email}
 								<Field.RequiredIndicator />
 							</Field.Label>
-							<Input fontSize='md' {...register('email')} />
+							<Input fontSize='md' {...register('email')} maxLength={MAX_CHARACTERS} />
 							<Field.ErrorText>{errors.email?.message}</Field.ErrorText>
 						</Field.Root>
 
@@ -77,7 +100,7 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 								{i18nData.password}
 								<Field.RequiredIndicator />
 							</Field.Label>
-							<PasswordInput fontSize='md' {...register('password')} />
+							<PasswordInput fontSize='md' {...register('password')} maxLength={MAX_CHARACTERS} />
 							<Field.ErrorText>{errors.password?.message}</Field.ErrorText>
 						</Field.Root>
 
@@ -87,10 +110,12 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 									{i18nData.confirmPassword}
 									<Field.RequiredIndicator />
 								</Field.Label>
-								<PasswordInput fontSize='md' {...register('confirmPassword')} />
-								<Field.ErrorText>
-									<Field.ErrorText>{errors.confirmPassword?.message}</Field.ErrorText>
-								</Field.ErrorText>
+								<PasswordInput
+									fontSize='md'
+									{...register('confirmPassword')}
+									maxLength={MAX_CHARACTERS}
+								/>
+								<Field.ErrorText>{errors.confirmPassword?.message}</Field.ErrorText>
 							</Field.Root>
 						)}
 					</Fieldset.Content>
@@ -111,7 +136,6 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 				{!isSignup && (
 					<Button
 						w='100%'
-						mt='-2'
 						variant='outline'
 						border='1px solid'
 						borderColor='border'

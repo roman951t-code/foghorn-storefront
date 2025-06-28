@@ -4,7 +4,7 @@ import type { I18nData } from '@/types/i18n';
 
 export const emailSignUpSchemaShape = (t: {
 	emailRequired: string;
-	emailMaxLength: string;
+	inputMaxLength: string;
 	wrongEmail: string;
 	passwordRequired: string;
 	passwordMin: string;
@@ -14,12 +14,24 @@ export const emailSignUpSchemaShape = (t: {
 	passwordAlphabetic: string;
 	passwordUnderscore: string;
 	passwordsNotMatch: string;
+	firstNameRequired: string;
+	nameMinLength: string;
 }) =>
 	z
 		.object({
+			firstName: z
+				.string({ required_error: t.firstNameRequired })
+				.min(2, { message: t.nameMinLength })
+				.max(60, { message: t.inputMaxLength })
+				.nonempty(),
+			lastName: z
+				.string()
+				.min(2, { message: t.nameMinLength })
+				.max(60, { message: t.inputMaxLength })
+				.optional(),
 			email: z
 				.string({ required_error: t.emailRequired })
-				.max(60, { message: t.emailMaxLength })
+				.max(60, { message: t.inputMaxLength })
 				.email({ message: t.wrongEmail }),
 
 			password: z
@@ -57,7 +69,7 @@ export async function getEmailSignUpSchema() {
 
 	return emailSignUpSchemaShape({
 		emailRequired: t('emailRequired'),
-		emailMaxLength: t('emailMaxLength'),
+		inputMaxLength: t('inputMaxLength'),
 		wrongEmail: t('wrongEmail'),
 		passwordRequired: t('passwordRequired'),
 		passwordMin: t('passwordMin'),
@@ -67,6 +79,8 @@ export async function getEmailSignUpSchema() {
 		passwordAlphabetic: t('passwordAlphabetic'),
 		passwordUnderscore: t('passwordUnderscore'),
 		passwordsNotMatch: t('passwordsNotMatch'),
+		firstNameRequired: t('firstNameRequired'),
+		nameMinLength: t('nameMinLength'),
 	});
 }
 

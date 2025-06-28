@@ -46,9 +46,11 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 				<CheckboxCard.HiddenInput />
 				<CheckboxCard.Control>
 					<CheckboxCard.Label>
+						{i18nData.accept}
 						<Link href='/terms' target='blank'>
 							<ChakraLink
 								as='span'
+								fontSize='15px'
 								textDecoration='underline'
 								textUnderlineOffset='3px'
 								transition='all .15s ease-in-out'

@@ -2,9 +2,9 @@
 
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { getEmailSignUpSchema } from '@/schemas/emailSignUpSchema';
+import { getEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
 import { getTranslations } from 'next-intl/server';
-import { signIn } from '@/lib/auth';
+// import { signIn } from '@/lib/auth';
 
 export async function registerEmailAction(
 	prevState: unknown,
@@ -49,11 +49,4 @@ export async function registerEmailAction(
 	} catch (e) {
 		return { message: t('useRegisterFail') };
 	}
-	const callbackUrl = '/ua';
-
-	await signIn('email-credentials', {
-		email,
-		password,
-		callbackUrl,
-	});
 }

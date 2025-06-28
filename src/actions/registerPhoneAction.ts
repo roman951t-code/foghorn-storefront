@@ -1,6 +1,6 @@
 'use server';
 
-import { getPhoneSchema } from '@/schemas/phoneSchema';
+import { getPhoneSchema } from 'formValidationSchemas/phoneSchema';
 import { getTranslations } from 'next-intl/server';
 
 export async function registerPhoneAction(

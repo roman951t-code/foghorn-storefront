@@ -1,5 +1,6 @@
+
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
 }
 
@@ -8,23 +9,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
 model User {
-  id            String          @id @default(cuid())
-  name          String?
-  email         String          @unique
-  emailVerified DateTime?
+  id             String    @id @default(cuid())
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
   hashedPassword String
-  image         String?
-  phone         String?         @unique
-  accounts      Account[]
-  sessions      Session[]
-  orders        Order[]
+  image          String?
+  phone          String?   @unique
+  accounts       Account[]
+  sessions       Session[]
+  orders         Order[]
 
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("user")
 }
 
 model Account {
@@ -45,7 +56,17 @@ model Account {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  password              String?
+
   @@id([provider, providerAccountId])
+  @@map("account")
 }
 
 model Session {
@@ -56,6 +77,13 @@ model Session {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  expiresAt DateTime
+  token     String
+  ipAddress String?
+  userAgent String?
+
+  @@unique([token])
+  @@map("session")
 }
 
 model VerificationToken {
@@ -67,6 +95,7 @@ model VerificationToken {
 }
 
 // Optional for WebAuthn support
+
 model Authenticator {
   credentialID         String  @unique
   userId               String
@@ -83,56 +112,61 @@ model Authenticator {
 }
 
 model ProductCategory {
-  id        String             @id @default(uuid())
-  name      String
-  parentId  String?
-  slug  String @unique
-  parent    ProductCategory?   @relation("Subcategories", fields: [parentId], references: [id])
-  children  ProductCategory[]  @relation("Subcategories")
-  products  Product[]
+  id       String            @id @default(uuid())
+  name     String
+  parentId String?
+  slug     String            @unique
+  parent   ProductCategory?  @relation("Subcategories", fields: [parentId], references: [id])
+  children ProductCategory[] @relation("Subcategories")
+  products Product[]
 }
 
 model Product {
-  id             String           @id @default(uuid())
-  name           String
-  description    String?
-  price          Decimal          @db.Decimal(10, 2)
-  stock          Int
-  slug       String   @unique
-  imageUrl       String?
-  categoryId     String
-  category       ProductCategory  @relation(fields: [categoryId], references: [id])
-  orderItems     OrderItem[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id          String          @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal         @db.Decimal(10, 2)
+  stock       Int
+  slug        String          @unique
+  imageUrl    String?
+  categoryId  String
+  category    ProductCategory @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 model Order {
-  id         String      @id @default(uuid())
-  userId     String
-  user       User        @relation(fields: [userId], references: [id])
-  items      OrderItem[]
-  total      Decimal     @db.Decimal(10, 2)
-  status     OrderStatus @default(PENDING)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id        String      @id @default(uuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+  total     Decimal     @db.Decimal(10, 2)
+  status    OrderStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
-  orderId    String
-  productId  String
-  quantity   Int
-  price      Decimal  @db.Decimal(10, 2)
-  unitPrice  Decimal  @db.Decimal(10, 2)
-  order      Order    @relation(fields: [orderId], references: [id])
-  product    Product  @relation(fields: [productId], references: [id])
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  unitPrice Decimal @db.Decimal(10, 2)
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 }
 
-enum OrderStatus {
-  PENDING
-  PAID
-  SHIPPED
-  DELIVERED
-  CANCELLED
+
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
 }

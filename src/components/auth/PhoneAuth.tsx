@@ -1,19 +1,16 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Fieldset, Input, PinInput, Highlight, Text } from '@chakra-ui/react';
-import { Field } from '@/components/ui/field';
+import React, { startTransition, useMemo, useState } from 'react';
+import { Button, Input, Stack, Field, Fieldset } from '@chakra-ui/react';
 import { useHookFormMask } from 'use-mask-input';
 import { useForm } from 'react-hook-form';
-import { createPhoneSchema } from '@/schemas/phoneSchema';
+import { createphoneSignUpSchema } from 'formValidationSchemas/phoneSignUpSchema';
 import type { I18nData } from '@/types/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useActionState } from 'react';
 import { registerPhoneAction } from '@/actions/registerPhoneAction';
-
-interface FormValues {
-	phone: string;
-}
+import PhoneConfirmation from './PhoneConfirmation';
+import { createphoneSignInSchema } from 'formValidationSchemas/phoneSignInSchema';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;
@@ -21,158 +18,105 @@ interface PhoneAuthProps {
 	isSignup?: boolean;
 }
 
-export default function PhoneAuth({ i18nData, disabled, isSignup = false }: PhoneAuthProps) {
-	const schema = useMemo(() => createPhoneSchema(i18nData), [i18nData]);
+type FormValues = {
+	firstName?: string;
+	lastName?: string;
+	phone: string;
+};
 
-	const [formError, action] = useActionState(registerPhoneAction, undefined);
+const MAX_CHARACTERS = 60;
+
+export default function PhoneAuth({ i18nData, disabled, isSignup = false }: PhoneAuthProps) {
+	const schema = useMemo(
+		() => (isSignup ? createphoneSignUpSchema(i18nData) : createphoneSignInSchema(i18nData)),
+		[i18nData]
+	);
+
+	const [formError, formAction, isPending] = useActionState(registerPhoneAction, undefined);
+
+	const [isSubmitted, setSubmitted] = useState(false);
 
 	const {
 		register,
-		handleSubmit,
-		formState: { errors, isSubmitting },
+		trigger,
+		getValues,
+		formState: { errors },
 	} = useForm<FormValues>({ mode: 'onSubmit', resolver: zodResolver(schema) });
-
 	const registerWithMask = useHookFormMask(register);
-	const [isSubmitted, setSubmitted] = useState(false);
-	const [timer, setTimer] = useState(0);
-
-	// const handlePhoneSubmit = (formData: FormValues) => {
-	// 	action(formData);
-	// 	setSubmitted(true);
-	// 	setTimer(120);
-	// };
-
-	useEffect(() => {
-		if (!isSubmitted || timer <= 0) return;
-
-		const id = setInterval(() => {
-			setTimer((t) => {
-				if (t <= 1) {
-					clearInterval(id);
-					return 0;
-				}
-				return t - 1;
-			});
-		}, 1000);
-
-		return () => clearInterval(id);
-	}, [isSubmitted, timer]);
-
-	const formatTime = (sec: number) => {
-		const m = Math.floor(sec / 60)
-			.toString()
-			.padStart(2, '0');
-		const s = (sec % 60).toString().padStart(2, '0');
-		return `${m}:${s}`;
-	};
-
-	const formattedTime = formatTime(timer);
 
 	if (isSubmitted) {
-		return (
-			<Fieldset.Root size='lg'>
-				<Fieldset.Legend fontSize='md'>{i18nData.phoneConfirmation}</Fieldset.Legend>
-				<Fieldset.HelperText fontSize='15px'>
-					{i18nData.activationCodeSentPrefix}
-					<Highlight query='0992304351' styles={{ fontWeight: 'semibold', mx: 1.5 }}>
-						0992304351
-					</Highlight>
-					{i18nData.activationCodeSentSuffix}
-				</Fieldset.HelperText>
-
-				<Fieldset.Content>
-					<PinInput.Root otp my='2' justifyContent='center'>
-						<PinInput.HiddenInput />
-						<PinInput.Control w='100%' justifyContent='center'>
-							{Array.from({ length: 6 }).map((_, i) => (
-								<PinInput.Input key={i} _focus={{ outline: 'none' }} index={i} />
-							))}
-						</PinInput.Control>
-					</PinInput.Root>
-				</Fieldset.Content>
-
-				<Button
-					mt='8'
-					w='100%'
-					loading={isSubmitting}
-					disabled={disabled && isSignup}
-					type='submit'
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-					color='black'
-					variant='solid'
-				>
-					{i18nData.confirmPhone}
-				</Button>
-
-				{timer > 0 ? (
-					<Fieldset.HelperText fontSize='15px' color='main'>
-						{i18nData.resendAfter}:
-						<Highlight
-							query={formattedTime}
-							styles={{ fontWeight: 'semibold', color: 'main.accent', ml: '2' }}
-						>
-							{formattedTime}
-						</Highlight>
-					</Fieldset.HelperText>
-				) : (
-					<Button
-						mt='4'
-						variant='outline'
-						border='1px solid'
-						borderColor='border'
-						onClick={() => {
-							setTimer(120);
-							action({ phone: '' });
-						}}
-					>
-						{i18nData.resendCode}
-					</Button>
-				)}
-
-				{formError?.message && (
-					<Text fontSize='sm' color='red.500'>
-						{formError.message}
-					</Text>
-				)}
-			</Fieldset.Root>
-		);
+		return <PhoneConfirmation i18nData={i18nData} />;
 	}
 
 	return (
-		<form action={action}>
-			<Field
-				label={i18nData.phoneNumber}
-				invalid={!!errors.phone}
-				errorText={errors.phone?.message}
-			>
-				<Input
-					{...registerWithMask('phone', ['(+38 0) 000000000'], {
-						required: i18nData.phoneRequired,
-					})}
-					_focus={{ outline: 'none' }}
-					placeholder='(+38 0) '
-					fontSize='md'
-				/>
-			</Field>
+		<form
+			action={async () => {
+				const result = await trigger();
+				if (!result) return;
 
-			<Button
-				mt='8'
-				w='100%'
-				loading={isSubmitting}
-				disabled={disabled && isSignup}
-				type='submit'
-				bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-				color='black'
-				variant='solid'
-			>
-				{i18nData.continue}
-			</Button>
+				const formData = getValues();
 
-			{formError?.message && (
-				<Text fontSize='sm' color='red.500'>
-					{formError.message}
-				</Text>
-			)}
+				startTransition(() => {
+					formAction(formData);
+				});
+
+				setSubmitted(true);
+			}}
+		>
+			<Stack gap='4' align='flex-start'>
+				<Fieldset.Root size='lg' invalid>
+					<Fieldset.Content>
+						{isSignup && (
+							<>
+								<Field.Root required={isSignup} invalid={!!errors.firstName}>
+									<Field.Label>
+										{i18nData.name}
+										<Field.RequiredIndicator />
+									</Field.Label>
+									<Input fontSize='md' {...register('firstName')} maxLength={MAX_CHARACTERS} />
+									<Field.ErrorText>{errors.firstName?.message}</Field.ErrorText>
+								</Field.Root>
+
+								<Field.Root invalid={!!errors.lastName}>
+									<Field.Label>{i18nData.lastname}</Field.Label>
+									<Input fontSize='md' {...register('lastName')} maxLength={MAX_CHARACTERS} />
+									<Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
+								</Field.Root>
+							</>
+						)}
+
+						<Field.Root required invalid={!!errors.phone}>
+							<Field.Label>
+								{i18nData.phoneNumber}
+								<Field.RequiredIndicator />
+							</Field.Label>
+
+							<Input
+								{...registerWithMask('phone', ['+380 99-999-9999', '99-999-9999'], {
+									required: i18nData.phoneRequired,
+								})}
+								type='text'
+								_focus={{ outline: 'none' }}
+								fontSize='md'
+								maxLength={17}
+							/>
+							<Field.ErrorText>{errors.phone?.message}</Field.ErrorText>
+						</Field.Root>
+					</Fieldset.Content>
+					<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
+				</Fieldset.Root>
+
+				<Button
+					w='100%'
+					type='submit'
+					loading={isPending}
+					disabled={disabled && isSignup}
+					color='black'
+					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+				>
+					{i18nData.continue}
+				</Button>
+			</Stack>
 		</form>
 	);
 }
