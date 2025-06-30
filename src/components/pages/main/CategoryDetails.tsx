@@ -68,7 +68,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				justify='space-between'
 				flexDirection='column'
 				align='center'
-				bgColor='bg.catalogPanel'
+				bgColor='catalog.bgCategory'
 				height='100%'
 				maxW='380px'
 				minW='280px'
@@ -94,13 +94,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					zIndex: -1,
 				}}
 			>
-				<Heading
-					color='main.darkOnly'
-					size='2xl'
-					fontWeight='medium'
-					borderBottom='1px solid'
-					pb='1'
-				>
+				<Heading color='main' size='2xl' fontWeight='medium' borderBottom='1px solid' pb='1'>
 					{category.name}
 				</Heading>
 				<LocaleNavButton href='/products/123'>

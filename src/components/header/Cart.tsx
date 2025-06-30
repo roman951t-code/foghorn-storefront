@@ -53,12 +53,13 @@ export default function Cart() {
 				<Stack direction='column'>
 					<Image
 						src={emptyCart}
+						width='240'
+						height='240'
 						alt='empty cart'
 						style={{
-							margin: '20px auto 20px 25%',
 							objectFit: 'cover',
-							width: '200px',
-							height: 'auto',
+							width: '240px',
+							height: '240px',
 						}}
 					/>
 					<EmptyState

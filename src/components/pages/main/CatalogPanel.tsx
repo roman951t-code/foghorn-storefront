@@ -80,7 +80,7 @@ const categories = [
 ];
 
 export default function CatalogPanel({ i18nData }: Props) {
-	const [activeCategory, setActiveCategory] = useState(null);
+	const [activeCategory, setActiveCategory] = useState();
 
 	const handleMouseEnter = (category) => {
 		setActiveCategory(category);
@@ -104,26 +104,26 @@ export default function CatalogPanel({ i18nData }: Props) {
 				mr='2'
 			>
 				<CatalogBtn fullText />
-				{categories.map((category) => (
+				{categories.map((category, index) => (
 					<HStack
 						key={category.name}
 						justify='space-between'
-						bg='bg.tertiary'
+						bg={index % 2 === 0 ? 'catalog.bgEven' : 'catalog.bgOdd'}
 						align='center'
 						px={4}
-						py={3}
+						py={2.5}
 						h='54px'
-						borderTop='1px solid'
+						borderTop='1px dotted'
 						borderColor={{ base: 'gray.200', _dark: 'gray.500' }}
 						transition='background 0.25s ease-in-out'
 						_hover={{
 							cursor: 'pointer',
-							bg: 'bgHover',
+							bg: 'gray.200',
 							color: 'main.darkOnly',
 						}}
 						onMouseEnter={() => handleMouseEnter(category)}
 					>
-						<Text fontSize='16px' fontWeight='medium'>
+						<Text fontSize='17px' fontWeight='normal'>
 							{category.name}
 						</Text>
 						<Icon fontSize='20px' color='main'>

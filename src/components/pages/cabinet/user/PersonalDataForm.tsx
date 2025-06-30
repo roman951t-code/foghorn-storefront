@@ -1,7 +1,5 @@
 'use client';
-import { HStack, Stack } from '@chakra-ui/react';
-import EditableInput from '@/components/reusable/inputs/EditableInput';
-import { Field } from '@/components/ui/field';
+import { HStack, Input, Field, Wrap } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 
@@ -48,71 +46,92 @@ export default function PersonalDataForm({ i18nData }: Props) {
 
 	return (
 		<form onSubmit={onSubmit}>
-			<HStack
-				gap='6'
-				my='4'
-				px='1'
-				flexDirection='row'
-				alignItems='center'
-				flexWrap='wrap'
-				css={{ '--field-label-width': '150px' }}
-			>
-				<Stack gap='4'>
-					<Field
-						minW='264px'
-						orientation='vertical'
-						label={i18nData.name}
-						invalid={!!errors.firstName}
-						errorText={errors.firstName?.message}
-					>
-						<EditableInput
-							defaultValue={initialValues.firstName}
-							onSubmit={(value) => handleEditableSubmit('firstName', value)}
-						/>
-					</Field>
+			<Wrap gap='8' width='full' mt='8' colorPalette='yellow'>
+				<Field.Root
+					orientation='vertical'
+					invalid={!!errors.firstName}
+					maxW={{ base: '100%', xs: '300px' }}
+				>
+					<Field.Label>{i18nData.name}</Field.Label>
+					<Input
+						variant='flushed'
+						transition='all .15s ease-in-out'
+						_placeholder={{ fontSize: 'sm' }}
+						_focus={{
+							outline: 'none',
+						}}
+						size='md'
+						fontSize='md'
+						defaultValue={initialValues.firstName}
+						onChange={(value) => handleEditableSubmit('firstName', value)}
+					/>
+					<Field.ErrorText>{errors.firstName?.message}</Field.ErrorText>
+				</Field.Root>
 
-					<Field
-						minW='264px'
-						orientation='vertical'
-						label={i18nData.email}
-						invalid={!!errors.email}
-						errorText={errors.email?.message}
-					>
-						<EditableInput
-							defaultValue={initialValues.email}
-							onSubmit={(value) => handleEditableSubmit('email', value)}
-						/>
-					</Field>
-				</Stack>
+				<Field.Root
+					orientation='vertical'
+					invalid={!!errors.email}
+					maxW={{ base: '100%', xs: '300px' }}
+				>
+					<Field.Label>{i18nData.email}</Field.Label>
+					<Input
+						variant='flushed'
+						size='md'
+						transition='all .15s ease-in-out'
+						_placeholder={{ fontSize: 'sm' }}
+						_focus={{
+							outline: 'none',
+						}}
+						type='email'
+						fontSize='md'
+						defaultValue={initialValues.email}
+						onChange={(value) => handleEditableSubmit('email', value)}
+					/>
+					<Field.ErrorText>{errors.email?.message}</Field.ErrorText>
+				</Field.Root>
 
-				<Stack gap='4'>
-					<Field
-						minW='264px'
-						orientation='vertical'
-						label={i18nData.phone}
-						invalid={!!errors.phone}
-						errorText={errors.phone?.message}
-					>
-						<EditableInput
-							defaultValue={initialValues.phone}
-							onSubmit={(value) => handleEditableSubmit('phone', value)}
-						/>
-					</Field>
+				<Field.Root
+					orientation='vertical'
+					invalid={!!errors.phone}
+					maxW={{ base: '100%', xs: '300px' }}
+				>
+					<Field.Label>{i18nData.phone}</Field.Label>
+					<Input
+						variant='flushed'
+						size='md'
+						transition='all .15s ease-in-out'
+						_placeholder={{ fontSize: 'sm' }}
+						_focus={{
+							outline: 'none',
+						}}
+						fontSize='md'
+						defaultValue={initialValues.phone}
+						onChange={(value) => handleEditableSubmit('phone', value)}
+					/>
+					<Field.ErrorText>{errors.phone?.message}</Field.ErrorText>
+				</Field.Root>
 
-					<Field
-						minW='264px'
-						orientation='vertical'
-						label={i18nData.lastname}
-						invalid={!!errors.lastName}
-						errorText={errors.lastName?.message}
-					>
-						<EditableInput
-							defaultValue={initialValues.lastName}
-							onSubmit={(value) => handleEditableSubmit('lastName', value)}
-						/>
-					</Field>
-				</Stack>
-			</HStack>
+				<Field.Root
+					orientation='vertical'
+					invalid={!!errors.lastName}
+					maxW={{ base: '100%', xs: '300px' }}
+				>
+					<Field.Label>{i18nData.lastname}</Field.Label>
+					<Input
+						variant='flushed'
+						size='md'
+						transition='all .15s ease-in-out'
+						_placeholder={{ fontSize: 'sm' }}
+						_focus={{
+							outline: 'none',
+						}}
+						fontSize='md'
+						defaultValue={initialValues.lastName}
+						onChange={(value) => handleEditableSubmit('lastName', value)}
+					/>
+					<Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
+				</Field.Root>
+			</Wrap>
 		</form>
 	);
 }

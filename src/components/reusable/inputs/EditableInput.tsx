@@ -11,8 +11,7 @@ export default function EditableInput({ defaultValue, onSubmit }: Props) {
 			<Editable.Preview textStyle='md' minW='110px' />
 			<Editable.Input
 				textAlign='left'
-				minW='180px'
-				maxW='220px'
+				flex='1'
 				rounded='md'
 				fontSize='md'
 				color='text'

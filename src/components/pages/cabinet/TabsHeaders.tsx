@@ -1,6 +1,6 @@
 'use client';
 import { Tabs, Icon } from '@chakra-ui/react';
-import { FiHeart, FiEye } from 'react-icons/fi';
+import { FiHeart } from 'react-icons/fi';
 import { LuUserRoundCog } from 'react-icons/lu';
 import { useRouter } from '@/i18n/routing';
 import { IoBagCheckOutline } from 'react-icons/io5';

@@ -28,6 +28,8 @@ export const authLocData = [
 	'confirmEmail',
 	'activationCodeSent',
 	'activationEmailCodeSent',
+	'continuePurchases',
+	'returnCongrats',
 ];
 
 export const validLocData = [

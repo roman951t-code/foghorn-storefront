@@ -67,10 +67,10 @@ export default function OrderInfo() {
 				<Button
 					w='100%'
 					type='submit'
+					mt='4'
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'
 					variant='solid'
-					m={{ base: 'initial', md: 'auto' }}
 				>
 					<IoMdCheckmarkCircleOutline />
 					{t('acceptOrder')}

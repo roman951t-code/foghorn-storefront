@@ -20,7 +20,7 @@ import {
 	Button,
 } from '@chakra-ui/react';
 import { Rating } from '@/components/ui/rating';
-import { FaShare } from 'react-icons/fa';
+import ShareProduct from './ShareProduct';
 
 export default function AboutTab() {
 	const t = useTranslations('Products');
@@ -60,20 +60,7 @@ export default function AboutTab() {
 								{t('productIsPresent')}
 							</Status.Root>
 
-							<IconButton
-								aria-label='Share'
-								variant='ghost'
-								rounded='full'
-								colorPalette='gray'
-								color='main.disabled'
-								transition='all 0.2s ease-in-out'
-								_hover={{
-									bg: 'colorPalette.600',
-									color: 'main.lightOnly',
-								}}
-							>
-								<FaShare />
-							</IconButton>
+							<ShareProduct copyText={t('pressToCopy')} shareText={t('shareProductText')} />
 
 							<IconButton
 								aria-label='Favourite'

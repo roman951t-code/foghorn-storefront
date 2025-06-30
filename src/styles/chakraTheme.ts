@@ -12,6 +12,26 @@ const config = defineConfig({
 		},
 		semanticTokens: {
 			colors: {
+				catalog: {
+					bgEven: {
+						value: {
+							base: 'rgb(240,242,244)',
+							_dark: '#272834',
+						},
+					},
+					bgOdd: {
+						value: {
+							base: 'rgb(244,246,248)',
+							_dark: '#1F202C',
+						},
+					},
+					bgCategory: {
+						value: {
+							base: 'rgb(244,246,248)',
+							_dark: '#272834',
+						},
+					},
+				},
 				bg: {
 					DEFAULT: {
 						value: '{colors.bg.subtle}',
@@ -41,12 +61,6 @@ const config = defineConfig({
 						value: {
 							base: 'rgb(244,246,248)',
 							_dark: '#1F202C',
-						},
-					},
-					catalogPanel: {
-						value: {
-							base: 'rgb(244,246,248)',
-							_dark: 'colors.yellow.400',
 						},
 					},
 					button: {
