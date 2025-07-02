@@ -15,7 +15,7 @@ export default function UserLinks({ onClose }) {
 	};
 
 	return (
-		<Stack gap='6' w='fit-content'>
+		<Stack gap='5' w='fit-content'>
 			<LocaleNavLink href='/cabinet' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
 					<LuUserRoundCog />

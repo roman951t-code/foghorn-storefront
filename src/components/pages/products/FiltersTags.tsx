@@ -1,8 +1,8 @@
-import { HStack, Tag } from '@chakra-ui/react';
+import { HStack, Tag, Wrap } from '@chakra-ui/react';
 
 export default function FiltersTags() {
 	return (
-		<HStack gap='4'>
+		<Wrap gap='4'>
 			{Array.from({ length: 6 }).map((_, index) => (
 				<HStack key={index}>
 					<Tag.Root
@@ -19,11 +19,11 @@ export default function FiltersTags() {
 					>
 						<Tag.Label>Filter</Tag.Label>
 						<Tag.EndElement>
-							<Tag.CloseTrigger />
+							<Tag.CloseTrigger cursor='pointer' />
 						</Tag.EndElement>
 					</Tag.Root>
 				</HStack>
 			))}
-		</HStack>
+		</Wrap>
 	);
 }

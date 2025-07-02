@@ -28,10 +28,10 @@ export const phoneSignUpSchemaShape = (t: {
 			}),
 	});
 
-export const createphoneSignUpSchema = (t: I18nData) =>
+export const createPhoneSignUpSchema = (t: I18nData) =>
 	phoneSignUpSchemaShape(t as Parameters<typeof phoneSignUpSchemaShape>[0]);
 
-export async function getphoneSignUpSchema() {
+export async function getPhoneSignUpSchema() {
 	const t = await getTranslations('Validation');
 
 	return phoneSignUpSchemaShape({
@@ -43,4 +43,4 @@ export async function getphoneSignUpSchema() {
 	});
 }
 
-export type phoneSignUpSchema = z.infer<Awaited<ReturnType<typeof getphoneSignUpSchema>>>;
+export type phoneSignUpSchema = z.infer<Awaited<ReturnType<typeof getPhoneSignUpSchema>>>;

@@ -1,83 +1,117 @@
 'use client';
-import { Button, Input, Stack } from '@chakra-ui/react';
-import { Field } from '@/components/ui/field';
-import { useForm } from 'react-hook-form';
-import { SetStateAction } from 'react';
-import type { I18nData } from '@/types/i18n';
 
-interface FormValues {
-	email: string;
-}
+import { Button, Fieldset, Stack, Field, PinInput } from '@chakra-ui/react';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { startTransition, useActionState } from 'react';
+import type { I18nData } from '@/types/i18n';
+import { useMemo } from 'react';
+import { resetPasswordAction } from '@/actions/resetPasswordAction';
+import { PasswordInput } from '../ui/password-input';
+import { createRestorePassSchema } from 'formValidationSchemas/restorepassSchema';
 
 interface ResetPassProps {
 	i18nData: I18nData;
-	onCloseAction: (value: SetStateAction<boolean>) => void;
+	onCloseAction: (value: boolean) => void;
 }
 
+type FormValues = {
+	pin: string[];
+	password: string;
+};
+
+const MAX_CHARACTERS = 60;
+
 export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
+	const schema = useMemo(() => createRestorePassSchema(i18nData), [i18nData]);
+
+	const [formError, formAction, isPending] = useActionState(resetPasswordAction, undefined);
+
 	const {
 		register,
-		handleSubmit,
+		trigger,
+		getValues,
+		control,
 		formState: { errors, isSubmitting },
-		reset,
-	} = useForm<FormValues>({ mode: 'onSubmit' });
+	} = useForm<FormValues>({
+		mode: 'onSubmit',
+		resolver: zodResolver(schema),
+	});
 
-	const handleRestorePass = async (formData: FormValues) => {
-		const response = await fetch('/api/auth/reset-password', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(formData),
-		});
-
-		if (response.ok) {
-			alert('Temporary password sent to your email');
-			reset();
-			onCloseAction(false);
-		} else {
-			alert('Error: unable to send temporary password');
-		}
-	};
+	const formData = getValues();
 
 	return (
-		<form onSubmit={handleSubmit(handleRestorePass)}>
+		<form
+			action={async () => {
+				const result = await trigger();
+				if (!result) {
+					return;
+				}
+
+				startTransition(() => {
+					formAction(formData);
+				});
+			}}
+		>
 			<Stack gap='4' align='flex-start'>
-				<Field label={i18nData.email} invalid={!!errors.email} errorText={errors.email?.message}>
-					<Input
-						fontSize='md'
-						_focus={{ outline: 'none' }}
-						{...register('email', {
-							required: i18nData.emailRequired,
-							pattern: {
-								value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-								message: i18nData.wrongEmail,
-							},
-						})}
-					/>
-				</Field>
+				<Fieldset.Root size='lg' invalid>
+					<Fieldset.Content>
+						<Controller
+							control={control}
+							name='pin'
+							render={({ field }) => (
+								<PinInput.Root
+									value={field.value}
+									onValueChange={(e) => field.onChange(e.value)}
+									otp
+									my='2'
+									justifyContent='center'
+								>
+									<PinInput.HiddenInput />
+									<PinInput.Control w='100%' justifyContent='center'>
+										{Array.from({ length: 5 }).map((_, i) => (
+											<PinInput.Input key={i} _focus={{ outline: 'none' }} index={i} />
+										))}
+									</PinInput.Control>
+								</PinInput.Root>
+							)}
+						/>
 
-				<Button
-					w='100%'
-					mt='4'
-					type='submit'
-					loading={isSubmitting}
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-					color='black'
-					variant='solid'
-				>
-					{i18nData.getTemporaryPass}
-				</Button>
+						<Field.Root required invalid={!!errors.password}>
+							<Field.Label>
+								{i18nData.password}
+								<Field.RequiredIndicator />
+							</Field.Label>
+							<PasswordInput fontSize='md' {...register('password')} maxLength={MAX_CHARACTERS} />
+							<Field.ErrorText>{errors.password?.message}</Field.ErrorText>
+						</Field.Root>
 
-				<Button
-					w='100%'
-					colorPalette='gray'
-					color='main'
-					variant='outline'
-					border='1px solid'
-					borderColor='border'
-					onClick={onCloseAction}
-				>
-					{i18nData.rememberPass}
-				</Button>
+						<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
+					</Fieldset.Content>
+
+					<Button
+						w='100%'
+						mt='4'
+						type='submit'
+						loading={isSubmitting || isPending}
+						bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+						color='black'
+						variant='solid'
+					>
+						{i18nData.setnewpass}
+					</Button>
+
+					<Button
+						w='100%'
+						color='main'
+						variant='outline'
+						border='1px solid'
+						borderColor='border'
+						onClick={() => onCloseAction(false)}
+					>
+						{i18nData.rememberPass}
+					</Button>
+				</Fieldset.Root>
 			</Stack>
 		</form>
 	);

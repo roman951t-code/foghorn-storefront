@@ -14,16 +14,7 @@ export default function GlobalError({
 
 	return (
 		<html>
-			<body
-				style={{
-					display: 'flex',
-					justifyContent: 'center',
-					alignItems: 'center',
-					height: '100vh',
-					flexDirection: 'column',
-					fontFamily: 'sans-serif',
-				}}
-			>
+			<body>
 				<h2>⚠️ Something went wrong</h2>
 				<p>{error.message}</p>
 				<button onClick={() => reset()} style={{ marginTop: '16px' }}>

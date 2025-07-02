@@ -4,13 +4,13 @@ import React, { startTransition, useMemo, useState } from 'react';
 import { Button, Input, Stack, Field, Fieldset } from '@chakra-ui/react';
 import { useHookFormMask } from 'use-mask-input';
 import { useForm } from 'react-hook-form';
-import { createphoneSignUpSchema } from 'formValidationSchemas/phoneSignUpSchema';
 import type { I18nData } from '@/types/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useActionState } from 'react';
+import { createPhoneSignUpSchema } from 'formValidationSchemas/phoneSignUpSchema';
+import { createphoneSignInSchema } from 'formValidationSchemas/phoneSignInSchema';
 import { registerPhoneAction } from '@/actions/registerPhoneAction';
 import PhoneConfirmation from './PhoneConfirmation';
-import { createphoneSignInSchema } from 'formValidationSchemas/phoneSignInSchema';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;
@@ -28,7 +28,7 @@ const MAX_CHARACTERS = 60;
 
 export default function PhoneAuth({ i18nData, disabled, isSignup = false }: PhoneAuthProps) {
 	const schema = useMemo(
-		() => (isSignup ? createphoneSignUpSchema(i18nData) : createphoneSignInSchema(i18nData)),
+		() => (isSignup ? createPhoneSignUpSchema(i18nData) : createphoneSignInSchema(i18nData)),
 		[i18nData]
 	);
 

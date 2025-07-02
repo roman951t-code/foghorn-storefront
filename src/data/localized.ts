@@ -30,6 +30,8 @@ export const authLocData = [
 	'activationEmailCodeSent',
 	'continuePurchases',
 	'returnCongrats',
+	'pin',
+	'toPost',
 ];
 
 export const validLocData = [
@@ -51,4 +53,12 @@ export const validLocData = [
 	'useRegisterFail',
 	'passwordsNotMatch',
 	'nameMinLength',
+	'pinRequired',
+	'userNotFound',
+	'alreadyVerified',
+	'verificationFailed',
+	'pinLength',
+	'invalidOtp',
+	'otpExpired',
+	'tooManyAttempts',
 ];

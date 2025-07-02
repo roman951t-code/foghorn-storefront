@@ -7,19 +7,19 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 import CategoryCard from '@/components/reusable/cards/CategoryCard';
-import LoadingSkeleton from '@/components/reusable/Skeleton';
+import { LoadingSkeleton } from '@/components/reusable/Skeleton';
 
 const breakpoints = {
-	280: {
+	518: {
 		slidesPerView: 2,
 	},
-	520: {
+	756: {
 		slidesPerView: 3,
 	},
-	800: {
+	1000: {
 		slidesPerView: 4,
 	},
-	1180: {
+	1234: {
 		slidesPerView: 5,
 	},
 };
@@ -103,6 +103,19 @@ const categories = [
 		],
 		viewAllHref: '/products/123',
 	},
+	{
+		title: 'Меблі та техніка 6',
+		imageUrl:
+			'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1770&q=80',
+		subcategories: [
+			{ name: 'Стільці', href: '/products/123' },
+			{ name: 'Дивани', href: '/products/123' },
+			{ name: 'Ліжка', href: '/products/123' },
+			{ name: 'Столи', href: '/products/123' },
+			{ name: 'Шафи', href: '/products/123' },
+		],
+		viewAllHref: '/products/123',
+	},
 ];
 
 export default function CategorySlider() {
@@ -115,7 +128,6 @@ export default function CategorySlider() {
 	if (!isClient) {
 		return (
 			<HStack gap='4' mt='8' justifyContent='space-between' overflow='hidden'>
-				<LoadingSkeleton />
 				<LoadingSkeleton />
 				<LoadingSkeleton />
 				<LoadingSkeleton />

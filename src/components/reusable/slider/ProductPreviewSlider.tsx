@@ -23,35 +23,17 @@ export default function ProductPreviewSlider() {
 		>
 			<SwiperSlide>
 				<Link href='#' variant='plain' _focus={{ outline: 'none' }}>
-					<Image
-						style={{ width: 'auto', height: 'auto' }}
-						src={img1}
-						width={120}
-						height={120}
-						alt='Product photo'
-					/>
+					<Image src={img1} width={116} height={116} alt='Product photo' />
 				</Link>
 			</SwiperSlide>
 			<SwiperSlide>
 				<Link href='#' variant='plain' _focus={{ outline: 'none' }}>
-					<Image
-						style={{ width: 'auto', height: 'auto' }}
-						width={120}
-						height={120}
-						src={img2}
-						alt='Product photo'
-					/>
+					<Image width={116} height={116} src={img2} alt='Product photo' />
 				</Link>
 			</SwiperSlide>
 			<SwiperSlide>
 				<Link href='#' variant='plain' _focus={{ outline: 'none' }}>
-					<Image
-						style={{ width: 'auto', height: 'auto' }}
-						width={120}
-						height={120}
-						src={img2}
-						alt='Product photo'
-					/>
+					<Image width={116} height={116} src={img2} alt='Product photo' />
 				</Link>
 			</SwiperSlide>
 		</Swiper>

@@ -25,6 +25,12 @@ import ShareProduct from './ShareProduct';
 export default function AboutTab() {
 	const t = useTranslations('Products');
 
+	const i18nData = {
+		pressToCopy: t('pressToCopy'),
+		shareProductText: t('shareProductText'),
+		shareSocial: t('shareSocial'),
+	};
+
 	return (
 		<VStack gap='8'>
 			<Group
@@ -60,7 +66,7 @@ export default function AboutTab() {
 								{t('productIsPresent')}
 							</Status.Root>
 
-							<ShareProduct copyText={t('pressToCopy')} shareText={t('shareProductText')} />
+							<ShareProduct i18nData={i18nData} />
 
 							<IconButton
 								aria-label='Favourite'

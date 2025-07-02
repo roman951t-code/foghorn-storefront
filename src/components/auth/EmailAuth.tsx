@@ -30,12 +30,16 @@ type FormValues = {
 const MAX_CHARACTERS = 60;
 
 export default function EmailAuth({ i18nData, disabled, isSignup = false }: EmailAuthProps) {
+	const [formError, formAction, isPending] = useActionState(registerEmailAction, undefined);
+
 	const schema = useMemo(
 		() => (isSignup ? createEmailSignUpSchema(i18nData) : createEmailSignInSchema(i18nData)),
 		[i18nData]
 	);
 
-	const [formError, formAction, isPending] = useActionState(registerEmailAction, undefined);
+	const [isRestorePassOpen, setRestorePassOpen] = useState(false);
+	const [isSubmitted, setSubmitted] = useState(false);
+
 	const {
 		register,
 		trigger,
@@ -46,29 +50,27 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 		resolver: zodResolver(schema),
 	});
 
-	const [isRestorePassOpen, setRestorePassOpen] = useState(false);
-
-	const [isSubmitted, setSubmitted] = useState(false);
+	const formData = getValues();
 
 	if (isRestorePassOpen) {
 		return <ResetPass i18nData={i18nData} onCloseAction={() => setRestorePassOpen(false)} />;
 	}
 
 	if (isSubmitted) {
-		return <EmailConfirmation i18nData={i18nData} />;
+		return <EmailConfirmation i18nData={i18nData} disabled={disabled} email={formData.email} />;
 	}
 
 	return (
 		<form
 			action={async () => {
-				// const result = await trigger();
-				// if (!result) return;
+				const result = await trigger();
+				if (!result) {
+					return;
+				}
 
-				// const formData = getValues();
-
-				// startTransition(() => {
-				// 	formAction(formData);
-				// });
+				startTransition(() => {
+					formAction(formData);
+				});
 
 				setSubmitted(true);
 			}}
@@ -120,8 +122,8 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 									<Field.RequiredIndicator />
 								</Field.Label>
 								<PasswordInput
-									fontSize='md'
 									{...register('confirmPassword')}
+									fontSize='md'
 									maxLength={MAX_CHARACTERS}
 								/>
 								<Field.ErrorText>{errors.confirmPassword?.message}</Field.ErrorText>

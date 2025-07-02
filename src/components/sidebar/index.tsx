@@ -1,6 +1,6 @@
 'use client';
 
-import { IconButton, Separator } from '@chakra-ui/react';
+import { Card, IconButton, QrCode, Separator } from '@chakra-ui/react';
 import { FiMenu } from 'react-icons/fi';
 import {
 	DrawerBackdrop,
@@ -20,6 +20,7 @@ import CollapsibleLinks from './CollapsibleLinks';
 import UserLinks from './UserLinks';
 import Image from 'next/image';
 import { LogoutSection, AuthorizeSection } from './AuthorizeSection';
+import { useTranslations } from 'next-intl';
 
 const logoBig = '/assets/images/logoBig.webp';
 const logoHeight = 36;
@@ -41,6 +42,7 @@ const Logo = () => {
 
 export default function SidePanel() {
 	const [open, setOpen] = useState(false);
+	const t = useTranslations('Sidebar');
 
 	const onClose = () => {
 		setOpen(false);
@@ -77,6 +79,22 @@ export default function SidePanel() {
 					<LogoutSection />
 					<Separator borderColor='border.light' my='5' />
 					<UserLinks onClose={onClose} />
+					<Separator borderColor='border.light' my='5' />
+					<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' mt='4'>
+						<Card.Body gap='4'>
+							<QrCode.Root
+								value='https://play.google.com/store/apps/details?id=com.lexiko&hl=uk'
+								m='auto'
+							>
+								<QrCode.Frame>
+									<QrCode.Pattern />
+								</QrCode.Frame>
+							</QrCode.Root>
+							<Card.Description color='main' textStyle='sm' textAlign='left'>
+								{t('lexikoProposal')}
+							</Card.Description>
+						</Card.Body>
+					</Card.Root>
 					<Separator borderColor='border.light' my='5' />
 					<CollapsibleLinks onClose={onClose} />
 				</DrawerBody>

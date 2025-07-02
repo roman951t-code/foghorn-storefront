@@ -1,6 +1,6 @@
 'use server';
 
-import { getPhoneSchema } from 'formValidationSchemas/phoneSchema';
+import { getPhoneSignUpSchema } from 'formValidationSchemas/phoneSignUpSchema';
 import { getTranslations } from 'next-intl/server';
 
 export async function registerPhoneAction(
@@ -14,7 +14,7 @@ export async function registerPhoneAction(
 	}
 
 	const data = Object.fromEntries(formData.entries());
-	const schema = await getPhoneSchema();
+	const schema = await getPhoneSignUpSchema();
 	const validated = schema.safeParse(data);
 
 	if (!validated.success) {

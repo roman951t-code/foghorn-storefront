@@ -1,5 +1,6 @@
 'use server';
 
+import { authClient } from '@/lib/auth-client';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { getEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
@@ -46,6 +47,8 @@ export async function registerEmailAction(
 				providerAccountId: email,
 			},
 		});
+
+		await authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' });
 	} catch (e) {
 		return { message: t('useRegisterFail') };
 	}

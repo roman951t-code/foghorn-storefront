@@ -1,7 +1,11 @@
 import { betterAuth } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { emailOTP } from 'better-auth/plugins';
+import { Resend } from 'resend';
 import { prisma } from './prisma';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const auth = betterAuth({
 	database: prismaAdapter(prisma, {
@@ -17,5 +21,25 @@ export const auth = betterAuth({
 		},
 	},
 
-	plugins: [nextCookies()], // make sure this is the last plugin in the array
+	plugins: [
+		emailOTP({
+			async sendVerificationOTP({ email, otp, type }) {
+				const subjectMap = {
+					'sign-in': 'Your sign-in code',
+					'email-verification': 'Verify your email',
+					'password-reset': 'Reset your password',
+				};
+
+				const subject = subjectMap[type] || 'Your OTP Code';
+
+				await resend.emails.send({
+					from: 'Acme <onboarding@resend.dev>',
+					to: [email],
+					subject,
+					html: `<p>Your OTP is: <strong>${otp}</strong></p>`,
+				});
+			},
+		}),
+		nextCookies(),
+	], // make sure this is the last plugin in the array
 });

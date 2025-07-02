@@ -1,4 +1,4 @@
-import { Heading, Flex, Link, FlexProps } from '@chakra-ui/react';
+import { Heading, Flex, FlexProps } from '@chakra-ui/react';
 import ProductsSlider from '@/components/reusable/slider/ProductsSlider';
 import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 
