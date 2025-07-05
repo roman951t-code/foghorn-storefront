@@ -1,7 +1,7 @@
 'use client';
 
 import { startTransition, useActionState } from 'react';
-import { Button, Input, Stack, Field, Fieldset } from '@chakra-ui/react';
+import { Button, Input, Stack, Field, Fieldset, Text, Highlight } from '@chakra-ui/react';
 import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
@@ -11,13 +11,8 @@ import { createEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema
 import { createEmailSignInSchema } from 'formValidationSchemas/emailSignInSchema';
 import type { I18nData } from '@/types/i18n';
 import ResetPass from './ResetPass';
-import EmailConfirmation from './EmailConfirmation';
-
-interface EmailAuthProps {
-	i18nData: I18nData;
-	disabled: boolean;
-	isSignup?: boolean;
-}
+import { loginEmailAction } from '@/actions/loginEmailAction';
+import { authClient } from '@/lib/auth-client';
 
 type FormValues = {
 	firstName?: string;
@@ -27,10 +22,23 @@ type FormValues = {
 	confirmPassword?: string;
 };
 
+interface EmailAuthProps {
+	i18nData: I18nData;
+	disabled: boolean;
+	isSignup?: boolean;
+}
+
 const MAX_CHARACTERS = 60;
 
 export default function EmailAuth({ i18nData, disabled, isSignup = false }: EmailAuthProps) {
-	const [formError, formAction, isPending] = useActionState(registerEmailAction, undefined);
+	const [signUpError, signUpFormAction, isSignUpPending] = useActionState(
+		registerEmailAction,
+		undefined
+	);
+	const [signInError, signInFormAction, isSignInPending] = useActionState(
+		loginEmailAction,
+		undefined
+	);
 
 	const schema = useMemo(
 		() => (isSignup ? createEmailSignUpSchema(i18nData) : createEmailSignInSchema(i18nData)),
@@ -56,9 +64,9 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 		return <ResetPass i18nData={i18nData} onCloseAction={() => setRestorePassOpen(false)} />;
 	}
 
-	if (isSubmitted) {
-		return <EmailConfirmation i18nData={i18nData} disabled={disabled} email={formData.email} />;
-	}
+	const formAction = isSignup ? signUpFormAction : signInFormAction;
+	const formError = isSignup ? signUpError : signInError;
+	const isPending = isSignup ? isSignUpPending : isSignInPending;
 
 	return (
 		<form
@@ -68,11 +76,15 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 					return;
 				}
 
+				const formData = getValues();
+
 				startTransition(() => {
 					formAction(formData);
 				});
 
-				setSubmitted(true);
+				if (isSignup) {
+					setSubmitted(true);
+				}
 			}}
 		>
 			<Stack gap='4' align='flex-start'>
@@ -131,6 +143,19 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 						)}
 					</Fieldset.Content>
 					<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
+
+					{isSubmitted && isSignup && !formError && (
+						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
+							{i18nData.toPost}
+							{formData?.email && (
+								<Highlight query={formData?.email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
+									{formData?.email}
+								</Highlight>
+							)}
+							<Text color='fg.muted'>{i18nData.activationEmailCodeSent}</Text>
+							{i18nData.activationCodeSentSuffix}
+						</Fieldset.HelperText>
+					)}
 				</Fieldset.Root>
 
 				<Button

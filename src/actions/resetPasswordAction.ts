@@ -40,7 +40,6 @@ export async function resetPasswordAction(
 
 		return { success: true };
 	} catch (err) {
-		console.error('Reset password failed:', err);
 		return { error: t('verificationFailed') };
 	}
 }

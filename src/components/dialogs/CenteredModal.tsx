@@ -1,4 +1,6 @@
-import React, { ReactNode, JSX } from 'react';
+'use client';
+
+import React, { ReactNode, JSX, useState } from 'react';
 import {
 	DialogBody,
 	DialogCloseTrigger,
@@ -15,6 +17,7 @@ interface Props {
 	trigger: ReactNode;
 	children: JSX.Element;
 	title: string;
+	open?: boolean;
 	closeOnInteractOutside?: boolean;
 	size?: ConditionalValue<'lg' | 'sm' | 'md' | 'xl' | 'xs' | 'cover' | 'full' | undefined>;
 }
@@ -25,9 +28,13 @@ export default function CenteredModal({
 	title,
 	size = 'lg',
 	closeOnInteractOutside = false,
+	open,
 }: Props) {
+	const [isOpen, setIsOpen] = useState(false);
 	return (
 		<DialogRoot
+			open={open || isOpen}
+			onOpenChange={(e) => setIsOpen(e.open)}
 			unmountOnExit
 			lazyMount
 			placement='center'

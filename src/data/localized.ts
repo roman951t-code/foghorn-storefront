@@ -50,7 +50,7 @@ export const validLocData = [
 	'invalidFormData',
 	'smsSendFailed',
 	'userExists',
-	'useRegisterFail',
+	'userRegisterFail',
 	'passwordsNotMatch',
 	'nameMinLength',
 	'pinRequired',

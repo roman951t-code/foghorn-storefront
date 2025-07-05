@@ -6,7 +6,7 @@ export const confirmEmailSchemaShape = (t: { pinRequired: string; pinLength: str
 	z.object({
 		pin: z
 			.array(z.string().min(1), { required_error: t.pinRequired })
-			.length(5, { message: t.pinLength }),
+			.length(6, { message: t.pinLength }),
 	});
 
 export const createConfirmEmailSchema = (t: I18nData) =>

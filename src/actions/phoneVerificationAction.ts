@@ -14,20 +14,6 @@ export async function emailVerificationAction(
 	const email = formData.email;
 
 	try {
-		const { error } = await authClient.emailOtp.verifyEmail({ email, otp });
-
-		if (error) {
-			const errorMap: Record<string, string> = {
-				'Invalid OTP': t('invalidOtp'),
-				'OTP expired': t('otpExpired'),
-				'Too many attempts': t('tooManyAttempts'),
-			};
-
-			return {
-				message: errorMap[error.message] || t('verificationFailed'),
-			};
-		}
-
 		const user = await prisma.user.findUnique({ where: { email } });
 
 		if (!user) {
@@ -37,17 +23,32 @@ export async function emailVerificationAction(
 		if (user.emailVerified) {
 			return { message: t('alreadyVerified') };
 		}
-
-		await prisma.user.update({
-			where: { email },
-			data: {
-				emailVerified: new Date(),
-			},
+		console.log('otp', otp);
+		const { data, error: signInError } = await authClient.signIn.emailOtp({
+			email,
+			otp,
 		});
+		console.log('signInError', signInError);
+		if (signInError) {
+			const errorMap: Record<string, string> = {
+				'Invalid OTP': t('invalidOtp'),
+				'OTP expired': t('otpExpired'),
+				'User not found': t('userNotFound'),
+				'Too many attempts': t('tooManyAttempts'),
+			};
+
+			return {
+				message: errorMap[signInError.message ?? ''] || t('signInFailed'),
+			};
+		}
+
+		// await prisma.user.update({
+		//   where: { email },
+		//   data: { emailVerified: true },
+		// });
 
 		return {};
 	} catch (e) {
-		console.error(e);
 		return { message: t('verificationFailed') };
 	}
 }

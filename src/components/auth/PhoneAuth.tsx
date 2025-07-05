@@ -9,8 +9,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useActionState } from 'react';
 import { createPhoneSignUpSchema } from 'formValidationSchemas/phoneSignUpSchema';
 import { createphoneSignInSchema } from 'formValidationSchemas/phoneSignInSchema';
-import { registerPhoneAction } from '@/actions/registerPhoneAction';
 import PhoneConfirmation from './PhoneConfirmation';
+import { registerPhoneAction } from '@/actions/registerPhoneAction';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;

@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { Button, PinInput, Highlight, Fieldset, Text } from '@chakra-ui/react';
 import type { I18nData } from '@/types/i18n';
+import { formatTime } from '@/utils/generalUtils';
+import { authClient } from '@/lib/auth-client';
 
 interface Props {
 	i18nData: I18nData;
@@ -26,14 +28,6 @@ export default function PhoneConfirmation({ i18nData }: Props) {
 
 		return () => clearInterval(id);
 	}, [timer]);
-
-	const formatTime = (sec: number) => {
-		const m = Math.floor(sec / 60)
-			.toString()
-			.padStart(2, '0');
-		const s = (sec % 60).toString().padStart(2, '0');
-		return `${m}:${s}`;
-	};
 
 	const formattedTime = formatTime(timer);
 
@@ -87,9 +81,12 @@ export default function PhoneConfirmation({ i18nData }: Props) {
 					variant='outline'
 					border='1px solid'
 					borderColor='border'
-					onClick={() => {
+					onClick={async () => {
 						setTimer(120);
-						action({ phone: '' });
+						await authClient.emailOtp.sendVerificationOtp({
+							email: 'roman951t@gmail.com',
+							type: 'sign-in',
+						});
 					}}
 				>
 					{i18nData.resendCode}

@@ -3,6 +3,7 @@ import { nextCookies } from 'better-auth/next-js';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { emailOTP } from 'better-auth/plugins';
 import { Resend } from 'resend';
+import { getTranslations } from 'next-intl/server';
 import { prisma } from './prisma';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -11,8 +12,18 @@ export const auth = betterAuth({
 	database: prismaAdapter(prisma, {
 		provider: 'postgresql',
 	}),
+	session: {
+		expiresIn: 60 * 60 * 24 * 7,
+		updateAge: 60 * 60 * 24,
+		cookieCache: {
+			enabled: true,
+			maxAge: 5 * 60,
+			secure: process.env.NODE_ENV === 'production',
+		},
+	},
 	emailAndPassword: {
 		enabled: true,
+		requireEmailVerification: true,
 	},
 	socialProviders: {
 		google: {
@@ -21,6 +32,18 @@ export const auth = betterAuth({
 		},
 	},
 
+	emailVerification: {
+		sendVerificationEmail: async ({ user, url, token }, request) => {
+			const t = await getTranslations('Auth');
+
+			await resend.emails.send({
+				from: 'Acme <onboarding@resend.dev>',
+				to: [user.email],
+				subject: t('verifyEmail'),
+				text: `${t('clickToVerifyEmail')}: ${url}`,
+			});
+		},
+	},
 	plugins: [
 		emailOTP({
 			async sendVerificationOTP({ email, otp, type }) {
@@ -30,13 +53,15 @@ export const auth = betterAuth({
 					'password-reset': 'Reset your password',
 				};
 
+				const t = await getTranslations('Auth');
+
 				const subject = subjectMap[type] || 'Your OTP Code';
 
 				await resend.emails.send({
 					from: 'Acme <onboarding@resend.dev>',
 					to: [email],
 					subject,
-					html: `<p>Your OTP is: <strong>${otp}</strong></p>`,
+					html: `<p>${t('emailOtpText')} <strong>${otp}</strong></p>`,
 				});
 			},
 		}),

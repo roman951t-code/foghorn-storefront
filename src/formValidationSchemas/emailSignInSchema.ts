@@ -33,7 +33,7 @@ export const emailSignInSchemaShape = (t: {
 export const createEmailSignInSchema = (t: I18nData) =>
 	emailSignInSchemaShape(t as Parameters<typeof emailSignInSchemaShape>[0]);
 
-export async function getEmailSchema() {
+export async function getEmailSignInSchema() {
 	const t = await getTranslations('Validation');
 
 	return emailSignInSchemaShape({
@@ -50,4 +50,4 @@ export async function getEmailSchema() {
 	});
 }
 
-export type EmailSchema = z.infer<Awaited<ReturnType<typeof getEmailSchema>>>;
+export type EmailSchema = z.infer<Awaited<ReturnType<typeof getEmailSignInSchema>>>;
