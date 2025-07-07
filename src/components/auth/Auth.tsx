@@ -4,11 +4,10 @@ import { Box, Button, VStack } from '@chakra-ui/react';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import type { I18nData } from '@/types/i18n';
 import Image from 'next/image';
-import { toaster } from '@/components/ui/toaster';
 import Login from './Login';
 import Signup from './Signup';
 import { authClient } from '@/lib/auth-client';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 const emptyCart = '/assets/images/emptyCart.png';
 
@@ -18,36 +17,19 @@ interface Props {
 }
 
 export default function Auth({ i18nData, trigger }: Props) {
-	const router = useRouter();
 	const { data: session } = authClient.useSession();
 	const [showSignup, setShowSignup] = useState(false);
 
 	const searchParams = useSearchParams();
 	const emailSignIn = searchParams?.get('email-sign-in') === 'true';
 
-	const [forceOpen, setForceOpen] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
 
 	useEffect(() => {
-		if (!emailSignIn) return;
-		if (session) return;
+		if (!emailSignIn || session) return;
 
 		if (emailSignIn) {
-			setForceOpen(true);
-			setTimeout(() =>
-				toaster.success({
-					title: 'Toast Title',
-					description: 'Toast Description',
-					duration: 8000,
-					closable: true,
-				})
-			),
-				10;
-
-			const current = new URLSearchParams(window.location.search);
-			current.delete('email-sign-in');
-			const newSearch = current.toString();
-			const newPath = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
-			router.replace(newPath);
+			setIsOpen(true);
 		}
 	}, [emailSignIn, session]);
 
@@ -67,7 +49,8 @@ export default function Auth({ i18nData, trigger }: Props) {
 			title={title}
 			trigger={trigger}
 			size='md'
-			open={forceOpen}
+			open={isOpen}
+			setIsOpen={setIsOpen}
 		>
 			<Box maxW='400px' mx='auto' my='auto'>
 				{!session && (
@@ -95,7 +78,7 @@ export default function Auth({ i18nData, trigger }: Props) {
 							}}
 						/>
 						<Button
-							onClick={async () => await authClient.signOut()}
+							onClick={() => setIsOpen(false)}
 							w='100%'
 							type='submit'
 							color='black'

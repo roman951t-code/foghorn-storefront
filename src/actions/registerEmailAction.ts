@@ -1,6 +1,6 @@
 'use server';
 
-import { authClient } from '@/lib/auth-client';
+import { auth } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
 import { getEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
 import { prisma } from '@/lib/prisma';
@@ -27,36 +27,35 @@ export async function registerEmailAction(
 			return { message: t('userExists') };
 		}
 
-		const { data, error } = await authClient.signUp.email({
-			email,
-			password,
-			name: `${firstName} ${lastName}`,
-			image: '',
-		});
-
-		if (error) {
-			const errorMap: Record<string, string> = {
-				'User already exists': t('userExists'),
-				'Invalid email': t('wrongEmail'),
-				'Invalid password': t('wrongPassword'),
-			};
-
-			return {
-				message: errorMap[error.message ?? ''] || t('userRegisterFail'),
-			};
-		}
-
-		await authClient.sendVerificationEmail({
-			email,
-			callbackURL: '/?email-sign-in=true',
+		await auth.api.signUpEmail({
+			body: {
+				email,
+				password,
+				name: `${firstName} ${lastName}`,
+				callbackURL: '/?email-sign-in=true',
+			},
 		});
 
 		return;
-	} catch (e: any) {
-		if (e.code === 'P2002') {
+	} catch (error: any) {
+		if (error.code === 'P2002') {
 			return { message: t('userExists') };
 		}
 
-		return { message: t('userRegisterFail') };
+		const errorMap: Record<string, string> = {
+			'User already exists': t('userExists'),
+			'Invalid email': t('wrongEmail'),
+			'Missing email': t('emailRequired'),
+			'Invalid password': t('wrongPassword'),
+			'Missing password': t('passwordRequired'),
+			'Password is too weak': t('passwordTooWeak'),
+			'Password is too short': t('passwordTooShort'),
+			'Too many requests': t('tooManyRequests'),
+			'Unknown error': t('userRegisterFail'),
+		};
+
+		return {
+			message: errorMap[error?.body?.message ?? ''] || t('userRegisterFail'),
+		};
 	}
 }

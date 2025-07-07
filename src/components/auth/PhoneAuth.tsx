@@ -14,7 +14,7 @@ import { registerPhoneAction } from '@/actions/registerPhoneAction';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;
-	disabled: boolean;
+	disabled?: boolean;
 	isSignup?: boolean;
 }
 

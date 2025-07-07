@@ -1,14 +1,13 @@
 'use client';
 
-import { Button, Fieldset, Stack, Field, PinInput } from '@chakra-ui/react';
-import { Controller, useForm } from 'react-hook-form';
+import { Button, Fieldset, Stack, Field, Input, Highlight, Text } from '@chakra-ui/react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { startTransition, useActionState } from 'react';
+import { startTransition, useActionState, useState } from 'react';
 import type { I18nData } from '@/types/i18n';
 import { useMemo } from 'react';
 import { resetPasswordAction } from '@/actions/resetPasswordAction';
-import { PasswordInput } from '../ui/password-input';
-import { createRestorePassSchema } from 'formValidationSchemas/restorepassSchema';
+import { createResetPassSchema } from 'formValidationSchemas/resetPassSchema';
 
 interface ResetPassProps {
 	i18nData: I18nData;
@@ -16,22 +15,27 @@ interface ResetPassProps {
 }
 
 type FormValues = {
-	pin: string[];
-	password: string;
+	email: string;
 };
 
 const MAX_CHARACTERS = 60;
 
 export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
-	const schema = useMemo(() => createRestorePassSchema(i18nData), [i18nData]);
+	const schema = useMemo(() => createResetPassSchema(i18nData), [i18nData]);
+
+	const [isSubmitted, setSubmitted] = useState(false);
 
 	const [formError, formAction, isPending] = useActionState(resetPasswordAction, undefined);
 
+	const resetForm = () => {
+		setSubmitted(false);
+		onCloseAction(false);
+	};
+
 	const {
 		register,
-		trigger,
 		getValues,
-		control,
+		handleSubmit,
 		formState: { errors, isSubmitting },
 	} = useForm<FormValues>({
 		mode: 'onSubmit',
@@ -42,76 +46,63 @@ export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
 
 	return (
 		<form
-			action={async () => {
-				const result = await trigger();
-				if (!result) {
-					return;
-				}
-
-				startTransition(() => {
+			onSubmit={handleSubmit(async (formData) => {
+				startTransition(async () => {
 					formAction(formData);
+
+					setSubmitted(true);
 				});
-			}}
+			})}
 		>
 			<Stack gap='4' align='flex-start'>
 				<Fieldset.Root size='lg' invalid>
 					<Fieldset.Content>
-						<Controller
-							control={control}
-							name='pin'
-							render={({ field }) => (
-								<PinInput.Root
-									value={field.value}
-									onValueChange={(e) => field.onChange(e.value)}
-									otp
-									my='2'
-									justifyContent='center'
-								>
-									<PinInput.HiddenInput />
-									<PinInput.Control w='100%' justifyContent='center'>
-										{Array.from({ length: 5 }).map((_, i) => (
-											<PinInput.Input key={i} _focus={{ outline: 'none' }} index={i} />
-										))}
-									</PinInput.Control>
-								</PinInput.Root>
-							)}
-						/>
-
-						<Field.Root required invalid={!!errors.password}>
+						<Field.Root required invalid={!!errors.email}>
 							<Field.Label>
-								{i18nData.password}
+								{i18nData.email}
 								<Field.RequiredIndicator />
 							</Field.Label>
-							<PasswordInput fontSize='md' {...register('password')} maxLength={MAX_CHARACTERS} />
-							<Field.ErrorText>{errors.password?.message}</Field.ErrorText>
+							<Input fontSize='md' {...register('email')} maxLength={MAX_CHARACTERS} />
+							<Field.ErrorText>{errors.email?.message}</Field.ErrorText>
 						</Field.Root>
 
 						<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
 					</Fieldset.Content>
 
-					<Button
-						w='100%'
-						mt='4'
-						type='submit'
-						loading={isSubmitting || isPending}
-						bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-						color='black'
-						variant='solid'
-					>
-						{i18nData.setnewpass}
-					</Button>
-
-					<Button
-						w='100%'
-						color='main'
-						variant='outline'
-						border='1px solid'
-						borderColor='border'
-						onClick={() => onCloseAction(false)}
-					>
-						{i18nData.rememberPass}
-					</Button>
+					{isSubmitted && !formError && !isPending && (
+						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
+							{i18nData.toPost}
+							{formData?.email && (
+								<Highlight query={formData?.email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
+									{formData?.email}
+								</Highlight>
+							)}
+							<Text color='fg.muted'>{i18nData.resetPassCodeSent}</Text>
+						</Fieldset.HelperText>
+					)}
 				</Fieldset.Root>
+
+				<Button
+					w='100%'
+					type='submit'
+					loading={isSubmitting || isPending}
+					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+					color='black'
+					variant='solid'
+				>
+					{i18nData.resetPassConfirm}
+				</Button>
+
+				<Button
+					w='100%'
+					color='main'
+					variant='outline'
+					border='1px solid'
+					borderColor='border'
+					onClick={resetForm}
+				>
+					{i18nData.rememberPass}
+				</Button>
 			</Stack>
 		</form>
 	);

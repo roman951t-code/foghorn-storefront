@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Button, Stack, Icon, CheckboxCard, Link as ChakraLink } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import EmailAuth from './EmailAuth';
-// import { signIn } from 'next-auth/react';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdArrowBack, IoMdPhonePortrait } from 'react-icons/io';
 import { Link } from '@/i18n/routing';
 import PhoneAuth from './PhoneAuth';
+import { signIn } from '@/lib/auth-client';
 
 interface Props {
 	i18nData: I18nData;
@@ -71,7 +71,11 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 					gap='12px'
 					variant='outline'
 					borderColor='main'
-					onClick={() => signIn('google')}
+					onClick={async () => {
+						await signIn.social({
+							provider: 'google',
+						});
+					}}
 				>
 					<Icon size='md'>
 						<FcGoogle />

@@ -9,7 +9,7 @@ export const authLocData = [
 	'password',
 	'continue',
 	'rememberPass',
-	'restorePass',
+	'resetPassAction',
 	'getTemporaryPass',
 	'accept',
 	'acceptTerms',
@@ -27,11 +27,14 @@ export const authLocData = [
 	'confirmPhone',
 	'confirmEmail',
 	'activationCodeSent',
-	'activationEmailCodeSent',
+	'signUpCodeSent',
 	'continuePurchases',
 	'returnCongrats',
 	'pin',
 	'toPost',
+	'resetPassConfirm',
+	'emailConfirmed',
+	'resetPassCodeSent',
 ];
 
 export const validLocData = [
@@ -61,4 +64,5 @@ export const validLocData = [
 	'invalidOtp',
 	'otpExpired',
 	'tooManyAttempts',
+	'emailNotVerified',
 ];

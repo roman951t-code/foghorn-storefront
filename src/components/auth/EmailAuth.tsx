@@ -1,7 +1,7 @@
 'use client';
 
-import { startTransition, useActionState } from 'react';
-import { Button, Input, Stack, Field, Fieldset, Text, Highlight } from '@chakra-ui/react';
+import { startTransition, useActionState, useEffect } from 'react';
+import { Button, Input, Stack, Field, Fieldset, Text, Highlight, Alert } from '@chakra-ui/react';
 import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
@@ -13,6 +13,8 @@ import type { I18nData } from '@/types/i18n';
 import ResetPass from './ResetPass';
 import { loginEmailAction } from '@/actions/loginEmailAction';
 import { authClient } from '@/lib/auth-client';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 type FormValues = {
 	firstName?: string;
@@ -24,13 +26,15 @@ type FormValues = {
 
 interface EmailAuthProps {
 	i18nData: I18nData;
-	disabled: boolean;
+	disabled?: boolean;
 	isSignup?: boolean;
 }
 
 const MAX_CHARACTERS = 60;
 
 export default function EmailAuth({ i18nData, disabled, isSignup = false }: EmailAuthProps) {
+	const router = useRouter();
+
 	const [signUpError, signUpFormAction, isSignUpPending] = useActionState(
 		registerEmailAction,
 		undefined
@@ -40,6 +44,15 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 		undefined
 	);
 
+	const [authError, setAuthError] = useState('');
+
+	const searchParams = useSearchParams();
+	const emailSignIn = searchParams?.get('email-sign-in') === 'true';
+
+	const [forceOpen, setForceOpen] = useState(false);
+
+	const { data: session } = authClient.useSession();
+
 	const schema = useMemo(
 		() => (isSignup ? createEmailSignUpSchema(i18nData) : createEmailSignInSchema(i18nData)),
 		[i18nData]
@@ -48,10 +61,24 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 	const [isRestorePassOpen, setRestorePassOpen] = useState(false);
 	const [isSubmitted, setSubmitted] = useState(false);
 
+	useEffect(() => {
+		if (!emailSignIn || session) return;
+
+		if (emailSignIn) {
+			setForceOpen(true);
+
+			const current = new URLSearchParams(window.location.search);
+			current.delete('email-sign-in');
+			const newSearch = current.toString();
+			const newPath = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
+			router.replace(newPath);
+		}
+	}, [emailSignIn, session]);
+
 	const {
 		register,
-		trigger,
 		getValues,
+		handleSubmit,
 		formState: { errors },
 	} = useForm<FormValues>({
 		mode: 'onSubmit',
@@ -68,24 +95,36 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 	const formError = isSignup ? signUpError : signInError;
 	const isPending = isSignup ? isSignUpPending : isSignInPending;
 
+	const errorMap: Record<string, string> = {
+		'Invalid email or password': i18nData.invalidFormData,
+		'User not found': i18nData.userNotFound,
+		'Email not verified': i18nData.emailNotVerified,
+		'Too many attempts': i18nData.tooManyAttempts,
+	};
+
 	return (
 		<form
-			action={async () => {
-				const result = await trigger();
-				if (!result) {
-					return;
-				}
-
-				const formData = getValues();
-
-				startTransition(() => {
+			onSubmit={handleSubmit(async (formData) => {
+				startTransition(async () => {
 					formAction(formData);
-				});
 
-				if (isSignup) {
-					setSubmitted(true);
-				}
-			}}
+					if (isSignup) {
+						setSubmitted(true);
+					} else {
+						const { error } = await authClient.signIn.email({
+							email: formData.email,
+							password: formData.password,
+						});
+
+						if (error) {
+							const messageKey = error?.message ?? '';
+							const message = errorMap[messageKey] || i18nData.userLoginFail;
+
+							setAuthError(message);
+						}
+					}
+				});
+			})}
 		>
 			<Stack gap='4' align='flex-start'>
 				<Fieldset.Root size='lg' invalid>
@@ -142,9 +181,16 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 							</Field.Root>
 						)}
 					</Fieldset.Content>
-					<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
+					<Fieldset.ErrorText>{authError || formError?.message}</Fieldset.ErrorText>
 
-					{isSubmitted && isSignup && !formError && (
+					{forceOpen && (
+						<Alert.Root status='success' variant='solid' my='2' fontSize='15px'>
+							<Alert.Indicator />
+							<Alert.Title>{i18nData.emailConfirmed}</Alert.Title>
+						</Alert.Root>
+					)}
+
+					{isSubmitted && isSignup && !formError && !isPending && (
 						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
 							{i18nData.toPost}
 							{formData?.email && (
@@ -152,8 +198,7 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 									{formData?.email}
 								</Highlight>
 							)}
-							<Text color='fg.muted'>{i18nData.activationEmailCodeSent}</Text>
-							{i18nData.activationCodeSentSuffix}
+							<Text color='fg.muted'>{i18nData.signUpCodeSent}</Text>
 						</Fieldset.HelperText>
 					)}
 				</Fieldset.Root>
@@ -177,7 +222,7 @@ export default function EmailAuth({ i18nData, disabled, isSignup = false }: Emai
 						borderColor='border'
 						onClick={() => setRestorePassOpen(true)}
 					>
-						{i18nData.restorePass}
+						{i18nData.resetPassAction}
 					</Button>
 				)}
 			</Stack>

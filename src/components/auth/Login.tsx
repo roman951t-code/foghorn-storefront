@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Button, Stack } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import EmailAuth from './EmailAuth';
-// import { signIn, useSession } from 'next-auth/react';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdPhonePortrait } from 'react-icons/io';
 import PhoneAuth from './PhoneAuth';
+import { signIn } from '@/lib/auth-client';
 
 interface Props {
 	i18nData: I18nData;
@@ -21,21 +21,20 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 
 	return (
 		<>
-			{isPhoneAuth && (
-				<PhoneAuth i18nData={i18nData} onSubmitAction={({ email, password }) => null} />
-			)}
-			{isEmailAuth && (
-				<EmailAuth
-					onSubmitAction={
-						({ email, password }) => false
-						// signIn('email-credentials', { email, password, redirect: false })
-					}
-					i18nData={i18nData}
-				/>
-			)}
+			{isPhoneAuth && <PhoneAuth i18nData={i18nData} />}
+			{isEmailAuth && <EmailAuth i18nData={i18nData} />}
 
 			<Stack gap={4} mt={12}>
-				<Button gap='12px' variant='outline' borderColor='main' onClick={() => false}>
+				<Button
+					gap='12px'
+					variant='outline'
+					borderColor='main'
+					onClick={async () => {
+						await signIn.social({
+							provider: 'google',
+						});
+					}}
+				>
 					<FcGoogle />
 					{i18nData.continueWith} Google
 				</Button>

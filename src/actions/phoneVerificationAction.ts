@@ -23,12 +23,12 @@ export async function emailVerificationAction(
 		if (user.emailVerified) {
 			return { message: t('alreadyVerified') };
 		}
-		console.log('otp', otp);
+
 		const { data, error: signInError } = await authClient.signIn.emailOtp({
 			email,
 			otp,
 		});
-		console.log('signInError', signInError);
+
 		if (signInError) {
 			const errorMap: Record<string, string> = {
 				'Invalid OTP': t('invalidOtp'),

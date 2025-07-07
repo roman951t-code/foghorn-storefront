@@ -1,7 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { emailOTP } from 'better-auth/plugins';
 import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from './prisma';
@@ -24,9 +23,20 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: true,
+		sendResetPassword: async ({ user, url, token }, request) => {
+			const t = await getTranslations('Auth');
+
+			await resend.emails.send({
+				from: 'Acme <onboarding@resend.dev>',
+				to: [user.email],
+				subject: t('resetPass'),
+				text: `${t('clickToResetPass')}: ${url}`,
+			});
+		},
 	},
 	socialProviders: {
 		google: {
+			prompt: 'select_account',
 			clientId: process.env.GOOGLE_CLIENT_ID as string,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
 		},
@@ -44,27 +54,5 @@ export const auth = betterAuth({
 			});
 		},
 	},
-	plugins: [
-		emailOTP({
-			async sendVerificationOTP({ email, otp, type }) {
-				const subjectMap = {
-					'sign-in': 'Your sign-in code',
-					'email-verification': 'Verify your email',
-					'password-reset': 'Reset your password',
-				};
-
-				const t = await getTranslations('Auth');
-
-				const subject = subjectMap[type] || 'Your OTP Code';
-
-				await resend.emails.send({
-					from: 'Acme <onboarding@resend.dev>',
-					to: [email],
-					subject,
-					html: `<p>${t('emailOtpText')} <strong>${otp}</strong></p>`,
-				});
-			},
-		}),
-		nextCookies(),
-	], // make sure this is the last plugin in the array
+	plugins: [nextCookies()],
 });

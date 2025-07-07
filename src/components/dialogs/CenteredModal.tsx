@@ -20,6 +20,7 @@ interface Props {
 	open?: boolean;
 	closeOnInteractOutside?: boolean;
 	size?: ConditionalValue<'lg' | 'sm' | 'md' | 'xl' | 'xs' | 'cover' | 'full' | undefined>;
+	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function CenteredModal({
@@ -28,12 +29,12 @@ export default function CenteredModal({
 	title,
 	size = 'lg',
 	closeOnInteractOutside = false,
+	setIsOpen,
 	open,
 }: Props) {
-	const [isOpen, setIsOpen] = useState(false);
 	return (
 		<DialogRoot
-			open={open || isOpen}
+			open={open}
 			onOpenChange={(e) => setIsOpen(e.open)}
 			unmountOnExit
 			lazyMount

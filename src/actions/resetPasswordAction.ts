@@ -1,45 +1,39 @@
 'use server';
 
-import bcrypt from 'bcryptjs';
 import { authClient } from '@/lib/auth-client';
-import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
+import { getResetPassSchema } from 'formValidationSchemas/resetPassSchema';
 
 export async function resetPasswordAction(
-	email: string,
-	otp: string,
-	newPassword: string
-): Promise<{ success?: boolean; error?: string }> {
+	prevState: unknown,
+	formData: unknown
+): Promise<{ message?: string } | undefined> {
 	const t = await getTranslations('Validation');
 
+	const schema = await getResetPassSchema();
+	const validatedFormData = schema.safeParse(formData);
+
+	if (!validatedFormData.success) {
+		return { message: t('invalidFormData') };
+	}
+
+	const { email } = validatedFormData.data;
+
 	try {
-		// Step 1: Reset password through Better Auth
-		const { error } = await authClient.emailOtp.resetPassword({
+		await authClient.requestPasswordReset({
 			email,
-			otp,
-			password: newPassword,
+			redirectTo: '/?reset-pass=true',
 		});
+	} catch (error: any) {
+		const errorMap: Record<string, string> = {
+			'Invalid email': t('wrongEmail'),
+			'Missing email': t('emailRequired'),
+			'Too many requests': t('tooManyRequests'),
+			'Unknown error': t('userRegisterFail'),
+		};
 
-		if (error) {
-			const errorMap: Record<string, string> = {
-				'Invalid OTP': t('invalidOtp'),
-				'OTP expired': t('otpExpired'),
-				'Too many attempts': t('tooManyAttempts'),
-			};
-
-			return { error: errorMap[error.message] || t('verificationFailed') };
-		}
-
-		// Step 2: Update hashed password in your DB
-		const hashed = await bcrypt.hash(newPassword, 10);
-
-		await prisma.user.update({
-			where: { email },
-			data: { hashedPassword: hashed },
-		});
-
-		return { success: true };
-	} catch (err) {
-		return { error: t('verificationFailed') };
+		return {
+			message: errorMap[error?.body?.message ?? ''] || t('userRegisterFail'),
+		};
 	}
 }

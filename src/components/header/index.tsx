@@ -7,7 +7,6 @@ import SearchInput from './SearchInput';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import UserActions from './UserActions';
 import Logo from './Logo';
-import { Toaster } from '../ui/toaster';
 
 export default function Header() {
 	const genT = useTranslations('General');
@@ -66,7 +65,6 @@ export default function Header() {
 					<SearchInput placeholder={t('search')} notFound={genT('resultsNotFound')} />
 				</Flex>
 			</Stack>
-			<Toaster />
 		</Box>
 	);
 }

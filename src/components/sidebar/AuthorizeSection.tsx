@@ -1,3 +1,4 @@
+import { authClient } from '@/lib/auth-client';
 import { Card, Button } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 
@@ -7,7 +8,13 @@ export function LogoutSection() {
 	return (
 		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
 			<Card.Body gap={3}>
-				<Button color='main' variant='outline' border='1px solid ' borderColor='border'>
+				<Button
+					color='main'
+					variant='outline'
+					border='1px solid '
+					borderColor='border'
+					onClick={async () => await authClient.signOut()}
+				>
 					{authT('logOut')}
 				</Button>
 			</Card.Body>
