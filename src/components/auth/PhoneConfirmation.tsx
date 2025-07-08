@@ -83,10 +83,6 @@ export default function PhoneConfirmation({ i18nData }: Props) {
 					borderColor='border'
 					onClick={async () => {
 						setTimer(120);
-						await authClient.emailOtp.sendVerificationOtp({
-							email: 'roman951t@gmail.com',
-							type: 'sign-in',
-						});
 					}}
 				>
 					{i18nData.resendCode}

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Button, Stack, Icon, CheckboxCard, Link as ChakraLink } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
-import EmailAuth from './EmailAuth';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdArrowBack, IoMdPhonePortrait } from 'react-icons/io';
 import { Link } from '@/i18n/routing';
 import PhoneAuth from './PhoneAuth';
 import { signIn } from '@/lib/auth-client';
+import EmailSignUp from './EmailSignUp';
 
 interface Props {
 	i18nData: I18nData;
@@ -27,11 +27,11 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 				<PhoneAuth
 					i18nData={i18nData}
 					disabled={!termsAccepted}
-					onSubmitAction={({ email, password }) => null}
+					// onSubmitAction={({ email, password }) => null}
 					isSignup
 				/>
 			)}
-			{isEmailAuth && <EmailAuth i18nData={i18nData} disabled={!termsAccepted} isSignup />}
+			{isEmailAuth && <EmailSignUp i18nData={i18nData} disabled={!termsAccepted} />}
 			<CheckboxCard.Root
 				onChange={() => setTermsAccepted(!termsAccepted)}
 				css={{

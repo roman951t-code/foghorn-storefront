@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Button, Stack } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
-import EmailAuth from './EmailAuth';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdPhonePortrait } from 'react-icons/io';
 import PhoneAuth from './PhoneAuth';
 import { signIn } from '@/lib/auth-client';
+import EmailSignIn from './EmailSignIn';
 
 interface Props {
 	i18nData: I18nData;
@@ -22,7 +22,7 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 	return (
 		<>
 			{isPhoneAuth && <PhoneAuth i18nData={i18nData} />}
-			{isEmailAuth && <EmailAuth i18nData={i18nData} />}
+			{isEmailAuth && <EmailSignIn i18nData={i18nData} />}
 
 			<Stack gap={4} mt={12}>
 				<Button

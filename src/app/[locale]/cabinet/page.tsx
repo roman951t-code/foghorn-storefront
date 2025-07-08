@@ -6,7 +6,13 @@ import { extractI18nData } from '@/utils/i18nUtils';
 export default function Cabinet() {
 	const t = useTranslations('Auth');
 
-	const i18nData = extractI18nData(t, ['name', 'email', 'phone', 'lastname']);
+	const i18nData = extractI18nData(t, [
+		'name',
+		'email',
+		'phone',
+		'lastname',
+		'preferredNotificationWay',
+	]);
 
 	return (
 		<VStack w='100%'>

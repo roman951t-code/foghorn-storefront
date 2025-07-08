@@ -29,11 +29,11 @@ export async function resetPasswordAction(
 			'Invalid email': t('wrongEmail'),
 			'Missing email': t('emailRequired'),
 			'Too many requests': t('tooManyRequests'),
-			'Unknown error': t('userRegisterFail'),
+			'Unknown error': t('setNewPassFail'),
 		};
 
 		return {
-			message: errorMap[error?.body?.message ?? ''] || t('userRegisterFail'),
+			message: errorMap[error?.body?.message ?? ''] || t('setNewPassFail'),
 		};
 	}
 }

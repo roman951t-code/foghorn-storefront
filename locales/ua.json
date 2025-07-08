@@ -43,6 +43,7 @@
 		"userExists": "Такий користувач вже є",
 		"userRegisterFail": "Не вдалося зареєструвати користувача",
 		"userLoginFail": "Не вдалося авторизувати користувача",
+		"setNewPassFail": "Не вдалося оновити пароль",
 		"passwordsNotMatch": "Паролі не збігаються",
 		"firstNameRequired": "Ім'я обов'язкове",
 		"invalidPhone": "Невірний формат номера. Приклад: +380501234567",
@@ -107,7 +108,10 @@
 		"resetPass": "Скиньте пароль",
 		"resetPassAction": "Скинути пароль",
 		"resetPassConfirm": "Підтвердити скидання паролю",
-		"clickToResetPass": "Натисніть на посилання, щоб скинути пароль"
+		"clickToResetPass": "Натисніть на посилання, щоб скинути пароль",
+		"preferredNotificationWay": "Бажаний спосіб отримання сповіщень",
+		"renewPass": "Відновлення паролю",
+		"saveNewPass": "Зберегти новий пароль"
 	},
 	"Main": {
 		"title": "Головна"

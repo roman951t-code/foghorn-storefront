@@ -44,7 +44,7 @@ export default function CenteredModal({
 			scrollBehavior='inside'
 			closeOnInteractOutside={closeOnInteractOutside}
 		>
-			<DialogTrigger asChild>{trigger}</DialogTrigger>
+			{trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 			<DialogContent bg='bg.tertiary' minWidth='350px'>
 				<DialogHeader>
 					<DialogTitle

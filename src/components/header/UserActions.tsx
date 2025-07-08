@@ -7,6 +7,7 @@ import { authLocData, validLocData } from '@/data/localized';
 
 import Auth from '../auth/Auth';
 import Cart from './Cart';
+import SetNewPassModal from '../auth/SetNewPassModal';
 
 const AuthBtn = () => (
 	<IconButton
@@ -37,6 +38,7 @@ export default function UserActions() {
 	return (
 		<>
 			<Auth trigger={<AuthBtn />} i18nData={i18nData} />
+			<SetNewPassModal i18nData={i18nData} />
 
 			<IconButton
 				position='relative'

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { getTranslations } from 'next-intl/server';
 import type { I18nData } from '@/types/i18n';
 
-export const restorePassSchemaShape = (t: {
+export const setNewPassSchema = (t: {
 	passwordRequired: string;
 	passwordMin: string;
 	passwordMax: string;
@@ -10,13 +10,8 @@ export const restorePassSchemaShape = (t: {
 	passwordLowercase: string;
 	passwordAlphabetic: string;
 	passwordUnderscore: string;
-	pinRequired: string;
-	pinLength: string;
 }) =>
 	z.object({
-		pin: z
-			.array(z.string().min(1), { required_error: t.pinRequired })
-			.length(5, { message: t.pinLength }),
 		password: z
 			.string({ required_error: t.passwordRequired })
 			.min(8, { message: t.passwordMin })
@@ -27,13 +22,13 @@ export const restorePassSchemaShape = (t: {
 			.regex(/_/, { message: t.passwordUnderscore }),
 	});
 
-export const createRestorePassSchema = (t: I18nData) =>
-	restorePassSchemaShape(t as Parameters<typeof restorePassSchemaShape>[0]);
+export const createNewPassSchema = (t: I18nData) =>
+	setNewPassSchema(t as Parameters<typeof setNewPassSchema>[0]);
 
-export async function getRestorePassSchema() {
+export async function getNewPassSchema() {
 	const t = await getTranslations('Validation');
 
-	return restorePassSchemaShape({
+	return setNewPassSchema({
 		passwordRequired: t('passwordRequired'),
 		passwordMin: t('passwordMin'),
 		passwordMax: t('passwordMax'),
@@ -41,9 +36,7 @@ export async function getRestorePassSchema() {
 		passwordLowercase: t('passwordLowercase'),
 		passwordAlphabetic: t('passwordAlphabetic'),
 		passwordUnderscore: t('passwordUnderscore'),
-		pinRequired: t('pinRequired'),
-		pinLength: t('pinLength'),
 	});
 }
 
-export type RestorePassSchema = z.infer<Awaited<ReturnType<typeof getRestorePassSchema>>>;
+export type RestorePassSchema = z.infer<Awaited<ReturnType<typeof getNewPassSchema>>>;

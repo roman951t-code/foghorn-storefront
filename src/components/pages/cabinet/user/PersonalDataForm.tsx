@@ -1,7 +1,9 @@
 'use client';
-import { HStack, Input, Field, Wrap } from '@chakra-ui/react';
+import { Input, Field, Wrap, RadioCard, Stack, Icon } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
+import { IoMailOutline } from 'react-icons/io5';
+import { IoMdPhonePortrait } from 'react-icons/io';
 
 interface FormValues {
 	email: string;
@@ -23,7 +25,6 @@ interface Props {
 
 export default function PersonalDataForm({ i18nData }: Props) {
 	const {
-		register,
 		handleSubmit,
 		setValue,
 		formState: { errors, isSubmitting },
@@ -43,6 +44,13 @@ export default function PersonalDataForm({ i18nData }: Props) {
 			console.error('Submission failed:', error);
 		}
 	});
+
+	const items = [
+		{ value: 'email', title: 'Email', icon: <IoMailOutline /> },
+		{ value: 'phone', title: 'Телефон', icon: <IoMdPhonePortrait /> },
+	];
+
+	// телефон або email як бажаний спосіб сповіщень задізейблений пока юзер не добаве свій номер і підтвердить його
 
 	return (
 		<form onSubmit={onSubmit}>
@@ -132,6 +140,40 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					<Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
 				</Field.Root>
 			</Wrap>
+
+			<RadioCard.Root
+				mt='16'
+				colorPalette='gray'
+				orientation={{ base: 'vertical', sm: 'horizontal' }}
+				align='center'
+				value={'email'}
+				// onChange={(event) => {
+				// 	const value = (event.target as HTMLInputElement).value;
+				// 	setSelectedPayment(value);
+				// }}
+			>
+				<RadioCard.Label fontSize='md' mb='3' fontWeight='normal'>
+					{i18nData.preferredNotificationWay}
+				</RadioCard.Label>
+				<Stack direction={{ base: 'column', xs: 'row' }} gap='4'>
+					{items.map((item) => (
+						<RadioCard.Item
+							key={item.value}
+							value={item.value}
+							_hover={{ cursor: 'pointer' }}
+							maxW='sm'
+						>
+							<RadioCard.ItemHiddenInput />
+							<RadioCard.ItemControl>
+								<Icon fontSize='2xl' color='fg.muted'>
+									{item.icon}
+								</Icon>
+								<RadioCard.ItemText>{item.title}</RadioCard.ItemText>
+							</RadioCard.ItemControl>
+						</RadioCard.Item>
+					))}
+				</Stack>
+			</RadioCard.Root>
 		</form>
 	);
 }

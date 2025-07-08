@@ -35,6 +35,8 @@ export const authLocData = [
 	'resetPassConfirm',
 	'emailConfirmed',
 	'resetPassCodeSent',
+	'renewPass',
+	'saveNewPass',
 ];
 
 export const validLocData = [
