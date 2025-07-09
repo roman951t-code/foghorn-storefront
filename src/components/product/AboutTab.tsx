@@ -125,7 +125,12 @@ export default function AboutTab() {
 					</Stat.Root>
 
 					<HStack gap='4'>
-						<Rating colorPalette='orange' readOnly size='xs' defaultValue={5} />
+						<Rating
+							colorPalette={{ base: 'orange', _dark: 'yellow' }}
+							readOnly
+							size='xs'
+							defaultValue={5}
+						/>
 						<Link
 							href='#'
 							variant='underline'

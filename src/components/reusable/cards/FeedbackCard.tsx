@@ -95,7 +95,12 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 						<Flex justifyContent='space-between' mt='6'>
 							<Stack>
 								<Heading size='md'> Roman Onyshchenko</Heading>
-								<Rating colorPalette='orange' readOnly size='xs' defaultValue={5} />
+								<Rating
+									colorPalette={{ base: 'orange', _dark: 'yellow' }}
+									readOnly
+									size='xs'
+									defaultValue={5}
+								/>
 							</Stack>
 
 							<IconButton

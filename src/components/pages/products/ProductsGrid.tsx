@@ -18,7 +18,7 @@ export default function ProductsGrid() {
 		</EmptyState.Root> */}
 			<SimpleGrid
 				className='productsSlider'
-				columns={{ base: 1, xs: 2, md: 3, xl: 4 } as any}
+				columns={{ base: 1, prodXs: 2, prodSm: 3, prodLg: 4, prodXl: 5 } as any}
 				gap='2'
 			>
 				{new Array(9).fill(null).map((_, index) => (

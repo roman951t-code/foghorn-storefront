@@ -31,7 +31,12 @@ export default function FeedbackTab() {
 					<Flex justifyContent='space-between' alignItems='center'>
 						<Stack>
 							<Heading size='md'> {prodT('feedbackTotal')}: 5</Heading>
-							<Rating colorPalette='orange' readOnly size='xs' defaultValue={5} />
+							<Rating
+								colorPalette={{ base: 'orange', _dark: 'yellow' }}
+								readOnly
+								size='xs'
+								defaultValue={5}
+							/>
 						</Stack>
 						<FeedbackModal i18nData={i18nData} />
 					</Flex>
@@ -50,7 +55,12 @@ export default function FeedbackTab() {
 					<Flex justifyContent='space-between'>
 						<Stack>
 							<Heading size='md'> Богдан</Heading>
-							<Rating colorPalette='orange' readOnly size='xs' defaultValue={5} />
+							<Rating
+								colorPalette={{ base: 'orange', _dark: 'yellow' }}
+								readOnly
+								size='xs'
+								defaultValue={5}
+							/>
 						</Stack>
 
 						<Text color='main.disabled' textStyle='sm'>
@@ -78,7 +88,12 @@ export default function FeedbackTab() {
 					<Flex justifyContent='space-between'>
 						<Stack>
 							<Heading size='md'> Микола</Heading>
-							<Rating colorPalette='orange' readOnly size='xs' defaultValue={4} />
+							<Rating
+								colorPalette={{ base: 'orange', _dark: 'yellow' }}
+								readOnly
+								size='xs'
+								defaultValue={4}
+							/>
 						</Stack>
 
 						<Text color='main.disabled' textStyle='sm'>

@@ -19,16 +19,7 @@ export default function OrderInfo() {
 	const t = useTranslations('Products');
 
 	return (
-		<Flex
-			direction='column'
-			w='100%'
-			gap={2}
-			p={4}
-			border='1px solid'
-			borderColor='border.dark'
-			bg='bg.tertiary'
-			mt='8'
-		>
+		<Flex direction='column' w='100%' gap={2} p={4} boxShadow='sm' bg='bg.tertiary'>
 			<Heading as='h3' size='2xl' fontWeight='medium' textAlign='center'>
 				{t('yourOrder')}
 			</Heading>

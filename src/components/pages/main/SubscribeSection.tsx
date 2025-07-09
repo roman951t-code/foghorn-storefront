@@ -42,6 +42,7 @@ export default function SubscribeSection() {
 					maxWidth='340px'
 					flex='1 1 0'
 					transition='all .15s ease-in-out'
+					colorPalette={{ base: 'orange', _dark: 'yellow' }}
 					_placeholder={{ fontSize: 'sm' }}
 					_focus={{
 						outline: 'none',

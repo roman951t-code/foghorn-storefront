@@ -11,8 +11,7 @@ import { createEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema
 import type { I18nData } from '@/types/i18n';
 
 type FormValues = {
-	firstName: string;
-	lastName: string;
+	name: string;
 	email: string;
 	password: string;
 	confirmPassword: string;
@@ -56,19 +55,13 @@ export default function EmailSignUp({ i18nData, disabled }: EmailAuthProps) {
 			<Stack gap='4' align='flex-start'>
 				<Fieldset.Root size='lg' invalid>
 					<Fieldset.Content>
-						<Field.Root required invalid={!!errors.firstName}>
+						<Field.Root required invalid={!!errors.name}>
 							<Field.Label>
 								{i18nData.name}
 								<Field.RequiredIndicator />
 							</Field.Label>
-							<Input fontSize='md' {...register('firstName')} maxLength={MAX_CHARACTERS} />
-							<Field.ErrorText>{errors.firstName?.message}</Field.ErrorText>
-						</Field.Root>
-
-						<Field.Root invalid={!!errors.lastName}>
-							<Field.Label>{i18nData.lastname}</Field.Label>
-							<Input fontSize='md' {...register('lastName')} maxLength={MAX_CHARACTERS} />
-							<Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
+							<Input fontSize='md' {...register('name')} maxLength={MAX_CHARACTERS} />
+							<Field.ErrorText>{errors.name?.message}</Field.ErrorText>
 						</Field.Root>
 
 						<Field.Root required invalid={!!errors.email}>

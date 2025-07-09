@@ -35,7 +35,6 @@ function ComboboxItem(props: { item: { label: string; value: string } }) {
 		error, //error object
 		refetch, //refetch the session
 	} = authClient.useSession();
-	console.log('session', session);
 
 	const combobox = useComboboxContext();
 	return (
@@ -86,7 +85,7 @@ export default function SearchInput({ placeholder, hideBelow, notFound }: Props)
 						_placeholder={{ fontSize: 'sm' }}
 						_focus={{
 							border: '1px solid',
-							borderColor: 'main.secondary',
+							borderColor: { base: 'orange', _dark: 'yellow' },
 							outline: 'none',
 						}}
 					/>

@@ -18,7 +18,7 @@ export async function registerEmailAction(
 		return { message: t('invalidFormData') };
 	}
 
-	const { email, password, firstName, lastName } = validatedFormData.data;
+	const { email, password, name } = validatedFormData.data;
 
 	try {
 		const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -31,7 +31,7 @@ export async function registerEmailAction(
 			body: {
 				email,
 				password,
-				name: `${firstName} ${lastName}`,
+				name,
 				callbackURL: '/?email-sign-in=true',
 			},
 		});

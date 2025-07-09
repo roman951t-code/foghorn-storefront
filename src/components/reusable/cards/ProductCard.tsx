@@ -24,6 +24,7 @@ export default function ProductCard() {
 
 	return (
 		<Card.Root
+			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			minWidth='200px'
 			w='100%'
 			border='1px solid'
@@ -31,7 +32,7 @@ export default function ProductCard() {
 			bg='bg.tertiary'
 			transition='all 0.25s ease-in-out'
 			_hover={{
-				borderColor: 'main.accent',
+				borderColor: { base: 'orange', _dark: 'yellow' },
 			}}
 		>
 			<Flex direction='column' gap={2} p={4} pt='2.5'>
@@ -90,7 +91,7 @@ export default function ProductCard() {
 				</LinkBox>
 
 				<HStack gap='4' mt='2'>
-					<Rating colorPalette='orange' readOnly size='xs' defaultValue={5} />
+					<Rating readOnly size='xs' defaultValue={5} />
 					<LocaleNavLink href='/cabinet/feedback' variant='underline' fontSize='sm' color='main'>
 						{t('feedback')} (3)
 					</LocaleNavLink>

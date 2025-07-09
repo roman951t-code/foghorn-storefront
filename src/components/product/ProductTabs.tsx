@@ -1,4 +1,4 @@
-import { Tabs, Flex } from '@chakra-ui/react';
+import { Tabs } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import AboutTab from './AboutTab';
 import CharacteristicsTab from './CharacteristicsTab';
@@ -27,7 +27,7 @@ export default function ProductTabs() {
 			mt='8'
 			defaultValue={t('about')}
 			width='full'
-			colorPalette='orange'
+			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			lazyMount
 			unmountOnExit
 			fitted

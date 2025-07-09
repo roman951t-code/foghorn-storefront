@@ -1,4 +1,4 @@
-import { Tabs, Box } from '@chakra-ui/react';
+import { Tabs, Box, Flex } from '@chakra-ui/react';
 import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import TabsList from '@/components/pages/cabinet/TabsHeaders';
@@ -35,34 +35,36 @@ export default function CabinetLayout({ children }: Props) {
 
 	return (
 		<Tabs.Root
+			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			defaultValue='main'
-			colorPalette='orange'
-			orientation='vertical'
-			variant='line'
-			px='3'
+			orientation='horizontal'
+			width='full'
+			lazyMount
+			fitted
 		>
-			<Box position='sticky' top='74px' h='100%' rounded='sm'>
+			<Box position='sticky' top='74px' rounded='sm'>
 				<TabsList i18nData={i18nData} />
 			</Box>
-
-			<Tabs.Content w='full' value='main'>
-				{children}
-			</Tabs.Content>
-			<Tabs.Content w='full' value={sideT('myOrders')}>
-				{children}
-			</Tabs.Content>
-			<Tabs.Content w='full' value={sideT('myFeedback')}>
-				{children}
-			</Tabs.Content>
-			<Tabs.Content w='full' value={sideT('wishList')}>
-				{children}
-			</Tabs.Content>
-			<Tabs.Content w='full' value={sideT('reviewedProducts')}>
-				{children}
-			</Tabs.Content>
-			<Tabs.Content w='full' value={sideT('chat')}>
-				{children}
-			</Tabs.Content>
+			<Flex px='4'>
+				<Tabs.Content w='full' value='main'>
+					{children}
+				</Tabs.Content>
+				<Tabs.Content w='full' value={sideT('myOrders')}>
+					{children}
+				</Tabs.Content>
+				<Tabs.Content w='full' value={sideT('myFeedback')}>
+					{children}
+				</Tabs.Content>
+				<Tabs.Content w='full' value={sideT('wishList')}>
+					{children}
+				</Tabs.Content>
+				<Tabs.Content w='full' value={sideT('reviewedProducts')}>
+					{children}
+				</Tabs.Content>
+				<Tabs.Content w='full' value={sideT('chat')}>
+					{children}
+				</Tabs.Content>
+			</Flex>
 		</Tabs.Root>
 	);
 }

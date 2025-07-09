@@ -15,11 +15,7 @@ export const phoneSignUpSchemaShape = (t: {
 			.min(2, { message: t.nameMinLength })
 			.max(60, { message: t.inputMaxLength })
 			.nonempty(),
-		lastName: z
-			.string()
-			.min(2, { message: t.nameMinLength })
-			.max(60, { message: t.inputMaxLength })
-			.optional(),
+
 		phone: z
 			.string({ required_error: t.phoneRequired })
 			.transform((val) => val.replace(/\D/g, ''))

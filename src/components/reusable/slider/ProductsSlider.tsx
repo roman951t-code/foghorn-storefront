@@ -8,14 +8,7 @@ import ProductCard from '../cards/ProductCard';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
-
-const breakpoints = {
-	430: { slidesPerView: 2 },
-	630: { slidesPerView: 3 },
-	840: { slidesPerView: 4 },
-	1120: { slidesPerView: 5 },
-	1260: { slidesPerView: 6 },
-};
+import { productsBreakpoints } from '@/data/breakpoints';
 
 export default function ProductsSlider() {
 	const [isClient, setIsClient] = useState(false);
@@ -38,7 +31,7 @@ export default function ProductsSlider() {
 		<Swiper
 			loop
 			navigation
-			breakpoints={breakpoints}
+			breakpoints={productsBreakpoints}
 			slidesPerView={1}
 			spaceBetween={8}
 			modules={[Navigation]}

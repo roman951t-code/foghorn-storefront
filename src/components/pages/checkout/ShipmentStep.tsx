@@ -1,5 +1,4 @@
 import { Icon, RadioCard, Stack } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
 import { FaTruck } from 'react-icons/fa';
 
 const items = [
@@ -9,47 +8,41 @@ const items = [
 ];
 
 export default function ShipmentStep() {
-	const t = useTranslations('Products');
-
 	return (
 		<RadioCard.Root
-			orientation={{ base: 'vertical', xl: 'horizontal' }}
+			colorPalette={{ base: 'orange', _dark: 'yellow' }}
+			orientation={{ base: 'vertical', sm: 'horizontal', md: 'vertical', lg: 'horizontal' }}
 			align='center'
 			defaultValue='paypal'
 			mt='4'
+			css={{
+				'& div[data-state="unchecked"] span': {
+					color: 'var(--chakra-colors-fg) !important',
+				},
+			}}
 		>
-			<Stack direction={{ base: 'column', xs: 'row' }}>
+			<Stack direction={{ base: 'column', xs: 'row' }} gap='4'>
 				{items.map((item) => (
-					<RadioCard.Item key={item.value} value={item.value} _hover={{ cursor: 'pointer' }}>
+					<RadioCard.Item
+						key={item.value}
+						value={item.value}
+						boxShadow='none'
+						_hover={{ cursor: 'pointer' }}
+						bg='main'
+						justifyContent={{ base: 'initial', xl: 'center' }}
+						h={{ base: 'auto', xl: '48px' }}
+					>
 						<RadioCard.ItemHiddenInput />
 						<RadioCard.ItemControl>
 							<Icon fontSize='2xl' color='fg.muted'>
 								{item.icon}
 							</Icon>
 							<RadioCard.ItemText>{item.title}</RadioCard.ItemText>
+							<RadioCard.ItemIndicator />
 						</RadioCard.ItemControl>
 					</RadioCard.Item>
 				))}
 			</Stack>
 		</RadioCard.Root>
-
-		// <Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' textAlign='center' p='4'>
-		// 	<RadioGroup w='100%' defaultValue='1' colorPalette='gray'>
-		// 		<VStack gap='8' alignItems='space-between'>
-		// 			<Flex justifyContent='space-between' alignItems='center'>
-		// 				<Radio value='1'>Нова Пошта</Radio>
-		// 				<Text> 115 ₴</Text>
-		// 			</Flex>
-		// 			<Flex justifyContent='space-between' alignItems='center'>
-		// 				<Radio value='2'>УкрПошта</Radio>
-		// 				<Text> 115 ₴</Text>
-		// 			</Flex>
-		// 			<Flex justifyContent='space-between' alignItems='center'>
-		// 				<Radio value='3'>Meest</Radio>
-		// 				<Text> 115 ₴</Text>
-		// 			</Flex>
-		// 		</VStack>
-		// 	</RadioGroup>
-		// </Card.Root>
 	);
 }

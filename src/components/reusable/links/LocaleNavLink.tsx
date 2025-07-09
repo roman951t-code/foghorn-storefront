@@ -29,8 +29,8 @@ export function LocaleNavButton({ href, children, ...props }: Props) {
 	return (
 		<Link href={href}>
 			<Button
-				bg='bg.button'
 				color='black'
+				bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 				variant='solid'
 				_hover={{
 					bg: 'bgHover.button',

@@ -1,5 +1,5 @@
 'use client';
-import { Input, Field, Wrap, RadioCard, Stack, Icon } from '@chakra-ui/react';
+import { Input, Field, Wrap, RadioCard, Stack, Icon, Button } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
@@ -8,15 +8,20 @@ import { IoMdPhonePortrait } from 'react-icons/io';
 interface FormValues {
 	email: string;
 	phone: string;
-	firstName: string;
-	lastName: string;
+	name: string;
+	shipmentAddress: string;
 }
+
+const items = [
+	{ value: 'email', title: 'Email', icon: <IoMailOutline /> },
+	{ value: 'phone', title: 'Телефон', icon: <IoMdPhonePortrait /> },
+];
 
 const initialValues = {
 	email: 'test@mail.com',
 	phone: '099-230-44-52',
-	firstName: 'Roman',
-	lastName: 'Onyshchenko',
+	name: 'Roman Onyshchenko',
+	shipmentAddress: 'Україна, Запорізька обл., м. Оріхів, вул. Запорізька, буд. 72, кв. 52',
 };
 
 interface Props {
@@ -45,24 +50,25 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		}
 	});
 
-	const items = [
-		{ value: 'email', title: 'Email', icon: <IoMailOutline /> },
-		{ value: 'phone', title: 'Телефон', icon: <IoMdPhonePortrait /> },
-	];
-
 	// телефон або email як бажаний спосіб сповіщень задізейблений пока юзер не добаве свій номер і підтвердить його
 
 	return (
 		<form onSubmit={onSubmit}>
-			<Wrap gap='8' width='full' mt='8' colorPalette='yellow'>
+			<Wrap
+				gapX='4'
+				gapY='8'
+				width='full'
+				mt='4'
+				colorPalette={{ base: 'orange', _dark: 'yellow' }}
+			>
 				<Field.Root
 					orientation='vertical'
-					invalid={!!errors.firstName}
-					maxW={{ base: '100%', xs: '300px' }}
+					invalid={!!errors.name}
+					maxW={{ base: '100%', xs: 'xs' }}
 				>
 					<Field.Label>{i18nData.name}</Field.Label>
 					<Input
-						variant='flushed'
+						variant='outline'
 						transition='all .15s ease-in-out'
 						_placeholder={{ fontSize: 'sm' }}
 						_focus={{
@@ -70,20 +76,20 @@ export default function PersonalDataForm({ i18nData }: Props) {
 						}}
 						size='md'
 						fontSize='md'
-						defaultValue={initialValues.firstName}
-						onChange={(value) => handleEditableSubmit('firstName', value)}
+						defaultValue={initialValues.name}
+						onChange={(value) => handleEditableSubmit('name', value)}
 					/>
-					<Field.ErrorText>{errors.firstName?.message}</Field.ErrorText>
+					<Field.ErrorText>{errors.name?.message}</Field.ErrorText>
 				</Field.Root>
 
 				<Field.Root
 					orientation='vertical'
 					invalid={!!errors.email}
-					maxW={{ base: '100%', xs: '300px' }}
+					maxW={{ base: '100%', xs: 'xs' }}
 				>
 					<Field.Label>{i18nData.email}</Field.Label>
 					<Input
-						variant='flushed'
+						variant='outline'
 						size='md'
 						transition='all .15s ease-in-out'
 						_placeholder={{ fontSize: 'sm' }}
@@ -101,11 +107,11 @@ export default function PersonalDataForm({ i18nData }: Props) {
 				<Field.Root
 					orientation='vertical'
 					invalid={!!errors.phone}
-					maxW={{ base: '100%', xs: '300px' }}
+					maxW={{ base: '100%', xs: 'xs' }}
 				>
 					<Field.Label>{i18nData.phone}</Field.Label>
 					<Input
-						variant='flushed'
+						variant='outline'
 						size='md'
 						transition='all .15s ease-in-out'
 						_placeholder={{ fontSize: 'sm' }}
@@ -118,41 +124,47 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					/>
 					<Field.ErrorText>{errors.phone?.message}</Field.ErrorText>
 				</Field.Root>
-
-				<Field.Root
-					orientation='vertical'
-					invalid={!!errors.lastName}
-					maxW={{ base: '100%', xs: '300px' }}
-				>
-					<Field.Label>{i18nData.lastname}</Field.Label>
-					<Input
-						variant='flushed'
-						size='md'
-						transition='all .15s ease-in-out'
-						_placeholder={{ fontSize: 'sm' }}
-						_focus={{
-							outline: 'none',
-						}}
-						fontSize='md'
-						defaultValue={initialValues.lastName}
-						onChange={(value) => handleEditableSubmit('lastName', value)}
-					/>
-					<Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
-				</Field.Root>
 			</Wrap>
+			<Field.Root
+				orientation='vertical'
+				invalid={!!errors.shipmentAddress}
+				mt='8'
+				maxW='1008px'
+				colorPalette={{ base: 'orange', _dark: 'yellow' }}
+			>
+				<Field.Label>{i18nData.shipmentAddress}</Field.Label>
+				<Input
+					variant='outline'
+					size='md'
+					transition='all .15s ease-in-out'
+					_placeholder={{ fontSize: 'sm' }}
+					_focus={{
+						outline: 'none',
+					}}
+					fontSize='md'
+					defaultValue={initialValues.shipmentAddress}
+					onChange={(value) => handleEditableSubmit('shipmentAddress', value)}
+				/>
+				<Field.ErrorText>{errors.shipmentAddress?.message}</Field.ErrorText>
+			</Field.Root>
 
 			<RadioCard.Root
-				mt='16'
-				colorPalette='gray'
+				mt='12'
+				colorPalette={{ base: 'orange', _dark: 'yellow' }}
 				orientation={{ base: 'vertical', sm: 'horizontal' }}
 				align='center'
-				value={'email'}
+				// value={'email'}
+				css={{
+					'& div[data-state="unchecked"] span': {
+						color: 'var(--chakra-colors-fg) !important',
+					},
+				}}
 				// onChange={(event) => {
 				// 	const value = (event.target as HTMLInputElement).value;
 				// 	setSelectedPayment(value);
 				// }}
 			>
-				<RadioCard.Label fontSize='md' mb='3' fontWeight='normal'>
+				<RadioCard.Label fontSize='md' mb='4' fontWeight='normal'>
 					{i18nData.preferredNotificationWay}
 				</RadioCard.Label>
 				<Stack direction={{ base: 'column', xs: 'row' }} gap='4'>
@@ -160,8 +172,12 @@ export default function PersonalDataForm({ i18nData }: Props) {
 						<RadioCard.Item
 							key={item.value}
 							value={item.value}
+							boxShadow='none'
 							_hover={{ cursor: 'pointer' }}
-							maxW='sm'
+							maxW='xs'
+							bg='main'
+							justifyContent={{ base: 'initial', xs: 'center' }}
+							h={{ base: 'auto', sm: '42px' }}
 						>
 							<RadioCard.ItemHiddenInput />
 							<RadioCard.ItemControl>
@@ -169,11 +185,25 @@ export default function PersonalDataForm({ i18nData }: Props) {
 									{item.icon}
 								</Icon>
 								<RadioCard.ItemText>{item.title}</RadioCard.ItemText>
+								<RadioCard.ItemIndicator />
 							</RadioCard.ItemControl>
 						</RadioCard.Item>
 					))}
 				</Stack>
 			</RadioCard.Root>
+
+			<Button
+				type='submit'
+				bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+				color='black'
+				variant='solid'
+				minWidth='280px'
+				rounded='md'
+				mt='12'
+				alignSelf='center'
+			>
+				{i18nData.save}
+			</Button>
 		</form>
 	);
 }

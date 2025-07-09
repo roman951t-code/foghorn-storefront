@@ -31,24 +31,40 @@ export default function PaymentStep() {
 	return (
 		<>
 			<RadioCard.Root
-				orientation={{ base: 'vertical', xl: 'horizontal' }}
+				colorPalette={{ base: 'orange', _dark: 'yellow' }}
+				orientation={{ base: 'vertical', sm: 'horizontal', md: 'vertical', lg: 'horizontal' }}
 				align='center'
+				defaultValue='paypal'
+				mt='4'
+				css={{
+					'& div[data-state="unchecked"] span': {
+						color: 'var(--chakra-colors-fg) !important',
+					},
+				}}
 				value={selectedPayment}
 				onChange={(event) => {
 					const value = (event.target as HTMLInputElement).value;
 					setSelectedPayment(value);
 				}}
-				mt='4'
 			>
 				<Stack direction={{ base: 'column', xs: 'row' }}>
 					{items.map((item) => (
-						<RadioCard.Item key={item.value} value={item.value} _hover={{ cursor: 'pointer' }}>
+						<RadioCard.Item
+							key={item.value}
+							value={item.value}
+							boxShadow='none'
+							_hover={{ cursor: 'pointer' }}
+							bg='main'
+							justifyContent={{ base: 'initial', xl: 'center' }}
+							h={{ base: 'auto', xl: '48px' }}
+						>
 							<RadioCard.ItemHiddenInput />
 							<RadioCard.ItemControl>
 								<Icon fontSize='2xl' color='fg.muted'>
 									{item.icon}
 								</Icon>
 								<RadioCard.ItemText>{item.title}</RadioCard.ItemText>
+								<RadioCard.ItemIndicator />
 							</RadioCard.ItemControl>
 						</RadioCard.Item>
 					))}

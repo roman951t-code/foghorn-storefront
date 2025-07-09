@@ -17,7 +17,10 @@ export default function ProductsSection({ title, ...restProps }: Props) {
 					textUnderlineOffset='12px'
 					textWrap='wrap'
 					wordBreak='break-all'
-					_hover={{ textDecorationColor: 'main.accent', textDecorationThickness: '2px' }}
+					_hover={{
+						textDecorationColor: { base: 'orange', _dark: 'yellow' },
+						textDecorationThickness: '2px',
+					}}
 				>
 					{title}
 				</LocaleNavLink>

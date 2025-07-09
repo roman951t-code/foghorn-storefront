@@ -1,7 +1,6 @@
 export const authLocData = [
 	'name',
 	'phone',
-	'lastname',
 	'authorize',
 	'continueWith',
 	'logOut',
@@ -37,6 +36,8 @@ export const authLocData = [
 	'resetPassCodeSent',
 	'renewPass',
 	'saveNewPass',
+	'save',
+	'shipmentAddress',
 ];
 
 export const validLocData = [

@@ -9,7 +9,6 @@
 		"subscribe": "Підписатися",
 		"close": "Закрити",
 		"send": "Надіслати",
-		"save": "Зберегти",
 		"from": "від",
 		"clear": "Очистити",
 		"units": "шт",
@@ -73,7 +72,6 @@
 		"deliveryAddress": "Адреса доставки",
 		"personalData": "Особисті дані",
 		"yourContacts": "Ваші контактні дані",
-		"lastname": "Прізвище",
 		"phone": "Мобільний телефон",
 		"rememberPass": "Пароль згадав",
 		"getTemporaryPass": "Отримати тимчасовий пароль",
@@ -111,7 +109,9 @@
 		"clickToResetPass": "Натисніть на посилання, щоб скинути пароль",
 		"preferredNotificationWay": "Бажаний спосіб отримання сповіщень",
 		"renewPass": "Відновлення паролю",
-		"saveNewPass": "Зберегти новий пароль"
+		"saveNewPass": "Зберегти новий пароль",
+		"shipmentAddress": "Адреса доставки",
+		"save": "Зберегти"
 	},
 	"Main": {
 		"title": "Головна"

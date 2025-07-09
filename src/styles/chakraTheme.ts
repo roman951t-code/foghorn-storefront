@@ -9,6 +9,12 @@ const config = defineConfig({
 			md: '768px',
 			lg: '960px',
 			xl: '1200px',
+
+			prodXs: '430px',
+			prodSm: '630px',
+			prodMd: '840px',
+			prodLg: '1120px',
+			prodXl: '1260px',
 		},
 		semanticTokens: {
 			colors: {
@@ -39,7 +45,7 @@ const config = defineConfig({
 					primary: {
 						value: {
 							base: 'linear-gradient(90deg, rgba(234,236,238, 1) 0%, rgba(240,242,244,1) 25%, rgba(244,246, 248, 1) 50%, rgba(240,242,244,1) 75%, rgba(234,236,238, 1) 100%)',
-							_dark: '#111',
+							_dark: '#161620',
 						},
 					},
 					secondary: {
@@ -116,7 +122,7 @@ const config = defineConfig({
 					DEFAULT: {
 						value: {
 							base: '#3e3c78',
-							_dark: '{colors.orange.400}',
+							_dark: '{colors.yellow.400}',
 						},
 					},
 				},

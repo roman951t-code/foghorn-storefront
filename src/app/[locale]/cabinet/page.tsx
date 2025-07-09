@@ -10,8 +10,9 @@ export default function Cabinet() {
 		'name',
 		'email',
 		'phone',
-		'lastname',
+		'shipmentAddress',
 		'preferredNotificationWay',
+		'save',
 	]);
 
 	return (

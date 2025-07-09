@@ -98,10 +98,10 @@ export default function OrderCard() {
 									justifyContent='center'
 									alignItems={{ base: 'flex-start', sm: 'flex-end' }}
 								>
-									<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray' w='170px'>
-										<Tag.Label>№ {prodT('order')}: 65719</Tag.Label>
+									<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
+										<Tag.Label textAlign='right'>№ {prodT('order')}: 65719</Tag.Label>
 									</Tag.Root>
-									<Text color='main' textStyle='sm'>
+									<Text color='main' textStyle='sm' fontWeight='semibold'>
 										{genT('from')} 12.02.2024
 									</Text>
 								</VStack>

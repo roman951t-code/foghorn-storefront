@@ -19,8 +19,7 @@ interface PhoneAuthProps {
 }
 
 type FormValues = {
-	firstName?: string;
-	lastName?: string;
+	name?: string;
 	phone: string;
 };
 
@@ -67,22 +66,14 @@ export default function PhoneAuth({ i18nData, disabled, isSignup = false }: Phon
 				<Fieldset.Root size='lg' invalid>
 					<Fieldset.Content>
 						{isSignup && (
-							<>
-								<Field.Root required={isSignup} invalid={!!errors.firstName}>
-									<Field.Label>
-										{i18nData.name}
-										<Field.RequiredIndicator />
-									</Field.Label>
-									<Input fontSize='md' {...register('firstName')} maxLength={MAX_CHARACTERS} />
-									<Field.ErrorText>{errors.firstName?.message}</Field.ErrorText>
-								</Field.Root>
-
-								<Field.Root invalid={!!errors.lastName}>
-									<Field.Label>{i18nData.lastname}</Field.Label>
-									<Input fontSize='md' {...register('lastName')} maxLength={MAX_CHARACTERS} />
-									<Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
-								</Field.Root>
-							</>
+							<Field.Root required={isSignup} invalid={!!errors.name}>
+								<Field.Label>
+									{i18nData.name}
+									<Field.RequiredIndicator />
+								</Field.Label>
+								<Input fontSize='md' {...register('name')} maxLength={MAX_CHARACTERS} />
+								<Field.ErrorText>{errors.name?.message}</Field.ErrorText>
+							</Field.Root>
 						)}
 
 						<Field.Root required invalid={!!errors.phone}>
