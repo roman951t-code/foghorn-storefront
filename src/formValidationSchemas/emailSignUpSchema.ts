@@ -19,7 +19,7 @@ export const emailSignUpSchemaShape = (t: {
 }) =>
 	z
 		.object({
-			firstName: z
+			name: z
 				.string({ required_error: t.firstNameRequired })
 				.min(2, { message: t.nameMinLength })
 				.max(60, { message: t.inputMaxLength })

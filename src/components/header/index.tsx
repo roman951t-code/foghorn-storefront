@@ -1,6 +1,7 @@
 import { Box, Stack, Flex } from '@chakra-ui/react';
 import { ColorModeButton } from '@/components/ui/color-mode';
 import { useTranslations } from 'next-intl';
+import { Toaster } from '@/components/ui/toaster';
 import Sidebar from '../sidebar';
 import LocaleSwitcher from './LocaleSwitcher';
 import SearchInput from './SearchInput';
@@ -65,6 +66,7 @@ export default function Header() {
 					<SearchInput placeholder={t('search')} notFound={genT('resultsNotFound')} />
 				</Flex>
 			</Stack>
+			<Toaster />
 		</Box>
 	);
 }

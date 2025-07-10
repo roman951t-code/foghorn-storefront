@@ -2,12 +2,18 @@
 
 import { getTranslations } from 'next-intl/server';
 import { getNewPassSchema } from 'formValidationSchemas/setNewpassSchema';
+import { auth } from '@/lib/auth';
+
+type FormValues = {
+	password: string;
+};
 
 export async function setNewPasswordAction(
 	prevState: unknown,
-	formData: unknown
+	payload: { formData: FormValues; token: string }
 ): Promise<{ message?: string } | undefined> {
 	const t = await getTranslations('Validation');
+	const { formData, token } = payload;
 
 	const schema = await getNewPassSchema();
 	const validatedFormData = schema.safeParse(formData);
@@ -18,11 +24,12 @@ export async function setNewPasswordAction(
 
 	const { password } = validatedFormData.data;
 
-	try {
-		return;
-	} catch (error: any) {
-		return {
-			message: t('setNewPassFail'),
-		};
-	}
+	await auth.api.resetPassword({
+		body: {
+			newPassword: password,
+			token,
+		},
+	});
+
+	return;
 }

@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import TabsList from '@/components/pages/cabinet/TabsHeaders';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
+import TabsProvider from '@/components/pages/cabinet/TabsProvider';
 
 type Params = {
 	params: { locale: string };
@@ -34,37 +35,32 @@ export default function CabinetLayout({ children }: Props) {
 	};
 
 	return (
-		<Tabs.Root
-			colorPalette={{ base: 'orange', _dark: 'yellow' }}
-			defaultValue='main'
-			orientation='horizontal'
-			width='full'
-			lazyMount
-			fitted
-		>
-			<Box position='sticky' top='74px' rounded='sm'>
-				<TabsList i18nData={i18nData} />
-			</Box>
-			<Flex px='4'>
-				<Tabs.Content w='full' value='main'>
-					{children}
-				</Tabs.Content>
-				<Tabs.Content w='full' value={sideT('myOrders')}>
-					{children}
-				</Tabs.Content>
-				<Tabs.Content w='full' value={sideT('myFeedback')}>
-					{children}
-				</Tabs.Content>
-				<Tabs.Content w='full' value={sideT('wishList')}>
-					{children}
-				</Tabs.Content>
-				<Tabs.Content w='full' value={sideT('reviewedProducts')}>
-					{children}
-				</Tabs.Content>
-				<Tabs.Content w='full' value={sideT('chat')}>
-					{children}
-				</Tabs.Content>
-			</Flex>
-		</Tabs.Root>
+		<TabsProvider>
+			<>
+				<Box position='sticky' zIndex='1000' bg='bg.dark' top='66px' rounded='md'>
+					<TabsList i18nData={i18nData} />
+				</Box>
+				<Flex px='4'>
+					<Tabs.Content w='full' value='cabinet'>
+						{children}
+					</Tabs.Content>
+					<Tabs.Content w='full' value={'orders'}>
+						{children}
+					</Tabs.Content>
+					<Tabs.Content w='full' value={'feedback'}>
+						{children}
+					</Tabs.Content>
+					<Tabs.Content w='full' value={'wishlist'}>
+						{children}
+					</Tabs.Content>
+					<Tabs.Content w='full' value={'reviewed'}>
+						{children}
+					</Tabs.Content>
+					<Tabs.Content w='full' value={'chat'}>
+						{children}
+					</Tabs.Content>
+				</Flex>
+			</>
+		</TabsProvider>
 	);
 }

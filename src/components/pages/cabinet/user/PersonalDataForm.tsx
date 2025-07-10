@@ -152,7 +152,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 				mt='12'
 				colorPalette={{ base: 'orange', _dark: 'yellow' }}
 				orientation={{ base: 'vertical', sm: 'horizontal' }}
-				align='center'
 				// value={'email'}
 				css={{
 					'& div[data-state="unchecked"] span': {
@@ -200,7 +199,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 				minWidth='280px'
 				rounded='md'
 				mt='12'
-				alignSelf='center'
 			>
 				{i18nData.save}
 			</Button>

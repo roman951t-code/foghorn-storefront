@@ -71,7 +71,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				bgColor='catalog.bgCategory'
 				height='100%'
 				maxW='380px'
-				minW='280px'
+				minW={{ base: '240px', xl: '280px' }}
 				position='absolute'
 				boxShadow='sm'
 				right={0}
@@ -79,7 +79,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				top={0}
 				zIndex={10}
 				p={4}
-				hideBelow='xl'
+				hideBelow='lg'
 				_after={{
 					content: `""`,
 					position: 'absolute',
@@ -97,7 +97,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				<Heading color='main' size='2xl' fontWeight='medium' borderBottom='1px solid' pb='1'>
 					{category.name}
 				</Heading>
-				<LocaleNavButton href='/products/123'>
+				<LocaleNavButton href='/products/123' w='100%'>
 					{i18nData.seeCategory}
 					<BsChevronRight />
 				</LocaleNavButton>

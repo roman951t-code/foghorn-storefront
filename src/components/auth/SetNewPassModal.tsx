@@ -1,14 +1,16 @@
 'use client';
 
-import { Button, Fieldset, Stack, Field, Box } from '@chakra-ui/react';
+import { Button, Fieldset, Stack, Field, Box, Alert } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { startTransition, useActionState, useEffect, useState } from 'react';
 import type { I18nData } from '@/types/i18n';
-import { resetPasswordAction } from '@/actions/resetPasswordAction';
 import { PasswordInput } from '../ui/password-input';
 import CenteredModal from '../dialogs/CenteredModal';
 import { useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
+import { toaster } from '../ui/toaster';
+import { setNewPasswordAction } from '@/actions/setNewPasswordAction';
+import { useRouter } from 'next/navigation';
 
 interface ResetPassProps {
 	i18nData: I18nData;
@@ -21,41 +23,58 @@ type FormValues = {
 const MAX_CHARACTERS = 60;
 
 export default function SetNewPassModal({ i18nData }: ResetPassProps) {
+	const router = useRouter();
 	const searchParams = useSearchParams();
 	const { data: session } = authClient.useSession();
 
 	const resetPass = searchParams?.get('reset-pass') === 'true';
 
-	const [formError, formAction, isPending] = useActionState(resetPasswordAction, undefined);
-
+	const [formError, formAction, isPending] = useActionState(setNewPasswordAction, undefined);
 	const [isOpen, setIsOpen] = useState(false);
+	const [token, setToken] = useState<string | null>(null);
+	const [isPassUpdated, setPassUpdated] = useState(false);
 
 	useEffect(() => {
-		if (!resetPass || session) return;
+		const token = new URLSearchParams(window.location.search).get('token');
 
-		if (resetPass) {
-			const token = new URLSearchParams(window.location.search).get('token');
-			if (!token) {
-				// Handle the error
+		if (session || !resetPass) return;
 
-				return;
-			}
+		if (!token) {
+			setTimeout(() => {
+				toaster.error({
+					title: i18nData.refreshTokenError,
+					duration: 5000,
+				});
+			}, 0);
 
-			setIsOpen(true);
+			return;
 		}
+
+		setToken(token);
+		setIsOpen(true);
 	}, [resetPass, session]);
 
 	const {
 		register,
-		trigger,
-		getValues,
-		control,
+		handleSubmit,
 		formState: { errors, isSubmitting },
 	} = useForm<FormValues>({
 		mode: 'onSubmit',
 	});
 
-	const formData = getValues();
+	const handleClose = () => {
+		setToken(null);
+		setIsOpen(false);
+		const current = new URLSearchParams(window.location.search);
+		current.delete('reset-pass');
+		current.delete('token');
+		current.delete('callbackURL');
+		const newSearch = current.toString();
+		const newPath = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
+		router.replace(newPath);
+	};
+
+	if (!isOpen || !token) return null;
 
 	return (
 		<CenteredModal
@@ -68,16 +87,15 @@ export default function SetNewPassModal({ i18nData }: ResetPassProps) {
 		>
 			<Box maxW='400px' mx='auto' my='auto'>
 				<form
-					action={async () => {
-						const result = await trigger();
-						if (!result) {
-							return;
-						}
+					onSubmit={handleSubmit(async (formData) => {
+						if (!token) return;
 
 						startTransition(() => {
-							formAction(formData);
+							formAction({ formData, token });
+
+							setPassUpdated(true);
 						});
-					}}
+					})}
 				>
 					<Stack gap='4' align='flex-start'>
 						<Fieldset.Root size='lg' invalid>
@@ -97,18 +115,40 @@ export default function SetNewPassModal({ i18nData }: ResetPassProps) {
 
 								<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
 							</Fieldset.Content>
+							{isPassUpdated && !isSubmitting && !isPending && (
+								<>
+									<Alert.Root status='success' variant='solid' my='2' fontSize='15px'>
+										<Alert.Indicator />
+										<Alert.Title>{i18nData.passUpdated}</Alert.Title>
+									</Alert.Root>
 
-							<Button
-								w='100%'
-								mt='4'
-								type='submit'
-								loading={isSubmitting || isPending}
-								bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-								color='black'
-								variant='solid'
-							>
-								{i18nData.saveNewPass}
-							</Button>
+									<Button
+										onClick={handleClose}
+										w='100%'
+										mt='4'
+										type='submit'
+										loading={isSubmitting || isPending}
+										borderColor='border'
+										variant='outline'
+									>
+										{i18nData.close}
+									</Button>
+								</>
+							)}
+
+							{!isPassUpdated && (
+								<Button
+									w='100%'
+									mt='4'
+									type='submit'
+									loading={isSubmitting || isPending}
+									bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+									color='black'
+									variant='solid'
+								>
+									{i18nData.saveNewPass}
+								</Button>
+							)}
 						</Fieldset.Root>
 					</Stack>
 				</form>

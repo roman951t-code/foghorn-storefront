@@ -15,8 +15,8 @@ interface Props {
 
 export default function TabsList({ i18nData }: Props) {
 	return (
-		<Tabs.List mb='4' gap='2' hideBelow='md'>
-			<Tabs.Trigger value='main' color='main' fontWeight='normal' fontSize='md' asChild>
+		<Tabs.List mb='4' gap='2' hideBelow='xs' flexWrap='wrap' justifyContent='center'>
+			<Tabs.Trigger value='cabinet' color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet' _hover={{ textDecoration: 'none' }}>
 					<Icon size='md' hideBelow='lg'>
 						<LuUserRoundCog />
@@ -24,13 +24,7 @@ export default function TabsList({ i18nData }: Props) {
 					Роман Онищенко
 				</LocaleNavLink>
 			</Tabs.Trigger>
-			<Tabs.Trigger
-				value={i18nData.myOrders}
-				color='main'
-				fontWeight='normal'
-				fontSize='md'
-				asChild
-			>
+			<Tabs.Trigger value={'orders'} color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet/orders' _hover={{ textDecoration: 'none' }}>
 					<Icon size='md' hideBelow='lg'>
 						<IoBagCheckOutline />
@@ -38,13 +32,7 @@ export default function TabsList({ i18nData }: Props) {
 					{i18nData.myOrders}
 				</LocaleNavLink>
 			</Tabs.Trigger>
-			<Tabs.Trigger
-				value={i18nData.myFeedback}
-				color='main'
-				fontWeight='normal'
-				fontSize='md'
-				asChild
-			>
+			<Tabs.Trigger value={'feedback'} color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet/feedback' _hover={{ textDecoration: 'none' }}>
 					<Icon size='md' hideBelow='lg'>
 						<VscFeedback />
@@ -52,13 +40,7 @@ export default function TabsList({ i18nData }: Props) {
 					{i18nData.myFeedback}
 				</LocaleNavLink>
 			</Tabs.Trigger>
-			<Tabs.Trigger
-				value={i18nData.wishList}
-				color='main'
-				fontWeight='normal'
-				fontSize='md'
-				asChild
-			>
+			<Tabs.Trigger value={'wishlist'} color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet/wishlist' _hover={{ textDecoration: 'none' }}>
 					<Icon size='md' hideBelow='lg'>
 						<FiHeart />
@@ -66,13 +48,7 @@ export default function TabsList({ i18nData }: Props) {
 					{i18nData.wishList}
 				</LocaleNavLink>
 			</Tabs.Trigger>
-			<Tabs.Trigger
-				value={i18nData.reviewedProducts}
-				color='main'
-				fontWeight='normal'
-				fontSize='md'
-				asChild
-			>
+			<Tabs.Trigger value={'reviewed'} color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet/reviewed' _hover={{ textDecoration: 'none' }}>
 					<Icon size='md' hideBelow='lg'>
 						<LuUserRoundCheck />
@@ -80,7 +56,7 @@ export default function TabsList({ i18nData }: Props) {
 					{i18nData.reviewedProducts}
 				</LocaleNavLink>
 			</Tabs.Trigger>
-			<Tabs.Trigger value={i18nData.chat} color='main' fontWeight='normal' fontSize='md' asChild>
+			<Tabs.Trigger value={'chat'} color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet/chat' _hover={{ textDecoration: 'none' }}>
 					<Icon size='md' hideBelow='lg'>
 						<IoChatboxEllipsesOutline />

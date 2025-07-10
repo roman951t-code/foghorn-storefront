@@ -19,7 +19,7 @@ export default function AuthStep() {
 	};
 
 	return (
-		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' textAlign='center' p='4'>
+		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' p='4'>
 			<Card.Header p='0'>
 				<Flex
 					gap='4'

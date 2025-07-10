@@ -19,8 +19,9 @@ export default function Reviewed() {
 				border='1px solid '
 				borderColor='border'
 				size='sm'
-				w='140px'
+				w={{ base: 'full', xs: '140px' }}
 				alignSelf='flex-end'
+				mt={{ base: '8', xs: '0' }}
 			>
 				{genT('clear')}
 			</Button>

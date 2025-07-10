@@ -29,6 +29,7 @@ export const authLocData = [
 	'signUpCodeSent',
 	'continuePurchases',
 	'returnCongrats',
+	'preferredNotificationWay',
 	'pin',
 	'toPost',
 	'resetPassConfirm',
@@ -38,6 +39,8 @@ export const authLocData = [
 	'saveNewPass',
 	'save',
 	'shipmentAddress',
+	'passUpdated',
+	'close',
 ];
 
 export const validLocData = [
@@ -61,6 +64,7 @@ export const validLocData = [
 	'nameMinLength',
 	'pinRequired',
 	'userNotFound',
+	'refreshTokenError',
 	'alreadyVerified',
 	'verificationFailed',
 	'pinLength',

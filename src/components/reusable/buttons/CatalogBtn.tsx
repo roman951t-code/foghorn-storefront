@@ -24,6 +24,7 @@ interface Props {
 
 export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: Props) {
 	const t = useTranslations('General');
+	const authT = useTranslations('Auth');
 	const catalogFull = t('catalogFull');
 	const catalogShort = t('catalogShort');
 	const text = fullText ? catalogFull : catalogShort;
@@ -61,7 +62,7 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 					<DrawerFooter>
 						<DrawerActionTrigger asChild>
 							<Button borderColor='border' variant='outline'>
-								{t('close')}
+								{authT('close')}
 							</Button>
 						</DrawerActionTrigger>
 					</DrawerFooter>
