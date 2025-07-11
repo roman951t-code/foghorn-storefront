@@ -1,10 +1,9 @@
 'use client';
 
-import { Card, IconButton, QrCode, Separator } from '@chakra-ui/react';
+import { Box, Card, IconButton, QrCode, Separator } from '@chakra-ui/react';
 import { FiMenu } from 'react-icons/fi';
 import {
 	DrawerBackdrop,
-	DrawerBody,
 	DrawerCloseTrigger,
 	DrawerContent,
 	DrawerFooter,
@@ -20,7 +19,9 @@ import CollapsibleLinks from './CollapsibleLinks';
 import UserLinks from './UserLinks';
 import Image from 'next/image';
 import { LogoutSection, AuthorizeSection } from './AuthorizeSection';
-import { useTranslations } from 'next-intl';
+import { useSession } from '../providers/SessionProvider';
+import { I18nData } from '@/types/i18n';
+import Auth from '../auth/Auth';
 
 const logoBig = '/assets/images/logoBig.webp';
 const logoHeight = 36;
@@ -40,76 +41,102 @@ const Logo = () => {
 	);
 };
 
-export default function SidePanel() {
+export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 	const [open, setOpen] = useState(false);
-	const t = useTranslations('Sidebar');
+	const [authOpen, setAuthOpen] = useState(false);
+
+	const { session } = useSession();
 
 	const onClose = () => {
 		setOpen(false);
 	};
 
+	const onAuthOpen = () => {
+		setAuthOpen(true);
+		onClose();
+	};
+
 	return (
-		<DrawerRoot placement='start' open={open} onOpenChange={(e) => setOpen(e.open)}>
-			<DrawerBackdrop />
-			<DrawerTrigger asChild>
-				<IconButton
-					aria-label='Menu'
-					color='main.lightOnly'
-					variant='ghost'
-					size='md'
-					bg='transparent'
-					_hover={{
-						bg: 'transparent',
-						border: '1px solid',
-						borderColor: 'main.lightOnly',
-					}}
-				>
-					<FiMenu />
-				</IconButton>
-			</DrawerTrigger>
-			<DrawerContent bg='bg.tertiary' minWidth='320px'>
-				<DrawerHeader bg='bg.secondary'>
-					<Logo />
-				</DrawerHeader>
-				<DrawerBody mt={4} px={4}>
-					<CatalogBtn fullText />
-					<Separator borderColor='border.light' my='5' />
-					<AuthorizeSection />
-					<Separator borderColor='border.light' my='5' />
-					<LogoutSection />
-					<Separator borderColor='border.light' my='5' />
-					<UserLinks onClose={onClose} />
-					<Separator borderColor='border.light' my='5' />
-					<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' mt='4'>
-						<Card.Body gap='4'>
-							<QrCode.Root
-								value='https://play.google.com/store/apps/details?id=com.lexiko&hl=uk'
-								m='auto'
-							>
-								<QrCode.Frame>
-									<QrCode.Pattern />
-								</QrCode.Frame>
-							</QrCode.Root>
-							<Card.Description color='main' textStyle='sm' textAlign='left'>
-								{t('lexikoProposal')}
-							</Card.Description>
-						</Card.Body>
-					</Card.Root>
-					<Separator borderColor='border.light' my='5' />
-					<CollapsibleLinks onClose={onClose} />
-				</DrawerBody>
-				<DrawerFooter bg='bg.secondary'>
-					<MediaContacts />
-				</DrawerFooter>
-				<DrawerCloseTrigger
-					color='main.lightOnly'
-					_hover={{
-						bg: 'transparent',
-						border: '1px solid',
-						borderColor: 'main.lightOnly',
-					}}
-				/>
-			</DrawerContent>
-		</DrawerRoot>
+		<>
+			<DrawerRoot placement='start' open={open} onOpenChange={(e) => setOpen(e.open)}>
+				<DrawerBackdrop />
+				<DrawerTrigger asChild>
+					<IconButton
+						aria-label='Menu'
+						color='main.lightOnly'
+						variant='ghost'
+						size='md'
+						bg='transparent'
+						_hover={{
+							bg: 'transparent',
+							border: '1px solid',
+							borderColor: 'main.lightOnly',
+						}}
+					>
+						<FiMenu />
+					</IconButton>
+				</DrawerTrigger>
+				<DrawerContent bg='bg.tertiary' minWidth='320px' display='flex' flexDirection='column'>
+					<DrawerHeader bg='bg.secondary'>
+						<Logo />
+					</DrawerHeader>
+
+					<Box flex='1' overflowY='auto' display='flex' flexDirection='column' height='100dvh'>
+						<Box px={4} my={4}>
+							<CatalogBtn fullText />
+							<Separator borderColor='border.light' my='5' />
+							{session?.session ? (
+								<>
+									<LogoutSection onClose={onClose} />
+									<Separator borderColor='border.light' my='5' />
+								</>
+							) : (
+								<>
+									<AuthorizeSection
+										i18nData={i18nData}
+										authOpen={authOpen}
+										onAuthOpen={onAuthOpen}
+									/>
+									<Separator borderColor='border.light' my='5' />
+								</>
+							)}
+							{session && <UserLinks onClose={onClose} />}
+							<Separator borderColor='border.light' my='5' />
+							<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' mt='4'>
+								<Card.Body gap='4'>
+									<QrCode.Root
+										value='https://play.google.com/store/apps/details?id=com.lexiko&hl=uk'
+										m='auto'
+									>
+										<QrCode.Frame>
+											<QrCode.Pattern />
+										</QrCode.Frame>
+									</QrCode.Root>
+									<Card.Description color='main' textStyle='sm' textAlign='left'>
+										{i18nData.lexikoProposal}
+									</Card.Description>
+								</Card.Body>
+							</Card.Root>
+							<Separator borderColor='border.light' my='5' />
+							<CollapsibleLinks onClose={onClose} />
+						</Box>
+
+						<DrawerFooter bg='bg.secondary' mt='auto'>
+							<MediaContacts />
+						</DrawerFooter>
+					</Box>
+
+					<DrawerCloseTrigger
+						color='main.lightOnly'
+						_hover={{
+							bg: 'transparent',
+							border: '1px solid',
+							borderColor: 'main.lightOnly',
+						}}
+					/>
+				</DrawerContent>
+			</DrawerRoot>
+			<Auth i18nData={i18nData} isOpen={authOpen} setIsOpen={setAuthOpen} />
+		</>
 	);
 }

@@ -7,6 +7,7 @@ import { IoMdPhonePortrait } from 'react-icons/io';
 import PhoneAuth from './PhoneAuth';
 import { signIn } from '@/lib/auth-client';
 import EmailSignIn from './EmailSignIn';
+import { useSession } from '../providers/SessionProvider';
 
 interface Props {
 	i18nData: I18nData;
@@ -15,6 +16,7 @@ interface Props {
 
 export default function Login({ i18nData, moveToSignup }: Props) {
 	const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
+	const { refresh } = useSession();
 
 	const isPhoneAuth = authMethod === 'phone';
 	const isEmailAuth = authMethod === 'email';
@@ -32,7 +34,14 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 					onClick={async () => {
 						await signIn.social({
 							provider: 'google',
+							callbackURL: window.location.href,
 						});
+
+						await refresh();
+
+						const bc = new BroadcastChannel('auth');
+						bc.postMessage('session-updated');
+						bc.close();
 					}}
 				>
 					<FcGoogle />

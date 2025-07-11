@@ -5,7 +5,7 @@ import {
 	AccordionRoot,
 } from '@/components/ui/accordion';
 import { useTranslations } from 'next-intl';
-import { Box, VStack, Flex, Text, Link, Heading } from '@chakra-ui/react';
+import { Box, VStack, Flex, Text, Heading } from '@chakra-ui/react';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 
 const categories = [
@@ -43,12 +43,18 @@ export default function CatalogDrawer() {
 					mb='4'
 				>
 					<AccordionItemTrigger>
-						<Heading fontWeight='semibold' textStyle='2xl' color='main' borderBottom='1px solid'>
+						<Heading
+							fontWeight='semibold'
+							textStyle='2xl'
+							color='main'
+							borderBottom='1px solid'
+							mb='2'
+						>
 							{category.name}
 						</Heading>
 					</AccordionItemTrigger>
 					<AccordionItemContent>
-						<Flex wrap='wrap' gap={4} justify='flex-start' position='relative' w='100%'>
+						<Flex wrap='wrap' gapX='4' gapY='8' justify='flex-start' position='relative' w='100%'>
 							{category.subcategories.map((subcategory) => (
 								<Box key={subcategory.title} minW='175px'>
 									<Text fontWeight='medium' textStyle='xl' mb={4}>

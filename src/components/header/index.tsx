@@ -8,10 +8,30 @@ import SearchInput from './SearchInput';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import UserActions from './UserActions';
 import Logo from './Logo';
+import { extractI18nData } from '@/utils/i18nUtils';
+import { authLocData, validLocData } from '@/data/localized';
 
 export default function Header() {
 	const genT = useTranslations('General');
 	const t = useTranslations('Header');
+	const authT = useTranslations('Auth');
+	const validT = useTranslations('Validation');
+	const sideT = useTranslations('Sidebar');
+
+	const authI18nData = extractI18nData(authT, authLocData);
+	const validI18nData = extractI18nData(validT, validLocData);
+
+	const i18nData = {
+		...authI18nData,
+		...validI18nData,
+	};
+
+	const i18nSidebar = {
+		...i18nData,
+		lexikoProposal: sideT('lexikoProposal'),
+		authorize: authT('authorize'),
+		authorizeDetails: sideT('authorizeDetails'),
+	};
 
 	return (
 		<Box
@@ -38,7 +58,7 @@ export default function Header() {
 					borderStyle={{ smToMd: 'dotted' }}
 				>
 					<Flex align='center' gap={4}>
-						<Sidebar />
+						<Sidebar i18nData={i18nSidebar} />
 						<Logo />
 					</Flex>
 					<SearchInput
@@ -47,7 +67,7 @@ export default function Header() {
 						notFound={genT('resultsNotFound')}
 					/>
 					<Flex align='center' gap={3}>
-						<UserActions />
+						<UserActions i18nData={i18nData} />
 						<LocaleSwitcher />
 						<ColorModeButton />
 					</Flex>

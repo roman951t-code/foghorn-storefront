@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, JSX, useState } from 'react';
+import React, { ReactNode, JSX } from 'react';
 import {
 	DialogBody,
 	DialogCloseTrigger,
@@ -20,7 +20,7 @@ interface Props {
 	open?: boolean;
 	closeOnInteractOutside?: boolean;
 	size?: ConditionalValue<'lg' | 'sm' | 'md' | 'xl' | 'xs' | 'cover' | 'full' | undefined>;
-	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	setIsOpen: any;
 }
 
 export default function CenteredModal({

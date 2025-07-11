@@ -13,6 +13,7 @@ import { loginEmailAction } from '@/actions/loginEmailAction';
 import { authClient } from '@/lib/auth-client';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import { useSession } from '../providers/SessionProvider';
 
 type FormValues = {
 	email: string;
@@ -37,8 +38,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 
 	const searchParams = useSearchParams();
 	const emailSignIn = searchParams?.get('email-sign-in') === 'true';
-
-	const { data: session } = authClient.useSession();
+	const { session, refresh } = useSession();
 
 	const schema = useMemo(() => createEmailSignInSchema(i18nData), [i18nData]);
 
@@ -93,6 +93,12 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 
 						setAuthError(message);
 					}
+
+					await refresh();
+
+					const bc = new BroadcastChannel('auth');
+					bc.postMessage('session-updated');
+					bc.close();
 				});
 			})}
 		>

@@ -1,7 +1,6 @@
 import React from 'react';
 import {
 	Heading,
-	Button,
 	Text,
 	VStack,
 	Flex,
@@ -13,7 +12,7 @@ import {
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { SidebarCheckoutCard, FullCheckoutCard } from '@/components/reusable/cards/CheckoutCard';
-import { IoMdCheckmarkCircleOutline } from 'react-icons/io';
+import AcceptOrderBtn from './AcceptOrderBtn';
 
 export default function OrderInfo() {
 	const t = useTranslations('Products');
@@ -55,17 +54,7 @@ export default function OrderInfo() {
 						55 699 ₴
 					</Stat.ValueText>
 				</Stat.Root>
-				<Button
-					w='100%'
-					type='submit'
-					mt='4'
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-					color='black'
-					variant='solid'
-				>
-					<IoMdCheckmarkCircleOutline />
-					{t('acceptOrder')}
-				</Button>
+				<AcceptOrderBtn text={t('acceptOrder')} w='100%' mt='4' />
 			</VStack>
 
 			<Stack
@@ -81,16 +70,7 @@ export default function OrderInfo() {
 							55 699 ₴
 						</Stat.ValueText>
 					</Stat.Root>
-					<Button
-						type='submit'
-						bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-						color='black'
-						variant='solid'
-						m={{ base: 'initial', md: 'auto' }}
-					>
-						<IoMdCheckmarkCircleOutline />
-						{t('acceptOrder')}
-					</Button>
+					<AcceptOrderBtn text={t('acceptOrder')} m={{ base: 'initial', md: 'auto' }} />
 				</VStack>
 				<VStack
 					alignItems={{ base: 'flex-start', sm: 'flex-end' }}

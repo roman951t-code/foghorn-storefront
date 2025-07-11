@@ -15,7 +15,12 @@ export default function CollapsibleLinks({ onClose }) {
 	};
 
 	return (
-		<AccordionRoot multiple defaultValue={['info']}>
+		<AccordionRoot
+			multiple
+			defaultValue={['info', 'clients']}
+			collapsible={false}
+			onValueChange={() => {}}
+		>
 			<AccordionItem value='info' borderBottomColor='border.light'>
 				<AccordionItemTrigger>{t('info')}</AccordionItemTrigger>
 				<AccordionItemContent>

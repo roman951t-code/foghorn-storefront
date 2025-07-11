@@ -6,30 +6,32 @@ import type { I18nData } from '@/types/i18n';
 import Image from 'next/image';
 import Login from './Login';
 import Signup from './Signup';
-import { authClient } from '@/lib/auth-client';
 import { useSearchParams } from 'next/navigation';
+import { useSession } from '../providers/SessionProvider';
 
 const emptyCart = '/assets/images/emptyCart.png';
 
 interface Props {
 	i18nData: I18nData;
 	trigger?: React.JSX.Element;
+	isOpen?: boolean;
+	setIsOpen?: (value: boolean) => void;
 }
 
-export default function Auth({ i18nData, trigger }: Props) {
-	const { data: session } = authClient.useSession();
+export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
+	const { session } = useSession();
 	const [showSignup, setShowSignup] = useState(false);
 
 	const searchParams = useSearchParams();
 	const emailSignIn = searchParams?.get('email-sign-in') === 'true';
 
-	const [isOpen, setIsOpen] = useState(false);
+	const [isAuthOpen, setAuthOpen] = useState(false);
 
 	useEffect(() => {
-		if (!emailSignIn || session) return;
+		if (!emailSignIn) return;
 
 		if (emailSignIn) {
-			setIsOpen(true);
+			setAuthOpen(true);
 		}
 	}, [emailSignIn, session]);
 
@@ -37,7 +39,7 @@ export default function Auth({ i18nData, trigger }: Props) {
 		setShowSignup((prevState) => !prevState);
 	};
 
-	const title = session
+	const title = session?.session
 		? `${i18nData.returnCongrats}, Roman!`
 		: showSignup
 			? i18nData.register
@@ -49,11 +51,11 @@ export default function Auth({ i18nData, trigger }: Props) {
 			title={title}
 			trigger={trigger}
 			size='md'
-			open={isOpen}
-			setIsOpen={setIsOpen}
+			open={isOpen ?? isAuthOpen}
+			setIsOpen={setIsOpen ?? setAuthOpen}
 		>
 			<Box maxW='400px' mx='auto' my='auto'>
-				{!session && (
+				{!session.session && (
 					<>
 						{showSignup ? (
 							<Signup i18nData={i18nData} backToLogin={toggleSignup} />
@@ -63,7 +65,7 @@ export default function Auth({ i18nData, trigger }: Props) {
 					</>
 				)}
 
-				{session && (
+				{session.session && (
 					<VStack gap='8'>
 						<Image
 							src={emptyCart}
@@ -78,7 +80,7 @@ export default function Auth({ i18nData, trigger }: Props) {
 							}}
 						/>
 						<Button
-							onClick={() => setIsOpen(false)}
+							onClick={() => setAuthOpen(false)}
 							w='100%'
 							type='submit'
 							color='black'
