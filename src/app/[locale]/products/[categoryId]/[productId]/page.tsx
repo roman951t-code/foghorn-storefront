@@ -1,9 +1,9 @@
 import Breadcrumbs from '@/components/reusable/links/Breadcrumbs';
-import { useTranslations } from 'next-intl';
 import { Flex } from '@chakra-ui/react';
 import ProductsSection from '@/components/pages/main/ProductsSection';
 import SubscribeSection from '@/components/pages/main/SubscribeSection';
 import ProductTabs from '@/components/product/ProductTabs';
+import { getTranslations } from 'next-intl/server';
 
 interface Props {
 	params: { category: string; subcategory: string; productId: string };
@@ -15,10 +15,11 @@ export const metadata = {
 	},
 };
 
-export default function ProductDetail({ params }: Props) {
+export default async function ProductDetail({ params }: Props) {
 	const { category, subcategory = 'Технika' } = params;
 
-	const t = useTranslations('Products');
+	const t = await getTranslations('Products');
+
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>
 			<Breadcrumbs category={category} subcategory={subcategory} />

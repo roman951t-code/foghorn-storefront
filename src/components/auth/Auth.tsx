@@ -39,6 +39,15 @@ export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
 		setShowSignup((prevState) => !prevState);
 	};
 
+	const handleCloseClick = () => {
+		if (setIsOpen) {
+			setIsOpen(false);
+		}
+		if (setAuthOpen) {
+			setAuthOpen(false);
+		}
+	};
+
 	const title = session?.session
 		? `${i18nData.returnCongrats}, Roman!`
 		: showSignup
@@ -55,7 +64,7 @@ export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
 			setIsOpen={setIsOpen ?? setAuthOpen}
 		>
 			<Box maxW='400px' mx='auto' my='auto'>
-				{!session.session && (
+				{!session?.session && (
 					<>
 						{showSignup ? (
 							<Signup i18nData={i18nData} backToLogin={toggleSignup} />
@@ -65,7 +74,7 @@ export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
 					</>
 				)}
 
-				{session.session && (
+				{session?.session && (
 					<VStack gap='8'>
 						<Image
 							src={emptyCart}
@@ -80,7 +89,7 @@ export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
 							}}
 						/>
 						<Button
-							onClick={() => setAuthOpen(false)}
+							onClick={handleCloseClick}
 							w='100%'
 							type='submit'
 							color='black'

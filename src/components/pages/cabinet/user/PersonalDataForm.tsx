@@ -1,207 +1,176 @@
 'use client';
-import { Input, Field, Wrap, RadioCard, Stack, Icon, Button } from '@chakra-ui/react';
+import { Input, Field, Wrap, Button, Box } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
-import { IoMailOutline } from 'react-icons/io5';
-import { IoMdPhonePortrait } from 'react-icons/io';
-
-interface FormValues {
-	email: string;
-	phone: string;
-	name: string;
-	shipmentAddress: string;
-}
-
-const items = [
-	{ value: 'email', title: 'Email', icon: <IoMailOutline /> },
-	{ value: 'phone', title: 'Телефон', icon: <IoMdPhonePortrait /> },
-];
-
-const initialValues = {
-	email: 'test@mail.com',
-	phone: '099-230-44-52',
-	name: 'Roman Onyshchenko',
-	shipmentAddress: 'Україна, Запорізька обл., м. Оріхів, вул. Запорізька, буд. 72, кв. 52',
-};
+import { useMemo } from 'react';
+import { createAccountSchema } from 'formValidationSchemas/accountSchema';
+import { z } from 'zod';
+import PreferredDeliveryForm from './PreferredDeliveryForm';
+import EmailDialog from './EmailDialog';
+import PhoneDialog from './PhoneDialog';
 
 interface Props {
 	i18nData: I18nData;
 }
 
+const initialValues = {
+	email: 'test@mail.com',
+	phone: '380992304452',
+	name: 'Roman Onyshchenko',
+	shipmentAddress: 'Україна, Запорізька обл., м. Оріхів, вул. Запорізька, буд. 72, кв. 52',
+};
+
 export default function PersonalDataForm({ i18nData }: Props) {
-	const {
-		handleSubmit,
-		setValue,
-		formState: { errors, isSubmitting },
-	} = useForm<FormValues>({
-		defaultValues: initialValues,
-		mode: 'onSubmit',
+	const schemaShape = useMemo(() => createAccountSchema(i18nData), [i18nData]);
+
+	const nameSchema = useMemo(() => z.object({ name: schemaShape.name }), [schemaShape]);
+	const emailSchema = useMemo(() => z.object({ email: schemaShape.email }), [schemaShape]);
+	const phoneSchema = useMemo(() => z.object({ phone: schemaShape.phone }), [schemaShape]);
+	const addressSchema = useMemo(
+		() => z.object({ shipmentAddress: schemaShape.shipmentAddress }),
+		[schemaShape]
+	);
+	const notificationSchema = useMemo(
+		() => z.object({ notificationMethod: schemaShape.notificationMethod }),
+		[schemaShape]
+	);
+
+	const nameForm = useForm({
+		defaultValues: { name: initialValues.name },
+		resolver: zodResolver(nameSchema),
 	});
 
-	const handleEditableSubmit = (field: keyof FormValues, value: string) => {
-		setValue(field, value);
+	const emailForm = useForm({
+		defaultValues: { email: initialValues.email },
+		resolver: zodResolver(emailSchema),
+	});
+
+	const phoneForm = useForm({
+		defaultValues: { phone: initialValues.phone },
+		resolver: zodResolver(phoneSchema),
+	});
+
+	const addressForm = useForm({
+		defaultValues: { shipmentAddress: initialValues.shipmentAddress },
+		resolver: zodResolver(addressSchema),
+	});
+
+	const handleFieldSubmit = (fieldName: string, data: any) => {
+		console.log(`${fieldName} updated:`, data);
 	};
 
-	const onSubmit = handleSubmit(async (data) => {
-		try {
-			console.log('Form Submitted:', data);
-		} catch (error) {
-			console.error('Submission failed:', error);
-		}
-	});
-
-	// телефон або email як бажаний спосіб сповіщень задізейблений пока юзер не добаве свій номер і підтвердить його
+	const fieldOrientation = { base: 'vertical', md: 'horizontal' };
 
 	return (
-		<form onSubmit={onSubmit}>
+		<Box m='0 auto'>
 			<Wrap
 				gapX='4'
 				gapY='8'
 				width='full'
 				mt='4'
 				colorPalette={{ base: 'orange', _dark: 'yellow' }}
+				css={{ '--field-label-width': '150px' }}
 			>
-				<Field.Root
-					orientation='vertical'
-					invalid={!!errors.name}
-					maxW={{ base: '100%', xs: 'xs' }}
-				>
-					<Field.Label>{i18nData.name}</Field.Label>
-					<Input
-						variant='outline'
-						transition='all .15s ease-in-out'
-						_placeholder={{ fontSize: 'sm' }}
-						_focus={{
-							outline: 'none',
-						}}
-						size='md'
-						fontSize='md'
-						defaultValue={initialValues.name}
-						onChange={(value) => handleEditableSubmit('name', value)}
-					/>
-					<Field.ErrorText>{errors.name?.message}</Field.ErrorText>
-				</Field.Root>
-
-				<Field.Root
-					orientation='vertical'
-					invalid={!!errors.email}
-					maxW={{ base: '100%', xs: 'xs' }}
-				>
-					<Field.Label>{i18nData.email}</Field.Label>
-					<Input
-						variant='outline'
-						size='md'
-						transition='all .15s ease-in-out'
-						_placeholder={{ fontSize: 'sm' }}
-						_focus={{
-							outline: 'none',
-						}}
-						type='email'
-						fontSize='md'
-						defaultValue={initialValues.email}
-						onChange={(value) => handleEditableSubmit('email', value)}
-					/>
-					<Field.ErrorText>{errors.email?.message}</Field.ErrorText>
-				</Field.Root>
-
-				<Field.Root
-					orientation='vertical'
-					invalid={!!errors.phone}
-					maxW={{ base: '100%', xs: 'xs' }}
-				>
-					<Field.Label>{i18nData.phone}</Field.Label>
-					<Input
-						variant='outline'
-						size='md'
-						transition='all .15s ease-in-out'
-						_placeholder={{ fontSize: 'sm' }}
-						_focus={{
-							outline: 'none',
-						}}
-						fontSize='md'
-						defaultValue={initialValues.phone}
-						onChange={(value) => handleEditableSubmit('phone', value)}
-					/>
-					<Field.ErrorText>{errors.phone?.message}</Field.ErrorText>
-				</Field.Root>
-			</Wrap>
-			<Field.Root
-				orientation='vertical'
-				invalid={!!errors.shipmentAddress}
-				mt='8'
-				maxW='1008px'
-				colorPalette={{ base: 'orange', _dark: 'yellow' }}
-			>
-				<Field.Label>{i18nData.shipmentAddress}</Field.Label>
-				<Input
-					variant='outline'
-					size='md'
-					transition='all .15s ease-in-out'
-					_placeholder={{ fontSize: 'sm' }}
-					_focus={{
-						outline: 'none',
-					}}
-					fontSize='md'
-					defaultValue={initialValues.shipmentAddress}
-					onChange={(value) => handleEditableSubmit('shipmentAddress', value)}
-				/>
-				<Field.ErrorText>{errors.shipmentAddress?.message}</Field.ErrorText>
-			</Field.Root>
-
-			<RadioCard.Root
-				mt='12'
-				colorPalette={{ base: 'orange', _dark: 'yellow' }}
-				orientation={{ base: 'vertical', sm: 'horizontal' }}
-				// value={'email'}
-				css={{
-					'& div[data-state="unchecked"] span': {
-						color: 'var(--chakra-colors-fg) !important',
-					},
-				}}
-				// onChange={(event) => {
-				// 	const value = (event.target as HTMLInputElement).value;
-				// 	setSelectedPayment(value);
-				// }}
-			>
-				<RadioCard.Label fontSize='md' mb='4' fontWeight='normal'>
-					{i18nData.preferredNotificationWay}
-				</RadioCard.Label>
-				<Stack direction={{ base: 'column', xs: 'row' }} gap='4'>
-					{items.map((item) => (
-						<RadioCard.Item
-							key={item.value}
-							value={item.value}
-							boxShadow='none'
-							_hover={{ cursor: 'pointer' }}
-							maxW='xs'
-							bg='main'
-							justifyContent={{ base: 'initial', xs: 'center' }}
-							h={{ base: 'auto', sm: '42px' }}
+				<form onSubmit={nameForm.handleSubmit((data) => handleFieldSubmit('name', data))}>
+					<Field.Root
+						orientation={fieldOrientation}
+						invalid={!!nameForm.formState.errors.name}
+						gap='4'
+						justifyContent='center'
+					>
+						<Field.Label maxH='20px'>{i18nData.name}</Field.Label>
+						<Input {...nameForm.register('name')} variant='outline' size='md' maxW='xl' />
+						<Field.ErrorText>{nameForm.formState.errors.name?.message}</Field.ErrorText>
+						<Button
+							type='submit'
+							colorPalette='gray'
+							color='main'
+							variant='outline'
+							border='1px solid '
+							borderColor='border'
+							size='md'
+							rounded='md'
 						>
-							<RadioCard.ItemHiddenInput />
-							<RadioCard.ItemControl>
-								<Icon fontSize='2xl' color='fg.muted'>
-									{item.icon}
-								</Icon>
-								<RadioCard.ItemText>{item.title}</RadioCard.ItemText>
-								<RadioCard.ItemIndicator />
-							</RadioCard.ItemControl>
-						</RadioCard.Item>
-					))}
-				</Stack>
-			</RadioCard.Root>
+							{i18nData.save}
+						</Button>
+					</Field.Root>
+				</form>
 
-			<Button
-				type='submit'
-				bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-				color='black'
-				variant='solid'
-				minWidth='280px'
-				rounded='md'
-				mt='12'
-			>
-				{i18nData.save}
-			</Button>
-		</form>
+				<form onSubmit={emailForm.handleSubmit((data) => handleFieldSubmit('email', data))}>
+					<Field.Root
+						orientation={fieldOrientation}
+						invalid={!!emailForm.formState.errors.email}
+						gap='4'
+						justifyContent='center'
+					>
+						<Field.Label maxH='20px'>{i18nData.email}</Field.Label>
+						<Input
+							{...emailForm.register('email')}
+							type='email'
+							variant='outline'
+							size='md'
+							maxW='xl'
+						/>
+						<Field.ErrorText>{emailForm.formState.errors.email?.message}</Field.ErrorText>
+						<EmailDialog i18nData={i18nData} />
+					</Field.Root>
+				</form>
+
+				<form onSubmit={phoneForm.handleSubmit((data) => handleFieldSubmit('phone', data))}>
+					<Field.Root
+						orientation={fieldOrientation}
+						invalid={!!phoneForm.formState.errors.phone}
+						gap='4'
+						justifyContent='center'
+					>
+						<Field.Label maxH='20px'>{i18nData.phone}</Field.Label>
+						<Input {...phoneForm.register('phone')} variant='outline' size='md' maxW='xl' />
+						<Field.ErrorText>{phoneForm.formState.errors.phone?.message}</Field.ErrorText>
+						<PhoneDialog i18nData={i18nData} />
+					</Field.Root>
+				</form>
+
+				<form
+					onSubmit={addressForm.handleSubmit((data) => handleFieldSubmit('shipmentAddress', data))}
+				>
+					<Field.Root
+						orientation={fieldOrientation}
+						invalid={!!addressForm.formState.errors.shipmentAddress}
+						gap='4'
+						justifyContent='center'
+					>
+						<Field.Label maxH='20px'>{i18nData.shipmentAddress}</Field.Label>
+						<Input
+							{...addressForm.register('shipmentAddress')}
+							variant='outline'
+							size='md'
+							maxW='xl'
+						/>
+						<Field.ErrorText>
+							{addressForm.formState.errors.shipmentAddress?.message}
+						</Field.ErrorText>
+						<Button
+							type='submit'
+							color='main'
+							variant='outline'
+							colorPalette='gray'
+							border='1px solid '
+							borderColor='border'
+							size='md'
+							rounded='md'
+						>
+							{i18nData.save}
+						</Button>
+					</Field.Root>
+				</form>
+
+				<PreferredDeliveryForm
+					schema={notificationSchema}
+					i18nData={i18nData}
+					onSubmitAction={(data) => handleFieldSubmit('notificationMethod', data)}
+				/>
+			</Wrap>
+		</Box>
 	);
 }

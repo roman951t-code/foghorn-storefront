@@ -1,5 +1,4 @@
 import Breadcrumbs from '@/components/reusable/links/Breadcrumbs';
-import { useTranslations } from 'next-intl';
 import { Flex, Heading, Box, Group, VStack } from '@chakra-ui/react';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import QuickFilters from '@/components/pages/products/QuickFilters';
@@ -8,14 +7,15 @@ import ProductsGrid from '@/components/pages/products/ProductsGrid';
 import FiltersSidebar from '@/components/pages/products/FiltersSidebar';
 import ProductsSection from '@/components/pages/main/ProductsSection';
 import FiltersTags from '@/components/pages/products/FiltersTags';
+import { getTranslations } from 'next-intl/server';
 
 interface Props {
 	params: { category: string; subcategory: string };
 }
 
-export default function Subcategory({ params }: Props) {
-	const t = useTranslations('Products');
-	const sidebarT = useTranslations('Sidebar');
+export default async function Subcategory({ params }: Props) {
+	const t = await getTranslations('Products');
+	const sidebarT = await getTranslations('Sidebar');
 	const { category, subcategory = 'Технika' } = params;
 
 	return (

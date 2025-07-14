@@ -9,9 +9,9 @@ import { useSession } from '@/components/providers/SessionProvider';
 export default function AuthData({ i18nData }: { i18nData: I18nData }) {
 	const { session } = useSession();
 
-	return session.session ? (
+	return session?.session ? (
 		<VStack w='100%' mt='8' gap='4' direction='column'>
-			<Heading as='h4' size='md' w='100%' textAlign='left'>
+			<Heading as='h4' size='md' w='100%' textAlign='center'>
 				{i18nData.yourContacts}
 			</Heading>
 			<PersonalDataForm i18nData={i18nData} />

@@ -17,7 +17,7 @@ export default function AcceptOrderBtn({ text, ...restProps }: Props) {
 			bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 			color='black'
 			variant='solid'
-			disabled={!session.session}
+			disabled={!session?.session}
 			{...restProps}
 		>
 			<IoMdCheckmarkCircleOutline />

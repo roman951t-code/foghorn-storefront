@@ -32,13 +32,13 @@ export default function PaymentStep() {
 		<>
 			<RadioCard.Root
 				colorPalette={{ base: 'orange', _dark: 'yellow' }}
-				orientation={{ base: 'vertical', sm: 'horizontal', md: 'vertical', lg: 'horizontal' }}
+				orientation={{ base: 'vertical', sm: 'horizontal' }}
 				align='center'
 				defaultValue='paypal'
 				mt='4'
 				css={{
 					'& div[data-state="unchecked"] span': {
-						color: 'var(--chakra-colors-fg) !important',
+						borderColor: 'var(--chakra-colors-fg) !important',
 					},
 				}}
 				value={selectedPayment}

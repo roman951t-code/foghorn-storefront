@@ -1,8 +1,8 @@
 import { Stack, Heading, Text } from '@chakra-ui/react';
 import aboutData from '@/data/about';
-import { useTranslations } from 'next-intl';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
+import { getTranslations } from 'next-intl/server';
 
 type Params = {
 	params: { locale: string };
@@ -13,8 +13,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	return getLocalizedMetadata(locale, 'aboutUs');
 }
 
-export default function AboutUs() {
-	const t = useTranslations('Sidebar');
+export default async function AboutUs() {
+	const t = await getTranslations('Sidebar');
 
 	return (
 		<Stack gap={6} p={4} pt={1}>

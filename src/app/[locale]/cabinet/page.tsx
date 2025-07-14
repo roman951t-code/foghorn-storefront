@@ -13,11 +13,15 @@ export default function Cabinet() {
 		'shipmentAddress',
 		'preferredNotificationWay',
 		'save',
+		'editEmail',
+		'editPhone',
+		'toPost',
+		'editEmailCodeSent',
 	]);
 
 	return (
 		<VStack w='100%'>
-			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
+			<Heading as='h2' size='2xl' fontWeight='normal'>
 				{t('personalData')}
 			</Heading>
 			<PersonalDataForm i18nData={i18nData} />

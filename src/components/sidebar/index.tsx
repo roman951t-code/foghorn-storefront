@@ -22,6 +22,7 @@ import { LogoutSection, AuthorizeSection } from './AuthorizeSection';
 import { useSession } from '../providers/SessionProvider';
 import { I18nData } from '@/types/i18n';
 import Auth from '../auth/Auth';
+import { DeleteAccount } from './DeleteAccount';
 
 const logoBig = '/assets/images/logoBig.webp';
 const logoHeight = 36;
@@ -82,7 +83,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 					</DrawerHeader>
 
 					<Box flex='1' overflowY='auto' display='flex' flexDirection='column' height='100dvh'>
-						<Box px={4} my={4}>
+						<Box px={4} my={4} h='100%'>
 							<CatalogBtn fullText />
 							<Separator borderColor='border.light' my='5' />
 							{session?.session ? (
@@ -100,7 +101,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 									<Separator borderColor='border.light' my='5' />
 								</>
 							)}
-							{session && <UserLinks onClose={onClose} />}
+							{session?.session && <UserLinks onClose={onClose} />}
 							<Separator borderColor='border.light' my='5' />
 							<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' mt='4'>
 								<Card.Body gap='4'>
@@ -120,6 +121,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 							<Separator borderColor='border.light' my='5' />
 							<CollapsibleLinks onClose={onClose} />
 						</Box>
+						{session?.session && <DeleteAccount i18nData={i18nData} />}
 
 						<DrawerFooter bg='bg.secondary' mt='auto'>
 							<MediaContacts />

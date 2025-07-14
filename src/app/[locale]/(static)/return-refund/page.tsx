@@ -1,8 +1,8 @@
 import { Stack, Heading, Text } from '@chakra-ui/react';
 import returnRefundData from '@/data/returnRefund';
-import { useTranslations } from 'next-intl';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
+import { getTranslations } from 'next-intl/server';
 
 type Params = {
 	params: { locale: string };
@@ -13,8 +13,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	return getLocalizedMetadata(locale, 'returnRefund');
 }
 
-export default function ReturnRefund() {
-	const t = useTranslations('Sidebar');
+export default async function ReturnRefund() {
+	const t = await getTranslations('Sidebar');
 
 	return (
 		<Stack gap={6} p={4} pt={1}>

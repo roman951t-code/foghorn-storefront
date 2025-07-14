@@ -18,7 +18,16 @@ export default function OrderInfo() {
 	const t = useTranslations('Products');
 
 	return (
-		<Flex direction='column' w='100%' gap={2} p={4} boxShadow='sm' bg='bg.tertiary'>
+		<Flex
+			direction='column'
+			w='100%'
+			gap={2}
+			p={4}
+			boxShadow='sm'
+			bg='bg.tertiary'
+			mt='8'
+			rounded='sm'
+		>
 			<Heading as='h3' size='2xl' fontWeight='medium' textAlign='center'>
 				{t('yourOrder')}
 			</Heading>
@@ -54,7 +63,7 @@ export default function OrderInfo() {
 						55 699 ₴
 					</Stat.ValueText>
 				</Stat.Root>
-				<AcceptOrderBtn text={t('acceptOrder')} w='100%' mt='4' />
+				<AcceptOrderBtn text={t('acceptOrder')} w='100%' mt='4' maxW='xs' />
 			</VStack>
 
 			<Stack

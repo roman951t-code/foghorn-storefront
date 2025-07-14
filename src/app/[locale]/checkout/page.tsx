@@ -3,6 +3,7 @@ import CheckoutSteps from '@/components/pages/checkout/CheckoutSteps';
 import OrderInfo from '@/components/pages/checkout/OrderInfo';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
+import { getTranslations } from 'next-intl/server';
 
 type Params = {
 	params: { locale: string };
@@ -13,16 +14,18 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	return getLocalizedMetadata(locale, 'checkout');
 }
 
-export default function Checkout() {
+export default async function Checkout() {
+	const t = await getTranslations('Products');
+
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
 			<Heading as='h1' size='4xl' fontWeight='normal'>
-				Оформлення замовлення
+				{t('orderProcessing')}
 			</Heading>
 			<Group justifyContent='space-between' align='flex-start' gap='4'>
 				<Box as='section' w={{ base: '100%', lg: '75%' }}>
 					<CheckoutSteps />
-					<Box hideFrom='md'>{<OrderInfo />}</Box>
+					<Box hideFrom='lg'>{<OrderInfo />}</Box>
 				</Box>
 				<Box
 					as='aside'
@@ -30,7 +33,7 @@ export default function Checkout() {
 					minW='304px'
 					bg='bg.tertiary'
 					rounded='sm'
-					hideBelow='md'
+					hideBelow='lg'
 					position='sticky'
 					top='74px'
 				>

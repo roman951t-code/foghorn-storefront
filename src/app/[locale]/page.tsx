@@ -3,9 +3,9 @@ import CatalogPanel from '@/components/pages/main/CatalogPanel';
 import ProductsSection from '@/components/pages/main/ProductsSection';
 import SubscribeSection from '@/components/pages/main/SubscribeSection';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
-import { useTranslations } from 'next-intl';
 import { extractI18nData, getLocalizedMetadata } from '@/utils/i18nUtils';
 import { type Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 type Params = {
 	params: { locale: string };
@@ -16,9 +16,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	return getLocalizedMetadata(locale, 'main');
 }
 
-export default function Main() {
-	const genT = useTranslations('General');
-	const prodT = useTranslations('Products');
+export default async function Main() {
+	const genT = await getTranslations('General');
+	const prodT = await getTranslations('Products');
 
 	const i18nData = extractI18nData(genT, ['seeCategory', 'seeAll']);
 

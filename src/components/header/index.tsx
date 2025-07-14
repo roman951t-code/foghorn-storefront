@@ -29,8 +29,11 @@ export default function Header() {
 	const i18nSidebar = {
 		...i18nData,
 		lexikoProposal: sideT('lexikoProposal'),
-		authorize: authT('authorize'),
 		authorizeDetails: sideT('authorizeDetails'),
+		authorize: authT('authorize'),
+		deleteAccount: authT('deleteAccount'),
+		areYouSure: authT('areYouSure'),
+		confirmDeleteAcc: authT('confirmDeleteAcc'),
 	};
 
 	return (

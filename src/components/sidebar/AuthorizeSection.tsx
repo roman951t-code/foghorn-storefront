@@ -3,6 +3,7 @@ import { Card, Button } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { useSession } from '../providers/SessionProvider';
 import { I18nData } from '@/types/i18n';
+import { redirect } from 'next/navigation';
 
 interface LogoutProps {
 	onClose: () => void;
@@ -20,6 +21,8 @@ export function LogoutSection({ onClose }: LogoutProps) {
 		bc.postMessage('session-updated');
 		bc.close();
 		onClose();
+
+		redirect('/ua');
 	};
 
 	return (

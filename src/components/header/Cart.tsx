@@ -1,3 +1,5 @@
+'use client';
+
 import { FiTrash2, FiShoppingCart } from 'react-icons/fi';
 import {
 	IconButton,
@@ -11,18 +13,20 @@ import {
 	Highlight,
 	Text,
 } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
 import { EmptyState } from '@/components/ui/empty-state';
 import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import Image from 'next/image';
 import { MdOutlineShoppingCartCheckout } from 'react-icons/md';
 import { LocaleNavButton } from '../reusable/links/LocaleNavLink';
+import { useState } from 'react';
+import { I18nData } from '@/types/i18n';
 
 const emptyCart = '/assets/images/emptyCart.png';
 
-const CartBtn = () => (
+const CartBtn = ({ setIsOpen }: { setIsOpen: any }) => (
 	<IconButton
+		onClick={setIsOpen}
 		aria-label='Cart'
 		size='md'
 		variant='ghost'
@@ -41,14 +45,23 @@ const CartBtn = () => (
 	</IconButton>
 );
 
-export default function Cart() {
-	const headT = useTranslations('Header');
-	const prodT = useTranslations('Products');
+interface Props {
+	i18nData: I18nData;
+}
 
+export default function Cart({ i18nData }: Props) {
 	const isCartEmpty = false;
 
+	const [isOpen, setIsOpen] = useState(false);
+
 	return (
-		<CenteredModal title={headT('cart')} trigger={<CartBtn />} size={isCartEmpty ? 'md' : 'lg'}>
+		<CenteredModal
+			title={i18nData.cart}
+			trigger={<CartBtn setIsOpen={setIsOpen} />}
+			size={isCartEmpty ? 'md' : 'lg'}
+			open={isOpen}
+			setIsOpen={setIsOpen}
+		>
 			{isCartEmpty ? (
 				<Stack direction='column'>
 					<Image
@@ -65,8 +78,8 @@ export default function Cart() {
 					<EmptyState
 						paddingBlock='0'
 						paddingBottom={8}
-						title={headT('emptyCart')}
-						description={headT('emptyCartDescr')}
+						title={i18nData.emptyCart}
+						description={i18nData.emptyCartDescr}
 					/>
 				</Stack>
 			) : (
@@ -75,20 +88,20 @@ export default function Cart() {
 						<Flex justifyContent='flex-start' gap={6} direction='column'>
 							<VStack gap='3' alignItems='flex-start'>
 								<Stat.Root>
-									<Stat.Label fontSize='sm'>{prodT('totalAmount')}</Stat.Label>
+									<Stat.Label fontSize='sm'>{i18nData.totalAmount}</Stat.Label>
 									<Stat.ValueText w='124px' fontSize='3xl'>
 										55 699 ₴
 									</Stat.ValueText>
 								</Stat.Root>
 								<Text textStyle='sm' fontWeight='normal'>
 									<Highlight query='3' styles={{ fontWeight: 'bold' }}>
-										{`${prodT('numOfProducts')}: 3`}
+										{`${i18nData.numOfProducts}: 3`}
 									</Highlight>
 								</Text>
 							</VStack>
-							<LocaleNavButton href='/checkout'>
+							<LocaleNavButton href='/checkout' onClick={() => setIsOpen(false)}>
 								<MdOutlineShoppingCartCheckout />
-								{headT('order')}
+								{i18nData.order}
 							</LocaleNavButton>
 						</Flex>
 						<IconButton

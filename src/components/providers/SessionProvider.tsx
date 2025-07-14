@@ -27,6 +27,7 @@ export function SessionProvider({
 				disableCookieCache: true,
 			},
 		});
+
 		setSession(newSession);
 	};
 
@@ -47,11 +48,18 @@ export function SessionProvider({
 		return () => channel.close();
 	}, []);
 
-	return <SessionContext.Provider value={{ session, refresh }}>{children}</SessionContext.Provider>;
+	const activeSession = session?.data ? session?.data : session;
+
+	return (
+		<SessionContext.Provider value={{ session: activeSession, refresh }}>
+			{children}
+		</SessionContext.Provider>
+	);
 }
 
 export function useSession() {
 	const context = useContext(SessionContext);
+
 	if (!context) throw new Error('useSession must be used within a SessionProvider');
 	return context;
 }

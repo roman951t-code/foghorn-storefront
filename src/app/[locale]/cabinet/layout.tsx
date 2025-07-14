@@ -1,10 +1,13 @@
 import { Tabs, Box, Flex } from '@chakra-ui/react';
 import { ReactNode } from 'react';
-import { useTranslations } from 'next-intl';
 import TabsList from '@/components/pages/cabinet/TabsHeaders';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
 import TabsProvider from '@/components/pages/cabinet/TabsProvider';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
 type Params = {
 	params: { locale: string };
@@ -20,9 +23,17 @@ interface Props {
 	params: { locale: 'ua' | 'ru' };
 }
 
-export default function CabinetLayout({ children }: Props) {
-	const sideT = useTranslations('Sidebar');
-	const authT = useTranslations('Auth');
+export default async function CabinetLayout({ children }: Props) {
+	const sideT = await getTranslations('Sidebar');
+	const authT = await getTranslations('Auth');
+
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
+
+	if (!session) {
+		redirect('/ua');
+	}
 
 	const i18nData = {
 		myOrders: sideT('myOrders'),

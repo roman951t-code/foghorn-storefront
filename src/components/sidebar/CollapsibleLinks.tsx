@@ -7,7 +7,11 @@ import {
 import { useTranslations } from 'next-intl';
 import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 
-export default function CollapsibleLinks({ onClose }) {
+interface Props {
+	onClose: () => void;
+}
+
+export default function CollapsibleLinks({ onClose }: Props) {
 	const t = useTranslations('Sidebar');
 
 	const handleClick = () => {
@@ -24,7 +28,9 @@ export default function CollapsibleLinks({ onClose }) {
 			<AccordionItem value='info' borderBottomColor='border.light'>
 				<AccordionItemTrigger>{t('info')}</AccordionItemTrigger>
 				<AccordionItemContent>
-					<LocaleNavLink href='/about-us'>{t('aboutUs')}</LocaleNavLink>
+					<LocaleNavLink href='/about-us' onClick={handleClick}>
+						{t('aboutUs')}
+					</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/public-offer' onClick={handleClick}>
