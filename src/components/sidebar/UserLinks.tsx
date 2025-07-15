@@ -7,7 +7,12 @@ import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 import { VscFeedback } from 'react-icons/vsc';
 import { BsEmojiSunglasses } from 'react-icons/bs';
 
-export default function UserLinks({ onClose }) {
+interface Props {
+	userName: string;
+	onClose: () => void;
+}
+
+export default function UserLinks({ userName, onClose }: Props) {
 	const t = useTranslations('Sidebar');
 
 	const handleClose = () => {
@@ -20,7 +25,7 @@ export default function UserLinks({ onClose }) {
 				<Icon size='md' mr='2' verticalAlign='top'>
 					<LuUserRoundCog />
 				</Icon>
-				{'Роман Онищенко'}
+				{userName}
 			</LocaleNavLink>
 
 			<LocaleNavLink href='/cabinet/orders' onClick={handleClose}>

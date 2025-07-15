@@ -1,8 +1,8 @@
 'use server';
 
-import { authClient } from '@/lib/auth-client';
 import { getTranslations } from 'next-intl/server';
 import { getResetPassSchema } from 'formValidationSchemas/resetPassSchema';
+import { auth } from '@/lib/auth';
 
 export async function resetPasswordAction(
 	prevState: unknown,
@@ -20,9 +20,11 @@ export async function resetPasswordAction(
 	const { email } = validatedFormData.data;
 
 	try {
-		await authClient.requestPasswordReset({
-			email,
-			redirectTo: '/?reset-pass=true',
+		await auth.api.requestPasswordReset({
+			body: {
+				email,
+				redirectTo: '/?reset-pass=true',
+			},
 		});
 	} catch (error: any) {
 		const errorMap: Record<string, string> = {

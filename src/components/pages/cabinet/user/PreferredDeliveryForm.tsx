@@ -1,13 +1,14 @@
-'use client';
 import { Field, RadioCard, Stack, Icon, Button } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdPhonePortrait } from 'react-icons/io';
+import { useMemo } from 'react';
+import z from 'zod';
 
 interface Props {
-	schema: any;
+	schemaShape: any;
 	i18nData: I18nData;
 	onSubmitAction: (data: { notificationMethod: string }) => void;
 }
@@ -17,12 +18,17 @@ const items = [
 	{ value: 'phone', title: 'Телефон', icon: <IoMdPhonePortrait /> },
 ];
 
-export default function PreferredDeliveryForm({ schema, i18nData, onSubmitAction }: Props) {
+export default function PreferredDeliveryForm({ schemaShape, i18nData, onSubmitAction }: Props) {
+	const notificationSchema = useMemo(
+		() => z.object({ notificationMethod: schemaShape.notificationMethod }),
+		[schemaShape]
+	);
+
 	const form = useForm({
 		defaultValues: {
 			notificationMethod: '',
 		},
-		resolver: zodResolver(schema),
+		resolver: zodResolver(notificationSchema),
 	});
 
 	return (
@@ -58,7 +64,7 @@ export default function PreferredDeliveryForm({ schema, i18nData, onSubmitAction
 								_hover={{ cursor: 'pointer' }}
 								maxW='xs'
 								bg='main'
-								justifyContent={{ base: 'initial', xs: 'center' }}
+								justifyContent={{ base: 'initial', xs: 'center' } as any}
 								h={{ base: 'auto', sm: '42px' }}
 							>
 								<RadioCard.ItemHiddenInput />
@@ -73,11 +79,9 @@ export default function PreferredDeliveryForm({ schema, i18nData, onSubmitAction
 						))}
 						<Button
 							type='submit'
-							color='main'
-							variant='outline'
-							border='1px solid '
-							colorPalette='gray'
-							borderColor='border'
+							color='black'
+							bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+							variant='solid'
 							size='md'
 							rounded='md'
 							maxW='xs'

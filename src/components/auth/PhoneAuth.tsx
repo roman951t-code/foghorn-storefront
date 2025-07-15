@@ -10,7 +10,6 @@ import { useActionState } from 'react';
 import { createPhoneSignUpSchema } from 'formValidationSchemas/phoneSignUpSchema';
 import { createphoneSignInSchema } from 'formValidationSchemas/phoneSignInSchema';
 import PhoneConfirmation from './PhoneConfirmation';
-import { registerPhoneAction } from '@/actions/registerPhoneAction';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;
@@ -31,7 +30,7 @@ export default function PhoneAuth({ i18nData, disabled, isSignup = false }: Phon
 		[i18nData]
 	);
 
-	const [formError, formAction, isPending] = useActionState(registerPhoneAction, undefined);
+	const [formError, formAction, isPending] = useActionState(null, undefined);
 
 	const [isSubmitted, setSubmitted] = useState(false);
 

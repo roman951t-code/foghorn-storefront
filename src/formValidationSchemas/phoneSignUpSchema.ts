@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import type { I18nData } from '@/types/i18n';
 
 export const phoneSignUpSchemaShape = (t: {
-	firstNameRequired: string;
+	nameRequired: string;
 	nameMinLength: string;
 	phoneRequired: string;
 	inputMaxLength: string;
@@ -11,7 +11,7 @@ export const phoneSignUpSchemaShape = (t: {
 }) =>
 	z.object({
 		firstName: z
-			.string({ required_error: t.firstNameRequired })
+			.string({ required_error: t.nameRequired })
 			.min(2, { message: t.nameMinLength })
 			.max(60, { message: t.inputMaxLength })
 			.nonempty(),
@@ -34,7 +34,7 @@ export async function getPhoneSignUpSchema() {
 		phoneRequired: t('phoneRequired'),
 		inputMaxLength: t('inputMaxLength'),
 		invalidPhone: t('invalidPhone'),
-		firstNameRequired: t('firstNameRequired'),
+		nameRequired: t('nameRequired'),
 		nameMinLength: t('nameMinLength'),
 	});
 }

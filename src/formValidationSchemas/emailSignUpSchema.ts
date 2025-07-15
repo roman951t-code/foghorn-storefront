@@ -14,13 +14,13 @@ export const emailSignUpSchemaShape = (t: {
 	passwordAlphabetic: string;
 	passwordUnderscore: string;
 	passwordsNotMatch: string;
-	firstNameRequired: string;
+	nameRequired: string;
 	nameMinLength: string;
 }) =>
 	z
 		.object({
 			name: z
-				.string({ required_error: t.firstNameRequired })
+				.string({ required_error: t.nameRequired })
 				.min(2, { message: t.nameMinLength })
 				.max(60, { message: t.inputMaxLength })
 				.nonempty(),
@@ -74,7 +74,7 @@ export async function getEmailSignUpSchema() {
 		passwordAlphabetic: t('passwordAlphabetic'),
 		passwordUnderscore: t('passwordUnderscore'),
 		passwordsNotMatch: t('passwordsNotMatch'),
-		firstNameRequired: t('firstNameRequired'),
+		nameRequired: t('nameRequired'),
 		nameMinLength: t('nameMinLength'),
 	});
 }

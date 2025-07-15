@@ -83,7 +83,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 					</DrawerHeader>
 
 					<Box flex='1' overflowY='auto' display='flex' flexDirection='column' height='100dvh'>
-						<Box px={4} my={4} h='100%'>
+						<Box px={4} my={4} h='100%' overflowY='auto'>
 							<CatalogBtn fullText />
 							<Separator borderColor='border.light' my='5' />
 							{session?.session ? (
@@ -101,7 +101,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 									<Separator borderColor='border.light' my='5' />
 								</>
 							)}
-							{session?.session && <UserLinks onClose={onClose} />}
+							{session?.session && <UserLinks userName={session?.user?.name} onClose={onClose} />}
 							<Separator borderColor='border.light' my='5' />
 							<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' mt='4'>
 								<Card.Body gap='4'>

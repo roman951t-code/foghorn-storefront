@@ -10,12 +10,14 @@ export const accountSchemaShape = (t: {
 	wrongEmail: string;
 	phoneRequired: string;
 	invalidPhone: string;
-	addressRequired: string;
 	addressMax: string;
-	notificationRequired: string;
+	nameMinLength: string;
 }) => ({
-	name: z.string({ required_error: t.nameRequired }).max(60, { message: t.nameMax }),
-
+	name: z
+		.string({ required_error: t.nameRequired })
+		.min(2, { message: t.nameMinLength })
+		.max(60, { message: t.inputMaxLength })
+		.nonempty(),
 	email: z
 		.string({ required_error: t.emailRequired })
 		.max(60, { message: t.inputMaxLength })
@@ -28,15 +30,7 @@ export const accountSchemaShape = (t: {
 			message: t.invalidPhone,
 		}),
 
-	shipmentAddress: z
-		.string({ required_error: t.addressRequired })
-		.max(200, { message: t.addressMax }),
-
-	notificationMethod: z
-		.string({ required_error: t.notificationRequired })
-		.refine((val) => val === 'email' || val === 'phone', {
-			message: t.notificationRequired,
-		}),
+	shipmentAddress: z.string().max(200, { message: t.addressMax }),
 });
 
 export const createAccountSchema = (t: I18nData) =>
@@ -53,17 +47,15 @@ export async function getAccountSchemas() {
 		wrongEmail: t('wrongEmail'),
 		phoneRequired: t('phoneRequired'),
 		invalidPhone: t('invalidPhone'),
-		addressRequired: t('addressRequired'),
 		addressMax: t('inputMaxLength'),
-		notificationRequired: t('notificationRequired'),
+		nameMinLength: t('nameMinLength'),
 	});
 
 	return {
-		nameSchema: z.object({ name: shape.name }),
+		nameSchema: z.object({ name: shape.name, email: shape.email }),
 		emailSchema: z.object({ email: shape.email }),
-		phoneSchema: z.object({ phone: shape.phone }),
-		addressSchema: z.object({ shipmentAddress: shape.shipmentAddress }),
-		notificationSchema: z.object({ notificationMethod: shape.notificationMethod }),
+		phoneSchema: z.object({ phone: shape.phone, email: shape.email }),
+		addressSchema: z.object({ shipmentAddress: shape.shipmentAddress, email: shape.email }),
 	};
 }
 

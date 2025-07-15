@@ -73,3 +73,33 @@ export const validLocData = [
 	'tooManyAttempts',
 	'emailNotVerified',
 ];
+
+export const accountValidLoc = [
+	'nameRequired',
+	'wrongEmail',
+	'emailRequired',
+	'phoneRequired',
+	'invalidPhone',
+	'invalidFormData',
+	'nameMinLength',
+	'userNotFound',
+	'addressMax',
+	'userLoginFail',
+	'nameMinLength',
+	'editNameFail',
+];
+
+export const accountAuthLoc = [
+	'name',
+	'email',
+	'phone',
+	'shipmentAddress',
+	'preferredNotificationWay',
+	'save',
+	'editEmail',
+	'editPhone',
+	'toPost',
+	'editEmailCodeSent',
+	'nameUpdated',
+	'emailUpdated',
+];

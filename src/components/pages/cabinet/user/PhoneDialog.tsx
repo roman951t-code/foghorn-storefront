@@ -12,11 +12,9 @@ interface TriggerProps {
 const Trigger = ({ text, onClick }: TriggerProps) => (
 	<Button
 		type='submit'
-		color='main'
-		colorPalette='gray'
-		variant='outline'
-		border='1px solid '
-		borderColor='border'
+		color='black'
+		bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+		variant='solid'
 		size='md'
 		rounded='md'
 		onClick={onClick}
