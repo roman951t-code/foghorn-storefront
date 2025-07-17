@@ -1,9 +1,9 @@
 'use client';
-import { Wrap, Box } from '@chakra-ui/react';
+import { Fieldset, Stack, Wrap } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
-import { startTransition, useActionState, useMemo } from 'react';
+import { startTransition, useActionState, useMemo, useState } from 'react';
 import { createAccountSchema } from 'formValidationSchemas/accountSchema';
 import { z } from 'zod';
 import PreferredDeliveryForm from './PreferredDeliveryForm';
@@ -29,9 +29,18 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	const { session } = useSession();
 	const userEmail = session?.user?.email;
 
-	const schemaShape = useMemo(() => createAccountSchema(i18nData), [i18nData]);
+	const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 
-	const nameSchema = useMemo(() => z.object({ name: schemaShape.name }), [schemaShape]);
+	const schemaShape = useMemo(() => createAccountSchema(i18nData), [i18nData]);
+	const nameSchema = useMemo(
+		() =>
+			z.object({
+				name: schemaShape.name,
+				lastName: schemaShape.lastName,
+				middleName: schemaShape.middleName,
+			}),
+		[schemaShape]
+	);
 	const emailSchema = useMemo(() => z.object({ email: schemaShape.email }), [schemaShape]);
 	const phoneSchema = useMemo(() => z.object({ phone: schemaShape.phone }), [schemaShape]);
 	const addressSchema = useMemo(
@@ -48,7 +57,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	);
 
 	const nameForm = useForm({
-		defaultValues: { name: session?.user?.name },
+		defaultValues: { name: session?.user?.name, lastName: 'Онищенко', middleName: 'Вікторович' },
 		resolver: zodResolver(nameSchema),
 	});
 
@@ -100,6 +109,20 @@ export default function PersonalDataForm({ i18nData }: Props) {
 
 		startTransition(async () => {
 			await emailAction(payload);
+
+			const result = await authClient.changeEmail({
+				newEmail: data.email,
+				callbackURL: '/?email-change=true',
+			});
+
+			if (result?.error) {
+				toaster.error({
+					title: i18nData.editEmailFail,
+					duration: 5000,
+				});
+			} else {
+				setEmailDialogOpen(true);
+			}
 		});
 	};
 
@@ -120,53 +143,65 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	};
 
 	return (
-		<Box m='0 auto'>
-			<Wrap
-				gapX='4'
-				gapY='8'
-				width='full'
-				mt='4'
-				colorPalette={{ base: 'orange', _dark: 'yellow' }}
-				css={{ '--field-label-width': '150px' }}
-			>
-				<NameForm
-					i18nData={i18nData}
-					pending={isNamePending}
-					nameForm={nameForm}
-					error={nameError}
-					onSubmitAction={nameForm.handleSubmit(handleNameSubmit)}
-				/>
+		<Wrap
+			gapX='4'
+			gapY='8'
+			mt='4'
+			colorPalette={{ base: 'orange', _dark: 'yellow' }}
+			css={{ '--field-label-width': '140px' }}
+		>
+			<NameForm
+				i18nData={i18nData}
+				pending={isNamePending}
+				nameForm={nameForm}
+				error={nameError}
+				onSubmitAction={nameForm.handleSubmit(handleNameSubmit)}
+			/>
 
-				<EmailForm
-					i18nData={i18nData}
-					pending={isEmailPending}
-					emailForm={emailForm}
-					error={emailError}
-					onSubmitAction={emailForm.handleSubmit(handleEmailSubmit)}
-				/>
+			<Fieldset.Root size='lg' alignItems='center'>
+				<Fieldset.Content
+					gap='6'
+					border='1px solid'
+					borderColor='border.dark'
+					borderRadius='md'
+					p='4'
+					maxW='4xl'
+				>
+					<EmailForm
+						i18nData={i18nData}
+						pending={isEmailPending}
+						emailForm={emailForm}
+						error={emailError}
+						isOpen={emailDialogOpen}
+						userEmail={userEmail}
+						setIsOpenAction={setEmailDialogOpen}
+						onSubmitAction={emailForm.handleSubmit(handleEmailSubmit)}
+					/>
 
-				<PhoneForm
-					i18nData={i18nData}
-					pending={isPhonePending}
-					phoneForm={phoneForm}
-					error={phoneError}
-					onSubmitAction={phoneForm.handleSubmit(handlePhoneSubmit)}
-				/>
+					<PhoneForm
+						i18nData={i18nData}
+						pending={isPhonePending}
+						phoneForm={phoneForm}
+						error={phoneError}
+						onSubmitAction={phoneForm.handleSubmit(handlePhoneSubmit)}
+					/>
 
-				<AddressForm
-					i18nData={i18nData}
-					addressForm={addressForm}
-					error={addressError}
-					pending={isAddressPending}
-					onSubmitAction={addressForm.handleSubmit(handleAddressSubmit)}
-				/>
+					<AddressForm
+						i18nData={i18nData}
+						addressForm={addressForm}
+						error={addressError}
+						pending={isAddressPending}
+						onSubmitAction={addressForm.handleSubmit(handleAddressSubmit)}
+					/>
+				</Fieldset.Content>
+			</Fieldset.Root>
 
-				<PreferredDeliveryForm
-					schemaShape={schemaShape}
-					i18nData={i18nData}
-					onSubmitAction={(data) => handleFieldSubmit('notificationMethod', data)}
-				/>
-			</Wrap>
-		</Box>
+			<PreferredDeliveryForm
+				userEmail={userEmail}
+				i18nData={i18nData}
+				schemaShape={schemaShape}
+				onSubmitAction={(data) => handleFieldSubmit('notificationMethod', data)}
+			/>
+		</Wrap>
 	);
 }

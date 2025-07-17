@@ -4,10 +4,12 @@ import { getEmailSignInSchema } from 'formValidationSchemas/emailSignInSchema';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
 
+type LoginEmailResult = { message: string } | { success: true };
+
 export async function loginEmailAction(
 	prevState: unknown,
 	formData: unknown
-): Promise<{ message?: string } | undefined> {
+): Promise<LoginEmailResult> {
 	const t = await getTranslations('Validation');
 
 	const schema = await getEmailSignInSchema();
@@ -21,15 +23,14 @@ export async function loginEmailAction(
 
 	try {
 		const existingUser = await prisma.user.findUnique({ where: { email } });
+		console.log('existingUser', existingUser);
 
 		if (!existingUser) {
 			return { message: t('userNotFound') };
 		}
 
-		return;
+		return { success: true };
 	} catch (error: any) {
-		return {
-			message: t('userLoginFail'),
-		};
+		return { message: t('userLoginFail') };
 	}
 }

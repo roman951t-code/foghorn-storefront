@@ -1,4 +1,4 @@
-import { Input, Field, Button } from '@chakra-ui/react';
+import { Input, Field, Button, VStack } from '@chakra-ui/react';
 import { UseFormReturn } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 
@@ -30,10 +30,14 @@ export default function PhoneForm({ phoneForm, i18nData, error, pending, onSubmi
 				justifyContent='center'
 			>
 				<Field.Label maxH='20px'>{i18nData.phone}</Field.Label>
-				<Input {...phoneForm.register('phone')} variant='outline' size='md' maxW='xl' />
-				<Field.ErrorText>
-					{phoneForm.formState.errors.phone?.message?.toString() || error?.message}
-				</Field.ErrorText>
+
+				<VStack w='full' maxW='xl'>
+					<Input {...phoneForm.register('phone')} variant='outline' size='md' maxW='xl' />
+					<Field.ErrorText alignSelf='flex-start'>
+						{phoneForm.formState.errors.phone?.message?.toString() || error?.message}
+					</Field.ErrorText>
+				</VStack>
+
 				<Button
 					type='submit'
 					loading={pending}
@@ -42,6 +46,8 @@ export default function PhoneForm({ phoneForm, i18nData, error, pending, onSubmi
 					variant='solid'
 					size='md'
 					rounded='md'
+					mt={{ base: '2', sm: '0' }}
+					w={{ base: 'full', sm: 'auto' }}
 				>
 					{i18nData.save}
 				</Button>

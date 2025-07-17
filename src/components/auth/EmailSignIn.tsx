@@ -30,7 +30,7 @@ const MAX_CHARACTERS = 60;
 export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 	const router = useRouter();
 
-	const [formError, formAction, isPending] = useActionState(loginEmailAction, undefined);
+	const [fetchedData, formAction, isPending] = useActionState(loginEmailAction, undefined);
 
 	const [authError, setAuthError] = useState('');
 	const [forceOpen, setForceOpen] = useState(false);
@@ -90,8 +90,8 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 					if (error) {
 						const messageKey = error?.message ?? '';
 						const message = errorMap[messageKey] || i18nData.userLoginFail;
-
 						setAuthError(message);
+						return;
 					}
 
 					await refresh();
@@ -123,7 +123,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 							<Field.ErrorText>{errors.password?.message}</Field.ErrorText>
 						</Field.Root>
 					</Fieldset.Content>
-					<Fieldset.ErrorText>{authError || formError?.message}</Fieldset.ErrorText>
+					<Fieldset.ErrorText>{authError || fetchedData?.message}</Fieldset.ErrorText>
 
 					{forceOpen && (
 						<Alert.Root status='success' variant='solid' my='2' fontSize='15px'>

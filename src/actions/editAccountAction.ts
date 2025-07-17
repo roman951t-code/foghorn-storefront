@@ -6,6 +6,13 @@ import { getAccountSchemas } from 'formValidationSchemas/accountSchema';
 
 type SchemaName = 'nameSchema' | 'emailSchema' | 'phoneSchema' | 'addressSchema';
 
+const errors = {
+	nameSchema: 'editNameFail',
+	emailSchema: 'editEmailFail',
+	phoneSchema: '',
+	addressSchema: '',
+};
+
 export async function editAccountAction(
 	prevState: unknown,
 	formData: { schemaName: SchemaName; email: string }
@@ -31,7 +38,7 @@ export async function editAccountAction(
 		return;
 	} catch (error: any) {
 		return {
-			message: t('editNameFail'),
+			message: t(errors[formData.schemaName]),
 		};
 	}
 }

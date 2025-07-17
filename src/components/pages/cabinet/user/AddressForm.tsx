@@ -1,4 +1,4 @@
-import { Input, Field, Button } from '@chakra-ui/react';
+import { Input, Field, Button, VStack } from '@chakra-ui/react';
 import { UseFormReturn } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 
@@ -36,10 +36,18 @@ export default function AddressForm({
 				justifyContent='center'
 			>
 				<Field.Label maxH='20px'>{i18nData.shipmentAddress}</Field.Label>
-				<Input {...addressForm.register('shipmentAddress')} variant='outline' size='md' maxW='xl' />
-				<Field.ErrorText>
-					{addressForm.formState.errors.shipmentAddress?.message?.toString() || error?.message}
-				</Field.ErrorText>
+
+				<VStack w='full' maxW='xl'>
+					<Input
+						{...addressForm.register('shipmentAddress')}
+						variant='outline'
+						size='md'
+						maxW='xl'
+					/>
+					<Field.ErrorText alignSelf='flex-start'>
+						{addressForm.formState.errors.shipmentAddress?.message?.toString() || error?.message}
+					</Field.ErrorText>
+				</VStack>
 
 				<Button
 					type='submit'
@@ -49,6 +57,8 @@ export default function AddressForm({
 					variant='solid'
 					size='md'
 					rounded='md'
+					mt={{ base: '2', sm: '0' }}
+					w={{ base: 'full', sm: 'auto' }}
 				>
 					{i18nData.save}
 				</Button>

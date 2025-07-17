@@ -36,6 +36,11 @@ export async function registerEmailAction(
 			},
 		});
 
+		await prisma.user.update({
+			where: { email },
+			data: { notificationMethod: 'email' },
+		});
+
 		return;
 	} catch (error: any) {
 		if (error.code === 'P2002') {

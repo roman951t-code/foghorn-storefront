@@ -8,6 +8,21 @@ import { prisma } from './prisma';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const auth = betterAuth({
+	user: {
+		changeEmail: {
+			enabled: true,
+			sendChangeEmailVerification: async ({ user, newEmail, url, token }, request) => {
+				const t = await getTranslations('Auth');
+
+				await resend.emails.send({
+					from: 'Acme <onboarding@resend.dev>',
+					to: [user.email],
+					subject: t('verifyChangeEmail'),
+					text: `${t('clickToChangeEmail')}: ${url}`,
+				});
+			},
+		},
+	},
 	database: prismaAdapter(prisma, {
 		provider: 'postgresql',
 	}),

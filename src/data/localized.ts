@@ -85,8 +85,10 @@ export const accountValidLoc = [
 	'userNotFound',
 	'addressMax',
 	'userLoginFail',
-	'nameMinLength',
 	'editNameFail',
+	'editEmailFail',
+	'lastNameRequired',
+	'middleNameRequired',
 ];
 
 export const accountAuthLoc = [
@@ -102,4 +104,6 @@ export const accountAuthLoc = [
 	'editEmailCodeSent',
 	'nameUpdated',
 	'emailUpdated',
+	'middleName',
+	'lastName',
 ];

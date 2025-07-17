@@ -12,9 +12,21 @@ export const accountSchemaShape = (t: {
 	invalidPhone: string;
 	addressMax: string;
 	nameMinLength: string;
+	middleNameRequired: string;
+	lastNameRequired: string;
 }) => ({
 	name: z
 		.string({ required_error: t.nameRequired })
+		.min(2, { message: t.nameMinLength })
+		.max(60, { message: t.inputMaxLength })
+		.nonempty(),
+	middleName: z
+		.string({ required_error: t.middleNameRequired })
+		.min(2, { message: t.nameMinLength })
+		.max(60, { message: t.inputMaxLength })
+		.nonempty(),
+	lastName: z
+		.string({ required_error: t.lastNameRequired })
 		.min(2, { message: t.nameMinLength })
 		.max(60, { message: t.inputMaxLength })
 		.nonempty(),
@@ -49,10 +61,17 @@ export async function getAccountSchemas() {
 		invalidPhone: t('invalidPhone'),
 		addressMax: t('inputMaxLength'),
 		nameMinLength: t('nameMinLength'),
+		middleNameRequired: t('middleNameRequired'),
+		lastNameRequired: t('lastNameRequired'),
 	});
 
 	return {
-		nameSchema: z.object({ name: shape.name, email: shape.email }),
+		nameSchema: z.object({
+			name: shape.name,
+			lastName: shape.lastName,
+			middleName: shape.middleName,
+			email: shape.email,
+		}),
 		emailSchema: z.object({ email: shape.email }),
 		phoneSchema: z.object({ phone: shape.phone, email: shape.email }),
 		addressSchema: z.object({ shipmentAddress: shape.shipmentAddress, email: shape.email }),
