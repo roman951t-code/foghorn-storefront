@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Box, Button, VStack } from '@chakra-ui/react';
+import { Box, VStack } from '@chakra-ui/react';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import type { I18nData } from '@/types/i18n';
 import Image from 'next/image';
@@ -8,6 +8,7 @@ import Login from './Login';
 import Signup from './Signup';
 import { useSearchParams } from 'next/navigation';
 import { useSession } from '../providers/SessionProvider';
+import { PrimaryButton } from '../reusable/buttons/ActionButton';
 
 const emptyCart = '/assets/images/emptyCart.png';
 
@@ -88,15 +89,9 @@ export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
 								marginLeft: -45,
 							}}
 						/>
-						<Button
-							onClick={handleCloseClick}
-							w='100%'
-							type='submit'
-							color='black'
-							bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-						>
+						<PrimaryButton onClick={handleCloseClick} w='100%' type='submit'>
 							{i18nData.continuePurchases}
-						</Button>
+						</PrimaryButton>
 					</VStack>
 				)}
 			</Box>

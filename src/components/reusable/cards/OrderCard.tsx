@@ -6,7 +6,6 @@ import {
 	Badge,
 	VStack,
 	Tag,
-	Button,
 	Separator,
 	Highlight,
 	Flex,
@@ -20,6 +19,7 @@ import { BsArrowRepeat } from 'react-icons/bs';
 import FeedbackModal from '@/components/product/FeedbackModal';
 import Image from 'next/image';
 import { LocaleNavLink } from '../links/LocaleNavLink';
+import { PrimaryButton } from '../buttons/ActionButton';
 
 const img1 = '/assets/images/temp/1.webp';
 const img2 = '/assets/images/temp/2.webp';
@@ -63,7 +63,7 @@ export default function OrderCard() {
 					<Accordion.Item value={item.name} borderBottom='none'>
 						<Accordion.ItemTrigger w='100%' p='0'>
 							<Flex
-								direction={{ base: 'column', xs: 'row' }}
+								direction={{ base: 'column', xs: 'row' } as any}
 								justifyContent='space-between'
 								w='100%'
 								gap='3'
@@ -120,16 +120,11 @@ export default function OrderCard() {
 									gap={{ base: '4', sm: '0' }}
 									direction={{ base: 'column', sm: 'row' }}
 								>
-									<Button
-										colorPalette='gray'
-										color='main'
-										variant='outline'
-										border='1px solid '
-										borderColor='border'
-									>
+									<PrimaryButton>
 										<BsArrowRepeat />
 										{prodT('repeatOrder')}
-									</Button>
+									</PrimaryButton>
+
 									<FeedbackModal i18nData={i18nData} />
 								</Flex>
 								<Stack gap='4' maxH='500px' overflowY='auto'>

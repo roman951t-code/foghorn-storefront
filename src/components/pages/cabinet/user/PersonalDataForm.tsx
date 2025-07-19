@@ -1,15 +1,20 @@
 'use client';
-import { Fieldset, Stack, Wrap } from '@chakra-ui/react';
+import { Fieldset, Wrap } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
 import { startTransition, useActionState, useMemo, useState } from 'react';
-import { createAccountSchema } from 'formValidationSchemas/accountSchema';
+import {
+	AccountSchemas,
+	createAccountSchema,
+	EditNameActionPayload,
+	NameSchemaData,
+} from 'formValidationSchemas/accountSchema';
 import { z } from 'zod';
 import PreferredDeliveryForm from './PreferredDeliveryForm';
 import { useSession } from '@/components/providers/SessionProvider';
 import AddressForm from './AddressForm';
-import { editAccountAction } from '@/actions/editAccountAction';
+import { editAccountAction, editNameAction } from '@/actions/editAccountAction';
 import { toaster } from '@/components/ui/toaster';
 import { authClient } from '@/lib/auth-client';
 import NameForm from './NameForm';
@@ -19,11 +24,6 @@ import PhoneForm from './PhoneForm';
 interface Props {
 	i18nData: I18nData;
 }
-
-const initialValues = {
-	phone: '380992304452',
-	shipmentAddress: 'Україна, Запорізька обл., м. Оріхів, вул. Запорізька, буд. 72, кв. 52',
-};
 
 export default function PersonalDataForm({ i18nData }: Props) {
 	const { session } = useSession();
@@ -57,7 +57,11 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	);
 
 	const nameForm = useForm({
-		defaultValues: { name: session?.user?.name, lastName: 'Онищенко', middleName: 'Вікторович' },
+		defaultValues: {
+			name: session?.user?.name,
+			lastName: session?.user?.lastName,
+			middleName: session?.user?.middleName,
+		},
 		resolver: zodResolver(nameSchema),
 	});
 
@@ -67,41 +71,43 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	});
 
 	const phoneForm = useForm({
-		defaultValues: { phone: initialValues.phone },
+		defaultValues: { phone: '380992304452' },
 		resolver: zodResolver(phoneSchema),
 	});
 
 	const addressForm = useForm({
-		defaultValues: { shipmentAddress: initialValues.shipmentAddress },
+		defaultValues: {
+			shipmentAddress: 'Запорізька обл., м. Оріхів, вул. Запорізька, буд. 72, кв. 52',
+		},
 		resolver: zodResolver(addressSchema),
 	});
 
-	const handleFieldSubmit = (fieldName: string, data: any) => {
-		console.log(`${fieldName} updated:`, data);
-	};
+	const handleNameSubmit = async (data: NameSchemaData) => {
+		const payload: EditNameActionPayload = {
+			...data,
+			email: userEmail || '',
+		};
 
-	const handleNameSubmit = async (data: { name: string }) => {
-		const payload = { schemaName: 'nameSchema' as 'nameSchema', email: userEmail };
+		try {
+			const result = await editNameAction(null, payload);
 
-		startTransition(async () => {
-			await nameAction(payload);
-
-			const result = await authClient.updateUser({
-				name: data.name,
-			});
-
-			if (result?.error) {
-				toaster.error({
-					title: i18nData.editNameFail,
-					duration: 5000,
-				});
-			} else {
+			if (result?.success) {
 				toaster.success({
 					title: i18nData.nameUpdated,
 					duration: 5000,
 				});
+			} else {
+				toaster.error({
+					title: i18nData.editNameFail,
+					duration: 5000,
+				});
 			}
-		});
+		} catch {
+			toaster.error({
+				title: i18nData.editNameFail,
+				duration: 5000,
+			});
+		}
 	};
 
 	const handleEmailSubmit = async (data: { email: string }) => {
@@ -143,13 +149,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	};
 
 	return (
-		<Wrap
-			gapX='4'
-			gapY='8'
-			mt='4'
-			colorPalette={{ base: 'orange', _dark: 'yellow' }}
-			css={{ '--field-label-width': '140px' }}
-		>
+		<Wrap gapX='4' gapY='8' mt='4' colorPalette={{ base: 'orange', _dark: 'yellow' }}>
 			<NameForm
 				i18nData={i18nData}
 				pending={isNamePending}
@@ -166,6 +166,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					borderRadius='md'
 					p='4'
 					maxW='4xl'
+					css={{ '--field-label-width': '150px' }}
 				>
 					<EmailForm
 						i18nData={i18nData}
@@ -196,12 +197,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 				</Fieldset.Content>
 			</Fieldset.Root>
 
-			<PreferredDeliveryForm
-				userEmail={userEmail}
-				i18nData={i18nData}
-				schemaShape={schemaShape}
-				onSubmitAction={(data) => handleFieldSubmit('notificationMethod', data)}
-			/>
+			<PreferredDeliveryForm userEmail={userEmail} i18nData={i18nData} schemaShape={schemaShape} />
 		</Wrap>
 	);
 }

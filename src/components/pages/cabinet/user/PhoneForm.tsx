@@ -1,6 +1,7 @@
-import { Input, Field, Button, VStack } from '@chakra-ui/react';
+import { Input, Field, VStack, Stack } from '@chakra-ui/react';
 import { UseFormReturn } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
+import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
 
 interface Props {
 	phoneForm: UseFormReturn<
@@ -26,31 +27,22 @@ export default function PhoneForm({ phoneForm, i18nData, error, pending, onSubmi
 			<Field.Root
 				orientation={fieldOrientation}
 				invalid={!!phoneForm.formState.errors.phone || !!error?.message}
-				gap='4'
 				justifyContent='center'
 			>
 				<Field.Label maxH='20px'>{i18nData.phone}</Field.Label>
 
-				<VStack w='full' maxW='xl'>
-					<Input {...phoneForm.register('phone')} variant='outline' size='md' maxW='xl' />
-					<Field.ErrorText alignSelf='flex-start'>
-						{phoneForm.formState.errors.phone?.message?.toString() || error?.message}
-					</Field.ErrorText>
-				</VStack>
+				<Stack w='full' direction={{ base: 'column', sm: 'row' } as any} gap='4'>
+					<VStack w='full' alignItems='flex-start'>
+						<Input {...phoneForm.register('phone')} variant='outline' size='md' />
+						<Field.ErrorText>
+							{phoneForm.formState.errors.phone?.message?.toString() || error?.message}
+						</Field.ErrorText>
+					</VStack>
 
-				<Button
-					type='submit'
-					loading={pending}
-					color='black'
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-					variant='solid'
-					size='md'
-					rounded='md'
-					mt={{ base: '2', sm: '0' }}
-					w={{ base: 'full', sm: 'auto' }}
-				>
-					{i18nData.save}
-				</Button>
+					<SecondaryButton type='submit' loading={pending} mt={{ base: '2', sm: '0' }}>
+						{i18nData.save}
+					</SecondaryButton>
+				</Stack>
 			</Field.Root>
 		</form>
 	);

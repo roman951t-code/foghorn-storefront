@@ -48,7 +48,7 @@ export default async function CabinetLayout({ children }: Props) {
 	return (
 		<TabsProvider>
 			<>
-				<Box bg='bg.dark' zIndex='1' rounded='md'>
+				<Box bg='bg.tertiary' zIndex='1' rounded='md'>
 					<TabsList i18nData={i18nData} />
 				</Box>
 				<Flex px='4'>

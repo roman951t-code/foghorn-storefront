@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Stack, Icon, CheckboxCard, Link as ChakraLink } from '@chakra-ui/react';
+import { Stack, Icon, CheckboxCard, Link as ChakraLink } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
@@ -8,6 +8,7 @@ import { Link } from '@/i18n/routing';
 import PhoneAuth from './PhoneAuth';
 import { signIn } from '@/lib/auth-client';
 import EmailSignUp from './EmailSignUp';
+import { TertiaryButton } from '../reusable/buttons/ActionButton';
 
 interface Props {
 	i18nData: I18nData;
@@ -23,14 +24,7 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 
 	return (
 		<>
-			{isPhoneAuth && (
-				<PhoneAuth
-					i18nData={i18nData}
-					disabled={!termsAccepted}
-					// onSubmitAction={({ email, password }) => null}
-					isSignup
-				/>
-			)}
+			{isPhoneAuth && <PhoneAuth i18nData={i18nData} disabled={!termsAccepted} isSignup />}
 			{isEmailAuth && <EmailSignUp i18nData={i18nData} disabled={!termsAccepted} />}
 			<CheckboxCard.Root
 				onChange={() => setTermsAccepted(!termsAccepted)}
@@ -66,11 +60,9 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 				</CheckboxCard.Control>
 			</CheckboxCard.Root>
 			<Stack gap={4} mt={12}>
-				<Button
+				<TertiaryButton
 					disabled={!termsAccepted}
-					gap='12px'
-					variant='outline'
-					borderColor='main'
+					gap='2.5'
 					onClick={async () => {
 						await signIn.social({
 							provider: 'google',
@@ -81,42 +73,25 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 						<FcGoogle />
 					</Icon>
 					{i18nData.continueWith} Google
-				</Button>
+				</TertiaryButton>
 				{isPhoneAuth && (
-					<Button
-						gap='12px'
-						variant='outline'
-						borderColor='main'
-						onClick={() => setAuthMethod('email')}
-					>
+					<TertiaryButton gap='2.5' onClick={() => setAuthMethod('email')}>
 						<IoMailOutline />
 						{i18nData.continueWithEmail}
-					</Button>
+					</TertiaryButton>
 				)}
 				{isEmailAuth && (
-					<Button
-						gap='12px'
-						variant='outline'
-						borderColor='main'
-						onClick={() => setAuthMethod('phone')}
-					>
+					<TertiaryButton gap='2.5' onClick={() => setAuthMethod('phone')}>
 						<IoMdPhonePortrait />
 						{i18nData.continueWithPhone}
-					</Button>
+					</TertiaryButton>
 				)}
 			</Stack>
 
-			<Button
-				mt={12}
-				w='100%'
-				variant='outline'
-				border='1px solid'
-				borderColor='border'
-				onClick={backToLogin}
-			>
+			<TertiaryButton mt={12} w='100%' onClick={backToLogin}>
 				<IoMdArrowBack />
 				{i18nData.backToLogin}
-			</Button>
+			</TertiaryButton>
 		</>
 	);
 }

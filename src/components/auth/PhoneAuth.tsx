@@ -1,7 +1,7 @@
 'use client';
 
 import React, { startTransition, useMemo, useState } from 'react';
-import { Button, Input, Stack, Field, Fieldset } from '@chakra-ui/react';
+import { Input, Stack, Field, Fieldset } from '@chakra-ui/react';
 import { useHookFormMask } from 'use-mask-input';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
@@ -10,6 +10,7 @@ import { useActionState } from 'react';
 import { createPhoneSignUpSchema } from 'formValidationSchemas/phoneSignUpSchema';
 import { createphoneSignInSchema } from 'formValidationSchemas/phoneSignInSchema';
 import PhoneConfirmation from './PhoneConfirmation';
+import { PrimaryButton } from '../reusable/buttons/ActionButton';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;
@@ -96,16 +97,9 @@ export default function PhoneAuth({ i18nData, disabled, isSignup = false }: Phon
 					<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
 				</Fieldset.Root>
 
-				<Button
-					w='100%'
-					type='submit'
-					loading={isPending}
-					disabled={disabled && isSignup}
-					color='black'
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-				>
+				<PrimaryButton w='100%' type='submit' loading={isPending} disabled={disabled && isSignup}>
 					{i18nData.continue}
-				</Button>
+				</PrimaryButton>
 			</Stack>
 		</form>
 	);

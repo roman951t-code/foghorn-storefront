@@ -17,10 +17,10 @@ import {
 	Separator,
 	Stat,
 	Status,
-	Button,
 } from '@chakra-ui/react';
 import { Rating } from '@/components/ui/rating';
 import ShareProduct from './ShareProduct';
+import { PrimaryButton } from '../reusable/buttons/ActionButton';
 
 export default function AboutTab() {
 	const t = useTranslations('Products');
@@ -90,15 +90,10 @@ export default function AboutTab() {
 					</Flex>
 					<Stat.Root my='3'>
 						<Flex flexWrap='wrap' alignItems='center' gap='4'>
-							<Button
-								size='md'
-								w='200px'
-								bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-								color='black'
-								variant='solid'
-							>
+							<PrimaryButton w='200px'>
 								<FiShoppingCart /> {t('buy')}
-							</Button>
+							</PrimaryButton>
+
 							<Stat.ValueText w={{ base: '90%', xs: '124px' } as any} fontSize='3xl'>
 								55 699 ₴
 							</Stat.ValueText>

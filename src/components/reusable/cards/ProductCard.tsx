@@ -2,17 +2,7 @@ import React from 'react';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { Rating } from '@/components/ui/rating';
 import { useTranslations } from 'next-intl';
-import {
-	IconButton,
-	Text,
-	Flex,
-	HStack,
-	Card,
-	Badge,
-	Link,
-	LinkBox,
-	LinkOverlay,
-} from '@chakra-ui/react';
+import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox } from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -42,7 +32,7 @@ export default function ProductCard() {
 						variant='ghost'
 						rounded='full'
 						colorPalette='green'
-						color='colorPalette.600'
+						color={{ base: 'colorPalette.600', _dark: 'colorPalette.500' }}
 						transition='all 0.2s ease-in-out'
 						_hover={{
 							bg: 'colorPalette.600',

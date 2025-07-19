@@ -5,16 +5,16 @@ import { getResetPassSchema } from 'formValidationSchemas/resetPassSchema';
 import { auth } from '@/lib/auth';
 
 export async function resetPasswordAction(
-	prevState: unknown,
+	_: unknown,
 	formData: unknown
-): Promise<{ message?: string } | undefined> {
+): Promise<{ success: boolean; message?: string } | undefined> {
 	const t = await getTranslations('Validation');
 
 	const schema = await getResetPassSchema();
 	const validatedFormData = schema.safeParse(formData);
 
 	if (!validatedFormData.success) {
-		return { message: t('invalidFormData') };
+		return { success: false, message: t('invalidFormData') };
 	}
 
 	const { email } = validatedFormData.data;
@@ -26,6 +26,8 @@ export async function resetPasswordAction(
 				redirectTo: '/?reset-pass=true',
 			},
 		});
+
+		return { success: true };
 	} catch (error: any) {
 		const errorMap: Record<string, string> = {
 			'Invalid email': t('wrongEmail'),
@@ -35,6 +37,7 @@ export async function resetPasswordAction(
 		};
 
 		return {
+			success: false,
 			message: errorMap[error?.body?.message ?? ''] || t('setNewPassFail'),
 		};
 	}

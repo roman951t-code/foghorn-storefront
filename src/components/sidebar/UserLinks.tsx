@@ -2,10 +2,9 @@ import { Stack, Icon } from '@chakra-ui/react';
 import { FiHeart } from 'react-icons/fi';
 import { IoBagCheckOutline, IoChatboxEllipsesOutline } from 'react-icons/io5';
 import { useTranslations } from 'next-intl';
-import { LuUserRoundCog } from 'react-icons/lu';
+import { LuUserRoundCheck, LuUserRoundCog } from 'react-icons/lu';
 import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 import { VscFeedback } from 'react-icons/vsc';
-import { BsEmojiSunglasses } from 'react-icons/bs';
 
 interface Props {
 	userName: string;
@@ -51,7 +50,7 @@ export default function UserLinks({ userName, onClose }: Props) {
 
 			<LocaleNavLink href='/cabinet/reviewed' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
-					<BsEmojiSunglasses />
+					<LuUserRoundCheck />
 				</Icon>
 				{t('reviewedProducts')}
 			</LocaleNavLink>

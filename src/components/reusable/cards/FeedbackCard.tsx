@@ -4,15 +4,12 @@ import {
 	Stack,
 	Card,
 	Badge,
-	Link,
 	Separator,
 	Flex,
 	IconButton,
 	Heading,
 	Box,
 	Accordion,
-	LinkBox,
-	LinkOverlay,
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import FeedbackModal from '@/components/product/FeedbackModal';
@@ -49,10 +46,10 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 		>
 			<Accordion.Item value={item.name} borderBottom='none'>
 				<Accordion.ItemTrigger w='100%' p='0'>
-					<Flex alignItems='center' direction={{ base: 'column', md: 'row' }} w='100%'>
+					<Flex alignItems='center' direction={{ base: 'column', xs: 'row' }} w='100%'>
 						<Box ml='-8px' mr='1' mb={{ base: '12px', md: '0' }}>
 							<Image
-								width={124}
+								width={110}
 								height={110}
 								style={{ minWidth: '100px' }}
 								src={img1}
@@ -156,11 +153,7 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 			mb='4'
 		>
 			<Accordion.Item value={item.name} borderBottom='none'>
-				<Flex
-					alignItems='center'
-					direction={{ base: 'column', sm: 'row', md: 'column', lg: 'row' }}
-					w='100%'
-				>
+				<Flex alignItems='center' direction={{ base: 'column', xs: 'row' }} w='100%'>
 					<Box ml='-8px' mr='1' mb={{ base: '12px', sm: '0', md: '12px', lg: '0' }}>
 						<Image
 							width={110}
@@ -199,10 +192,12 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 							</Text>
 						</Stack>
 					</Stack>
-
-					<Flex alignSelf='flex-end' flex={1} justifyContent='flex-end'>
+					<Flex alignSelf='flex-end' flex={1} justifyContent='flex-end' hideBelow='md'>
 						<FeedbackModal i18nData={i18nData} />
 					</Flex>
+				</Flex>
+				<Flex alignSelf='flex-end' flex={1} justifyContent='flex-end' hideFrom='md'>
+					<FeedbackModal i18nData={i18nData} />
 				</Flex>
 			</Accordion.Item>
 		</Card.Root>

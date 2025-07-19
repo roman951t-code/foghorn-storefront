@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/drawer';
 import CatalogDrawer from '@/components/reusable/drawer/CatalogDrawer';
 import { TbCategory2 } from 'react-icons/tb';
+import { PrimaryButton } from './ActionButton';
 
 interface Props {
 	fullText: boolean;
@@ -35,17 +36,10 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 				<DrawerBackdrop />
 				<DrawerTrigger asChild>
 					{trigger || (
-						<Button
-							color='black'
-							bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-							variant='solid'
-							width={fullText ? '100%' : ''}
-							hideBelow={hideBelow}
-							hideFrom={hideFrom}
-						>
+						<PrimaryButton width={fullText ? '100%' : ''} hideBelow={hideBelow} hideFrom={hideFrom}>
 							<TbCategory2 />
 							{text}
-						</Button>
+						</PrimaryButton>
 					)}
 				</DrawerTrigger>
 				<DrawerContent

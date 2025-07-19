@@ -2,19 +2,22 @@
 
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
 
 export async function setNotificationMethodAction(
 	_: unknown,
 	formData: { notificationMethod: 'email' | 'phone' }
-): Promise<{ message?: string }> {
+): Promise<{ success: boolean; message?: string } | undefined> {
+	const t = await getTranslations('Validation');
+
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
 	console.log('session', session);
 
 	if (!session?.user?.email) {
-		return { message: 'Unauthorized' };
+		return { success: false, message: t('userNotFound') };
 	}
 
 	try {
@@ -24,8 +27,9 @@ export async function setNotificationMethodAction(
 				notificationMethod: formData.notificationMethod,
 			},
 		});
-		return { message: 'Updated successfully' };
+
+		return { success: true };
 	} catch (error) {
-		return { message: 'Failed to update' };
+		return { success: false, message: t('preferedNotifFailed') };
 	}
 }

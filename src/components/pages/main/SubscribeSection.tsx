@@ -1,4 +1,5 @@
-import { Heading, Flex, Input, Button } from '@chakra-ui/react';
+import { PrimaryButton } from '@/components/reusable/buttons/ActionButton';
+import { Heading, Flex, Input } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { IoMailOutline } from 'react-icons/io5';
 
@@ -48,19 +49,15 @@ export default function SubscribeSection() {
 						outline: 'none',
 					}}
 				/>
-				<Button
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-					color='black'
-					variant='solid'
+				<PrimaryButton
 					minWidth='280px'
 					maxWidth='340px'
-					rounded='md'
 					w={{ base: '100%', md: 'auto' }}
 					flexShrink={0}
 				>
 					<IoMailOutline />
 					{genT('subscribe')}
-				</Button>
+				</PrimaryButton>
 			</Flex>
 		</Flex>
 	);

@@ -1,6 +1,7 @@
-import { Button, Link as ChakraLink } from '@chakra-ui/react';
+import { Link as ChakraLink } from '@chakra-ui/react';
 import { Link } from '@/i18n/routing';
 import type { ReactNode } from 'react';
+import { PrimaryButton } from '../buttons/ActionButton';
 
 interface Props {
 	href: string;
@@ -28,18 +29,7 @@ export function LocaleNavLink({ href, children, ...props }: Props) {
 export function LocaleNavButton({ href, children, ...props }: Props) {
 	return (
 		<Link href={href}>
-			<Button
-				color='black'
-				bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-				variant='solid'
-				_hover={{
-					bg: 'bgHover.button',
-				}}
-				mb='1'
-				{...props}
-			>
-				{children}
-			</Button>
+			<PrimaryButton {...props}>{children}</PrimaryButton>
 		</Link>
 	);
 }

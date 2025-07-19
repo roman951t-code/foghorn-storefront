@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import z from 'zod';
 import { useTransition } from 'react';
 import { setNotificationMethodAction } from '@/actions/setNotificationMethodAction';
+import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
 
 interface Props {
 	userEmail: string;
@@ -109,18 +110,16 @@ export default function PreferredDeliveryForm({ schemaShape, userEmail, i18nData
 										<RadioCard.ItemIndicator />
 									</RadioCard.ItemControl>
 								</RadioCard.Item>
-								<Button
+								<SecondaryButton
 									type='submit'
-									color='black'
-									bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-									variant='solid'
-									size='md'
-									rounded='md'
-									maxW={{ base: 'full', sm: 'xs' }}
 									loading={isPending}
+									size='md'
+									maxW={{ base: 'full', sm: 'xs' }}
+									mt={{ base: '2', sm: '0' }}
+									alignSelf={{ base: 'stretch', sm: 'flex-start' }}
 								>
 									{i18nData.save}
-								</Button>
+								</SecondaryButton>
 							</Stack>
 							<Field.ErrorText mt='2'>
 								{form.formState.errors.notificationMethod?.message?.toString()}

@@ -3,7 +3,7 @@
 import { Button, Fieldset, Stack, Field, Input, Highlight, Text } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { startTransition, useActionState, useState } from 'react';
+import { useState } from 'react';
 import type { I18nData } from '@/types/i18n';
 import { useMemo } from 'react';
 import { resetPasswordAction } from '@/actions/resetPasswordAction';
@@ -24,8 +24,8 @@ export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
 	const schema = useMemo(() => createResetPassSchema(i18nData), [i18nData]);
 
 	const [isSubmitted, setSubmitted] = useState(false);
-
-	const [formError, formAction, isPending] = useActionState(resetPasswordAction, undefined);
+	const [actionError, setActionError] = useState('');
+	const [isPending, setIsPending] = useState(false);
 
 	const resetForm = () => {
 		setSubmitted(false);
@@ -42,22 +42,31 @@ export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
 		resolver: zodResolver(schema),
 	});
 
+	const onSubmit = async (formData: FormValues) => {
+		setIsPending(true);
+
+		try {
+			const result = await resetPasswordAction(null, formData);
+
+			if (!result?.success) {
+				setActionError(result?.message!);
+			}
+		} catch (err) {
+			setActionError(i18nData.invalidFormData);
+		} finally {
+			setIsPending(false);
+			setSubmitted(true);
+		}
+	};
+
 	const formData = getValues();
 
 	return (
-		<form
-			onSubmit={handleSubmit(async (formData) => {
-				startTransition(async () => {
-					formAction(formData);
-
-					setSubmitted(true);
-				});
-			})}
-		>
+		<form onSubmit={handleSubmit(onSubmit)}>
 			<Stack gap='4' align='flex-start'>
 				<Fieldset.Root size='lg' invalid>
 					<Fieldset.Content>
-						<Field.Root required invalid={!!errors.email}>
+						<Field.Root required invalid={!!errors.email || !!actionError}>
 							<Field.Label>
 								{i18nData.email}
 								<Field.RequiredIndicator />
@@ -66,10 +75,10 @@ export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
 							<Field.ErrorText>{errors.email?.message}</Field.ErrorText>
 						</Field.Root>
 
-						<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
+						<Fieldset.ErrorText>{actionError}</Fieldset.ErrorText>
 					</Fieldset.Content>
 
-					{isSubmitted && !formError && !isPending && (
+					{isSubmitted && !actionError && !isPending && (
 						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
 							{i18nData.toPost}
 							{formData?.email && (

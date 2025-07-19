@@ -17,7 +17,6 @@ import { EmptyState } from '@/components/ui/empty-state';
 import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import Image from 'next/image';
-import { MdOutlineShoppingCartCheckout } from 'react-icons/md';
 import { LocaleNavButton } from '../reusable/links/LocaleNavLink';
 import { useState } from 'react';
 import { I18nData } from '@/types/i18n';
@@ -100,7 +99,7 @@ export default function Cart({ i18nData }: Props) {
 								</Text>
 							</VStack>
 							<LocaleNavButton href='/checkout' onClick={() => setIsOpen(false)}>
-								<MdOutlineShoppingCartCheckout />
+								<FiShoppingCart />
 								{i18nData.order}
 							</LocaleNavButton>
 						</Flex>

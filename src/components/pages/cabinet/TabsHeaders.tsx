@@ -19,49 +19,49 @@ export default function TabsList({ i18nData }: Props) {
 
 	return (
 		<Tabs.List mb='4' gap='2' hideBelow='xs' flexWrap='wrap' justifyContent='center'>
-			<Tabs.Trigger value='cabinet' color='main' fontWeight='normal' fontSize='15px' asChild>
+			<Tabs.Trigger value='cabinet' color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md' hideBelow='lg'>
+					<Icon size='md'>
 						<LuUserRoundCog />
 					</Icon>
 					{session?.user?.name}
 				</LocaleNavLink>
 			</Tabs.Trigger>
-			<Tabs.Trigger value={'orders'} color='main' fontWeight='normal' fontSize='15px' asChild>
+			<Tabs.Trigger value={'orders'} color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet/orders' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md' hideBelow='lg'>
+					<Icon size='md'>
 						<IoBagCheckOutline />
 					</Icon>
 					{i18nData.myOrders}
 				</LocaleNavLink>
 			</Tabs.Trigger>
-			<Tabs.Trigger value={'feedback'} color='main' fontWeight='normal' fontSize='15px' asChild>
+			<Tabs.Trigger value={'feedback'} color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet/feedback' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md' hideBelow='lg'>
+					<Icon size='md'>
 						<VscFeedback />
 					</Icon>
 					{i18nData.myFeedback}
 				</LocaleNavLink>
 			</Tabs.Trigger>
-			<Tabs.Trigger value={'wishlist'} color='main' fontWeight='normal' fontSize='15px' asChild>
+			<Tabs.Trigger value={'wishlist'} color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet/wishlist' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md' hideBelow='lg'>
+					<Icon size='md'>
 						<FiHeart />
 					</Icon>
 					{i18nData.wishList}
 				</LocaleNavLink>
 			</Tabs.Trigger>
-			<Tabs.Trigger value={'reviewed'} color='main' fontWeight='normal' fontSize='15px' asChild>
+			<Tabs.Trigger value={'reviewed'} color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet/reviewed' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md' hideBelow='lg'>
+					<Icon size='md'>
 						<LuUserRoundCheck />
 					</Icon>
 					{i18nData.reviewedProducts}
 				</LocaleNavLink>
 			</Tabs.Trigger>
-			<Tabs.Trigger value={'chat'} color='main' fontWeight='normal' fontSize='15px' asChild>
+			<Tabs.Trigger value={'chat'} color='main' fontWeight='normal' fontSize='md' asChild>
 				<LocaleNavLink href='/cabinet/chat' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md' hideBelow='lg'>
+					<Icon size='md'>
 						<IoChatboxEllipsesOutline />
 					</Icon>
 					{i18nData.chat}

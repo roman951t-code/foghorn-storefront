@@ -1,6 +1,7 @@
 import { Card, HStack, Badge } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavButton, LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
+import { useTranslations } from 'next-intl';
 
 type CategoryCardProps = {
 	title: string;
@@ -15,6 +16,7 @@ export default function CategoryCard({
 	subcategories,
 	viewAllHref,
 }: CategoryCardProps) {
+	const t = useTranslations('Products');
 	return (
 		<Card.Root
 			variant='outline'
@@ -45,7 +47,9 @@ export default function CategoryCard({
 				</HStack>
 			</Card.Body>
 			<Card.Footer justifyContent='center'>
-				<LocaleNavButton href={viewAllHref}>Дивитись товари</LocaleNavButton>
+				<LocaleNavButton href={viewAllHref} mb='1'>
+					{t('seeProducts')}
+				</LocaleNavButton>
 			</Card.Footer>
 			<Image height={186} width={316} src={imageUrl} alt={title} style={{ width: '100%' }} />
 		</Card.Root>

@@ -1,7 +1,6 @@
 'use client';
 
-import { startTransition, useActionState } from 'react';
-import { Button, Input, Stack, Field, Fieldset, Text, Highlight } from '@chakra-ui/react';
+import { Input, Stack, Field, Fieldset, Text, Highlight } from '@chakra-ui/react';
 import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
@@ -9,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { registerEmailAction } from '@/actions/registerEmailAction';
 import { createEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
 import type { I18nData } from '@/types/i18n';
+import { PrimaryButton } from '../reusable/buttons/ActionButton';
 
 type FormValues = {
 	name: string;
@@ -25,9 +25,9 @@ interface EmailAuthProps {
 const MAX_CHARACTERS = 60;
 
 export default function EmailSignUp({ i18nData, disabled }: EmailAuthProps) {
-	const [formError, formAction, isPending] = useActionState(registerEmailAction, undefined);
-
 	const [isSubmitted, setSubmitted] = useState(false);
+	const [authError, setAuthError] = useState('');
+	const [isPending, setIsPending] = useState(false);
 
 	const schema = useMemo(() => createEmailSignUpSchema(i18nData), [i18nData]);
 
@@ -41,21 +41,31 @@ export default function EmailSignUp({ i18nData, disabled }: EmailAuthProps) {
 		resolver: zodResolver(schema),
 	});
 
+	const onSubmit = async (formData: FormValues) => {
+		setIsPending(true);
+
+		try {
+			const result = await registerEmailAction(null, formData);
+
+			if (!result?.success) {
+				setAuthError(result?.message!);
+			}
+		} catch (err) {
+			setAuthError(i18nData.invalidFormData);
+		} finally {
+			setIsPending(false);
+			setSubmitted(true);
+		}
+	};
+
 	const formData = getValues();
 
 	return (
-		<form
-			onSubmit={handleSubmit(async (formData) => {
-				startTransition(async () => {
-					formAction(formData);
-					setSubmitted(true);
-				});
-			})}
-		>
+		<form onSubmit={handleSubmit(onSubmit)}>
 			<Stack gap='4' align='flex-start'>
 				<Fieldset.Root size='lg' invalid>
 					<Fieldset.Content>
-						<Field.Root required invalid={!!errors.name}>
+						<Field.Root required invalid={!!errors.name || !!authError}>
 							<Field.Label>
 								{i18nData.name}
 								<Field.RequiredIndicator />
@@ -95,9 +105,9 @@ export default function EmailSignUp({ i18nData, disabled }: EmailAuthProps) {
 							<Field.ErrorText>{errors.confirmPassword?.message}</Field.ErrorText>
 						</Field.Root>
 					</Fieldset.Content>
-					<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
+					<Fieldset.ErrorText>{authError}</Fieldset.ErrorText>
 
-					{isSubmitted && !formError && !isPending && (
+					{isSubmitted && !authError && !isPending && (
 						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
 							{i18nData.toPost}
 							{formData?.email && (
@@ -110,16 +120,9 @@ export default function EmailSignUp({ i18nData, disabled }: EmailAuthProps) {
 					)}
 				</Fieldset.Root>
 
-				<Button
-					w='100%'
-					type='submit'
-					loading={isPending}
-					disabled={disabled}
-					color='black'
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-				>
+				<PrimaryButton w='100%' type='submit' loading={isPending} disabled={disabled}>
 					{i18nData.continue}
-				</Button>
+				</PrimaryButton>
 			</Stack>
 		</form>
 	);

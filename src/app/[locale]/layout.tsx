@@ -26,8 +26,7 @@ export default async function Layout({ children, params }: Props) {
 		notFound();
 	}
 
-	const messages = await loadClientMessages(['Sidebar', 'Products', 'Auth', 'General', 'Error']);
-
+	const messages = await loadClientMessages(['General', 'Auth', 'Products', 'Sidebar']);
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});

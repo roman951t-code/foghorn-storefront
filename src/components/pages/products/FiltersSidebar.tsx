@@ -1,4 +1,4 @@
-import { Button, Flex } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import {
 	DrawerBackdrop,
 	DrawerBody,
@@ -10,6 +10,7 @@ import {
 import QuickFilters from './QuickFilters';
 import Filters from './Filters';
 import { IoFilter } from 'react-icons/io5';
+import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
 
 interface Props {
 	btnText: string;
@@ -20,19 +21,10 @@ export default function FiltersSidebar({ btnText }: Props) {
 		<DrawerRoot placement='end'>
 			<DrawerBackdrop />
 			<DrawerTrigger asChild>
-				<Button
-					color='main'
-					variant='outline'
-					border='1px solid '
-					borderColor='border'
-					size='sm'
-					w='140px'
-					alignSelf='flex-end'
-					hideFrom='lg'
-				>
+				<SecondaryButton w='140px' alignSelf='flex-end' hideFrom='lg'>
 					<IoFilter />
 					{btnText}
-				</Button>
+				</SecondaryButton>
 			</DrawerTrigger>
 			<DrawerContent bg='bg.tertiary' w='280px'>
 				<DrawerBody>

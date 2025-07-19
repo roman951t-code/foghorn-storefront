@@ -1,7 +1,7 @@
 'use client';
 
-import { startTransition, useActionState, useEffect } from 'react';
-import { Button, Input, Stack, Field, Fieldset, Alert } from '@chakra-ui/react';
+import { useEffect } from 'react';
+import { Input, Stack, Field, Fieldset, Alert } from '@chakra-ui/react';
 import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
@@ -14,6 +14,7 @@ import { authClient } from '@/lib/auth-client';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useSession } from '../providers/SessionProvider';
+import { PrimaryButton, TertiaryButton } from '../reusable/buttons/ActionButton';
 
 type FormValues = {
 	email: string;
@@ -30,20 +31,20 @@ const MAX_CHARACTERS = 60;
 export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 	const router = useRouter();
 
-	const [fetchedData, formAction, isPending] = useActionState(loginEmailAction, undefined);
-
 	const [authError, setAuthError] = useState('');
+	const [isPending, setIsPending] = useState(false);
+
 	const [forceOpen, setForceOpen] = useState(false);
 	const [isRestorePassOpen, setRestorePassOpen] = useState(false);
 
 	const searchParams = useSearchParams();
 	const emailSignIn = searchParams?.get('email-sign-in') === 'true';
-	const { session, refresh } = useSession();
+	const { refresh } = useSession();
 
 	const schema = useMemo(() => createEmailSignInSchema(i18nData), [i18nData]);
 
 	useEffect(() => {
-		if (!emailSignIn || session) return;
+		if (!emailSignIn) return;
 
 		if (emailSignIn) {
 			setForceOpen(true);
@@ -54,7 +55,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 			const newPath = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
 			router.replace(newPath);
 		}
-	}, [emailSignIn, session]);
+	}, [emailSignIn]);
 
 	const {
 		register,
@@ -70,42 +71,52 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 	}
 
 	const errorMap: Record<string, string> = {
-		'Invalid email or password': i18nData.invalidFormData,
+		'Invalid password': i18nData.invalidFormData,
 		'User not found': i18nData.userNotFound,
 		'Email not verified': i18nData.emailNotVerified,
 		'Too many attempts': i18nData.tooManyAttempts,
 	};
 
-	return (
-		<form
-			onSubmit={handleSubmit(async (formData) => {
-				startTransition(async () => {
-					formAction(formData);
+	const onSubmit = async (formData: FormValues) => {
+		setIsPending(true);
 
-					const { error } = await authClient.signIn.email({
-						email: formData.email,
-						password: formData.password,
-					});
+		try {
+			const result = await loginEmailAction(null, formData);
 
-					if (error) {
-						const messageKey = error?.message ?? '';
-						const message = errorMap[messageKey] || i18nData.userLoginFail;
-						setAuthError(message);
-						return;
-					}
-
-					await refresh();
-
-					const bc = new BroadcastChannel('auth');
-					bc.postMessage('session-updated');
-					bc.close();
+			if (result?.success) {
+				const { error } = await authClient.signIn.email({
+					email: formData.email,
+					password: formData.password,
 				});
-			})}
-		>
+
+				if (error) {
+					const messageKey = error?.message ?? '';
+					const message = errorMap[messageKey] || i18nData.userLoginFail;
+					setAuthError(message);
+					return;
+				}
+
+				await refresh();
+
+				const bc = new BroadcastChannel('auth');
+				bc.postMessage('session-updated');
+				bc.close();
+			} else {
+				setAuthError(result?.message!);
+			}
+		} catch (err) {
+			setAuthError(i18nData.invalidFormData);
+		} finally {
+			setIsPending(false);
+		}
+	};
+
+	return (
+		<form onSubmit={handleSubmit(onSubmit)}>
 			<Stack gap='4' align='flex-start'>
 				<Fieldset.Root size='lg' invalid>
 					<Fieldset.Content>
-						<Field.Root required invalid={!!errors.email}>
+						<Field.Root required invalid={!!errors?.email || !!authError}>
 							<Field.Label>
 								{i18nData.email}
 								<Field.RequiredIndicator />
@@ -123,7 +134,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 							<Field.ErrorText>{errors.password?.message}</Field.ErrorText>
 						</Field.Root>
 					</Fieldset.Content>
-					<Fieldset.ErrorText>{authError || fetchedData?.message}</Fieldset.ErrorText>
+					<Fieldset.ErrorText>{authError}</Fieldset.ErrorText>
 
 					{forceOpen && (
 						<Alert.Root status='success' variant='solid' my='2' fontSize='15px'>
@@ -133,26 +144,13 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 					)}
 				</Fieldset.Root>
 
-				<Button
-					w='100%'
-					type='submit'
-					loading={isPending}
-					disabled={disabled}
-					color='black'
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-				>
+				<PrimaryButton w='100%' type='submit' loading={isPending} disabled={disabled}>
 					{i18nData.continue}
-				</Button>
+				</PrimaryButton>
 
-				<Button
-					w='100%'
-					variant='outline'
-					border='1px solid'
-					borderColor='border'
-					onClick={() => setRestorePassOpen(true)}
-				>
+				<TertiaryButton w='100%' onClick={() => setRestorePassOpen(true)}>
 					{i18nData.resetPassAction}
-				</Button>
+				</TertiaryButton>
 			</Stack>
 		</form>
 	);

@@ -70,12 +70,14 @@ export async function getAccountSchemas() {
 			name: shape.name,
 			lastName: shape.lastName,
 			middleName: shape.middleName,
-			email: shape.email,
 		}),
 		emailSchema: z.object({ email: shape.email }),
-		phoneSchema: z.object({ phone: shape.phone, email: shape.email }),
-		addressSchema: z.object({ shipmentAddress: shape.shipmentAddress, email: shape.email }),
+		phoneSchema: z.object({ phone: shape.phone }),
+		addressSchema: z.object({ shipmentAddress: shape.shipmentAddress }),
 	};
 }
 
 export type AccountSchemas = Awaited<ReturnType<typeof getAccountSchemas>>;
+
+export type NameSchemaData = z.infer<Awaited<ReturnType<typeof getAccountSchemas>>['nameSchema']>;
+export type EditNameActionPayload = NameSchemaData & { email: string };

@@ -9,9 +9,9 @@ type FormValues = {
 };
 
 export async function setNewPasswordAction(
-	prevState: unknown,
+	_: unknown,
 	payload: { formData: FormValues; token: string }
-): Promise<{ message?: string } | undefined> {
+): Promise<{ success: boolean; message?: string } | undefined> {
 	const t = await getTranslations('Validation');
 	const { formData, token } = payload;
 
@@ -19,17 +19,21 @@ export async function setNewPasswordAction(
 	const validatedFormData = schema.safeParse(formData);
 
 	if (!validatedFormData.success) {
-		return { message: t('invalidFormData') };
+		return { success: false, message: t('invalidFormData') };
 	}
 
 	const { password } = validatedFormData.data;
 
-	await auth.api.resetPassword({
-		body: {
-			newPassword: password,
-			token,
-		},
-	});
+	try {
+		await auth.api.resetPassword({
+			body: {
+				newPassword: password,
+				token,
+			},
+		});
 
-	return;
+		return { success: true };
+	} catch (error: any) {
+		return { success: false, message: t('setNewPassFail') };
+	}
 }

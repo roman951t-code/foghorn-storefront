@@ -32,14 +32,14 @@ export default function OrderInfo() {
 				{t('yourOrder')}
 			</Heading>
 			<Separator my='2' color='border.dark' />
-			<Box maxH='480px' overflowY='auto' hideBelow='md'>
+			<Box maxH='480px' overflowY='auto' hideBelow='lg'>
 				<SidebarCheckoutCard />
 				<SidebarCheckoutCard />
 			</Box>
-			<Box maxH='480px' overflowY='auto' hideFrom='md'>
+			<Box maxH='480px' overflowY='auto' hideFrom='lg'>
 				<FullCheckoutCard />
 			</Box>
-			<VStack alignItems='flex-start' hideBelow='md'>
+			<VStack alignItems='flex-start' hideBelow='lg'>
 				<Text>
 					<Highlight query='1 шт' styles={{ fontWeight: 'semibold' }}>
 						{`${t('productsInCart')}: 1 шт`}
@@ -63,11 +63,11 @@ export default function OrderInfo() {
 						55 699 ₴
 					</Stat.ValueText>
 				</Stat.Root>
-				<AcceptOrderBtn text={t('acceptOrder')} w='100%' mt='4' maxW='xs' />
+				<AcceptOrderBtn text={t('acceptOrder')} w='100%' mt='4' maxW='280px' />
 			</VStack>
 
 			<Stack
-				hideFrom='md'
+				hideFrom='lg'
 				justifyContent='space-between'
 				alignItems='flex-start'
 				direction={{ base: 'column', sm: 'row' }}
@@ -84,7 +84,7 @@ export default function OrderInfo() {
 				<VStack
 					alignItems={{ base: 'flex-start', sm: 'flex-end' }}
 					order={{ base: 1, sm: 2 }}
-					gap='4'
+					gap='3'
 				>
 					<Text>
 						<Highlight query='1 шт' styles={{ fontWeight: 'semibold' }}>

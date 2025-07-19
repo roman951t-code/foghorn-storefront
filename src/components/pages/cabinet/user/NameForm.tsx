@@ -1,6 +1,7 @@
-import { Input, Field, Button, VStack, Fieldset } from '@chakra-ui/react';
+import { Input, Field, VStack, Fieldset } from '@chakra-ui/react';
 import { UseFormReturn } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
+import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
 
 interface Props {
 	nameForm: UseFormReturn<
@@ -29,6 +30,7 @@ export default function NameForm({ nameForm, i18nData, error, pending, onSubmitA
 		<form onSubmit={onSubmitAction}>
 			<Fieldset.Root size='lg' alignItems='center'>
 				<Fieldset.Content
+					css={{ '--field-label-width': '120px' }}
 					gap='6'
 					border='1px solid'
 					borderColor='border.dark'
@@ -47,8 +49,8 @@ export default function NameForm({ nameForm, i18nData, error, pending, onSubmitA
 							{i18nData.name} <Field.RequiredIndicator />
 						</Field.Label>
 
-						<VStack w='full' maxW='2xl'>
-							<Input {...nameForm.register('name')} variant='outline' size='md' maxW='2xl' />
+						<VStack w='full' maxW='3xl'>
+							<Input {...nameForm.register('name')} variant='outline' size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.name?.message?.toString() || error?.message}
 							</Field.ErrorText>
@@ -66,8 +68,8 @@ export default function NameForm({ nameForm, i18nData, error, pending, onSubmitA
 							{i18nData.lastName} <Field.RequiredIndicator />
 						</Field.Label>
 
-						<VStack w='full' maxW='2xl'>
-							<Input {...nameForm.register('lastName')} variant='outline' size='md' maxW='2xl' />
+						<VStack w='full' maxW='3xl'>
+							<Input {...nameForm.register('lastName')} variant='outline' size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.lastName?.message?.toString() || error?.message}
 							</Field.ErrorText>
@@ -86,25 +88,21 @@ export default function NameForm({ nameForm, i18nData, error, pending, onSubmitA
 							<Field.RequiredIndicator />
 						</Field.Label>
 
-						<VStack w='full' maxW='2xl'>
-							<Input {...nameForm.register('middleName')} variant='outline' size='md' maxW='2xl' />
+						<VStack w='full' maxW='3xl'>
+							<Input {...nameForm.register('middleName')} variant='outline' size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.middleName?.message?.toString() || error?.message}
 							</Field.ErrorText>
 						</VStack>
 					</Field.Root>
-					<Button
+					<SecondaryButton
 						alignSelf={{ base: 'stretch', sm: 'flex-end' }}
 						type='submit'
 						loading={pending}
-						color='black'
-						bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-						variant='solid'
 						size='md'
-						rounded='md'
 					>
 						{i18nData.save}
-					</Button>
+					</SecondaryButton>
 				</Fieldset.Content>
 			</Fieldset.Root>
 		</form>

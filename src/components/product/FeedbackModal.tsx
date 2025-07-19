@@ -1,19 +1,11 @@
 'use client';
-import {
-	Box,
-	Button,
-	Center,
-	Input,
-	Heading,
-	Fieldset,
-	RatingGroup,
-	Textarea,
-} from '@chakra-ui/react';
+import { Box, Center, Input, Heading, Fieldset, RatingGroup, Textarea } from '@chakra-ui/react';
 import { VscFeedback } from 'react-icons/vsc';
 import { Field } from '@/components/ui/field';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
+import { PrimaryButton, SecondaryButton } from '../reusable/buttons/ActionButton';
 
 interface Props {
 	i18nData: I18nData;
@@ -60,13 +52,9 @@ export default function FeedbackModal({ i18nData }: Props) {
 		<CenteredModal
 			title={i18nData.leaveFeedback}
 			trigger={
-				<Button
-					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-					color='main.darkOnly'
-					variant='solid'
-				>
+				<SecondaryButton>
 					<VscFeedback /> {i18nData.leaveFeedback}
-				</Button>
+				</SecondaryButton>
 			}
 			size='md'
 		>
@@ -124,17 +112,9 @@ export default function FeedbackModal({ i18nData }: Props) {
 								/>
 							</Field>
 						</Fieldset.Content>
-
-						<Button
-							w='100%'
-							mt='8'
-							type='submit'
-							bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-							color='black'
-							variant='solid'
-						>
+						<PrimaryButton w='100%' mt='8' type='submit'>
 							{i18nData.send}
-						</Button>
+						</PrimaryButton>
 					</Fieldset.Root>
 				</form>
 			</Box>

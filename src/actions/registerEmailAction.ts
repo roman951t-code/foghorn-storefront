@@ -6,16 +6,16 @@ import { getEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
 import { prisma } from '@/lib/prisma';
 
 export async function registerEmailAction(
-	prevState: unknown,
+	_: unknown,
 	formData: unknown
-): Promise<{ message?: string } | undefined> {
+): Promise<{ success: boolean; message?: string } | undefined> {
 	const t = await getTranslations('Validation');
 
 	const schema = await getEmailSignUpSchema();
 	const validatedFormData = schema.safeParse(formData);
 
 	if (!validatedFormData.success) {
-		return { message: t('invalidFormData') };
+		return { success: false, message: t('invalidFormData') };
 	}
 
 	const { email, password, name } = validatedFormData.data;
@@ -24,7 +24,7 @@ export async function registerEmailAction(
 		const existingUser = await prisma.user.findUnique({ where: { email } });
 
 		if (existingUser) {
-			return { message: t('userExists') };
+			return { success: false, message: t('userExists') };
 		}
 
 		await auth.api.signUpEmail({
@@ -41,10 +41,10 @@ export async function registerEmailAction(
 			data: { notificationMethod: 'email' },
 		});
 
-		return;
+		return { success: true };
 	} catch (error: any) {
 		if (error.code === 'P2002') {
-			return { message: t('userExists') };
+			return { success: false, message: t('userExists') };
 		}
 
 		const errorMap: Record<string, string> = {
@@ -60,6 +60,7 @@ export async function registerEmailAction(
 		};
 
 		return {
+			success: false,
 			message: errorMap[error?.body?.message ?? ''] || t('userRegisterFail'),
 		};
 	}

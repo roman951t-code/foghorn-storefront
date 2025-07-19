@@ -41,6 +41,9 @@ export const authLocData = [
 	'shipmentAddress',
 	'passUpdated',
 	'close',
+	'middleName',
+	'nameUpdated',
+	'lastName',
 ];
 
 export const validLocData = [
@@ -71,7 +74,10 @@ export const validLocData = [
 	'invalidOtp',
 	'otpExpired',
 	'tooManyAttempts',
+	'lastNameRequired',
+	'middleNameRequired',
 	'emailNotVerified',
+	'editNameFail',
 ];
 
 export const accountValidLoc = [

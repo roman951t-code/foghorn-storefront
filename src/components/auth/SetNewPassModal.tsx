@@ -2,7 +2,7 @@
 
 import { Button, Fieldset, Stack, Field, Box, Alert } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-import { startTransition, useActionState, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { I18nData } from '@/types/i18n';
 import { PasswordInput } from '../ui/password-input';
 import CenteredModal from '../dialogs/CenteredModal';
@@ -29,7 +29,8 @@ export default function SetNewPassModal({ i18nData }: ResetPassProps) {
 
 	const resetPass = searchParams?.get('reset-pass') === 'true';
 
-	const [formError, formAction, isPending] = useActionState(setNewPasswordAction, undefined);
+	const [actionError, setActionError] = useState('');
+	const [isPending, setIsPending] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 	const [token, setToken] = useState<string | null>(null);
 	const [isPassUpdated, setPassUpdated] = useState(false);
@@ -76,6 +77,25 @@ export default function SetNewPassModal({ i18nData }: ResetPassProps) {
 
 	if (!isOpen || !token) return null;
 
+	const onSubmit = async (formData: FormValues) => {
+		if (!token) return;
+
+		setIsPending(true);
+
+		try {
+			const result = await setNewPasswordAction(null, { formData, token });
+
+			if (!result?.success) {
+				setActionError(result?.message!);
+			}
+		} catch (err) {
+			setActionError(i18nData.invalidFormData);
+		} finally {
+			setIsPending(false);
+			setPassUpdated(true);
+		}
+	};
+
 	return (
 		<CenteredModal
 			closeOnInteractOutside={false}
@@ -86,21 +106,11 @@ export default function SetNewPassModal({ i18nData }: ResetPassProps) {
 			setIsOpen={setIsOpen}
 		>
 			<Box maxW='400px' mx='auto' my='auto'>
-				<form
-					onSubmit={handleSubmit(async (formData) => {
-						if (!token) return;
-
-						startTransition(() => {
-							formAction({ formData, token });
-
-							setPassUpdated(true);
-						});
-					})}
-				>
+				<form onSubmit={handleSubmit(onSubmit)}>
 					<Stack gap='4' align='flex-start'>
 						<Fieldset.Root size='lg' invalid>
 							<Fieldset.Content>
-								<Field.Root required invalid={!!errors.password}>
+								<Field.Root required invalid={!!errors.password || !!actionError}>
 									<Field.Label>
 										{i18nData.password}
 										<Field.RequiredIndicator />
@@ -113,7 +123,7 @@ export default function SetNewPassModal({ i18nData }: ResetPassProps) {
 									<Field.ErrorText>{errors.password?.message}</Field.ErrorText>
 								</Field.Root>
 
-								<Fieldset.ErrorText>{formError?.message}</Fieldset.ErrorText>
+								<Fieldset.ErrorText>{actionError}</Fieldset.ErrorText>
 							</Fieldset.Content>
 							{isPassUpdated && !isSubmitting && !isPending && (
 								<>
