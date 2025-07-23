@@ -1,3 +1,4 @@
+
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -9,21 +10,25 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String
-  middleName    String?
-  lastName      String?
-  notificationMethod          String?
-  email         String    @unique
-  emailVerified Boolean
-  image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
-  orders        Order[]
-  accounts      Account[]
-  sessions      Session[]
+  id                 String    @id
+  name               String
+  middleName         String?
+  lastName           String?
+  notificationMethod String?   @default("email")
+  email              String    @unique
+  emailVerified      Boolean
+  image              String?
+  createdAt          DateTime
+  updatedAt          DateTime
+  orders             Order[]
+  accounts           Account[]
+  sessions           Session[]
+
+  phoneNumber         String?
+  phoneNumberVerified Boolean?
 
   @@map("user")
+  @@unique([phoneNumber])
 }
 
 model Session {

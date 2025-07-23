@@ -17,13 +17,11 @@ interface Props {
 			middleName: any;
 		}
 	>;
-	error?: { message?: string };
-	pending: boolean;
 	i18nData: I18nData;
 	onSubmitAction: (e?: React.BaseSyntheticEvent) => Promise<void>;
 }
 
-export default function NameForm({ nameForm, i18nData, error, pending, onSubmitAction }: Props) {
+export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) {
 	const fieldOrientation = { base: 'vertical' as const, sm: 'horizontal' as const };
 
 	return (
@@ -40,7 +38,7 @@ export default function NameForm({ nameForm, i18nData, error, pending, onSubmitA
 				>
 					<Field.Root
 						orientation={fieldOrientation}
-						invalid={!!nameForm.formState.errors.name || !!error?.message}
+						invalid={!!nameForm.formState.errors.name}
 						gap='4'
 						justifyContent='center'
 						required
@@ -52,14 +50,14 @@ export default function NameForm({ nameForm, i18nData, error, pending, onSubmitA
 						<VStack w='full' maxW='3xl'>
 							<Input {...nameForm.register('name')} variant='outline' size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
-								{nameForm.formState.errors.name?.message?.toString() || error?.message}
+								{nameForm.formState.errors.name?.message?.toString()}
 							</Field.ErrorText>
 						</VStack>
 					</Field.Root>
 
 					<Field.Root
 						orientation={fieldOrientation}
-						invalid={!!nameForm.formState.errors.lastName || !!error?.message}
+						invalid={!!nameForm.formState.errors.lastName}
 						gap='4'
 						justifyContent='center'
 						required
@@ -71,14 +69,14 @@ export default function NameForm({ nameForm, i18nData, error, pending, onSubmitA
 						<VStack w='full' maxW='3xl'>
 							<Input {...nameForm.register('lastName')} variant='outline' size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
-								{nameForm.formState.errors.lastName?.message?.toString() || error?.message}
+								{nameForm.formState.errors.lastName?.message?.toString()}
 							</Field.ErrorText>
 						</VStack>
 					</Field.Root>
 
 					<Field.Root
 						orientation={fieldOrientation}
-						invalid={!!nameForm.formState.errors.middleName || !!error?.message}
+						invalid={!!nameForm.formState.errors.middleName}
 						gap='4'
 						justifyContent='center'
 						required
@@ -91,16 +89,11 @@ export default function NameForm({ nameForm, i18nData, error, pending, onSubmitA
 						<VStack w='full' maxW='3xl'>
 							<Input {...nameForm.register('middleName')} variant='outline' size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
-								{nameForm.formState.errors.middleName?.message?.toString() || error?.message}
+								{nameForm.formState.errors.middleName?.message?.toString()}
 							</Field.ErrorText>
 						</VStack>
 					</Field.Root>
-					<SecondaryButton
-						alignSelf={{ base: 'stretch', sm: 'flex-end' }}
-						type='submit'
-						loading={pending}
-						size='md'
-					>
+					<SecondaryButton alignSelf={{ base: 'stretch', sm: 'flex-end' }} type='submit' size='md'>
 						{i18nData.save}
 					</SecondaryButton>
 				</Fieldset.Content>

@@ -7,16 +7,12 @@ import { useState } from 'react';
 import type { I18nData } from '@/types/i18n';
 import { useMemo } from 'react';
 import { resetPasswordAction } from '@/actions/resetPasswordAction';
-import { createResetPassSchema } from 'formValidationSchemas/resetPassSchema';
+import { createResetPassSchema, ResetPassSchema } from 'formValidationSchemas/resetPassSchema';
 
 interface ResetPassProps {
 	i18nData: I18nData;
 	onCloseAction: (value: boolean) => void;
 }
-
-type FormValues = {
-	email: string;
-};
 
 const MAX_CHARACTERS = 60;
 
@@ -37,12 +33,12 @@ export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
 		getValues,
 		handleSubmit,
 		formState: { errors, isSubmitting },
-	} = useForm<FormValues>({
+	} = useForm<ResetPassSchema>({
 		mode: 'onSubmit',
 		resolver: zodResolver(schema),
 	});
 
-	const onSubmit = async (formData: FormValues) => {
+	const onSubmit = async (formData: ResetPassSchema) => {
 		setIsPending(true);
 
 		try {

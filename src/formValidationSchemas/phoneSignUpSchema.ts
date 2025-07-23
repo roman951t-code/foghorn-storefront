@@ -10,7 +10,7 @@ export const phoneSignUpSchemaShape = (t: {
 	invalidPhone: string;
 }) =>
 	z.object({
-		firstName: z
+		name: z
 			.string({ required_error: t.nameRequired })
 			.min(2, { message: t.nameMinLength })
 			.max(60, { message: t.inputMaxLength })
@@ -39,4 +39,4 @@ export async function getPhoneSignUpSchema() {
 	});
 }
 
-export type phoneSignUpSchema = z.infer<Awaited<ReturnType<typeof getPhoneSignUpSchema>>>;
+export type PhoneSignUpSchema = z.infer<Awaited<ReturnType<typeof getPhoneSignUpSchema>>>;

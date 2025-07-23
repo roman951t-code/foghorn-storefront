@@ -18,7 +18,8 @@ export default function WishList() {
 				my='4'
 				className='productsSlider'
 				columns={{ base: 1, prodXs: 2, prodSm: 3, prodMd: 4, prodLg: 5, prodXl: 6 } as any}
-				gap='2'
+				gapX='2'
+				gapY='4'
 			>
 				{new Array(9).fill(null).map((_, index) => (
 					<Box key={index}>

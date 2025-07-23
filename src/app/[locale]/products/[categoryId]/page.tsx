@@ -48,7 +48,7 @@ export default async function Subcategory({ params }: Props) {
 					</VStack>
 				</Box>
 				<Box as='section' w={{ base: '100%', lg: '80%' }}>
-					<ProductsGrid />
+					<ProductsGrid notFound={t('productsNotFound')} />
 				</Box>
 			</Group>
 			<ProductsSection title={t('viewed')} />

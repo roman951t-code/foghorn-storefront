@@ -14,21 +14,33 @@ export async function setNotificationMethodAction(
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
-	console.log('session', session);
 
-	if (!session?.user?.email) {
+	if (!session?.user?.email && !session?.user?.phoneNumber) {
 		return { success: false, message: t('userNotFound') };
 	}
 
 	try {
-		await prisma.user.update({
-			where: { email: session.user.email },
-			data: {
-				notificationMethod: formData.notificationMethod,
-			},
-		});
+		if (session?.user?.email) {
+			await prisma.user.update({
+				where: { email: session.user.email },
+				data: {
+					notificationMethod: formData.notificationMethod,
+				},
+			});
 
-		return { success: true };
+			return { success: true };
+		}
+
+		if (session?.user?.phoneNumber) {
+			await prisma.user.update({
+				where: { phoneNumber: session.user.phoneNumber },
+				data: {
+					notificationMethod: formData.notificationMethod,
+				},
+			});
+
+			return { success: true };
+		}
 	} catch (error) {
 		return { success: false, message: t('preferedNotifFailed') };
 	}

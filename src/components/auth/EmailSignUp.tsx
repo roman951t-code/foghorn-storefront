@@ -6,16 +6,12 @@ import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerEmailAction } from '@/actions/registerEmailAction';
-import { createEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
+import {
+	createEmailSignUpSchema,
+	EmailSignUpSchema,
+} from 'formValidationSchemas/emailSignUpSchema';
 import type { I18nData } from '@/types/i18n';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
-
-type FormValues = {
-	name: string;
-	email: string;
-	password: string;
-	confirmPassword: string;
-};
 
 interface EmailAuthProps {
 	i18nData: I18nData;
@@ -36,12 +32,12 @@ export default function EmailSignUp({ i18nData, disabled }: EmailAuthProps) {
 		getValues,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<FormValues>({
+	} = useForm<EmailSignUpSchema>({
 		mode: 'onSubmit',
 		resolver: zodResolver(schema),
 	});
 
-	const onSubmit = async (formData: FormValues) => {
+	const onSubmit = async (formData: EmailSignUpSchema) => {
 		setIsPending(true);
 
 		try {

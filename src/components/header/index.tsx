@@ -34,6 +34,7 @@ export default function Header() {
 		deleteAccount: authT('deleteAccount'),
 		areYouSure: authT('areYouSure'),
 		confirmDeleteAcc: authT('confirmDeleteAcc'),
+		deleteFailed: validT('deleteFailed'),
 	};
 
 	return (

@@ -43,6 +43,7 @@ export const authLocData = [
 	'close',
 	'middleName',
 	'nameUpdated',
+	'notifUpdated',
 	'lastName',
 ];
 
@@ -77,6 +78,7 @@ export const validLocData = [
 	'lastNameRequired',
 	'middleNameRequired',
 	'emailNotVerified',
+	'preferedNotifFailed',
 	'editNameFail',
 ];
 
@@ -94,6 +96,7 @@ export const accountValidLoc = [
 	'editNameFail',
 	'editEmailFail',
 	'lastNameRequired',
+	'preferedNotifFailed',
 	'middleNameRequired',
 ];
 
@@ -111,5 +114,6 @@ export const accountAuthLoc = [
 	'nameUpdated',
 	'emailUpdated',
 	'middleName',
+	'notifUpdated',
 	'lastName',
 ];

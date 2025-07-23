@@ -6,7 +6,7 @@ import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createEmailSignInSchema } from 'formValidationSchemas/emailSignInSchema';
+import { createEmailSignInSchema, EmailSchema } from 'formValidationSchemas/emailSignInSchema';
 import type { I18nData } from '@/types/i18n';
 import ResetPass from './ResetPass';
 import { loginEmailAction } from '@/actions/loginEmailAction';
@@ -15,11 +15,6 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useSession } from '../providers/SessionProvider';
 import { PrimaryButton, TertiaryButton } from '../reusable/buttons/ActionButton';
-
-type FormValues = {
-	email: string;
-	password: string;
-};
 
 interface EmailAuthProps {
 	i18nData: I18nData;
@@ -61,7 +56,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<FormValues>({
+	} = useForm<EmailSchema>({
 		mode: 'onSubmit',
 		resolver: zodResolver(schema),
 	});
@@ -77,7 +72,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 		'Too many attempts': i18nData.tooManyAttempts,
 	};
 
-	const onSubmit = async (formData: FormValues) => {
+	const onSubmit = async (formData: EmailSchema) => {
 		setIsPending(true);
 
 		try {

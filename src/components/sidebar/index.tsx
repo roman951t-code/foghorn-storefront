@@ -120,7 +120,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 							</Card.Root>
 							<Separator borderColor='border.light' my='5' />
 							<CollapsibleLinks onClose={onClose} />
-							{session?.session && <DeleteAccount i18nData={i18nData} />}
+							{session?.session && <DeleteAccount i18nData={i18nData} onCloseAction={onClose} />}
 						</Box>
 
 						<DrawerFooter bg='bg.secondary' mt='auto'>

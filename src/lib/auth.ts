@@ -3,6 +3,7 @@ import { nextCookies } from 'better-auth/next-js';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
+import { phoneNumber } from 'better-auth/plugins';
 import { prisma } from './prisma';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -21,6 +22,9 @@ export const auth = betterAuth({
 					text: `${t('clickToChangeEmail')}: ${url}`,
 				});
 			},
+		},
+		deleteUser: {
+			enabled: true,
 		},
 	},
 	database: prismaAdapter(prisma, {
@@ -69,5 +73,20 @@ export const auth = betterAuth({
 			});
 		},
 	},
-	plugins: [nextCookies()],
+	plugins: [
+		phoneNumber({
+			sendOTP: ({ phoneNumber, code }, request) => {
+				console.log('code', code);
+			},
+			signUpOnVerification: {
+				getTempEmail: (phoneNumber) => {
+					return '';
+				},
+				getTempName: (phoneNumber) => {
+					return phoneNumber;
+				},
+			},
+		}),
+		nextCookies(),
+	],
 });

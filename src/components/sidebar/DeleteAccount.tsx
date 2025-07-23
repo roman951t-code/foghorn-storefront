@@ -1,10 +1,55 @@
 import { Button, CloseButton, Dialog, Portal, Text } from '@chakra-ui/react';
 import { I18nData } from '@/types/i18n';
 import { AlertButton } from '../reusable/buttons/ActionButton';
+import { deleteUserAction } from '@/actions/deleteUserAction';
+import { authClient } from '@/lib/auth-client';
+import { toaster } from '../ui/toaster';
+import { useSession } from '../providers/SessionProvider';
+import { useState } from 'react';
 
-export function DeleteAccount({ i18nData }: { i18nData: I18nData }) {
+interface Props {
+	onCloseAction: () => void;
+	i18nData: I18nData;
+}
+
+export function DeleteAccount({ i18nData, onCloseAction }: Props) {
+	const [open, setOpen] = useState(false);
+	const [pending, setPending] = useState(false);
+	const { refresh } = useSession();
+
+	const handleDeleteUser = async () => {
+		setPending(true);
+		try {
+			const result = await deleteUserAction();
+
+			if (result?.success) {
+				await authClient.signOut();
+				await refresh();
+
+				const bc = new BroadcastChannel('auth');
+				bc.postMessage('session-updated');
+				bc.close();
+				setOpen(false);
+
+				onCloseAction();
+			} else {
+				toaster.error({
+					title: result?.message,
+					duration: 5000,
+				});
+			}
+		} catch {
+			toaster.error({
+				title: i18nData?.deleteFailed,
+				duration: 5000,
+			});
+		} finally {
+			setPending(false);
+		}
+	};
+
 	return (
-		<Dialog.Root role='alertdialog'>
+		<Dialog.Root role='alertdialog' lazyMount open={open} onOpenChange={(e) => setOpen(e.open)}>
 			<Dialog.Trigger asChild>
 				<AlertButton mt='8' w='full'>
 					{i18nData.deleteAccount}
@@ -29,6 +74,8 @@ export function DeleteAccount({ i18nData }: { i18nData: I18nData }) {
 								</Button>
 							</Dialog.ActionTrigger>
 							<Button
+								onClick={handleDeleteUser}
+								loading={pending}
 								colorPalette='red'
 								variant={{
 									base: 'surface',

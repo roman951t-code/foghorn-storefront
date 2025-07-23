@@ -13,8 +13,8 @@ const config = defineConfig({
 			prodXs: '430px',
 			prodSm: '630px',
 			prodMd: '840px',
-			prodLg: '1120px',
-			prodXl: '1260px',
+			prodLg: '1210px',
+			prodXl: '1290px',
 		},
 		semanticTokens: {
 			colors: {
@@ -117,6 +117,7 @@ const config = defineConfig({
 							_dark: '{colors.gray.700}',
 						},
 					},
+					disabled: { value: '{colors.fg.muted}' },
 				},
 				link: {
 					DEFAULT: {

@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
 import { startTransition, useActionState, useMemo, useState } from 'react';
 import {
-	AccountSchemas,
 	createAccountSchema,
 	EditNameActionPayload,
 	NameSchemaData,
@@ -28,6 +27,7 @@ interface Props {
 export default function PersonalDataForm({ i18nData }: Props) {
 	const { session } = useSession();
 	const userEmail = session?.user?.email;
+	const userPhone = session?.user?.phoneNumber;
 
 	const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 
@@ -48,7 +48,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		[schemaShape]
 	);
 
-	const [nameError, nameAction, isNamePending] = useActionState(editAccountAction, undefined);
 	const [emailError, emailAction, isEmailPending] = useActionState(editAccountAction, undefined);
 	const [phoneError, phoneAction, isPhonePending] = useActionState(editAccountAction, undefined);
 	const [addressError, addressAction, isAddressPending] = useActionState(
@@ -71,7 +70,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	});
 
 	const phoneForm = useForm({
-		defaultValues: { phone: '380992304452' },
+		defaultValues: { phone: userPhone },
 		resolver: zodResolver(phoneSchema),
 	});
 
@@ -152,12 +151,9 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		<Wrap gapX='4' gapY='8' mt='4' colorPalette={{ base: 'orange', _dark: 'yellow' }}>
 			<NameForm
 				i18nData={i18nData}
-				pending={isNamePending}
 				nameForm={nameForm}
-				error={nameError}
 				onSubmitAction={nameForm.handleSubmit(handleNameSubmit)}
 			/>
-
 			<Fieldset.Root size='lg' alignItems='center'>
 				<Fieldset.Content
 					gap='6'
@@ -178,7 +174,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 						setIsOpenAction={setEmailDialogOpen}
 						onSubmitAction={emailForm.handleSubmit(handleEmailSubmit)}
 					/>
-
 					<PhoneForm
 						i18nData={i18nData}
 						pending={isPhonePending}
@@ -186,7 +181,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 						error={phoneError}
 						onSubmitAction={phoneForm.handleSubmit(handlePhoneSubmit)}
 					/>
-
 					<AddressForm
 						i18nData={i18nData}
 						addressForm={addressForm}
@@ -196,8 +190,12 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					/>
 				</Fieldset.Content>
 			</Fieldset.Root>
-
-			<PreferredDeliveryForm userEmail={userEmail} i18nData={i18nData} schemaShape={schemaShape} />
+			<PreferredDeliveryForm
+				userEmail={userEmail}
+				userPhone={userPhone}
+				i18nData={i18nData}
+				schemaShape={schemaShape}
+			/>
 		</Wrap>
 	);
 }

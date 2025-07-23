@@ -1,7 +1,7 @@
 'use server';
 
 import { getTranslations } from 'next-intl/server';
-import { getNewPassSchema } from 'formValidationSchemas/setNewpassSchema';
+import { getNewPassSchema } from 'formValidationSchemas/setNewPassSchema';
 import { auth } from '@/lib/auth';
 
 type FormValues = {

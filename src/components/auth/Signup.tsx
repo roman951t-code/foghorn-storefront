@@ -5,7 +5,7 @@ import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdArrowBack, IoMdPhonePortrait } from 'react-icons/io';
 import { Link } from '@/i18n/routing';
-import PhoneAuth from './PhoneAuth';
+import PhoneSignUp from './PhoneSignUp';
 import { signIn } from '@/lib/auth-client';
 import EmailSignUp from './EmailSignUp';
 import { TertiaryButton } from '../reusable/buttons/ActionButton';
@@ -24,7 +24,7 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 
 	return (
 		<>
-			{isPhoneAuth && <PhoneAuth i18nData={i18nData} disabled={!termsAccepted} isSignup />}
+			{isPhoneAuth && <PhoneSignUp i18nData={i18nData} disabled={!termsAccepted} />}
 			{isEmailAuth && <EmailSignUp i18nData={i18nData} disabled={!termsAccepted} />}
 			<CheckboxCard.Root
 				onChange={() => setTermsAccepted(!termsAccepted)}

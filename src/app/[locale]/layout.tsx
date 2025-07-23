@@ -14,6 +14,7 @@ import { loadClientMessages } from '@/utils/i18nUtils';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { SessionProvider } from '@/components/providers/SessionProvider';
+import { prisma } from '@/lib/prisma';
 
 interface Props {
 	children: ReactNode;
@@ -30,6 +31,25 @@ export default async function Layout({ children, params }: Props) {
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
+
+	if (session?.user?.id) {
+		const fullUser = await prisma.user.findUnique({
+			where: {
+				id: session.user.id,
+			},
+			select: {
+				lastName: true,
+				middleName: true,
+				phoneNumber: true,
+			},
+		});
+
+		if (fullUser) {
+			(session.user as any).lastName = fullUser.lastName || null;
+			(session.user as any).middleName = fullUser.middleName || null;
+			(session.user as any).phoneNumber = fullUser.phoneNumber || null;
+		}
+	}
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
