@@ -1,6 +1,5 @@
 'use client';
 
-import { authClient } from '@/lib/auth-client';
 import {
 	IconButton,
 	Group,
@@ -28,13 +27,6 @@ const frameworks = [
 
 function ComboboxItem(props: { item: { label: string; value: string } }) {
 	const { item } = props;
-
-	const {
-		data: session,
-		isPending, //loading state
-		error, //error object
-		refetch, //refetch the session
-	} = authClient.useSession();
 
 	const combobox = useComboboxContext();
 	return (

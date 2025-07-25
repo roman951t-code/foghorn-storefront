@@ -1,7 +1,6 @@
 'use client';
 
 import { Input, Stack, Field, Fieldset, Text, Highlight } from '@chakra-ui/react';
-import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,6 +11,7 @@ import {
 } from 'formValidationSchemas/emailSignUpSchema';
 import type { I18nData } from '@/types/i18n';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
+import { PasswordInput } from '../reusable/chakra/password-input';
 
 interface EmailAuthProps {
 	i18nData: I18nData;

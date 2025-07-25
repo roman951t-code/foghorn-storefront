@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { Input, Stack, Field, Fieldset, Alert } from '@chakra-ui/react';
-import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +14,7 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useSession } from '../providers/SessionProvider';
 import { PrimaryButton, TertiaryButton } from '../reusable/buttons/ActionButton';
+import { PasswordInput } from '../reusable/chakra/password-input';
 
 interface EmailAuthProps {
 	i18nData: I18nData;

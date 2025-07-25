@@ -32,7 +32,7 @@ export default async function CabinetLayout({ children }: Props) {
 	});
 
 	if (!session) {
-		redirect('/ua');
+		redirect('/');
 	}
 
 	const i18nData = {

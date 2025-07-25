@@ -1,27 +1,16 @@
 'use client';
 
-import { FiTrash2, FiShoppingCart } from 'react-icons/fi';
-import {
-	IconButton,
-	Stack,
-	Flex,
-	Icon,
-	Stat,
-	Float,
-	Circle,
-	VStack,
-	Highlight,
-	Text,
-} from '@chakra-ui/react';
-import { EmptyState } from '@/components/ui/empty-state';
-import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
+import { FiShoppingCart } from 'react-icons/fi';
+import { IconButton, Stack, Float, Circle, EmptyState } from '@chakra-ui/react';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import Image from 'next/image';
-import { LocaleNavButton } from '../reusable/links/LocaleNavLink';
 import { useState } from 'react';
 import { I18nData } from '@/types/i18n';
+import dynamic from 'next/dynamic.js';
 
 const emptyCart = '/assets/images/emptyCart.png';
+
+const CartWithProducts = dynamic(() => import('./CartWithProducts.tsx'));
 
 const CartBtn = ({ setIsOpen }: { setIsOpen: any }) => (
 	<IconButton
@@ -82,49 +71,7 @@ export default function Cart({ i18nData }: Props) {
 					/>
 				</Stack>
 			) : (
-				<>
-					<Flex align='center' py={3} justifyContent='space-between'>
-						<Flex justifyContent='flex-start' gap={6} direction='column'>
-							<VStack gap='3' alignItems='flex-start'>
-								<Stat.Root>
-									<Stat.Label fontSize='sm'>{i18nData.totalAmount}</Stat.Label>
-									<Stat.ValueText w='124px' fontSize='3xl'>
-										55 699 ₴
-									</Stat.ValueText>
-								</Stat.Root>
-								<Text textStyle='sm' fontWeight='normal'>
-									<Highlight query='3' styles={{ fontWeight: 'bold' }}>
-										{`${i18nData.numOfProducts}: 3`}
-									</Highlight>
-								</Text>
-							</VStack>
-							<LocaleNavButton href='/checkout' onClick={() => setIsOpen(false)}>
-								<FiShoppingCart />
-								{i18nData.order}
-							</LocaleNavButton>
-						</Flex>
-						<IconButton
-							aria-label='Trash'
-							variant='ghost'
-							rounded='full'
-							color='main.disabled'
-							transition='all 0.2s ease-in-out'
-							_hover={{
-								bg: 'colorPalette.500',
-								color: 'main.lightOnly',
-							}}
-						>
-							<Icon size='lg'>
-								<FiTrash2 />
-							</Icon>
-						</IconButton>
-					</Flex>
-					<Stack direction='column' overflowY='auto' gap={4} mt={4} maxHeight='650px'>
-						<CartOrderCard />
-						<CartOrderCard />
-						<CartOrderCard />
-					</Stack>
-				</>
+				<CartWithProducts setIsOpen={setIsOpen} i18nData={i18nData} />
 			)}
 		</CenteredModal>
 	);

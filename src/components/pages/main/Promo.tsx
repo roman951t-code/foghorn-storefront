@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Flex, HStack, useBreakpointValue } from '@chakra-ui/react';
+import { LoadingPromoSkeleton } from '@/components/reusable/Skeleton';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import NextImage from 'next/image';
-import { LoadingPromoSkeleton } from '@/components/reusable/Skeleton';
 
 import 'swiper/css';
 
@@ -20,35 +20,22 @@ const breakpoints = {
 	1100: { slidesPerView: 2 },
 };
 
-export default function Promo() {
-	const [isClient, setIsClient] = useState(false);
-
-	useEffect(() => {
-		setIsClient(true);
-	}, []);
-
-	const skeletonCount =
-		useBreakpointValue({
-			base: 1,
-			sm: 2,
-			md: 1,
-			lg: 2,
-		}) ?? 4;
-
-	if (!isClient) {
-		return (
-			<HStack gap='4' mt='8' overflowX='auto' overflowY='hidden' w='100%'>
-				{Array.from({ length: skeletonCount }).map((_, i) => (
-					<LoadingPromoSkeleton key={i} />
-				))}
-			</HStack>
-		);
-	}
+function PromoSkeletonFallback() {
+	const skeletonCount = useBreakpointValue({ base: 1, sm: 2, md: 1, lg: 2 }) ?? 4;
 
 	return (
+		<HStack gap='4' mt='8' overflowX='auto' overflowY='hidden' w='100%'>
+			{Array.from({ length: skeletonCount }).map((_, i) => (
+				<LoadingPromoSkeleton key={i} />
+			))}
+		</HStack>
+	);
+}
+
+function PromoSlider() {
+	return (
 		<Swiper
-			loop={true}
-			// autoplay={{ delay: 3000 }}
+			loop
 			spaceBetween={10}
 			breakpoints={breakpoints}
 			modules={[Autoplay]}
@@ -69,4 +56,13 @@ export default function Promo() {
 			))}
 		</Swiper>
 	);
+}
+
+const DynamicPromoSlider = dynamic(() => Promise.resolve(PromoSlider), {
+	ssr: false,
+	loading: () => <PromoSkeletonFallback />,
+});
+
+export default function Promo() {
+	return <DynamicPromoSlider />;
 }

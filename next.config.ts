@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-eval' 'unsafe-inline';
@@ -14,26 +16,29 @@ const cspHeader = `
   upgrade-insecure-requests;
 `;
 
-const nextConfig: NextConfig = {
+const baseConfig: NextConfig = {
 	experimental: {
 		optimizePackageImports: ['@chakra-ui/react'],
 	},
+
 	images: {
 		domains: ['images.unsplash.com'],
 	},
-	async headers() {
-		return [
-			{
-				source: '/(.*)',
-				headers: [
-					{
-						key: 'Content-Security-Policy',
-						value: cspHeader.replace(/\n/g, ''),
-					},
-				],
-			},
-		];
-	},
+	...(isProd && {
+		async headers() {
+			return [
+				{
+					source: '/(.*)',
+					headers: [
+						{
+							key: 'Content-Security-Policy',
+							value: cspHeader.replace(/\n/g, ''),
+						},
+					],
+				},
+			];
+		},
+	}),
 	logging: {
 		fetches: {
 			fullUrl: true,
@@ -43,8 +48,4 @@ const nextConfig: NextConfig = {
 
 const withNextIntl = createNextIntlPlugin();
 
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-	enabled: process.env.ANALYZE === 'true',
-});
-
-export default withBundleAnalyzer(withNextIntl(nextConfig));
+export default withNextIntl(baseConfig);

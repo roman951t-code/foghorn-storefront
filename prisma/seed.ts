@@ -1,116 +1,150 @@
-import { PrismaClient } from '@prisma/client';
-import { add } from 'date-fns';
+import { PrismaClient, OrderStatus } from '@prisma/client';
+import { faker } from '@faker-js/faker';
+import slugify from 'slugify';
+import { Decimal } from '@prisma/client/runtime/library';
 
 const prisma = new PrismaClient();
 
+function createSlug(text: string) {
+	return slugify(text, { lower: true, strict: true });
+}
+
+const mainCategories = [
+	'Phones',
+	'Tablets',
+	'Laptops',
+	'Accessories',
+	'Smartwatches',
+	'Audio',
+	'Gaming',
+	'Monitors',
+];
+
+const subcategoriesMap: Record<string, string[]> = {
+	Phones: ['Smartphones', 'Feature Phones'],
+	Tablets: ['Android Tablets', 'iPads'],
+	Laptops: ['Ultrabooks', 'Gaming Laptops'],
+	Accessories: ['Chargers', 'Cables'],
+	Smartwatches: ['Fitness Trackers', 'Wear OS Watches'],
+	Audio: ['Headphones', 'Speakers'],
+	Gaming: ['Consoles', 'Controllers'],
+	Monitors: ['4K Monitors', 'Gaming Monitors'],
+};
+
 async function main() {
-	// === 1. Create User ===
-	const user = await prisma.user.upsert({
-		where: { email: 'john.doe@example.com' },
+	console.log('🌱 Seeding started...');
+
+	const brand = await prisma.brand.upsert({
+		where: { slug: 'techbrand' },
 		update: {},
 		create: {
-			email: 'john.doe@example.com',
-			name: 'John Doe',
-			hashedPassword: '123',
-			image: 'https://randomuser.me/api/portraits/men/1.jpg',
-			phone: '+1234567890',
-			emailVerified: new Date(),
+			name: 'TechBrand',
+			slug: 'techbrand',
+			logoUrl: faker.image.avatar(),
 		},
 	});
 
-	// === 2. Create Auth Account ===
-	await prisma.account.upsert({
-		where: {
-			provider_providerAccountId: {
-				provider: 'google',
-				providerAccountId: 'google-oauth2|1234567890',
+	const allProducts = [];
+
+	for (const main of mainCategories) {
+		const parentSlug = createSlug(main);
+		const parent = await prisma.productCategory.upsert({
+			where: { slug: parentSlug },
+			update: {},
+			create: { name: main, slug: parentSlug },
+		});
+
+		for (const sub of subcategoriesMap[main]) {
+			const subSlug = createSlug(`${main}-${sub}`);
+			const subcategory = await prisma.productCategory.upsert({
+				where: { slug: subSlug },
+				update: {},
+				create: { name: sub, slug: subSlug, parentId: parent.id },
+			});
+
+			const count = faker.number.int({ min: 2, max: 3 });
+			for (let i = 0; i < count; i++) {
+				const name = faker.commerce.productName();
+				const price = new Decimal(faker.number.float({ min: 100, max: 1500, fractionDigits: 2 }));
+				const stock = faker.number.int({ min: 5, max: 50 });
+
+				const product = await prisma.product.create({
+					data: {
+						name,
+						slug: createSlug(`${name}-${Date.now()}`),
+						description: faker.commerce.productDescription(),
+						imageUrl: faker.image.urlLoremFlickr({ category: 'technology' }),
+						basePrice: price,
+						stock,
+						brandId: brand.id,
+						categoryId: subcategory.id,
+					},
+				});
+
+				allProducts.push(product);
+			}
+		}
+	}
+
+	const roman = await prisma.user.upsert({
+		where: { email: 'roman951t@gmail.com' },
+		update: {},
+		create: {
+			id: 'user-roman-951',
+			email: 'roman951t@gmail.com',
+			name: 'Roman',
+			emailVerified: true,
+			phoneNumber: '+380951234567',
+			phoneNumberVerified: true,
+			image: faker.image.avatar(),
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		},
+	});
+
+	const wishlistProducts = faker.helpers.arrayElements(allProducts, 5);
+	await prisma.wishlist.createMany({
+		data: wishlistProducts.map((p) => ({
+			userId: roman.id,
+			productId: p.id,
+			createdAt: new Date(),
+		})),
+		skipDuplicates: true,
+	});
+
+	const reviewedProducts = faker.helpers.arrayElements(allProducts, 3);
+	for (const product of reviewedProducts) {
+		await prisma.review.create({
+			data: {
+				userId: roman.id,
+				productId: product.id,
+				rating: faker.number.int({ min: 3, max: 5 }),
+				comment: faker.lorem.sentences(2),
+				createdAt: new Date(),
 			},
-		},
-		update: {},
-		create: {
-			provider: 'google',
-			providerAccountId: 'google-oauth2|1234567890',
-			type: 'oauth',
-			access_token: 'fakeaccesstoken',
-			refresh_token: 'fakerefreshtoken',
-			userId: user.id,
-		},
-	});
+		});
+	}
 
-	// === 5. Product Categories ===
-	const smartphoneCategory = await prisma.productCategory.upsert({
-		where: { slug: 'smartphones' },
-		update: {},
-		create: {
-			name: 'Smartphones',
-			slug: 'smartphones',
-		},
-	});
+	const orderedProducts = faker.helpers.arrayElements(allProducts, 2);
+	const total = orderedProducts.reduce((sum, p) => sum.add(p.basePrice), new Decimal(0));
 
-	const laptopCategory = await prisma.productCategory.upsert({
-		where: { slug: 'laptops' },
-		update: {},
-		create: {
-			name: 'Laptops',
-			slug: 'laptops',
-		},
-	});
-
-	// === 6. Products ===
-	const product1 = await prisma.product.upsert({
-		where: { slug: 'iphone-15-pro-max' },
-		update: {},
-		create: {
-			name: 'iPhone 15 Pro Max',
-			description: 'Latest iPhone with amazing camera and performance.',
-			price: 1199.99,
-			stock: 50,
-			slug: 'iphone-15-pro-max',
-			imageUrl: 'https://example.com/iphone.jpg',
-			categoryId: smartphoneCategory.id,
-		},
-	});
-
-	const product2 = await prisma.product.upsert({
-		where: { slug: 'macbook-air-m3' },
-		update: {},
-		create: {
-			name: 'MacBook Air M3',
-			description: 'Lightweight and powerful Apple laptop.',
-			price: 1499.99,
-			stock: 30,
-			slug: 'macbook-air-m3',
-			imageUrl: 'https://example.com/macbook.jpg',
-			categoryId: laptopCategory.id,
-		},
-	});
-
-	// === 7. Order for the user ===
 	await prisma.order.create({
 		data: {
-			userId: user.id,
-			total: product1.price.add(product2.price),
-			status: 'PAID',
+			userId: roman.id,
+			total,
+			status: OrderStatus.PAID,
 			items: {
-				create: [
-					{
-						productId: product1.id,
-						quantity: 1,
-						price: product1.price,
-						unitPrice: product1.price,
-					},
-					{
-						productId: product2.id,
-						quantity: 1,
-						price: product2.price,
-						unitPrice: product2.price,
-					},
-				],
+				create: orderedProducts.map((p) => ({
+					productId: p.id,
+					quantity: 1,
+					price: p.basePrice,
+					unitPrice: p.basePrice,
+				})),
 			},
 		},
 	});
 
-	console.log('🌱 Seeding finished successfully.');
+	console.log('✅ Seeding completed.');
 }
 
 main()

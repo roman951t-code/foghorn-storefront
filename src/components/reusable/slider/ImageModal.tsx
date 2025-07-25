@@ -1,4 +1,9 @@
-import { DialogBody, DialogCloseTrigger, DialogContent, DialogRoot } from '@/components/ui/dialog';
+import {
+	DialogBody,
+	DialogCloseTrigger,
+	DialogContent,
+	DialogRoot,
+} from '@/components/reusable/chakra/dialog';
 import { Image } from '@chakra-ui/react';
 
 interface Props {

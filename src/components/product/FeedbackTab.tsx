@@ -1,7 +1,9 @@
 import { Card, Text, Flex, Stack, Heading, Separator } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import { Rating } from '@/components/ui/rating';
-import FeedbackModal from './FeedbackModal';
+import dynamic from 'next/dynamic';
+import { Rating } from '../reusable/chakra/rating';
+
+const FeedbackModal = dynamic(() => import('./FeedbackModal'));
 
 export default function FeedbackTab() {
 	const authT = useTranslations('Auth');

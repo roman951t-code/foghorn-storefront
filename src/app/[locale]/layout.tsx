@@ -1,6 +1,4 @@
-// src/app/layout.tsx
 import { ReactNode } from 'react';
-import { ColorModeProvider } from '@/components/ui/color-mode';
 import ChakraUIProvider from '@/components/providers/ChakraUIProvider';
 import { Box } from '@chakra-ui/react';
 import Header from '@/components/header';
@@ -15,6 +13,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { prisma } from '@/lib/prisma';
+import { ColorModeProvider } from '@/components/reusable/chakra/color-mode';
 
 interface Props {
 	children: ReactNode;
@@ -53,30 +52,24 @@ export default async function Layout({ children, params }: Props) {
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
-			<head />
 			<body>
-				<NextIntlClientProvider messages={messages}>
-					<ColorModeProvider>
-						<ChakraUIProvider>
+				<ColorModeProvider>
+					<ChakraUIProvider>
+						<Box display='flex' flexDirection='column' minHeight='100vh' gap='6' bg='bg.primary'>
 							<SessionProvider initialSession={session}>
-								<Box
-									display='flex'
-									flexDirection='column'
-									minHeight='100vh'
-									gap='6'
-									bg='bg.primary'
-								>
+								<NextIntlClientProvider messages={messages}>
 									<Header />
+
 									<Box as='main' maxWidth='1444px' flex='1' mx='auto' width='100%'>
-										<div id='root'>{children}</div>
-										{/* <ToTop /> */}
+										{children}
+										<ToTop />
 									</Box>
-									<Footer />
-								</Box>
+								</NextIntlClientProvider>
+								<Footer />
 							</SessionProvider>
-						</ChakraUIProvider>
-					</ColorModeProvider>
-				</NextIntlClientProvider>
+						</Box>
+					</ChakraUIProvider>
+				</ColorModeProvider>
 			</body>
 		</html>
 	);

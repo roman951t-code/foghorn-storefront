@@ -3,9 +3,9 @@ import { I18nData } from '@/types/i18n';
 import { AlertButton } from '../reusable/buttons/ActionButton';
 import { deleteUserAction } from '@/actions/deleteUserAction';
 import { authClient } from '@/lib/auth-client';
-import { toaster } from '../ui/toaster';
 import { useSession } from '../providers/SessionProvider';
 import { useState } from 'react';
+import { toaster } from '../reusable/chakra/toaster';
 
 interface Props {
 	onCloseAction: () => void;

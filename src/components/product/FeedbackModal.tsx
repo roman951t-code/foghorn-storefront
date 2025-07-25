@@ -1,11 +1,12 @@
 'use client';
 import { Box, Center, Input, Heading, Fieldset, RatingGroup, Textarea } from '@chakra-ui/react';
 import { VscFeedback } from 'react-icons/vsc';
-import { Field } from '@/components/ui/field';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { PrimaryButton, SecondaryButton } from '../reusable/buttons/ActionButton';
+import { useState } from 'react';
+import { Field } from '../reusable/chakra/field';
 
 interface Props {
 	i18nData: I18nData;
@@ -27,12 +28,12 @@ interface FormValues {
 }
 
 export default function FeedbackModal({ i18nData }: Props) {
+	const [isOpen, setIsOpen] = useState(false);
 	const {
 		register,
 		handleSubmit,
-		formState: { errors, isSubmitting },
+		formState: { errors },
 		setValue,
-		watch,
 	} = useForm<FormValues>({
 		mode: 'onSubmit',
 		defaultValues: {
@@ -50,13 +51,15 @@ export default function FeedbackModal({ i18nData }: Props) {
 
 	return (
 		<CenteredModal
+			open={isOpen}
+			setIsOpen={setIsOpen}
 			title={i18nData.leaveFeedback}
 			trigger={
 				<SecondaryButton>
 					<VscFeedback /> {i18nData.leaveFeedback}
 				</SecondaryButton>
 			}
-			size='md'
+			size='sm'
 		>
 			<Box maxW='400px' p={4} borderRadius='lg' mx='auto'>
 				<form onSubmit={handleSubmit(onSubmit)}>

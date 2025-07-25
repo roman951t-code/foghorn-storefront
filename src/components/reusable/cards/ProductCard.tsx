@@ -1,6 +1,5 @@
 import React from 'react';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
-import { Rating } from '@/components/ui/rating';
 import { useTranslations } from 'next-intl';
 import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox } from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
@@ -8,6 +7,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 import { LocaleNavLink } from '../links/LocaleNavLink';
+import { Rating } from '../chakra/rating';
 
 export default function ProductCard() {
 	const t = useTranslations('Products');

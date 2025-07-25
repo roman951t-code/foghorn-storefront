@@ -1,7 +1,5 @@
 import { Box, Stack, Flex } from '@chakra-ui/react';
-import { ColorModeButton } from '@/components/ui/color-mode';
 import { useTranslations } from 'next-intl';
-import { Toaster } from '@/components/ui/toaster';
 import Sidebar from '../sidebar';
 import LocaleSwitcher from './LocaleSwitcher';
 import SearchInput from './SearchInput';
@@ -10,6 +8,8 @@ import UserActions from './UserActions';
 import Logo from './Logo';
 import { extractI18nData } from '@/utils/i18nUtils';
 import { authLocData, validLocData } from '@/data/localized';
+import { ColorModeButton } from '../reusable/chakra/color-mode';
+import { Toaster } from '../reusable/chakra/toaster';
 
 export default function Header() {
 	const genT = useTranslations('General');

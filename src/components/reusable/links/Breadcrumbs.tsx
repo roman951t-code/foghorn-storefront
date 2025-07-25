@@ -1,8 +1,11 @@
-import { BreadcrumbCurrentLink, BreadcrumbLink, BreadcrumbRoot } from '@/components/ui/breadcrumb';
+import {
+	BreadcrumbCurrentLink,
+	BreadcrumbLink,
+	BreadcrumbRoot,
+} from '@/components/reusable/chakra/breadcrumb';
 import { GiClothes } from 'react-icons/gi';
 import { HiOutlineSlash } from 'react-icons/hi2';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
-import { useTranslations } from 'next-intl';
 
 interface Props {
 	category?: string;
@@ -11,8 +14,6 @@ interface Props {
 }
 
 export default function Breadcrumbs({ category, subcategory, productId }: Props) {
-	const t = useTranslations('General');
-
 	return (
 		<BreadcrumbRoot variant='underline' separator={<HiOutlineSlash />} size='lg'>
 			<CatalogBtn
@@ -26,7 +27,7 @@ export default function Breadcrumbs({ category, subcategory, productId }: Props)
 						_hover={{ cursor: 'pointer' }}
 						_focus={{ outline: 'none' }}
 					>
-						{t('catalogShort')}
+						Каталог
 					</BreadcrumbLink>
 				}
 			/>

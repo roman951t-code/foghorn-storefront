@@ -120,7 +120,6 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 						{phone}
 					</Highlight>
 					<Text color='fg.muted'>{i18nData.activationCodeSent}</Text>
-					{i18nData.activationCodeSentSuffix}
 				</Fieldset.HelperText>
 
 				<Fieldset.Content>

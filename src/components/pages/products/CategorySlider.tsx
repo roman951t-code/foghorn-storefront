@@ -1,27 +1,20 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { HStack } from '@chakra-ui/react';
+import { LoadingSkeleton } from '@/components/reusable/Skeleton';
+import CategoryCard from '@/components/reusable/cards/CategoryCard';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-import { HStack } from '@chakra-ui/react';
+
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
-import CategoryCard from '@/components/reusable/cards/CategoryCard';
-import { LoadingSkeleton } from '@/components/reusable/Skeleton';
 
 const breakpoints = {
-	518: {
-		slidesPerView: 2,
-	},
-	756: {
-		slidesPerView: 3,
-	},
-	1000: {
-		slidesPerView: 4,
-	},
-	1234: {
-		slidesPerView: 5,
-	},
+	518: { slidesPerView: 2 },
+	756: { slidesPerView: 3 },
+	1000: { slidesPerView: 4 },
+	1234: { slidesPerView: 5 },
 };
 
 const categories = [
@@ -118,23 +111,7 @@ const categories = [
 	},
 ];
 
-export default function CategorySlider() {
-	const [isClient, setIsClient] = useState(false);
-
-	useEffect(() => {
-		setIsClient(true);
-	}, []);
-
-	if (!isClient) {
-		return (
-			<HStack gap='4' mt='8' justifyContent='space-between' overflow='hidden'>
-				<LoadingSkeleton />
-				<LoadingSkeleton />
-				<LoadingSkeleton />
-			</HStack>
-		);
-	}
-
+function CategorySliderInner() {
 	return (
 		<Swiper
 			loop
@@ -152,4 +129,23 @@ export default function CategorySlider() {
 			))}
 		</Swiper>
 	);
+}
+
+function CategorySliderFallback() {
+	return (
+		<HStack gap='4' mt='8' justifyContent='space-between' overflow='hidden'>
+			<LoadingSkeleton />
+			<LoadingSkeleton />
+			<LoadingSkeleton />
+		</HStack>
+	);
+}
+
+const DynamicCategorySlider = dynamic(() => Promise.resolve(CategorySliderInner), {
+	ssr: false,
+	loading: () => <CategorySliderFallback />,
+});
+
+export default function CategorySlider() {
+	return <DynamicCategorySlider />;
 }

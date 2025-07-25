@@ -1,7 +1,7 @@
-import { Radio, RadioGroup } from '@/components/ui/radio';
 import { VStack, Flex } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import PriceSlider from './PriceSlider';
+import { Radio, RadioGroup } from '@/components/reusable/chakra/radio';
 
 export default function QuickFilters() {
 	const t = useTranslations('Products');

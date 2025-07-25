@@ -4,13 +4,13 @@ import { Button, Fieldset, Stack, Field, Box, Alert } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import type { I18nData } from '@/types/i18n';
-import { PasswordInput } from '../ui/password-input';
 import CenteredModal from '../dialogs/CenteredModal';
 import { useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
-import { toaster } from '../ui/toaster';
 import { setNewPasswordAction } from '@/actions/setNewPasswordAction';
 import { useRouter } from 'next/navigation';
+import { toaster } from '../reusable/chakra/toaster';
+import { PasswordInput } from '../reusable/chakra/password-input';
 
 interface ResetPassProps {
 	i18nData: I18nData;

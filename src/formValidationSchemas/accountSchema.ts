@@ -34,14 +34,12 @@ export const accountSchemaShape = (t: {
 		.string({ required_error: t.emailRequired })
 		.max(60, { message: t.inputMaxLength })
 		.email({ message: t.wrongEmail }),
-
 	phone: z
 		.string({ required_error: t.phoneRequired })
 		.transform((val) => val.replace(/\D/g, ''))
 		.refine((val) => val.length === 12 && val.startsWith('380'), {
 			message: t.invalidPhone,
 		}),
-
 	shipmentAddress: z.string().max(200, { message: t.addressMax }),
 });
 
@@ -80,4 +78,6 @@ export async function getAccountSchemas() {
 export type AccountSchemas = Awaited<ReturnType<typeof getAccountSchemas>>;
 
 export type NameSchemaData = z.infer<Awaited<ReturnType<typeof getAccountSchemas>>['nameSchema']>;
+export type PhoneSchemaData = z.infer<Awaited<ReturnType<typeof getAccountSchemas>>['phoneSchema']>;
+
 export type EditNameActionPayload = NameSchemaData & { email: string };

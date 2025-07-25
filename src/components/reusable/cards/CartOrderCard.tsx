@@ -1,9 +1,9 @@
 import React from 'react';
 import { FiTrash2, FiHeart } from 'react-icons/fi';
 import { IconButton, Text, Flex, Card, Badge, Group } from '@chakra-ui/react';
-import { StepperInput } from '@/components/ui/stepper-input';
 import Image from 'next/image';
 import { LocaleNavLink } from '../links/LocaleNavLink';
+import { StepperInput } from '../chakra/stepper-input';
 
 const img1 = '/assets/images/temp/1.webp';
 

@@ -10,48 +10,42 @@ import {
 	DrawerHeader,
 	DrawerRoot,
 	DrawerTrigger,
-} from '@/components/ui/drawer';
+} from '@/components/reusable/chakra/drawer';
 import { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import MediaContacts from '@/components/reusable/links/MediaContacts';
-import CollapsibleLinks from './CollapsibleLinks';
-import UserLinks from './UserLinks';
 import Image from 'next/image';
-import { LogoutSection, AuthorizeSection } from './AuthorizeSection';
 import { useSession } from '../providers/SessionProvider';
 import { I18nData } from '@/types/i18n';
 import Auth from '../auth/Auth';
+import { AuthorizeSection, LogoutSection } from './AuthorizeSection';
+import UserLinks from './UserLinks';
+import CollapsibleLinks from './CollapsibleLinks';
 import { DeleteAccount } from './DeleteAccount';
 
 const logoBig = '/assets/images/logoBig.webp';
 const logoHeight = 36;
 const logoWidth = 170;
 
-const Logo = () => {
-	return (
-		<Link href='/'>
-			<Image
-				src={logoBig}
-				width={logoWidth}
-				height={logoHeight}
-				style={{ width: 'auto', height: 'auto' }}
-				alt='logo'
-			/>
-		</Link>
-	);
-};
+const Logo = () => (
+	<Link href='/'>
+		<Image
+			src={logoBig}
+			width={logoWidth}
+			height={logoHeight}
+			style={{ width: 'auto', height: 'auto' }}
+			alt='logo'
+		/>
+	</Link>
+);
 
 export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 	const [open, setOpen] = useState(false);
 	const [authOpen, setAuthOpen] = useState(false);
-
 	const { session } = useSession();
 
-	const onClose = () => {
-		setOpen(false);
-	};
-
+	const onClose = () => setOpen(false);
 	const onAuthOpen = () => {
 		setAuthOpen(true);
 		onClose();
@@ -59,7 +53,12 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 
 	return (
 		<>
-			<DrawerRoot placement='start' open={open} onOpenChange={(e) => setOpen(e.open)}>
+			<DrawerRoot
+				placement='start'
+				open={open}
+				onOpenChange={(e) => setOpen(e.open)}
+				closeOnInteractOutside={true}
+			>
 				<DrawerBackdrop />
 				<DrawerTrigger asChild>
 					<IconButton
@@ -86,6 +85,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 						<Box px={4} my={4} h='100%' overflowY='auto'>
 							<CatalogBtn fullText />
 							<Separator borderColor='border.light' my='5' />
+
 							{session?.session ? (
 								<>
 									<LogoutSection onClose={onClose} />
@@ -101,8 +101,14 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 									<Separator borderColor='border.light' my='5' />
 								</>
 							)}
-							{session?.session && <UserLinks userName={session?.user?.name} onClose={onClose} />}
-							<Separator borderColor='border.light' my='5' />
+
+							{session?.session && (
+								<>
+									<UserLinks userName={session.user?.name} onClose={onClose} />
+									<Separator borderColor='border.light' my='5' />
+								</>
+							)}
+
 							<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' mt='4'>
 								<Card.Body gap='4'>
 									<QrCode.Root
@@ -118,9 +124,17 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 									</Card.Description>
 								</Card.Body>
 							</Card.Root>
+
 							<Separator borderColor='border.light' my='5' />
+
 							<CollapsibleLinks onClose={onClose} />
-							{session?.session && <DeleteAccount i18nData={i18nData} onCloseAction={onClose} />}
+
+							{session?.session && (
+								<>
+									<Separator borderColor='border.light' my='5' />
+									<DeleteAccount i18nData={i18nData} onCloseAction={onClose} />
+								</>
+							)}
 						</Box>
 
 						<DrawerFooter bg='bg.secondary' mt='auto'>

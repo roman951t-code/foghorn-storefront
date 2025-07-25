@@ -20,7 +20,7 @@ export async function sendVerifyPhoneAction(
 
 	const { phone } = validatedFormData.data;
 	const rawPhone = phone.replace(/\D/g, '');
-
+	console.log('rawPhone', rawPhone);
 	try {
 		await prisma.verification.deleteMany({
 			where: {
@@ -36,6 +36,7 @@ export async function sendVerifyPhoneAction(
 
 		return { success: true };
 	} catch (error: any) {
+		console.log('error', error);
 		const errorMap: Record<string, string> = {
 			'Too many requests': t('tooManyRequests'),
 			'Unknown error': t('smsSendFailed'),

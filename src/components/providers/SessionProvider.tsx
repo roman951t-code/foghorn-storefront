@@ -31,13 +31,6 @@ export function SessionProvider({
 		setSession(newSession);
 	};
 
-	// Optional: poll every 1 minute to check if session changed (e.g. expired or logged out in another tab)
-	//   useEffect(() => {
-	//     const interval = setInterval(refresh, 60_000);
-	//     return () => clearInterval(interval);
-	//   }, []);
-
-	// Optional: cross-tab sync using BroadcastChannel
 	useEffect(() => {
 		const channel = new BroadcastChannel('auth');
 		channel.onmessage = (event) => {

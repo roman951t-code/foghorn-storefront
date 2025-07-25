@@ -5,10 +5,12 @@ import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdArrowBack, IoMdPhonePortrait } from 'react-icons/io';
 import { Link } from '@/i18n/routing';
-import PhoneSignUp from './PhoneSignUp';
 import { signIn } from '@/lib/auth-client';
-import EmailSignUp from './EmailSignUp';
 import { TertiaryButton } from '../reusable/buttons/ActionButton';
+import dynamic from 'next/dynamic';
+
+const PhoneSignUp = dynamic(() => import('./PhoneSignUp'));
+const EmailSignUp = dynamic(() => import('./EmailSignUp'));
 
 interface Props {
 	i18nData: I18nData;

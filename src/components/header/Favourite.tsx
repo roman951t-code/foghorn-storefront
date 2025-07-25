@@ -1,9 +1,9 @@
 'use client';
 
-import { FiHeart } from 'react-icons/fi';
 import { IconButton, Float, Circle } from '@chakra-ui/react';
 import { useSession } from '../providers/SessionProvider';
 import { Link } from '@/i18n/routing';
+import { FiHeart } from 'react-icons/fi';
 
 export default function Favourite() {
 	const { session } = useSession();

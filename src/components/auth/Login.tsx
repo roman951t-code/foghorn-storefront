@@ -4,10 +4,12 @@ import { FcGoogle } from 'react-icons/fc';
 import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdPhonePortrait } from 'react-icons/io';
-import PhoneSignIn from './PhoneSignIn';
 import { signIn } from '@/lib/auth-client';
-import EmailSignIn from './EmailSignIn';
 import { useSession } from '../providers/SessionProvider';
+import dynamic from 'next/dynamic';
+
+const PhoneSignIn = dynamic(() => import('./PhoneSignIn'));
+const EmailSignIn = dynamic(() => import('./EmailSignIn'));
 
 interface Props {
 	i18nData: I18nData;

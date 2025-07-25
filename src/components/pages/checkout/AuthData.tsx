@@ -1,14 +1,32 @@
 'use client';
-import { Flex, Heading, Card, VStack } from '@chakra-ui/react';
-import Auth from '@/components/auth/Auth';
-import PersonalDataForm from '@/components/pages/cabinet/user/PersonalDataForm';
+
+import { Flex, Heading, Card, VStack, Spinner } from '@chakra-ui/react';
 import { FiUserCheck } from 'react-icons/fi';
+import dynamic from 'next/dynamic';
 import { I18nData } from '@/types/i18n';
 import { useSession } from '@/components/providers/SessionProvider';
 import { PrimaryButton } from '@/components/reusable/buttons/ActionButton';
 
+const PersonalDataForm = dynamic(() => import('@/components/pages/cabinet/user/PersonalDataForm'), {
+	loading: () => <Spinner size='sm' />,
+	ssr: false,
+});
+
+const Auth = dynamic(() => import('@/components/auth/Auth'), {
+	loading: () => <Spinner size='sm' />,
+	ssr: false,
+});
+
 export default function AuthData({ i18nData }: { i18nData: I18nData }) {
 	const { session } = useSession();
+
+	if (session === undefined) {
+		return (
+			<Flex justifyContent='center' alignItems='center' w='100%'>
+				<Spinner size='md' />
+			</Flex>
+		);
+	}
 
 	return session?.session ? (
 		<VStack w='100%' gap='4' direction='column'>

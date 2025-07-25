@@ -8,10 +8,9 @@ import {
 	DrawerCloseTrigger,
 	DrawerContent,
 	DrawerFooter,
-	DrawerHeader,
 	DrawerRoot,
 	DrawerTrigger,
-} from '@/components/ui/drawer';
+} from '@/components/reusable/chakra/drawer';
 import CatalogDrawer from '@/components/reusable/drawer/CatalogDrawer';
 import { TbCategory2 } from 'react-icons/tb';
 import { PrimaryButton } from './ActionButton';
@@ -27,8 +26,7 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 	const t = useTranslations('General');
 	const authT = useTranslations('Auth');
 	const catalogFull = t('catalogFull');
-	const catalogShort = t('catalogShort');
-	const text = fullText ? catalogFull : catalogShort;
+	const text = fullText ? catalogFull : 'Каталог';
 
 	return (
 		<HStack wrap='wrap'>
@@ -49,7 +47,6 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 					bg='bg.tertiary'
 					rounded='md'
 				>
-					<DrawerHeader></DrawerHeader>
 					<DrawerBody>
 						<CatalogDrawer />
 					</DrawerBody>

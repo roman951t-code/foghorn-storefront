@@ -9,12 +9,12 @@ import {
 	DialogTrigger,
 	DialogHeader,
 	DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/components/reusable/chakra/dialog';
 
 type ConditionalValue<T> = T | { base?: T; sm?: T; md?: T; lg?: T; xl?: T };
 
 interface Props {
-	trigger: ReactNode;
+	trigger?: ReactNode;
 	children: JSX.Element;
 	title: string;
 	open?: boolean;

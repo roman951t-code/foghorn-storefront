@@ -1,8 +1,10 @@
 import { Tabs } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import AboutTab from './AboutTab';
-import CharacteristicsTab from './CharacteristicsTab';
-import FeedbackTab from './FeedbackTab';
+import dynamic from 'next/dynamic';
+
+const AboutTab = dynamic(() => import('./AboutTab'));
+const CharacteristicsTab = dynamic(() => import('./CharacteristicsTab'));
+const FeedbackTab = dynamic(() => import('./FeedbackTab'));
 
 export default function ProductTabs() {
 	const t = useTranslations('Products');

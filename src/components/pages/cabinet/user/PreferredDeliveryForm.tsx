@@ -8,7 +8,7 @@ import { useState } from 'react';
 import type { I18nData } from '@/types/i18n';
 import { setNotificationMethodAction } from '@/actions/setNotificationMethodAction';
 import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
-import { toaster } from '@/components/ui/toaster';
+import { toaster } from '@/components/reusable/chakra/toaster';
 
 interface Props {
 	userEmail: string;

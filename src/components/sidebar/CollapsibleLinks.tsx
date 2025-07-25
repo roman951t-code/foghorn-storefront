@@ -3,7 +3,7 @@ import {
 	AccordionItemContent,
 	AccordionItemTrigger,
 	AccordionRoot,
-} from '@/components/ui/accordion';
+} from '@/components/reusable/chakra/accordion';
 import { useTranslations } from 'next-intl';
 import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 

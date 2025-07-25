@@ -6,7 +6,7 @@ import {
 	DrawerContent,
 	DrawerRoot,
 	DrawerTrigger,
-} from '@/components/ui/drawer';
+} from '@/components/reusable/chakra/drawer';
 import QuickFilters from './QuickFilters';
 import Filters from './Filters';
 import { IoFilter } from 'react-icons/io5';

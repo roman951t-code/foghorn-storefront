@@ -4,17 +4,6 @@ import { UseFormReturn } from 'react-hook-form';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
 
-interface TriggerProps {
-	text: string;
-	pending: boolean;
-}
-
-const Trigger = ({ text, pending }: TriggerProps) => (
-	<SecondaryButton type='submit' loading={pending} mt={{ base: '2', sm: '0' }}>
-		{text}
-	</SecondaryButton>
-);
-
 interface Props {
 	error?: { message?: string };
 	pending: boolean;
@@ -66,7 +55,11 @@ export default function EmailForm({
 					<CenteredModal
 						closeOnInteractOutside={false}
 						title={i18nData.editEmail}
-						trigger={<Trigger text={i18nData.save} pending={pending} />}
+						trigger={
+							<SecondaryButton type='submit' loading={pending} mt={{ base: '2', sm: '0' }}>
+								{i18nData.save}
+							</SecondaryButton>
+						}
 						size='md'
 						open={isOpen}
 						setIsOpen={setIsOpenAction}

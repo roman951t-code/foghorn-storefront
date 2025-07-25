@@ -47,7 +47,7 @@ export default function PaymentStep() {
 					setSelectedPayment(value);
 				}}
 			>
-				<Stack direction={{ base: 'column', xs: 'row' }}>
+				<Stack direction={{ base: 'column', xs: 'row' } as any}>
 					{items.map((item) => (
 						<RadioCard.Item
 							key={item.value}

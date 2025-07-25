@@ -1,7 +1,7 @@
 'use client';
-import { Slider } from '@/components/ui/slider';
 import { FiSearch } from 'react-icons/fi';
 import { Text, Input, Flex, IconButton } from '@chakra-ui/react';
+import { Slider } from '@/components/reusable/chakra/slider';
 
 interface Props {
 	title: string;

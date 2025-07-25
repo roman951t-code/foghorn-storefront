@@ -13,10 +13,10 @@ import {
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import FeedbackModal from '@/components/product/FeedbackModal';
-import { Rating } from '@/components/ui/rating';
 import { FiTrash2 } from 'react-icons/fi';
 import Image from 'next/image';
 import { LocaleNavLink } from '../links/LocaleNavLink';
+import { Rating } from '../chakra/rating';
 
 const img1 = '/assets/images/temp/1.webp';
 
@@ -46,7 +46,7 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 		>
 			<Accordion.Item value={item.name} borderBottom='none'>
 				<Accordion.ItemTrigger w='100%' p='0'>
-					<Flex alignItems='center' direction={{ base: 'column', xs: 'row' }} w='100%'>
+					<Flex alignItems='center' direction={{ base: 'column', xs: 'row' } as any} w='100%'>
 						<Box ml='-8px' mr='1' mb={{ base: '12px', md: '0' }}>
 							<Image
 								width={110}
@@ -192,11 +192,11 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 							</Text>
 						</Stack>
 					</Stack>
-					<Flex alignSelf='flex-end' flex={1} justifyContent='flex-end' hideBelow='md'>
+					<Flex flex={1} justifyContent='flex-end' hideBelow='md'>
 						<FeedbackModal i18nData={i18nData} />
 					</Flex>
 				</Flex>
-				<Flex alignSelf='flex-end' flex={1} justifyContent='flex-end' hideFrom='md'>
+				<Flex flex={1} justifyContent='flex-end' hideFrom='md' mt='2'>
 					<FeedbackModal i18nData={i18nData} />
 				</Flex>
 			</Accordion.Item>

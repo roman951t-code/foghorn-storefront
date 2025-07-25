@@ -3,9 +3,9 @@ import {
 	AccordionItemContent,
 	AccordionItemTrigger,
 	AccordionRoot,
-} from '@/components/ui/accordion';
+} from '@/components/reusable/chakra/accordion';
+import { Checkbox } from '@/components/reusable/chakra/checkbox';
 import { VStack, CheckboxGroup, Fieldset } from '@chakra-ui/react';
-import { Checkbox } from '@/components/ui/checkbox';
 
 export default function Filters() {
 	return (

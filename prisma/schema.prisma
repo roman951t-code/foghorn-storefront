@@ -1,4 +1,3 @@
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -10,12 +9,12 @@ datasource db {
 }
 
 model User {
-  id                 String    @id
+  id                 String     @id
   name               String
   middleName         String?
   lastName           String?
-  notificationMethod String?   @default("email")
-  email              String    @unique
+  notificationMethod String?    @default("email")
+  email              String     @unique
   emailVerified      Boolean
   image              String?
   createdAt          DateTime
@@ -23,12 +22,48 @@ model User {
   orders             Order[]
   accounts           Account[]
   sessions           Session[]
+  wishlist           Wishlist[]
+  reviews            Review[]
 
   phoneNumber         String?
   phoneNumberVerified Boolean?
 
-  @@map("user")
   @@unique([phoneNumber])
+  @@map("user")
+}
+
+model Brand {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  slug     String    @unique
+  logoUrl  String?
+  products Product[]
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
 }
 
 model Session {
@@ -78,26 +113,60 @@ model Verification {
 model ProductCategory {
   id       String            @id @default(uuid())
   name     String
-  parentId String?
   slug     String            @unique
-  products Product[]
+  parentId String?
   parent   ProductCategory?  @relation("Subcategories", fields: [parentId], references: [id])
   children ProductCategory[] @relation("Subcategories")
+  products Product[]
 }
 
 model Product {
-  id          String          @id @default(uuid())
-  name        String
-  description String?
-  price       Decimal         @db.Decimal(10, 2)
-  stock       Int
-  slug        String          @unique
-  imageUrl    String?
-  categoryId  String
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  orderItems  OrderItem[]
-  category    ProductCategory @relation(fields: [categoryId], references: [id])
+  id           String                  @id @default(uuid())
+  name         String
+  description  String?
+  slug         String                  @unique
+  imageUrl     String?
+  basePrice    Decimal                 @db.Decimal(10, 2)
+  stock        Int
+  brandId      String
+  categoryId   String
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+  brand        Brand                   @relation(fields: [brandId], references: [id])
+  category     ProductCategory         @relation(fields: [categoryId], references: [id])
+  attributes   ProductAttributeValue[]
+  variants     ProductVariant[]
+  orderItems   OrderItem[]
+  wishlistedBy Wishlist[]
+  reviews      Review[]
+}
+
+model ProductAttribute {
+  id       String                  @id @default(uuid())
+  name     String
+  unit     String?
+  products ProductAttributeValue[]
+}
+
+model ProductAttributeValue {
+  id          String           @id @default(uuid())
+  productId   String
+  attributeId String
+  value       String
+  product     Product          @relation(fields: [productId], references: [id])
+  attribute   ProductAttribute @relation(fields: [attributeId], references: [id])
+}
+
+model ProductVariant {
+  id         String      @id @default(uuid())
+  productId  String
+  name       String
+  price      Decimal     @db.Decimal(10, 2)
+  stock      Int
+  sku        String      @unique
+  imageUrl   String?
+  product    Product     @relation(fields: [productId], references: [id])
+  orderItems OrderItem[] @relation("OrderVariantRelation")
 }
 
 model Order {
@@ -112,14 +181,16 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
+  id        String          @id @default(uuid())
   orderId   String
   productId String
+  variantId String?
   quantity  Int
-  price     Decimal @db.Decimal(10, 2)
-  unitPrice Decimal @db.Decimal(10, 2)
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
+  price     Decimal         @db.Decimal(10, 2)
+  unitPrice Decimal         @db.Decimal(10, 2)
+  order     Order           @relation(fields: [orderId], references: [id])
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation("OrderVariantRelation", fields: [variantId], references: [id])
 }
 
 enum OrderStatus {

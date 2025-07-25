@@ -14,11 +14,11 @@ import PreferredDeliveryForm from './PreferredDeliveryForm';
 import { useSession } from '@/components/providers/SessionProvider';
 import AddressForm from './AddressForm';
 import { editAccountAction, editNameAction } from '@/actions/editAccountAction';
-import { toaster } from '@/components/ui/toaster';
 import { authClient } from '@/lib/auth-client';
 import NameForm from './NameForm';
 import EmailForm from './EmailForm';
 import PhoneForm from './PhoneForm';
+import { toaster } from '@/components/reusable/chakra/toaster';
 
 interface Props {
 	i18nData: I18nData;
@@ -49,12 +49,10 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	);
 
 	const [emailError, emailAction, isEmailPending] = useActionState(editAccountAction, undefined);
-	const [phoneError, phoneAction, isPhonePending] = useActionState(editAccountAction, undefined);
 	const [addressError, addressAction, isAddressPending] = useActionState(
 		editAccountAction,
 		undefined
 	);
-
 	const nameForm = useForm({
 		defaultValues: {
 			name: session?.user?.name,
@@ -63,15 +61,9 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		},
 		resolver: zodResolver(nameSchema),
 	});
-
 	const emailForm = useForm({
 		defaultValues: { email: session?.user?.email },
 		resolver: zodResolver(emailSchema),
-	});
-
-	const phoneForm = useForm({
-		defaultValues: { phone: userPhone },
-		resolver: zodResolver(phoneSchema),
 	});
 
 	const addressForm = useForm({
@@ -131,14 +123,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		});
 	};
 
-	const handlePhoneSubmit = async (data: { phone: string }) => {
-		const payload = { schemaName: 'phoneSchema' as 'phoneSchema', email: userEmail };
-
-		startTransition(async () => {
-			await phoneAction(payload);
-		});
-	};
-
 	const handleAddressSubmit = async (data: { shipmentAddress: string }) => {
 		const payload = { schemaName: 'addressSchema' as 'addressSchema', email: userEmail };
 
@@ -174,13 +158,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 						setIsOpenAction={setEmailDialogOpen}
 						onSubmitAction={emailForm.handleSubmit(handleEmailSubmit)}
 					/>
-					<PhoneForm
-						i18nData={i18nData}
-						pending={isPhonePending}
-						phoneForm={phoneForm}
-						error={phoneError}
-						onSubmitAction={phoneForm.handleSubmit(handlePhoneSubmit)}
-					/>
+					<PhoneForm i18nData={i18nData} userPhone={userPhone} schema={phoneSchema} />
 					<AddressForm
 						i18nData={i18nData}
 						addressForm={addressForm}
@@ -190,12 +168,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					/>
 				</Fieldset.Content>
 			</Fieldset.Root>
-			<PreferredDeliveryForm
-				userEmail={userEmail}
-				userPhone={userPhone}
-				i18nData={i18nData}
-				schemaShape={schemaShape}
-			/>
+			<PreferredDeliveryForm userEmail={userEmail} userPhone={userPhone} i18nData={i18nData} />
 		</Wrap>
 	);
 }

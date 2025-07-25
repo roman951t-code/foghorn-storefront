@@ -4,13 +4,15 @@ import { Box, VStack } from '@chakra-ui/react';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import type { I18nData } from '@/types/i18n';
 import Image from 'next/image';
-import Login from './Login';
-import Signup from './Signup';
 import { useSearchParams } from 'next/navigation';
 import { useSession } from '../providers/SessionProvider';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
+import dynamic from 'next/dynamic';
 
 const emptyCart = '/assets/images/emptyCart.png';
+
+const Signup = dynamic(() => import('./Signup'));
+const Login = dynamic(() => import('./Login'));
 
 interface Props {
 	i18nData: I18nData;
@@ -50,7 +52,7 @@ export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
 	};
 
 	const title = session?.session
-		? `${i18nData.returnCongrats}, Roman!`
+		? `${i18nData.returnCongrats}, ${session?.user.name}!`
 		: showSignup
 			? i18nData.register
 			: i18nData.authorize;
@@ -58,9 +60,9 @@ export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
 	return (
 		<CenteredModal
 			closeOnInteractOutside={false}
-			title={title}
+			title={`${title}`}
 			trigger={trigger}
-			size='md'
+			size='sm'
 			open={isOpen ?? isAuthOpen}
 			setIsOpen={setIsOpen ?? setAuthOpen}
 		>

@@ -18,9 +18,9 @@ import {
 	Stat,
 	Status,
 } from '@chakra-ui/react';
-import { Rating } from '@/components/ui/rating';
 import ShareProduct from './ShareProduct';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
+import { Rating } from '../reusable/chakra/rating';
 
 export default function AboutTab() {
 	const t = useTranslations('Products');
