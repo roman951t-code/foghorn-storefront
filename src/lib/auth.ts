@@ -19,7 +19,10 @@ export const auth = betterAuth({
 					from: 'Acme <onboarding@resend.dev>',
 					to: [user.email],
 					subject: t('verifyChangeEmail'),
-					text: `${t('clickToChangeEmail')}: ${url}`,
+					text: `${t('hiUser')} ${user?.name || ''},
+${t('clickToChangeEmail')}:
+
+${url}`,
 				});
 			},
 		},
@@ -49,7 +52,11 @@ export const auth = betterAuth({
 				from: 'Acme <onboarding@resend.dev>',
 				to: [user.email],
 				subject: t('resetPass'),
-				text: `${t('clickToResetPass')}: ${url}`,
+				text: `${t('hiUser')} ${user?.name || ''},
+
+${t('clickToResetPass')}:
+
+${url}`,
 			});
 		},
 	},
@@ -69,7 +76,11 @@ export const auth = betterAuth({
 				from: 'Acme <onboarding@resend.dev>',
 				to: [user.email],
 				subject: t('verifyEmail'),
-				text: `${t('clickToVerifyEmail')}: ${url}`,
+				text: `${t('hiUser')} ${user?.name || ''},
+
+${t('clickToVerifyEmail')}:
+
+${url}`,
 			});
 		},
 	},

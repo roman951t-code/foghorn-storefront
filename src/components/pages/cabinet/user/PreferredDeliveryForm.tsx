@@ -13,6 +13,8 @@ import { toaster } from '@/components/reusable/chakra/toaster';
 interface Props {
 	userEmail: string;
 	userPhone: string;
+	userNotifMethod: 'email' | 'phone';
+	refreshSession: () => void;
 	i18nData: I18nData;
 }
 
@@ -20,12 +22,17 @@ interface NotificationFormValues {
 	notificationMethod: 'email' | 'phone' | '';
 }
 
-export default function PreferredDeliveryForm({ userEmail, userPhone, i18nData }: Props) {
+export default function PreferredDeliveryForm({
+	userEmail,
+	userPhone,
+	i18nData,
+	userNotifMethod,
+	refreshSession,
+}: Props) {
 	const [isPending, setIsPending] = useState(false);
-
 	const form = useForm<NotificationFormValues>({
 		defaultValues: {
-			notificationMethod: userPhone ? 'phone' : userEmail ? 'email' : '',
+			notificationMethod: userNotifMethod,
 		},
 	});
 
@@ -41,6 +48,7 @@ export default function PreferredDeliveryForm({ userEmail, userPhone, i18nData }
 					title: i18nData.notifUpdated,
 					duration: 5000,
 				});
+				await refreshSession();
 			} else {
 				toaster.error({
 					title: i18nData.preferedNotifFailed,

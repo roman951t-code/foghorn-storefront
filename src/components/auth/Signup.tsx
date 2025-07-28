@@ -7,10 +7,8 @@ import { IoMdArrowBack, IoMdPhonePortrait } from 'react-icons/io';
 import { Link } from '@/i18n/routing';
 import { signIn } from '@/lib/auth-client';
 import { TertiaryButton } from '../reusable/buttons/ActionButton';
-import dynamic from 'next/dynamic';
-
-const PhoneSignUp = dynamic(() => import('./PhoneSignUp'));
-const EmailSignUp = dynamic(() => import('./EmailSignUp'));
+import PhoneSignUp from './PhoneSignUp';
+import EmailSignUp from './EmailSignUp';
 
 interface Props {
 	i18nData: I18nData;

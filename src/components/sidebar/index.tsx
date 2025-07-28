@@ -131,7 +131,6 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 
 							{session?.session && (
 								<>
-									<Separator borderColor='border.light' my='5' />
 									<DeleteAccount i18nData={i18nData} onCloseAction={onClose} />
 								</>
 							)}

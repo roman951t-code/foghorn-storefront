@@ -38,10 +38,18 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 
 	const schema = useMemo(() => createEmailSignInSchema(i18nData), [i18nData]);
 
+	const refreshSession = async () => {
+		await refresh();
+
+		const bc = new BroadcastChannel('auth');
+		bc.postMessage('session-updated');
+		bc.close();
+	};
+
 	useEffect(() => {
 		if (!emailSignIn) return;
 
-		if (emailSignIn) {
+		const handleEmailSignIn = async () => {
 			setForceOpen(true);
 
 			const current = new URLSearchParams(window.location.search);
@@ -49,7 +57,11 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 			const newSearch = current.toString();
 			const newPath = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
 			router.replace(newPath);
-		}
+
+			await refreshSession();
+		};
+
+		handleEmailSignIn();
 	}, [emailSignIn]);
 
 	const {
@@ -91,11 +103,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 					return;
 				}
 
-				await refresh();
-
-				const bc = new BroadcastChannel('auth');
-				bc.postMessage('session-updated');
-				bc.close();
+				refreshSession();
 			} else {
 				setAuthError(result?.message!);
 			}

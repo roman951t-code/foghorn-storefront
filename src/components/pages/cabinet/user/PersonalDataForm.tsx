@@ -25,9 +25,11 @@ interface Props {
 }
 
 export default function PersonalDataForm({ i18nData }: Props) {
-	const { session } = useSession();
+	const { session, refresh } = useSession();
+
 	const userEmail = session?.user?.email;
 	const userPhone = session?.user?.phoneNumber;
+	const userNotifMethod = session?.user?.notificationMethod;
 
 	const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 
@@ -53,6 +55,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		editAccountAction,
 		undefined
 	);
+
 	const nameForm = useForm({
 		defaultValues: {
 			name: session?.user?.name,
@@ -61,6 +64,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		},
 		resolver: zodResolver(nameSchema),
 	});
+
 	const emailForm = useForm({
 		defaultValues: { email: session?.user?.email },
 		resolver: zodResolver(emailSchema),
@@ -72,6 +76,14 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		},
 		resolver: zodResolver(addressSchema),
 	});
+
+	const refreshSession = async () => {
+		await refresh();
+
+		const bc = new BroadcastChannel('auth');
+		bc.postMessage('session-updated');
+		bc.close();
+	};
 
 	const handleNameSubmit = async (data: NameSchemaData) => {
 		const payload: EditNameActionPayload = {
@@ -87,6 +99,8 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					title: i18nData.nameUpdated,
 					duration: 5000,
 				});
+
+				await refreshSession();
 			} else {
 				toaster.error({
 					title: i18nData.editNameFail,
@@ -99,6 +113,34 @@ export default function PersonalDataForm({ i18nData }: Props) {
 				duration: 5000,
 			});
 		}
+	};
+
+	const handleAddEmail = async (data: { email: string }) => {
+		const errorMap: Record<string, string> = {
+			'Invalid password': i18nData.invalidFormData,
+			'User not found': i18nData.userNotFound,
+			'Too many attempts': i18nData.tooManyAttempts,
+		};
+
+		const payload = { schemaName: 'emailSchema' as 'emailSchema', email: userEmail };
+
+		startTransition(async () => {
+			await emailAction(payload);
+
+			const { error } = await authClient.sendVerificationEmail({
+				email: userEmail,
+				callbackURL: '/cabinet?email-sign-in=true',
+			});
+
+			if (error) {
+				const messageKey = error?.message ?? '';
+				const message = errorMap[messageKey] || i18nData.editEmailFail;
+				toaster.error({
+					title: message,
+					duration: 5000,
+				});
+			}
+		});
 	};
 
 	const handleEmailSubmit = async (data: { email: string }) => {
@@ -149,16 +191,24 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					css={{ '--field-label-width': '150px' }}
 				>
 					<EmailForm
+						isEmailVerified={session?.user?.emailVerified}
 						i18nData={i18nData}
 						pending={isEmailPending}
 						emailForm={emailForm}
 						error={emailError}
 						isOpen={emailDialogOpen}
 						userEmail={userEmail}
+						refreshSession={refreshSession}
 						setIsOpenAction={setEmailDialogOpen}
-						onSubmitAction={emailForm.handleSubmit(handleEmailSubmit)}
+						onAddEmailAction={emailForm.handleSubmit(handleAddEmail)}
+						onEditEmailAction={emailForm.handleSubmit(handleEmailSubmit)}
 					/>
-					<PhoneForm i18nData={i18nData} userPhone={userPhone} schema={phoneSchema} />
+					<PhoneForm
+						i18nData={i18nData}
+						userPhone={userPhone}
+						schema={phoneSchema}
+						refreshSession={refreshSession}
+					/>
 					<AddressForm
 						i18nData={i18nData}
 						addressForm={addressForm}
@@ -168,7 +218,13 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					/>
 				</Fieldset.Content>
 			</Fieldset.Root>
-			<PreferredDeliveryForm userEmail={userEmail} userPhone={userPhone} i18nData={i18nData} />
+			<PreferredDeliveryForm
+				userEmail={userEmail}
+				userPhone={userPhone}
+				i18nData={i18nData}
+				userNotifMethod={userNotifMethod}
+				refreshSession={refreshSession}
+			/>
 		</Wrap>
 	);
 }

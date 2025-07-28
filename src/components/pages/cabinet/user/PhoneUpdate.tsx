@@ -17,10 +17,11 @@ import { toaster } from '@/components/reusable/chakra/toaster';
 interface Props {
 	i18nData: I18nData;
 	phone: string;
+	refreshSession: () => void;
 	onCloseAction: () => void;
 }
 
-export default function PhoneUpdate({ phone, i18nData, onCloseAction }: Props) {
+export default function PhoneUpdate({ phone, i18nData, refreshSession, onCloseAction }: Props) {
 	const schema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
 
 	const [timer, setTimer] = useState(0);
@@ -92,6 +93,8 @@ export default function PhoneUpdate({ phone, i18nData, onCloseAction }: Props) {
 					duration: 5000,
 				});
 				onCloseAction();
+
+				await refreshSession();
 			}
 		} catch (err) {
 			setVerifyError(i18nData.invalidFormData);

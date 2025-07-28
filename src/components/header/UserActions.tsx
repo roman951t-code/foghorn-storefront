@@ -6,6 +6,7 @@ import SetNewPassModal from '../auth/SetNewPassModal';
 import { I18nData } from '@/types/i18n';
 import Favourite from './Favourite';
 import { useTranslations } from 'next-intl';
+import UpdateEmailModal from '../auth/UpdateEmailModal';
 
 const AuthBtn = () => (
 	<IconButton
@@ -38,6 +39,7 @@ export default function UserActions({ i18nData }: { i18nData: I18nData }) {
 		<>
 			<Auth trigger={<AuthBtn />} i18nData={i18nData} />
 			<SetNewPassModal i18nData={i18nData} />
+			<UpdateEmailModal i18nData={i18nData} />
 			<Favourite />
 			<Cart i18nData={cartI18nData} />
 		</>

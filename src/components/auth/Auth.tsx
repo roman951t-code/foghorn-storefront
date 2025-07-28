@@ -7,12 +7,10 @@ import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useSession } from '../providers/SessionProvider';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
-import dynamic from 'next/dynamic';
+import Signup from './Signup';
+import Login from './Login';
 
 const emptyCart = '/assets/images/emptyCart.png';
-
-const Signup = dynamic(() => import('./Signup'));
-const Login = dynamic(() => import('./Login'));
 
 interface Props {
 	i18nData: I18nData;
@@ -36,7 +34,7 @@ export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
 		if (emailSignIn) {
 			setAuthOpen(true);
 		}
-	}, [emailSignIn, session]);
+	}, [emailSignIn]);
 
 	const toggleSignup = () => {
 		setShowSignup((prevState) => !prevState);
@@ -52,7 +50,7 @@ export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
 	};
 
 	const title = session?.session
-		? `${i18nData.returnCongrats}, ${session?.user.name}!`
+		? `${i18nData.returnCongrats}, ${session?.user?.name}!`
 		: showSignup
 			? i18nData.register
 			: i18nData.authorize;
@@ -62,7 +60,7 @@ export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
 			closeOnInteractOutside={false}
 			title={`${title}`}
 			trigger={trigger}
-			size='sm'
+			size='md'
 			open={isOpen ?? isAuthOpen}
 			setIsOpen={setIsOpen ?? setAuthOpen}
 		>

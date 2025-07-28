@@ -11,6 +11,7 @@ import { setNewPasswordAction } from '@/actions/setNewPasswordAction';
 import { useRouter } from 'next/navigation';
 import { toaster } from '../reusable/chakra/toaster';
 import { PasswordInput } from '../reusable/chakra/password-input';
+import { PrimaryButton } from '../reusable/buttons/ActionButton';
 
 interface ResetPassProps {
 	i18nData: I18nData;
@@ -147,17 +148,9 @@ export default function SetNewPassModal({ i18nData }: ResetPassProps) {
 							)}
 
 							{!isPassUpdated && (
-								<Button
-									w='100%'
-									mt='4'
-									type='submit'
-									loading={isSubmitting || isPending}
-									bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
-									color='black'
-									variant='solid'
-								>
+								<PrimaryButton w='100%' mt='4' type='submit' loading={isSubmitting || isPending}>
 									{i18nData.saveNewPass}
-								</Button>
+								</PrimaryButton>
 							)}
 						</Fieldset.Root>
 					</Stack>

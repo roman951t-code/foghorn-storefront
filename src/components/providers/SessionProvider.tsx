@@ -22,13 +22,12 @@ export function SessionProvider({
 	const [session, setSession] = useState<Session>(initialSession || { session: null });
 
 	const refresh = async () => {
-		const newSession = await authClient.getSession({
-			query: {
-				disableCookieCache: true,
-			},
+		const res = await fetch('/api/session/extended', {
+			cache: 'no-store',
 		});
+		const data = await res.json();
 
-		setSession(newSession);
+		setSession(data);
 	};
 
 	useEffect(() => {

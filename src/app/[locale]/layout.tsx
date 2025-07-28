@@ -39,14 +39,14 @@ export default async function Layout({ children, params }: Props) {
 			select: {
 				lastName: true,
 				middleName: true,
-				phoneNumber: true,
+				notificationMethod: true,
 			},
 		});
 
 		if (fullUser) {
 			(session.user as any).lastName = fullUser.lastName || null;
 			(session.user as any).middleName = fullUser.middleName || null;
-			(session.user as any).phoneNumber = fullUser.phoneNumber || null;
+			(session.user as any).notificationMethod = fullUser.notificationMethod || null;
 		}
 	}
 

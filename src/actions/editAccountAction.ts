@@ -26,7 +26,7 @@ export async function editAccountAction(
 		return { success: false, message: t('invalidFormData') };
 	}
 
-	const { email } = validatedFormData.data;
+	const { email } = validatedFormData.data as any;
 
 	try {
 		const existingUser = await prisma.user.findUnique({ where: { email } });

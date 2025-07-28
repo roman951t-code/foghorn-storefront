@@ -6,10 +6,8 @@ import { IoMailOutline } from 'react-icons/io5';
 import { IoMdPhonePortrait } from 'react-icons/io';
 import { signIn } from '@/lib/auth-client';
 import { useSession } from '../providers/SessionProvider';
-import dynamic from 'next/dynamic';
-
-const PhoneSignIn = dynamic(() => import('./PhoneSignIn'));
-const EmailSignIn = dynamic(() => import('./EmailSignIn'));
+import PhoneSignIn from './PhoneSignIn';
+import EmailSignIn from './EmailSignIn';
 
 interface Props {
 	i18nData: I18nData;

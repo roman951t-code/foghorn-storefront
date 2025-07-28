@@ -14,6 +14,7 @@ import PhoneUpdate from './PhoneUpdate';
 interface Props {
 	i18nData: I18nData;
 	userPhone: string;
+	refreshSession: () => void;
 	schema: z.ZodObject<
 		{
 			phone: z.ZodEffects<z.ZodEffects<z.ZodString, string, string>, string, string>;
@@ -34,7 +35,7 @@ type FormValues = {
 	phone: string;
 };
 
-export default function PhoneForm({ i18nData, userPhone, schema }: Props) {
+export default function PhoneForm({ i18nData, userPhone, schema, refreshSession }: Props) {
 	const fieldOrientation = { base: 'vertical' as const, md: 'horizontal' as const };
 
 	const [isOpen, setIsOpen] = useState(false);
@@ -92,8 +93,8 @@ export default function PhoneForm({ i18nData, userPhone, schema }: Props) {
 											required: i18nData.phoneRequired,
 										})}
 										type='text'
-										_focus={{ outline: 'none' }}
-										fontSize='md'
+										variant='outline'
+										size='md'
 										maxLength={17}
 									/>
 									<Field.ErrorText>{errors.phone?.message || authError}</Field.ErrorText>
@@ -122,6 +123,7 @@ export default function PhoneForm({ i18nData, userPhone, schema }: Props) {
 					i18nData={i18nData}
 					phone={watchPhone}
 					onCloseAction={() => setIsOpen(false)}
+					refreshSession={refreshSession}
 				/>
 			</CenteredModal>
 		</>
