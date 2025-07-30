@@ -26,7 +26,6 @@ export function SessionProvider({
 			cache: 'no-store',
 		});
 		const data = await res.json();
-
 		setSession(data);
 	};
 

@@ -12,8 +12,9 @@ import { loadClientMessages } from '@/utils/i18nUtils';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { SessionProvider } from '@/components/providers/SessionProvider';
-import { prisma } from '@/lib/prisma';
 import { ColorModeProvider } from '@/components/reusable/chakra/color-mode';
+import { prisma } from '@/lib/prisma';
+import { CatalogProvider } from '@/components/providers/CatalogProvider';
 
 interface Props {
 	children: ReactNode;
@@ -31,24 +32,15 @@ export default async function Layout({ children, params }: Props) {
 		headers: await headers(),
 	});
 
-	if (session?.user?.id) {
-		const fullUser = await prisma.user.findUnique({
-			where: {
-				id: session.user.id,
+	const topLevelCategories = await prisma.productCategory.findMany({
+		where: { parentId: null },
+		include: {
+			children: {
+				select: { id: true, name: true, slug: true },
 			},
-			select: {
-				lastName: true,
-				middleName: true,
-				notificationMethod: true,
-			},
-		});
-
-		if (fullUser) {
-			(session.user as any).lastName = fullUser.lastName || null;
-			(session.user as any).middleName = fullUser.middleName || null;
-			(session.user as any).notificationMethod = fullUser.notificationMethod || null;
-		}
-	}
+		},
+		orderBy: { name: 'asc' },
+	});
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
@@ -58,12 +50,13 @@ export default async function Layout({ children, params }: Props) {
 						<Box display='flex' flexDirection='column' minHeight='100vh' gap='6' bg='bg.primary'>
 							<SessionProvider initialSession={session}>
 								<NextIntlClientProvider messages={messages}>
-									<Header />
-
-									<Box as='main' maxWidth='1444px' flex='1' mx='auto' width='100%'>
-										{children}
-										<ToTop />
-									</Box>
+									<CatalogProvider categories={topLevelCategories}>
+										<Header />
+										<Box as='main' maxWidth='1444px' flex='1' mx='auto' width='100%'>
+											{children}
+											<ToTop />
+										</Box>
+									</CatalogProvider>
 								</NextIntlClientProvider>
 								<Footer />
 							</SessionProvider>

@@ -23,7 +23,7 @@ export function LogoutSection({ onClose }: LogoutProps) {
 		bc.close();
 		onClose();
 
-		redirect('/ua');
+		redirect('/');
 	};
 
 	return (

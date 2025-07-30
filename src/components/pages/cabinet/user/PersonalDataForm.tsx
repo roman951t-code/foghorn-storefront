@@ -3,7 +3,7 @@ import { Fieldset, Wrap } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
-import { startTransition, useActionState, useMemo, useState } from 'react';
+import { startTransition, useActionState, useMemo } from 'react';
 import {
 	createAccountSchema,
 	EditNameActionPayload,
@@ -14,7 +14,6 @@ import PreferredDeliveryForm from './PreferredDeliveryForm';
 import { useSession } from '@/components/providers/SessionProvider';
 import AddressForm from './AddressForm';
 import { editAccountAction, editNameAction } from '@/actions/editAccountAction';
-import { authClient } from '@/lib/auth-client';
 import NameForm from './NameForm';
 import EmailForm from './EmailForm';
 import PhoneForm from './PhoneForm';
@@ -30,8 +29,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	const userEmail = session?.user?.email;
 	const userPhone = session?.user?.phoneNumber;
 	const userNotifMethod = session?.user?.notificationMethod;
-
-	const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 
 	const schemaShape = useMemo(() => createAccountSchema(i18nData), [i18nData]);
 	const nameSchema = useMemo(
@@ -50,7 +47,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		[schemaShape]
 	);
 
-	const [emailError, emailAction, isEmailPending] = useActionState(editAccountAction, undefined);
 	const [addressError, addressAction, isAddressPending] = useActionState(
 		editAccountAction,
 		undefined
@@ -115,56 +111,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		}
 	};
 
-	const handleAddEmail = async (data: { email: string }) => {
-		const errorMap: Record<string, string> = {
-			'Invalid password': i18nData.invalidFormData,
-			'User not found': i18nData.userNotFound,
-			'Too many attempts': i18nData.tooManyAttempts,
-		};
-
-		const payload = { schemaName: 'emailSchema' as 'emailSchema', email: userEmail };
-
-		startTransition(async () => {
-			await emailAction(payload);
-
-			const { error } = await authClient.sendVerificationEmail({
-				email: userEmail,
-				callbackURL: '/cabinet?email-sign-in=true',
-			});
-
-			if (error) {
-				const messageKey = error?.message ?? '';
-				const message = errorMap[messageKey] || i18nData.editEmailFail;
-				toaster.error({
-					title: message,
-					duration: 5000,
-				});
-			}
-		});
-	};
-
-	const handleEmailSubmit = async (data: { email: string }) => {
-		const payload = { schemaName: 'emailSchema' as 'emailSchema', email: userEmail };
-
-		startTransition(async () => {
-			await emailAction(payload);
-
-			const result = await authClient.changeEmail({
-				newEmail: data.email,
-				callbackURL: '/?email-change=true',
-			});
-
-			if (result?.error) {
-				toaster.error({
-					title: i18nData.editEmailFail,
-					duration: 5000,
-				});
-			} else {
-				setEmailDialogOpen(true);
-			}
-		});
-	};
-
 	const handleAddressSubmit = async (data: { shipmentAddress: string }) => {
 		const payload = { schemaName: 'addressSchema' as 'addressSchema', email: userEmail };
 
@@ -193,15 +139,8 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					<EmailForm
 						isEmailVerified={session?.user?.emailVerified}
 						i18nData={i18nData}
-						pending={isEmailPending}
 						emailForm={emailForm}
-						error={emailError}
-						isOpen={emailDialogOpen}
 						userEmail={userEmail}
-						refreshSession={refreshSession}
-						setIsOpenAction={setEmailDialogOpen}
-						onAddEmailAction={emailForm.handleSubmit(handleAddEmail)}
-						onEditEmailAction={emailForm.handleSubmit(handleEmailSubmit)}
 					/>
 					<PhoneForm
 						i18nData={i18nData}

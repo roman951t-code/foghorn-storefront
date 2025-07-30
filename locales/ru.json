@@ -45,6 +45,7 @@
 		"userLoginFail": "Не удалось авторизовать пользователя",
 		"editNameFail": "Не удалось изменить имя",
 		"editEmailFail": "Не вдалося изменить email",
+		"editPhoneFail": "Не удалось изменить номер телефона",
 		"setNewPassFail": "Не удалось обновить пароль",
 		"passwordsNotMatch": "Пароли не совпадают",
 		"nameRequired": "Имя обязательно",

@@ -43,6 +43,7 @@
 		"userLoginFail": "Не вдалося авторизувати користувача",
 		"editNameFail": "Не вдалося змінити ім'я",
 		"editEmailFail": "Не вдалося змінити email",
+		"editPhoneFail": "Не вдалося змінити номер телефону",
 		"setNewPassFail": "Не вдалося оновити пароль",
 		"passwordsNotMatch": "Паролі не збігаються",
 		"nameRequired": "Ім'я обов'язкове",

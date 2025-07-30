@@ -63,6 +63,7 @@ export const validLocData = [
 	'passwordMax',
 	'passwordUppercase',
 	'passwordLowercase',
+	'editEmailFail',
 	'passwordAlphabetic',
 	'passwordUnderscore',
 	'phoneRequired',

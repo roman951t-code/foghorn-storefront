@@ -15,22 +15,20 @@ export async function GET() {
 			id: session.user.id,
 		},
 		select: {
-			email: true,
-			emailVerified: true,
 			phoneNumber: true,
 			phoneNumberVerified: true,
-			name: true,
 			lastName: true,
 			middleName: true,
 			notificationMethod: true,
 		},
 	});
-
+	console.log('dbUser', dbUser);
 	if (!dbUser) return NextResponse.json(null);
 
 	const enrichedSession = {
 		...session,
 		user: {
+			...session.user,
 			...dbUser,
 		},
 	};

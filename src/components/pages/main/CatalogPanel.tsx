@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState } from 'react';
 import { Flex, Text, VStack, HStack, Icon } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
@@ -6,83 +7,18 @@ import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import CategoryDetails from './CategoryDetails';
 import Promo from './Promo';
 import type { I18nData } from '@/types/i18n';
+import { useCatalog } from '@/components/providers/CatalogProvider';
+import type { Category } from '@/types/product';
 
 interface Props {
 	i18nData: I18nData;
 }
 
-const categories = [
-	{
-		name: 'Electronics',
-		subcategories: [
-			{ title: 'Mobiles', links: ['iPhone', 'Samsung', 'OnePlus'] },
-			{ title: 'Laptops', links: ['MacBook', 'Dell', 'HP'] },
-			{ title: 'Kitchen', links: ['Refrigerators', 'Microwaves', 'Ovens'] },
-			{ title: 'Living Room', links: ['Televisions', 'Speakers', 'Sofas'] },
-		],
-	},
-	{
-		name: 'Fashion',
-		subcategories: [
-			{ title: 'Men', links: ['Shirts', 'Pants', 'Shoes'] },
-			{ title: 'Women', links: ['Dresses', 'Handbags', 'Jewelry'] },
-		],
-	},
-	{
-		name: 'Home Appliances',
-		subcategories: [
-			{ title: 'Kitchen', links: ['Refrigerators', 'Microwaves', 'Ovens'] },
-			{ title: 'Living Room', links: ['Televisions', 'Speakers', 'Sofas'] },
-		],
-	},
-	{
-		name: 'Kitchen',
-		subcategories: [
-			{ title: 'Mobiles', links: ['iPhone', 'Samsung', 'OnePlus'] },
-			{ title: 'Laptops', links: ['MacBook', 'Dell', 'HP'] },
-		],
-	},
-	{
-		name: 'Household',
-		subcategories: [
-			{ title: 'Men', links: ['Shirts', 'Pants', 'Shoes'] },
-			{ title: 'Women', links: ['Dresses', 'Handbags', 'Jewelry'] },
-		],
-	},
-	{
-		name: 'Backyard',
-		subcategories: [
-			{ title: 'Kitchen', links: ['Refrigerators', 'Microwaves', 'Ovens'] },
-			{ title: 'Living Room', links: ['Televisions', 'Speakers', 'Sofas'] },
-		],
-	},
-	{
-		name: 'Digital',
-		subcategories: [
-			{ title: 'Mobiles', links: ['iPhone', 'Samsung', 'OnePlus'] },
-			{ title: 'Laptops', links: ['MacBook', 'Dell', 'HP'] },
-		],
-	},
-	{
-		name: 'Cost free',
-		subcategories: [
-			{ title: 'Men', links: ['Shirts', 'Pants', 'Shoes'] },
-			{ title: 'Women', links: ['Dresses', 'Handbags', 'Jewelry'] },
-		],
-	},
-	{
-		name: 'Second hand',
-		subcategories: [
-			{ title: 'Kitchen', links: ['Refrigerators', 'Microwaves', 'Ovens'] },
-			{ title: 'Living Room', links: ['Televisions', 'Speakers', 'Sofas'] },
-		],
-	},
-];
-
 export default function CatalogPanel({ i18nData }: Props) {
-	const [activeCategory, setActiveCategory] = useState();
+	const [activeCategory, setActiveCategory] = useState<Category | null>(null);
+	const { categories } = useCatalog();
 
-	const handleMouseEnter = (category) => {
+	const handleMouseEnter = (category: Category) => {
 		setActiveCategory(category);
 	};
 
@@ -106,7 +42,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 				<CatalogBtn fullText />
 				{categories.map((category, index) => (
 					<HStack
-						key={category.name}
+						key={category.id}
 						justify='space-between'
 						bg={index % 2 === 0 ? 'catalog.bgEven' : 'catalog.bgOdd'}
 						align='center'
@@ -132,8 +68,9 @@ export default function CatalogPanel({ i18nData }: Props) {
 					</HStack>
 				))}
 			</VStack>
+
 			{!activeCategory && <Promo />}
-			<CategoryDetails category={activeCategory} i18nData={i18nData} />
+			{activeCategory && <CategoryDetails category={activeCategory} i18nData={i18nData} />}
 		</Flex>
 	);
 }

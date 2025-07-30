@@ -3,3 +3,14 @@ export interface Product {
 	name: string;
 	price: number;
 }
+
+export type Category = {
+	id: string;
+	name: string;
+	slug: string;
+	children: {
+		id: string;
+		name: string;
+		slug: string;
+	}[];
+};

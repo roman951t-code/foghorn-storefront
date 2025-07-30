@@ -3,7 +3,7 @@ import { nextCookies } from 'better-auth/next-js';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
-import { phoneNumber } from 'better-auth/plugins';
+import { phoneNumber, customSession } from 'better-auth/plugins';
 import { prisma } from './prisma';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -97,6 +97,27 @@ ${url}`,
 					return phoneNumber;
 				},
 			},
+		}),
+		customSession(async ({ user, session }) => {
+			const dbUser = await prisma.user.findUnique({
+				where: {
+					id: user.id,
+				},
+				select: {
+					phoneNumber: true,
+					phoneNumberVerified: true,
+					lastName: true,
+					middleName: true,
+					notificationMethod: true,
+				},
+			});
+			return {
+				user: {
+					...user,
+					...dbUser,
+				},
+				session,
+			};
 		}),
 		nextCookies(),
 	],

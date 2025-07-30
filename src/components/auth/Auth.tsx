@@ -9,6 +9,7 @@ import { useSession } from '../providers/SessionProvider';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
 import Signup from './Signup';
 import Login from './Login';
+import { useRouter } from 'next/navigation';
 
 const emptyCart = '/assets/images/emptyCart.png';
 
@@ -20,18 +21,37 @@ interface Props {
 }
 
 export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
-	const { session } = useSession();
-	const [showSignup, setShowSignup] = useState(false);
-
+	const { session, refresh } = useSession();
+	const router = useRouter();
 	const searchParams = useSearchParams();
 	const emailSignIn = searchParams?.get('email-sign-in') === 'true';
 
+	const [showSignup, setShowSignup] = useState(false);
 	const [isAuthOpen, setAuthOpen] = useState(false);
+
+	const refreshSession = async () => {
+		await refresh();
+
+		const bc = new BroadcastChannel('auth');
+		bc.postMessage('session-updated');
+		bc.close();
+	};
 
 	useEffect(() => {
 		if (!emailSignIn) return;
 
 		if (emailSignIn) {
+			const handleEmailSignIn = async () => {
+				const current = new URLSearchParams(window.location.search);
+				current.delete('email-sign-in');
+				const newSearch = current.toString();
+				const newPath = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
+				router.replace(newPath);
+
+				await refreshSession();
+			};
+
+			handleEmailSignIn();
 			setAuthOpen(true);
 		}
 	}, [emailSignIn]);

@@ -9,7 +9,7 @@ type SchemaName = 'nameSchema' | 'emailSchema' | 'phoneSchema' | 'addressSchema'
 const errors = {
 	nameSchema: 'editNameFail',
 	emailSchema: 'editEmailFail',
-	phoneSchema: '',
+	phoneSchema: 'editPhoneFail',
 	addressSchema: '',
 };
 
@@ -47,7 +47,7 @@ export async function editNameAction(
 ): Promise<{ success: boolean; message?: string } | undefined> {
 	const t = await getTranslations('Validation');
 
-	const schema = (await getAccountSchemas())['nameSchema'];
+	const schema = (await getAccountSchemas()).nameSchema;
 
 	const validatedFormData = schema.safeParse({
 		name: formData.name,
@@ -76,6 +76,6 @@ export async function editNameAction(
 
 		return { success: true };
 	} catch (error: any) {
-		return { success: false, message: t('userLoginFail') };
+		return { success: false, message: t(errors.nameSchema) };
 	}
 }
