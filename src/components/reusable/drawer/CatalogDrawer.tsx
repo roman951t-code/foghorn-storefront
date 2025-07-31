@@ -7,17 +7,18 @@ import {
 	AccordionRoot,
 } from '@/components/reusable/chakra/accordion';
 import { useTranslations } from 'next-intl';
-import { Box, VStack, Flex, Text, Heading, HStack } from '@chakra-ui/react';
+import { Box, VStack, Text, Heading, Wrap, Separator } from '@chakra-ui/react';
 import { LocaleNavLink, LocaleNavSecButton } from '../links/LocaleNavLink';
 import { useCatalog } from '@/components/providers/CatalogProvider';
 import { BsChevronRight } from 'react-icons/bs';
+import { Fragment } from 'react';
 
 export default function CatalogDrawer() {
 	const t = useTranslations('General');
 	const { categories } = useCatalog();
 
 	return (
-		<AccordionRoot multiple defaultValue={[categories?.[0]?.slug]}>
+		<AccordionRoot multiple defaultValue={[categories?.[0]?.slug]} w='full'>
 			{categories.map((category) => (
 				<AccordionItem
 					key={category.id}
@@ -26,65 +27,68 @@ export default function CatalogDrawer() {
 					borderBottomColor='border.dark'
 					mb='4'
 				>
-					<AccordionItemTrigger>
-						<Heading
-							fontWeight='semibold'
-							textStyle='2xl'
-							color='main'
-							borderBottom='1px solid'
-							mb='2'
-						>
+					<AccordionItemTrigger cursor='pointer'>
+						<Heading fontWeight='medium' textStyle='2xl' color='main' mb='2'>
 							{category.name}
 						</Heading>
 					</AccordionItemTrigger>
 
 					<AccordionItemContent justifyContent='space-between'>
-						<Flex
-							wrap='wrap'
-							gapX='4'
-							gapY='8'
+						<VStack
+							gap={8}
 							justifyContent='flex-start'
+							alignItems='flex-start'
 							position='relative'
 							w='100%'
 						>
-							{category.children.map((sub) => (
-								<Box key={sub.id} minW='175px'>
+							{category.children?.map((subcategory) => (
+								<Box key={subcategory.id}>
 									<Text fontWeight='medium' textStyle='xl' mb={4}>
-										{sub.name}
+										{subcategory.name}
 									</Text>
-									<VStack align='start' gap={4}>
-										<LocaleNavLink
-											href={`/catalog/`}
-											fontSize='md'
-											variant='plain'
-											textWrap='wrap'
-											wordBreak='break-all'
-										>
-											{sub.name}
-										</LocaleNavLink>
+
+									<Wrap align='start' gap='4'>
+										{subcategory.products.map((product) => (
+											<Fragment key={product.id}>
+												<LocaleNavLink
+													key={product.id}
+													href={`/products/${subcategory.slug}/${product.slug}`}
+													fontSize='md'
+													variant='plain'
+													textWrap='wrap'
+													wordBreak='break-word'
+													_hover={{ color: 'link' }}
+													_focus={{ outline: 'none' }}
+												>
+													{product.name}
+												</LocaleNavLink>
+
+												<Separator orientation='vertical' height='4' alignSelf='center' />
+											</Fragment>
+										))}
 
 										<LocaleNavLink
-											href={`/catalog/${sub.slug}`}
+											href={`/category/${subcategory.slug}`}
 											fontSize='md'
 											variant='plain'
 											transition='color 0.25s ease-in-out'
 											textWrap='wrap'
 											wordBreak='break-all'
 											color='link'
-											mt='3'
 											textDecoration='underline'
 											textUnderlineOffset='4px'
 											_focus={{ outline: 'none' }}
 										>
 											{t('seeAll')}
 										</LocaleNavLink>
-									</VStack>
+									</Wrap>
 								</Box>
 							))}
-							<LocaleNavSecButton href={`/products/catalog/${category.slug}`}>
+
+							<LocaleNavSecButton href={`/products/catalog/${category.slug}`} size='sm'>
 								{t('seeCategory')} <BsChevronRight />
 							</LocaleNavSecButton>
-						</Flex>
+						</VStack>
 					</AccordionItemContent>
 				</AccordionItem>
 			))}

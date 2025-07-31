@@ -8,17 +8,18 @@ import CategoryDetails from './CategoryDetails';
 import Promo from './Promo';
 import type { I18nData } from '@/types/i18n';
 import { useCatalog } from '@/components/providers/CatalogProvider';
-import type { Category } from '@/types/product';
+import type { CategoryWithSubcategories } from '@/types/product';
 
 interface Props {
 	i18nData: I18nData;
 }
 
 export default function CatalogPanel({ i18nData }: Props) {
-	const [activeCategory, setActiveCategory] = useState<Category | null>(null);
 	const { categories } = useCatalog();
 
-	const handleMouseEnter = (category: Category) => {
+	const [activeCategory, setActiveCategory] = useState<(typeof categories)[0] | null>(null);
+
+	const handleMouseEnter = (category: CategoryWithSubcategories) => {
 		setActiveCategory(category);
 	};
 
@@ -29,8 +30,8 @@ export default function CatalogPanel({ i18nData }: Props) {
 	return (
 		<Flex h='500px' position='relative' rounded='md' gap={2} onMouseLeave={handleMouseLeave}>
 			<VStack
-				minW='300px'
-				w='300px'
+				minW='280px'
+				w='280px'
 				align='stretch'
 				gap='0'
 				boxShadow='sm'

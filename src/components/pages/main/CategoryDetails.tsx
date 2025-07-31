@@ -1,15 +1,15 @@
 'use client';
 
 import React from 'react';
-import { Box, Flex, Text, VStack, Heading } from '@chakra-ui/react';
+import { Box, Flex, Text, VStack, Heading, Wrap } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
 import { LocaleNavLink, LocaleNavButton } from '@/components/reusable/links/LocaleNavLink';
 import type { I18nData } from '@/types/i18n';
-import type { Category } from '@/types/product';
+import type { CategoryWithSubcategories } from '@/types/product';
 
 interface Props {
 	i18nData: I18nData;
-	category: Category | null;
+	category: CategoryWithSubcategories | null;
 }
 
 export default function CategoryDetails({ category, i18nData }: Props) {
@@ -17,33 +17,31 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 
 	return (
 		<Flex bg='bg.tertiary' overflowY='auto' rounded='sm' boxShadow='sm' w='100%' p={4}>
-			<Flex
-				wrap='wrap'
-				gap={4}
-				justify='flex-start'
-				position='relative'
-				w={{ base: '100%', lg: '75%' }}
-			>
+			<Wrap gap={12} justify='flex-start' position='relative' w={{ base: '100%', lg: '75%' }}>
 				{category.children?.map((subcategory) => (
-					<Box key={subcategory.id} minW='175px' maxW='32%'>
+					<Box key={subcategory.id} maxW='32%'>
 						<Text fontWeight='semibold' textStyle='lg' mb={4}>
 							{subcategory.name}
 						</Text>
-						<VStack align='start'>
+
+						<VStack align='start' gap='4'>
+							{subcategory.products.map((product) => (
+								<LocaleNavLink
+									key={product.id}
+									href={`/products/${subcategory.slug}/${product.slug}`}
+									fontSize='md'
+									variant='plain'
+									textWrap='wrap'
+									wordBreak='break-word'
+									_hover={{ color: 'link' }}
+									_focus={{ outline: 'none' }}
+								>
+									{product.name}
+								</LocaleNavLink>
+							))}
+
 							<LocaleNavLink
-								key={subcategory.id}
-								href={`/products/${subcategory.slug}`}
-								fontSize='md'
-								variant='plain'
-								textWrap='wrap'
-								wordBreak='break-word'
-								_hover={{ color: 'link' }}
-								_focus={{ outline: 'none' }}
-							>
-								{subcategory.name}
-							</LocaleNavLink>
-							<LocaleNavLink
-								href={`/products/${subcategory.slug}`}
+								href={`/category/${subcategory.slug}`}
 								fontSize='md'
 								variant='plain'
 								transition='color 0.25s ease-in-out'
@@ -60,14 +58,14 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 						</VStack>
 					</Box>
 				))}
-			</Flex>
+			</Wrap>
 
 			<Flex
 				justify='space-between'
-				flexDirection='column'
+				direction='column'
 				align='center'
 				bgColor='catalog.bgCategory'
-				height='100%'
+				h='full'
 				maxW='380px'
 				minW={{ base: '240px', xl: '280px' }}
 				position='absolute'

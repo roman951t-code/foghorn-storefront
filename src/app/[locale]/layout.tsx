@@ -36,7 +36,20 @@ export default async function Layout({ children, params }: Props) {
 		where: { parentId: null },
 		include: {
 			children: {
-				select: { id: true, name: true, slug: true },
+				select: {
+					id: true,
+					name: true,
+					slug: true,
+					products: {
+						select: {
+							id: true,
+							name: true,
+							slug: true,
+						},
+						orderBy: { name: 'asc' },
+						take: 6,
+					},
+				},
 			},
 		},
 		orderBy: { name: 'asc' },

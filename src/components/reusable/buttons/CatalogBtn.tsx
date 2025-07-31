@@ -42,12 +42,13 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 				</DrawerTrigger>
 				<DrawerContent
 					w={{ base: '96%', xl: '77%' }}
+					maxW='1460px'
 					m='auto'
 					maxHeight='96%'
 					bg='bg.tertiary'
 					rounded='md'
 				>
-					<DrawerBody>
+					<DrawerBody maxW='1444px' margin='auto' w='full' py='4'>
 						<CatalogDrawer />
 					</DrawerBody>
 					<DrawerFooter>

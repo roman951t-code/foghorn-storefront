@@ -16,10 +16,8 @@ const images = [img1, img2, img2];
 
 function ProductPreviewSkeleton() {
 	return (
-		<HStack gap='4' mt='4' overflowX='auto' overflowY='hidden'>
-			{images.map((_, i) => (
-				<Skeleton key={i} width='116px' height='116px' borderRadius='md' />
-			))}
+		<HStack overflowX='hidden' overflowY='hidden' alignSelf='center'>
+			<Skeleton width='116px' height='116px' borderRadius='sm' />
 		</HStack>
 	);
 }
