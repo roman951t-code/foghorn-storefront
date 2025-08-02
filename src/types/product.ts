@@ -13,6 +13,13 @@ export type Product = {
 	id: string;
 	name: string;
 	slug: string;
+	imageUrl: string | null;
+	basePrice: number;
+	discountPrice: number | null;
+	averageRating: number;
+	productCode: string;
+	reviewCount: number;
+	inStock: boolean;
 };
 
 export type SubcategoryWithProducts = {

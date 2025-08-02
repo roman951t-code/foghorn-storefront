@@ -11,7 +11,6 @@ type Props = {
 
 export default function CategoryClient({ slug }: Props) {
 	const { categories } = useCatalog();
-
 	const category = categories.find((cat) => cat.slug === slug);
 
 	if (!category) {

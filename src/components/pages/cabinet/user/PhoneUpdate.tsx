@@ -11,7 +11,7 @@ import {
 	PhoneVerifySchema,
 } from 'formValidationSchemas/phoneVerifySchema';
 import { authClient } from '@/lib/auth-client';
-import { sendVerifyPhoneAction } from '@/actions/sendVerifyPhoneAction';
+import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
 import { toaster } from '@/components/reusable/chakra/toaster';
 
 interface Props {

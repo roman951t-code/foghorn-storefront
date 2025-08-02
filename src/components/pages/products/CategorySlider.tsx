@@ -37,9 +37,9 @@ function CategorySliderInner({ category }: { category: CategoryWithSubcategories
 						}
 						products={sub.products.map((product) => ({
 							name: product.name,
-							href: `/products/${sub.slug}/${product.slug}`,
+							href: `/products/${category.slug}/${sub.slug}/${product.slug}`,
 						}))}
-						viewAllHref={`/products/${sub.slug}`}
+						viewAllHref={`/products/${category.slug}/${sub.slug}`}
 					/>
 				</SwiperSlide>
 			))}

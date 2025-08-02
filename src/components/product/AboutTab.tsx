@@ -21,8 +21,13 @@ import {
 import ShareProduct from './ShareProduct';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
 import { Rating } from '../reusable/chakra/rating';
+import { Product } from '@/types/product';
 
-export default function AboutTab() {
+interface Props {
+	product: Product;
+}
+
+export default function AboutTab({ product }: Props) {
 	const t = useTranslations('Products');
 
 	const i18nData = {
@@ -31,8 +36,10 @@ export default function AboutTab() {
 		shareSocial: t('shareSocial'),
 	};
 
+	const discount = product?.discountPrice ? product.basePrice - product?.discountPrice : 0;
+
 	return (
-		<VStack gap='8'>
+		<VStack gap='8' colorPalette='gray'>
 			<Group
 				align={{ base: 'center', lg: 'flex-start' }}
 				flexDirection={{ base: 'column', lg: 'row' }}
@@ -50,7 +57,7 @@ export default function AboutTab() {
 				</Box>
 				<VStack gap='2' alignItems='flex-start'>
 					<Heading as='h1' size={{ base: '2xl', sm: '3xl' }} fontWeight='medium'>
-						Смартфон Samsung Galaxy S25 Ultra 12/512GB Titanium Whitesilver (SM-S938BZSGEUC)
+						{product.name}
 					</Heading>
 					<Flex
 						w='100%'
@@ -61,9 +68,9 @@ export default function AboutTab() {
 						gap='2'
 					>
 						<HStack>
-							<Status.Root size={'lg'} colorPalette='green' mr='4'>
-								<Status.Indicator />
-								{t('productIsPresent')}
+							<Status.Root size={'lg'} mr='4'>
+								<Status.Indicator colorPalette={product.inStock ? 'green' : 'red'} />
+								{product.inStock ? t('productIsPresent') : t('productIsOutOfStock')}
 							</Status.Root>
 
 							<ShareProduct i18nData={i18nData} />
@@ -85,7 +92,9 @@ export default function AboutTab() {
 						</HStack>
 
 						<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray' mr='1'>
-							<Tag.Label>{t('productCode')}: 65719</Tag.Label>
+							<Tag.Label>
+								{t('productCode')}: {product.productCode}
+							</Tag.Label>
 						</Tag.Root>
 					</Flex>
 					<Stat.Root my='3'>
@@ -94,28 +103,30 @@ export default function AboutTab() {
 								<FiShoppingCart /> {t('buy')}
 							</PrimaryButton>
 
-							<Stat.ValueText w={{ base: '90%', xs: '124px' } as any} fontSize='3xl'>
-								55 699 ₴
+							<Stat.ValueText w='auto' fontSize='3xl'>
+								{product?.discountPrice ?? product.basePrice} ₴
 							</Stat.ValueText>
-							<Badge colorPalette='gray'>
-								<Box
-									as='span'
-									color='main.disabled'
-									fontSize='sm'
-									textDecoration='line-through'
-									marginLeft='1'
-								>
-									59 709 ₴
-									<Badge
-										variant='solid'
-										color='main.lightOnly'
-										bg='main.tertiary'
-										marginLeft='12px'
+							{discount > 0 && (
+								<Badge colorPalette='gray'>
+									<Box
+										as='span'
+										color='main.disabled'
+										fontSize='sm'
+										textDecoration='line-through'
+										marginLeft='1'
 									>
-										- 150₴
-									</Badge>
-								</Box>
-							</Badge>
+										{product.basePrice} ₴
+										<Badge
+											variant='solid'
+											color='main.lightOnly'
+											bg='main.tertiary'
+											marginLeft='12px'
+										>
+											- {discount}₴
+										</Badge>
+									</Box>
+								</Badge>
+							)}
 						</Flex>
 					</Stat.Root>
 
@@ -133,7 +144,7 @@ export default function AboutTab() {
 							color='main'
 							_focus={{ outline: 'none' }}
 						>
-							{t('feedback')} (3)
+							{t('feedback')} ({product.reviewCount})
 						</Link>
 					</HStack>
 					<Stack w='100%' gap='4' mt='6'>

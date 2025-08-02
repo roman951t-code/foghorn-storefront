@@ -19,7 +19,7 @@
 		"@hookform/resolvers": "^5.0.1",
 		"@next/bundle-analyzer": "^15.3.3",
 		"@prisma/adapter-pg": "^6.9.0",
-		"@prisma/client": "^6.10.1",
+		"@prisma/client": "^6.13.0",
 		"@types/lodash.pick": "^4.4.9",
 		"bcryptjs": "^3.0.2",
 		"better-auth": "^1.2.12",
@@ -56,7 +56,7 @@
 		"@types/react-payment-inputs": "^1.1.4",
 		"eslint": "^9.27.0",
 		"eslint-config-next": "15.4.0-canary.51",
-		"prisma": "^6.10.1",
+		"prisma": "^6.13.0",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.8.3"
 	}

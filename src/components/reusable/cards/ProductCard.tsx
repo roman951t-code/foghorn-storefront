@@ -8,15 +8,25 @@ import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { Rating } from '../chakra/rating';
+import { Product } from '@/types/product';
 
-export default function ProductCard() {
+type Props = {
+	category: string;
+	subcategory: string;
+	product: Product;
+};
+
+export default function ProductCard({ product, category, subcategory }: Props) {
+	if (!product) return null;
 	const t = useTranslations('Products');
+	const discount = product?.discountPrice ? product.basePrice - product?.discountPrice : 0;
 
 	return (
 		<Card.Root
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			minWidth='200px'
-			w='100%'
+			w='full'
+			h='full'
 			border='1px solid'
 			borderColor='border.dark'
 			bg='bg.tertiary'
@@ -25,7 +35,7 @@ export default function ProductCard() {
 				borderColor: { base: 'orange', _dark: 'yellow' },
 			}}
 		>
-			<Flex direction='column' gap={2} p={4} pt='2.5'>
+			<Flex direction='column' gap={2} p={4} pt='2.5' h='full'>
 				<Flex align='center' justifyContent='space-between'>
 					<IconButton
 						aria-label='Cart'
@@ -56,34 +66,44 @@ export default function ProductCard() {
 						<FiHeart />
 					</IconButton>
 				</Flex>
+
 				<ProductPreviewSlider />
 
 				<LinkBox>
 					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='1' w='100%'>
 						<LocaleNavLink
-							href='/products/1/1'
+							href={`/products/${category}/${subcategory}/${product?.slug}`}
 							textDecorationColor='main'
 							color='main'
 							variant='underline'
 						>
-							iPhone 16 Pro Max 256 GB Desert Titanium
+							{product.name}
 						</LocaleNavLink>
 					</Card.Title>
+
 					<Text color='main' fontSize='2xl' mt='2'>
-						55 699 ₴
+						{product?.discountPrice ?? product.basePrice} ₴
 					</Text>
-					<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
-						59 709 ₴
-						<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='12px'>
-							- 150₴
-						</Badge>
-					</Text>
+
+					{discount > 0 && (
+						<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
+							{product.basePrice} ₴
+							<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' ml='12px'>
+								- {discount}₴
+							</Badge>
+						</Text>
+					)}
 				</LinkBox>
 
 				<HStack gap='4' mt='2'>
-					<Rating readOnly size='xs' defaultValue={5} />
-					<LocaleNavLink href='/cabinet/feedback' variant='underline' fontSize='sm' color='main'>
-						{t('feedback')} (3)
+					<Rating readOnly size='xs' defaultValue={product.averageRating ?? 0} />
+					<LocaleNavLink
+						href={`/products/${category}/${subcategory}/${product?.slug}?tab=feedback`}
+						variant='underline'
+						fontSize='sm'
+						color='main'
+					>
+						{t('feedback')} ({product.reviewCount ?? 0})
 					</LocaleNavLink>
 				</HStack>
 			</Flex>

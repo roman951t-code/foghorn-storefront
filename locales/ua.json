@@ -185,6 +185,7 @@
 		"guarantee": "Гарантія",
 		"description": "Опис",
 		"productIsPresent": "Товар в наявності",
+		"productIsOutOfStock": "Товар відсутній",
 		"productCode": "Код товару",
 		"leaveFeedback": "Залишити відгук",
 		"rate": "Поставте оцінку",
@@ -256,6 +257,8 @@
 		"terms": {
 			"title": "Умови та положення",
 			"description": "Переглядайте ваші замовлення, відгуки, улюблені товари та особисту інформацію."
-		}
+		},
+		"category": "Товари в категорії {category}",
+		"product": "{product} Купити онлайн"
 	}
 }

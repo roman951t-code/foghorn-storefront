@@ -1,3 +1,4 @@
+import { Product } from '@/types/product';
 import { Tabs } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
@@ -6,13 +7,22 @@ const AboutTab = dynamic(() => import('./AboutTab'));
 const CharacteristicsTab = dynamic(() => import('./CharacteristicsTab'));
 const FeedbackTab = dynamic(() => import('./FeedbackTab'));
 
-export default function ProductTabs() {
+interface Props {
+	tab?: string;
+	product: Product | null;
+}
+
+export default function ProductTabs({ tab = 'about', product }: Props) {
 	const t = useTranslations('Products');
+
+	if (!product) {
+		return null;
+	}
 
 	const items = [
 		{
 			title: t('about'),
-			content: <AboutTab />,
+			content: <AboutTab product={product} />,
 		},
 		{
 			title: t('characteristics'),
@@ -27,7 +37,7 @@ export default function ProductTabs() {
 	return (
 		<Tabs.Root
 			mt='8'
-			defaultValue={t('about')}
+			defaultValue={t(tab)}
 			width='full'
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			lazyMount

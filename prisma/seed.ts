@@ -68,6 +68,11 @@ async function main() {
 				const price = new Decimal(faker.number.float({ min: 100, max: 1500, fractionDigits: 2 }));
 				const stock = faker.number.int({ min: 5, max: 50 });
 
+				const hasDiscount = faker.datatype.boolean();
+				const discountPrice = hasDiscount
+					? price.sub(new Decimal(faker.number.int({ min: 10, max: 100 })))
+					: null;
+
 				const product = await prisma.product.create({
 					data: {
 						name,
@@ -75,7 +80,12 @@ async function main() {
 						description: faker.commerce.productDescription(),
 						imageUrl: faker.image.urlLoremFlickr({ category: 'technology' }),
 						basePrice: price,
+						discountPrice,
 						stock,
+						averageRating: 4.8,
+						reviewCount: 3,
+						productCode: '65719',
+						inStock: stock > 10 && faker.datatype.boolean(),
 						brandId: brand.id,
 						categoryId: subcategory.id,
 					},

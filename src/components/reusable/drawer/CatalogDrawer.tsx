@@ -52,7 +52,7 @@ export default function CatalogDrawer() {
 											<Fragment key={product.id}>
 												<LocaleNavLink
 													key={product.id}
-													href={`/products/${subcategory.slug}/${product.slug}`}
+													href={`/products/${category.slug}/${subcategory.slug}/${product.slug}`}
 													fontSize='md'
 													variant='plain'
 													textWrap='wrap'
@@ -68,7 +68,7 @@ export default function CatalogDrawer() {
 										))}
 
 										<LocaleNavLink
-											href={`/category/${subcategory.slug}`}
+											href={`/products/${category.slug}/${subcategory.slug}`}
 											fontSize='md'
 											variant='plain'
 											transition='color 0.25s ease-in-out'
@@ -85,7 +85,7 @@ export default function CatalogDrawer() {
 								</Box>
 							))}
 
-							<LocaleNavSecButton href={`/products/catalog/${category.slug}`} size='sm'>
+							<LocaleNavSecButton href={`/products/${category.slug}`} size='sm'>
 								{t('seeCategory')} <BsChevronRight />
 							</LocaleNavSecButton>
 						</VStack>

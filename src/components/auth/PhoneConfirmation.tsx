@@ -12,8 +12,8 @@ import {
 } from 'formValidationSchemas/phoneVerifySchema';
 import { authClient } from '@/lib/auth-client';
 import { useSession } from '../providers/SessionProvider';
-import { registerPhoneAction } from '@/actions/registerPhoneAction';
-import { sendVerifyPhoneAction } from '@/actions/sendVerifyPhoneAction';
+import { registerPhoneAction } from '@/actions/auth/registerPhoneAction';
+import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
 
 interface Props {
 	i18nData: I18nData;

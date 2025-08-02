@@ -1,7 +1,7 @@
 import { Button, CloseButton, Dialog, Portal, Text } from '@chakra-ui/react';
 import { I18nData } from '@/types/i18n';
 import { AlertButton } from '../reusable/buttons/ActionButton';
-import { deleteUserAction } from '@/actions/deleteUserAction';
+import { deleteUserAction } from '@/actions/auth/deleteUserAction';
 import { authClient } from '@/lib/auth-client';
 import { useSession } from '../providers/SessionProvider';
 import { useState } from 'react';

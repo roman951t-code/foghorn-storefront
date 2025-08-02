@@ -1,12 +1,20 @@
-import { EmptyState, VStack } from '@chakra-ui/react';
+import { SimpleGrid, Box, VStack } from '@chakra-ui/react';
+import { EmptyState } from '@chakra-ui/react';
 import { HiColorSwatch } from 'react-icons/hi';
-import { SimpleGrid, Box } from '@chakra-ui/react';
 import ProductCard from '../../reusable/cards/ProductCard';
+import { Product } from '@prisma/client';
 
-export default function ProductsGrid({ notFound }: { notFound: string }) {
-	return (
-		<>
-			{/* <EmptyState.Root>
+interface Props {
+	products: Product[];
+	category: string;
+	subcategory: string;
+	notFound: string;
+}
+
+export default function ProductsGrid({ products, notFound, category, subcategory }: Props) {
+	if (!products || products.length === 0) {
+		return (
+			<EmptyState.Root>
 				<EmptyState.Content>
 					<EmptyState.Indicator>
 						<HiColorSwatch />
@@ -15,19 +23,19 @@ export default function ProductsGrid({ notFound }: { notFound: string }) {
 						<EmptyState.Title>{notFound}</EmptyState.Title>
 					</VStack>
 				</EmptyState.Content>
-			</EmptyState.Root> */}
-			<SimpleGrid
-				className='productsSlider'
-				columns={{ base: 1, prodXs: 2, prodSm: 3, prodLg: 4, prodXl: 5 } as any}
-				gapX='2'
-				gapY='4'
-			>
-				{new Array(9).fill(null).map((_, index) => (
-					<Box key={index}>
-						<ProductCard />
-					</Box>
-				))}
-			</SimpleGrid>
-		</>
+			</EmptyState.Root>
+		);
+	}
+
+	const columns = { base: 1, prodXs: 2, prodSm: 3, prodLg: 4, prodXl: 5 } as any;
+
+	return (
+		<SimpleGrid className='productsSlider' columns={columns} gapX='2' gapY='4'>
+			{products.map((product) => (
+				<Box key={product.id}>
+					<ProductCard product={product} category={category} subcategory={subcategory} />
+				</Box>
+			))}
+		</SimpleGrid>
 	);
 }

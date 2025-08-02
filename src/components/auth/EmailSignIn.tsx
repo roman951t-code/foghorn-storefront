@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createEmailSignInSchema, EmailSchema } from 'formValidationSchemas/emailSignInSchema';
 import type { I18nData } from '@/types/i18n';
 import ResetPass from './ResetPass';
-import { loginEmailAction } from '@/actions/loginEmailAction';
+import { loginEmailAction } from '@/actions/auth/loginEmailAction';
 import { authClient } from '@/lib/auth-client';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';

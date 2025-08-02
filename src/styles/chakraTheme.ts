@@ -158,6 +158,11 @@ const config = defineConfig({
 			padding: '8px',
 			borderRadius: '60%',
 		},
+		'.thumbsSlider .swiper-button-prev, .thumbsSlider .swiper-button-next': {
+			backgroundColor: 'bg',
+			height: '90px !important',
+			width: '30px !important',
+		},
 		'.ReactModal__Overlay': {
 			opacity: 0,
 			transition: 'opacity 150ms ease-in-out',

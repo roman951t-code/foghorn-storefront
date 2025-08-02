@@ -6,7 +6,7 @@ import { IoMailOutline } from 'react-icons/io5';
 import { IoMdPhonePortrait } from 'react-icons/io';
 import { useState } from 'react';
 import type { I18nData } from '@/types/i18n';
-import { setNotificationMethodAction } from '@/actions/setNotificationMethodAction';
+import { setNotificationMethodAction } from '@/actions/auth/setNotificationMethodAction';
 import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
 import { toaster } from '@/components/reusable/chakra/toaster';
 

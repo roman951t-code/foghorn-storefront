@@ -66,7 +66,7 @@ export default function ShareProduct({ i18nData }: Props) {
 						<VStack gap='2' alignItems='flex-start'>
 							<Text fontSize='md'>{i18nData.shareProductText}</Text>
 
-							<Clipboard.Root value={fullUrl}>
+							<Clipboard.Root value={fullUrl} wordBreak='break-all' lineHeight='1.25'>
 								<Clipboard.Trigger asChild>
 									<Chakralink as='span' color='blue.fg' textStyle='md'>
 										<Clipboard.Indicator />

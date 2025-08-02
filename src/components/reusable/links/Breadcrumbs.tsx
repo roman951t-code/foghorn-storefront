@@ -1,53 +1,88 @@
-import {
-	BreadcrumbCurrentLink,
-	BreadcrumbLink,
-	BreadcrumbRoot,
-} from '@/components/reusable/chakra/breadcrumb';
-import { GiClothes } from 'react-icons/gi';
-import { HiOutlineSlash } from 'react-icons/hi2';
+import { BreadcrumbLink, BreadcrumbRoot } from '@/components/reusable/chakra/breadcrumb';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
+import { LocaleNavLink } from './LocaleNavLink';
+import { Badge } from '@chakra-ui/react';
 
 interface Props {
 	category?: string;
 	subcategory?: string;
-	productId?: string;
+	product?: string;
 }
 
-export default function Breadcrumbs({ category, subcategory, productId }: Props) {
+function CustomBreadcrumbLink({ href, children }: { href: string; children: React.ReactNode }) {
 	return (
-		<BreadcrumbRoot variant='underline' separator={<HiOutlineSlash />} size='lg'>
+		<Badge variant='outline' size='md'>
+			<LocaleNavLink
+				href={href}
+				wordBreak='break-word'
+				fontSize='md'
+				transition='all .15s ease-in-out'
+				textDecorationColor='main'
+				color='main'
+				_hover={{ color: 'link', cursor: 'pointer' }}
+				_focus={{ outline: 'none' }}
+			>
+				{children}
+			</LocaleNavLink>
+		</Badge>
+	);
+}
+
+function BreadcrumbCurrentLink({ children }: { children: React.ReactNode }) {
+	return (
+		<BreadcrumbLink
+			wordBreak='break-word'
+			color='main'
+			cursor='default'
+			fontWeight='medium'
+			fontSize='md'
+			textDecoration='none'
+			_focus={{ outline: 'none' }}
+		>
+			{children}
+		</BreadcrumbLink>
+	);
+}
+
+export default function Breadcrumbs({ category, subcategory, product }: Props) {
+	return (
+		<BreadcrumbRoot variant='underline' size='lg'>
 			<CatalogBtn
 				fullText={false}
 				trigger={
-					<BreadcrumbLink
-						fontSize='15px'
-						transition='all .15s ease-in-out'
-						textDecorationColor='main'
-						color='link'
-						_hover={{ cursor: 'pointer' }}
-						_focus={{ outline: 'none' }}
-					>
-						Каталог
-					</BreadcrumbLink>
+					<Badge variant='outline' size='md'>
+						<BreadcrumbLink
+							wordBreak='break-word'
+							fontSize='md'
+							fontWeight='medium'
+							color='main'
+							textDecorationColor='main'
+							_hover={{ color: 'link', cursor: 'pointer' }}
+							_focus={{ outline: 'none' }}
+						>
+							Каталог
+						</BreadcrumbLink>
+					</Badge>
 				}
 			/>
 
-			{category && (
-				<BreadcrumbLink
-					href={`/catalog/${category}`}
-					fontSize='15px'
-					transition='all .15s ease-in-out'
-					textDecorationColor='main'
-					color='link'
-					_hover={{ color: 'main', cursor: 'pointer' }}
-					_focus={{ outline: 'none' }}
-				>
-					<GiClothes /> {category}
-				</BreadcrumbLink>
-			)}
+			{category &&
+				(!subcategory && !product ? (
+					<BreadcrumbCurrentLink>{category}</BreadcrumbCurrentLink>
+				) : (
+					<CustomBreadcrumbLink href={`/products/${category}`}>{category}</CustomBreadcrumbLink>
+				))}
 
-			{subcategory && <BreadcrumbCurrentLink>{subcategory}</BreadcrumbCurrentLink>}
-			{productId && <BreadcrumbCurrentLink>{productId}</BreadcrumbCurrentLink>}
+			{subcategory &&
+				(!product ? (
+					<BreadcrumbCurrentLink>{subcategory}</BreadcrumbCurrentLink>
+				) : (
+					<CustomBreadcrumbLink href={`/products/${category}/${subcategory}`}>
+						{subcategory}
+					</CustomBreadcrumbLink>
+				))}
+
+			{product && <BreadcrumbCurrentLink>{product}</BreadcrumbCurrentLink>}
 		</BreadcrumbRoot>
 	);
 }

@@ -7,7 +7,7 @@ import type { I18nData } from '@/types/i18n';
 import CenteredModal from '../dialogs/CenteredModal';
 import { useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
-import { setNewPasswordAction } from '@/actions/setNewPasswordAction';
+import { setNewPasswordAction } from '@/actions/auth/setNewPasswordAction';
 import { useRouter } from 'next/navigation';
 import { toaster } from '../reusable/chakra/toaster';
 import { PasswordInput } from '../reusable/chakra/password-input';

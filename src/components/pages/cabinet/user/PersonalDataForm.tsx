@@ -13,7 +13,7 @@ import { z } from 'zod';
 import PreferredDeliveryForm from './PreferredDeliveryForm';
 import { useSession } from '@/components/providers/SessionProvider';
 import AddressForm from './AddressForm';
-import { editAccountAction, editNameAction } from '@/actions/editAccountAction';
+import { editAccountAction, editNameAction } from '@/actions/auth/editAccountAction';
 import NameForm from './NameForm';
 import EmailForm from './EmailForm';
 import PhoneForm from './PhoneForm';

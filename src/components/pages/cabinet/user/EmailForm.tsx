@@ -5,7 +5,7 @@ import CenteredModal from '@/components/dialogs/CenteredModal';
 import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
 import { useState } from 'react';
 import { authClient } from '@/lib/auth-client';
-import { editAccountAction } from '@/actions/editAccountAction';
+import { editAccountAction } from '@/actions/auth/editAccountAction';
 
 interface Props {
 	isEmailVerified: boolean;

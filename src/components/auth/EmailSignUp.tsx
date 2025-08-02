@@ -4,7 +4,7 @@ import { Input, Stack, Field, Fieldset, Text, Highlight } from '@chakra-ui/react
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { registerEmailAction } from '@/actions/registerEmailAction';
+import { registerEmailAction } from '@/actions/auth/registerEmailAction';
 import {
 	createEmailSignUpSchema,
 	EmailSignUpSchema,

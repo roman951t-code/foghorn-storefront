@@ -11,7 +11,7 @@ import {
 	PhoneSignInSchema,
 } from 'formValidationSchemas/phoneSignInSchema';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
-import { sendVerifyPhoneAction } from '@/actions/sendVerifyPhoneAction';
+import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
 import dynamic from 'next/dynamic';
 
 const PhoneConfirmation = dynamic(() => import('./PhoneConfirmation'));

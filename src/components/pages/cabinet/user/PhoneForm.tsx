@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useHookFormMask } from 'use-mask-input';
 import z from 'zod';
-import { sendVerifyPhoneAction } from '@/actions/sendVerifyPhoneAction';
+import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
 import { PhoneSchemaData } from 'formValidationSchemas/accountSchema';
 import PhoneUpdate from './PhoneUpdate';
 

@@ -28,7 +28,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 							{subcategory.products.map((product) => (
 								<LocaleNavLink
 									key={product.id}
-									href={`/products/${subcategory.slug}/${product.slug}`}
+									href={`/products/${category.slug}/${subcategory.slug}/${product.slug}`}
 									fontSize='md'
 									variant='plain'
 									textWrap='wrap'
@@ -41,7 +41,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 							))}
 
 							<LocaleNavLink
-								href={`/category/${subcategory.slug}`}
+								href={`/products/${category.slug}/${subcategory.slug}`}
 								fontSize='md'
 								variant='plain'
 								transition='color 0.25s ease-in-out'
@@ -94,7 +94,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					{category.name}
 				</Heading>
 
-				<LocaleNavButton href={`/products/catalog/${category.slug}`} w='100%'>
+				<LocaleNavButton href={`/products/${category.slug}`} w='100%'>
 					{i18nData.seeCategory}
 					<BsChevronRight />
 				</LocaleNavButton>
