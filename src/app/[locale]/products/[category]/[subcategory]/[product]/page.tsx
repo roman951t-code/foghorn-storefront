@@ -41,9 +41,14 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>
 			<Breadcrumbs category={category} subcategory={subcategory} product={product} />
-			<ProductTabs tab={tab} product={currentProduct} />
-			<ProductsSection title={t('similar')} mb='0' />
-			<SubscribeSection />
+			<ProductTabs
+				tab={tab}
+				product={currentProduct}
+				category={category}
+				subcategory={subcategory}
+			/>
+			{/* <ProductsSection title={t('similar')} mb='0' /> */}
+			{/* <SubscribeSection /> */}
 		</Flex>
 	);
 }

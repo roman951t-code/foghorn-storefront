@@ -71,6 +71,7 @@
 		"hiUser": "Здравстуйте",
 		"authorize": "Авторизоваться",
 		"editEmail": "Изменение электронного адреса",
+		"notifUpdated": "Способ получения уведомлений успешно изменен",
 		"editPhone": "Изменение номера телефона",
 		"name": "Имя",
 		"middleName": "Отчество",
@@ -186,7 +187,9 @@
 		"productIsPresent": "Товар в наличии",
 		"productIsOutOfStock": "Товар отсутствует",
 		"productCode": "Код товара",
+		"lookSimilar": "Искать похожие",
 		"leaveFeedback": "Оставить отзыв",
+		"feedbackAbsent": "Отзывов пока что нет",
 		"rate": "Поставьте оценку",
 		"myRate": "Мой отзыв",
 		"totalAmount": "Общая сумма",
@@ -196,6 +199,7 @@
 		"discountSum": "Скидка",
 		"acceptOrder": "Подтверждаю заказ",
 		"feedbackTotal": "Всего отзывов",
+		"averageFeedback": "Средняя оценка",
 		"numOfProducts": "Количество товаров",
 		"order": "заказа",
 		"repeatOrder": "Повторить заказ",
@@ -207,7 +211,9 @@
 		"shareSocial": "Или распространите через социальные сети",
 		"orderProcessing": "Оформление заказа",
 		"seeProducts": "Смотреть товары",
-		"productsNotFound": "Товаров не найдено"
+		"productsNotFound": "Товаров не найдено",
+		"products": "Товары",
+		"categories": "Категории"
 	},
 	"NotFoundPage": {
 		"title": "Страница не найдена",

@@ -186,6 +186,7 @@
 		"description": "Опис",
 		"productIsPresent": "Товар в наявності",
 		"productIsOutOfStock": "Товар відсутній",
+		"lookSimilar": "Шукати схожі",
 		"productCode": "Код товару",
 		"leaveFeedback": "Залишити відгук",
 		"rate": "Поставте оцінку",
@@ -197,6 +198,8 @@
 		"discountSum": "Знижка",
 		"acceptOrder": "Підтверджую замовлення",
 		"feedbackTotal": "Загалом відгуків",
+		"averageFeedback": "Середня оцінка",
+		"feedbackAbsent": "Відгуків поки що немає",
 		"numOfProducts": "Кількість товарів",
 		"order": "замовлення",
 		"repeatOrder": "Повторити замовлення",
@@ -207,7 +210,9 @@
 		"shareSocial": "Або поширте через соціальні мережі",
 		"orderProcessing": "Оформлення замовлення",
 		"seeProducts": "Дивитись товари",
-		"productsNotFound": "Товарів не знайдено"
+		"productsNotFound": "Товарів не знайдено",
+		"products": "Товари",
+		"categories": "Категорії"
 	},
 	"NotFoundPage": {
 		"title": "Сторінку не знайдено",

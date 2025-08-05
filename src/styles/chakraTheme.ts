@@ -75,6 +75,7 @@ const config = defineConfig({
 							_dark: 'white',
 						},
 					},
+					disabled: { value: 'gray.100/20' },
 				},
 				bgHover: {
 					DEFAULT: {
@@ -160,6 +161,9 @@ const config = defineConfig({
 		},
 		'.thumbsSlider .swiper-button-prev, .thumbsSlider .swiper-button-next': {
 			backgroundColor: 'bg',
+			borderWidth: '0.5px',
+			borderRadius: '6px',
+			borderColor: 'var(--chakra-colors-border-light)',
 			height: '90px !important',
 			width: '30px !important',
 		},

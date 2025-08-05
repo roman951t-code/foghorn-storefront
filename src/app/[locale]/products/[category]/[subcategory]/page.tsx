@@ -11,13 +11,17 @@ import ProductsSection from '@/components/pages/main/ProductsSection';
 import FiltersTags from '@/components/pages/products/FiltersTags';
 import { getProductsBySubcategorySlug } from '@/actions/products/getProductsBySubcategorySlug';
 import { Metadata } from 'next';
+import Pagination from '@/components/reusable/Pagination';
 
 type Params = {
 	params: { category: string; subcategory: string };
+	searchParams: { page?: string };
 };
 
+const PRODUCTS_PER_PAGE = 4;
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-	const { subcategory } = params;
+	const { subcategory } = await params;
 
 	const t = await getTranslations('Metadata');
 	const title = t('category', { category: subcategory });
@@ -28,12 +32,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	};
 }
 
-export default async function Subcategory({ params }: Params) {
+export default async function Subcategory({ params, searchParams }: Params) {
 	const { category, subcategory } = await params;
+	const searchData = await searchParams;
+
+	const page = parseInt(searchData.page || '1', 10);
+	const offset = (page - 1) * PRODUCTS_PER_PAGE;
+
 	const t = await getTranslations('Products');
 	const sidebarT = await getTranslations('Sidebar');
 
-	const products = await getProductsBySubcategorySlug(subcategory, 12);
+	const products = await getProductsBySubcategorySlug(subcategory, PRODUCTS_PER_PAGE, offset);
 	if (!products) notFound();
 
 	return (
@@ -72,6 +81,13 @@ export default async function Subcategory({ params }: Params) {
 						category={category}
 						subcategory={subcategory}
 						notFound={t('productsNotFound')}
+					/>
+					<Pagination
+						currentPage={page}
+						totalProductsCount={50}
+						productsPerPage={PRODUCTS_PER_PAGE}
+						category={category}
+						subcategory={subcategory}
 					/>
 				</Box>
 			</Group>

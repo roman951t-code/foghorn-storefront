@@ -14,6 +14,25 @@ export async function getProductBySlug(slug: string) {
 			inStock: true,
 			averageRating: true,
 			reviewCount: true,
+			attributes: {
+				select: {
+					attribute: {
+						select: { name: true, unit: true },
+					},
+					value: true,
+				},
+			},
+			reviews: {
+				select: {
+					rating: true,
+					comment: true,
+					createdAt: true,
+					user: {
+						select: { name: true, image: true },
+					},
+				},
+				orderBy: { createdAt: 'desc' },
+			},
 		},
 	});
 
@@ -23,5 +42,16 @@ export async function getProductBySlug(slug: string) {
 		...product,
 		basePrice: product.basePrice.toNumber(),
 		discountPrice: product.discountPrice?.toNumber() ?? null,
+		attributes: product.attributes.map((attr) => ({
+			name: attr.attribute.name,
+			unit: attr.attribute.unit,
+			value: attr.value,
+		})),
+		reviews: product.reviews.map((review) => ({
+			rating: review.rating,
+			comment: review.comment,
+			createdAt: review.createdAt,
+			user: review.user,
+		})),
 	};
 }

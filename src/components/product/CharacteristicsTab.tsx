@@ -1,8 +1,23 @@
 import { DataList } from '@chakra-ui/react';
 import { Flex, Box } from '@chakra-ui/react';
 import ProductCard from '@/components/reusable/cards/ProductCard';
+import { Product } from '@/types/product';
 
-export default function CharacteristicsTab() {
+import '@/styles/swiper.css';
+
+type CharacteristicsTabProps = {
+	product: Product;
+	category: string;
+	subcategory: string;
+	attributes: { name: string; value: string; unit?: string | null }[];
+};
+
+export default function CharacteristicsTab({
+	attributes,
+	product,
+	category,
+	subcategory,
+}: CharacteristicsTabProps) {
 	return (
 		<Flex justifyContent='space-between' gap='4'>
 			<DataList.Root
@@ -16,47 +31,21 @@ export default function CharacteristicsTab() {
 				borderColor='border.dark'
 				p='4'
 			>
-				{items.map((item) => (
-					<DataList.Item key={item.label} pt='4' fontSize='14px'>
+				{attributes.map((attr) => (
+					<DataList.Item key={attr.name} pt='4' fontSize='14px'>
 						<DataList.ItemLabel fontWeight='semibold' color='main' w='164px'>
-							{item.label}
+							{attr.name}
 						</DataList.ItemLabel>
-						<DataList.ItemValue>{item.value}</DataList.ItemValue>
+						<DataList.ItemValue>
+							{attr.value}
+							{attr.unit ? ` ${attr.unit}` : ''}
+						</DataList.ItemValue>
 					</DataList.Item>
 				))}
 			</DataList.Root>
 			<Box hideBelow='md' maxW='250px' className='productsSlider'>
-				<ProductCard />
+				<ProductCard product={product} category={category} subcategory={subcategory} />
 			</Box>
 		</Flex>
 	);
 }
-
-const items = [
-	{
-		label: 'Бренд',
-		value: `Lightning`,
-	},
-	{ label: 'Призначення', value: 'Динамічні' },
-	{
-		label: 'Довжина кабеля',
-		value: `Менше 1.5 м`,
-	},
-	{
-		label: 'Комплектація',
-		value: `Силіконові насадки, Навушники`,
-	},
-	{
-		label: 'Колір',
-		value: `Темно синій`,
-	},
-	{
-		label: 'Довжина в ширину',
-		value: `Не менше 15 м`,
-	},
-	{ label: 'Тип покриття', value: 'Мармур' },
-	{
-		label: 'Вбудований вай фай',
-		value: `Врядлі`,
-	},
-];

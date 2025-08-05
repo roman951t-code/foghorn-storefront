@@ -8,11 +8,13 @@ const CharacteristicsTab = dynamic(() => import('./CharacteristicsTab'));
 const FeedbackTab = dynamic(() => import('./FeedbackTab'));
 
 interface Props {
+	category: string;
+	subcategory: string;
 	tab?: string;
 	product: Product | null;
 }
 
-export default function ProductTabs({ tab = 'about', product }: Props) {
+export default function ProductTabs({ tab = 'about', product, category, subcategory }: Props) {
 	const t = useTranslations('Products');
 
 	if (!product) {
@@ -22,15 +24,22 @@ export default function ProductTabs({ tab = 'about', product }: Props) {
 	const items = [
 		{
 			title: t('about'),
-			content: <AboutTab product={product} />,
+			content: <AboutTab product={product} category={category} subcategory={subcategory} />,
 		},
 		{
 			title: t('characteristics'),
-			content: <CharacteristicsTab />,
+			content: (
+				<CharacteristicsTab
+					product={product}
+					attributes={product.attributes}
+					category={category}
+					subcategory={subcategory}
+				/>
+			),
 		},
 		{
 			title: t('feedback'),
-			content: <FeedbackTab />,
+			content: <FeedbackTab reviews={product.reviews} />,
 		},
 	];
 

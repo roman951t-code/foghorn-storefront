@@ -33,7 +33,7 @@ export default async function Main() {
 			<ProductsSection title={prodT('discount')} />
 			<ProductsSection title={prodT('promotional')} />
 			<ProductsSection title={prodT('viewed')} /> */}
-			<SubscribeSection />
+			{/* <SubscribeSection /> */}
 		</Flex>
 	);
 }

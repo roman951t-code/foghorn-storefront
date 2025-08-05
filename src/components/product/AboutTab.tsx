@@ -17,7 +17,9 @@ import {
 	Separator,
 	Stat,
 	Status,
+	Icon,
 } from '@chakra-ui/react';
+import { MdOutlineManageSearch } from 'react-icons/md';
 import ShareProduct from './ShareProduct';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
 import { Rating } from '../reusable/chakra/rating';
@@ -25,9 +27,11 @@ import { Product } from '@/types/product';
 
 interface Props {
 	product: Product;
+	category: string;
+	subcategory: string;
 }
 
-export default function AboutTab({ product }: Props) {
+export default function AboutTab({ product, category, subcategory }: Props) {
 	const t = useTranslations('Products');
 
 	const i18nData = {
@@ -99,13 +103,23 @@ export default function AboutTab({ product }: Props) {
 					</Flex>
 					<Stat.Root my='3'>
 						<Flex flexWrap='wrap' alignItems='center' gap='4'>
-							<PrimaryButton w='200px'>
-								<FiShoppingCart /> {t('buy')}
-							</PrimaryButton>
+							{product.inStock ? (
+								<PrimaryButton w='200px'>
+									<FiShoppingCart /> {t('buy')}
+								</PrimaryButton>
+							) : (
+								<PrimaryButton w='200px'>
+									<Icon size='lg'>
+										<MdOutlineManageSearch />
+									</Icon>
+									{t('lookSimilar')}
+								</PrimaryButton>
+							)}
 
 							<Stat.ValueText w='auto' fontSize='3xl'>
 								{product?.discountPrice ?? product.basePrice} ₴
 							</Stat.ValueText>
+
 							{discount > 0 && (
 								<Badge colorPalette='gray'>
 									<Box
@@ -115,14 +129,14 @@ export default function AboutTab({ product }: Props) {
 										textDecoration='line-through'
 										marginLeft='1'
 									>
-										{product.basePrice} ₴
+										{parseInt(product.basePrice.toFixed(2))}₴
 										<Badge
 											variant='solid'
 											color='main.lightOnly'
 											bg='main.tertiary'
 											marginLeft='12px'
 										>
-											- {discount}₴
+											- {parseInt(discount.toFixed(2))}₴
 										</Badge>
 									</Box>
 								</Badge>
@@ -138,7 +152,7 @@ export default function AboutTab({ product }: Props) {
 							defaultValue={5}
 						/>
 						<Link
-							href='#'
+							href={`/products/${category}/${subcategory}/${product?.slug}?tab=feedback`}
 							variant='underline'
 							fontSize='sm'
 							color='main'

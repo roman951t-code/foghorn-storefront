@@ -24,7 +24,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 							{subcategory.name}
 						</Text>
 
-						<VStack align='start' gap='4'>
+						<VStack align='start' gap='4' pb='4'>
 							{subcategory.products.map((product) => (
 								<LocaleNavLink
 									key={product.id}

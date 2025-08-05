@@ -44,6 +44,24 @@ async function main() {
 		},
 	});
 
+	const attributeNames = [
+		{ name: 'Weight', unit: 'g' },
+		{ name: 'Size', unit: 'mm' },
+		{ name: 'Model', unit: '' },
+		{ name: 'Color', unit: '' },
+		{ name: 'Battery', unit: 'mAh' },
+	];
+
+	const attributes = await Promise.all(
+		attributeNames.map((attr) =>
+			prisma.productAttribute.upsert({
+				where: { name: attr.name },
+				update: {},
+				create: { name: attr.name, unit: attr.unit },
+			})
+		)
+	);
+
 	const allProducts = [];
 
 	for (const main of mainCategories) {
@@ -84,12 +102,23 @@ async function main() {
 						stock,
 						averageRating: 4.8,
 						reviewCount: 3,
-						productCode: '65719',
+						productCode: faker.string.numeric(6),
 						inStock: stock > 10 && faker.datatype.boolean(),
 						brandId: brand.id,
 						categoryId: subcategory.id,
 					},
 				});
+
+				for (const attr of attributes) {
+					await prisma.productAttributeValue.create({
+						data: {
+							productId: product.id,
+							attributeId: attr.id,
+							value:
+								faker.commerce.productAdjective() + ' ' + faker.number.int({ min: 100, max: 9999 }),
+						},
+					});
+				}
 
 				allProducts.push(product);
 			}
@@ -122,15 +151,25 @@ async function main() {
 		skipDuplicates: true,
 	});
 
-	const reviewedProducts = faker.helpers.arrayElements(allProducts, 3);
+	const reviewedProducts = faker.helpers.arrayElements(allProducts, 10);
+
 	for (const product of reviewedProducts) {
+		const rating = faker.number.int({ min: 3, max: 5 });
 		await prisma.review.create({
 			data: {
 				userId: roman.id,
 				productId: product.id,
-				rating: faker.number.int({ min: 3, max: 5 }),
-				comment: faker.lorem.sentences(2),
-				createdAt: new Date(),
+				rating,
+				comment: faker.lorem.sentences(faker.number.int({ min: 1, max: 3 })),
+				createdAt: faker.date.recent({ days: 30 }),
+			},
+		});
+
+		await prisma.product.update({
+			where: { id: product.id },
+			data: {
+				averageRating: rating,
+				reviewCount: 1,
 			},
 		});
 	}

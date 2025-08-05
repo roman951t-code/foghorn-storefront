@@ -9,6 +9,24 @@ export type Category = {
 	}[];
 };
 
+export type ProductAttribute = {
+	name: string;
+	unit?: string | null;
+	value: string;
+};
+
+export type ProductReviewUser = {
+	name: string;
+	image?: string | null;
+};
+
+export type ProductReview = {
+	rating: number;
+	comment: string;
+	createdAt: string | Date;
+	user: ProductReviewUser;
+};
+
 export type Product = {
 	id: string;
 	name: string;
@@ -17,9 +35,11 @@ export type Product = {
 	basePrice: number;
 	discountPrice: number | null;
 	averageRating: number;
-	productCode: string;
+	productCode?: string;
 	reviewCount: number;
 	inStock: boolean;
+	attributes?: ProductAttribute[];
+	reviews?: ProductReview[];
 };
 
 export type SubcategoryWithProducts = {

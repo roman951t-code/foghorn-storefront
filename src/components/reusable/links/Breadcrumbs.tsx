@@ -15,7 +15,7 @@ function CustomBreadcrumbLink({ href, children }: { href: string; children: Reac
 			<LocaleNavLink
 				href={href}
 				wordBreak='break-word'
-				fontSize='md'
+				fontSize='15px'
 				transition='all .15s ease-in-out'
 				textDecorationColor='main'
 				color='main'
@@ -35,7 +35,7 @@ function BreadcrumbCurrentLink({ children }: { children: React.ReactNode }) {
 			color='main'
 			cursor='default'
 			fontWeight='medium'
-			fontSize='md'
+			fontSize='15px'
 			textDecoration='none'
 			_focus={{ outline: 'none' }}
 		>
@@ -53,7 +53,7 @@ export default function Breadcrumbs({ category, subcategory, product }: Props) {
 					<Badge variant='outline' size='md'>
 						<BreadcrumbLink
 							wordBreak='break-word'
-							fontSize='md'
+							fontSize='15px'
 							fontWeight='medium'
 							color='main'
 							textDecorationColor='main'

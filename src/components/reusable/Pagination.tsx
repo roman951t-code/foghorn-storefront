@@ -1,14 +1,51 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { ButtonGroup, IconButton, Pagination as ChakraPagination } from '@chakra-ui/react';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 
-export default function Pagination() {
+type PaginationProps = {
+	currentPage: number;
+	totalProductsCount: number;
+	productsPerPage: number;
+	category: string;
+	subcategory: string;
+};
+
+export default function Pagination({
+	currentPage,
+	totalProductsCount,
+	productsPerPage,
+	category,
+	subcategory,
+}: PaginationProps) {
+	const router = useRouter();
+	const totalPages = Math.ceil(totalProductsCount / productsPerPage);
+
+	const goToPage = (page: number) => {
+		const searchParams = new URLSearchParams(window.location.search);
+		searchParams.set('page', page.toString());
+		router.push(`/products/${category}/${subcategory}?${searchParams.toString()}`);
+	};
+
 	return (
-		<ChakraPagination.Root count={10} pageSize={2} defaultPage={1} my='8' colorPalette='gray'>
+		<ChakraPagination.Root
+			pageSize={4}
+			defaultPage={1}
+			count={totalPages}
+			page={currentPage}
+			mt='16'
+			colorPalette='gray'
+			display='flex'
+			justifyContent='center'
+		>
 			<ButtonGroup variant='ghost' size='md'>
 				<ChakraPagination.PrevTrigger asChild>
-					<IconButton>
+					<IconButton
+						disabled={currentPage === 1}
+						onClick={() => goToPage(currentPage - 1)}
+						aria-label='Previous'
+					>
 						<LuChevronLeft />
 					</IconButton>
 				</ChakraPagination.PrevTrigger>
@@ -16,8 +53,11 @@ export default function Pagination() {
 				<ChakraPagination.Items
 					render={(page) => (
 						<IconButton
-							_selected={{ borderColor: 'border.dark' }}
-							variant={{ base: 'ghost', _selected: 'outline' }}
+							key={page.value}
+							onClick={() => goToPage(page.value)}
+							variant={currentPage === page.value ? 'outline' : 'ghost'}
+							borderColor={currentPage === page.value ? 'border.dark' : 'transparent'}
+							aria-label={`Page ${page.value}`}
 						>
 							{page.value}
 						</IconButton>
@@ -25,7 +65,11 @@ export default function Pagination() {
 				/>
 
 				<ChakraPagination.NextTrigger asChild>
-					<IconButton>
+					<IconButton
+						disabled={currentPage === totalPages}
+						onClick={() => goToPage(currentPage + 1)}
+						aria-label='Next'
+					>
 						<LuChevronRight />
 					</IconButton>
 				</ChakraPagination.NextTrigger>

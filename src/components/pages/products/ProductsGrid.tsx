@@ -2,7 +2,7 @@ import { SimpleGrid, Box, VStack } from '@chakra-ui/react';
 import { EmptyState } from '@chakra-ui/react';
 import { HiColorSwatch } from 'react-icons/hi';
 import ProductCard from '../../reusable/cards/ProductCard';
-import { Product } from '@prisma/client';
+import { Product } from '@/types/product';
 
 interface Props {
 	products: Product[];

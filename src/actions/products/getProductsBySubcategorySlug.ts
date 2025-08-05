@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { Product } from '@prisma/client';
+import { Product } from '@/types/product';
 
 export async function getProductsBySubcategorySlug(
 	slug: string,
@@ -8,11 +8,11 @@ export async function getProductsBySubcategorySlug(
 ): Promise<Product[]> {
 	const subcategory = await prisma.productCategory.findUnique({
 		where: { slug },
-		select: {
+		include: {
 			products: {
-				orderBy: { name: 'asc' },
-				take: limit,
+				orderBy: [{ inStock: 'desc' }, { name: 'asc' }],
 				skip: offset,
+				take: limit,
 				select: {
 					id: true,
 					name: true,
@@ -20,12 +20,12 @@ export async function getProductsBySubcategorySlug(
 					imageUrl: true,
 					basePrice: true,
 					discountPrice: true,
-					reviews: {
-						select: {
-							rating: true,
-						},
-					},
+					inStock: true,
+					reviews: { select: { rating: true } },
 				},
+			},
+			_count: {
+				select: { products: true },
 			},
 		},
 	});
@@ -41,9 +41,10 @@ export async function getProductsBySubcategorySlug(
 			id: product.id,
 			name: product.name,
 			slug: product.slug,
+			inStock: product.inStock,
 			imageUrl: product.imageUrl ?? '',
 			basePrice: Number(product.basePrice),
-			discountPrice: product.discountPrice ? Number(product.discountPrice) : undefined,
+			discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
 			averageRating,
 			reviewCount: product.reviews.length,
 		};

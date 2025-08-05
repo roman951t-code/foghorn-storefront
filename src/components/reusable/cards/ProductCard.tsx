@@ -3,23 +3,26 @@ import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox } from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import '@/styles/swiper.css';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { Rating } from '../chakra/rating';
 import { Product } from '@/types/product';
 
+import 'swiper/css';
+import 'swiper/css/navigation';
+import '@/styles/swiper.css';
+
 type Props = {
 	category: string;
 	subcategory: string;
-	product: Product;
+	product: Product | null;
 };
 
 export default function ProductCard({ product, category, subcategory }: Props) {
-	if (!product) return null;
 	const t = useTranslations('Products');
 	const discount = product?.discountPrice ? product.basePrice - product?.discountPrice : 0;
+	const isInStock = product?.inStock;
+
+	if (!product) return null;
 
 	return (
 		<Card.Root
@@ -29,7 +32,8 @@ export default function ProductCard({ product, category, subcategory }: Props) {
 			h='full'
 			border='1px solid'
 			borderColor='border.dark'
-			bg='bg.tertiary'
+			bg={isInStock ? 'bg.tertiary' : 'gray.100/10'}
+			opacity={isInStock ? '1' : '.9'}
 			transition='all 0.25s ease-in-out'
 			_hover={{
 				borderColor: { base: 'orange', _dark: 'yellow' },
@@ -38,6 +42,7 @@ export default function ProductCard({ product, category, subcategory }: Props) {
 			<Flex direction='column' gap={2} p={4} pt='2.5' h='full'>
 				<Flex align='center' justifyContent='space-between'>
 					<IconButton
+						disabled={!isInStock}
 						aria-label='Cart'
 						variant='ghost'
 						rounded='full'
@@ -79,6 +84,12 @@ export default function ProductCard({ product, category, subcategory }: Props) {
 						>
 							{product.name}
 						</LocaleNavLink>
+
+						{!isInStock && (
+							<Text color='main' fontSize='md' mt='3'>
+								{t('productIsOutOfStock')}
+							</Text>
+						)}
 					</Card.Title>
 
 					<Text color='main' fontSize='2xl' mt='2'>
@@ -87,9 +98,9 @@ export default function ProductCard({ product, category, subcategory }: Props) {
 
 					{discount > 0 && (
 						<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
-							{product.basePrice} ₴
+							{parseInt(product.basePrice.toFixed(2))}₴
 							<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' ml='12px'>
-								- {discount}₴
+								- {parseInt(discount.toFixed(2))}₴
 							</Badge>
 						</Text>
 					)}

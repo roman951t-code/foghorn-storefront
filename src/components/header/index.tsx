@@ -17,6 +17,7 @@ export default function Header() {
 	const authT = useTranslations('Auth');
 	const validT = useTranslations('Validation');
 	const sideT = useTranslations('Sidebar');
+	const prodT = useTranslations('Products');
 
 	const authI18nData = extractI18nData(authT, authLocData);
 	const validI18nData = extractI18nData(validT, validLocData);
@@ -69,6 +70,8 @@ export default function Header() {
 						hideBelow='md'
 						placeholder={t('search')}
 						notFound={genT('resultsNotFound')}
+						products={prodT('products')}
+						categories={prodT('categories')}
 					/>
 					<Flex align='center' gap={3}>
 						<UserActions i18nData={i18nData} />
@@ -87,7 +90,12 @@ export default function Header() {
 					gap={{ base: 0, sm: 4 }}
 				>
 					<CatalogBtn hideBelow='sm' fullText={false} />
-					<SearchInput placeholder={t('search')} notFound={genT('resultsNotFound')} />
+					<SearchInput
+						placeholder={t('search')}
+						notFound={genT('resultsNotFound')}
+						products={prodT('products')}
+						categories={prodT('categories')}
+					/>
 				</Flex>
 			</Stack>
 			<Toaster />
