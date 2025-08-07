@@ -1,47 +1,24 @@
 'use client';
-
 import {
 	Combobox,
 	Group,
 	Heading,
-	Highlight,
+	Icon,
 	IconButton,
-	useComboboxContext,
+	Spinner,
 	useListCollection,
+	Wrap,
 } from '@chakra-ui/react';
 import { useAsync } from 'react-use';
 import { useRef, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
-import { LocaleNavLink } from '../reusable/links/LocaleNavLink';
+import { SearchProductItem, SearchSubcategoryItem } from '@/types/product';
+import { IoPricetagsOutline } from 'react-icons/io5';
+import { CategorySearchItem, ProductSearchItem, SeeAllLink } from './SearchItem';
 
-interface ProductItem {
-	label: string;
-	value: string;
-}
-
-function ComboboxItem(props: { item: ProductItem }) {
-	const { item } = props;
-	const combobox = useComboboxContext();
-
-	return (
-		<Combobox.Item item={item} key={item.value} fontSize='15px' py='2'>
-			<Combobox.ItemText _hover={{ cursor: 'pointer' }} fontWeight='medium'>
-				<LocaleNavLink asChild href='/' textDecoration='none' fontSize='15px'>
-					<Highlight
-						ignoreCase
-						query={combobox.inputValue}
-						styles={{
-							bg: 'yellow.200',
-							color: 'black',
-							fontWeight: 'medium',
-						}}
-					>
-						{item.value}
-					</Highlight>
-				</LocaleNavLink>
-			</Combobox.ItemText>
-		</Combobox.Item>
-	);
+interface SearchResponse {
+	products: SearchProductItem[];
+	subcategories: SearchSubcategoryItem[];
 }
 
 interface Props {
@@ -49,6 +26,7 @@ interface Props {
 	notFound: string;
 	products: string;
 	categories: string;
+	seeAll: string;
 	hideBelow?: string;
 }
 
@@ -56,24 +34,27 @@ export default function SearchInput({
 	placeholder,
 	notFound,
 	hideBelow,
+	seeAll,
 	products,
 	categories,
 }: Props) {
 	const [inputValue, setInputValue] = useState('');
 	const [hasSearched, setHasSearched] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+	const [subcategories, setSubcategories] = useState<SearchSubcategoryItem[]>([]);
 
-	const { collection, set } = useListCollection<ProductItem>({
+	const { collection, set } = useListCollection<SearchProductItem>({
 		initialItems: [],
-		itemToString: (item) => item.label,
-		itemToValue: (item) => item.value,
+		itemToString: (item) => item.name,
+		itemToValue: (item) => item.name,
 	});
 
-	const cache = useRef<Map<string, ProductItem[]>>(new Map());
+	const cache = useRef<Map<string, SearchResponse>>(new Map());
 
 	useAsync(async () => {
 		if (!inputValue || inputValue.length < 2) {
 			set([]);
+			setSubcategories([]);
 			setHasSearched(false);
 			setIsLoading(false);
 			return;
@@ -83,18 +64,22 @@ export default function SearchInput({
 		setIsLoading(true);
 
 		if (cache.current.has(inputValue)) {
-			set(cache.current.get(inputValue) || []);
+			const cached = cache.current.get(inputValue)!;
+			set(cached.products);
+			setSubcategories(cached.subcategories);
 			setIsLoading(false);
 			return;
 		}
 
 		try {
 			const res = await fetch(`/api/products/search?q=${encodeURIComponent(inputValue)}`);
-			const data = await res.json();
+			const data: SearchResponse = await res.json();
 			cache.current.set(inputValue, data);
-			set(data);
-		} catch (err) {
+			set(data.products);
+			setSubcategories(data.subcategories);
+		} catch {
 			set([]);
+			setSubcategories([]);
 		} finally {
 			setIsLoading(false);
 		}
@@ -106,7 +91,7 @@ export default function SearchInput({
 				variant='subtle'
 				collection={collection}
 				size='md'
-				openOnChange={(e) => e.inputValue.length > 1}
+				openOnChange={(e) => e.inputValue.length > 0}
 				onInputValueChange={(e) => setInputValue(e.inputValue)}
 				positioning={{ flip: false, gutter: 2 }}
 			>
@@ -130,29 +115,70 @@ export default function SearchInput({
 
 				<Combobox.Positioner>
 					<Combobox.Content
+						bg='bg.tertiary'
+						maxHeight='540px'
 						px='2'
 						_open={{ animationStyle: 'scale-fade-in' }}
-						_closed={{
-							animationStyle: 'scale-fade-out',
-							animationDuration: 'fast',
-						}}
+						_closed={{ animationStyle: 'scale-fade-out', animationDuration: 'fast' }}
 					>
-						{hasSearched && !isLoading && collection.items.length === 0 && (
-							<Combobox.Empty fontSize='15px'>{notFound}</Combobox.Empty>
+						{isLoading && (
+							<Group justify='center' py='4'>
+								<Spinner size='md' color='main.accent' />
+							</Group>
 						)}
 
-						<Heading fontSize='lg' fontWeight='normal' my='2'>
-							{products}
-						</Heading>
-						{collection.items.map((item) => (
-							<ComboboxItem item={item} key={item.value} />
-						))}
-						<Heading fontSize='lg' fontWeight='normal' my='2'>
-							{categories}
-						</Heading>
-						{collection.items.map((item) => (
-							<ComboboxItem item={item} key={item.value} />
-						))}
+						{hasSearched && !isLoading && collection.items.length === 0 && (
+							<Combobox.Empty fontSize='15px' fontWeight='medium'>
+								{notFound}
+							</Combobox.Empty>
+						)}
+
+						{hasSearched && !isLoading && collection.items.length > 0 && (
+							<>
+								<Heading
+									fontSize='lg'
+									fontWeight='medium'
+									my='2'
+									borderBottom='1px solid'
+									borderColor='border.light'
+								>
+									<Icon mr='2'>
+										<IoPricetagsOutline />
+									</Icon>
+									{products}
+								</Heading>
+								{collection.items.map((item) => (
+									<ProductSearchItem key={`product-${item.name}`} item={item} />
+								))}
+
+								<SeeAllLink
+									linkTo={`/products/search/?searchQuery=${encodeURIComponent(inputValue.trim())}`}
+									seeAll={seeAll}
+								/>
+
+								{subcategories.length > 0 && (
+									<>
+										<Heading
+											fontSize='lg'
+											fontWeight='medium'
+											my='2'
+											borderBottom='1px solid'
+											borderColor='border.light'
+										>
+											<Icon mr='2'>
+												<IoPricetagsOutline />
+											</Icon>
+											{categories}
+										</Heading>
+										<Wrap gap='4' my='3' pl='2'>
+											{subcategories.map((item) => (
+												<CategorySearchItem key={`category-${item.name}`} item={item} />
+											))}
+										</Wrap>
+									</>
+								)}
+							</>
+						)}
 					</Combobox.Content>
 				</Combobox.Positioner>
 			</Combobox.Root>

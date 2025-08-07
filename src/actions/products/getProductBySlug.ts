@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma';
-
 export async function getProductBySlug(slug: string) {
 	const product = await prisma.product.findUnique({
 		where: { slug },
@@ -14,6 +13,18 @@ export async function getProductBySlug(slug: string) {
 			inStock: true,
 			averageRating: true,
 			reviewCount: true,
+			category: {
+				select: {
+					name: true,
+					slug: true,
+					parent: {
+						select: {
+							name: true,
+							slug: true,
+						},
+					},
+				},
+			},
 			attributes: {
 				select: {
 					attribute: {
@@ -42,6 +53,8 @@ export async function getProductBySlug(slug: string) {
 		...product,
 		basePrice: product.basePrice.toNumber(),
 		discountPrice: product.discountPrice?.toNumber() ?? null,
+		categoryName: product.category?.parent?.name || '',
+		subcategoryName: product.category?.name || '',
 		attributes: product.attributes.map((attr) => ({
 			name: attr.attribute.name,
 			unit: attr.attribute.unit,

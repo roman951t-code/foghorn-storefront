@@ -62,3 +62,18 @@ export type CatalogCategory = {
 	slug: string;
 	children: SubcategoryWithProducts[];
 };
+
+export type SearchProductItem = {
+	type: 'product';
+	name: string;
+	product: string;
+	category: string;
+	subcategory: string;
+};
+
+export type SearchSubcategoryItem = {
+	type: 'subcategory';
+	name: string;
+	subcategory: string;
+	category: string;
+};

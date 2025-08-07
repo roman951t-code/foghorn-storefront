@@ -11,7 +11,16 @@ interface Props {
 
 function CustomBreadcrumbLink({ href, children }: { href: string; children: React.ReactNode }) {
 	return (
-		<Badge variant='outline' size='md'>
+		<Badge
+			variant='outline'
+			size='md'
+			borderWidth='0.5px'
+			bg='bg.tertiary'
+			px='1.5'
+			py='1'
+			boxShadow='none'
+			borderColor='border.light'
+		>
 			<LocaleNavLink
 				href={href}
 				wordBreak='break-word'
@@ -32,7 +41,7 @@ function BreadcrumbCurrentLink({ children }: { children: React.ReactNode }) {
 	return (
 		<BreadcrumbLink
 			wordBreak='break-word'
-			color='main'
+			color='fg'
 			cursor='default'
 			fontWeight='medium'
 			fontSize='15px'
@@ -44,20 +53,50 @@ function BreadcrumbCurrentLink({ children }: { children: React.ReactNode }) {
 	);
 }
 
-export default function Breadcrumbs({ category, subcategory, product }: Props) {
+interface Props {
+	categorySlug?: string;
+	subcategorySlug?: string;
+	categoryName?: string;
+	subcategoryName?: string;
+	productSlug?: string;
+	productName?: string;
+}
+
+export default function Breadcrumbs({
+	categorySlug,
+	subcategorySlug,
+	categoryName,
+	subcategoryName,
+	productSlug,
+	productName,
+}: Props) {
 	return (
 		<BreadcrumbRoot variant='underline' size='lg'>
 			<CatalogBtn
 				fullText={false}
 				trigger={
-					<Badge variant='outline' size='md'>
+					<Badge
+						variant='outline'
+						size='md'
+						borderWidth='0.5px'
+						bg='bg.tertiary'
+						boxShadow='none'
+						px='1.5'
+						py='1'
+						borderColor='border.light'
+					>
 						<BreadcrumbLink
 							wordBreak='break-word'
 							fontSize='15px'
-							fontWeight='medium'
+							transition='all .15s ease-in-out'
+							textDecoration='none'
 							color='main'
-							textDecorationColor='main'
-							_hover={{ color: 'link', cursor: 'pointer' }}
+							_hover={{
+								color: 'link',
+								cursor: 'pointer',
+								textDecoration: 'underline',
+								textDecorationColor: 'main',
+							}}
 							_focus={{ outline: 'none' }}
 						>
 							Каталог
@@ -66,23 +105,25 @@ export default function Breadcrumbs({ category, subcategory, product }: Props) {
 				}
 			/>
 
-			{category &&
-				(!subcategory && !product ? (
-					<BreadcrumbCurrentLink>{category}</BreadcrumbCurrentLink>
+			{categorySlug &&
+				(!subcategorySlug && !productSlug ? (
+					<BreadcrumbCurrentLink>{categoryName}</BreadcrumbCurrentLink>
 				) : (
-					<CustomBreadcrumbLink href={`/products/${category}`}>{category}</CustomBreadcrumbLink>
-				))}
-
-			{subcategory &&
-				(!product ? (
-					<BreadcrumbCurrentLink>{subcategory}</BreadcrumbCurrentLink>
-				) : (
-					<CustomBreadcrumbLink href={`/products/${category}/${subcategory}`}>
-						{subcategory}
+					<CustomBreadcrumbLink href={`/products/${categorySlug}`}>
+						{categoryName}
 					</CustomBreadcrumbLink>
 				))}
 
-			{product && <BreadcrumbCurrentLink>{product}</BreadcrumbCurrentLink>}
+			{subcategorySlug &&
+				(!productSlug ? (
+					<BreadcrumbCurrentLink>{subcategoryName}</BreadcrumbCurrentLink>
+				) : (
+					<CustomBreadcrumbLink href={`/products/${categorySlug}/${subcategorySlug}`}>
+						{subcategoryName}
+					</CustomBreadcrumbLink>
+				))}
+
+			{productSlug && <BreadcrumbCurrentLink>{productName}</BreadcrumbCurrentLink>}
 		</BreadcrumbRoot>
 	);
 }

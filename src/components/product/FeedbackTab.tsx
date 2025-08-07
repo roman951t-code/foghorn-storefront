@@ -1,4 +1,4 @@
-import { Card, Text, Flex, Stack, Heading, Separator, DataList } from '@chakra-ui/react';
+import { Card, Flex, Stack, Heading, Separator, DataList } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Rating } from '../reusable/chakra/rating';
@@ -37,7 +37,7 @@ export default function FeedbackTab({ reviews }: FeedbackTabProps) {
 
 	const averageRating =
 		reviews.length > 0 ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length : 0;
-	console.log('averageRating', averageRating);
+
 	return (
 		<Stack gap='4'>
 			<Card.Root

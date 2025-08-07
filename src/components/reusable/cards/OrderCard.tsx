@@ -98,7 +98,15 @@ export default function OrderCard() {
 									justifyContent='center'
 									alignItems={{ base: 'flex-start', sm: 'flex-end' }}
 								>
-									<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
+									<Tag.Root
+										variant='surface'
+										borderWidth='0.5px'
+										boxShadow='none'
+										bg='bg.tertiary'
+										borderColor='border.light'
+										size='lg'
+										color='main'
+									>
 										<Tag.Label textAlign='right'>№ {prodT('order')}: 65719</Tag.Label>
 									</Tag.Root>
 									<Text color='main' textStyle='sm' fontWeight='semibold'>

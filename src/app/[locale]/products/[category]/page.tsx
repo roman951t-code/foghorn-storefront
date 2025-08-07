@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 export default async function CategoryPage({ params }: Params) {
-	const { category } = params;
+	const { category } = await params;
 
 	return (
 		<Stack mx={{ base: '12px', '2xl': 0 }} gap={16} direction='column' mb='6'>

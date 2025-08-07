@@ -212,7 +212,8 @@
 		"seeProducts": "Дивитись товари",
 		"productsNotFound": "Товарів не знайдено",
 		"products": "Товари",
-		"categories": "Категорії"
+		"categories": "Категорії",
+		"searchQueryResults": "Результати за запитом {searchQuery}"
 	},
 	"NotFoundPage": {
 		"title": "Сторінку не знайдено",

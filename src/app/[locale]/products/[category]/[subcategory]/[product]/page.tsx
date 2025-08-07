@@ -34,19 +34,22 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 	const { category, subcategory, product } = await params;
 	const { tab } = await searchParams;
 
-	const currentProduct = await getProductBySlug(product);
+	const productData = await getProductBySlug(product);
 
 	const t = await getTranslations('Products');
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>
-			<Breadcrumbs category={category} subcategory={subcategory} product={product} />
-			<ProductTabs
-				tab={tab}
-				product={currentProduct}
-				category={category}
-				subcategory={subcategory}
+			<Breadcrumbs
+				categorySlug={category}
+				subcategorySlug={subcategory}
+				categoryName={productData?.categoryName}
+				subcategoryName={productData?.subcategoryName}
+				productSlug={productData?.slug}
+				productName={productData?.name}
 			/>
+
+			<ProductTabs tab={tab} product={productData} category={category} subcategory={subcategory} />
 			{/* <ProductsSection title={t('similar')} mb='0' /> */}
 			{/* <SubscribeSection /> */}
 		</Flex>

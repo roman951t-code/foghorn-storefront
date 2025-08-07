@@ -5,10 +5,15 @@ export async function getProductsBySubcategorySlug(
 	slug: string,
 	limit: number = 12,
 	offset: number = 0
-): Promise<Product[]> {
+): Promise<{
+	categoryName: string;
+	subcategoryName: string;
+	products: Product[];
+}> {
 	const subcategory = await prisma.productCategory.findUnique({
 		where: { slug },
 		include: {
+			parent: true,
 			products: {
 				orderBy: [{ inStock: 'desc' }, { name: 'asc' }],
 				skip: offset,
@@ -30,7 +35,13 @@ export async function getProductsBySubcategorySlug(
 		},
 	});
 
-	if (!subcategory) return [];
+	if (!subcategory) {
+		return {
+			categoryName: '',
+			subcategoryName: '',
+			products: [],
+		};
+	}
 
 	const products: Product[] = subcategory.products.map((product) => {
 		const ratings = product.reviews.map((r) => r.rating);
@@ -50,5 +61,9 @@ export async function getProductsBySubcategorySlug(
 		};
 	});
 
-	return products;
+	return {
+		categoryName: subcategory.parent?.name || '',
+		subcategoryName: subcategory.name,
+		products,
+	};
 }

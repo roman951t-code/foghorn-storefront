@@ -95,7 +95,16 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 							</IconButton>
 						</HStack>
 
-						<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray' mr='1'>
+						<Tag.Root
+							variant='surface'
+							borderWidth='0.5px'
+							boxShadow='none'
+							bg='bg.tertiary'
+							borderColor='border.light'
+							size='lg'
+							color='main'
+							mr='1'
+						>
 							<Tag.Label>
 								{t('productCode')}: {product.productCode}
 							</Tag.Label>
@@ -151,6 +160,7 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 							size='xs'
 							defaultValue={5}
 						/>
+
 						<Link
 							href={`/products/${category}/${subcategory}/${product?.slug}?tab=feedback`}
 							variant='underline'
@@ -158,7 +168,7 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 							color='main'
 							_focus={{ outline: 'none' }}
 						>
-							{t('feedback')} ({product.reviewCount})
+							{t('feedback')} ({product.reviewCount ?? 0})
 						</Link>
 					</HStack>
 					<Stack w='100%' gap='4' mt='6'>

@@ -9,6 +9,23 @@ interface Props {
 	[key: string]: any;
 }
 
+export function LocaleSearchLink({ href, children, ...props }: Props) {
+	return (
+		<Link href={href}>
+			<ChakraLink
+				as='span'
+				transition='all .15s ease-in-out'
+				textDecorationColor='main'
+				_hover={{ color: 'link' }}
+				_focus={{ outline: 'none' }}
+				{...props}
+			>
+				{children}
+			</ChakraLink>
+		</Link>
+	);
+}
+
 export function LocaleNavLink({ href, children, ...props }: Props) {
 	return (
 		<Link href={href}>

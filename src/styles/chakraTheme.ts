@@ -69,13 +69,9 @@ const config = defineConfig({
 							_dark: '#1F202C',
 						},
 					},
-					button: {
-						value: {
-							base: '{colors.yellow.400}',
-							_dark: 'white',
-						},
+					search: {
+						value: '{colors.gray.200}',
 					},
-					disabled: { value: 'gray.100/20' },
 				},
 				bgHover: {
 					DEFAULT: {

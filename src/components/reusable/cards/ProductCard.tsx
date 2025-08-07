@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
-import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox } from '@chakra-ui/react';
+import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link } from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { Rating } from '../chakra/rating';
@@ -108,14 +108,15 @@ export default function ProductCard({ product, category, subcategory }: Props) {
 
 				<HStack gap='4' mt='2'>
 					<Rating readOnly size='xs' defaultValue={product.averageRating ?? 0} />
-					<LocaleNavLink
+					<Link
 						href={`/products/${category}/${subcategory}/${product?.slug}?tab=feedback`}
 						variant='underline'
 						fontSize='sm'
 						color='main'
+						_focus={{ outline: 'none' }}
 					>
 						{t('feedback')} ({product.reviewCount ?? 0})
-					</LocaleNavLink>
+					</Link>
 				</HStack>
 			</Flex>
 		</Card.Root>

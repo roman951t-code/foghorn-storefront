@@ -71,6 +71,7 @@ export default function Header() {
 						placeholder={t('search')}
 						notFound={genT('resultsNotFound')}
 						products={prodT('products')}
+						seeAll={genT('seeAll')}
 						categories={prodT('categories')}
 					/>
 					<Flex align='center' gap={3}>
@@ -92,6 +93,7 @@ export default function Header() {
 					<CatalogBtn hideBelow='sm' fullText={false} />
 					<SearchInput
 						placeholder={t('search')}
+						seeAll={genT('seeAll')}
 						notFound={genT('resultsNotFound')}
 						products={prodT('products')}
 						categories={prodT('categories')}

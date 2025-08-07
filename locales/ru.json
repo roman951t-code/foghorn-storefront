@@ -213,7 +213,8 @@
 		"seeProducts": "Смотреть товары",
 		"productsNotFound": "Товаров не найдено",
 		"products": "Товары",
-		"categories": "Категории"
+		"categories": "Категории",
+		"searchQueryResults": "Результаты по запросу {searchQuery}"
 	},
 	"NotFoundPage": {
 		"title": "Страница не найдена",
