@@ -31,6 +31,8 @@ export type Product = {
 	id: string;
 	name: string;
 	slug: string;
+	category?: string;
+	subcategory?: string;
 	imageUrl: string | null;
 	basePrice: number;
 	discountPrice: number | null;

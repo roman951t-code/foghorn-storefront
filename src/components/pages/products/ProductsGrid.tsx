@@ -6,8 +6,8 @@ import { Product } from '@/types/product';
 
 interface Props {
 	products: Product[];
-	category: string;
-	subcategory: string;
+	category?: string;
+	subcategory?: string;
 	notFound: string;
 }
 
@@ -33,7 +33,11 @@ export default function ProductsGrid({ products, notFound, category, subcategory
 		<SimpleGrid className='productsSlider' columns={columns} gapX='2' gapY='4'>
 			{products.map((product) => (
 				<Box key={product.id}>
-					<ProductCard product={product} category={category} subcategory={subcategory} />
+					<ProductCard
+						product={product}
+						category={category || product?.category!}
+						subcategory={subcategory || product?.subcategory!}
+					/>
 				</Box>
 			))}
 		</SimpleGrid>

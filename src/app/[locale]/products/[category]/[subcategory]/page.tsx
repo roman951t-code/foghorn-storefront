@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import Breadcrumbs from '@/components/reusable/links/Breadcrumbs';
 import ProductsGrid from '@/components/pages/products/ProductsGrid';
-import { Flex, Heading, Box, Group, VStack } from '@chakra-ui/react';
+import { Flex, Heading, Box, Group, VStack, Text, Highlight, Separator } from '@chakra-ui/react';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import QuickFilters from '@/components/pages/products/QuickFilters';
 import Filters from '@/components/pages/products/Filters';
@@ -79,7 +79,16 @@ export default async function Subcategory({ params, searchParams }: Params) {
 					top='74px'
 				>
 					<CatalogBtn fullText />
-					<VStack p='4' mt='4' justifyContent='flex-start'>
+					<VStack p='4' justifyContent='flex-start'>
+						<Text w='full'>
+							<Highlight
+								query={subcategoryData?.totalCount?.toString()}
+								styles={{ fontWeight: 'semibold' }}
+							>
+								{`${t('totalProducts')}: ${subcategoryData?.totalCount}`}
+							</Highlight>
+						</Text>
+						<Separator color='border.light' w='full' mb='2' />
 						<QuickFilters />
 						<Filters />
 					</VStack>
@@ -94,10 +103,9 @@ export default async function Subcategory({ params, searchParams }: Params) {
 					/>
 					<Pagination
 						currentPage={page}
-						totalProductsCount={50}
+						totalProductsCount={subcategoryData?.totalCount || 0}
 						productsPerPage={PRODUCTS_PER_PAGE}
-						category={category}
-						subcategory={subcategory}
+						baseRoute={`/products/${category}/${subcategory}`}
 					/>
 				</Box>
 			</Group>

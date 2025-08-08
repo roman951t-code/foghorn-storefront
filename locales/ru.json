@@ -214,6 +214,7 @@
 		"productsNotFound": "Товаров не найдено",
 		"products": "Товары",
 		"categories": "Категории",
+		"allCategories": "Все категории",
 		"searchQueryResults": "Результаты по запросу {searchQuery}"
 	},
 	"NotFoundPage": {

@@ -9,7 +9,7 @@ import {
 	useListCollection,
 	Wrap,
 } from '@chakra-ui/react';
-import { useAsync } from 'react-use';
+import { useDebounce } from 'react-use';
 import { useRef, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import { SearchProductItem, SearchSubcategoryItem } from '@/types/product';
@@ -48,42 +48,51 @@ export default function SearchInput({
 		itemToString: (item) => item.name,
 		itemToValue: (item) => item.name,
 	});
-
 	const cache = useRef<Map<string, SearchResponse>>(new Map());
+	useDebounce(
+		async () => {
+			if (!inputValue || inputValue.length < 2) {
+				set([]);
+				setSubcategories([]);
+				setHasSearched(false);
+				setIsLoading(false);
+				return;
+			}
 
-	useAsync(async () => {
-		if (!inputValue || inputValue.length < 2) {
-			set([]);
-			setSubcategories([]);
-			setHasSearched(false);
-			setIsLoading(false);
-			return;
-		}
+			setHasSearched(true);
+			setIsLoading(true);
 
-		setHasSearched(true);
-		setIsLoading(true);
+			if (cache.current.has(inputValue)) {
+				const cached = cache.current.get(inputValue)!;
 
-		if (cache.current.has(inputValue)) {
-			const cached = cache.current.get(inputValue)!;
-			set(cached.products);
-			setSubcategories(cached.subcategories);
-			setIsLoading(false);
-			return;
-		}
+				const isRelevant = cached.products.some((p) =>
+					p.name.toLowerCase().includes(inputValue.toLowerCase())
+				);
 
-		try {
-			const res = await fetch(`/api/products/search?q=${encodeURIComponent(inputValue)}`);
-			const data: SearchResponse = await res.json();
-			cache.current.set(inputValue, data);
-			set(data.products);
-			setSubcategories(data.subcategories);
-		} catch {
-			set([]);
-			setSubcategories([]);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [inputValue]);
+				if (isRelevant) {
+					set(cached.products);
+					setSubcategories(cached.subcategories);
+					setIsLoading(false);
+					return;
+				}
+			}
+
+			try {
+				const res = await fetch(`/api/products/search?q=${encodeURIComponent(inputValue)}`);
+				const data: SearchResponse = await res.json();
+				cache.current.set(inputValue, data);
+				set(data.products);
+				setSubcategories(data.subcategories);
+			} catch {
+				set([]);
+				setSubcategories([]);
+			} finally {
+				setIsLoading(false);
+			}
+		},
+		400,
+		[inputValue]
+	);
 
 	return (
 		<Group flex='1' hideBelow={hideBelow} px={{ base: '0px', md: '20px' }} attached>

@@ -213,6 +213,8 @@
 		"productsNotFound": "Товарів не знайдено",
 		"products": "Товари",
 		"categories": "Категорії",
+		"allCategories": "Всі категорії",
+		"hideAllCategories": "Всі категорії",
 		"searchQueryResults": "Результати за запитом {searchQuery}"
 	},
 	"NotFoundPage": {

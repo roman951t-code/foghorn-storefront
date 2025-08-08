@@ -8,31 +8,32 @@ type PaginationProps = {
 	currentPage: number;
 	totalProductsCount: number;
 	productsPerPage: number;
-	category: string;
-	subcategory: string;
+	baseRoute: string;
 };
 
 export default function Pagination({
 	currentPage,
 	totalProductsCount,
 	productsPerPage,
-	category,
-	subcategory,
+	baseRoute,
 }: PaginationProps) {
 	const router = useRouter();
 	const totalPages = Math.ceil(totalProductsCount / productsPerPage);
-
 	const goToPage = (page: number) => {
 		const searchParams = new URLSearchParams(window.location.search);
 		searchParams.set('page', page.toString());
-		router.push(`/products/${category}/${subcategory}?${searchParams.toString()}`);
+		router.push(`${baseRoute}?${searchParams.toString()}`);
 	};
+
+	if (totalProductsCount === 0) {
+		return null;
+	}
 
 	return (
 		<ChakraPagination.Root
-			pageSize={4}
+			pageSize={productsPerPage}
 			defaultPage={1}
-			count={totalPages}
+			count={totalProductsCount}
 			page={currentPage}
 			mt='16'
 			colorPalette='gray'
