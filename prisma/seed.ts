@@ -62,6 +62,8 @@ async function main() {
 		)
 	);
 
+	const TAGS = ['popular', 'new', 'discount', 'promotional', 'viewed'];
+
 	const allProducts = [];
 
 	for (const main of mainCategories) {
@@ -106,6 +108,7 @@ async function main() {
 						inStock: stock > 10 && faker.datatype.boolean(),
 						brandId: brand.id,
 						categoryId: subcategory.id,
+						tags: [],
 					},
 				});
 
@@ -122,6 +125,29 @@ async function main() {
 
 				allProducts.push(product);
 			}
+		}
+	}
+
+	for (const tag of TAGS) {
+		const inStockProducts = allProducts.filter((p) => p.inStock);
+
+		while (inStockProducts.length < 6) {
+			const randomProduct = faker.helpers.arrayElement(allProducts);
+			if (!randomProduct.inStock) {
+				await prisma.product.update({
+					where: { id: randomProduct.id },
+					data: { inStock: true, stock: faker.number.int({ min: 15, max: 50 }) },
+				});
+				inStockProducts.push({ ...randomProduct, inStock: true });
+			}
+		}
+
+		const productsForTag = faker.helpers.arrayElements(inStockProducts, 6);
+		for (const p of productsForTag) {
+			await prisma.product.update({
+				where: { id: p.id },
+				data: { tags: { push: tag } },
+			});
 		}
 	}
 

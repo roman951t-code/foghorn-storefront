@@ -10,18 +10,21 @@ import ProductsGrid from '@/components/pages/products/ProductsGrid';
 import Pagination from '@/components/reusable/Pagination';
 import { Metadata } from 'next';
 import { getProductsBySearchQuery } from '@/actions/products/getProductsBySearchQuery';
+import { getProductsByTag } from '@/actions/products/getProductsByTag';
 import SearchCategories from '@/components/pages/products/SearchCategories';
 
 type Params = {
-	searchParams: { searchQuery?: string; page?: string };
+	searchParams: { searchQuery?: string; tag?: string; page?: string };
 };
 
 const PRODUCTS_PER_PAGE = 4;
 
 export async function generateMetadata({ searchParams }: Params): Promise<Metadata> {
-	const searchData = await searchParams;
+	const { searchQuery, tag } = await searchParams;
 	const t = await getTranslations('Products');
-	const title = t('searchQueryResults', { searchQuery: searchData?.searchQuery || '' });
+
+	const title = t('searchQueryResults', { searchQuery: tag ? t(tag) : searchQuery || '' });
+
 	return {
 		title,
 		description: '',
@@ -29,24 +32,33 @@ export async function generateMetadata({ searchParams }: Params): Promise<Metada
 }
 
 export default async function SearchProducts({ searchParams }: Params) {
-	const searchData = await searchParams;
+	const { searchQuery = '', tag, page: pageParam = '1' } = await searchParams;
 	const t = await getTranslations('Products');
 	const sidebarT = await getTranslations('Sidebar');
 
-	const query = searchData?.searchQuery || '';
-	const page = parseInt(searchData.page || '1', 10);
+	const page = parseInt(pageParam, 10);
 	const offset = (page - 1) * PRODUCTS_PER_PAGE;
 
-	const { products, subcategories, totalCount } = await getProductsBySearchQuery(
-		query,
-		PRODUCTS_PER_PAGE,
-		offset
-	);
+	let products: any[] = [];
+	let subcategories: any[] = [];
+	let totalCount = 0;
+
+	if (tag) {
+		const result = await getProductsByTag(tag, true, PRODUCTS_PER_PAGE, offset);
+		products = result.products;
+		subcategories = result?.subcategories;
+		totalCount = result?.totalCount;
+	} else {
+		const result = await getProductsBySearchQuery(searchQuery, PRODUCTS_PER_PAGE, offset);
+		products = result.products;
+		subcategories = result.subcategories;
+		totalCount = result.totalCount;
+	}
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<Heading as='h1' size='4xl' fontWeight='medium'>
-				{t('searchQueryResults', { searchQuery: query })}
+			<Heading as='h1' size='3xl' fontWeight='medium'>
+				{t('searchQueryResults', { searchQuery: tag ? t(tag) : searchQuery || '' })}
 			</Heading>
 
 			<Flex hideFrom='lg' justifyContent='flex-end'>
@@ -89,12 +101,12 @@ export default async function SearchProducts({ searchParams }: Params) {
 						currentPage={page}
 						totalProductsCount={totalCount}
 						productsPerPage={PRODUCTS_PER_PAGE}
-						baseRoute={`/products/search/`}
+						baseRoute='/products/search/'
 					/>
 				</Box>
 			</Group>
 
-			<ProductsSection title={t('viewed')} />
+			<ProductsSection title={t('viewed')} tag='viewed' />
 		</Flex>
 	);
 }

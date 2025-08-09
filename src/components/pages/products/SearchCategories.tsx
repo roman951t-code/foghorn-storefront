@@ -86,22 +86,25 @@ export default function SearchCategories({ data, allCategories }: Props) {
 				))}
 			</Accordion.Root>
 
-			<Link
-				mt='2'
-				w='full'
-				gap='4'
-				transition='all .15s ease-in-out'
-				variant='underline'
-				textDecorationColor='main'
-				_hover={{ color: 'link' }}
-				_focus={{ outline: 'none' }}
-				onClick={() => setShowAll((prev) => !prev)}
-			>
-				{allCategories}
-				{showAll ? <IoIosArrowUp /> : <IoIosArrowDown />}
-			</Link>
-
-			<Separator color='border.light' w='full' />
+			{categoryList?.length > 5 && (
+				<>
+					<Link
+						mt='2'
+						w='full'
+						gap='4'
+						transition='all .15s ease-in-out'
+						variant='underline'
+						textDecorationColor='main'
+						_hover={{ color: 'link' }}
+						_focus={{ outline: 'none' }}
+						onClick={() => setShowAll((prev) => !prev)}
+					>
+						{allCategories}
+						{showAll ? <IoIosArrowUp /> : <IoIosArrowDown />}
+					</Link>
+					<Separator color='border.light' w='full' />
+				</>
+			)}
 		</VStack>
 	);
 }

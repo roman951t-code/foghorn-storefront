@@ -4,14 +4,15 @@ import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 
 interface Props extends FlexProps {
 	title: string;
+	tag: string;
 }
 
-export default function ProductsSection({ title, ...restProps }: Props) {
+export default function ProductsSection({ title, tag, ...restProps }: Props) {
 	return (
-		<Flex gap={6} direction='column' my={20} {...restProps}>
+		<Flex gap={6} direction='column' mt={24} {...restProps}>
 			<Heading fontWeight='normal'>
 				<LocaleNavLink
-					href='/products/123'
+					href={`/products/search/?tag=${tag}`}
 					fontSize='28px'
 					variant='underline'
 					textUnderlineOffset='12px'
@@ -25,7 +26,7 @@ export default function ProductsSection({ title, ...restProps }: Props) {
 					{title}
 				</LocaleNavLink>
 			</Heading>
-			<ProductsSlider />
+			<ProductsSlider tag={tag} />
 		</Flex>
 	);
 }

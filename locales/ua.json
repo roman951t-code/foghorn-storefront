@@ -215,7 +215,7 @@
 		"categories": "Категорії",
 		"allCategories": "Всі категорії",
 		"hideAllCategories": "Всі категорії",
-		"searchQueryResults": "Результати за запитом {searchQuery}"
+		"searchQueryResults": "Результати за запитом: {searchQuery}"
 	},
 	"NotFoundPage": {
 		"title": "Сторінку не знайдено",

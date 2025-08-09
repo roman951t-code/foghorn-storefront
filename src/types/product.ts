@@ -79,3 +79,18 @@ export type SearchSubcategoryItem = {
 	subcategory: string;
 	category: string;
 };
+
+export type SubcategoryInfo = {
+	categoryName: string;
+	categorySlug: string;
+	subcategoryName: string;
+	subcategorySlug: string;
+};
+
+export type ProductsOnly = { products: Product[] };
+
+export type ProductsWithMeta = {
+	products: Product[];
+	totalCount: number;
+	subcategories: SubcategoryInfo[];
+};

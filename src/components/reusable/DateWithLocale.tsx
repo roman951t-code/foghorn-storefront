@@ -20,7 +20,7 @@ export default function DateWithLocale({ date }: { date: string | Date }) {
 		.replace('.', '');
 
 	return (
-		<Text color='main.disabled' textStyle='sm'>
+		<Text color='main' textStyle='sm'>
 			{formattedDate}
 		</Text>
 	);

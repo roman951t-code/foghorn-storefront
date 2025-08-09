@@ -134,6 +134,7 @@ model Product {
   brandId      String
   averageRating  Float    @default(0)
   reviewCount    Int      @default(0)
+  tags         String[]
   categoryId   String
   createdAt    DateTime                @default(now())
   updatedAt    DateTime                @updatedAt

@@ -24,6 +24,7 @@ import ShareProduct from './ShareProduct';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
 import { Rating } from '../reusable/chakra/rating';
 import { Product } from '@/types/product';
+import { LocaleNavButton } from '../reusable/links/LocaleNavLink';
 
 interface Props {
 	product: Product;
@@ -117,12 +118,15 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 									<FiShoppingCart /> {t('buy')}
 								</PrimaryButton>
 							) : (
-								<PrimaryButton w='200px'>
+								<LocaleNavButton
+									href={`/products/${category}/${subcategory}?search=similar`}
+									w='200px'
+								>
 									<Icon size='lg'>
 										<MdOutlineManageSearch />
 									</Icon>
 									{t('lookSimilar')}
-								</PrimaryButton>
+								</LocaleNavButton>
 							)}
 
 							<Stat.ValueText w='auto' fontSize='3xl'>

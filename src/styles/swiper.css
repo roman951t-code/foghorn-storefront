@@ -20,6 +20,7 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	height: auto;
 }
 .productsSlider .swiper-slide img {
 	object-fit: fill;

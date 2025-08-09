@@ -59,7 +59,6 @@ export async function getProductsBySearchQuery(
 		}
 	}
 
-	// Fetch only paginated product data
 	const products = await prisma.product.findMany({
 		where: {
 			name: { contains: searchQuery, mode: 'insensitive' },

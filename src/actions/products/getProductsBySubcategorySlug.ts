@@ -3,8 +3,9 @@ import { Product } from '@/types/product';
 
 export async function getProductsBySubcategorySlug(
 	slug: string,
-	limit: number = 12,
-	offset: number = 0
+	limit = 12,
+	offset = 0,
+	onlyInStock?: boolean
 ): Promise<{
 	categoryName: string;
 	subcategoryName: string;
@@ -13,9 +14,7 @@ export async function getProductsBySubcategorySlug(
 }> {
 	const subcategory = await prisma.productCategory.findUnique({
 		where: { slug },
-		include: {
-			parent: true,
-		},
+		include: { parent: true },
 	});
 
 	if (!subcategory) {
@@ -29,9 +28,8 @@ export async function getProductsBySubcategorySlug(
 
 	const paginatedProducts = await prisma.product.findMany({
 		where: {
-			category: {
-				slug: slug,
-			},
+			category: { slug },
+			...(onlyInStock ? { inStock: true } : {}),
 		},
 		orderBy: [{ inStock: 'desc' }, { name: 'asc' }],
 		skip: offset,
@@ -45,21 +43,35 @@ export async function getProductsBySubcategorySlug(
 			discountPrice: true,
 			inStock: true,
 			reviews: { select: { rating: true } },
+			tags: true,
 		},
 	});
 
 	const totalCount = await prisma.product.count({
 		where: {
-			category: {
-				slug: slug,
-			},
+			category: { slug },
+			...(onlyInStock ? { inStock: true } : {}),
 		},
 	});
 
-	const products: Product[] = paginatedProducts.map((product) => {
+	const tagPriority = ['popular', 'new', 'discount', 'promotional'];
+
+	const sortedProducts = paginatedProducts.sort((a, b) => {
+		const aScore = Math.min(
+			...tagPriority.map((tag, i) => (a.tags?.includes(tag) ? i : tagPriority.length))
+		);
+		const bScore = Math.min(
+			...tagPriority.map((tag, i) => (b.tags?.includes(tag) ? i : tagPriority.length))
+		);
+		return aScore - bScore;
+	});
+
+	const products: Product[] = sortedProducts.map((product) => {
 		const ratings = product.reviews.map((r) => r.rating);
 		const averageRating =
-			ratings.length > 0 ? ratings.reduce((sum, val) => sum + val, 0) / ratings.length : 0;
+			ratings.length > 0
+				? ratings.reduce((sum: number, val: number) => sum + val, 0) / ratings.length
+				: 0;
 
 		return {
 			id: product.id,

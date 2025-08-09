@@ -15,7 +15,7 @@ import Pagination from '@/components/reusable/Pagination';
 
 type Params = {
 	params: { category: string; subcategory: string };
-	searchParams: { page?: string };
+	searchParams: { page?: string; search?: string };
 };
 
 const PRODUCTS_PER_PAGE = 4;
@@ -33,8 +33,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 export default async function Subcategory({ params, searchParams }: Params) {
-	const { category, subcategory } = await params;
-	const searchData = await searchParams;
+	const { category, subcategory } = params;
+	const searchData = searchParams;
 
 	const page = parseInt(searchData.page || '1', 10);
 	const offset = (page - 1) * PRODUCTS_PER_PAGE;
@@ -42,10 +42,13 @@ export default async function Subcategory({ params, searchParams }: Params) {
 	const t = await getTranslations('Products');
 	const sidebarT = await getTranslations('Sidebar');
 
+	const onlyInStock = searchData.search === 'similar';
+
 	const subcategoryData = await getProductsBySubcategorySlug(
 		subcategory,
 		PRODUCTS_PER_PAGE,
-		offset
+		offset,
+		onlyInStock
 	);
 
 	if (!subcategoryData) notFound();
@@ -58,7 +61,7 @@ export default async function Subcategory({ params, searchParams }: Params) {
 				categoryName={subcategoryData?.categoryName}
 				subcategoryName={subcategoryData?.subcategoryName}
 			/>
-			<Heading as='h1' size='4xl' fontWeight='medium'>
+			<Heading as='h1' size='3xl' fontWeight='medium'>
 				{subcategoryData?.subcategoryName}
 			</Heading>
 			<Flex hideFrom='lg' justifyContent='flex-end'>
@@ -110,7 +113,7 @@ export default async function Subcategory({ params, searchParams }: Params) {
 				</Box>
 			</Group>
 
-			<ProductsSection title={t('viewed')} />
+			<ProductsSection title={t('viewed')} tag='viewed' />
 		</Flex>
 	);
 }

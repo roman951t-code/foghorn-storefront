@@ -14,6 +14,7 @@ import {
 import { MessageBox, Input, Button } from 'react-chat-elements';
 import { IoMdAttach } from 'react-icons/io';
 import 'react-chat-elements/dist/main.css';
+import DateWithLocale from '../DateWithLocale';
 
 const items = [
 	{
@@ -81,12 +82,19 @@ export default function ChatCard({ sendText, productNumText, inputPlaceholder }:
 					<Accordion.Item value={item.name} borderBottom='none'>
 						<Accordion.ItemTrigger w='100%' p='0'>
 							<Flex justifyContent='space-between' w='100%'>
-								<Tag.Root variant='surface' size='lg' color='main' colorPalette='gray'>
-									<Tag.Label>№ {productNumText}: 65719</Tag.Label>
+								<Tag.Root
+									variant='surface'
+									borderWidth='0.5px'
+									boxShadow='none'
+									bg='bg.tertiary'
+									borderColor='border.light'
+									size='lg'
+									color='main'
+								>
+									<Tag.Label textAlign='right'>№ {productNumText}: 65719</Tag.Label>
 								</Tag.Root>
-								<Text color='main.disabled' textStyle='sm'>
-									12.02.2024
-								</Text>
+
+								<DateWithLocale date={new Date()} />
 							</Flex>
 
 							<Accordion.ItemIndicator />

@@ -28,12 +28,13 @@ export default async function Main() {
 				<CatalogBtn fullText />
 			</Box>
 			<CatalogPanel i18nData={i18nData} />
-			<ProductsSection title={prodT('popular')} />
-			{/* <ProductsSection title={prodT('new')} />
-			<ProductsSection title={prodT('discount')} />
-			<ProductsSection title={prodT('promotional')} />
-			<ProductsSection title={prodT('viewed')} /> */}
-			{/* <SubscribeSection /> */}
+			<ProductsSection title={prodT('popular')} tag='popular' />
+			{/* <ProductsSection title={prodT('new')} tag='new' />
+			<ProductsSection title={prodT('discount')} tag='discount' />
+			<ProductsSection title={prodT('promotional')} tag='promotional' />
+			<ProductsSection title={prodT('viewed')} tag='viewed' /> */}
+
+			<SubscribeSection />
 		</Flex>
 	);
 }

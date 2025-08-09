@@ -9,7 +9,7 @@ type Params = {
 };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-	const { category } = params;
+	const { category } = await params;
 
 	const t = await getTranslations('Metadata');
 	const title = t('category', { category });

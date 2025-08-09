@@ -1,17 +1,19 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { HStack } from '@chakra-ui/react';
 import { LoadingSkeleton } from '../Skeleton';
 import ProductCard from '../cards/ProductCard';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
+import { useEffect, useState } from 'react';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 
 import { productsBreakpoints } from '@/data/breakpoints';
+import { getProductsByTag } from '@/actions/products/getProductsByTag';
+import { Product } from '@/types/product';
 
 function ProductsSkeletonFallback() {
 	return (
@@ -23,7 +25,11 @@ function ProductsSkeletonFallback() {
 	);
 }
 
-function ProductsSwiper() {
+type Props = {
+	tag: string;
+};
+
+function ProductsSwiper({ products }: { products: Product[] }) {
 	return (
 		<Swiper
 			loop
@@ -34,20 +40,34 @@ function ProductsSwiper() {
 			modules={[Navigation]}
 			className='productsSlider'
 		>
-			{Array.from({ length: 12 }).map((_, index) => (
-				<SwiperSlide key={index}>
-					<ProductCard />
+			{products.map((p) => (
+				<SwiperSlide key={p.id}>
+					<ProductCard product={p} category={p.category!} subcategory={p.subcategory!} />
 				</SwiperSlide>
 			))}
 		</Swiper>
 	);
 }
 
-const DynamicProductsSwiper = dynamic(() => Promise.resolve(ProductsSwiper), {
-	ssr: false,
-	loading: () => <ProductsSkeletonFallback />,
-});
+export default function ProductsSlider({ tag }: Props) {
+	const [products, setProducts] = useState<Product[]>([]);
+	const [loading, setLoading] = useState(true);
 
-export default function ProductsSlider() {
-	return <DynamicProductsSwiper />;
+	useEffect(() => {
+		let mounted = true;
+		(async () => {
+			const data = await getProductsByTag(tag);
+			if (mounted) {
+				setProducts(data?.products);
+				setLoading(false);
+			}
+		})();
+		return () => {
+			mounted = false;
+		};
+	}, [tag]);
+
+	if (loading) return <ProductsSkeletonFallback />;
+
+	return products.length > 0 ? <ProductsSwiper products={products} /> : null;
 }

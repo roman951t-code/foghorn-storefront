@@ -215,7 +215,7 @@
 		"products": "Товары",
 		"categories": "Категории",
 		"allCategories": "Все категории",
-		"searchQueryResults": "Результаты по запросу {searchQuery}"
+		"searchQueryResults": "Результаты по запросу: {searchQuery}"
 	},
 	"NotFoundPage": {
 		"title": "Страница не найдена",
