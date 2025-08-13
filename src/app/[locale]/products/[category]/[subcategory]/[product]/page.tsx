@@ -6,6 +6,8 @@ import ProductTabs from '@/components/product/ProductTabs';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
 import { getProductBySlug } from '@/actions/products/getProductBySlug';
+import { notFound } from 'next/navigation';
+import { getProductNameBySlug } from '@/actions/products/getProductNameBySlug';
 
 type Props = {
 	params: { category: string; subcategory: string; product: string };
@@ -13,10 +15,13 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-	const { product } = await params;
+	const { product: productSlug } = await params;
+
+	const productData = await getProductNameBySlug(productSlug);
+	if (!productData) notFound();
 
 	const t = await getTranslations('Metadata');
-	const title = t('product', { product });
+	const title = t('product', { product: productData.name });
 
 	return {
 		title,
@@ -24,17 +29,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	};
 }
 
-// export const metadata = {
-// 	openGraph: {
-// 		images: ['/ua/products/123/888/opengraph-image'],
-// 	},
-// };
-
 export default async function ProductDetail({ params, searchParams }: Props) {
 	const { category, subcategory, product } = await params;
 	const { tab } = await searchParams;
 
 	const productData = await getProductBySlug(product);
+
+	if (!productData) notFound();
 
 	const t = await getTranslations('Products');
 

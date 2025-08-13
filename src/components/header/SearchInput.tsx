@@ -108,7 +108,7 @@ export default function SearchInput({
 					<Combobox.Input
 						placeholder={placeholder}
 						_placeholder={{ fontSize: 'sm' }}
-						fontSize='md'
+						fontSize='sm'
 						roundedRight='0'
 						_focus={{
 							border: '1px solid',

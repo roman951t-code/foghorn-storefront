@@ -109,19 +109,18 @@ async function main() {
 						brandId: brand.id,
 						categoryId: subcategory.id,
 						tags: [],
-					},
-				});
-
-				for (const attr of attributes) {
-					await prisma.productAttributeValue.create({
-						data: {
-							productId: product.id,
-							attributeId: attr.id,
-							value:
-								faker.commerce.productAdjective() + ' ' + faker.number.int({ min: 100, max: 9999 }),
+						attributes: {
+							create: attributes.map((attr) => ({
+								attributeId: attr.id,
+								value:
+									faker.commerce.productAdjective() +
+									' ' +
+									faker.number.int({ min: 100, max: 9999 }),
+							})),
 						},
-					});
-				}
+					},
+					include: { attributes: true },
+				});
 
 				allProducts.push(product);
 			}

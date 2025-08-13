@@ -3,7 +3,7 @@ import { Tabs } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 
-const AboutTab = dynamic(() => import('./AboutTab'));
+const AboutTab = dynamic(() => import('./about/AboutTab'));
 const CharacteristicsTab = dynamic(() => import('./CharacteristicsTab'));
 const FeedbackTab = dynamic(() => import('./FeedbackTab'));
 

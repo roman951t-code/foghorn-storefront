@@ -1,7 +1,7 @@
 import { FiUser } from 'react-icons/fi';
 import { IconButton } from '@chakra-ui/react';
 import Auth from '../auth/Auth';
-import Cart from './Cart';
+import CartModal from './CartModal';
 import SetNewPassModal from '../auth/SetNewPassModal';
 import { I18nData } from '@/types/i18n';
 import Favourite from './Favourite';
@@ -23,13 +23,14 @@ const AuthBtn = () => (
 );
 
 export default function UserActions({ i18nData }: { i18nData: I18nData }) {
+	const cartT = useTranslations('Cart');
 	const headT = useTranslations('Header');
 	const prodT = useTranslations('Products');
 
 	const cartI18nData = {
-		cart: headT('cart'),
-		emptyCart: headT('emptyCart'),
-		emptyCartDescr: headT('emptyCartDescr'),
+		cart: cartT('cart'),
+		emptyCart: cartT('emptyCart'),
+		emptyCartDescr: cartT('emptyCartDescr'),
 		order: headT('order'),
 		totalAmount: prodT('totalAmount'),
 		numOfProducts: prodT('numOfProducts'),
@@ -41,7 +42,7 @@ export default function UserActions({ i18nData }: { i18nData: I18nData }) {
 			<SetNewPassModal i18nData={i18nData} />
 			<UpdateEmailModal i18nData={i18nData} />
 			<Favourite />
-			<Cart i18nData={cartI18nData} />
+			<CartModal i18nData={cartI18nData} />
 		</>
 	);
 }

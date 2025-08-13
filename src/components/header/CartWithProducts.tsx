@@ -4,13 +4,15 @@ import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
 import { LocaleNavButton } from '../reusable/links/LocaleNavLink';
 import { I18nData } from '@/types/i18n';
 import { Dispatch, SetStateAction } from 'react';
+import { Product } from '@/types/product';
 
 interface Props {
 	i18nData: I18nData;
 	setIsOpen: Dispatch<SetStateAction<boolean>>;
+	cartItems: Product[];
 }
 
-export default function Cart({ i18nData, setIsOpen }: Props) {
+export default function CartWithProducts({ i18nData, setIsOpen, cartItems }: Props) {
 	return (
 		<>
 			<Flex align='center' py={3} justifyContent='space-between'>
@@ -22,9 +24,9 @@ export default function Cart({ i18nData, setIsOpen }: Props) {
 								55 699 ₴
 							</Stat.ValueText>
 						</Stat.Root>
-						<Text textStyle='sm' fontWeight='normal'>
-							<Highlight query='3' styles={{ fontWeight: 'bold' }}>
-								{`${i18nData.numOfProducts}: 3`}
+						<Text fontSize='15px' fontWeight='normal'>
+							<Highlight query={`${cartItems?.length || 0}`} styles={{ fontWeight: 'bold' }}>
+								{`${i18nData.numOfProducts}: ${cartItems?.length || 0}`}
 							</Highlight>
 						</Text>
 					</VStack>
@@ -50,9 +52,9 @@ export default function Cart({ i18nData, setIsOpen }: Props) {
 				</IconButton>
 			</Flex>
 			<Stack direction='column' overflowY='auto' gap={4} mt={4} maxHeight='650px'>
-				<CartOrderCard />
-				<CartOrderCard />
-				<CartOrderCard />
+				{cartItems.map((item) => (
+					<CartOrderCard key={item.id} product={item} />
+				))}
 			</Stack>
 		</>
 	);

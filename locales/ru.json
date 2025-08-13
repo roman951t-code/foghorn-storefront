@@ -20,6 +20,16 @@
 		"emptyCartDescr": "Ознакомьтесь с нашим каталогом и добавьте заказ",
 		"order": "Оформить заказ"
 	},
+	"Cart": {
+		"productRemovedFromCart": "Товар был удалён из корзины",
+		"allCartItemsRemoved": "Все товары были удалены из корзины",
+		"cartNotFound": "Корзина не найдена",
+		"productNotFoundInCart": "Товар не найден в корзине",
+		"cartUpdateFailed": "Не удалось обновить корзину",
+		"buy": "Купить",
+		"productIsInCart": "Товар в корзине",
+		"cartFetchFailed": "Не удалось получить товары из корзины"
+	},
 	"Validation": {
 		"wrongEmail": "Неверный адрес электронной почты",
 		"emailNotVerified": "Адрес электронной почты не подтвержден",
@@ -179,7 +189,6 @@
 		"about": "О товаре",
 		"characteristics": "Характеристики",
 		"similar": "Похожие товары",
-		"buy": "Купить",
 		"payment": "Оплата",
 		"shipment": "Доставка",
 		"guarantee": "Гарантия",

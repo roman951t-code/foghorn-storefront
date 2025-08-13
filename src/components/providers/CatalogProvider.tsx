@@ -1,4 +1,3 @@
-// app/providers/CatalogProvider.tsx
 'use client';
 
 import { CatalogCategory } from '@/types/product';

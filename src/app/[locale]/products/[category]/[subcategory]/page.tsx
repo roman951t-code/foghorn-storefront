@@ -12,6 +12,7 @@ import FiltersTags from '@/components/pages/products/FiltersTags';
 import { getProductsBySubcategorySlug } from '@/actions/products/getProductsBySubcategorySlug';
 import { Metadata } from 'next';
 import Pagination from '@/components/reusable/Pagination';
+import { getSubcategoryNameBySlug } from '@/actions/products/getSubcategoryNameBySlug';
 
 type Params = {
 	params: { category: string; subcategory: string };
@@ -23,8 +24,11 @@ const PRODUCTS_PER_PAGE = 4;
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	const { subcategory } = await params;
 
+	const subcategoryData = await getSubcategoryNameBySlug(subcategory);
+	if (!subcategoryData) notFound();
+
 	const t = await getTranslations('Metadata');
-	const title = t('category', { category: subcategory });
+	const title = t('category', { category: subcategoryData.subcategoryName });
 
 	return {
 		title,
@@ -33,8 +37,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 export default async function Subcategory({ params, searchParams }: Params) {
-	const { category, subcategory } = params;
-	const searchData = searchParams;
+	const { category, subcategory } = await params;
+	const searchData = await searchParams;
 
 	const page = parseInt(searchData.page || '1', 10);
 	const offset = (page - 1) * PRODUCTS_PER_PAGE;

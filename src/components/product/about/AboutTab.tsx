@@ -1,11 +1,9 @@
 import ProductThumbsSlider from '@/components/reusable/slider/ProductThumbsSlider';
 import { useTranslations } from 'next-intl';
-import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import {
 	Heading,
 	Box,
 	Group,
-	IconButton,
 	HStack,
 	Link,
 	Badge,
@@ -21,10 +19,11 @@ import {
 } from '@chakra-ui/react';
 import { MdOutlineManageSearch } from 'react-icons/md';
 import ShareProduct from './ShareProduct';
-import { PrimaryButton } from '../reusable/buttons/ActionButton';
-import { Rating } from '../reusable/chakra/rating';
+import { Rating } from '../../reusable/chakra/rating';
 import { Product } from '@/types/product';
-import { LocaleNavButton } from '../reusable/links/LocaleNavLink';
+import { LocaleNavButton } from '../../reusable/links/LocaleNavLink';
+import AddToFavourite from './AddToFavourite';
+import AddToCartButton from './AddToCartButton';
 
 interface Props {
 	product: Product;
@@ -33,12 +32,26 @@ interface Props {
 }
 
 export default function AboutTab({ product, category, subcategory }: Props) {
-	const t = useTranslations('Products');
+	const cartT = useTranslations('Cart');
+	const headT = useTranslations('Header');
+	const prodT = useTranslations('Products');
 
-	const i18nData = {
-		pressToCopy: t('pressToCopy'),
-		shareProductText: t('shareProductText'),
-		shareSocial: t('shareSocial'),
+	const shareI18nData = {
+		pressToCopy: prodT('pressToCopy'),
+		shareProductText: prodT('shareProductText'),
+		shareSocial: prodT('shareSocial'),
+	};
+
+	const cartI18nData = {
+		cart: cartT('cart'),
+		emptyCart: cartT('emptyCart'),
+		emptyCartDescr: cartT('emptyCartDescr'),
+		order: headT('order'),
+		totalAmount: prodT('totalAmount'),
+		numOfProducts: prodT('numOfProducts'),
+		buyText: cartT('buy'),
+		productInCartText: cartT('productIsInCart'),
+		cartUpdateFailed: cartT('cartUpdateFailed'),
 	};
 
 	const discount = product?.discountPrice ? product.basePrice - product?.discountPrice : 0;
@@ -75,25 +88,10 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 						<HStack>
 							<Status.Root size={'lg'} mr='4'>
 								<Status.Indicator colorPalette={product.inStock ? 'green' : 'red'} />
-								{product.inStock ? t('productIsPresent') : t('productIsOutOfStock')}
+								{product.inStock ? prodT('productIsPresent') : prodT('productIsOutOfStock')}
 							</Status.Root>
-
-							<ShareProduct i18nData={i18nData} />
-
-							<IconButton
-								aria-label='Favourite'
-								variant='ghost'
-								rounded='full'
-								colorPalette='red'
-								color='colorPalette.400'
-								transition='all 0.2s ease-in-out'
-								_hover={{
-									bg: 'colorPalette.400',
-									color: 'main.lightOnly',
-								}}
-							>
-								<FiHeart />
-							</IconButton>
+							<ShareProduct i18nData={shareI18nData} />
+							<AddToFavourite />
 						</HStack>
 
 						<Tag.Root
@@ -107,16 +105,14 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 							mr='1'
 						>
 							<Tag.Label>
-								{t('productCode')}: {product.productCode}
+								{prodT('productCode')}: {product.productCode}
 							</Tag.Label>
 						</Tag.Root>
 					</Flex>
 					<Stat.Root my='3'>
 						<Flex flexWrap='wrap' alignItems='center' gap='4'>
 							{product.inStock ? (
-								<PrimaryButton w='200px'>
-									<FiShoppingCart /> {t('buy')}
-								</PrimaryButton>
+								<AddToCartButton i18nData={cartI18nData} product={product} />
 							) : (
 								<LocaleNavButton
 									href={`/products/${category}/${subcategory}?search=similar`}
@@ -125,7 +121,7 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 									<Icon size='lg'>
 										<MdOutlineManageSearch />
 									</Icon>
-									{t('lookSimilar')}
+									{prodT('lookSimilar')}
 								</LocaleNavButton>
 							)}
 
@@ -172,7 +168,7 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 							color='main'
 							_focus={{ outline: 'none' }}
 						>
-							{t('feedback')} ({product.reviewCount ?? 0})
+							{prodT('feedback')} ({product.reviewCount ?? 0})
 						</Link>
 					</HStack>
 					<Stack w='100%' gap='4' mt='6'>
@@ -189,7 +185,7 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 
 						<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
 							<Card.Header>
-								<Heading size='md'> {t('payment')}</Heading>
+								<Heading size='md'> {prodT('payment')}</Heading>
 							</Card.Header>
 							<Card.Body>
 								Картою онлайн, Оплата під час отримання товару, Оплата карткою у відділенні, Apple
@@ -199,14 +195,14 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 
 						<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
 							<Card.Header>
-								<Heading size='md'> {t('shipment')}</Heading>
+								<Heading size='md'> {prodT('shipment')}</Heading>
 							</Card.Header>
 							<Card.Body>Доставка кур'єром Нової Пошти</Card.Body>
 						</Card.Root>
 
 						<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
 							<Card.Header>
-								<Heading size='md'> {t('guarantee')}</Heading>
+								<Heading size='md'> {prodT('guarantee')}</Heading>
 							</Card.Header>
 							<Card.Body>
 								Законом про захист прав споживачів не передбачено повернення цього товару належної
@@ -219,7 +215,7 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 			<Separator borderColor='border.dark' />
 			<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
 				<Card.Header>
-					<Heading size='lg'> {t('description')}</Heading>
+					<Heading size='lg'> {prodT('description')}</Heading>
 				</Card.Header>
 				<Card.Body>
 					Pringles — торгова марка пшенично-картопляної закуски у формі параболоїда, яку виробляє

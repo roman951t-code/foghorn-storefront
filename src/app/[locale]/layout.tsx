@@ -15,6 +15,9 @@ import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ColorModeProvider } from '@/components/reusable/chakra/color-mode';
 import { prisma } from '@/lib/prisma';
 import { CatalogProvider } from '@/components/providers/CatalogProvider';
+import { CartProvider } from '@/components/providers/CartProvider';
+import { getCartItems } from '@/actions/cart/getCartItems';
+import { getCartProductIds } from '@/actions/cart/getCartProductIds';
 
 interface Props {
 	children: ReactNode;
@@ -47,7 +50,7 @@ export default async function Layout({ children, params }: Props) {
 							slug: true,
 						},
 						orderBy: { name: 'asc' },
-						take: 6,
+						take: 5,
 					},
 				},
 			},
@@ -55,6 +58,9 @@ export default async function Layout({ children, params }: Props) {
 		orderBy: { name: 'asc' },
 	});
 
+	const cartItems = await getCartItems();
+	const cartProductIds = await getCartProductIds();
+	console.log('cartItems', cartItems);
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<body>
@@ -64,11 +70,13 @@ export default async function Layout({ children, params }: Props) {
 							<SessionProvider initialSession={session}>
 								<NextIntlClientProvider messages={messages}>
 									<CatalogProvider categories={topLevelCategories}>
-										<Header />
-										<Box as='main' maxWidth='1444px' flex='1' mx='auto' width='100%'>
-											{children}
-											<ToTop />
-										</Box>
+										<CartProvider cartItems={cartItems} cartProcuctIds={cartProductIds}>
+											<Header />
+											<Box as='main' maxWidth='1444px' flex='1' mx='auto' width='100%'>
+												{children}
+												<ToTop />
+											</Box>
+										</CartProvider>
 									</CatalogProvider>
 								</NextIntlClientProvider>
 								<Footer />

@@ -4,10 +4,22 @@ import { IconButton, Text, Flex, Card, Badge, Group } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { StepperInput } from '../chakra/stepper-input';
+import { Product } from '@/types/product';
+import { useCart } from '@/components/providers/CartProvider';
+
+interface Props {
+	product: Product;
+}
 
 const img1 = '/assets/images/temp/1.webp';
 
-export default function CartOrderCard() {
+export default function CartOrderCard({ product }: Props) {
+	const { handleRemoveItem } = useCart();
+
+	const discountAmount = product.discountPrice
+		? Number(product.basePrice) - Number(product.discountPrice)
+		: 0;
+
 	return (
 		<Card.Root
 			minWidth='200px'
@@ -29,13 +41,14 @@ export default function CartOrderCard() {
 					justifyContent='space-between'
 					direction={{ base: 'column', sm: 'row' }}
 					pl={{ base: 3, sm: 0 }}
+					w='full'
 				>
 					<Flex
 						order={{ base: 0, sm: 1 }}
 						direction={{ base: 'row', sm: 'column' }}
 						justifyContent='space-between'
 						alignItems={{ base: 'center', sm: 'flex-end' }}
-						h={{ base: 'auto', sm: '140px' }}
+						h={{ base: 'auto', sm: '130px' }}
 						w={{ base: '100%', sm: 'auto' }}
 					>
 						<Group mt='0'>
@@ -63,11 +76,12 @@ export default function CartOrderCard() {
 									bg: 'colorPalette.500',
 									color: 'main.lightOnly',
 								}}
+								onClick={() => handleRemoveItem(product.id)}
 							>
 								<FiTrash2 />
 							</IconButton>
 						</Group>
-						<StepperInput defaultValue='1' min={1} size='xs' />
+						<StepperInput defaultValue={product.quantity?.toString() || '1'} min={1} size='xs' />
 					</Flex>
 
 					<Flex
@@ -78,36 +92,45 @@ export default function CartOrderCard() {
 					>
 						<Image
 							src={img1}
-							alt='Product photo'
-							width='128'
-							height='20'
-							style={{ objectFit: 'contain' }}
+							alt={product.name}
+							width={110}
+							height={110}
+							style={{ objectFit: 'contain', marginRight: '6px' }}
 						/>
 						<Flex direction='column' gap={3} pt={{ base: 2, sm: 0 }}>
 							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
 								<LocaleNavLink
-									href='/products/1/1'
+									href={`/products/${product.category}/${product.subcategory}/${product.slug}`}
 									textDecorationColor='main'
 									color='main'
 									variant='underline'
 								>
-									Велотренажер Gymtek XB1400 до 150 кг магнітний домашній синій
+									{product.name}
 								</LocaleNavLink>
 							</Card.Title>
 							<Text color='main' fontSize='xl' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
-								55 699 ₴
-								<Text
-									as='span'
-									color='main.disabled'
-									fontSize='sm'
-									textDecoration='line-through'
-									marginLeft='8px'
-								>
-									59 709 ₴
-								</Text>
-								<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='12px'>
-									-150 ₴
-								</Badge>
+								{product.discountPrice ? product.discountPrice : product.basePrice} ₴
+								{product.discountPrice && (
+									<Text
+										as='span'
+										color='main.disabled'
+										fontSize='sm'
+										textDecoration='line-through'
+										marginLeft='8px'
+									>
+										{product.basePrice} ₴
+									</Text>
+								)}
+								{discountAmount > 0 && (
+									<Badge
+										variant='solid'
+										color='main.lightOnly'
+										bg='main.tertiary'
+										marginLeft='12px'
+									>
+										-{discountAmount} ₴
+									</Badge>
+								)}
 							</Text>
 						</Flex>
 					</Flex>

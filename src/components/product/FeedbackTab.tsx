@@ -53,7 +53,7 @@ export default function FeedbackTab({ reviews }: FeedbackTabProps) {
 						<Stack>
 							<DataList.Root orientation='horizontal'>
 								<DataList.Item>
-									<DataList.ItemLabel fontSize='md' fontWeight='medium' color='main'>
+									<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
 										{reviews.length > 0 ? `${prodT('feedbackTotal')}:` : prodT('feedbackAbsent')}
 									</DataList.ItemLabel>
 									{reviews.length > 0 && (

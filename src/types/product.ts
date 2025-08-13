@@ -39,6 +39,7 @@ export type Product = {
 	averageRating: number;
 	productCode?: string;
 	reviewCount: number;
+	quantity?: number;
 	inStock: boolean;
 	attributes?: ProductAttribute[];
 	reviews?: ProductReview[];
@@ -59,10 +60,21 @@ export type CategoryWithSubcategories = {
 };
 
 export type CatalogCategory = {
-	id: string;
+	children: {
+		name: string;
+		id: string;
+		slug: string;
+		products: {
+			name: string;
+			id: string;
+			slug: string;
+		}[];
+	}[];
+} & {
 	name: string;
+	id: string;
 	slug: string;
-	children: SubcategoryWithProducts[];
+	parentId: string | null;
 };
 
 export type SearchProductItem = {

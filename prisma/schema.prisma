@@ -8,6 +8,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Cart {
+  id        String      @id @default(uuid())
+  userId    String      @unique
+  user      User        @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model CartItem {
+  id         String   @id @default(uuid())
+  cartId     String
+  productId  String
+  quantity   Int      @default(1)
+  product    Product  @relation(fields: [productId], references: [id])
+  cart       Cart     @relation(fields: [cartId], references: [id])
+
+  @@unique([cartId, productId])
+}
+
 model User {
   id                 String     @id
   name               String
@@ -24,6 +44,8 @@ model User {
   sessions           Session[]
   wishlist           Wishlist[]
   reviews            Review[]
+  cart               Cart?
+  cartItems String[] @default([])
 
   phoneNumber         String?
   phoneNumberVerified Boolean?
@@ -120,6 +142,7 @@ model ProductCategory {
   products Product[]
 }
 
+
 model Product {
   id           String                  @id @default(uuid())
   name         String
@@ -145,6 +168,7 @@ model Product {
   orderItems   OrderItem[]
   wishlistedBy Wishlist[]
   reviews      Review[]
+  cartItems    CartItem[]
 }
 
 model ProductAttribute {
