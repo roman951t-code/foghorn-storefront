@@ -1,11 +1,13 @@
 import { prisma } from '@/lib/prisma';
+import { ProductDetail } from '@/types/product';
 
-export async function getProductBySlug(slug: string) {
+export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {
 	const product = await prisma.product.findUnique({
 		where: { slug },
 		select: {
 			id: true,
 			name: true,
+			fullSlug: true,
 			slug: true,
 			imageUrl: true,
 			basePrice: true,
@@ -14,23 +16,11 @@ export async function getProductBySlug(slug: string) {
 			inStock: true,
 			averageRating: true,
 			reviewCount: true,
-			category: {
-				select: {
-					name: true,
-					slug: true,
-					parent: {
-						select: {
-							name: true,
-							slug: true,
-						},
-					},
-				},
-			},
+			categoryName: true,
+			subcategoryName: true,
 			attributes: {
 				select: {
-					attribute: {
-						select: { name: true, unit: true },
-					},
+					attribute: { select: { name: true, unit: true } },
 					value: true,
 				},
 			},
@@ -39,9 +29,7 @@ export async function getProductBySlug(slug: string) {
 					rating: true,
 					comment: true,
 					createdAt: true,
-					user: {
-						select: { name: true, image: true },
-					},
+					user: { select: { name: true, image: true } },
 				},
 				orderBy: { createdAt: 'desc' },
 			},
@@ -54,8 +42,6 @@ export async function getProductBySlug(slug: string) {
 		...product,
 		basePrice: product.basePrice.toNumber(),
 		discountPrice: product.discountPrice?.toNumber() ?? null,
-		categoryName: product.category?.parent?.name || '',
-		subcategoryName: product.category?.name || '',
 		attributes: product.attributes.map((attr) => ({
 			name: attr.attribute.name,
 			unit: attr.attribute.unit,
@@ -64,8 +50,8 @@ export async function getProductBySlug(slug: string) {
 		reviews: product.reviews.map((review) => ({
 			rating: review.rating,
 			comment: review.comment,
-			createdAt: review.createdAt,
+			createdAt: new Date(review.createdAt),
 			user: review.user,
 		})),
-	};
+	} as ProductDetail;
 }

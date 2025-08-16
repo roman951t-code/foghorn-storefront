@@ -144,31 +144,34 @@ model ProductCategory {
 
 
 model Product {
-  id           String                  @id @default(uuid())
-  name         String
-  description  String?
-  slug         String                  @unique
-  imageUrl     String?
-  basePrice     Decimal @db.Decimal(10, 2)
-  discountPrice Decimal? @db.Decimal(10, 2)
-  productCode   String
-  stock        Int
-  inStock      Boolean  @default(true)
-  brandId      String
-  averageRating  Float    @default(0)
-  reviewCount    Int      @default(0)
-  tags         String[]
-  categoryId   String
-  createdAt    DateTime                @default(now())
-  updatedAt    DateTime                @updatedAt
-  brand        Brand                   @relation(fields: [brandId], references: [id])
-  category     ProductCategory         @relation(fields: [categoryId], references: [id])
-  attributes   ProductAttributeValue[]
-  variants     ProductVariant[]
-  orderItems   OrderItem[]
-  wishlistedBy Wishlist[]
-  reviews      Review[]
-  cartItems    CartItem[]
+  id              String                  @id @default(uuid())
+  name            String
+  description     String?
+  slug            String                  @unique
+  imageUrl        String?
+  basePrice       Decimal @db.Decimal(10, 2)
+  discountPrice   Decimal? @db.Decimal(10, 2)
+  productCode     String
+  stock           Int
+  inStock         Boolean  @default(true)
+  brandId         String
+  averageRating   Float    @default(0)
+  reviewCount     Int      @default(0)
+  tags            String[]
+  categoryId      String
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  brand           Brand                   @relation(fields: [brandId], references: [id])
+  category        ProductCategory         @relation(fields: [categoryId], references: [id])
+  attributes      ProductAttributeValue[]
+  variants        ProductVariant[]
+  orderItems      OrderItem[]
+  wishlistedBy    Wishlist[]
+  reviews         Review[]
+  cartItems       CartItem[]
+  fullSlug        String
+  categoryName    String
+  subcategoryName String
 }
 
 model ProductAttribute {

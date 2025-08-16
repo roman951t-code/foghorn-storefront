@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { Product, ProductsOnly, ProductsWithMeta, SubcategoryInfo } from '@/types/product';
+import { ProductsOnly, ProductsWithMeta, SubcategoryInfo, TaggedProduct } from '@/types/product';
 
 export async function getProductsByTag<T extends boolean>(
 	tag: string,
@@ -41,7 +41,7 @@ export async function getProductsByTag<T extends boolean>(
 		},
 	});
 
-	const products: Product[] = productsQuery.map((product) => {
+	const products: TaggedProduct[] = productsQuery.map((product) => {
 		const ratings = product.reviews.map((r) => r.rating);
 		const averageRating =
 			ratings.length > 0 ? ratings.reduce((sum, val) => sum + val, 0) / ratings.length : 0;

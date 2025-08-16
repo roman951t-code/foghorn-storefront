@@ -6,7 +6,10 @@ import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { PrimaryButton, SecondaryButton } from '../reusable/buttons/ActionButton';
 import { useState } from 'react';
+
 import { Field } from '../reusable/chakra/field';
+import Auth from '../auth/Auth';
+import { useSession } from '../providers/SessionProvider';
 
 interface Props {
 	i18nData: I18nData;
@@ -28,7 +31,10 @@ interface FormValues {
 }
 
 export default function FeedbackModal({ i18nData }: Props) {
+	const { session } = useSession();
+
 	const [isOpen, setIsOpen] = useState(false);
+
 	const {
 		register,
 		handleSubmit,
@@ -48,6 +54,19 @@ export default function FeedbackModal({ i18nData }: Props) {
 			console.error('Submission failed:', error);
 		}
 	};
+
+	if (!session?.session) {
+		return (
+			<Auth
+				i18nData={i18nData}
+				trigger={
+					<SecondaryButton>
+						<VscFeedback /> {i18nData.leaveFeedback}
+					</SecondaryButton>
+				}
+			/>
+		);
+	}
 
 	return (
 		<CenteredModal

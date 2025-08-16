@@ -1,23 +1,16 @@
 import { DataList } from '@chakra-ui/react';
 import { Flex, Box } from '@chakra-ui/react';
 import ProductCard from '@/components/reusable/cards/ProductCard';
-import { Product } from '@/types/product';
+import { ProductDetail } from '@/types/product';
 
 import '@/styles/swiper.css';
 
 type CharacteristicsTabProps = {
-	product: Product;
-	category: string;
-	subcategory: string;
+	product: ProductDetail;
 	attributes: { name: string; value: string; unit?: string | null }[];
 };
 
-export default function CharacteristicsTab({
-	attributes,
-	product,
-	category,
-	subcategory,
-}: CharacteristicsTabProps) {
+export default function CharacteristicsTab({ attributes, product }: CharacteristicsTabProps) {
 	return (
 		<Flex justifyContent='space-between' gap='4'>
 			<DataList.Root
@@ -44,7 +37,7 @@ export default function CharacteristicsTab({
 				))}
 			</DataList.Root>
 			<Box hideBelow='md' maxW='250px' className='productsSlider'>
-				<ProductCard product={product} category={category} subcategory={subcategory} />
+				<ProductCard product={product} />
 			</Box>
 		</Flex>
 	);

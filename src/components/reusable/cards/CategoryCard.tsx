@@ -1,4 +1,4 @@
-import { Card, HStack, Badge } from '@chakra-ui/react';
+import { Card, HStack, Badge, VStack } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavButton, LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 import { useTranslations } from 'next-intl';
@@ -21,7 +21,9 @@ export default function CategoryCard({
 	return (
 		<Card.Root
 			variant='outline'
-			minWidth='240px'
+			maxW={{ base: '100%', xs: '316px' } as any}
+			minW='240px'
+			flex='1'
 			size='sm'
 			overflow='hidden'
 			border='1px solid'
@@ -38,15 +40,33 @@ export default function CategoryCard({
 					{title}
 				</Card.Title>
 
-				<HStack flexWrap='wrap' my='6' overflowY='auto' justifyContent='center' gap={4}>
+				<VStack my='6' overflowY='auto' justifyContent='center' gap={4}>
 					{products.map((product, index) => (
-						<Badge key={index} variant='outline' size='lg'>
-							<LocaleNavLink href={product.href} textDecoration='underline'>
+						<Badge
+							key={index}
+							variant='outline'
+							size='md'
+							borderWidth='0.5px'
+							bg='bg.tertiary'
+							px='1.5'
+							py='1'
+							boxShadow='none'
+							borderColor='border.light'
+						>
+							<LocaleNavLink
+								href={product.href}
+								wordBreak='break-word'
+								transition='all .15s ease-in-out'
+								textDecorationColor='main'
+								color='main'
+								_hover={{ color: 'link', cursor: 'pointer' }}
+								_focus={{ outline: 'none' }}
+							>
 								{product.name}
 							</LocaleNavLink>
 						</Badge>
 					))}
-				</HStack>
+				</VStack>
 			</Card.Body>
 
 			<Card.Footer justifyContent='center'>

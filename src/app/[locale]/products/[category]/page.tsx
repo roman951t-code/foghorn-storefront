@@ -3,8 +3,9 @@ import Breadcrumbs from '@/components/reusable/links/Breadcrumbs';
 import { Heading, Stack } from '@chakra-ui/react';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
-import CategorySlider from '@/components/pages/products/CategorySlider';
 import { notFound } from 'next/navigation';
+import { getCategoryData } from '@/actions/products/getCategoryData';
+import CategoryCards from '@/components/pages/products/CategoryCards';
 
 type Params = {
 	params: { locale: string; category: string };
@@ -33,31 +34,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Params) {
 	const { category: categorySlug } = await params;
+	const categoryDataResponse = await getCategoryData();
 
-	const categories = await prisma.productCategory.findMany({
-		where: { parentId: null },
-		include: {
-			children: {
-				select: {
-					id: true,
-					name: true,
-					slug: true,
-					products: {
-						select: {
-							id: true,
-							name: true,
-							slug: true,
-						},
-						orderBy: { name: 'asc' },
-						take: 5,
-					},
-				},
-			},
-		},
-		orderBy: { name: 'asc' },
-	});
-
-	const category = categories.find((cat) => cat.slug === categorySlug);
+	const category = categoryDataResponse.categoryData.find((cat) => cat.slug === categorySlug);
 
 	if (!category) notFound();
 
@@ -70,7 +49,7 @@ export default async function CategoryPage({ params }: Params) {
 					{category.name}
 				</Heading>
 
-				<CategorySlider category={category} />
+				<CategoryCards category={category} />
 			</Stack>
 		</Stack>
 	);

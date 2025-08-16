@@ -1,7 +1,7 @@
 import Breadcrumbs from '@/components/reusable/links/Breadcrumbs';
 import { Flex } from '@chakra-ui/react';
 import ProductsSection from '@/components/pages/main/ProductsSection';
-import SubscribeSection from '@/components/pages/main/SubscribeSection';
+import SubscribeSection from '@/components/reusable/SubscribeSection';
 import ProductTabs from '@/components/product/ProductTabs';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';

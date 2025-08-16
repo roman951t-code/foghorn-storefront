@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { Product } from '@/types/product';
+import { SubcategoryProduct } from '@/types/product';
 
 export async function getProductsBySubcategorySlug(
 	slug: string,
@@ -9,7 +9,7 @@ export async function getProductsBySubcategorySlug(
 ): Promise<{
 	categoryName: string;
 	subcategoryName: string;
-	products: Product[];
+	products: SubcategoryProduct[];
 	totalCount: number;
 }> {
 	const subcategory = await prisma.productCategory.findUnique({
@@ -21,7 +21,7 @@ export async function getProductsBySubcategorySlug(
 		return {
 			categoryName: '',
 			subcategoryName: '',
-			products: [],
+			products: [] as SubcategoryProduct[],
 			totalCount: 0,
 		};
 	}
@@ -37,9 +37,11 @@ export async function getProductsBySubcategorySlug(
 		select: {
 			id: true,
 			name: true,
-			slug: true,
+			fullSlug: true,
 			imageUrl: true,
 			basePrice: true,
+			categoryName: true,
+			subcategoryName: true,
 			discountPrice: true,
 			inStock: true,
 			reviews: { select: { rating: true } },
@@ -66,7 +68,7 @@ export async function getProductsBySubcategorySlug(
 		return aScore - bScore;
 	});
 
-	const products: Product[] = sortedProducts.map((product) => {
+	const products: SubcategoryProduct[] = sortedProducts.map((product) => {
 		const ratings = product.reviews.map((r) => r.rating);
 		const averageRating =
 			ratings.length > 0
@@ -74,16 +76,12 @@ export async function getProductsBySubcategorySlug(
 				: 0;
 
 		return {
-			id: product.id,
-			name: product.name,
-			slug: product.slug,
-			inStock: product.inStock,
-			imageUrl: product.imageUrl ?? '',
+			...product,
 			basePrice: Number(product.basePrice),
 			discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
 			averageRating,
 			reviewCount: product.reviews.length,
-		};
+		} as SubcategoryProduct;
 	});
 
 	return {

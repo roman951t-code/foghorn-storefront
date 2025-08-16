@@ -1,3 +1,6 @@
+'use client';
+
+import { useSession } from '@/components/providers/SessionProvider';
 import { PrimaryButton } from '@/components/reusable/buttons/ActionButton';
 import { Heading, Flex, Input } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
@@ -6,6 +9,12 @@ import { IoMailOutline } from 'react-icons/io5';
 export default function SubscribeSection() {
 	const genT = useTranslations('General');
 	const authT = useTranslations('Auth');
+
+	const { session } = useSession();
+
+	if (!session?.session) {
+		return null;
+	}
 
 	return (
 		<Flex

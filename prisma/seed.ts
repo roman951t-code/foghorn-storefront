@@ -75,7 +75,7 @@ async function main() {
 		});
 
 		for (const sub of subcategoriesMap[main]) {
-			const subSlug = createSlug(`${main}-${sub}`);
+			const subSlug = createSlug(sub);
 			const subcategory = await prisma.productCategory.upsert({
 				where: { slug: subSlug },
 				update: {},
@@ -93,10 +93,16 @@ async function main() {
 					? price.sub(new Decimal(faker.number.int({ min: 10, max: 100 })))
 					: null;
 
+				const productSlug = createSlug(`${name}-${Date.now()}`);
+				const fullSlug = `${parentSlug}/${subSlug}/${productSlug}`;
+
 				const product = await prisma.product.create({
 					data: {
 						name,
-						slug: createSlug(`${name}-${Date.now()}`),
+						slug: productSlug,
+						fullSlug,
+						categoryName: main,
+						subcategoryName: sub,
 						description: faker.commerce.productDescription(),
 						imageUrl: faker.image.urlLoremFlickr({ category: 'technology' }),
 						basePrice: price,
@@ -119,7 +125,6 @@ async function main() {
 							})),
 						},
 					},
-					include: { attributes: true },
 				});
 
 				allProducts.push(product);

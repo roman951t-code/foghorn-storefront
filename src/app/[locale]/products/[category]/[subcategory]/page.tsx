@@ -62,11 +62,11 @@ export default async function Subcategory({ params, searchParams }: Params) {
 			<Breadcrumbs
 				categorySlug={category}
 				subcategorySlug={subcategory}
-				categoryName={subcategoryData?.categoryName}
-				subcategoryName={subcategoryData?.subcategoryName}
+				categoryName={subcategoryData.categoryName}
+				subcategoryName={subcategoryData.subcategoryName}
 			/>
 			<Heading as='h1' size='3xl' fontWeight='medium'>
-				{subcategoryData?.subcategoryName}
+				{subcategoryData.subcategoryName}
 			</Heading>
 			<Flex hideFrom='lg' justifyContent='flex-end'>
 				<FiltersSidebar btnText={sidebarT('filters')} />
@@ -102,12 +102,7 @@ export default async function Subcategory({ params, searchParams }: Params) {
 				</Box>
 
 				<Box as='section' w={{ base: '100%', lg: '80%' }}>
-					<ProductsGrid
-						products={subcategoryData?.products}
-						category={category}
-						subcategory={subcategory}
-						notFound={t('productsNotFound')}
-					/>
+					<ProductsGrid products={subcategoryData.products} notFound={t('productsNotFound')} />
 					<Pagination
 						currentPage={page}
 						totalProductsCount={subcategoryData?.totalCount || 0}

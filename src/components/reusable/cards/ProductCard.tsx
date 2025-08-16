@@ -5,21 +5,19 @@ import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link } from '@cha
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { Rating } from '../chakra/rating';
-import { Product } from '@/types/product';
+import { SubcategoryProduct } from '@/types/product';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 
 type Props = {
-	category: string;
-	subcategory: string;
-	product: Product | null;
+	product: SubcategoryProduct;
 };
 
-export default function ProductCard({ product, category, subcategory }: Props) {
+export default function ProductCard({ product }: Props) {
 	const t = useTranslations('Products');
-	const discount = product?.discountPrice ? product.basePrice - product?.discountPrice : 0;
+	const discount = product?.discountPrice ? product?.basePrice! - product?.discountPrice : 0;
 	const isInStock = product?.inStock;
 
 	if (!product) return null;
@@ -77,7 +75,7 @@ export default function ProductCard({ product, category, subcategory }: Props) {
 				<LinkBox>
 					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='1' w='100%'>
 						<LocaleNavLink
-							href={`/products/${category}/${subcategory}/${product?.slug}`}
+							href={`/products/${product.fullSlug}`}
 							textDecorationColor='main'
 							color='main'
 							variant='underline'
@@ -98,7 +96,7 @@ export default function ProductCard({ product, category, subcategory }: Props) {
 
 					{discount > 0 && (
 						<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
-							{parseInt(product.basePrice.toFixed(2))}₴
+							{parseInt(product?.basePrice!.toFixed(2))}₴
 							<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' ml='12px'>
 								- {parseInt(discount.toFixed(2))}₴
 							</Badge>
@@ -109,7 +107,7 @@ export default function ProductCard({ product, category, subcategory }: Props) {
 				<HStack gap='4' mt='2'>
 					<Rating readOnly size='xs' defaultValue={product.averageRating ?? 0} />
 					<Link
-						href={`/products/${category}/${subcategory}/${product?.slug}?tab=feedback`}
+						href={`/products/${product.fullSlug}/?tab=feedback`}
 						variant='underline'
 						fontSize='sm'
 						color='main'

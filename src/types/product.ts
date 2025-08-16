@@ -1,63 +1,47 @@
-export type Category = {
-	id: string;
-	name: string;
-	slug: string;
-	children: {
-		id: string;
-		name: string;
-		slug: string;
-	}[];
-};
+import { Prisma } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 
-export type ProductAttribute = {
-	name: string;
-	unit?: string | null;
-	value: string;
-};
+type ReplaceDecimalWithString<T> = T extends Decimal
+	? number
+	: T extends Array<infer U>
+		? Array<ReplaceDecimalWithString<U>>
+		: T extends object
+			? { [K in keyof T]: ReplaceDecimalWithString<T[K]> }
+			: T;
 
-export type ProductReviewUser = {
-	name: string;
-	image?: string | null;
-};
+type ProductBase = Prisma.ProductGetPayload<{
+	include: {
+		category: true;
+	};
+}>;
 
-export type ProductReview = {
-	rating: number;
-	comment: string;
-	createdAt: string | Date;
-	user: ProductReviewUser;
-};
+export type Product = ReplaceDecimalWithString<ProductBase>;
 
-export type Product = {
-	id: string;
-	name: string;
-	slug: string;
-	category?: string;
-	subcategory?: string;
-	imageUrl: string | null;
-	basePrice: number;
-	discountPrice: number | null;
-	averageRating: number;
-	productCode?: string;
-	reviewCount: number;
-	quantity?: number;
-	inStock: boolean;
-	attributes?: ProductAttribute[];
-	reviews?: ProductReview[];
-};
+export type ProductPick<K extends keyof Product> = Pick<Product, K>;
 
-export type SubcategoryWithProducts = {
-	id: string;
-	name: string;
-	slug: string;
-	products: Product[];
-};
+export type ProductSummary = ProductPick<'id' | 'name' | 'basePrice'>;
 
-export type CategoryWithSubcategories = {
-	id: string;
-	name: string;
-	slug: string;
-	children: SubcategoryWithProducts[];
-};
+export type SubcategoryProduct = Partial<Product> & { averageRating: number; reviewCount: number };
+
+export type CategoryWithSubcategories =
+	| ({
+			children: {
+				name: string;
+				id: string;
+				slug: string;
+				products: {
+					name: string;
+					id: string;
+					fullSlug: string;
+				}[];
+			}[];
+	  } & {
+			name: string;
+			id: string;
+			slug: string;
+			parentId: string | null;
+	  })
+	| undefined;
 
 export type CatalogCategory = {
 	children: {
@@ -102,7 +86,50 @@ export type SubcategoryInfo = {
 export type ProductsOnly = { products: Product[] };
 
 export type ProductsWithMeta = {
-	products: Product[];
+	products: TaggedProduct[];
 	totalCount: number;
 	subcategories: SubcategoryInfo[];
+};
+
+type ProductDetailBase = Prisma.ProductGetPayload<{
+	select: {
+		id: true;
+		name: true;
+		fullSlug: true;
+		slug: true;
+		imageUrl: true;
+		basePrice: true;
+		discountPrice: true;
+		productCode: true;
+		inStock: true;
+		averageRating: true;
+		reviewCount: true;
+		categoryName: true;
+		subcategoryName: true;
+		attributes: {
+			select: {
+				attribute: { select: { name: true; unit: true } };
+				value: true;
+			};
+		};
+		reviews: {
+			select: {
+				rating: true;
+				comment: true;
+				createdAt: true;
+				user: { select: { name: true; image: true } };
+			};
+			orderBy: { createdAt: 'desc' };
+		};
+	};
+}>;
+
+export type ProductDetail = Omit<ReplaceDecimalWithString<ProductDetailBase>, 'attributes'> & {
+	attributes: { name: string; unit: string | null; value: string }[];
+	reviews: {
+		rating: number;
+		comment: string;
+		createdAt: Date;
+		user: { name: string; image?: string | null };
+	}[];
 };

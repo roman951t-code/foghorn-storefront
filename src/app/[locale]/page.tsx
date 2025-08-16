@@ -1,7 +1,7 @@
 import { Flex, Box } from '@chakra-ui/react';
 import CatalogPanel from '@/components/pages/main/CatalogPanel';
 import ProductsSection from '@/components/pages/main/ProductsSection';
-import SubscribeSection from '@/components/pages/main/SubscribeSection';
+import SubscribeSection from '@/components/reusable/SubscribeSection';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import { extractI18nData, getLocalizedMetadata } from '@/utils/i18nUtils';
 import { type Metadata } from 'next';

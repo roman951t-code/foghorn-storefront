@@ -2,16 +2,14 @@ import { SimpleGrid, Box, VStack } from '@chakra-ui/react';
 import { EmptyState } from '@chakra-ui/react';
 import { HiColorSwatch } from 'react-icons/hi';
 import ProductCard from '../../reusable/cards/ProductCard';
-import { Product } from '@/types/product';
+import { SubcategoryProduct } from '@/types/product';
 
 interface Props {
-	products: Product[];
-	category?: string;
-	subcategory?: string;
+	products: SubcategoryProduct[];
 	notFound: string;
 }
 
-export default function ProductsGrid({ products, notFound, category, subcategory }: Props) {
+export default function ProductsGrid({ products, notFound }: Props) {
 	if (!products || products.length === 0) {
 		return (
 			<EmptyState.Root>
@@ -33,11 +31,7 @@ export default function ProductsGrid({ products, notFound, category, subcategory
 		<SimpleGrid className='productsSlider' columns={columns} gapX='2' gapY='4'>
 			{products.map((product) => (
 				<Box key={product.id}>
-					<ProductCard
-						product={product}
-						category={category || product?.category!}
-						subcategory={subcategory || product?.subcategory!}
-					/>
+					<ProductCard product={product} />
 				</Box>
 			))}
 		</SimpleGrid>

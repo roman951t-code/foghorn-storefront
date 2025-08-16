@@ -4,17 +4,16 @@ import dynamic from 'next/dynamic';
 import { Rating } from '../reusable/chakra/rating';
 import { Tooltip } from '../ui/tooltip';
 import DateWithLocale from '../reusable/DateWithLocale';
+import { extractI18nData } from '@/utils/i18nUtils';
+import { authLocData, validLocData } from '@/data/localized';
 
 const FeedbackModal = dynamic(() => import('./FeedbackModal'));
 
 type Review = {
 	rating: number;
 	comment: string;
-	createdAt: string | Date;
-	user: {
-		name: string;
-		image?: string | null;
-	};
+	createdAt: Date;
+	user: { name: string; image?: string | null };
 };
 
 type FeedbackTabProps = {
@@ -25,10 +24,18 @@ export default function FeedbackTab({ reviews }: FeedbackTabProps) {
 	const authT = useTranslations('Auth');
 	const genT = useTranslations('General');
 	const prodT = useTranslations('Products');
+	const validT = useTranslations('Validation');
+
+	const authI18nData = extractI18nData(authT, authLocData);
+	const validI18nData = extractI18nData(validT, validLocData);
 
 	const i18nData = {
+		...authI18nData,
+		...validI18nData,
+		authToOrder: authT('authToOrder'),
+		authorize: authT('authorize'),
+		yourContacts: authT('yourContacts'),
 		name: authT('name'),
-		email: authT('email'),
 		rate: prodT('rate'),
 		leaveFeedback: prodT('leaveFeedback'),
 		myRate: prodT('myRate'),
@@ -92,6 +99,7 @@ export default function FeedbackTab({ reviews }: FeedbackTabProps) {
 								)}
 							</DataList.Root>
 						</Stack>
+
 						<FeedbackModal i18nData={i18nData} />
 					</Flex>
 				</Card.Header>

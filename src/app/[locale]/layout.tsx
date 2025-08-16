@@ -13,11 +13,11 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ColorModeProvider } from '@/components/reusable/chakra/color-mode';
-import { prisma } from '@/lib/prisma';
 import { CatalogProvider } from '@/components/providers/CatalogProvider';
 import { CartProvider } from '@/components/providers/CartProvider';
 import { getCartItems } from '@/actions/cart/getCartItems';
 import { getCartProductIds } from '@/actions/cart/getCartProductIds';
+import { getCatalog } from '@/actions/products/getCatalog';
 
 interface Props {
 	children: ReactNode;
@@ -35,32 +35,10 @@ export default async function Layout({ children, params }: Props) {
 		headers: await headers(),
 	});
 
-	const topLevelCategories = await prisma.productCategory.findMany({
-		where: { parentId: null },
-		include: {
-			children: {
-				select: {
-					id: true,
-					name: true,
-					slug: true,
-					products: {
-						select: {
-							id: true,
-							name: true,
-							slug: true,
-						},
-						orderBy: { name: 'asc' },
-						take: 5,
-					},
-				},
-			},
-		},
-		orderBy: { name: 'asc' },
-	});
-
+	const catalogResponse = await getCatalog();
 	const cartItems = await getCartItems();
 	const cartProductIds = await getCartProductIds();
-	console.log('cartItems', cartItems);
+
 	return (
 		<html lang={locale} suppressHydrationWarning>
 			<body>
@@ -69,10 +47,10 @@ export default async function Layout({ children, params }: Props) {
 						<Box display='flex' flexDirection='column' minHeight='100vh' gap='6' bg='bg.primary'>
 							<SessionProvider initialSession={session}>
 								<NextIntlClientProvider messages={messages}>
-									<CatalogProvider categories={topLevelCategories}>
+									<CatalogProvider categories={catalogResponse.catalog}>
 										<CartProvider cartItems={cartItems} cartProcuctIds={cartProductIds}>
 											<Header />
-											<Box as='main' maxWidth='1444px' flex='1' mx='auto' width='100%'>
+											<Box as='main' w='full' maxW='1444px' flex='1' mx='auto'>
 												{children}
 												<ToTop />
 											</Box>

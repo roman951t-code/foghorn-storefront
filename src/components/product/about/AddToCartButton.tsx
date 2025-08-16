@@ -7,11 +7,11 @@ import { useState } from 'react';
 import { I18nData } from '@/types/i18n';
 import CartModal from '@/components/header/CartModal';
 import { useCart } from '@/components/providers/CartProvider';
-import { Product } from '@/types/product';
+import { ProductDetail } from '@/types/product';
 
 interface AddToCartButtonProps {
 	i18nData: I18nData;
-	product: Product;
+	product: ProductDetail;
 }
 
 export default function AddToCartButton({ i18nData, product }: AddToCartButtonProps) {

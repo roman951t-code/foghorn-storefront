@@ -20,13 +20,13 @@ import {
 import { MdOutlineManageSearch } from 'react-icons/md';
 import ShareProduct from './ShareProduct';
 import { Rating } from '../../reusable/chakra/rating';
-import { Product } from '@/types/product';
+import { ProductDetail } from '@/types/product';
 import { LocaleNavButton } from '../../reusable/links/LocaleNavLink';
 import AddToFavourite from './AddToFavourite';
 import AddToCartButton from './AddToCartButton';
 
 interface Props {
-	product: Product;
+	product: ProductDetail;
 	category: string;
 	subcategory: string;
 }
@@ -162,7 +162,7 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 						/>
 
 						<Link
-							href={`/products/${category}/${subcategory}/${product?.slug}?tab=feedback`}
+							href={`/products/${product.fullSlug}?tab=feedback`}
 							variant='underline'
 							fontSize='sm'
 							color='main'
