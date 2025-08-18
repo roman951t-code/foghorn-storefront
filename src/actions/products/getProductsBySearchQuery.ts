@@ -1,12 +1,12 @@
 import { prisma } from '@/lib/prisma';
-import { Product } from '@/types/product';
+import { SubcategoryProduct } from '@/types/product';
 
 export async function getProductsBySearchQuery(
 	searchQuery: string,
 	limit: number = 12,
 	offset: number = 0
 ): Promise<{
-	products: Product[];
+	products: SubcategoryProduct[];
 	totalCount: number;
 	subcategories: {
 		categoryName: string;
@@ -69,47 +69,30 @@ export async function getProductsBySearchQuery(
 		select: {
 			id: true,
 			name: true,
-			slug: true,
+			fullSlug: true,
 			imageUrl: true,
 			basePrice: true,
+			categoryName: true,
+			subcategoryName: true,
 			discountPrice: true,
 			inStock: true,
-			reviews: {
-				select: { rating: true },
-			},
-			category: {
-				select: {
-					slug: true,
-					name: true,
-					parent: {
-						select: {
-							slug: true,
-							name: true,
-						},
-					},
-				},
-			},
+			reviews: { select: { rating: true } },
+			tags: true,
 		},
 	});
 
-	const productItems: Product[] = products.map((product) => {
+	const productItems: SubcategoryProduct[] = products.map((product) => {
 		const ratings = product.reviews.map((r) => r.rating);
 		const averageRating =
 			ratings.length > 0 ? ratings.reduce((sum, val) => sum + val, 0) / ratings.length : 0;
 
 		return {
-			id: product.id,
-			name: product.name,
-			slug: product.slug,
-			category: product.category.parent?.slug || '',
-			subcategory: product.category.slug,
-			imageUrl: product.imageUrl ?? '',
-			inStock: product.inStock,
+			...product,
 			basePrice: Number(product.basePrice),
 			discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
 			averageRating,
 			reviewCount: product.reviews.length,
-		};
+		} as SubcategoryProduct;
 	});
 
 	return {

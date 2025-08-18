@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/prisma';
-import { ProductDetail } from '@/types/product';
 
-export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {
+export async function getProductBySlug(slug: string) {
 	const product = await prisma.product.findUnique({
 		where: { slug },
 		select: {
@@ -47,11 +46,11 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
 			unit: attr.attribute.unit,
 			value: attr.value,
 		})),
-		reviews: product.reviews.map((review) => ({
-			rating: review.rating,
-			comment: review.comment,
-			createdAt: new Date(review.createdAt),
-			user: review.user,
-		})),
-	} as ProductDetail;
+		// reviews: product.reviews.map((review) => ({
+		// 	rating: review.rating,
+		// 	comment: review.comment,
+		// 	createdAt: new Date(review.createdAt),
+		// 	user: review.user,
+		// })),
+	};
 }

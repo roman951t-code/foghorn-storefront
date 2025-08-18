@@ -5,14 +5,14 @@ import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link } from '@cha
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { Rating } from '../chakra/rating';
-import { SubcategoryProduct } from '@/types/product';
+import { Product } from '@/types/product';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 
 type Props = {
-	product: SubcategoryProduct;
+	product: Product;
 };
 
 export default function ProductCard({ product }: Props) {

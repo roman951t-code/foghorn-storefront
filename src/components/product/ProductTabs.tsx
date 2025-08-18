@@ -1,4 +1,4 @@
-import { ProductDetail } from '@/types/product';
+import { Product } from '@/types/product';
 import { Tabs } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
@@ -11,7 +11,7 @@ interface Props {
 	category: string;
 	subcategory: string;
 	tab?: string;
-	product: ProductDetail | null;
+	product: Product;
 }
 
 export default function ProductTabs({ tab = 'about', product, category, subcategory }: Props) {

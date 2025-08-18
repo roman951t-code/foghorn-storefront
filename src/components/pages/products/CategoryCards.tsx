@@ -3,14 +3,14 @@
 import dynamic from 'next/dynamic';
 import CategoryCard from '@/components/reusable/cards/CategoryCard';
 import { LoadingSkeleton } from '@/components/reusable/Skeleton';
-import type { CategoryWithSubcategories } from '@/types/product';
+import type { CatalogCategory } from '@/types/product';
 import { Wrap } from '@chakra-ui/react';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 
-function CategoryCardsInner({ category }: { category?: CategoryWithSubcategories }) {
+function CategoryCardsInner({ category }: { category?: CatalogCategory }) {
 	return (
 		<Wrap>
 			{category?.children.map((sub) => (
@@ -36,6 +36,6 @@ const DynamicCategoryCards = dynamic(() => Promise.resolve(CategoryCardsInner), 
 	loading: () => <LoadingSkeleton />,
 });
 
-export default function CategoryCards({ category }: { category: CategoryWithSubcategories }) {
+export default function CategoryCards({ category }: { category: CatalogCategory }) {
 	return <DynamicCategoryCards category={category} />;
 }

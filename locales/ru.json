@@ -28,6 +28,7 @@
 		"cartUpdateFailed": "Не удалось обновить корзину",
 		"buy": "Купить",
 		"productIsInCart": "Товар в корзине",
+		"cartRemoveFailed": "Не удалось удалить из корзины",
 		"cartFetchFailed": "Не удалось получить товары из корзины"
 	},
 	"Validation": {
@@ -209,7 +210,7 @@
 		"acceptOrder": "Подтверждаю заказ",
 		"feedbackTotal": "Всего отзывов",
 		"averageFeedback": "Средняя оценка",
-		"numOfProducts": "Количество товаров",
+		"numOfProducts": "Количество товаров к заказу",
 		"order": "заказа",
 		"repeatOrder": "Повторить заказ",
 		"totalProducts": "Всего товаров",

@@ -4,15 +4,23 @@ import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
 import { LocaleNavButton } from '../reusable/links/LocaleNavLink';
 import { I18nData } from '@/types/i18n';
 import { Dispatch, SetStateAction } from 'react';
-import { Product } from '@/types/product';
+import { useCart } from '../providers/CartProvider';
 
 interface Props {
 	i18nData: I18nData;
 	setIsOpen: Dispatch<SetStateAction<boolean>>;
-	cartItems: Product[];
 }
 
-export default function CartWithProducts({ i18nData, setIsOpen, cartItems }: Props) {
+export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
+	const { cartData, handleClearCart } = useCart();
+	const { items: cartItems } = cartData;
+
+	const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+	const totalPrice = cartItems.reduce((acc, item) => {
+		const price = item.discountPrice ?? item.basePrice;
+		return acc + price * item.quantity;
+	}, 0);
+
 	return (
 		<>
 			<Flex align='center' py={3} justifyContent='space-between'>
@@ -20,13 +28,11 @@ export default function CartWithProducts({ i18nData, setIsOpen, cartItems }: Pro
 					<VStack gap='3' alignItems='flex-start'>
 						<Stat.Root>
 							<Stat.Label fontSize='sm'>{i18nData.totalAmount}</Stat.Label>
-							<Stat.ValueText w='124px' fontSize='3xl'>
-								55 699 ₴
-							</Stat.ValueText>
+							<Stat.ValueText fontSize='3xl'>{`${totalPrice} ₴`}</Stat.ValueText>
 						</Stat.Root>
 						<Text fontSize='15px' fontWeight='normal'>
-							<Highlight query={`${cartItems?.length || 0}`} styles={{ fontWeight: 'bold' }}>
-								{`${i18nData.numOfProducts}: ${cartItems?.length || 0}`}
+							<Highlight query={`${totalCount}`} styles={{ fontWeight: 'bold' }}>
+								{`${i18nData.numOfProducts}: ${totalCount}`}
 							</Highlight>
 						</Text>
 					</VStack>
@@ -36,6 +42,7 @@ export default function CartWithProducts({ i18nData, setIsOpen, cartItems }: Pro
 					</LocaleNavButton>
 				</Flex>
 				<IconButton
+					onClick={handleClearCart}
 					aria-label='Trash'
 					variant='ghost'
 					rounded='full'
@@ -53,7 +60,7 @@ export default function CartWithProducts({ i18nData, setIsOpen, cartItems }: Pro
 			</Flex>
 			<Stack direction='column' overflowY='auto' gap={4} mt={4} maxHeight='650px'>
 				{cartItems.map((item) => (
-					<CartOrderCard key={item.id} product={item} />
+					<CartOrderCard key={item?.id} product={item} i18nData={i18nData} />
 				))}
 			</Stack>
 		</>

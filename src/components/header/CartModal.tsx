@@ -48,10 +48,10 @@ interface Props {
 }
 
 export default function CartModal({ i18nData, triggerType, isInCart }: Props) {
-	const { cartItems } = useCart();
-	const isCartEmpty = cartItems.length === 0;
+	const { cartData } = useCart();
+	const isCartEmpty = cartData.items.length === 0;
 	const [isOpen, setIsOpen] = useState(false);
-
+	console.log('cartData', cartData);
 	return (
 		<CenteredModal
 			title={i18nData.cart}
@@ -64,7 +64,7 @@ export default function CartModal({ i18nData, triggerType, isInCart }: Props) {
 						</PrimaryButton>
 					)
 				) : (
-					<CartBtn setIsOpen={setIsOpen} cartSize={cartItems?.length} />
+					<CartBtn setIsOpen={setIsOpen} cartSize={cartData.items.length} />
 				)
 			}
 			size={isCartEmpty ? 'md' : 'lg'}
@@ -97,7 +97,7 @@ export default function CartModal({ i18nData, triggerType, isInCart }: Props) {
 					</EmptyState.Root>
 				</Stack>
 			) : (
-				<CartWithProducts setIsOpen={setIsOpen} i18nData={i18nData} cartItems={cartItems} />
+				<CartWithProducts setIsOpen={setIsOpen} i18nData={i18nData} />
 			)}
 		</CenteredModal>
 	);

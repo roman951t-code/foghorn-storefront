@@ -1,12 +1,12 @@
 import { DataList } from '@chakra-ui/react';
 import { Flex, Box } from '@chakra-ui/react';
 import ProductCard from '@/components/reusable/cards/ProductCard';
-import { ProductDetail } from '@/types/product';
 
 import '@/styles/swiper.css';
+import { Product } from '@/types/product';
 
 type CharacteristicsTabProps = {
-	product: ProductDetail;
+	product: Product;
 	attributes: { name: string; value: string; unit?: string | null }[];
 };
 

@@ -18,6 +18,7 @@ import { CartProvider } from '@/components/providers/CartProvider';
 import { getCartItems } from '@/actions/cart/getCartItems';
 import { getCartProductIds } from '@/actions/cart/getCartProductIds';
 import { getCatalog } from '@/actions/products/getCatalog';
+import { CartData } from '@/types/cart';
 
 interface Props {
 	children: ReactNode;
@@ -36,8 +37,14 @@ export default async function Layout({ children, params }: Props) {
 	});
 
 	const catalogResponse = await getCatalog();
-	const cartItems = await getCartItems();
+	const cartResponse = await getCartItems();
 	const cartProductIds = await getCartProductIds();
+
+	const emptyCartData: CartData = {
+		items: [],
+	};
+
+	const { success, ...restCartData } = cartResponse;
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
@@ -48,7 +55,10 @@ export default async function Layout({ children, params }: Props) {
 							<SessionProvider initialSession={session}>
 								<NextIntlClientProvider messages={messages}>
 									<CatalogProvider categories={catalogResponse.catalog}>
-										<CartProvider cartItems={cartItems} cartProcuctIds={cartProductIds}>
+										<CartProvider
+											cartData={success ? restCartData : emptyCartData}
+											cartProductIds={cartProductIds}
+										>
 											<Header />
 											<Box as='main' w='full' maxW='1444px' flex='1' mx='auto'>
 												{children}

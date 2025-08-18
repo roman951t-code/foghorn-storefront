@@ -6,7 +6,8 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
 export async function addToCart(productIds: string | string[]) {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('Cart');
+
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
 
@@ -42,8 +43,8 @@ export async function addToCart(productIds: string | string[]) {
 			});
 		}
 
-		return { success: true, added: newIds.length };
+		return { success: true };
 	} catch (error) {
-		return { success: false, message: (error as Error).message || t('cartUpdateFailed') };
+		return { success: false, message: t('cartUpdateFailed') };
 	}
 }

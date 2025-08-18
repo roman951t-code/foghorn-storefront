@@ -10,7 +10,7 @@ interface RemoveCartItemParams {
 }
 
 export async function removeFromCart({ productId }: RemoveCartItemParams) {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('Cart');
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
 
@@ -39,15 +39,15 @@ export async function removeFromCart({ productId }: RemoveCartItemParams) {
 				where: { id: existingItem.id },
 			});
 
-			return { success: true, message: t('productRemovedFromCart') };
+			return { success: true };
 		} else {
 			await prisma.cartItem.deleteMany({
 				where: { cartId: cart.id },
 			});
 
-			return { success: true, message: t('allCartItemsRemoved') };
+			return { success: true };
 		}
 	} catch (error) {
-		return { success: false, message: (error as Error).message || t('cartUpdateFailed') };
+		return { success: false, message: t('cartUpdateFailed') };
 	}
 }

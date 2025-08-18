@@ -19,7 +19,6 @@ export default function SubscribeSection() {
 	return (
 		<Flex
 			mt={24}
-			mb={12}
 			bg='bg.dark'
 			p={4}
 			rounded='md'

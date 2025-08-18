@@ -15,7 +15,7 @@ export async function getCatalog() {
 						select: {
 							id: true,
 							name: true,
-							slug: true,
+							fullSlug: true,
 						},
 						orderBy: { name: 'asc' },
 						take: 5,

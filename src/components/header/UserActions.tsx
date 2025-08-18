@@ -34,6 +34,7 @@ export default function UserActions({ i18nData }: { i18nData: I18nData }) {
 		order: headT('order'),
 		totalAmount: prodT('totalAmount'),
 		numOfProducts: prodT('numOfProducts'),
+		cartRemoveFailed: cartT('cartRemoveFailed'),
 	};
 
 	return (

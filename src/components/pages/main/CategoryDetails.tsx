@@ -5,11 +5,11 @@ import { Box, Flex, Text, VStack, Heading, Wrap } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
 import { LocaleNavLink, LocaleNavButton } from '@/components/reusable/links/LocaleNavLink';
 import type { I18nData } from '@/types/i18n';
-import type { CategoryWithSubcategories } from '@/types/product';
+import type { CatalogCategory } from '@/types/product';
 
 interface Props {
 	i18nData: I18nData;
-	category: CategoryWithSubcategories | null;
+	category: CatalogCategory | null;
 }
 
 export default function CategoryDetails({ category, i18nData }: Props) {
@@ -28,7 +28,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 							{subcategory.products.map((product) => (
 								<LocaleNavLink
 									key={product.id}
-									href={`/products/${category.slug}/${subcategory.slug}/${product.slug}`}
+									href={`/products/${product.fullSlug}`}
 									fontSize='md'
 									variant='plain'
 									textWrap='wrap'

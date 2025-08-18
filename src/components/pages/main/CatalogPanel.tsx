@@ -8,7 +8,7 @@ import CategoryDetails from './CategoryDetails';
 import Promo from './Promo';
 import type { I18nData } from '@/types/i18n';
 import { useCatalog } from '@/components/providers/CatalogProvider';
-import type { CategoryWithSubcategories } from '@/types/product';
+import type { CatalogCategory } from '@/types/product';
 
 interface Props {
 	i18nData: I18nData;
@@ -17,9 +17,9 @@ interface Props {
 export default function CatalogPanel({ i18nData }: Props) {
 	const { categories } = useCatalog();
 
-	const [activeCategory, setActiveCategory] = useState<(typeof categories)[0] | null>(null);
+	const [activeCategory, setActiveCategory] = useState<CatalogCategory | null>(null);
 
-	const handleMouseEnter = (category: CategoryWithSubcategories) => {
+	const handleMouseEnter = (category: CatalogCategory) => {
 		setActiveCategory(category);
 	};
 

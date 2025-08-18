@@ -3,19 +3,13 @@
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
-import { getTranslations } from 'next-intl/server';
 
 export async function getCartItems() {
-	const t = await getTranslations('Validation');
 	const session = await auth.api.getSession({ headers: await headers() });
-
-	if (!session?.user?.id) {
-		return { guest: true };
-	}
 
 	try {
 		const cart = await prisma.cart.findUnique({
-			where: { userId: session.user.id },
+			where: { userId: session?.user.id },
 			include: {
 				items: {
 					include: {
@@ -23,17 +17,10 @@ export async function getCartItems() {
 							select: {
 								id: true,
 								name: true,
-								slug: true,
+								fullSlug: true,
 								imageUrl: true,
 								basePrice: true,
 								discountPrice: true,
-								tags: true,
-								category: {
-									select: {
-										slug: true,
-										parent: { select: { slug: true } },
-									},
-								},
 							},
 						},
 					},
@@ -43,14 +30,14 @@ export async function getCartItems() {
 
 		const reshapedItems =
 			cart?.items.map((item) => {
-				const { category, ...restProduct } = item.product;
+				const basePrice = item.product.basePrice?.toNumber?.() ?? 0;
+				const discountPrice = item.product.discountPrice?.toNumber?.() ?? null;
+
 				return {
-					...restProduct,
+					...item.product,
 					quantity: item.quantity,
-					subcategory: category.slug,
-					category: category.parent?.slug || null,
-					basePrice: item.product.basePrice?.toNumber?.() ?? null,
-					discountPrice: item.product.discountPrice?.toNumber?.() ?? null,
+					basePrice,
+					discountPrice,
 				};
 			}) ?? [];
 
@@ -58,7 +45,7 @@ export async function getCartItems() {
 	} catch (error) {
 		return {
 			success: false,
-			message: (error as Error).message || t('cartFetchFailed'),
+			items: [],
 		};
 	}
 }

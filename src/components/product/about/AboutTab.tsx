@@ -20,13 +20,13 @@ import {
 import { MdOutlineManageSearch } from 'react-icons/md';
 import ShareProduct from './ShareProduct';
 import { Rating } from '../../reusable/chakra/rating';
-import { ProductDetail } from '@/types/product';
 import { LocaleNavButton } from '../../reusable/links/LocaleNavLink';
 import AddToFavourite from './AddToFavourite';
 import AddToCartButton from './AddToCartButton';
+import { Product } from '@/types/product';
 
 interface Props {
-	product: ProductDetail;
+	product: Product;
 	category: string;
 	subcategory: string;
 }
@@ -55,6 +55,8 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 	};
 
 	const discount = product?.discountPrice ? product.basePrice - product?.discountPrice : 0;
+
+	if (!product) return null;
 
 	return (
 		<VStack gap='8' colorPalette='gray'>

@@ -4,21 +4,45 @@ import { IconButton, Text, Flex, Card, Badge, Group } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { StepperInput } from '../chakra/stepper-input';
-import { Product } from '@/types/product';
 import { useCart } from '@/components/providers/CartProvider';
+import { toaster } from '../chakra/toaster';
+import { I18nData } from '@/types/i18n';
+import { CartProduct } from '@/types/cart';
 
 interface Props {
-	product: Product;
+	product: CartProduct;
+	i18nData: I18nData;
 }
 
 const img1 = '/assets/images/temp/1.webp';
 
-export default function CartOrderCard({ product }: Props) {
-	const { handleRemoveItem } = useCart();
+export default function CartOrderCard({ product, i18nData }: Props) {
+	const { handleRemoveItem, handleUpdateQuantity } = useCart();
 
 	const discountAmount = product.discountPrice
 		? Number(product.basePrice) - Number(product.discountPrice)
 		: 0;
+
+	const handleDelete = async () => {
+		const result = await handleRemoveItem(product.id);
+
+		if (!result.success) {
+			toaster.error({
+				title: i18nData.cartRemoveFailed,
+				duration: 5000,
+			});
+		}
+	};
+
+	const handleQuantityChange = async (e: any) => {
+		const qty = Number(e.value);
+		if (Number.isFinite(qty) && qty >= 1) {
+			const res = await handleUpdateQuantity(product.id, qty);
+			if (!res.success) {
+				toaster.error({ title: i18nData.cartUpdateFailed, duration: 5000 });
+			}
+		}
+	};
 
 	return (
 		<Card.Root
@@ -76,12 +100,17 @@ export default function CartOrderCard({ product }: Props) {
 									bg: 'colorPalette.500',
 									color: 'main.lightOnly',
 								}}
-								onClick={() => handleRemoveItem(product.id)}
+								onClick={handleDelete}
 							>
 								<FiTrash2 />
 							</IconButton>
 						</Group>
-						<StepperInput defaultValue={product.quantity?.toString() || '1'} min={1} size='xs' />
+						<StepperInput
+							defaultValue={product.quantity?.toString() || '1'}
+							min={1}
+							size='xs'
+							onValueChange={handleQuantityChange}
+						/>
 					</Flex>
 
 					<Flex
@@ -100,7 +129,7 @@ export default function CartOrderCard({ product }: Props) {
 						<Flex direction='column' gap={3} pt={{ base: 2, sm: 0 }}>
 							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
 								<LocaleNavLink
-									href={`/products/${product.category}/${product.subcategory}/${product.slug}`}
+									href={`/products/${product.fullSlug}`}
 									textDecorationColor='main'
 									color='main'
 									variant='underline'

@@ -52,7 +52,7 @@ export default function CatalogDrawer() {
 											<Fragment key={product.id}>
 												<LocaleNavLink
 													key={product.id}
-													href={`/products/${category.slug}/${subcategory.slug}/${product.slug}`}
+													href={`/products/${product.fullSlug}`}
 													fontSize='md'
 													variant='plain'
 													textWrap='wrap'

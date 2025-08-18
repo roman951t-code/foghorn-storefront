@@ -1,7 +1,12 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { ProductsOnly, ProductsWithMeta, SubcategoryInfo, TaggedProduct } from '@/types/product';
+import {
+	ProductsOnly,
+	ProductsWithMeta,
+	SubcategoryInfo,
+	SubcategoryProduct,
+} from '@/types/product';
 
 export async function getProductsByTag<T extends boolean>(
 	tag: string,
@@ -20,45 +25,30 @@ export async function getProductsByTag<T extends boolean>(
 		select: {
 			id: true,
 			name: true,
-			slug: true,
+			fullSlug: true,
 			imageUrl: true,
 			basePrice: true,
+			categoryName: true,
+			subcategoryName: true,
 			discountPrice: true,
 			inStock: true,
 			reviews: { select: { rating: true } },
-			category: {
-				select: {
-					slug: true,
-					name: true,
-					parent: {
-						select: {
-							slug: true,
-							name: true,
-						},
-					},
-				},
-			},
+			tags: true,
 		},
 	});
 
-	const products: TaggedProduct[] = productsQuery.map((product) => {
+	const products = productsQuery.map((product) => {
 		const ratings = product.reviews.map((r) => r.rating);
 		const averageRating =
 			ratings.length > 0 ? ratings.reduce((sum, val) => sum + val, 0) / ratings.length : 0;
 
 		return {
-			id: product.id,
-			name: product.name,
-			slug: product.slug,
-			category: product.category.parent?.slug || '',
-			subcategory: product.category.slug,
-			imageUrl: product.imageUrl ?? '',
-			inStock: product.inStock,
+			...product,
 			basePrice: Number(product.basePrice),
 			discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
 			averageRating,
 			reviewCount: product.reviews.length,
-		};
+		} as SubcategoryProduct;
 	});
 
 	if (!fetchAll) {
