@@ -36,6 +36,7 @@ export function SessionProvider({
 				refresh();
 			}
 		};
+
 		return () => channel.close();
 	}, []);
 

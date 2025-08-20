@@ -1,3 +1,5 @@
+'use client';
+
 import { SimpleGrid, Box, VStack } from '@chakra-ui/react';
 import { EmptyState } from '@chakra-ui/react';
 import { HiColorSwatch } from 'react-icons/hi';

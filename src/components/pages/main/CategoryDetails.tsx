@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Box, Flex, Text, VStack, Heading, Wrap } from '@chakra-ui/react';
+import { Box, Flex, Text, VStack, Heading, Wrap, Badge } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
 import { LocaleNavLink, LocaleNavButton } from '@/components/reusable/links/LocaleNavLink';
 import type { I18nData } from '@/types/i18n';
@@ -26,18 +26,30 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 
 						<VStack align='start' gap='4' pb='4'>
 							{subcategory.products.map((product) => (
-								<LocaleNavLink
+								<Badge
 									key={product.id}
-									href={`/products/${product.fullSlug}`}
-									fontSize='md'
-									variant='plain'
-									textWrap='wrap'
-									wordBreak='break-word'
-									_hover={{ color: 'link' }}
-									_focus={{ outline: 'none' }}
+									variant='outline'
+									size='md'
+									borderWidth='0.5px'
+									bg='bg.tertiary'
+									px='1.5'
+									py='1'
+									boxShadow='none'
+									borderColor='border.light'
 								>
-									{product.name}
-								</LocaleNavLink>
+									<LocaleNavLink
+										href={`/products/${product.fullSlug}`}
+										fontSize='md'
+										variant='plain'
+										fontWeight='normal'
+										textWrap='wrap'
+										wordBreak='break-word'
+										_hover={{ color: 'link' }}
+										_focus={{ outline: 'none' }}
+									>
+										{product.name}
+									</LocaleNavLink>
+								</Badge>
 							))}
 
 							<LocaleNavLink

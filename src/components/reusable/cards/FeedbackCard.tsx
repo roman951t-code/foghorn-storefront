@@ -45,9 +45,9 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 			mb='4'
 		>
 			<Accordion.Item value={item.name} borderBottom='none'>
-				<Accordion.ItemTrigger w='100%' p='0'>
+				<Accordion.ItemTrigger w='100%' p='0' cursor='pointer'>
 					<Flex alignItems='center' direction={{ base: 'column', xs: 'row' } as any} w='100%'>
-						<Box ml='-8px' mr='1' mb={{ base: '12px', md: '0' }}>
+						<Box ml='-8px' mr='1'>
 							<Image
 								width={110}
 								height={110}
@@ -88,7 +88,7 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 				</Accordion.ItemTrigger>
 
 				<Accordion.ItemContent>
-					<Accordion.ItemBody p='0'>
+					<Accordion.ItemBody p='0' pt='4'>
 						<Flex justifyContent='space-between' mt='6'>
 							<Stack>
 								<Heading size='md'> Roman Onyshchenko</Heading>
@@ -153,7 +153,7 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 			mb='4'
 		>
 			<Accordion.Item value={item.name} borderBottom='none'>
-				<Flex alignItems='center' direction={{ base: 'column', xs: 'row' }} w='100%'>
+				<Flex alignItems='center' direction={{ base: 'column', xs: 'row' } as any} w='100%'>
 					<Box ml='-8px' mr='1' mb={{ base: '12px', sm: '0', md: '12px', lg: '0' }}>
 						<Image
 							width={110}
@@ -196,7 +196,7 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 						<FeedbackModal i18nData={i18nData} />
 					</Flex>
 				</Flex>
-				<Flex flex={1} justifyContent='flex-end' hideFrom='md' mt='2'>
+				<Flex flex={1} justifyContent='flex-end' hideFrom='md'>
 					<FeedbackModal i18nData={i18nData} />
 				</Flex>
 			</Accordion.Item>

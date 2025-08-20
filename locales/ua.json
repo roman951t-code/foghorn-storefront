@@ -141,6 +141,9 @@
 	"Main": {
 		"title": "Головна"
 	},
+	"Wishlist": {
+		"wishlistUpdateFailed": "Не вдалось оновити список бажань"
+	},
 	"Cart": {
 		"productRemovedFromCart": "Товар було видалено з кошика",
 		"allCartItemsRemoved": "Всі товари були видалені з кошика",
@@ -210,7 +213,7 @@
 		"feedbackTotal": "Загалом відгуків",
 		"averageFeedback": "Середня оцінка",
 		"feedbackAbsent": "Відгуків поки що немає",
-		"numOfProducts": "Кількість товарів до замовлення",
+		"numOfProducts": "Кількість товарів",
 		"order": "замовлення",
 		"repeatOrder": "Повторити замовлення",
 		"totalProducts": "Всього товарів",

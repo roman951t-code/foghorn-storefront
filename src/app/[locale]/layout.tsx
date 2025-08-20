@@ -19,6 +19,8 @@ import { getCartItems } from '@/actions/cart/getCartItems';
 import { getCartProductIds } from '@/actions/cart/getCartProductIds';
 import { getCatalog } from '@/actions/products/getCatalog';
 import { CartData } from '@/types/cart';
+import { getWishListProducts } from '@/actions/wishlist/getWishListProducts';
+import { getWishListProductIds } from '@/actions/wishlist/getWishListProductIds';
 
 interface Props {
 	children: ReactNode;
@@ -31,7 +33,7 @@ export default async function Layout({ children, params }: Props) {
 		notFound();
 	}
 
-	const messages = await loadClientMessages(['General', 'Auth', 'Products', 'Sidebar']);
+	const messages = await loadClientMessages(['General', 'Auth', 'Products', 'Cart', 'Sidebar']);
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -39,11 +41,12 @@ export default async function Layout({ children, params }: Props) {
 	const catalogResponse = await getCatalog();
 	const cartResponse = await getCartItems();
 	const cartProductIds = await getCartProductIds();
+	const wishListData = await getWishListProducts();
+	const wishListIds = await getWishListProductIds();
 
 	const emptyCartData: CartData = {
 		items: [],
 	};
-
 	const { success, ...restCartData } = cartResponse;
 
 	return (

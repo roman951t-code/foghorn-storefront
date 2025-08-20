@@ -36,8 +36,8 @@ function ProductPreviewSwiper() {
 						<Image
 							loading='lazy'
 							src={src}
-							width={116}
-							height={116}
+							width={110}
+							height={110}
 							alt='Product photo'
 							style={{ borderRadius: '8px' }}
 						/>

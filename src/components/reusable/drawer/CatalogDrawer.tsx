@@ -1,5 +1,4 @@
 'use client';
-
 import {
 	AccordionItem,
 	AccordionItemContent,
@@ -7,11 +6,10 @@ import {
 	AccordionRoot,
 } from '@/components/reusable/chakra/accordion';
 import { useTranslations } from 'next-intl';
-import { Box, VStack, Text, Heading, Wrap, Separator } from '@chakra-ui/react';
+import { Box, VStack, Text, Heading, Wrap, Badge } from '@chakra-ui/react';
 import { LocaleNavLink, LocaleNavSecButton } from '../links/LocaleNavLink';
 import { useCatalog } from '@/components/providers/CatalogProvider';
 import { BsChevronRight } from 'react-icons/bs';
-import { Fragment } from 'react';
 
 export default function CatalogDrawer() {
 	const t = useTranslations('General');
@@ -43,17 +41,40 @@ export default function CatalogDrawer() {
 						>
 							{category.children?.map((subcategory) => (
 								<Box key={subcategory.id}>
-									<Text fontWeight='medium' textStyle='xl' mb={4}>
+									<LocaleNavLink
+										href={`/products/${category.slug}/${subcategory.slug}`}
+										fontSize='md'
+										fontWeight='medium'
+										textStyle='xl'
+										variant='plain'
+										transition='color 0.25s ease-in-out'
+										textWrap='wrap'
+										wordBreak='break-all'
+										color='main'
+										textDecoration='underline'
+										textUnderlineOffset='6px'
+										mb={6}
+										_focus={{ outline: 'none' }}
+									>
 										{subcategory.name}
-									</Text>
+									</LocaleNavLink>
 
-									<Wrap align='start' gap='4'>
+									<Wrap align='center' gap='6'>
 										{subcategory.products.map((product) => (
-											<Fragment key={product.id}>
+											<Badge
+												key={product.id}
+												variant='outline'
+												size='md'
+												borderWidth='0.5px'
+												bg='bg.tertiary'
+												px='1.5'
+												py='1'
+												boxShadow='none'
+												borderColor='border.light'
+											>
 												<LocaleNavLink
-													key={product.id}
 													href={`/products/${product.fullSlug}`}
-													fontSize='md'
+													fontSize='15px'
 													variant='plain'
 													textWrap='wrap'
 													wordBreak='break-word'
@@ -62,9 +83,7 @@ export default function CatalogDrawer() {
 												>
 													{product.name}
 												</LocaleNavLink>
-
-												<Separator orientation='vertical' height='4' alignSelf='center' />
-											</Fragment>
+											</Badge>
 										))}
 
 										<LocaleNavLink

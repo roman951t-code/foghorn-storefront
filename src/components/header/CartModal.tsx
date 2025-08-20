@@ -51,7 +51,11 @@ export default function CartModal({ i18nData, triggerType, isInCart }: Props) {
 	const { cartData } = useCart();
 	const isCartEmpty = cartData.items.length === 0;
 	const [isOpen, setIsOpen] = useState(false);
-	console.log('cartData', cartData);
+
+	const { items: cartItems } = cartData;
+
+	const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
 	return (
 		<CenteredModal
 			title={i18nData.cart}
@@ -64,7 +68,7 @@ export default function CartModal({ i18nData, triggerType, isInCart }: Props) {
 						</PrimaryButton>
 					)
 				) : (
-					<CartBtn setIsOpen={setIsOpen} cartSize={cartData.items.length} />
+					<CartBtn setIsOpen={setIsOpen} cartSize={totalCount} />
 				)
 			}
 			size={isCartEmpty ? 'md' : 'lg'}

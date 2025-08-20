@@ -25,14 +25,15 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 		<>
 			<Flex align='center' py={3} justifyContent='space-between'>
 				<Flex justifyContent='flex-start' gap={6} direction='column'>
-					<VStack gap='3' alignItems='flex-start'>
+					<VStack gap='4' alignItems='flex-start'>
 						<Stat.Root>
-							<Stat.Label fontSize='sm'>{i18nData.totalAmount}</Stat.Label>
-							<Stat.ValueText fontSize='3xl'>{`${totalPrice} ₴`}</Stat.ValueText>
+							<Stat.Label fontSize='15px'>{i18nData.totalAmount}</Stat.Label>
+							<Stat.ValueText fontSize='3xl'>{`${totalPrice.toFixed(2)} ₴`}</Stat.ValueText>
 						</Stat.Root>
-						<Text fontSize='15px' fontWeight='normal'>
-							<Highlight query={`${totalCount}`} styles={{ fontWeight: 'bold' }}>
-								{`${i18nData.numOfProducts}: ${totalCount}`}
+						<Text fontWeight='normal' fontSize='15px'>
+							{`${i18nData.numOfProducts}:  `}
+							<Highlight query={`${totalCount}`} styles={{ fontWeight: 'bold', fontSize: 'lg' }}>
+								{`${totalCount}`}
 							</Highlight>
 						</Text>
 					</VStack>

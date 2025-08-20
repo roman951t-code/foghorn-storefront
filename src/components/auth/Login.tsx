@@ -5,7 +5,6 @@ import type { I18nData } from '@/types/i18n';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdPhonePortrait } from 'react-icons/io';
 import { signIn } from '@/lib/auth-client';
-import { useSession } from '../providers/SessionProvider';
 import PhoneSignIn from './PhoneSignIn';
 import EmailSignIn from './EmailSignIn';
 
@@ -16,10 +15,16 @@ interface Props {
 
 export default function Login({ i18nData, moveToSignup }: Props) {
 	const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
-	const { refresh } = useSession();
 
 	const isPhoneAuth = authMethod === 'phone';
 	const isEmailAuth = authMethod === 'email';
+
+	const handleGoogleLogin = async () => {
+		await signIn.social({
+			provider: 'google',
+			callbackURL: window.location.href + '?auth=google',
+		});
+	};
 
 	return (
 		<>
@@ -27,23 +32,7 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 			{isEmailAuth && <EmailSignIn i18nData={i18nData} />}
 
 			<Stack gap={4} mt={12}>
-				<Button
-					gap='12px'
-					variant='outline'
-					borderColor='main'
-					onClick={async () => {
-						await signIn.social({
-							provider: 'google',
-							callbackURL: window.location.href,
-						});
-
-						await refresh();
-
-						const bc = new BroadcastChannel('auth');
-						bc.postMessage('session-updated');
-						bc.close();
-					}}
-				>
+				<Button gap='12px' variant='outline' borderColor='main' onClick={handleGoogleLogin}>
 					<FcGoogle />
 					{i18nData.continueWith} Google
 				</Button>
