@@ -171,16 +171,6 @@ async function main() {
 		},
 	});
 
-	const wishlistProducts = faker.helpers.arrayElements(allProducts, 5);
-	await prisma.wishlist.createMany({
-		data: wishlistProducts.map((p) => ({
-			userId: roman.id,
-			productId: p.id,
-			createdAt: new Date(),
-		})),
-		skipDuplicates: true,
-	});
-
 	const reviewedProducts = faker.helpers.arrayElements(allProducts, 10);
 
 	for (const product of reviewedProducts) {

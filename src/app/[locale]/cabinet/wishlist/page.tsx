@@ -1,15 +1,17 @@
-import { VStack, HStack, Heading, IconButton, Icon, Highlight, Text } from '@chakra-ui/react';
+import { VStack, HStack, Heading, IconButton, Icon } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { IoShareSocialOutline } from 'react-icons/io5';
 import WishList from '@/components/pages/cabinet/wishlist/WishList';
 import ProductsFilter from '@/components/pages/cabinet/wishlist/ProductsFilter';
 import { FiTrash2 } from 'react-icons/fi';
-import Pagination from '@/components/reusable/Pagination';
+import WishlistPagination from '@/components/pages/cabinet/wishlist/WishlistPagination';
+import WishListCount from '@/components/pages/cabinet/wishlist/WishlistCount';
 
 export default function Wishlist() {
 	const t = useTranslations('Sidebar');
 	const prodT = useTranslations('Products');
 	const genT = useTranslations('General');
+	const wishT = useTranslations('Wishlist');
 
 	const i18nData = {
 		new: prodT('new'),
@@ -24,11 +26,8 @@ export default function Wishlist() {
 			</Heading>
 
 			<HStack w='100%' mt='6' justifyContent='space-between' alignItems='flex-start'>
-				<Text>
-					<Highlight query='100 шт' styles={{ fontWeight: 'semibold' }}>
-						{`${prodT('totalProducts')}: 100 ${genT('units')}`}
-					</Highlight>
-				</Text>
+				<WishListCount totalProductsText={prodT('totalProducts')} unitsText={genT('units')} />
+
 				<VStack mt='-4'>
 					<HStack alignSelf='flex-end' gap='2'>
 						<IconButton
@@ -69,8 +68,8 @@ export default function Wishlist() {
 					<ProductsFilter i18nData={i18nData} />
 				</VStack>
 			</HStack>
-			<WishList />
-			<Pagination />
+			<WishList emptyText={wishT('wishListEmpty')} />
+			<WishlistPagination />
 		</VStack>
 	);
 }

@@ -8,7 +8,7 @@ export async function getWishListProductIds() {
 	const session = await auth.api.getSession({ headers: await headers() });
 
 	if (!session?.user?.id) {
-		return { guest: true, productIds: [] };
+		return { success: false, productIds: [] };
 	}
 
 	const wishlist = await prisma.wishlist.findMany({
@@ -16,5 +16,8 @@ export async function getWishListProductIds() {
 		select: { productId: true },
 	});
 
-	return wishlist?.map((item) => item.productId) ?? [];
+	return {
+		success: true,
+		productIds: wishlist?.map((item) => item.productId) ?? [],
+	};
 }

@@ -34,7 +34,12 @@ export default function ImageModal({ image, resetModal }: Props) {
 						/>
 					)}
 				</DialogBody>
-				<DialogCloseTrigger onClick={resetModal} borderColor={{ _hover: 'border' }} />
+
+				<DialogCloseTrigger
+					onClick={resetModal}
+					_focus={{ outline: 'none' }}
+					borderColor={{ _hover: 'border' }}
+				/>
 			</DialogContent>
 		</DialogRoot>
 	);

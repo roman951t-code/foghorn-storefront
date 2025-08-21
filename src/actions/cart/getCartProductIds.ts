@@ -8,7 +8,7 @@ export async function getCartProductIds() {
 	const session = await auth.api.getSession({ headers: await headers() });
 
 	if (!session?.user?.id) {
-		return { guest: true, productIds: [] };
+		return { success: false, productIds: [] };
 	}
 
 	const cart = await prisma.cart.findUnique({

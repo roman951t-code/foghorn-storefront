@@ -4,11 +4,15 @@ import { IconButton, Float, Circle } from '@chakra-ui/react';
 import { useSession } from '../providers/SessionProvider';
 import { Link } from '@/i18n/routing';
 import { FiHeart } from 'react-icons/fi';
+import { useWishList } from '../providers/WishListProvider';
 
 export default function Favourite() {
 	const { session } = useSession();
+	const { ids: wishListIds } = useWishList();
 
-	if (!session?.session) {
+	const isVisible = session?.session && wishListIds?.length > 0;
+
+	if (!isVisible) {
 		return null;
 	}
 
@@ -26,7 +30,7 @@ export default function Favourite() {
 			>
 				<Float offset='0.5'>
 					<Circle size='4.5' bg='bg.accent' color='black' fontSize='xs' fontWeight='semibold'>
-						5
+						{wishListIds.length}
 					</Circle>
 				</Float>
 				<FiHeart />

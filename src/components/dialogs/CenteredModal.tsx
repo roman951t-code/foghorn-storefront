@@ -59,7 +59,7 @@ export default function CenteredModal({
 					</DialogTitle>
 				</DialogHeader>
 				<DialogBody>{children}</DialogBody>
-				<DialogCloseTrigger borderColor={{ _hover: 'border' }} />
+				<DialogCloseTrigger _focus={{ outline: 'none' }} borderColor={{ _hover: 'border' }} />
 			</DialogContent>
 		</DialogRoot>
 	);

@@ -142,7 +142,8 @@
 		"title": "Головна"
 	},
 	"Wishlist": {
-		"wishlistUpdateFailed": "Не вдалось оновити список бажань"
+		"wishlistUpdateFailed": "Не вдалось оновити список бажань",
+		"wishListEmpty": "Список бажань порожній"
 	},
 	"Cart": {
 		"productRemovedFromCart": "Товар було видалено з кошика",

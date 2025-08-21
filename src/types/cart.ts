@@ -1,4 +1,4 @@
-import { Product } from './product';
+import { SubcategoryProduct } from './product';
 
 export type CartProduct = {
 	basePrice: number;
@@ -20,12 +20,12 @@ export type CartContextType = {
 	productIds: string[];
 	handleClearCart: () => void;
 	handleUpdateQuantity: (productId: string, quantity: number) => Promise<{ success: boolean }>;
-	handleAddItem: (product: Product) => Promise<{ success: boolean }>;
+	handleAddItem: (product: SubcategoryProduct) => Promise<{ success: boolean }>;
 	handleRemoveItem: (productId: string) => Promise<{ success: boolean }>;
 };
 
 export type CartProviderProps = {
 	children: React.ReactNode;
 	cartData: CartData;
-	cartProductIds: { success?: boolean; productIds?: string[]; guest?: boolean };
+	cartProductIds: { success?: boolean; productIds?: string[] };
 };

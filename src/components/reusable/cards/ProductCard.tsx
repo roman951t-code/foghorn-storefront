@@ -6,33 +6,37 @@ import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link, Icon } from
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { Rating } from '../chakra/rating';
-
+import { toaster } from '../chakra/toaster';
+import { IoBagCheckOutline } from 'react-icons/io5';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 import { useCart } from '@/components/providers/CartProvider';
-import { toaster } from '../chakra/toaster';
-import { IoBagCheckOutline } from 'react-icons/io5';
-import { addToFavourite } from '@/actions/wishlist/addToWishList';
+import { useWishList } from '@/components/providers/WishListProvider';
+import { BsBagHeart } from 'react-icons/bs';
+import { SubcategoryProduct } from '@/types/product';
 
 type Props = {
-	product: any;
+	product: SubcategoryProduct;
 };
 
 export default function ProductCard({ product }: Props) {
 	const t = useTranslations('Products');
 	const cartT = useTranslations('Cart');
+	const wishT = useTranslations('Wishlist');
 	const discount = product?.discountPrice ? product?.basePrice! - product?.discountPrice : 0;
 	const isInStock = product?.inStock;
 
 	const [isLoading, setIsLoading] = useState(false);
 	const { productIds, handleAddItem } = useCart();
+	const { ids: wishListIds, handleWishAdd, handleWishRemove } = useWishList();
 
 	if (!product) return null;
 
 	const isInCart = productIds.includes(product?.id);
+	const isInWishlist = wishListIds.includes(product?.id);
 
-	const handleAdd = async () => {
+	const addToCard = async () => {
 		setIsLoading(true);
 
 		try {
@@ -48,20 +52,27 @@ export default function ProductCard({ product }: Props) {
 		}
 	};
 
-	const handleFavourite = async () => {
+	const addToWishList = async () => {
 		try {
-			const result = await addToFavourite(product.id);
-			if (result.success) {
-				if (result.added) {
-					toaster.success({ title: result.message });
-				} else if (result.removed) {
-					toaster.info({ title: result.message });
-				}
-			} else {
-				toaster.error({ title: result.message });
+			const result = await handleWishAdd(product);
+
+			if (!result.success) {
+				toaster.error({ title: wishT('wishlistUpdateFailed'), duration: 5000 });
 			}
 		} catch {
-			toaster.error({ title: cartT('wishlistUpdateFailed') });
+			toaster.error({ title: wishT('wishlistUpdateFailed'), duration: 5000 });
+		}
+	};
+
+	const removeFromWishList = async () => {
+		try {
+			const result = await handleWishRemove(product.id);
+
+			if (!result.success) {
+				toaster.error({ title: wishT('wishlistUpdateFailed'), duration: 5000 });
+			}
+		} catch {
+			toaster.error({ title: wishT('wishlistUpdateFailed'), duration: 5000 });
 		}
 	};
 
@@ -94,7 +105,7 @@ export default function ProductCard({ product }: Props) {
 					) : (
 						<IconButton
 							loading={isLoading}
-							onClick={handleAdd}
+							onClick={addToCard}
 							disabled={!isInStock}
 							aria-label='Cart'
 							variant='ghost'
@@ -112,7 +123,7 @@ export default function ProductCard({ product }: Props) {
 					)}
 
 					<IconButton
-						onClick={handleFavourite}
+						onClick={isInWishlist ? removeFromWishList : addToWishList}
 						aria-label='Favourite'
 						variant='ghost'
 						rounded='full'
@@ -124,7 +135,13 @@ export default function ProductCard({ product }: Props) {
 							color: 'main.lightOnly',
 						}}
 					>
-						<FiHeart />
+						{isInWishlist ? (
+							<Icon size='lg' aria-label='Wish'>
+								<BsBagHeart />
+							</Icon>
+						) : (
+							<FiHeart />
+						)}
 					</IconButton>
 				</Flex>
 

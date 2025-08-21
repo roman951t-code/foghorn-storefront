@@ -21,7 +21,8 @@
 		"order": "Оформить заказ"
 	},
 	"Wishlist": {
-		"wishlistUpdateFailed": "Не удалось обновить список желаний"
+		"wishlistUpdateFailed": "Не удалось обновить список желаний",
+		"wishListEmpty": "Список желаний пуст"
 	},
 	"Cart": {
 		"productRemovedFromCart": "Товар был удалён из корзины",

@@ -1,6 +1,6 @@
 import React from 'react';
-import { FiTrash2, FiHeart } from 'react-icons/fi';
-import { IconButton, Text, Flex, Card, Badge, Group } from '@chakra-ui/react';
+import { FiTrash2 } from 'react-icons/fi';
+import { IconButton, Text, Flex, Card, Badge } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { StepperInput } from '../chakra/stepper-input';
@@ -64,61 +64,9 @@ export default function CartOrderCard({ product, i18nData }: Props) {
 					align='center'
 					justifyContent='space-between'
 					direction={{ base: 'column', sm: 'row' }}
-					pl={{ base: 3, sm: 0 }}
 					w='full'
 				>
-					<Flex
-						order={{ base: 0, sm: 1 }}
-						direction={{ base: 'row', sm: 'column' }}
-						justifyContent='space-between'
-						alignItems={{ base: 'center', sm: 'flex-end' }}
-						h={{ base: 'auto', sm: '130px' }}
-						w={{ base: '100%', sm: 'auto' }}
-					>
-						<Group mt='0'>
-							<IconButton
-								aria-label='Favourite'
-								variant='ghost'
-								rounded='full'
-								colorPalette='red'
-								color='colorPalette.400'
-								transition='all 0.2s ease-in-out'
-								_hover={{
-									bg: 'colorPalette.400',
-									color: 'main.lightOnly',
-								}}
-							>
-								<FiHeart />
-							</IconButton>
-							<IconButton
-								aria-label='Trash'
-								variant='ghost'
-								rounded='full'
-								color='main.disabled'
-								transition='all 0.2s ease-in-out'
-								_hover={{
-									bg: 'colorPalette.500',
-									color: 'main.lightOnly',
-								}}
-								onClick={handleDelete}
-							>
-								<FiTrash2 />
-							</IconButton>
-						</Group>
-						<StepperInput
-							defaultValue={product.quantity?.toString() || '1'}
-							min={1}
-							size='xs'
-							onValueChange={handleQuantityChange}
-						/>
-					</Flex>
-
-					<Flex
-						order={{ base: 1, sm: 0 }}
-						alignItems='center'
-						direction={{ base: 'column', sm: 'row' }}
-						w='100%'
-					>
+					<Flex alignItems='center' direction='row' w='100%'>
 						<Image
 							src={img1}
 							alt={product.name}
@@ -126,7 +74,7 @@ export default function CartOrderCard({ product, i18nData }: Props) {
 							height={110}
 							style={{ objectFit: 'contain', marginRight: '6px' }}
 						/>
-						<Flex direction='column' gap={3} pt={{ base: 2, sm: 0 }}>
+						<Flex direction='column' gap={3} pt={{ base: 2, xs: 0 } as any}>
 							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
 								<LocaleNavLink
 									href={`/products/${product.fullSlug}`}
@@ -137,7 +85,13 @@ export default function CartOrderCard({ product, i18nData }: Props) {
 									{product.name}
 								</LocaleNavLink>
 							</Card.Title>
-							<Text color='main' fontSize='xl' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
+							<Text
+								color='main'
+								fontSize='xl'
+								fontWeight='medium'
+								mb={{ base: 4, sm: 0 }}
+								mr={{ base: 0, sm: 2 }}
+							>
 								{product.discountPrice ? product.discountPrice : product.basePrice} ₴
 								{product.discountPrice && (
 									<Text
@@ -145,23 +99,50 @@ export default function CartOrderCard({ product, i18nData }: Props) {
 										color='main.disabled'
 										fontSize='sm'
 										textDecoration='line-through'
-										marginLeft='8px'
+										marginLeft='3'
 									>
 										{product.basePrice} ₴
 									</Text>
 								)}
 								{discountAmount > 0 && (
-									<Badge
-										variant='solid'
-										color='main.lightOnly'
-										bg='main.tertiary'
-										marginLeft='12px'
-									>
+									<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='4'>
 										-{discountAmount} ₴
 									</Badge>
 								)}
 							</Text>
 						</Flex>
+					</Flex>
+
+					<Flex
+						order={{ base: 1, sm: 0 }}
+						direction={{ base: 'row', sm: 'column' }}
+						justifyContent='space-between'
+						alignItems={{ base: 'center', sm: 'flex-end' }}
+						mt={{ base: 4, sm: 0 } as any}
+						h={{ base: 'auto', sm: '110px' }}
+						w={{ base: '100%', sm: 'auto' }}
+					>
+						<StepperInput
+							defaultValue={product.quantity?.toString() || '1'}
+							min={1}
+							size='xs'
+							onValueChange={handleQuantityChange}
+						/>
+						<IconButton
+							mt='0'
+							aria-label='Trash'
+							variant='ghost'
+							rounded='full'
+							color='main.disabled'
+							transition='all 0.2s ease-in-out'
+							_hover={{
+								bg: 'colorPalette.500',
+								color: 'main.lightOnly',
+							}}
+							onClick={handleDelete}
+						>
+							<FiTrash2 />
+						</IconButton>
 					</Flex>
 				</Flex>
 			</Flex>

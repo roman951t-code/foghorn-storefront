@@ -21,6 +21,7 @@ import { getCatalog } from '@/actions/products/getCatalog';
 import { CartData } from '@/types/cart';
 import { getWishListProducts } from '@/actions/wishlist/getWishListProducts';
 import { getWishListProductIds } from '@/actions/wishlist/getWishListProductIds';
+import { WishListProvider } from '@/components/providers/WishListProvider';
 
 interface Props {
 	children: ReactNode;
@@ -33,7 +34,14 @@ export default async function Layout({ children, params }: Props) {
 		notFound();
 	}
 
-	const messages = await loadClientMessages(['General', 'Auth', 'Products', 'Cart', 'Sidebar']);
+	const messages = await loadClientMessages([
+		'General',
+		'Auth',
+		'Products',
+		'Cart',
+		'Sidebar',
+		'Wishlist',
+	]);
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -62,11 +70,16 @@ export default async function Layout({ children, params }: Props) {
 											cartData={success ? restCartData : emptyCartData}
 											cartProductIds={cartProductIds}
 										>
-											<Header />
-											<Box as='main' w='full' maxW='1444px' flex='1' mx='auto'>
-												{children}
-												<ToTop />
-											</Box>
+											<WishListProvider
+												wishListData={wishListData?.products ?? []}
+												wishListIds={wishListIds}
+											>
+												<Header />
+												<Box as='main' w='full' maxW='1444px' flex='1' mx='auto'>
+													{children}
+													<ToTop />
+												</Box>
+											</WishListProvider>
 										</CartProvider>
 									</CatalogProvider>
 								</NextIntlClientProvider>

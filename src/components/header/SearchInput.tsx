@@ -151,7 +151,7 @@ export default function SearchInput({
 									borderBottom='1px solid'
 									borderColor='border.light'
 								>
-									<Icon mr='2'>
+									<Icon ml='1' mr='2.5'>
 										<IoPricetagsOutline />
 									</Icon>
 									{products}
@@ -174,7 +174,7 @@ export default function SearchInput({
 											borderBottom='1px solid'
 											borderColor='border.light'
 										>
-											<Icon mr='2'>
+											<Icon ml='1' mr='2.5'>
 												<IoPricetagsOutline />
 											</Icon>
 											{categories}

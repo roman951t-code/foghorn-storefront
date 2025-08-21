@@ -35,6 +35,7 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 	const cartT = useTranslations('Cart');
 	const headT = useTranslations('Header');
 	const prodT = useTranslations('Products');
+	const wishT = useTranslations('Wishlist');
 
 	const shareI18nData = {
 		pressToCopy: prodT('pressToCopy'),
@@ -93,7 +94,10 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 								{product.inStock ? prodT('productIsPresent') : prodT('productIsOutOfStock')}
 							</Status.Root>
 							<ShareProduct i18nData={shareI18nData} />
-							<AddToFavourite />
+							<AddToFavourite
+								wishlistUpdateFailed={wishT('wishlistUpdateFailed')}
+								product={product}
+							/>
 						</HStack>
 
 						<Tag.Root

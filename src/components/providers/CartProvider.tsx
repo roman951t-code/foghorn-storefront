@@ -6,7 +6,7 @@ import { removeFromCart } from '@/actions/cart/removeFromCart';
 import { updateCartItemQuantity } from '@/actions/cart/updateCartItemQuantity';
 import { clearCart } from '@/actions/cart/clearCart';
 import { CartContextType, CartProduct, CartProviderProps } from '@/types/cart';
-import { Product } from '@/types/product';
+import { SubcategoryProduct } from '@/types/product';
 import { useSession } from './SessionProvider';
 import { mergeCartData } from '@/actions/cart/mergeCartData';
 
@@ -132,17 +132,17 @@ export function CartProvider({ children, cartData, cartProductIds }: CartProvide
 		prevLoggedInRef.current = nowLoggedIn;
 	}, [isLoggedIn, setFromServer]);
 
-	const handleAddItem = async (product: Product): Promise<{ success: boolean }> => {
+	const handleAddItem = async (product: SubcategoryProduct): Promise<{ success: boolean }> => {
 		if (!product) return { success: false };
 
 		const cartProduct: CartProduct = {
-			basePrice: product.basePrice,
-			discountPrice: product.discountPrice,
+			basePrice: product.basePrice!,
+			discountPrice: product.discountPrice!,
 			id: product.id,
-			imageUrl: product.imageUrl,
-			name: product.name,
+			imageUrl: product.imageUrl!,
+			name: product.name!,
 			quantity: 1,
-			fullSlug: product.fullSlug,
+			fullSlug: product.fullSlug!,
 		};
 
 		if (isLoggedIn) {
