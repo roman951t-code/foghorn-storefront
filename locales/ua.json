@@ -61,7 +61,8 @@
 		"tooManyRequests": "Занадто багато спроб. Повторіть пізніше.",
 		"deleteFailed": "Не вдалось видалити акаунт",
 		"refreshTokenError": "Активаційний код для відновлення паролю застарів, спробуйте отримати новий",
-		"emailNotVerifiedError": "Електронна адреса не підтверджена. Ви не можете здійснювати покупки"
+		"emailNotVerifiedError": "Електронна адреса не підтверджена. Ви не можете здійснювати покупки",
+		"feedbackRequired": "Відгук обов'язковий"
 	},
 	"Auth": {
 		"hiUser": "Вітаємо",
@@ -229,7 +230,9 @@
 		"categories": "Категорії",
 		"allCategories": "Всі категорії",
 		"hideAllCategories": "Всі категорії",
-		"searchQueryResults": "Результати за запитом: {searchQuery}"
+		"searchQueryResults": "Результати за запитом: {searchQuery}",
+		"advantages": "Переваги",
+		"disAdvantages": "Недоліки"
 	},
 	"NotFoundPage": {
 		"title": "Сторінку не знайдено",

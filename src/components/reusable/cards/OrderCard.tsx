@@ -37,6 +37,7 @@ export default function OrderCard() {
 	const authT = useTranslations('Auth');
 	const genT = useTranslations('General');
 	const prodT = useTranslations('Products');
+	const validT = useTranslations('Validation');
 
 	const i18nData = {
 		name: authT('name'),
@@ -45,6 +46,9 @@ export default function OrderCard() {
 		leaveFeedback: prodT('leaveFeedback'),
 		myRate: prodT('myRate'),
 		send: genT('send'),
+		advantages: prodT('advantages'),
+		disAdvantages: prodT('disAdvantages'),
+		invalidFormData: validT('invalidFormData'),
 	};
 
 	return (

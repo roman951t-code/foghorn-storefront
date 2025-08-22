@@ -1,57 +1,64 @@
 'use client';
-import { Box, Center, Input, Heading, Fieldset, RatingGroup, Textarea } from '@chakra-ui/react';
+import {
+	Box,
+	Center,
+	Input,
+	Heading,
+	Fieldset,
+	Field,
+	RatingGroup,
+	Textarea,
+} from '@chakra-ui/react';
 import { VscFeedback } from 'react-icons/vsc';
 import CenteredModal from '@/components/dialogs/CenteredModal';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { PrimaryButton, SecondaryButton } from '../reusable/buttons/ActionButton';
-import { useState } from 'react';
-
-import { Field } from '../reusable/chakra/field';
+import { useMemo, useState } from 'react';
 import Auth from '../auth/Auth';
 import { useSession } from '../providers/SessionProvider';
+import { createFeedbackSchema, FeedbackSchema } from 'formValidationSchemas/feedbackSchema';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface Props {
 	i18nData: I18nData;
 }
 
-const emojiMap: Record<number, string> = {
-	1: '🙁',
-	2: '😕',
-	3: '😏',
-	4: '😊',
-	5: '😍',
-};
-
-interface FormValues {
-	name: string;
-	email?: string;
-	feedback: string;
-	rating: number;
-}
-
 export default function FeedbackModal({ i18nData }: Props) {
 	const { session } = useSession();
-
 	const [isOpen, setIsOpen] = useState(false);
+	const [isPending, setIsPending] = useState(false);
+	const [verifyError, setVerifyError] = useState('');
+
+	const schema = useMemo(() => createFeedbackSchema(i18nData), [i18nData]);
 
 	const {
 		register,
 		handleSubmit,
+		control,
 		formState: { errors },
-		setValue,
-	} = useForm<FormValues>({
+	} = useForm<FeedbackSchema>({
 		mode: 'onSubmit',
+		resolver: zodResolver(schema),
 		defaultValues: {
+			name: session?.session?.user?.name || '',
+			lastName: session?.session?.user?.lastName || '',
+			feedback: '',
+			advantages: '',
+			disAdvantages: '',
 			rating: 5,
 		},
 	});
 
-	const onSubmit = async (data: FormValues) => {
+	const onSubmit = async (formData: FeedbackSchema) => {
+		console.log('formData', formData);
+		setIsPending(true);
+
 		try {
-			console.log('Feedback Submitted:', data);
-		} catch (error) {
-			console.error('Submission failed:', error);
+		} catch (err) {
+			setVerifyError(i18nData.invalidFormData);
+		} finally {
+			setIsPending(false);
 		}
 	};
 
@@ -78,63 +85,102 @@ export default function FeedbackModal({ i18nData }: Props) {
 					<VscFeedback /> {i18nData.leaveFeedback}
 				</SecondaryButton>
 			}
-			size='sm'
+			size='md'
 		>
-			<Box maxW='400px' p={4} borderRadius='lg' mx='auto'>
+			<Box p={4} borderRadius='lg' mx='auto'>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<Center flexDirection='column' gap='4' mb='6'>
 						<Heading size='3xl' fontWeight='normal'>
 							{i18nData.rate}
 						</Heading>
-						<RatingGroup.Root
-							defaultValue={5}
-							onValueChange={(val) => setValue('rating', Number(val))}
-						>
-							<RatingGroup.Control gap='4'>
-								{Array.from({ length: 5 }).map((_, index) => (
-									<RatingGroup.Item
-										key={index}
-										index={index + 1}
-										minW='9'
-										filter={{ base: 'orangescale(1)', _checked: 'revert' }}
-										transition='scale 0.1s'
-										scale='2'
-										_hover={{ scale: '2.2', cursor: 'pointer' }}
+						<Controller
+							control={control}
+							name='rating'
+							render={({ field }) => (
+								<RatingGroup.Root
+									defaultValue={5}
+									name={field.name}
+									value={field.value}
+									onValueChange={({ value }) => field.onChange(value)}
+								>
+									<RatingGroup.Root
+										size='lg'
+										colorPalette={{ base: 'orange', _dark: 'yellow' }}
+										allowHalf
+										count={5}
+										name={field.name}
+										value={field.value}
+										onValueChange={({ value }) => field.onChange(value)}
 									>
-										{emojiMap[index + 1]}
-									</RatingGroup.Item>
-								))}
-							</RatingGroup.Control>
-						</RatingGroup.Root>
+										<RatingGroup.HiddenInput />
+										<RatingGroup.Control />
+									</RatingGroup.Root>
+								</RatingGroup.Root>
+							)}
+						/>
 					</Center>
 
 					<Fieldset.Root size='lg' maxW='md'>
 						<Fieldset.Content gap='6'>
-							<Field label={i18nData.name} required errorText={errors.name?.message}>
-								<Input {...register('name', { required: i18nData.name + ' is required' })} />
-							</Field>
+							<Field.Root invalid={!!errors.name} gap='2' justifyContent='center' required>
+								<Field.Label maxH='20px'>
+									{i18nData.name} <Field.RequiredIndicator />
+								</Field.Label>
 
-							<Field label={i18nData.email} errorText={errors.email?.message}>
-								<Input
-									{...register('email', {
-										pattern: {
-											value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-											message: 'Invalid email address',
-										},
-									})}
-									type='email'
-								/>
-							</Field>
+								<Input {...register('name')} variant='outline' size='md' />
+								<Field.ErrorText alignSelf='flex-start'>
+									{errors.name?.message?.toString()}
+								</Field.ErrorText>
+							</Field.Root>
 
-							<Field label={i18nData.myRate} required errorText={errors.feedback?.message}>
+							<Field.Root invalid={!!errors.lastName} gap='2' justifyContent='center' required>
+								<Field.Label maxH='20px'>
+									{i18nData.lastName} <Field.RequiredIndicator />
+								</Field.Label>
+
+								<Input {...register('lastName')} variant='outline' size='md' />
+								<Field.ErrorText alignSelf='flex-start'>
+									{errors.lastName?.message?.toString()}
+								</Field.ErrorText>
+							</Field.Root>
+
+							<Field.Root invalid={!!errors.advantages} gap='2' justifyContent='center'>
+								<Field.Label maxH='20px'>{i18nData.advantages}</Field.Label>
+
+								<Input {...register('advantages')} variant='outline' size='md' />
+								<Field.ErrorText alignSelf='flex-start'>
+									{errors.advantages?.message?.toString()}
+								</Field.ErrorText>
+							</Field.Root>
+
+							<Field.Root invalid={!!errors.disAdvantages} gap='2' justifyContent='center'>
+								<Field.Label maxH='20px'>{i18nData.disAdvantages}</Field.Label>
+
+								<Input {...register('disAdvantages')} variant='outline' size='md' />
+								<Field.ErrorText alignSelf='flex-start'>
+									{errors.disAdvantages?.message?.toString()}
+								</Field.ErrorText>
+							</Field.Root>
+
+							<Field.Root invalid={!!errors.lastName} gap='2' justifyContent='center' required>
+								<Field.Label maxH='20px'>
+									{i18nData.myRate} <Field.RequiredIndicator />
+								</Field.Label>
+
 								<Textarea
 									minH='100px'
 									maxH='300px'
 									{...register('feedback', { required: i18nData.myRate + ' is required' })}
 								/>
-							</Field>
+								<Field.ErrorText alignSelf='flex-start'>
+									{errors.feedback?.message?.toString()}
+								</Field.ErrorText>
+							</Field.Root>
 						</Fieldset.Content>
-						<PrimaryButton w='100%' mt='8' type='submit'>
+
+						<Fieldset.ErrorText>{verifyError}</Fieldset.ErrorText>
+
+						<PrimaryButton w='100%' mt='8' type='submit' loading={isPending}>
 							{i18nData.send}
 						</PrimaryButton>
 					</Fieldset.Root>

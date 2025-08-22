@@ -69,6 +69,7 @@
 		"nameRequired": "Имя обязательно",
 		"wrongPhone": "Неверный формат номера. Пример: +380501234567",
 		"pinRequired": "Код подтверждения обязателен",
+		"feedbackRequired": "Отзыв обязателен",
 		"pinLength": "Код подтверждения должен состоять из 6 символов",
 		"userNotFound": "Пользователь не найден",
 		"alreadyVerified": "Пользователь уже имеет подтвержденный email",
@@ -232,7 +233,9 @@
 		"products": "Товары",
 		"categories": "Категории",
 		"allCategories": "Все категории",
-		"searchQueryResults": "Результаты по запросу: {searchQuery}"
+		"searchQueryResults": "Результаты по запросу: {searchQuery}",
+		"advantages": "Преимущества",
+		"disAdvantages": "Недостатки"
 	},
 	"NotFoundPage": {
 		"title": "Страница не найдена",

@@ -40,6 +40,9 @@ export default function FeedbackTab({ reviews }: FeedbackTabProps) {
 		leaveFeedback: prodT('leaveFeedback'),
 		myRate: prodT('myRate'),
 		send: genT('send'),
+		invalidFormData: validT('invalidFormData'),
+		advantages: prodT('advantages'),
+		disAdvantages: prodT('disAdvantages'),
 	};
 
 	const averageRating =

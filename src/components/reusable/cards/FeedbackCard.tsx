@@ -132,13 +132,17 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 	const authT = useTranslations('Auth');
 	const genT = useTranslations('General');
 	const prodT = useTranslations('Products');
+	const validT = useTranslations('Validation');
 
 	const i18nData = {
 		name: authT('name'),
 		email: authT('email'),
 		rate: prodT('rate'),
+		advantages: prodT('advantages'),
+		disAdvantages: prodT('disAdvantages'),
 		leaveFeedback: prodT('leaveFeedback'),
 		myRate: prodT('myRate'),
+		invalidFormData: validT('invalidFormData'),
 		send: genT('send'),
 	};
 

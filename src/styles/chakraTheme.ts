@@ -253,6 +253,10 @@ const config = defineConfig({
 			height: '100%',
 			width: '100%',
 		},
+		'span.chakra-rating-group__item:not([data-highlighted]) path, span.chakra-rating-group__item[data-half] svg:first-of-type path':
+			{
+				color: 'var(--mix-textDecorationColor, lightgray) !important',
+			},
 	},
 });
 
