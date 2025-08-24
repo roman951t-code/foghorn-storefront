@@ -181,6 +181,8 @@ async function main() {
 				productId: product.id,
 				rating,
 				comment: faker.lorem.sentences(faker.number.int({ min: 1, max: 3 })),
+				advantages: faker.lorem.words(faker.number.int({ min: 2, max: 5 })),
+				disadvantages: faker.lorem.words(faker.number.int({ min: 2, max: 5 })),
 				createdAt: faker.date.recent({ days: 30 }),
 			},
 		});

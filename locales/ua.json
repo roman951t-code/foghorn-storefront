@@ -62,7 +62,10 @@
 		"deleteFailed": "Не вдалось видалити акаунт",
 		"refreshTokenError": "Активаційний код для відновлення паролю застарів, спробуйте отримати новий",
 		"emailNotVerifiedError": "Електронна адреса не підтверджена. Ви не можете здійснювати покупки",
-		"feedbackRequired": "Відгук обов'язковий"
+		"feedbackRequired": "Відгук обов'язковий",
+		"addReviewFail": "Не вдалося додати відгук",
+		"feedbackMinLength": "Мінімум 5 символів",
+		"feedbackMaxLength": "Максимум 200 символів"
 	},
 	"Auth": {
 		"hiUser": "Вітаємо",
@@ -189,6 +192,7 @@
 		"promotional": "Акції",
 		"viewed": "Ви переглядали",
 		"feedback": "Відгуки",
+		"comment": "Коментар",
 		"expensiveToCheap": "Від дорогих до дешевих",
 		"cheapToExpensive": "Від дешевих до дорогих",
 		"price": "Ціна",

@@ -19,16 +19,18 @@ import Auth from '../auth/Auth';
 import { useSession } from '../providers/SessionProvider';
 import { createFeedbackSchema, FeedbackSchema } from 'formValidationSchemas/feedbackSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { leaveFeedback } from '@/actions/feedback/leaveFeedback';
+import { toaster } from '../reusable/chakra/toaster';
 
 interface Props {
 	i18nData: I18nData;
+	productId: string;
 }
 
-export default function FeedbackModal({ i18nData }: Props) {
+export default function FeedbackModal({ i18nData, productId }: Props) {
 	const { session } = useSession();
 	const [isOpen, setIsOpen] = useState(false);
 	const [isPending, setIsPending] = useState(false);
-	const [verifyError, setVerifyError] = useState('');
 
 	const schema = useMemo(() => createFeedbackSchema(i18nData), [i18nData]);
 
@@ -38,11 +40,11 @@ export default function FeedbackModal({ i18nData }: Props) {
 		control,
 		formState: { errors },
 	} = useForm<FeedbackSchema>({
-		mode: 'onSubmit',
+		mode: 'all',
 		resolver: zodResolver(schema),
 		defaultValues: {
-			name: session?.session?.user?.name || '',
-			lastName: session?.session?.user?.lastName || '',
+			name: session?.user?.name || '',
+			lastName: session?.user?.lastName || '',
 			feedback: '',
 			advantages: '',
 			disAdvantages: '',
@@ -51,12 +53,18 @@ export default function FeedbackModal({ i18nData }: Props) {
 	});
 
 	const onSubmit = async (formData: FeedbackSchema) => {
-		console.log('formData', formData);
 		setIsPending(true);
 
 		try {
+			const result = await leaveFeedback(null, formData, productId);
+			console.log('result', result);
+			if (!result.success) {
+				toaster.error({ title: result?.message! ?? i18nData.addReviewFail, duration: 5000 });
+			} else {
+				setIsOpen(false);
+			}
 		} catch (err) {
-			setVerifyError(i18nData.invalidFormData);
+			toaster.error({ title: i18nData.addReviewFail, duration: 5000 });
 		} finally {
 			setIsPending(false);
 		}
@@ -162,7 +170,7 @@ export default function FeedbackModal({ i18nData }: Props) {
 								</Field.ErrorText>
 							</Field.Root>
 
-							<Field.Root invalid={!!errors.lastName} gap='2' justifyContent='center' required>
+							<Field.Root invalid={!!errors.feedback} gap='2' justifyContent='center' required>
 								<Field.Label maxH='20px'>
 									{i18nData.myRate} <Field.RequiredIndicator />
 								</Field.Label>
@@ -177,8 +185,6 @@ export default function FeedbackModal({ i18nData }: Props) {
 								</Field.ErrorText>
 							</Field.Root>
 						</Fieldset.Content>
-
-						<Fieldset.ErrorText>{verifyError}</Fieldset.ErrorText>
 
 						<PrimaryButton w='100%' mt='8' type='submit' loading={isPending}>
 							{i18nData.send}

@@ -1,16 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-	Text,
-	Card,
-	Tag,
-	Separator,
-	Flex,
-	Accordion,
-	Button as ChakraBtn,
-	Icon,
-} from '@chakra-ui/react';
+import { Card, Tag, Separator, Flex, Accordion, Button as ChakraBtn, Icon } from '@chakra-ui/react';
 import { MessageBox, Input, Button } from 'react-chat-elements';
 import { IoMdAttach } from 'react-icons/io';
 import 'react-chat-elements/dist/main.css';

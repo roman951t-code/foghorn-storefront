@@ -144,6 +144,8 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 		myRate: prodT('myRate'),
 		invalidFormData: validT('invalidFormData'),
 		send: genT('send'),
+		feedbackMinLength: validT('feedbackMinLength'),
+		feedbackMaxLength: validT('feedbackMaxLength'),
 	};
 
 	return (

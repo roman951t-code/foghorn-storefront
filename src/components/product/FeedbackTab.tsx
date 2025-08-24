@@ -10,17 +10,21 @@ import { authLocData, validLocData } from '@/data/localized';
 const FeedbackModal = dynamic(() => import('./FeedbackModal'));
 
 type Review = {
+	id: string;
 	rating: number;
 	comment: string;
+	advantages: string | null;
+	disadvantages: string | null;
 	createdAt: Date;
-	user: { name: string; image?: string | null };
+	user: { name: string; lastName: string | null };
 };
 
 type FeedbackTabProps = {
 	reviews: Review[];
+	productId: string;
 };
 
-export default function FeedbackTab({ reviews }: FeedbackTabProps) {
+export default function FeedbackTab({ reviews, productId }: FeedbackTabProps) {
 	const authT = useTranslations('Auth');
 	const genT = useTranslations('General');
 	const prodT = useTranslations('Products');
@@ -43,6 +47,9 @@ export default function FeedbackTab({ reviews }: FeedbackTabProps) {
 		invalidFormData: validT('invalidFormData'),
 		advantages: prodT('advantages'),
 		disAdvantages: prodT('disAdvantages'),
+		addReviewFail: validT('addReviewFail'),
+		feedbackMinLength: validT('feedbackMinLength'),
+		feedbackMaxLength: validT('feedbackMaxLength'),
 	};
 
 	const averageRating =
@@ -63,7 +70,7 @@ export default function FeedbackTab({ reviews }: FeedbackTabProps) {
 						<Stack>
 							<DataList.Root orientation='horizontal'>
 								<DataList.Item>
-									<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
+									<DataList.ItemLabel fontSize='md' fontWeight='medium' color='main'>
 										{reviews.length > 0 ? `${prodT('feedbackTotal')}:` : prodT('feedbackAbsent')}
 									</DataList.ItemLabel>
 									{reviews.length > 0 && (
@@ -103,17 +110,17 @@ export default function FeedbackTab({ reviews }: FeedbackTabProps) {
 							</DataList.Root>
 						</Stack>
 
-						<FeedbackModal i18nData={i18nData} />
+						<FeedbackModal i18nData={i18nData} productId={productId} />
 					</Flex>
 				</Card.Header>
 			</Card.Root>
 
-			{reviews.map((review, idx) => (
+			{reviews.map((review) => (
 				<Card.Root
-					key={idx}
+					key={review.id}
 					size='sm'
 					minWidth='200px'
-					w='100%'
+					w='full'
 					border='1px solid'
 					borderColor='border.dark'
 					bg='bg.tertiary'
@@ -121,10 +128,11 @@ export default function FeedbackTab({ reviews }: FeedbackTabProps) {
 					<Card.Header>
 						<Flex justifyContent='space-between'>
 							<Stack>
-								<Heading size='md'>{review.user.name}</Heading>
+								<Heading size='md'>{`${review.user.name} ${review.user.lastName ?? ''}`}</Heading>
 								<Rating
 									colorPalette={{ base: 'orange', _dark: 'yellow' }}
 									readOnly
+									allowHalf
 									size='xs'
 									defaultValue={review.rating}
 								/>
@@ -134,7 +142,32 @@ export default function FeedbackTab({ reviews }: FeedbackTabProps) {
 						</Flex>
 					</Card.Header>
 					<Separator mt='4' color='border.dark' />
-					<Card.Body color='main'>{review.comment}</Card.Body>
+					<Card.Body color='main'>
+						<DataList.Root>
+							{review.advantages && (
+								<DataList.Item gap='2.5'>
+									<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
+										{prodT('advantages')}
+									</DataList.ItemLabel>
+									<DataList.ItemValue fontSize='15px'>{review.advantages}</DataList.ItemValue>
+								</DataList.Item>
+							)}
+							{review.disadvantages && (
+								<DataList.Item gap='2.5'>
+									<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
+										{prodT('disAdvantages')}
+									</DataList.ItemLabel>
+									<DataList.ItemValue fontSize='15px'>{review.disadvantages}</DataList.ItemValue>
+								</DataList.Item>
+							)}
+							<DataList.Item gap='2.5'>
+								<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
+									{prodT('comment')}
+								</DataList.ItemLabel>
+								<DataList.ItemValue fontSize='15px'>{review.comment}</DataList.ItemValue>
+							</DataList.Item>
+						</DataList.Root>
+					</Card.Body>
 				</Card.Root>
 			))}
 		</Stack>

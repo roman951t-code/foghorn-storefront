@@ -48,6 +48,8 @@ export default function OrderCard() {
 		send: genT('send'),
 		advantages: prodT('advantages'),
 		disAdvantages: prodT('disAdvantages'),
+		feedbackMinLength: validT('feedbackMinLength'),
+		feedbackMaxLength: validT('feedbackMaxLength'),
 		invalidFormData: validT('invalidFormData'),
 	};
 

@@ -7,7 +7,8 @@ export const feedbackSchemaShape = (t: {
 	lastNameRequired: string;
 	feedbackRequired: string;
 	inputMaxLength: string;
-	ratingRequired: string;
+	feedbackMinLength: string;
+	feedbackMaxLength: string;
 }) =>
 	z.object({
 		name: z
@@ -22,14 +23,11 @@ export const feedbackSchemaShape = (t: {
 			.nonempty(),
 		feedback: z
 			.string({ required_error: t.feedbackRequired })
-			.min(5, { message: t.feedbackRequired })
-			.max(500, { message: t.inputMaxLength }),
+			.min(5, { message: t.feedbackMinLength })
+			.max(500, { message: t.feedbackMaxLength }),
 		advantages: z.string().max(200, { message: t.inputMaxLength }).optional(),
 		disAdvantages: z.string().max(200, { message: t.inputMaxLength }).optional(),
-		rating: z
-			.number({ required_error: t.ratingRequired })
-			.min(1, { message: t.ratingRequired })
-			.max(5, { message: t.ratingRequired }),
+		rating: z.number().min(1).max(5),
 	});
 
 export const createFeedbackSchema = (t: I18nData) =>
@@ -43,7 +41,8 @@ export async function getFeedbackSchema() {
 		lastNameRequired: t('lastNameRequired'),
 		feedbackRequired: t('feedbackRequired'),
 		inputMaxLength: t('inputMaxLength'),
-		ratingRequired: t('ratingRequired'),
+		feedbackMinLength: t('feedbackMinLength'),
+		feedbackMaxLength: t('feedbackMaxLength'),
 	});
 }
 

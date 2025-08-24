@@ -75,18 +75,21 @@ model Wishlist {
 }
 
 model Review {
-  id        String   @id @default(uuid())
-  userId    String
-  productId String
-  rating    Int
-  comment   String
-  createdAt DateTime @default(now())
+  id            String   @id @default(uuid())
+  userId        String
+  productId     String
+  rating        Float
+  comment       String
+  advantages    String?
+  disadvantages String?
+  createdAt     DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
 
   @@unique([userId, productId])
 }
+
 
 model Session {
   id        String   @id

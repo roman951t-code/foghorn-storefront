@@ -17,7 +17,7 @@ import { BsBagHeart } from 'react-icons/bs';
 import { SubcategoryProduct } from '@/types/product';
 
 type Props = {
-	product: SubcategoryProduct;
+	product: any;
 };
 
 export default function ProductCard({ product }: Props) {

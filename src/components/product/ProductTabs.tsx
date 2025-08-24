@@ -32,7 +32,7 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 		},
 		{
 			title: t('feedback'),
-			content: <FeedbackTab reviews={product.reviews} />,
+			content: <FeedbackTab reviews={product.reviews} productId={product.id} />,
 		},
 	];
 

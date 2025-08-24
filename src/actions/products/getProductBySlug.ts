@@ -25,10 +25,15 @@ export async function getProductBySlug(slug: string) {
 			},
 			reviews: {
 				select: {
+					id: true,
 					rating: true,
 					comment: true,
+					advantages: true,
+					disadvantages: true,
 					createdAt: true,
-					user: { select: { name: true, image: true } },
+					user: {
+						select: { id: true, name: true, lastName: true },
+					},
 				},
 				orderBy: { createdAt: 'desc' },
 			},
