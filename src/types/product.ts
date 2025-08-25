@@ -55,3 +55,13 @@ export type ProductsWithMeta = {
 	totalCount: number;
 	subcategories: SubcategoryInfo[];
 };
+
+export type Review = {
+	id: string;
+	rating: number;
+	comment: string;
+	advantages: string | null;
+	disadvantages: string | null;
+	createdAt: Date;
+	user: { name: string; lastName: string | null; id: string };
+};

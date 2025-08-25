@@ -19,18 +19,19 @@ import Auth from '../auth/Auth';
 import { useSession } from '../providers/SessionProvider';
 import { createFeedbackSchema, FeedbackSchema } from 'formValidationSchemas/feedbackSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { leaveFeedback } from '@/actions/feedback/leaveFeedback';
 import { toaster } from '../reusable/chakra/toaster';
+import { useReviews } from '../providers/ReviewProvider';
 
 interface Props {
 	i18nData: I18nData;
-	productId: string;
 }
 
-export default function FeedbackModal({ i18nData, productId }: Props) {
+export default function FeedbackModal({ i18nData }: Props) {
 	const { session } = useSession();
 	const [isOpen, setIsOpen] = useState(false);
 	const [isPending, setIsPending] = useState(false);
+
+	const { handleReviewAction } = useReviews();
 
 	const schema = useMemo(() => createFeedbackSchema(i18nData), [i18nData]);
 
@@ -48,7 +49,7 @@ export default function FeedbackModal({ i18nData, productId }: Props) {
 			feedback: '',
 			advantages: '',
 			disAdvantages: '',
-			rating: 5,
+			rating: 4.5,
 		},
 	});
 
@@ -56,10 +57,10 @@ export default function FeedbackModal({ i18nData, productId }: Props) {
 		setIsPending(true);
 
 		try {
-			const result = await leaveFeedback(null, formData, productId);
-			console.log('result', result);
-			if (!result.success) {
-				toaster.error({ title: result?.message! ?? i18nData.addReviewFail, duration: 5000 });
+			const { success } = await handleReviewAction(formData);
+
+			if (!success) {
+				toaster.error({ title: i18nData.addReviewFail, duration: 5000 });
 			} else {
 				setIsOpen(false);
 			}
@@ -95,9 +96,9 @@ export default function FeedbackModal({ i18nData, productId }: Props) {
 			}
 			size='md'
 		>
-			<Box p={4} borderRadius='lg' mx='auto'>
+			<Box px={4} pt='0' borderRadius='md'>
 				<form onSubmit={handleSubmit(onSubmit)}>
-					<Center flexDirection='column' gap='4' mb='6'>
+					<Center flexDirection='column' gap='4' mb='4'>
 						<Heading size='3xl' fontWeight='normal'>
 							{i18nData.rate}
 						</Heading>
@@ -106,6 +107,7 @@ export default function FeedbackModal({ i18nData, productId }: Props) {
 							name='rating'
 							render={({ field }) => (
 								<RatingGroup.Root
+									cursor='pointer'
 									defaultValue={5}
 									name={field.name}
 									value={field.value}
@@ -129,7 +131,7 @@ export default function FeedbackModal({ i18nData, productId }: Props) {
 					</Center>
 
 					<Fieldset.Root size='lg' maxW='md'>
-						<Fieldset.Content gap='6'>
+						<Fieldset.Content gap='6' maxH='580px' overflowY='auto'>
 							<Field.Root invalid={!!errors.name} gap='2' justifyContent='center' required>
 								<Field.Label maxH='20px'>
 									{i18nData.name} <Field.RequiredIndicator />
@@ -155,7 +157,7 @@ export default function FeedbackModal({ i18nData, productId }: Props) {
 							<Field.Root invalid={!!errors.advantages} gap='2' justifyContent='center'>
 								<Field.Label maxH='20px'>{i18nData.advantages}</Field.Label>
 
-								<Input {...register('advantages')} variant='outline' size='md' />
+								<Textarea minH='80px' maxH='300px' {...register('advantages')} />
 								<Field.ErrorText alignSelf='flex-start'>
 									{errors.advantages?.message?.toString()}
 								</Field.ErrorText>
@@ -164,7 +166,7 @@ export default function FeedbackModal({ i18nData, productId }: Props) {
 							<Field.Root invalid={!!errors.disAdvantages} gap='2' justifyContent='center'>
 								<Field.Label maxH='20px'>{i18nData.disAdvantages}</Field.Label>
 
-								<Input {...register('disAdvantages')} variant='outline' size='md' />
+								<Textarea minH='80px' maxH='300px' {...register('disAdvantages')} />
 								<Field.ErrorText alignSelf='flex-start'>
 									{errors.disAdvantages?.message?.toString()}
 								</Field.ErrorText>
@@ -176,7 +178,7 @@ export default function FeedbackModal({ i18nData, productId }: Props) {
 								</Field.Label>
 
 								<Textarea
-									minH='100px'
+									minH='80px'
 									maxH='300px'
 									{...register('feedback', { required: i18nData.myRate + ' is required' })}
 								/>

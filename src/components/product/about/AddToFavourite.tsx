@@ -61,7 +61,7 @@ export default function AddToFavourite({ wishlistUpdateFailed, product }: Props)
 			}}
 		>
 			{isInWishlist ? (
-				<Icon size='lg' aria-label='Wish'>
+				<Icon size='md' aria-label='Wish'>
 					<BsBagHeart />
 				</Icon>
 			) : (

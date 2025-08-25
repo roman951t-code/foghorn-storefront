@@ -1,62 +1,43 @@
-import { Card, Flex, Stack, Heading, Separator, DataList } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
-import dynamic from 'next/dynamic';
+'use client';
+import { Card, Flex, Stack, Heading, Separator, DataList, IconButton } from '@chakra-ui/react';
 import { Rating } from '../reusable/chakra/rating';
 import { Tooltip } from '../ui/tooltip';
 import DateWithLocale from '../reusable/DateWithLocale';
-import { extractI18nData } from '@/utils/i18nUtils';
-import { authLocData, validLocData } from '@/data/localized';
+import { useReviews } from '../providers/ReviewProvider';
+import { I18nData } from '@/types/i18n';
+import { useTranslations } from 'next-intl';
+import FeedbackModal from './FeedbackModal';
+import { FiTrash2 } from 'react-icons/fi';
+import { useSession } from '../providers/SessionProvider';
+import { toaster } from '../reusable/chakra/toaster';
 
-const FeedbackModal = dynamic(() => import('./FeedbackModal'));
-
-type Review = {
-	id: string;
-	rating: number;
-	comment: string;
-	advantages: string | null;
-	disadvantages: string | null;
-	createdAt: Date;
-	user: { name: string; lastName: string | null };
+type Props = {
+	averageRating: number;
+	i18nData: I18nData;
+	deleteReviewFail: string;
 };
 
-type FeedbackTabProps = {
-	reviews: Review[];
-	productId: string;
-};
-
-export default function FeedbackTab({ reviews, productId }: FeedbackTabProps) {
-	const authT = useTranslations('Auth');
-	const genT = useTranslations('General');
+export default function FeedbackTab({ i18nData, averageRating, deleteReviewFail }: Props) {
+	const { reviews, handleRemoveAction } = useReviews();
+	const { session } = useSession();
 	const prodT = useTranslations('Products');
-	const validT = useTranslations('Validation');
 
-	const authI18nData = extractI18nData(authT, authLocData);
-	const validI18nData = extractI18nData(validT, validLocData);
+	const userId = session?.user?.id;
 
-	const i18nData = {
-		...authI18nData,
-		...validI18nData,
-		authToOrder: authT('authToOrder'),
-		authorize: authT('authorize'),
-		yourContacts: authT('yourContacts'),
-		name: authT('name'),
-		rate: prodT('rate'),
-		leaveFeedback: prodT('leaveFeedback'),
-		myRate: prodT('myRate'),
-		send: genT('send'),
-		invalidFormData: validT('invalidFormData'),
-		advantages: prodT('advantages'),
-		disAdvantages: prodT('disAdvantages'),
-		addReviewFail: validT('addReviewFail'),
-		feedbackMinLength: validT('feedbackMinLength'),
-		feedbackMaxLength: validT('feedbackMaxLength'),
+	const onRemoveFeedback = async () => {
+		try {
+			const { success } = await handleRemoveAction();
+
+			if (!success) {
+				toaster.error({ title: deleteReviewFail, duration: 5000 });
+			}
+		} catch {
+			toaster.error({ title: deleteReviewFail, duration: 5000 });
+		}
 	};
 
-	const averageRating =
-		reviews.length > 0 ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length : 0;
-
 	return (
-		<Stack gap='4'>
+		<Stack gap='4' colorPalette='gray'>
 			<Card.Root
 				size='sm'
 				minWidth='200px'
@@ -110,7 +91,7 @@ export default function FeedbackTab({ reviews, productId }: FeedbackTabProps) {
 							</DataList.Root>
 						</Stack>
 
-						<FeedbackModal i18nData={i18nData} productId={productId} />
+						<FeedbackModal i18nData={i18nData} />
 					</Flex>
 				</Card.Header>
 			</Card.Root>
@@ -142,14 +123,16 @@ export default function FeedbackTab({ reviews, productId }: FeedbackTabProps) {
 						</Flex>
 					</Card.Header>
 					<Separator mt='4' color='border.dark' />
-					<Card.Body color='main'>
-						<DataList.Root>
+					<Card.Body color='main' flexDirection='row'>
+						<DataList.Root flex='1'>
 							{review.advantages && (
 								<DataList.Item gap='2.5'>
 									<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
 										{prodT('advantages')}
 									</DataList.ItemLabel>
-									<DataList.ItemValue fontSize='15px'>{review.advantages}</DataList.ItemValue>
+									<DataList.ItemValue fontSize='15px' wordBreak='break-word'>
+										{review.advantages}
+									</DataList.ItemValue>
 								</DataList.Item>
 							)}
 							{review.disadvantages && (
@@ -157,16 +140,39 @@ export default function FeedbackTab({ reviews, productId }: FeedbackTabProps) {
 									<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
 										{prodT('disAdvantages')}
 									</DataList.ItemLabel>
-									<DataList.ItemValue fontSize='15px'>{review.disadvantages}</DataList.ItemValue>
+									<DataList.ItemValue fontSize='15px' wordBreak='break-word'>
+										{review.disadvantages}
+									</DataList.ItemValue>
 								</DataList.Item>
 							)}
 							<DataList.Item gap='2.5'>
 								<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
 									{prodT('comment')}
 								</DataList.ItemLabel>
-								<DataList.ItemValue fontSize='15px'>{review.comment}</DataList.ItemValue>
+								<DataList.ItemValue fontSize='15px' wordBreak='break-word'>
+									{review.comment}
+								</DataList.ItemValue>
 							</DataList.Item>
 						</DataList.Root>
+
+						{userId === review.user.id && (
+							<IconButton
+								onClick={onRemoveFeedback}
+								alignSelf='flex-end'
+								justifySelf='flex-end'
+								aria-label='Trash'
+								variant='ghost'
+								rounded='full'
+								color='main.disabled'
+								transition='all 0.2s ease-in-out'
+								_hover={{
+									bg: 'colorPalette.500',
+									color: 'main.lightOnly',
+								}}
+							>
+								<FiTrash2 />
+							</IconButton>
+						)}
 					</Card.Body>
 				</Card.Root>
 			))}

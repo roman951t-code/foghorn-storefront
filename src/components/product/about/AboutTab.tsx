@@ -29,9 +29,10 @@ interface Props {
 	product: Product;
 	category: string;
 	subcategory: string;
+	averageRating: number;
 }
 
-export default function AboutTab({ product, category, subcategory }: Props) {
+export default function AboutTab({ product, category, subcategory, averageRating }: Props) {
 	const cartT = useTranslations('Cart');
 	const headT = useTranslations('Header');
 	const prodT = useTranslations('Products');
@@ -164,7 +165,7 @@ export default function AboutTab({ product, category, subcategory }: Props) {
 							colorPalette={{ base: 'orange', _dark: 'yellow' }}
 							readOnly
 							size='xs'
-							defaultValue={5}
+							defaultValue={averageRating}
 						/>
 
 						<Link

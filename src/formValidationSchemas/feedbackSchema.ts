@@ -25,8 +25,8 @@ export const feedbackSchemaShape = (t: {
 			.string({ required_error: t.feedbackRequired })
 			.min(5, { message: t.feedbackMinLength })
 			.max(500, { message: t.feedbackMaxLength }),
-		advantages: z.string().max(200, { message: t.inputMaxLength }).optional(),
-		disAdvantages: z.string().max(200, { message: t.inputMaxLength }).optional(),
+		advantages: z.string().max(200, { message: t.feedbackMaxLength }).optional(),
+		disAdvantages: z.string().max(200, { message: t.feedbackMaxLength }).optional(),
 		rating: z.number().min(1).max(5),
 	});
 
