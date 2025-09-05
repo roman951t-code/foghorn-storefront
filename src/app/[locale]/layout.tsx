@@ -42,19 +42,23 @@ export default async function Layout({ children, params }: Props) {
 		'Sidebar',
 		'Wishlist',
 	]);
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+
+	const session = await auth.api.getSession({ headers: await headers() });
+	const userId = session?.user?.id ?? null;
 
 	const catalogResponse = await getCatalog();
-	const cartResponse = await getCartItems();
-	const cartProductIds = await getCartProductIds();
-	const wishListData = await getWishListProducts();
-	const wishListIds = await getWishListProductIds();
 
-	const emptyCartData: CartData = {
-		items: [],
-	};
+	const cartResponse = userId ? await getCartItems(userId) : { success: true, items: [] };
+	const cartProductIds = userId
+		? await getCartProductIds(userId)
+		: { success: false, productIds: [] };
+
+	const wishListData = userId ? await getWishListProducts(userId) : { products: [] };
+	const wishListIds = userId
+		? await getWishListProductIds(userId)
+		: { success: false, productIds: [] };
+
+	const emptyCartData: CartData = { items: [] };
 	const { success, ...restCartData } = cartResponse;
 
 	return (

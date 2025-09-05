@@ -13,10 +13,11 @@ import { IoFilter } from 'react-icons/io5';
 import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
 
 interface Props {
+	maxProductPrice: number;
 	btnText: string;
 }
 
-export default function FiltersSidebar({ btnText }: Props) {
+export default function FiltersSidebar({ btnText, maxProductPrice }: Props) {
 	return (
 		<DrawerRoot placement='end'>
 			<DrawerBackdrop />
@@ -29,7 +30,7 @@ export default function FiltersSidebar({ btnText }: Props) {
 			<DrawerContent bg='bg.tertiary' w='280px'>
 				<DrawerBody>
 					<Flex flexDirection='column' h='100%' justifyContent='center'>
-						<QuickFilters />
+						<QuickFilters maxProductPrice={maxProductPrice} />
 						<Filters />
 					</Flex>
 				</DrawerBody>

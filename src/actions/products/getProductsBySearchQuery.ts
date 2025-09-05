@@ -1,10 +1,13 @@
+'use server';
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 
 export async function getProductsBySearchQuery(
 	searchQuery: string,
 	limit: number = 12,
-	offset: number = 0
+	offset: number = 0,
+	minPrice?: number,
+	maxPrice?: number
 ): Promise<{
 	products: SubcategoryProduct[];
 	totalCount: number;
@@ -14,22 +17,37 @@ export async function getProductsBySearchQuery(
 		subcategoryName: string;
 		subcategorySlug: string;
 	}[];
+	maxProductPrice: number;
 }> {
+	const priceFilter =
+		minPrice !== undefined && maxPrice !== undefined
+			? { gte: minPrice, lte: maxPrice }
+			: minPrice !== undefined
+				? { gte: minPrice }
+				: maxPrice !== undefined
+					? { lte: maxPrice }
+					: undefined;
+
+	const whereClause: any = {
+		name: { contains: searchQuery, mode: 'insensitive' },
+		...(priceFilter
+			? {
+					OR: [
+						{ discountPrice: priceFilter },
+						{ AND: [{ discountPrice: null }, { basePrice: priceFilter }] },
+					],
+				}
+			: {}),
+	};
+
 	const allMatchingProducts = await prisma.product.findMany({
-		where: {
-			name: { contains: searchQuery, mode: 'insensitive' },
-		},
+		where: whereClause,
 		select: {
 			category: {
 				select: {
 					slug: true,
 					name: true,
-					parent: {
-						select: {
-							slug: true,
-							name: true,
-						},
-					},
+					parent: { select: { slug: true, name: true } },
 				},
 			},
 		},
@@ -60,9 +78,7 @@ export async function getProductsBySearchQuery(
 	}
 
 	const products = await prisma.product.findMany({
-		where: {
-			name: { contains: searchQuery, mode: 'insensitive' },
-		},
+		where: whereClause,
 		orderBy: [{ inStock: 'desc' }, { name: 'asc' }],
 		skip: offset,
 		take: limit,
@@ -92,12 +108,18 @@ export async function getProductsBySearchQuery(
 			discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
 			averageRating,
 			reviewCount: product.reviews.length,
-		} as SubcategoryProduct;
+		};
 	});
+
+	const maxPriceValue = productItems.reduce((max, product) => {
+		const price = product.discountPrice ?? product.basePrice ?? 0;
+		return Math.max(max, Number(price));
+	}, 0);
 
 	return {
 		products: productItems,
 		totalCount,
 		subcategories: Array.from(uniqueSubcategoriesMap.values()),
+		maxProductPrice: maxPriceValue,
 	};
 }

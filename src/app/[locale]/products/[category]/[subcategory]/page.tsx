@@ -16,7 +16,7 @@ import { getSubcategoryNameBySlug } from '@/actions/products/getSubcategoryNameB
 
 type Params = {
 	params: { category: string; subcategory: string };
-	searchParams: { page?: string; search?: string };
+	searchParams: { page?: string; search?: string; min?: string; max?: string };
 };
 
 const PRODUCTS_PER_PAGE = 4;
@@ -48,11 +48,16 @@ export default async function Subcategory({ params, searchParams }: Params) {
 
 	const onlyInStock = searchData.search === 'similar';
 
+	const minPrice = searchData?.min ? parseFloat(searchData?.min) : undefined;
+	const maxPrice = searchData?.max ? parseFloat(searchData?.max) : undefined;
+
 	const subcategoryData = await getProductsBySubcategorySlug(
 		subcategory,
 		PRODUCTS_PER_PAGE,
 		offset,
-		onlyInStock
+		onlyInStock,
+		minPrice,
+		maxPrice
 	);
 
 	if (!subcategoryData) notFound();
@@ -69,7 +74,10 @@ export default async function Subcategory({ params, searchParams }: Params) {
 				{subcategoryData.subcategoryName}
 			</Heading>
 			<Flex hideFrom='lg' justifyContent='flex-end'>
-				<FiltersSidebar btnText={sidebarT('filters')} />
+				<FiltersSidebar
+					maxProductPrice={subcategoryData.maxProductPrice}
+					btnText={sidebarT('filters')}
+				/>
 			</Flex>
 			<FiltersTags />
 
@@ -96,7 +104,7 @@ export default async function Subcategory({ params, searchParams }: Params) {
 							</Highlight>
 						</Text>
 						<Separator color='border.light' w='full' mb='2' />
-						<QuickFilters />
+						<QuickFilters maxProductPrice={subcategoryData.maxProductPrice} />
 						<Filters />
 					</VStack>
 				</Box>

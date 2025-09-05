@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import PriceSlider from './PriceSlider';
 import { Radio, RadioGroup } from '@/components/reusable/chakra/radio';
 
-export default function QuickFilters() {
+export default function QuickFilters({ maxProductPrice }: { maxProductPrice: number }) {
 	const t = useTranslations('Products');
 	return (
 		<Flex flexDirection='column' gap='6'>
@@ -20,7 +20,7 @@ export default function QuickFilters() {
 					</Radio>
 				</VStack>
 			</RadioGroup>
-			<PriceSlider title={t('price')} />
+			<PriceSlider maxProductPrice={maxProductPrice} title={t('price')} />
 		</Flex>
 	);
 }

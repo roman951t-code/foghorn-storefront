@@ -2,15 +2,14 @@
 
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
-import { headers } from 'next/headers';
-import { auth } from '@/lib/auth';
 
-export async function getWishListProducts(): Promise<{ products: SubcategoryProduct[] }> {
-	const session = await auth.api.getSession({ headers: await headers() });
-	if (!session?.user?.id) return { products: [] };
+export async function getWishListProducts(
+	userId: string
+): Promise<{ products: SubcategoryProduct[] }> {
+	if (!userId) return { products: [] };
 
 	const wishlist = await prisma.wishlist.findMany({
-		where: { userId: session.user.id },
+		where: { userId },
 		include: {
 			product: {
 				select: {

@@ -1,15 +1,15 @@
 'use server';
 
-import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/lib/auth';
 
-export async function getCartItems() {
-	const session = await auth.api.getSession({ headers: await headers() });
+export async function getCartItems(userId: string) {
+	if (!userId) {
+		return { success: false, items: [] };
+	}
 
 	try {
 		const cart = await prisma.cart.findUnique({
-			where: { userId: session?.user.id },
+			where: { userId },
 			include: {
 				items: {
 					include: {

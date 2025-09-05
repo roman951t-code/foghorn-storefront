@@ -48,12 +48,16 @@ export type SubcategoryInfo = {
 	subcategorySlug: string;
 };
 
-export type ProductsOnly = { products: SubcategoryProduct[] };
+export type ProductsOnly = {
+	products: SubcategoryProduct[];
+	maxProductPrice: number;
+};
 
 export type ProductsWithMeta = {
 	products: SubcategoryProduct[];
 	totalCount: number;
 	subcategories: SubcategoryInfo[];
+	maxProductPrice: number;
 };
 
 export type Review = {

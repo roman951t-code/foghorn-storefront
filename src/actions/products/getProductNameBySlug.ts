@@ -1,9 +1,17 @@
+'use server';
+
+import { unstable_cache } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 
-export async function getProductNameBySlug(slug: string) {
-	const product = await prisma.product.findUnique({
-		where: { slug },
-		select: { name: true },
-	});
-	return product;
-}
+export const getProductNameBySlug = unstable_cache(
+	async (slug: string) => {
+		return prisma.product.findUnique({
+			where: { slug },
+			select: { name: true },
+		});
+	},
+	['product-name'],
+	{
+		tags: ['product'],
+	}
+);

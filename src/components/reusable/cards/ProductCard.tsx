@@ -14,7 +14,6 @@ import '@/styles/swiper.css';
 import { useCart } from '@/components/providers/CartProvider';
 import { useWishList } from '@/components/providers/WishListProvider';
 import { BsBagHeart } from 'react-icons/bs';
-import { SubcategoryProduct } from '@/types/product';
 
 type Props = {
 	product: any;
@@ -79,7 +78,8 @@ export default function ProductCard({ product }: Props) {
 	return (
 		<Card.Root
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
-			minWidth='200px'
+			minW='200px'
+			maxW='240px'
 			w='full'
 			h='full'
 			border='1px solid'

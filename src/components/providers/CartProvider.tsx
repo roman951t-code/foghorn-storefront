@@ -93,6 +93,14 @@ export function CartProvider({ children, cartData, cartProductIds }: CartProvide
 	}, [isLoggedIn, mergeLocalIntoServerAndRefresh]);
 
 	useEffect(() => {
+		if (!isLoggedIn) {
+			const guestCart = loadGuestCart();
+			setCartItemsState(guestCart);
+			setProductIdsState(guestCart.map((item) => item.id));
+		}
+	}, [isLoggedIn]);
+
+	useEffect(() => {
 		const wasLoggedIn = prevLoggedInRef.current;
 		const nowLoggedIn = isLoggedIn;
 

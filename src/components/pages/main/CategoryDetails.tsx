@@ -30,12 +30,10 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 									key={product.id}
 									variant='outline'
 									size='md'
-									borderWidth='0.5px'
 									bg='bg.tertiary'
 									px='1.5'
 									py='1'
 									boxShadow='none'
-									borderColor='border.light'
 								>
 									<LocaleNavLink
 										href={`/products/${product.fullSlug}`}

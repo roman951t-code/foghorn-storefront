@@ -1,18 +1,14 @@
 'use server';
 
-import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/lib/auth';
 
-export async function getWishListProductIds() {
-	const session = await auth.api.getSession({ headers: await headers() });
-
-	if (!session?.user?.id) {
+export async function getWishListProductIds(userId: string) {
+	if (!userId) {
 		return { success: false, productIds: [] };
 	}
 
 	const wishlist = await prisma.wishlist.findMany({
-		where: { userId: session.user.id },
+		where: { userId },
 		select: { productId: true },
 	});
 

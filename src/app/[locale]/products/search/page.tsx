@@ -14,7 +14,7 @@ import { getProductsByTag } from '@/actions/products/getProductsByTag';
 import SearchCategories from '@/components/pages/products/SearchCategories';
 
 type Params = {
-	searchParams: { searchQuery?: string; tag?: string; page?: string };
+	searchParams: { searchQuery?: string; tag?: string; page?: string; min?: string; max?: string };
 };
 
 const PRODUCTS_PER_PAGE = 4;
@@ -32,27 +32,40 @@ export async function generateMetadata({ searchParams }: Params): Promise<Metada
 }
 
 export default async function SearchProducts({ searchParams }: Params) {
-	const { searchQuery = '', tag, page: pageParam = '1' } = await searchParams;
+	const { searchQuery = '', tag, page: pageParam = '1', min = 0, max = 0 } = await searchParams;
 	const t = await getTranslations('Products');
 	const sidebarT = await getTranslations('Sidebar');
 
 	const page = parseInt(pageParam, 10);
 	const offset = (page - 1) * PRODUCTS_PER_PAGE;
 
+	const minPrice = min ? parseFloat(min) : undefined;
+	const maxPrice = max ? parseFloat(max) : undefined;
+
 	let products: any[] = [];
 	let subcategories: any[] = [];
 	let totalCount = 0;
+	let maxProductPrice = 0;
 
 	if (tag) {
-		const result = await getProductsByTag(tag, true, PRODUCTS_PER_PAGE, offset);
+		const result = await getProductsByTag(tag, true, PRODUCTS_PER_PAGE, offset, minPrice, maxPrice);
 		products = result.products;
 		subcategories = result?.subcategories;
 		totalCount = result?.totalCount;
+		maxProductPrice = result.maxProductPrice;
 	} else {
-		const result = await getProductsBySearchQuery(searchQuery, PRODUCTS_PER_PAGE, offset);
+		const result = await getProductsBySearchQuery(
+			searchQuery,
+			PRODUCTS_PER_PAGE,
+			offset,
+			minPrice,
+			maxPrice
+		);
+
 		products = result.products;
 		subcategories = result.subcategories;
 		totalCount = result.totalCount;
+		maxProductPrice = result.maxProductPrice;
 	}
 
 	return (
@@ -62,7 +75,7 @@ export default async function SearchProducts({ searchParams }: Params) {
 			</Heading>
 
 			<Flex hideFrom='lg' justifyContent='flex-end'>
-				<FiltersSidebar btnText={sidebarT('filters')} />
+				<FiltersSidebar maxProductPrice={maxProductPrice} btnText={sidebarT('filters')} />
 			</Flex>
 
 			<FiltersTags />
@@ -90,7 +103,7 @@ export default async function SearchProducts({ searchParams }: Params) {
 
 						<SearchCategories data={subcategories} allCategories={t('allCategories')} />
 
-						<QuickFilters />
+						<QuickFilters maxProductPrice={maxProductPrice} />
 						<Filters />
 					</VStack>
 				</Box>
