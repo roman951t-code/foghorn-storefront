@@ -13,13 +13,21 @@ import { getProductsBySubcategorySlug } from '@/actions/products/getProductsBySu
 import { Metadata } from 'next';
 import Pagination from '@/components/reusable/Pagination';
 import { getSubcategoryNameBySlug } from '@/actions/products/getSubcategoryNameBySlug';
+import { getSubcategoryFilters } from '@/actions/products/getProductsFilters';
 
 type Params = {
 	params: { category: string; subcategory: string };
-	searchParams: { page?: string; search?: string; min?: string; max?: string };
+	searchParams: {
+		page?: string;
+		search?: string;
+		min?: string;
+		max?: string;
+		inStock?: string;
+		orderBy?: 'new' | 'expensive' | 'cheap';
+	};
 };
 
-const PRODUCTS_PER_PAGE = 4;
+const PRODUCTS_PER_PAGE = 5;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	const { subcategory } = await params;
@@ -46,18 +54,39 @@ export default async function Subcategory({ params, searchParams }: Params) {
 	const t = await getTranslations('Products');
 	const sidebarT = await getTranslations('Sidebar');
 
-	const onlyInStock = searchData.search === 'similar';
-
 	const minPrice = searchData?.min ? parseFloat(searchData?.min) : undefined;
 	const maxPrice = searchData?.max ? parseFloat(searchData?.max) : undefined;
 
+	const onlyInStock = searchData.search === 'similar';
+	const orderBy = searchData?.orderBy as 'new' | 'expensive' | 'cheap' | undefined;
+
+	const inStockParam = searchData?.inStock;
+	let inStock: boolean | undefined = undefined;
+
+	if (inStockParam === 'true') inStock = true;
+	if (inStockParam === 'false') inStock = false;
+
+	const excluded = ['page', 'search', 'min', 'max', 'inStock', 'orderBy'];
+	const dynamicFilters: Record<string, string[]> = {};
+
+	for (const [key, value] of Object.entries(searchData)) {
+		if (!excluded.includes(key) && value) {
+			if (!dynamicFilters[key]) dynamicFilters[key] = [];
+			dynamicFilters[key].push(value);
+		}
+	}
+
+	const subcategoryFilters = await getSubcategoryFilters(subcategory);
 	const subcategoryData = await getProductsBySubcategorySlug(
 		subcategory,
 		PRODUCTS_PER_PAGE,
 		offset,
 		onlyInStock,
+		inStock,
 		minPrice,
-		maxPrice
+		maxPrice,
+		orderBy,
+		dynamicFilters
 	);
 
 	if (!subcategoryData) notFound();
@@ -103,9 +132,9 @@ export default async function Subcategory({ params, searchParams }: Params) {
 								{`${t('totalProducts')}: ${subcategoryData?.totalCount}`}
 							</Highlight>
 						</Text>
-						<Separator color='border.light' w='full' mb='2' />
+						<Separator color='border.light' w='full' my='2' />
 						<QuickFilters maxProductPrice={subcategoryData.maxProductPrice} />
-						<Filters />
+						<Filters filters={subcategoryFilters} />
 					</VStack>
 				</Box>
 

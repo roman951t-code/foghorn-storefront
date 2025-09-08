@@ -45,11 +45,11 @@ async function main() {
 	});
 
 	const attributeNames = [
-		{ name: 'Weight', unit: 'g' },
-		{ name: 'Size', unit: 'mm' },
-		{ name: 'Model', unit: '' },
-		{ name: 'Color', unit: '' },
-		{ name: 'Battery', unit: 'mAh' },
+		{ name: 'Вага', unit: 'г' },
+		{ name: 'Розмір', unit: 'мм' },
+		{ name: 'Модель', unit: '' },
+		{ name: 'Колір', unit: '' },
+		{ name: 'Батарея', unit: 'мА·г' },
 	];
 
 	const attributes = await Promise.all(

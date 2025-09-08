@@ -12,9 +12,18 @@ import { Metadata } from 'next';
 import { getProductsBySearchQuery } from '@/actions/products/getProductsBySearchQuery';
 import { getProductsByTag } from '@/actions/products/getProductsByTag';
 import SearchCategories from '@/components/pages/products/SearchCategories';
+import { getSearchFilters, getTagFilters } from '@/actions/products/getProductsFilters';
 
 type Params = {
-	searchParams: { searchQuery?: string; tag?: string; page?: string; min?: string; max?: string };
+	searchParams: {
+		searchQuery?: string;
+		tag?: string;
+		page?: string;
+		min?: string;
+		max?: string;
+		inStock?: string;
+		orderBy?: 'new' | 'expensive' | 'cheap';
+	};
 };
 
 const PRODUCTS_PER_PAGE = 4;
@@ -22,7 +31,6 @@ const PRODUCTS_PER_PAGE = 4;
 export async function generateMetadata({ searchParams }: Params): Promise<Metadata> {
 	const { searchQuery, tag } = await searchParams;
 	const t = await getTranslations('Products');
-
 	const title = t('searchQueryResults', { searchQuery: tag ? t(tag) : searchQuery || '' });
 
 	return {
@@ -33,6 +41,7 @@ export async function generateMetadata({ searchParams }: Params): Promise<Metada
 
 export default async function SearchProducts({ searchParams }: Params) {
 	const { searchQuery = '', tag, page: pageParam = '1', min = 0, max = 0 } = await searchParams;
+	const searchData = await searchParams;
 	const t = await getTranslations('Products');
 	const sidebarT = await getTranslations('Sidebar');
 
@@ -42,13 +51,43 @@ export default async function SearchProducts({ searchParams }: Params) {
 	const minPrice = min ? parseFloat(min) : undefined;
 	const maxPrice = max ? parseFloat(max) : undefined;
 
+	const orderBy = searchData?.orderBy as 'new' | 'expensive' | 'cheap' | undefined;
+
+	const inStockParam = searchData?.inStock;
+	let inStock: boolean | undefined = undefined;
+
+	if (inStockParam === 'true') inStock = true;
+	if (inStockParam === 'false') inStock = false;
+
 	let products: any[] = [];
+	let filters: any[] = [];
 	let subcategories: any[] = [];
 	let totalCount = 0;
 	let maxProductPrice = 0;
+	const excluded = ['searchQuery', 'tag', 'page', 'search', 'min', 'max', 'inStock', 'orderBy'];
+	const dynamicFilters: Record<string, string[]> = {};
+
+	for (const [key, value] of Object.entries(searchData)) {
+		if (!excluded.includes(key) && value) {
+			if (!dynamicFilters[key]) dynamicFilters[key] = [];
+			dynamicFilters[key].push(value);
+		}
+	}
 
 	if (tag) {
-		const result = await getProductsByTag(tag, true, PRODUCTS_PER_PAGE, offset, minPrice, maxPrice);
+		const result = await getProductsByTag(
+			tag,
+			true,
+			PRODUCTS_PER_PAGE,
+			offset,
+			minPrice,
+			maxPrice,
+			inStock,
+			orderBy,
+			dynamicFilters
+		);
+
+		filters = await getTagFilters(tag);
 		products = result.products;
 		subcategories = result?.subcategories;
 		totalCount = result?.totalCount;
@@ -59,9 +98,13 @@ export default async function SearchProducts({ searchParams }: Params) {
 			PRODUCTS_PER_PAGE,
 			offset,
 			minPrice,
-			maxPrice
+			maxPrice,
+			inStock,
+			orderBy,
+			dynamicFilters
 		);
 
+		filters = await getSearchFilters(searchQuery);
 		products = result.products;
 		subcategories = result.subcategories;
 		totalCount = result.totalCount;
@@ -104,7 +147,7 @@ export default async function SearchProducts({ searchParams }: Params) {
 						<SearchCategories data={subcategories} allCategories={t('allCategories')} />
 
 						<QuickFilters maxProductPrice={maxProductPrice} />
-						<Filters />
+						<Filters filters={filters} />
 					</VStack>
 				</Box>
 

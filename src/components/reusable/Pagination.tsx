@@ -25,7 +25,7 @@ export default function Pagination({
 		router.push(`${baseRoute}?${searchParams.toString()}`);
 	};
 
-	if (totalProductsCount === 0) {
+	if (totalProductsCount <= productsPerPage) {
 		return null;
 	}
 

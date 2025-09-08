@@ -10,8 +10,11 @@ export const getProductsBySubcategorySlug = unstable_cache(
 		limit = 12,
 		offset = 0,
 		onlyInStock?: boolean,
+		inStock?: boolean,
 		minPrice?: number,
-		maxPrice?: number
+		maxPrice?: number,
+		orderBy?: 'new' | 'expensive' | 'cheap',
+		filters?: Record<string, string[]>
 	) => {
 		const subcategory = await prisma.productCategory.findUnique({
 			where: { slug },
@@ -37,24 +40,48 @@ export const getProductsBySubcategorySlug = unstable_cache(
 						? { lte: maxPrice }
 						: undefined;
 
+		const dynamicConditions = filters
+			? Object.entries(filters).map(([key, values]) => ({
+					attributes: {
+						some: {
+							attribute: { name: key },
+							value: { in: values.flat() },
+						},
+					},
+				}))
+			: [];
+
 		const whereClause: any = {
 			category: { slug },
 			...(onlyInStock ? { inStock: true } : {}),
+			...(inStock !== undefined ? { inStock } : {}),
 			...(priceFilter
 				? {
 						OR: [
 							{ discountPrice: priceFilter },
-							{
-								AND: [{ discountPrice: null }, { basePrice: priceFilter }],
-							},
+							{ AND: [{ discountPrice: null }, { basePrice: priceFilter }] },
 						],
 					}
 				: {}),
+			...(dynamicConditions.length > 0 ? { AND: dynamicConditions } : {}),
 		};
+
+		const orderByClause: any[] = (() => {
+			switch (orderBy) {
+				case 'new':
+					return [{ createdAt: 'desc' }];
+				case 'expensive':
+					return [{ basePrice: 'desc' }];
+				case 'cheap':
+					return [{ basePrice: 'asc' }];
+				default:
+					return [{ inStock: 'desc' }, { name: 'asc' }];
+			}
+		})();
 
 		const paginatedProducts = await prisma.product.findMany({
 			where: whereClause,
-			orderBy: [{ inStock: 'desc' }, { name: 'asc' }],
+			orderBy: orderByClause,
 			skip: offset,
 			take: limit,
 			select: {
@@ -69,41 +96,39 @@ export const getProductsBySubcategorySlug = unstable_cache(
 				inStock: true,
 				reviews: { select: { rating: true } },
 				tags: true,
+				createdAt: true,
 			},
 		});
 
 		const totalCount = await prisma.product.count({ where: whereClause });
 
-		const tagPriority = ['popular', 'new', 'discount', 'promotional'];
+		let finalProducts = paginatedProducts;
+		if (!orderBy) {
+			const tagPriority = ['popular', 'new', 'discount', 'promotional'];
+			finalProducts = [...paginatedProducts].sort((a, b) => {
+				const score = (p: typeof a) =>
+					Math.min(...tagPriority.map((t, i) => (p.tags?.includes(t) ? i : tagPriority.length)));
+				return score(a) - score(b);
+			});
+		}
 
-		const sortedProducts = paginatedProducts.sort((a, b) => {
-			const aScore = Math.min(
-				...tagPriority.map((tag, i) => (a.tags?.includes(tag) ? i : tagPriority.length))
-			);
-			const bScore = Math.min(
-				...tagPriority.map((tag, i) => (b.tags?.includes(tag) ? i : tagPriority.length))
-			);
-			return aScore - bScore;
-		});
-
-		const products: SubcategoryProduct[] = sortedProducts.map((product) => {
-			const ratings = product.reviews.map((r) => r.rating);
-			const averageRating =
-				ratings.length > 0
-					? ratings.reduce((sum: number, val: number) => sum + val, 0) / ratings.length
-					: 0;
+		const products: SubcategoryProduct[] = finalProducts.map((p) => {
+			const ratings = p.reviews.map((r) => r.rating);
+			const averageRating = ratings.length
+				? ratings.reduce((s, v) => s + v, 0) / ratings.length
+				: 0;
 
 			return {
-				...product,
-				basePrice: Number(product.basePrice),
-				discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
+				...p,
+				basePrice: Number(p.basePrice),
+				discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
 				averageRating,
-				reviewCount: product.reviews.length,
+				reviewCount: p.reviews.length,
 			} as SubcategoryProduct;
 		});
 
-		const maxPriceValue = paginatedProducts.reduce((max, product) => {
-			const price = product.discountPrice ?? product.basePrice ?? 0;
+		const maxProductPrice = paginatedProducts.reduce((max, p) => {
+			const price = p.discountPrice ?? p.basePrice ?? 0;
 			return Math.max(max, Number(price));
 		}, 0);
 
@@ -112,11 +137,9 @@ export const getProductsBySubcategorySlug = unstable_cache(
 			subcategoryName: subcategory.name,
 			products,
 			totalCount,
-			maxProductPrice: maxPriceValue,
+			maxProductPrice,
 		};
 	},
 	['products-by-subcategory'],
-	{
-		tags: ['subcategory', 'products'],
-	}
+	{ tags: ['subcategory', 'products'] }
 );

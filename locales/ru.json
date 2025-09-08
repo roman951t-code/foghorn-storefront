@@ -238,7 +238,8 @@
 		"allCategories": "Все категории",
 		"searchQueryResults": "Результаты по запросу: {searchQuery}",
 		"advantages": "Преимущества",
-		"disAdvantages": "Недостатки"
+		"disAdvantages": "Недостатки",
+		"all": "Все"
 	},
 	"NotFoundPage": {
 		"title": "Страница не найдена",

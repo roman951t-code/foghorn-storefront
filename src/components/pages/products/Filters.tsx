@@ -1,3 +1,5 @@
+'use client';
+
 import {
 	AccordionItem,
 	AccordionItemContent,
@@ -6,79 +8,78 @@ import {
 } from '@/components/reusable/chakra/accordion';
 import { Checkbox } from '@/components/reusable/chakra/checkbox';
 import { VStack, CheckboxGroup, Fieldset } from '@chakra-ui/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback } from 'react';
 
-export default function Filters() {
+type Filter = {
+	id: string;
+	name: string;
+	values: string[];
+};
+
+type Props = {
+	filters: Filter[] | null;
+};
+
+export default function Filters({ filters }: Props) {
+	const router = useRouter();
+	const searchParams = useSearchParams();
+
+	const updateParams = useCallback(
+		(key: string, values: string[]) => {
+			const params = new URLSearchParams(searchParams.toString());
+
+			params.delete(key);
+
+			values.forEach((value) => params.append(key, value));
+
+			router.push(`?${params.toString()}`, { scroll: false });
+		},
+		[router, searchParams]
+	);
+
+	if (!filters || filters.length === 0) {
+		return null;
+	}
+
 	return (
 		<VStack mt='8' w='100%'>
-			<AccordionRoot collapsible multiple defaultValue={['Колір']}>
-				<AccordionItem mb='3' value='Колір' borderBottomColor='border.light'>
-					<AccordionItemTrigger>Колір</AccordionItemTrigger>
-					<AccordionItemContent>
-						<Fieldset.Root>
-							<CheckboxGroup defaultValue={['react']} name='framework'>
-								<Fieldset.Content colorPalette='gray' w='100%'>
-									<Checkbox value='react' _hover={{ cursor: 'pointer' }}>
-										Чорний
-									</Checkbox>
-									<Checkbox value='svelte' _hover={{ cursor: 'pointer' }}>
-										Зелений
-									</Checkbox>
-									<Checkbox value='vue' _hover={{ cursor: 'pointer' }}>
-										Синій
-									</Checkbox>
-									<Checkbox value='angular' _hover={{ cursor: 'pointer' }}>
-										Жовтий
-									</Checkbox>
-								</Fieldset.Content>
-							</CheckboxGroup>
-						</Fieldset.Root>
-					</AccordionItemContent>
-				</AccordionItem>
+			<AccordionRoot
+				collapsible
+				multiple
+				defaultValue={filters.length > 0 ? [filters[0].name] : []}
+			>
+				{filters.map((filter) => {
+					const selectedValues = searchParams.getAll(filter.name);
 
-				<AccordionItem mb='3' value='Бренд' borderBottomColor='border.light'>
-					<AccordionItemTrigger>Бренд</AccordionItemTrigger>
-					<AccordionItemContent>
-						<Fieldset.Root>
-							<CheckboxGroup defaultValue={['react']} name='framework'>
-								<Fieldset.Content colorPalette='gray' w='100%'>
-									<Checkbox value='react' _hover={{ cursor: 'pointer' }}>
-										Чорний
-									</Checkbox>
-									<Checkbox value='svelte' _hover={{ cursor: 'pointer' }}>
-										Зелений
-									</Checkbox>
-									<Checkbox value='vue' _hover={{ cursor: 'pointer' }}>
-										Синій
-									</Checkbox>
-									<Checkbox value='angular' _hover={{ cursor: 'pointer' }}>
-										Жовтий
-									</Checkbox>
-								</Fieldset.Content>
-							</CheckboxGroup>
-						</Fieldset.Root>
-					</AccordionItemContent>
-				</AccordionItem>
-
-				<AccordionItem mb='3' value='Модель' borderBottomColor='border.light'>
-					<AccordionItemTrigger>Модель</AccordionItemTrigger>
-					<AccordionItemContent>
-						<Fieldset.Root>
-							<CheckboxGroup defaultValue={['react']} name='framework'>
-								<Fieldset.Content colorPalette='gray' w='100%'>
-									<Checkbox value='react' _hover={{ cursor: 'pointer' }}>
-										Чорний
-									</Checkbox>
-									<Checkbox value='svelte' _hover={{ cursor: 'pointer' }}>
-										Зелений
-									</Checkbox>
-									<Checkbox value='vue' _hover={{ cursor: 'pointer' }}>
-										Синій
-									</Checkbox>
-								</Fieldset.Content>
-							</CheckboxGroup>
-						</Fieldset.Root>
-					</AccordionItemContent>
-				</AccordionItem>
+					return (
+						<AccordionItem
+							key={filter.id}
+							mb='3'
+							value={filter.name}
+							borderBottomColor='border.light'
+						>
+							<AccordionItemTrigger>{filter.name}</AccordionItemTrigger>
+							<AccordionItemContent>
+								<Fieldset.Root>
+									<CheckboxGroup
+										value={selectedValues}
+										onValueChange={(values) => updateParams(filter.name, values as string[])}
+										name={filter.name}
+									>
+										<Fieldset.Content colorPalette='gray' w='100%'>
+											{filter.values.map((val) => (
+												<Checkbox key={val} value={val} _hover={{ cursor: 'pointer' }}>
+													{val}
+												</Checkbox>
+											))}
+										</Fieldset.Content>
+									</CheckboxGroup>
+								</Fieldset.Root>
+							</AccordionItemContent>
+						</AccordionItem>
+					);
+				})}
 			</AccordionRoot>
 		</VStack>
 	);

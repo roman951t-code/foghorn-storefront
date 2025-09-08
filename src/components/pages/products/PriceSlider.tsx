@@ -15,10 +15,10 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
-	const maxPrice = useRef(maxProductPrice);
+	const maxPrice = useRef(Math.ceil(maxProductPrice));
 
 	const minFromParams = Number(searchParams.get('min')) || 0;
-	const maxFromParams = Number(searchParams.get('max')) || maxProductPrice;
+	const maxFromParams = Number(searchParams.get('max')) || maxPrice.current;
 
 	const [values, setValues] = useState([minFromParams, maxFromParams]);
 
@@ -48,7 +48,7 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 	return (
 		<>
 			<Text>{title} ₴</Text>
-			<Flex justifyContent='space-between' alignItems='center' gap='1.5'>
+			<Flex justifyContent='space-between' alignItems='center' gap='2'>
 				<Flex gap='1.5'>
 					<Input
 						fontSize='md'

@@ -15,6 +15,13 @@ const config = defineConfig({
 			prodMd: '840px',
 			prodLg: '1210px',
 			prodXl: '1290px',
+
+			gridXs: '444px',
+			gridSm: '648px',
+			gridMd: '848px',
+			gridLg: '960px',
+			gridXl: '1090px',
+			grid2Xl: '1290px',
 		},
 		semanticTokens: {
 			colors: {

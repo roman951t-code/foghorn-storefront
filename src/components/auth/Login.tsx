@@ -20,9 +20,11 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 	const isEmailAuth = authMethod === 'email';
 
 	const handleGoogleLogin = async () => {
+		const url = new URL(window.location.href);
+		url.searchParams.set('auth', 'google');
 		await signIn.social({
 			provider: 'google',
-			callbackURL: window.location.href + '?auth=google',
+			callbackURL: url.toString(),
 		});
 	};
 

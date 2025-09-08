@@ -237,7 +237,8 @@
 		"hideAllCategories": "Всі категорії",
 		"searchQueryResults": "Результати за запитом: {searchQuery}",
 		"advantages": "Переваги",
-		"disAdvantages": "Недоліки"
+		"disAdvantages": "Недоліки",
+		"all": "Всі"
 	},
 	"NotFoundPage": {
 		"title": "Сторінку не знайдено",

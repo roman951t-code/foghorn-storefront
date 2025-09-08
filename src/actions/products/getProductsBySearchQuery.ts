@@ -7,7 +7,10 @@ export async function getProductsBySearchQuery(
 	limit: number = 12,
 	offset: number = 0,
 	minPrice?: number,
-	maxPrice?: number
+	maxPrice?: number,
+	inStock?: boolean,
+	orderBy?: 'new' | 'expensive' | 'cheap',
+	filters?: Record<string, string[]>
 ): Promise<{
 	products: SubcategoryProduct[];
 	totalCount: number;
@@ -28,8 +31,20 @@ export async function getProductsBySearchQuery(
 					? { lte: maxPrice }
 					: undefined;
 
+	const dynamicConditions = filters
+		? Object.entries(filters).map(([key, values]) => ({
+				attributes: {
+					some: {
+						attribute: { name: key },
+						value: { in: values.flat() },
+					},
+				},
+			}))
+		: [];
+
 	const whereClause: any = {
 		name: { contains: searchQuery, mode: 'insensitive' },
+		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
 			? {
 					OR: [
@@ -38,6 +53,7 @@ export async function getProductsBySearchQuery(
 					],
 				}
 			: {}),
+		...(dynamicConditions.length > 0 ? { AND: dynamicConditions } : {}),
 	};
 
 	const allMatchingProducts = await prisma.product.findMany({
@@ -77,9 +93,22 @@ export async function getProductsBySearchQuery(
 		}
 	}
 
+	const orderByClause: any[] = (() => {
+		switch (orderBy) {
+			case 'new':
+				return [{ createdAt: 'desc' }];
+			case 'expensive':
+				return [{ basePrice: 'desc' }];
+			case 'cheap':
+				return [{ basePrice: 'asc' }];
+			default:
+				return [{ inStock: 'desc' }, { name: 'asc' }];
+		}
+	})();
+
 	const products = await prisma.product.findMany({
 		where: whereClause,
-		orderBy: [{ inStock: 'desc' }, { name: 'asc' }],
+		orderBy: orderByClause,
 		skip: offset,
 		take: limit,
 		select: {
@@ -94,6 +123,7 @@ export async function getProductsBySearchQuery(
 			inStock: true,
 			reviews: { select: { rating: true } },
 			tags: true,
+			createdAt: true,
 		},
 	});
 

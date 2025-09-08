@@ -1,5 +1,4 @@
 'use server';
-
 import { prisma } from '@/lib/prisma';
 import {
 	ProductsOnly,
@@ -16,7 +15,10 @@ export const getProductsByTag = unstable_cache(
 		limit = 12,
 		offset = 0,
 		minPrice?: number,
-		maxPrice?: number
+		maxPrice?: number,
+		inStock?: boolean,
+		orderBy?: 'new' | 'expensive' | 'cheap',
+		filters?: Record<string, string[]>
 	): Promise<T extends true ? ProductsWithMeta : ProductsOnly> => {
 		const priceFilter =
 			minPrice !== undefined && maxPrice !== undefined
@@ -27,9 +29,20 @@ export const getProductsByTag = unstable_cache(
 						? { lte: maxPrice }
 						: undefined;
 
+		const dynamicConditions = filters
+			? Object.entries(filters).map(([key, values]) => ({
+					attributes: {
+						some: {
+							attribute: { name: key },
+							value: { in: values.flat() },
+						},
+					},
+				}))
+			: [];
+
 		const whereClause: any = {
 			tags: { has: tag },
-			inStock: true,
+			...(inStock !== undefined ? { inStock } : {}),
 			...(priceFilter
 				? {
 						OR: [
@@ -38,11 +51,11 @@ export const getProductsByTag = unstable_cache(
 						],
 					}
 				: {}),
+			...(dynamicConditions.length > 0 ? { AND: dynamicConditions } : {}),
 		};
 
 		const productsQuery = await prisma.product.findMany({
 			where: whereClause,
-			orderBy: [{ name: 'asc' }],
 			skip: fetchAll ? 0 : offset,
 			take: fetchAll ? undefined : Math.min(limit, 10),
 			select: {
@@ -57,18 +70,34 @@ export const getProductsByTag = unstable_cache(
 				inStock: true,
 				reviews: { select: { rating: true } },
 				tags: true,
+				createdAt: true,
 			},
 		});
 
-		const maxProductPrice = productsQuery.reduce((max, product) => {
-			const price = product.discountPrice ?? product.basePrice ?? 0;
-			return Math.max(max, Number(price));
-		}, 0);
+		const productsWithPrice = productsQuery.map((p) => ({
+			...p,
+			effectivePrice: Number(p.discountPrice ?? p.basePrice ?? 0),
+		}));
 
-		const products = productsQuery.map((product) => {
+		let sortedProducts = [...productsWithPrice];
+		if (orderBy === 'new') {
+			sortedProducts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+		} else if (orderBy === 'expensive') {
+			sortedProducts.sort((a, b) => b.effectivePrice - a.effectivePrice);
+		} else if (orderBy === 'cheap') {
+			sortedProducts.sort((a, b) => a.effectivePrice - b.effectivePrice);
+		} else {
+			sortedProducts.sort((a, b) => {
+				if (a.inStock !== b.inStock) return a.inStock ? -1 : 1;
+				return a.name.localeCompare(b.name);
+			});
+		}
+
+		const products: SubcategoryProduct[] = sortedProducts.map((product) => {
 			const ratings = product.reviews.map((r) => r.rating);
-			const averageRating =
-				ratings.length > 0 ? ratings.reduce((sum, val) => sum + val, 0) / ratings.length : 0;
+			const averageRating = ratings.length
+				? ratings.reduce((sum, val) => sum + val, 0) / ratings.length
+				: 0;
 
 			return {
 				...product,
@@ -78,6 +107,11 @@ export const getProductsByTag = unstable_cache(
 				reviewCount: product.reviews.length,
 			} as SubcategoryProduct;
 		});
+
+		const maxProductPrice = products.reduce(
+			(max, p) => Math.max(max, p.discountPrice ?? p.basePrice ?? 0),
+			0
+		);
 
 		if (!fetchAll) {
 			return { products, maxProductPrice } as T extends true ? ProductsWithMeta : ProductsOnly;
