@@ -28,30 +28,41 @@ model CartItem {
   @@unique([cartId, productId])
 }
 
+model EmailVerificationCode {
+  id        String   @id @default(uuid())
+  email     String
+  name      String
+  password  String
+  code      String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+
 model User {
-  id                 String     @id
+  id                 String   @id
   name               String
   middleName         String?
   lastName           String?
-  notificationMethod String?    @default("email")
-  email              String     @unique
-  emailVerified      Boolean
+  notificationMethod String?  @default("email")
+  email              String   @unique
+  emailVerifiedAt    DateTime?
+  emailVerified      Boolean? @default(false)
   image              String?
-  createdAt          DateTime
-  updatedAt          DateTime
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
   orders             Order[]
   accounts           Account[]
   sessions           Session[]
   wishlist           Wishlist[]
   reviews            Review[]
   cart               Cart?
-  cartItems String[] @default([])
+  cartItems          String[]   @default([])
 
-  phoneNumber         String?
+  phoneNumber         String?   @unique
   phoneNumberVerified Boolean?
-
-  @@unique([phoneNumber])
-  @@map("user")
 }
 
 model Brand {

@@ -25,7 +25,9 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 	return (
 		<>
 			{isPhoneAuth && <PhoneSignUp i18nData={i18nData} disabled={!termsAccepted} />}
-			{isEmailAuth && <EmailSignUp i18nData={i18nData} disabled={!termsAccepted} />}
+			{isEmailAuth && (
+				<EmailSignUp i18nData={i18nData} disabled={!termsAccepted} backToLogin={backToLogin} />
+			)}
 			<CheckboxCard.Root
 				onChange={() => setTermsAccepted(!termsAccepted)}
 				css={{

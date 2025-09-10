@@ -11,13 +11,15 @@ import QuickFilters from './QuickFilters';
 import Filters from './Filters';
 import { IoFilter } from 'react-icons/io5';
 import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
+import { Filter } from '@/types/product';
 
 interface Props {
 	maxProductPrice: number;
 	btnText: string;
+	filters: Filter[] | null;
 }
 
-export default function FiltersSidebar({ btnText, maxProductPrice }: Props) {
+export default function FiltersSidebar({ btnText, maxProductPrice, filters }: Props) {
 	return (
 		<DrawerRoot placement='end'>
 			<DrawerBackdrop />
@@ -31,7 +33,7 @@ export default function FiltersSidebar({ btnText, maxProductPrice }: Props) {
 				<DrawerBody>
 					<Flex flexDirection='column' h='100%' justifyContent='center'>
 						<QuickFilters maxProductPrice={maxProductPrice} />
-						<Filters />
+						<Filters filters={filters} />
 					</Flex>
 				</DrawerBody>
 				<DrawerCloseTrigger

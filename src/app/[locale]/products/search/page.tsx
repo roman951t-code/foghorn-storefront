@@ -26,7 +26,7 @@ type Params = {
 	};
 };
 
-const PRODUCTS_PER_PAGE = 4;
+const PRODUCTS_PER_PAGE = 12;
 
 export async function generateMetadata({ searchParams }: Params): Promise<Metadata> {
 	const { searchQuery, tag } = await searchParams;
@@ -118,7 +118,11 @@ export default async function SearchProducts({ searchParams }: Params) {
 			</Heading>
 
 			<Flex hideFrom='lg' justifyContent='flex-end'>
-				<FiltersSidebar maxProductPrice={maxProductPrice} btnText={sidebarT('filters')} />
+				<FiltersSidebar
+					filters={filters}
+					maxProductPrice={maxProductPrice}
+					btnText={sidebarT('filters')}
+				/>
 			</Flex>
 
 			<FiltersTags />

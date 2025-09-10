@@ -50,7 +50,7 @@ export default function PhoneSignUp({ i18nData, disabled }: PhoneAuthProps) {
 			if (!result?.success) {
 				setAuthError(result?.message!);
 			}
-		} catch (err) {
+		} catch {
 			setAuthError(i18nData.invalidFormData);
 		} finally {
 			setIsPending(false);
@@ -59,14 +59,7 @@ export default function PhoneSignUp({ i18nData, disabled }: PhoneAuthProps) {
 	};
 
 	if (isSubmitted) {
-		return (
-			<PhoneConfirmation
-				i18nData={i18nData}
-				name={watchedName}
-				phone={watchedPhone}
-				signup={true}
-			/>
-		);
+		return <PhoneConfirmation i18nData={i18nData} name={watchedName} phone={watchedPhone} signup />;
 	}
 
 	return (

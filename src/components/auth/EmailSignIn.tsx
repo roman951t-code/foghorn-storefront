@@ -57,8 +57,6 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 			const newSearch = current.toString();
 			const newPath = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
 			router.replace(newPath);
-
-			await refreshSession();
 		};
 
 		handleEmailSignIn();

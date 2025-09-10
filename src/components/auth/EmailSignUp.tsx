@@ -4,7 +4,7 @@ import { Input, Stack, Field, Fieldset, Text, Highlight } from '@chakra-ui/react
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { registerEmailAction } from '@/actions/auth/registerEmailAction';
+import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
 import {
 	createEmailSignUpSchema,
 	EmailSignUpSchema,
@@ -12,15 +12,17 @@ import {
 import type { I18nData } from '@/types/i18n';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
 import { PasswordInput } from '../reusable/chakra/password-input';
+import EmailConfirmation from './EmailConfirmation';
 
 interface EmailAuthProps {
 	i18nData: I18nData;
 	disabled?: boolean;
+	backToLogin: () => void;
 }
 
 const MAX_CHARACTERS = 60;
 
-export default function EmailSignUp({ i18nData, disabled }: EmailAuthProps) {
+export default function EmailSignUp({ i18nData, disabled, backToLogin }: EmailAuthProps) {
 	const [isSubmitted, setSubmitted] = useState(false);
 	const [authError, setAuthError] = useState('');
 	const [isPending, setIsPending] = useState(false);
@@ -41,20 +43,27 @@ export default function EmailSignUp({ i18nData, disabled }: EmailAuthProps) {
 		setIsPending(true);
 
 		try {
-			const result = await registerEmailAction(null, formData);
+			const result = await sendVerifyEmailAction(null, formData);
 
 			if (!result?.success) {
 				setAuthError(result?.message!);
+			} else {
+				setSubmitted(true);
 			}
-		} catch (err) {
+		} catch {
 			setAuthError(i18nData.invalidFormData);
 		} finally {
 			setIsPending(false);
-			setSubmitted(true);
 		}
 	};
 
 	const formData = getValues();
+
+	if (isSubmitted) {
+		return (
+			<EmailConfirmation i18nData={i18nData} resendData={formData} backToLogin={backToLogin} />
+		);
+	}
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>

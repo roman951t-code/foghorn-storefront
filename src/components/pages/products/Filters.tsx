@@ -7,15 +7,10 @@ import {
 	AccordionRoot,
 } from '@/components/reusable/chakra/accordion';
 import { Checkbox } from '@/components/reusable/chakra/checkbox';
+import { Filter } from '@/types/product';
 import { VStack, CheckboxGroup, Fieldset } from '@chakra-ui/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
-
-type Filter = {
-	id: string;
-	name: string;
-	values: string[];
-};
 
 type Props = {
 	filters: Filter[] | null;

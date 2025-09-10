@@ -156,11 +156,11 @@ async function main() {
 	}
 
 	const roman = await prisma.user.upsert({
-		where: { email: 'roman951t@gmail.com' },
+		where: { phoneNumber: '+380951234567' },
 		update: {},
 		create: {
 			id: 'user-roman-951',
-			email: 'roman951t@gmail.com',
+			email: '',
 			name: 'Roman',
 			emailVerified: true,
 			phoneNumber: '+380951234567',

@@ -129,6 +129,7 @@ export const accountAuthLoc = [
 	'nameUpdated',
 	'emailUpdated',
 	'phoneUpdated',
+	'confirmEmail',
 	'middleName',
 	'notifUpdated',
 	'sendVerifEmail',

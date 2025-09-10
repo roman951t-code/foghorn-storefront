@@ -27,7 +27,7 @@ type Params = {
 	};
 };
 
-const PRODUCTS_PER_PAGE = 5;
+const PRODUCTS_PER_PAGE = 12;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	const { subcategory } = await params;
@@ -104,6 +104,7 @@ export default async function Subcategory({ params, searchParams }: Params) {
 			</Heading>
 			<Flex hideFrom='lg' justifyContent='flex-end'>
 				<FiltersSidebar
+					filters={subcategoryFilters}
 					maxProductPrice={subcategoryData.maxProductPrice}
 					btnText={sidebarT('filters')}
 				/>

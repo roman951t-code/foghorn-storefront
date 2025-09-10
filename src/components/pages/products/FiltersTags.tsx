@@ -35,7 +35,7 @@ export default function FiltersTags() {
 
 	const dynamicFilters: { key: string; value: string }[] = [];
 	searchParams.forEach((value, key) => {
-		if (!['searchQuery', 'tag', 'min', 'max', 'inStock', 'orderBy'].includes(key)) {
+		if (!['searchQuery', 'tag', 'page', 'min', 'max', 'inStock', 'orderBy'].includes(key)) {
 			dynamicFilters.push({ key, value });
 		}
 	});

@@ -69,3 +69,9 @@ export type Review = {
 	createdAt: Date;
 	user: { name: string; lastName: string | null; id: string };
 };
+
+export type Filter = {
+	id: string;
+	name: string;
+	values: string[];
+};
