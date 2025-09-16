@@ -1,3 +1,4 @@
+
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -8,27 +9,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model NewsletterSubscription {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
 model Cart {
-  id        String      @id @default(uuid())
-  userId    String      @unique
-  user      User        @relation(fields: [userId], references: [id])
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id])
   items     CartItem[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model CartItem {
-  id         String   @id @default(uuid())
-  cartId     String
-  productId  String
-  quantity   Int      @default(1)
-  product    Product  @relation(fields: [productId], references: [id])
-  cart       Cart     @relation(fields: [cartId], references: [id])
+  id        String  @id @default(uuid())
+  cartId    String
+  productId String
+  quantity  Int     @default(1)
+  product   Product @relation(fields: [productId], references: [id])
+  cart      Cart    @relation(fields: [cartId], references: [id])
 
   @@unique([cartId, productId])
 }
 
-model EmailVerificationCode {
+model EmailRegistrationCode {
   id        String   @id @default(uuid())
   email     String
   name      String
@@ -37,32 +44,49 @@ model EmailVerificationCode {
   attempts  Int      @default(0)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@unique([email])
 }
 
+model EmailVerificationCode {
+  id        String   @id @default(uuid())
+  email     String
+  userId    String
+  code      String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([userId])
+}
 
 model User {
-  id                 String   @id
+  id                 String    @id
   name               String
   middleName         String?
   lastName           String?
-  notificationMethod String?  @default("email")
-  email              String   @unique
-  emailVerifiedAt    DateTime?
-  emailVerified      Boolean? @default(false)
+  notificationMethod String?   @default("email")
+  email              String?   @unique
+  emailVerified      Boolean   @default(false)
   image              String?
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  orders             Order[]
-  accounts           Account[]
-  sessions           Session[]
-  wishlist           Wishlist[]
-  reviews            Review[]
-  cart               Cart?
-  cartItems          String[]   @default([])
+  orders    Order[]
+  accounts  Account[]
+  sessions  Session[]
+  wishlist  Wishlist[]
+  reviews   Review[]
+  cart      Cart?
+  cartItems String[]   @default([])
 
-  phoneNumber         String?   @unique
+  phoneNumber         String?
   phoneNumberVerified Boolean?
+  subscribed Boolean  @default(false)
+
+
+  @@unique([phoneNumber])
+  @@map("user")
 }
 
 model Brand {
@@ -101,18 +125,18 @@ model Review {
   @@unique([userId, productId])
 }
 
-
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String   @unique
-  createdAt DateTime
-  updatedAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([token])
   @@map("session")
 }
 
@@ -121,6 +145,7 @@ model Account {
   accountId             String
   providerId            String
   userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -128,9 +153,8 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
-  createdAt             DateTime
-  updatedAt             DateTime
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   @@map("account")
 }
@@ -156,21 +180,20 @@ model ProductCategory {
   products Product[]
 }
 
-
 model Product {
   id              String                  @id @default(uuid())
   name            String
   description     String?
   slug            String                  @unique
   imageUrl        String?
-  basePrice       Decimal @db.Decimal(10, 2)
-  discountPrice   Decimal? @db.Decimal(10, 2)
+  basePrice       Decimal                 @db.Decimal(10, 2)
+  discountPrice   Decimal?                @db.Decimal(10, 2)
   productCode     String
   stock           Int
-  inStock         Boolean  @default(true)
+  inStock         Boolean                 @default(true)
   brandId         String
-  averageRating   Float    @default(0)
-  reviewCount     Int      @default(0)
+  averageRating   Float                   @default(0)
+  reviewCount     Int                     @default(0)
   tags            String[]
   categoryId      String
   createdAt       DateTime                @default(now())
@@ -196,14 +219,13 @@ model ProductAttribute {
 }
 
 model ProductAttributeValue {
-  id           String          @id @default(uuid())
-  productId    String
-  attributeId  String
-  value        String
-  product      Product         @relation(fields: [productId], references: [id])
-  attribute    ProductAttribute @relation(fields: [attributeId], references: [id])
+  id          String           @id @default(uuid())
+  productId   String
+  attributeId String
+  value       String
+  product     Product          @relation(fields: [productId], references: [id])
+  attribute   ProductAttribute @relation(fields: [attributeId], references: [id])
 }
-
 
 model ProductVariant {
   id         String      @id @default(uuid())
@@ -224,7 +246,7 @@ model Order {
   status    OrderStatus @default(PENDING)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   items     OrderItem[]
 }
 

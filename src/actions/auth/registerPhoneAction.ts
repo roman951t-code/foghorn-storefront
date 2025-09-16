@@ -11,6 +11,7 @@ export async function registerPhoneAction(
 
 	const { phone, name } = formData as { name: string; phone: string };
 	const rawPhone = phone.replace(/\D/g, '');
+	console.log('rawPhone', rawPhone);
 
 	try {
 		await prisma.user.update({

@@ -93,7 +93,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 					email: formData.email,
 					password: formData.password,
 				});
-
+				console.log('error', error);
 				if (error) {
 					const messageKey = error?.message ?? '';
 					const message = errorMap[messageKey] || i18nData.userLoginFail;

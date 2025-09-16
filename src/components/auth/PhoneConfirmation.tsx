@@ -14,6 +14,7 @@ import { authClient } from '@/lib/auth-client';
 import { useSession } from '../providers/SessionProvider';
 import { registerPhoneAction } from '@/actions/auth/registerPhoneAction';
 import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
+import { prisma } from '@/lib/prisma';
 
 interface Props {
 	i18nData: I18nData;
@@ -33,6 +34,7 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 
 	const {
 		handleSubmit,
+		reset,
 		control,
 		formState: { errors },
 	} = useForm<PhoneVerifySchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
@@ -54,6 +56,7 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 	}, [timer]);
 
 	const resendVerificationCode = async () => {
+		reset();
 		setTimer(120);
 
 		try {

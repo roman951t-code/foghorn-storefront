@@ -10,16 +10,21 @@ import {
 	createPhoneVerifySchema,
 	PhoneVerifySchema,
 } from 'formValidationSchemas/phoneVerifySchema';
-import { verifyEmailOtpAction } from '@/actions/auth/verifyEmailOtpAction';
+import { toaster } from '@/components/reusable/chakra/toaster';
 import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
+import { verifyEmailOtpAction } from '@/actions/auth/verifyEmailOtpAction';
+import { useSession } from '@/components/providers/SessionProvider';
 
 interface Props {
 	i18nData: I18nData;
+	onClose: () => void;
 	email: string;
 }
 
-export default function EmailVerification({ email, i18nData }: Props) {
+export default function EmailVerification({ email, i18nData, onClose }: Props) {
 	const schema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
+
+	const { refresh } = useSession();
 
 	const [timer, setTimer] = useState(0);
 	const [verifyError, setVerifyError] = useState('');
@@ -28,6 +33,7 @@ export default function EmailVerification({ email, i18nData }: Props) {
 	const {
 		handleSubmit,
 		control,
+		reset,
 		formState: { errors },
 	} = useForm<PhoneVerifySchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 
@@ -48,41 +54,58 @@ export default function EmailVerification({ email, i18nData }: Props) {
 	}, [timer]);
 
 	const resendVerificationCode = async () => {
-		// setTimer(120);
-		// try {
-		// 	const result = await sendVerifyEmailAction(null, resendData);
-		// 	if (!result?.success) {
-		// 		setVerifyError(result?.message!);
-		// 	}
-		// } catch  {
-		// 	setVerifyError(i18nData.invalidFormData);
-		// }
+		reset();
+
+		setTimer(120);
+		setIsPending(true);
+
+		try {
+			const result = await sendVerifyEmailAction(null, { email });
+
+			if (!result?.success) {
+				setVerifyError(i18nData.editEmailFail);
+			} else {
+				setVerifyError('');
+			}
+		} catch {
+			setVerifyError(i18nData.editEmailFail);
+		} finally {
+			setIsPending(false);
+		}
 	};
 
 	const onSubmit = async (formData: PhoneVerifySchema) => {
-		// setIsPending(true);
-		// try {
-		// 	const result = await verifyEmailOtpAction(email, formData.otp.join(''));
-		// 	if (!result?.success) {
-		// 		setVerifyError(result?.message!);
-		// 	} else {
-		// 		const current = new URLSearchParams(window.location.search);
-		// 		current.set('email-sign-in', 'true');
-		// 		const newSearch = current.toString();
-		// 		const newPath = `${window.location.pathname}?${newSearch}`;
-		// 		window.history.replaceState({}, '', newPath);
-		// 	}
-		// } catch  {
-		// 	setVerifyError(i18nData.invalidFormData);
-		// } finally {
-		// 	setIsPending(false);
-		// }
+		setIsPending(true);
+		try {
+			const result = await verifyEmailOtpAction(email, formData.otp.join(''));
+
+			if (!result?.success) {
+				setVerifyError(result?.message!);
+			} else {
+				toaster.success({
+					title: i18nData.emailUpdated,
+					duration: 5000,
+				});
+
+				await refresh();
+				onClose();
+			}
+		} catch {
+			setVerifyError(i18nData.invalidFormData);
+		} finally {
+			setIsPending(false);
+		}
 	};
 
 	const formattedTime = formatTime(timer);
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)}>
+		<form
+			onSubmit={(e) => {
+				e.stopPropagation();
+				void handleSubmit(onSubmit)(e);
+			}}
+		>
 			<Fieldset.Root size='lg' invalid>
 				<Fieldset.Legend fontSize='17px'>{i18nData.emailConfirmation}</Fieldset.Legend>
 				<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mt='4'>

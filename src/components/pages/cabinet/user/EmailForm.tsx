@@ -4,8 +4,9 @@ import { UseFormReturn } from 'react-hook-form';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
 import { useState } from 'react';
-import { authClient } from '@/lib/auth-client';
 import EmailVerification from './EmailVerification';
+import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
+import { EmailSchema } from 'formValidationSchemas/emailSubscribeSchema';
 
 interface Props {
 	isEmailVerified: boolean;
@@ -28,52 +29,36 @@ export default function EmailForm({ i18nData, userEmail, emailForm, isEmailVerif
 	const [isPending, setIsPending] = useState(false);
 	const [verifyEmailOpen, setVerifyEmailOpen] = useState(false);
 	const [error, setError] = useState('');
-	// const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 	const [newEmail, setNewEmail] = useState<string | null>(null);
 
-	// const handleAddEmail = async (data: { email: string }) => {
-	// 	setIsPending(true);
-
-	// 	const result = await authClient.changeEmail({
-	// 		newEmail: data.email,
-	// 		callbackURL: '/?email-change=true',
-	// 	});
-
-	// 	if (result?.error) {
-	// 		setError(i18nData.editEmailFail);
-	// 	} else {
-	// 		setVerifOpen(true);
-	// 	}
-
-	// 	setIsPending(false);
-	// };
-
-	const verifyEmail = async (data: { email: string }) => {
+	const onSubmit = async (formData: EmailSchema) => {
 		// if (userEmail === data.email) {
 		// 	return;
 		// }
 
 		setIsPending(true);
 
-		const result = await authClient.emailOtp.sendVerificationOtp({
-			email: data.email,
-			type: 'email-verification',
-		});
-		if (result?.data?.success) {
-			setNewEmail(data.email);
-			setVerifyEmailOpen(true);
-		} else {
-			setError(i18nData.editEmailFail);
-		}
+		try {
+			const result = await sendVerifyEmailAction(null, formData);
 
-		setIsPending(false);
+			if (!result?.success) {
+				setError(i18nData.editEmailFail);
+			} else {
+				setNewEmail(formData.email);
+				setVerifyEmailOpen(true);
+			}
+		} catch {
+			setError(i18nData.editEmailFail);
+		} finally {
+			setIsPending(false);
+		}
 	};
 
 	const isInvalid =
 		!!emailForm.formState.errors.email || !!error || (!isEmailVerified && !!userEmail);
 
 	return (
-		<form onSubmit={emailForm.handleSubmit(verifyEmail)}>
+		<form onSubmit={emailForm.handleSubmit(onSubmit)}>
 			<Field.Root orientation={fieldOrientation} invalid={isInvalid} justifyContent='center'>
 				<Field.Label maxH='20px'>{i18nData.email}</Field.Label>
 
@@ -100,37 +85,15 @@ export default function EmailForm({ i18nData, userEmail, emailForm, isEmailVerif
 								</SecondaryButton>
 							}
 							size='md'
-							open={verifyEmailOpen && !error}
-							setIsOpen={() => false}
+							open={verifyEmailOpen && !!newEmail && !error}
+							setIsOpen={setVerifyEmailOpen}
 						>
-							<EmailVerification email={newEmail!} i18nData={i18nData} />
+							<EmailVerification
+								email={newEmail!}
+								i18nData={i18nData}
+								onClose={() => setVerifyEmailOpen(false)}
+							/>
 						</CenteredModal>
-
-						{/* {!!userEmail && !isEmailVerified && (
-							<CenteredModal
-								closeOnInteractOutside={false}
-								title={i18nData.emailConfirmation}
-								trigger={
-									<SecondaryButton mt={{ base: '2', sm: '0' }} loading={isPending} type='submit'>
-										{i18nData.sendVerifEmail}
-									</SecondaryButton>
-								}
-								size='md'
-								open={isVerifOpen && !error}
-								setIsOpen={setVerifOpen}
-							>
-								<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
-									{i18nData.toPost}
-									<Highlight
-										query={emailForm.watch('email')}
-										styles={{ fontWeight: 'semibold', mx: 1.5 }}
-									>
-										{emailForm.watch('email')}
-									</Highlight>
-									<Text color='fg.muted'>{i18nData.signUpCodeSent}</Text>
-								</Fieldset.HelperText>
-							</CenteredModal>
-						)} */}
 					</VStack>
 				</Stack>
 			</Field.Root>

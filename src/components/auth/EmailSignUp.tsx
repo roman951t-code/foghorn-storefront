@@ -4,7 +4,6 @@ import { Input, Stack, Field, Fieldset, Text, Highlight } from '@chakra-ui/react
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
 import {
 	createEmailSignUpSchema,
 	EmailSignUpSchema,
@@ -13,6 +12,7 @@ import type { I18nData } from '@/types/i18n';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
 import { PasswordInput } from '../reusable/chakra/password-input';
 import EmailConfirmation from './EmailConfirmation';
+import { sendRegisterEmailAction } from '@/actions/auth/sendRegisterEmailAction';
 
 interface EmailAuthProps {
 	i18nData: I18nData;
@@ -43,7 +43,7 @@ export default function EmailSignUp({ i18nData, disabled, backToLogin }: EmailAu
 		setIsPending(true);
 
 		try {
-			const result = await sendVerifyEmailAction(null, formData);
+			const result = await sendRegisterEmailAction(null, formData);
 
 			if (!result?.success) {
 				setAuthError(result?.message!);

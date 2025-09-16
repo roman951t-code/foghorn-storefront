@@ -3,7 +3,7 @@ import { nextCookies } from 'better-auth/next-js';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
-import { phoneNumber, emailOTP, customSession } from 'better-auth/plugins';
+import { phoneNumber, customSession } from 'better-auth/plugins';
 import { prisma } from './prisma';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -91,32 +91,11 @@ ${url}`,
 			},
 			signUpOnVerification: {
 				getTempEmail: (phoneNumber) => {
-					return '';
+					return `${phoneNumber.replace(/\D/g, '')}@mail`;
 				},
 				getTempName: (phoneNumber) => {
 					return phoneNumber;
 				},
-			},
-		}),
-		emailOTP({
-			overrideDefaultEmailVerification: true,
-			async sendVerificationOTP({ email, otp, type }) {
-				if (type === 'sign-in') {
-					// Send the OTP for sign in
-				} else if (type === 'email-verification') {
-					const authT = await getTranslations('Auth');
-
-					await resend.emails.send({
-						from: 'Acme <onboarding@resend.dev>',
-						to: [email],
-						subject: authT('verifyEmail'),
-						text: `${authT('hiUser')},\n\n${authT('otpToVerifyEmail')}:\n\n${otp}\n\n${authT(
-							'otpExpiresIn'
-						)}.`,
-					});
-				} else {
-					// Send the OTP for password reset
-				}
 			},
 		}),
 		customSession(async ({ user, session }) => {
@@ -130,6 +109,7 @@ ${url}`,
 					lastName: true,
 					middleName: true,
 					notificationMethod: true,
+					subscribed: true,
 				},
 			});
 			return {

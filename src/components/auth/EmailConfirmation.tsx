@@ -10,7 +10,7 @@ import {
 	createPhoneVerifySchema,
 	PhoneVerifySchema,
 } from 'formValidationSchemas/phoneVerifySchema';
-import { verifyEmailOtpAction } from '@/actions/auth/verifyEmailOtpAction';
+import { verifyEmailRegisterOtpAction } from '@/actions/auth/verifyEmailRegisterOtpAction';
 import { EmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
 import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
 
@@ -68,7 +68,7 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 		setIsPending(true);
 
 		try {
-			const result = await verifyEmailOtpAction(email, formData.otp.join(''));
+			const result = await verifyEmailRegisterOtpAction(email, formData.otp.join(''));
 
 			if (!result?.success) {
 				setVerifyError(result?.message!);

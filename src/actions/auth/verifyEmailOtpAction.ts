@@ -2,11 +2,16 @@
 
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
-import { decryptPassword } from '@/lib/crypto';
 import { getTranslations } from 'next-intl/server';
+import { headers } from 'next/headers';
 
 export async function verifyEmailOtpAction(email: string, code: string) {
 	const t = await getTranslations('Validation');
+
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
+	const userId = session?.user?.id;
 
 	const record = await prisma.emailVerificationCode.findFirst({
 		where: {
@@ -22,25 +27,15 @@ export async function verifyEmailOtpAction(email: string, code: string) {
 	}
 
 	try {
-		const decryptedPassword = decryptPassword(record.password);
-
-		const user = await auth.api.signUpEmail({
-			body: {
-				email: record.email,
-				password: decryptedPassword,
-				name: record.name,
-			},
-		});
-
 		await prisma.user.update({
-			where: { id: user.user.id },
-			data: { emailVerified: true, emailVerifiedAt: new Date() },
+			where: { id: userId },
+			data: { email: record.email, emailVerified: true },
 		});
 
 		await prisma.emailVerificationCode.delete({ where: { id: record.id } });
 
 		return { success: true };
 	} catch {
-		return { success: false, message: t('userRegisterFail') };
+		return { success: false, message: t('verificationFailed') };
 	}
 }

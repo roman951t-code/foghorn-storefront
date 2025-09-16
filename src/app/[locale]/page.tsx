@@ -19,8 +19,32 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function Main() {
 	const genT = await getTranslations('General');
 	const prodT = await getTranslations('Products');
+	const authT = await getTranslations('Auth');
+	const validT = await getTranslations('Validation');
 
 	const i18nData = extractI18nData(genT, ['seeCategory', 'seeAll']);
+
+	const subscribeI18nData = {
+		subscribeInfo: genT('subscribeInfo'),
+		email: authT('email'),
+		subscribeProcedure: genT('subscribeProcedure'),
+		emailConfirmation: authT('emailConfirmation'),
+		toPost: authT('toPost'),
+		signUpCodeSent: authT('signUpCodeSent'),
+		confirmEmail: authT('confirmEmail'),
+		resendAfter: authT('resendAfter'),
+		resendCode: authT('resendCode'),
+		emailUpdated: authT('emailUpdated'),
+		subscribe: genT('subscribe'),
+		subscribed: genT('subscribed'),
+		unsubscribe: genT('unsubscribe'),
+		subscribeFail: validT('subscribeFail'),
+		subscribedSuccessfully: genT('subscribedSuccessfully'),
+		unsubscribedSuccessfully: genT('unsubscribedSuccessfully'),
+		editEmailFail: validT('editEmailFail'),
+		invalidFormData: validT('invalidFormData'),
+		unsubscribeFail: validT('unsubscribeFail'),
+	};
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} direction='column'>
@@ -34,7 +58,7 @@ export default async function Main() {
 			<ProductsSection title={prodT('promotional')} tag='promotional' />
 			<ProductsSection title={prodT('viewed')} tag='viewed' /> */}
 
-			<SubscribeSection />
+			<SubscribeSection i18nData={subscribeI18nData} />
 		</Flex>
 	);
 }

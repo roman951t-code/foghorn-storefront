@@ -66,7 +66,7 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 			}
 
 			setIsOpen(true);
-		} catch (err) {
+		} catch {
 			setAuthError(i18nData.invalidFormData);
 		} finally {
 			setIsPending(false);

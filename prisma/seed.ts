@@ -160,7 +160,7 @@ async function main() {
 		update: {},
 		create: {
 			id: 'user-roman-951',
-			email: '',
+			email: 'roman@mail.com',
 			name: 'Roman',
 			emailVerified: true,
 			phoneNumber: '+380951234567',
