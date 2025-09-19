@@ -72,7 +72,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 	});
 
 	if (isRestorePassOpen) {
-		return <ResetPass i18nData={i18nData} onCloseAction={() => setRestorePassOpen(false)} />;
+		return <ResetPass i18nData={i18nData} backToLogin={() => setRestorePassOpen(false)} />;
 	}
 
 	const errorMap: Record<string, string> = {
@@ -93,7 +93,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 					email: formData.email,
 					password: formData.password,
 				});
-				console.log('error', error);
+
 				if (error) {
 					const messageKey = error?.message ?? '';
 					const message = errorMap[messageKey] || i18nData.userLoginFail;

@@ -30,8 +30,6 @@ export async function subscribeNewsletterAction(
 			where: { email: formData.email },
 		});
 
-		console.log('existing', existing);
-
 		if (existing) {
 			return { success: false, message: t('alreadySubscribed') };
 		}

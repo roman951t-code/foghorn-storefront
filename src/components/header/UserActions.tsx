@@ -2,7 +2,6 @@ import { FiUser } from 'react-icons/fi';
 import { IconButton } from '@chakra-ui/react';
 import Auth from '../auth/Auth';
 import CartModal from './CartModal';
-import SetNewPassModal from '../auth/SetNewPassModal';
 import { I18nData } from '@/types/i18n';
 import Favourite from './Favourite';
 import { useTranslations } from 'next-intl';
@@ -40,7 +39,6 @@ export default function UserActions({ i18nData }: { i18nData: I18nData }) {
 	return (
 		<>
 			<Auth trigger={<AuthBtn />} i18nData={i18nData} />
-			<SetNewPassModal i18nData={i18nData} />
 			<UpdateEmailModal i18nData={i18nData} />
 			<Favourite />
 			<CartModal i18nData={cartI18nData} />

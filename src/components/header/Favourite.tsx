@@ -10,7 +10,7 @@ export default function Favourite() {
 	const { session } = useSession();
 	const { ids: wishListIds } = useWishList();
 
-	const isVisible = session?.session && wishListIds?.length > 0;
+	const isVisible = session?.session;
 
 	if (!isVisible) {
 		return null;
@@ -28,11 +28,13 @@ export default function Favourite() {
 				colorPalette='red'
 				bg={{ _hover: 'colorPalette.400' }}
 			>
-				<Float offset='0.5'>
-					<Circle size='4.5' bg='bg.accent' color='black' fontSize='xs' fontWeight='semibold'>
-						{wishListIds.length}
-					</Circle>
-				</Float>
+				{wishListIds.length > 0 && (
+					<Float offset='0.5'>
+						<Circle size='4.5' bg='bg.accent' color='black' fontSize='xs' fontWeight='semibold'>
+							{wishListIds.length}
+						</Circle>
+					</Float>
+				)}
 				<FiHeart />
 			</IconButton>
 		</Link>

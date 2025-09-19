@@ -33,6 +33,7 @@ interface Props {
 }
 
 export default function AboutTab({ product, category, subcategory, averageRating }: Props) {
+	console.log('product', product);
 	const cartT = useTranslations('Cart');
 	const headT = useTranslations('Header');
 	const prodT = useTranslations('Products');
@@ -184,9 +185,9 @@ export default function AboutTab({ product, category, subcategory, averageRating
 								<Heading size='md'> Секция плейсхолдер</Heading>
 							</Card.Header>
 							<Card.Body>
-								Тут будуть общі характерістіки товара тіпа цвет або розмір. Тут будуть общі
-								характерістіки товара тіпа цвет або розмір Тут будуть общі характерістіки товара
-								тіпа цвет або розмір
+								Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
+								Ipsum has been the industry's standard dummy text ever since the 1500s, when an
+								unknown printer took a galley of type and scrambled it to make a type specimen book.
 							</Card.Body>
 						</Card.Root>
 
@@ -225,14 +226,10 @@ export default function AboutTab({ product, category, subcategory, averageRating
 					<Heading size='lg'> {prodT('description')}</Heading>
 				</Card.Header>
 				<Card.Body>
-					Pringles — торгова марка пшенично-картопляної закуски у формі параболоїда, яку виробляє
-					компанія Kellogg's (до 5 квітня 2011 року — Procter&Gamble). Те, що виробляється під цим
-					брендом, зазвичай називають чипсами. Але це не зовсім так, адже цю продукцію правильніше
-					називати незграбним формулюванням «легка картопляна закуска». Річ у тім, що в складі
-					Pringles картоплі лише 40%, решта — пшеничне борошно та крохмаль. Це швидше хрустке
-					картопляне печиво, ніж чипси. До речі, саме цей факт довгий час давав змогу творцям
-					уникати високих податків у Великобританії, де така продукція як чипси обкладається високим
-					податком.
+					It has survived not only five centuries, but also the leap into electronic typesetting,
+					remaining essentially unchanged. It was popularised in the 1960s with the release of
+					Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing
+					software like Aldus PageMaker including versions of Lorem Ipsum.
 				</Card.Body>
 			</Card.Root>
 		</VStack>

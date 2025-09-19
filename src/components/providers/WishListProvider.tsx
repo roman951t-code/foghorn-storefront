@@ -149,6 +149,7 @@ export function WishListProvider({
 			setIds((prev) => [...prev, product.id]);
 
 			const res = await addToWishList(product.id);
+
 			if (!res.success) {
 				setItems((prev) => prev.filter((p) => p.id !== product.id));
 				setIds((prev) => prev.filter((id) => id !== product.id));

@@ -3,7 +3,7 @@ import { nextCookies } from 'better-auth/next-js';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
-import { phoneNumber, customSession } from 'better-auth/plugins';
+import { phoneNumber, emailOTP, customSession } from 'better-auth/plugins';
 import { prisma } from './prisma';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -12,19 +12,6 @@ export const auth = betterAuth({
 	user: {
 		changeEmail: {
 			enabled: true,
-			// 			sendChangeEmailVerification: async ({ user, newEmail, url, token }, request) => {
-			// 				const t = await getTranslations('Auth');
-
-			// 				await resend.emails.send({
-			// 					from: 'Acme <onboarding@resend.dev>',
-			// 					to: [user.email],
-			// 					subject: t('verifyChangeEmail'),
-			// 					text: `${t('hiUser')} ${user?.name || ''},
-			// ${t('clickToChangeEmail')}:
-
-			// ${url}`,
-			// 				});
-			// 			},
 		},
 		deleteUser: {
 			enabled: true,
@@ -67,23 +54,6 @@ ${url}`,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
 		},
 	},
-
-	// 	emailVerification: {
-	// 		sendVerificationEmail: async ({ user, url, token }, request) => {
-	// 			const t = await getTranslations('Auth');
-
-	// 			await resend.emails.send({
-	// 				from: 'Acme <onboarding@resend.dev>',
-	// 				to: [user.email],
-	// 				subject: t('verifyEmail'),
-	// 				text: `${t('hiUser')} ${user?.name || ''},
-
-	// ${t('clickToVerifyEmail')}:
-
-	// ${url}`,
-	// 			});
-	// 		},
-	// 	},
 	plugins: [
 		phoneNumber({
 			sendOTP: ({ phoneNumber, code }, request) => {
@@ -96,6 +66,29 @@ ${url}`,
 				getTempName: (phoneNumber) => {
 					return phoneNumber;
 				},
+			},
+		}),
+		emailOTP({
+			overrideDefaultEmailVerification: true,
+			async sendVerificationOTP({ email, otp, type }) {
+				const t = await getTranslations('Auth');
+
+				if (type === 'sign-in') {
+					// Send the OTP for sign in
+				} else if (type === 'email-verification') {
+					// Send the OTP for email verification
+				} else {
+					await resend.emails.send({
+						from: 'Acme <onboarding@resend.dev>',
+						to: [email],
+						subject: t('resetPass'),
+						text: `${t('hiUser')} ${email || ''},
+
+${t('otpToResetPass')}:
+
+${otp}`,
+					});
+				}
 			},
 		}),
 		customSession(async ({ user, session }) => {

@@ -28,7 +28,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 	};
 
 	return (
-		<Flex h='500px' position='relative' rounded='md' gap={2} onMouseLeave={handleMouseLeave}>
+		<Flex position='relative' rounded='md' gap={2} onMouseLeave={handleMouseLeave}>
 			<VStack
 				minW='280px'
 				w='280px'

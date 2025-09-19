@@ -145,7 +145,7 @@ export default function ProductCard({ product }: Props) {
 					</IconButton>
 				</Flex>
 
-				<ProductPreviewSlider />
+				<ProductPreviewSlider imageUrl={product.imageUrl} />
 
 				<LinkBox>
 					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='0.5' w='100%'>

@@ -41,7 +41,7 @@ const config = defineConfig({
 					bgCategory: {
 						value: {
 							base: 'rgb(244,246,248)',
-							_dark: '#272834',
+							_dark: '#272838',
 						},
 					},
 				},

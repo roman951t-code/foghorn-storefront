@@ -93,7 +93,10 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					right: 0,
 					height: '100%',
 					width: '100%',
-					backgroundImage: 'url("/assets/images/logoSmall.webp")',
+					backgroundImage: {
+						base: 'url("/assets/images/temp/1.webp")',
+						_dark: ' url("/assets/images/logoTemp.webp")',
+					},
 					backgroundRepeat: 'no-repeat',
 					backgroundPosition: 'center',
 					backgroundSize: 'auto',

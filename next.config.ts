@@ -22,7 +22,7 @@ const baseConfig: NextConfig = {
 	},
 
 	images: {
-		domains: ['images.unsplash.com'],
+		domains: ['images.unsplash.com', 'loremflickr.com', 'picsum.photos'],
 	},
 	...(isProd && {
 		async headers() {

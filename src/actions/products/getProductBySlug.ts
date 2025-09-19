@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { unstable_cache } from 'next/cache';
 
 export const getProductBySlug = unstable_cache(
-	async (slug: string) => {
+	async (fullSlug: string) => {
 		const product = await prisma.product.findUnique({
-			where: { slug },
+			where: { fullSlug },
 			select: {
 				id: true,
 				name: true,

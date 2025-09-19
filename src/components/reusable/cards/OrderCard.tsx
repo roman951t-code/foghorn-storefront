@@ -139,7 +139,7 @@ export default function OrderCard() {
 										{prodT('repeatOrder')}
 									</PrimaryButton>
 
-									<FeedbackModal i18nData={i18nData} />
+									{/* <FeedbackModal i18nData={i18nData} /> */}
 								</Flex>
 								<Stack gap='4' maxH='500px' overflowY='auto'>
 									<Separator color='border.dark' />

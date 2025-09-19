@@ -14,7 +14,7 @@ export default function Feedback() {
 			<FeedbackCard />
 			<FeedbackCard feedback='fff' />
 			<FeedbackCard />
-			<Pagination />
+			{/* <Pagination /> */}
 		</VStack>
 	);
 }

@@ -1,6 +1,7 @@
 import { PrismaClient, OrderStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import slugify from 'slugify';
+import { customAlphabet } from 'nanoid';
 import { Decimal } from '@prisma/client/runtime/library';
 
 const prisma = new PrismaClient();
@@ -8,6 +9,8 @@ const prisma = new PrismaClient();
 function createSlug(text: string) {
 	return slugify(text, { lower: true, strict: true });
 }
+
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6);
 
 const mainCategories = [
 	'Phones',
@@ -34,6 +37,7 @@ const subcategoriesMap: Record<string, string[]> = {
 async function main() {
 	console.log('🌱 Seeding started...');
 
+	// Brand
 	const brand = await prisma.brand.upsert({
 		where: { slug: 'techbrand' },
 		update: {},
@@ -44,6 +48,7 @@ async function main() {
 		},
 	});
 
+	// Attributes
 	const attributeNames = [
 		{ name: 'Вага', unit: 'г' },
 		{ name: 'Розмір', unit: 'мм' },
@@ -63,9 +68,9 @@ async function main() {
 	);
 
 	const TAGS = ['popular', 'new', 'discount', 'promotional', 'viewed'];
+	const allProducts: any[] = [];
 
-	const allProducts = [];
-
+	// Categories + Products
 	for (const main of mainCategories) {
 		const parentSlug = createSlug(main);
 		const parent = await prisma.productCategory.upsert({
@@ -82,18 +87,23 @@ async function main() {
 				create: { name: sub, slug: subSlug, parentId: parent.id },
 			});
 
-			const count = faker.number.int({ min: 2, max: 3 });
+			const count = faker.number.int({ min: 3, max: 5 });
 			for (let i = 0; i < count; i++) {
 				const name = faker.commerce.productName();
 				const price = new Decimal(faker.number.float({ min: 100, max: 1500, fractionDigits: 2 }));
 				const stock = faker.number.int({ min: 5, max: 50 });
 
-				const hasDiscount = faker.datatype.boolean();
-				const discountPrice = hasDiscount
-					? price.sub(new Decimal(faker.number.int({ min: 10, max: 100 })))
-					: null;
+				// Discount validation
+				let discountPrice: Decimal | null = null;
+				if (faker.datatype.boolean()) {
+					const discountValue = new Decimal(faker.number.int({ min: 10, max: 100 }));
+					if (price.gt(discountValue)) {
+						discountPrice = price.sub(discountValue);
+					}
+				}
 
-				const productSlug = createSlug(`${name}-${Date.now()}`);
+				// Safe unique slug
+				const productSlug = createSlug(`${name}-${nanoid()}`);
 				const fullSlug = `${parentSlug}/${subSlug}/${productSlug}`;
 
 				const product = await prisma.product.create({
@@ -104,14 +114,14 @@ async function main() {
 						categoryName: main,
 						subcategoryName: sub,
 						description: faker.commerce.productDescription(),
-						imageUrl: faker.image.urlLoremFlickr({ category: 'technology' }),
+						imageUrl: `https://picsum.photos/seed/${nanoid()}/320/240`,
 						basePrice: price,
 						discountPrice,
 						stock,
-						averageRating: 4.8,
-						reviewCount: 3,
+						inStock: stock > 0,
+						averageRating: 0,
+						reviewCount: 0,
 						productCode: faker.string.numeric(6),
-						inStock: stock > 10 && faker.datatype.boolean(),
 						brandId: brand.id,
 						categoryId: subcategory.id,
 						tags: [],
@@ -132,21 +142,26 @@ async function main() {
 		}
 	}
 
+	// Assign tags
 	for (const tag of TAGS) {
 		const inStockProducts = allProducts.filter((p) => p.inStock);
 
+		// Ensure at least 6 in stock
 		while (inStockProducts.length < 6) {
 			const randomProduct = faker.helpers.arrayElement(allProducts);
 			if (!randomProduct.inStock) {
 				await prisma.product.update({
 					where: { id: randomProduct.id },
-					data: { inStock: true, stock: faker.number.int({ min: 15, max: 50 }) },
+					data: {
+						inStock: true,
+						stock: faker.number.int({ min: 15, max: 50 }),
+					},
 				});
 				inStockProducts.push({ ...randomProduct, inStock: true });
 			}
 		}
 
-		const productsForTag = faker.helpers.arrayElements(inStockProducts, 6);
+		const productsForTag = faker.helpers.shuffle(inStockProducts).slice(0, 6);
 		for (const p of productsForTag) {
 			await prisma.product.update({
 				where: { id: p.id },
@@ -155,6 +170,7 @@ async function main() {
 		}
 	}
 
+	// Create user Roman
 	const roman = await prisma.user.upsert({
 		where: { phoneNumber: '+380951234567' },
 		update: {},
@@ -171,10 +187,12 @@ async function main() {
 		},
 	});
 
+	// Reviews
 	const reviewedProducts = faker.helpers.arrayElements(allProducts, 10);
 
 	for (const product of reviewedProducts) {
 		const rating = faker.number.int({ min: 3, max: 5 });
+
 		await prisma.review.create({
 			data: {
 				userId: roman.id,
@@ -187,15 +205,24 @@ async function main() {
 			},
 		});
 
+		// Update product rating + count properly
+		const reviews = await prisma.review.findMany({
+			where: { productId: product.id },
+			select: { rating: true },
+		});
+
+		const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+
 		await prisma.product.update({
 			where: { id: product.id },
 			data: {
-				averageRating: rating,
-				reviewCount: 1,
+				averageRating: avgRating,
+				reviewCount: reviews.length,
 			},
 		});
 	}
 
+	// Orders
 	const orderedProducts = faker.helpers.arrayElements(allProducts, 2);
 	const total = orderedProducts.reduce((sum, p) => sum.add(p.basePrice), new Decimal(0));
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Fieldset, Stack, Field, Input, Highlight, Text } from '@chakra-ui/react';
+import { Button, Fieldset, Stack, Field, Input } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
@@ -8,25 +8,21 @@ import type { I18nData } from '@/types/i18n';
 import { useMemo } from 'react';
 import { resetPasswordAction } from '@/actions/auth/resetPasswordAction';
 import { createResetPassSchema, ResetPassSchema } from 'formValidationSchemas/resetPassSchema';
+import ResetPassConfirmation from './ResetPassConfirmation';
 
 interface ResetPassProps {
 	i18nData: I18nData;
-	onCloseAction: (value: boolean) => void;
+	backToLogin: () => void;
 }
 
 const MAX_CHARACTERS = 60;
 
-export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
+export default function ResetPass({ i18nData, backToLogin }: ResetPassProps) {
 	const schema = useMemo(() => createResetPassSchema(i18nData), [i18nData]);
 
-	const [isSubmitted, setSubmitted] = useState(false);
+	const [isOtpSent, setOtpSent] = useState(false);
 	const [actionError, setActionError] = useState('');
 	const [isPending, setIsPending] = useState(false);
-
-	const resetForm = () => {
-		setSubmitted(false);
-		onCloseAction(false);
-	};
 
 	const {
 		register,
@@ -39,23 +35,32 @@ export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
 	});
 
 	const onSubmit = async (formData: ResetPassSchema) => {
+		setOtpSent(true);
+
 		setIsPending(true);
 
 		try {
 			const result = await resetPasswordAction(null, formData);
-
 			if (!result?.success) {
 				setActionError(result?.message!);
 			}
-		} catch (err) {
+		} catch {
 			setActionError(i18nData.invalidFormData);
 		} finally {
 			setIsPending(false);
-			setSubmitted(true);
+			setOtpSent(true);
 		}
 	};
 
 	const formData = getValues();
+
+	const isOtpFormVisible = isOtpSent && !actionError && !isPending;
+
+	if (isOtpFormVisible) {
+		return (
+			<ResetPassConfirmation i18nData={i18nData} email={formData.email} backToLogin={backToLogin} />
+		);
+	}
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>
@@ -73,18 +78,6 @@ export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
 
 						<Fieldset.ErrorText>{actionError}</Fieldset.ErrorText>
 					</Fieldset.Content>
-
-					{isSubmitted && !actionError && !isPending && (
-						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
-							{i18nData.toPost}
-							{formData?.email && (
-								<Highlight query={formData?.email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
-									{formData?.email}
-								</Highlight>
-							)}
-							<Text color='fg.muted'>{i18nData.resetPassCodeSent}</Text>
-						</Fieldset.HelperText>
-					)}
 				</Fieldset.Root>
 
 				<Button
@@ -95,7 +88,7 @@ export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
 					color='black'
 					variant='solid'
 				>
-					{i18nData.resetPassConfirm}
+					{i18nData.sendOtp}
 				</Button>
 
 				<Button
@@ -104,7 +97,7 @@ export default function ResetPass({ i18nData, onCloseAction }: ResetPassProps) {
 					variant='outline'
 					border='1px solid'
 					borderColor='border'
-					onClick={resetForm}
+					onClick={backToLogin}
 				>
 					{i18nData.rememberPass}
 				</Button>

@@ -9,11 +9,8 @@ import { EffectFlip, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-flip';
 import 'swiper/css/navigation';
-
 const img1 = '/assets/images/temp/1.webp';
 const img2 = '/assets/images/temp/2.webp';
-const images = [img1, img2, img2];
-
 function ProductPreviewSkeleton() {
 	return (
 		<HStack overflowX='hidden' overflowY='hidden' alignSelf='center'>
@@ -22,7 +19,9 @@ function ProductPreviewSkeleton() {
 	);
 }
 
-function ProductPreviewSwiper() {
+function ProductPreviewSwiper({ imageUrl }: { imageUrl: string }) {
+	const images = [imageUrl, img1, img2];
+
 	return (
 		<Swiper
 			effect='flip'
@@ -53,6 +52,6 @@ const DynamicProductPreviewSlider = dynamic(() => Promise.resolve(ProductPreview
 	loading: () => <ProductPreviewSkeleton />,
 });
 
-export default function ProductPreviewSlider() {
-	return <DynamicProductPreviewSlider />;
+export default function ProductPreviewSlider({ imageUrl }: { imageUrl: string }) {
+	return <DynamicProductPreviewSlider imageUrl={imageUrl} />;
 }

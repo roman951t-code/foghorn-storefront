@@ -10,7 +10,6 @@ export async function addToWishList(productId: string) {
 
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
-
 	if (!userId) {
 		return { guest: true };
 	}

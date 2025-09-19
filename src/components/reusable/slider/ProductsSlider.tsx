@@ -13,7 +13,7 @@ import '@/styles/swiper.css';
 
 import { productsBreakpoints } from '@/data/breakpoints';
 import { getProductsByTag } from '@/actions/products/getProductsByTag';
-import { Product } from '@/types/product';
+import { SubcategoryProduct } from '@/types/product';
 
 function ProductsSkeletonFallback() {
 	return (
@@ -29,7 +29,7 @@ type Props = {
 	tag: string;
 };
 
-function ProductsSwiper({ products }: { products: Product[] }) {
+function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
 	return (
 		<Swiper
 			loop
@@ -41,8 +41,8 @@ function ProductsSwiper({ products }: { products: Product[] }) {
 			className='productsSlider'
 		>
 			{products.map((p) => (
-				<SwiperSlide key={p.id}>
-					<ProductCard product={p} category={p.category!} subcategory={p.subcategory!} />
+				<SwiperSlide key={p?.id}>
+					<ProductCard product={p} />
 				</SwiperSlide>
 			))}
 		</Swiper>
@@ -50,7 +50,7 @@ function ProductsSwiper({ products }: { products: Product[] }) {
 }
 
 export default function ProductsSlider({ tag }: Props) {
-	const [products, setProducts] = useState<Product[]>([]);
+	const [products, setProducts] = useState<SubcategoryProduct[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {

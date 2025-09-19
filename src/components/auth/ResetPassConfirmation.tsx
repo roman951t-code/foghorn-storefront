@@ -1,42 +1,43 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, PinInput, Highlight, Fieldset, Text, Field } from '@chakra-ui/react';
+import { Button, PinInput, Highlight, Fieldset, Text, Field, Alert } from '@chakra-ui/react';
 import type { I18nData } from '@/types/i18n';
 import { formatTime } from '@/utils/generalUtils';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-	createPhoneVerifySchema,
-	PhoneVerifySchema,
-} from 'formValidationSchemas/phoneVerifySchema';
+	ConfirmResetPassSchema,
+	createConfirmResetPassSchema,
+} from 'formValidationSchemas/confirmResetPassSchema';
+import { resetPasswordAction } from '@/actions/auth/resetPasswordAction';
 import { authClient } from '@/lib/auth-client';
-import { useSession } from '../providers/SessionProvider';
-import { registerPhoneAction } from '@/actions/auth/registerPhoneAction';
-import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
+import { toaster } from '../reusable/chakra/toaster';
+import { PasswordInput } from '../reusable/chakra/password-input';
 
 interface Props {
 	i18nData: I18nData;
-	name?: string;
-	phone: string;
-	signup?: boolean;
+	email: string;
+	backToLogin: () => void;
 }
 
-export default function PhoneConfirmation({ name, phone, i18nData, signup }: Props) {
-	const schema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
+const MAX_CHARACTERS = 60;
+
+export default function ResetPassConfirmation({ email, i18nData, backToLogin }: Props) {
+	const schema = useMemo(() => createConfirmResetPassSchema(i18nData), [i18nData]);
 
 	const [timer, setTimer] = useState(0);
 	const [verifyError, setVerifyError] = useState('');
+	const [isPassUpdated, setPassUpdated] = useState(false);
 	const [isPending, setIsPending] = useState(false);
-
-	const { refresh } = useSession();
 
 	const {
 		handleSubmit,
-		reset,
+		register,
 		control,
+		reset,
 		formState: { errors },
-	} = useForm<PhoneVerifySchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
+	} = useForm<ConfirmResetPassSchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 
 	useEffect(() => {
 		if (timer <= 0) return;
@@ -55,21 +56,22 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 	}, [timer]);
 
 	const resendVerificationCode = async () => {
-		reset();
 		setTimer(120);
+		reset();
 
 		try {
-			const result = await sendVerifyPhoneAction(null, { name, phone });
+			const result = await resetPasswordAction(null, { email });
 
 			if (!result?.success) {
 				setVerifyError(result?.message!);
 			}
-		} catch (err) {
+		} catch {
 			setVerifyError(i18nData.invalidFormData);
+			setPassUpdated(true);
 		}
 	};
 
-	const onSubmit = async (formData: PhoneVerifySchema) => {
+	const onSubmit = async (formData: ConfirmResetPassSchema) => {
 		setIsPending(true);
 
 		const errorMap: Record<string, string> = {
@@ -80,31 +82,40 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 		};
 
 		try {
-			const { error } = await authClient.phoneNumber.verify({
-				phoneNumber: phone,
-				code: formData.otp.join(''),
-				disableSession: false,
-				updatePhoneNumber: false,
+			const { error: verifyError } = await authClient.emailOtp.checkVerificationOtp({
+				email,
+				type: 'forget-password',
+				otp: formData.otp.join(''),
 			});
 
-			if (error) {
-				const messageKey = error?.message ?? '';
-				const message = errorMap[messageKey] || i18nData.userRegisterFail;
+			if (verifyError) {
+				const messageKey = verifyError?.message ?? '';
+				const message = errorMap[messageKey] || i18nData.setNewPassFail;
 				setVerifyError(message);
 				return;
 			}
 
-			if (signup) {
-				await registerPhoneAction(null, { name, phone });
+			const { error: resetError } = await authClient.emailOtp.resetPassword({
+				email,
+				otp: formData.otp.join(''),
+				password: formData.password,
+			});
+
+			if (resetError) {
+				const messageKey = resetError?.message ?? '';
+				const message = errorMap[messageKey] || i18nData.setNewPassFail;
+				setVerifyError(message);
+				return;
+			} else {
+				toaster.success({
+					title: i18nData.passUpdated,
+					duration: 5000,
+				});
+
+				backToLogin();
 			}
-
-			await refresh();
-
-			const bc = new BroadcastChannel('auth');
-			bc.postMessage('session-updated');
-			bc.close();
-		} catch (err) {
-			setVerifyError(i18nData.invalidFormData);
+		} catch {
+			setVerifyError(i18nData.setNewPassFail);
 		} finally {
 			setIsPending(false);
 		}
@@ -115,13 +126,13 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>
 			<Fieldset.Root size='lg' invalid>
-				<Fieldset.Legend fontSize='17px'>{i18nData.phoneConfirmation}</Fieldset.Legend>
+				<Fieldset.Legend fontSize='17px'>{i18nData.resetPassConfirm}</Fieldset.Legend>
 				<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mt='4'>
-					На номер
-					<Highlight query={phone} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
-						{phone}
+					{i18nData.toPost}
+					<Highlight query={email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
+						{email}
 					</Highlight>
-					<Text color='fg.muted'>{i18nData.activationCodeSent}</Text>
+					<Text color='fg.muted'>{i18nData.resetPassCodeSent}</Text>
 				</Fieldset.HelperText>
 
 				<Fieldset.Content>
@@ -132,7 +143,7 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 							render={({ field }) => (
 								<PinInput.Root
 									otp
-									mt='2'
+									my='2'
 									justifyContent='center'
 									invalid={!!errors.otp}
 									value={field.value}
@@ -150,7 +161,36 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 
 						<Field.ErrorText>{errors.otp?.message}</Field.ErrorText>
 					</Field.Root>
+					<Field.Root required invalid={!!errors.password || !!verifyError}>
+						<Field.Label>
+							{i18nData.newPass}
+							<Field.RequiredIndicator />
+						</Field.Label>
+						<PasswordInput fontSize='md' {...register('password')} maxLength={MAX_CHARACTERS} />
+						<Field.ErrorText>{errors.password?.message}</Field.ErrorText>
+					</Field.Root>
 				</Fieldset.Content>
+				{isPassUpdated && !isPending && (
+					<>
+						<Alert.Root status='success' variant='solid' my='2' fontSize='15px'>
+							<Alert.Indicator />
+							<Alert.Title>{i18nData.passUpdated}</Alert.Title>
+						</Alert.Root>
+
+						<Button
+							w='100%'
+							mt='4'
+							type='submit'
+							loading={isPending}
+							borderColor='border'
+							variant='outline'
+							onClick={backToLogin}
+						>
+							{i18nData.close}
+						</Button>
+					</>
+				)}
+
 				<Fieldset.ErrorText>{verifyError}</Fieldset.ErrorText>
 
 				<Button
@@ -162,7 +202,7 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 					variant='solid'
 					loading={isPending}
 				>
-					{i18nData.confirmPhone}
+					{i18nData.saveNewPass}
 				</Button>
 
 				{timer > 0 ? (

@@ -206,7 +206,7 @@ model Product {
   wishlistedBy    Wishlist[]
   reviews         Review[]
   cartItems       CartItem[]
-  fullSlug        String
+  fullSlug        String @unique
   categoryName    String
   subcategoryName String
 }

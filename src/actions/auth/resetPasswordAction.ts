@@ -20,10 +20,9 @@ export async function resetPasswordAction(
 	const { email } = validatedFormData.data;
 
 	try {
-		await auth.api.requestPasswordReset({
+		await auth.api.forgetPasswordEmailOTP({
 			body: {
 				email,
-				redirectTo: '/?reset-pass=true',
 			},
 		});
 

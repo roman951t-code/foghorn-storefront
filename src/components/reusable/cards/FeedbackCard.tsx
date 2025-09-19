@@ -12,11 +12,13 @@ import {
 	Accordion,
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import FeedbackModal from '@/components/product/FeedbackModal';
+// import FeedbackModal from '@/components/product/FeedbackModal';
 import { FiTrash2 } from 'react-icons/fi';
 import Image from 'next/image';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { Rating } from '../chakra/rating';
+import { SecondaryButton } from '../buttons/ActionButton';
+import { VscFeedback } from 'react-icons/vsc';
 
 const img1 = '/assets/images/temp/1.webp';
 
@@ -116,10 +118,13 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 						</Flex>
 						<Separator mt='4' color='border.dark' />
 						<Card.Body color='main' px='0' pb='0'>
-							Купляв не сам збирав гроші певний час кинув на карту батькам. Вони купили гарантія є
-							все як треба. Переживав на рахунок того може щось не так з ним бо багато міфів про те
-							що яблука продають брак і тд. Але на зараз як вже другий тиждень користуюсь 16 максом
-							задоволений ніяких непорозумінь немає все чудово працює. Загалом рекомендую
+							Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum
+							has been the industry's standard dummy text ever since the 1500s, when an unknown
+							printer took a galley of type and scrambled it to make a type specimen book. It has
+							survived not only five centuries, but also the leap into electronic typesetting,
+							remaining essentially unchanged. It was popularised in the 1960s with the release of
+							Letraset sheets containing Lorem Ipsum passages, and more recently with desktop
+							publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 						</Card.Body>
 					</Accordion.ItemBody>
 				</Accordion.ItemContent>
@@ -199,11 +204,17 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 						</Stack>
 					</Stack>
 					<Flex flex={1} justifyContent='flex-end' hideBelow='md'>
-						<FeedbackModal i18nData={i18nData} />
+						{/* <FeedbackModal i18nData={i18nData} /> */}
+						<SecondaryButton>
+							<VscFeedback /> {i18nData.leaveFeedback}
+						</SecondaryButton>
 					</Flex>
 				</Flex>
 				<Flex flex={1} justifyContent='flex-end' hideFrom='md'>
-					<FeedbackModal i18nData={i18nData} />
+					{/* <FeedbackModal i18nData={i18nData} /> */}
+					<SecondaryButton>
+						<VscFeedback /> {i18nData.leaveFeedback}
+					</SecondaryButton>
 				</Flex>
 			</Accordion.Item>
 		</Card.Root>

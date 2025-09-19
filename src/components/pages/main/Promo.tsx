@@ -11,8 +11,9 @@ import 'swiper/css';
 
 const carousel1 = '/assets/images/carousel1.webp';
 const carousel2 = '/assets/images/carousel2.webp';
+const carousel3 = '/assets/images/carousel3.webp';
 
-const images = [carousel1, carousel2, carousel1, carousel2];
+const images = [carousel1, carousel2, carousel3];
 
 const breakpoints = {
 	690: { slidesPerView: 2 },
@@ -43,7 +44,7 @@ function PromoSlider() {
 		>
 			{images.map((src, index) => (
 				<SwiperSlide key={index}>
-					<Flex position='relative' height='500px' width='100%'>
+					<Flex position='relative' height='472px' width='100%'>
 						<NextImage
 							src={src}
 							alt={`Carousel ${index + 1}`}
