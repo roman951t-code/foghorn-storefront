@@ -1,24 +1,24 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Flex, HStack, useBreakpointValue } from '@chakra-ui/react';
+import { Flex, HStack, Text, useBreakpointValue } from '@chakra-ui/react';
 import { LoadingPromoSkeleton } from '@/components/reusable/Skeleton';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
-import NextImage from 'next/image';
 
 import 'swiper/css';
 
-const carousel1 = '/assets/images/carousel1.webp';
-const carousel2 = '/assets/images/carousel2.webp';
-const carousel3 = '/assets/images/carousel3.webp';
-
-const images = [carousel1, carousel2, carousel3];
+const promoTexts = [
+	{ id: 1, text: '🔥 Up to 50% off on all electronics!' },
+	{ id: 2, text: '🚚 Free shipping on orders over $100!' },
+	{ id: 3, text: '💳 Pay later with our flexible payment options!' },
+];
 
 const breakpoints = {
 	690: { slidesPerView: 2 },
 	768: { slidesPerView: 1 },
 	1100: { slidesPerView: 2 },
+	1564: { slidesPerView: 3 },
 };
 
 function PromoSkeletonFallback() {
@@ -36,22 +36,38 @@ function PromoSkeletonFallback() {
 function PromoSlider() {
 	return (
 		<Swiper
-			loop
-			spaceBetween={10}
+			// loop
+			spaceBetween={6}
 			breakpoints={breakpoints}
 			modules={[Autoplay]}
+			autoplay={false}
 			className='promoSlider'
+			grabCursor={true}
+			simulateTouch={true}
+			touchStartPreventDefault={false}
+			touchRatio={1}
 		>
-			{images.map((src, index) => (
-				<SwiperSlide key={index}>
-					<Flex position='relative' height='472px' width='100%'>
-						<NextImage
-							src={src}
-							alt={`Carousel ${index + 1}`}
-							fill
-							sizes='(max-width: 768px) 100vw, 480px'
-							style={{ objectFit: 'cover', borderRadius: '8px' }}
-						/>
+			{promoTexts.map((promo) => (
+				<SwiperSlide key={promo.id}>
+					<Flex
+						userSelect='none'
+						justify='center'
+						align='center'
+						cursor='pointer'
+						bg='transparent'
+						border='1px solid'
+						borderColor='border'
+						borderRadius='md'
+						height='472px'
+						width='100%'
+						color='main'
+						fontWeight='400'
+						fontSize='xl'
+						textAlign='center'
+						boxShadow='md'
+						p={6}
+					>
+						<Text>{promo.text}</Text>
 					</Flex>
 				</SwiperSlide>
 			))}

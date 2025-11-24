@@ -39,6 +39,7 @@ export const getSubcategoryFilters = unstable_cache(
 	['product-filters'],
 	{
 		tags: ['product'],
+		revalidate: 300,
 	}
 );
 
@@ -99,5 +100,5 @@ export const getSearchFilters = unstable_cache(
 			.filter((attr) => attr.values.length > 0);
 	},
 	['search-filters'],
-	{ tags: ['product'] }
+	{ tags: ['product'], revalidate: 300 }
 );

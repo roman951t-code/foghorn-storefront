@@ -141,5 +141,5 @@ export const getProductsBySubcategorySlug = unstable_cache(
 		};
 	},
 	['products-by-subcategory'],
-	{ tags: ['subcategory', 'products'] }
+	{ tags: ['subcategory', 'products'], revalidate: 300 }
 );

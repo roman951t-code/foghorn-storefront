@@ -155,5 +155,5 @@ export const getProductsByTag = unstable_cache(
 		} as T extends true ? ProductsWithMeta : ProductsOnly;
 	},
 	['products-by-tag'],
-	{ tags: ['products'] }
+	{ tags: ['products'], revalidate: 300 }
 );

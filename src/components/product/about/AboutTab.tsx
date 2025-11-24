@@ -33,7 +33,6 @@ interface Props {
 }
 
 export default function AboutTab({ product, category, subcategory, averageRating }: Props) {
-	console.log('product', product);
 	const cartT = useTranslations('Cart');
 	const headT = useTranslations('Header');
 	const prodT = useTranslations('Products');

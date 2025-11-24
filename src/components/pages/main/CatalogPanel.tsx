@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Flex, Text, VStack, HStack, Icon } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
@@ -18,12 +18,22 @@ export default function CatalogPanel({ i18nData }: Props) {
 	const { categories } = useCatalog();
 
 	const [activeCategory, setActiveCategory] = useState<CatalogCategory | null>(null);
+	const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
 	const handleMouseEnter = (category: CatalogCategory) => {
-		setActiveCategory(category);
+		if (hoverTimeout.current) {
+			clearTimeout(hoverTimeout.current);
+		}
+		hoverTimeout.current = setTimeout(() => {
+			setActiveCategory(category);
+		}, 350);
 	};
 
 	const handleMouseLeave = () => {
+		if (hoverTimeout.current) {
+			clearTimeout(hoverTimeout.current);
+			hoverTimeout.current = null;
+		}
 		setActiveCategory(null);
 	};
 

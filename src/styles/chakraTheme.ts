@@ -3,6 +3,13 @@ import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react';
 const config = defineConfig({
 	strictTokens: false,
 	theme: {
+		tokens: {
+			fonts: {
+				body: { value: 'var(--font-roboto), sans-serif' },
+				heading: { value: 'var(--font-montserrat), sans-serif' },
+				link: { value: 'var(--font-inter), sans-serif' },
+			},
+		},
 		breakpoints: {
 			xs: '430px',
 			sm: '560px',
@@ -139,7 +146,6 @@ const config = defineConfig({
 			margin: 0,
 			padding: 0,
 		},
-
 		body: {
 			display: 'flex',
 			flexDirection: 'column',
@@ -152,8 +158,17 @@ const config = defineConfig({
 		svg: {
 			display: 'inline',
 		},
-		'.productsSlider .swiper-button-prev:after, .productsSlider .swiper-button-next:after': {
-			color: 'var(--chakra-colors-fg)',
+		a: {
+			fontFamily: 'var(--font-montserrat), sans-serif',
+		},
+		'h1,h2,h3,h4,h5,h6': {
+			fontFamily: 'var(--font-montserrat), sans-serif',
+		},
+		'p, span': {
+			fontFamily: 'var(--font-inter), sans-serif',
+		},
+		'.productsSlider .swiper-button-prev, .productsSlider .swiper-button-next': {
+			color: 'var(--chakra-colors-fg) !important',
 		},
 		'.thumbsSlider .swiper-button-prev:after, .thumbsSlider .swiper-button-next:after': {
 			color: 'var(--chakra-colors-bg-inverted) !important',

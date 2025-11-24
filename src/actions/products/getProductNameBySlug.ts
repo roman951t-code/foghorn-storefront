@@ -13,5 +13,6 @@ export const getProductNameBySlug = unstable_cache(
 	['product-name'],
 	{
 		tags: ['product'],
+		revalidate: 300,
 	}
 );

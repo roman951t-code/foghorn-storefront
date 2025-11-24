@@ -30,10 +30,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductDetail({ params, searchParams }: Props) {
-	const { category, subcategory, product: productSlug } = await params;
+	const { category, subcategory, product } = await params;
 	const { tab } = await searchParams;
-	const fullSlug = `${category}/${subcategory}/${productSlug}`;
-	const productData = await getProductBySlug(fullSlug);
+
+	const productData = await getProductBySlug(product);
 
 	if (!productData) notFound();
 

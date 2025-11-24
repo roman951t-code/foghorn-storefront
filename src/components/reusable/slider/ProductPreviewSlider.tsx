@@ -33,12 +33,17 @@ function ProductPreviewSwiper({ imageUrl }: { imageUrl: string }) {
 				<SwiperSlide key={i}>
 					<Link href='#' variant='plain' _focus={{ outline: 'none' }}>
 						<Image
-							loading='lazy'
+							priority
+							loading='eager'
 							src={src}
-							width={110}
-							height={110}
+							width={320}
+							height={240}
 							alt='Product photo'
-							style={{ borderRadius: '8px' }}
+							style={{
+								borderRadius: '8px',
+								width: '110px',
+								height: 'auto',
+							}}
 						/>
 					</Link>
 				</SwiperSlide>

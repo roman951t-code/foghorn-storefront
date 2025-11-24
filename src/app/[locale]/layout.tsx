@@ -22,6 +22,7 @@ import { CartData } from '@/types/cart';
 import { getWishListProducts } from '@/actions/wishlist/getWishListProducts';
 import { getWishListProductIds } from '@/actions/wishlist/getWishListProductIds';
 import { WishListProvider } from '@/components/providers/WishListProvider';
+import { inter, montserrat, roboto } from '@/lib/fonts';
 
 interface Props {
 	children: ReactNode;
@@ -63,7 +64,7 @@ export default async function Layout({ children, params }: Props) {
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
-			<body>
+			<body className={`${inter.variable} ${montserrat.variable} ${roboto.variable}`}>
 				<ColorModeProvider>
 					<ChakraUIProvider>
 						<Box display='flex' flexDirection='column' minHeight='100vh' gap='6' bg='bg.primary'>

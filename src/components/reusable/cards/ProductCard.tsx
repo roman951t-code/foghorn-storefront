@@ -77,6 +77,7 @@ export default function ProductCard({ product }: Props) {
 
 	return (
 		<Card.Root
+			userSelect='none'
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			minW='200px'
 			maxW='240px'

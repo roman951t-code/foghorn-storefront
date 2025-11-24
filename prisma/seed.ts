@@ -170,11 +170,10 @@ async function main() {
 		}
 	}
 
-	// Create user Roman
-	const roman = await prisma.user.upsert({
-		where: { phoneNumber: '+380951234567' },
-		update: {},
-		create: {
+	await prisma.user.deleteMany({ where: { id: 'user-roman-951' } });
+
+	const roman = await prisma.user.create({
+		data: {
 			id: 'user-roman-951',
 			email: 'roman@mail.com',
 			name: 'Roman',
@@ -182,12 +181,9 @@ async function main() {
 			phoneNumber: '+380951234567',
 			phoneNumberVerified: true,
 			image: faker.image.avatar(),
-			createdAt: new Date(),
-			updatedAt: new Date(),
 		},
 	});
 
-	// Reviews
 	const reviewedProducts = faker.helpers.arrayElements(allProducts, 10);
 
 	for (const product of reviewedProducts) {

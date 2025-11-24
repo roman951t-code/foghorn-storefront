@@ -34,5 +34,5 @@ export const getCategoryData = unstable_cache(
 		};
 	},
 	['category-data'],
-	{ revalidate: 60 * 60, tags: ['categories'] }
+	{ revalidate: 300, tags: ['categories'] }
 );
