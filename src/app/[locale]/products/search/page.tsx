@@ -30,7 +30,7 @@ const PRODUCTS_PER_PAGE = 12;
 
 export async function generateMetadata({ searchParams }: Params): Promise<Metadata> {
 	const { searchQuery, tag } = await searchParams;
-	const t = await getTranslations('Products');
+	const t = await getTranslations('products');
 	const title = t('searchQueryResults', { searchQuery: tag ? t(tag) : searchQuery || '' });
 
 	return {
@@ -42,8 +42,8 @@ export async function generateMetadata({ searchParams }: Params): Promise<Metada
 export default async function SearchProducts({ searchParams }: Params) {
 	const { searchQuery = '', tag, page: pageParam = '1', min = 0, max = 0 } = await searchParams;
 	const searchData = await searchParams;
-	const t = await getTranslations('Products');
-	const sidebarT = await getTranslations('Sidebar');
+	const t = await getTranslations('products');
+	const sidebarT = await getTranslations('navigation');
 
 	const page = parseInt(pageParam, 10);
 	const offset = (page - 1) * PRODUCTS_PER_PAGE;
@@ -121,7 +121,7 @@ export default async function SearchProducts({ searchParams }: Params) {
 				<FiltersSidebar
 					filters={filters}
 					maxProductPrice={maxProductPrice}
-					btnText={sidebarT('filters')}
+					btnText={sidebarT('sidebar.filters')}
 				/>
 			</Flex>
 

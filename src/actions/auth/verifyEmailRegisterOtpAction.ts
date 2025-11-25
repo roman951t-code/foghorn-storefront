@@ -6,7 +6,7 @@ import { decryptPassword } from '@/lib/crypto';
 import { getTranslations } from 'next-intl/server';
 
 export async function verifyEmailRegisterOtpAction(email: string, code: string) {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	const record = await prisma.emailRegistrationCode.findFirst({
 		where: {

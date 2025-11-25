@@ -13,7 +13,7 @@ export const createConfirmEmailSchema = (t: I18nData) =>
 	confirmEmailSchemaShape(t as Parameters<typeof confirmEmailSchemaShape>[0]);
 
 export async function getConfirmEmailSchema() {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	return confirmEmailSchemaShape({
 		pinRequired: t('pinRequired'),

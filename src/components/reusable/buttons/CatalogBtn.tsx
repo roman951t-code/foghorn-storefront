@@ -23,8 +23,8 @@ interface Props {
 }
 
 export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: Props) {
-	const t = useTranslations('General');
-	const authT = useTranslations('Auth');
+	const t = useTranslations('common');
+	const authT = useTranslations('auth');
 	const catalogFull = t('catalogFull');
 	const text = fullText ? catalogFull : 'Каталог';
 

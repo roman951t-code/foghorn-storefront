@@ -2,7 +2,6 @@ import { authClient } from '@/lib/auth-client';
 import { Card } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { useSession } from '../providers/SessionProvider';
-import { I18nData } from '@/types/i18n';
 import { redirect } from 'next/navigation';
 import { TertiaryButton } from '../reusable/buttons/ActionButton';
 
@@ -11,7 +10,7 @@ interface LogoutProps {
 }
 
 export function LogoutSection({ onClose }: LogoutProps) {
-	const authT = useTranslations('Auth');
+	const authT = useTranslations('auth');
 	const { refresh } = useSession();
 
 	const handleLogogut = async () => {
@@ -36,19 +35,20 @@ export function LogoutSection({ onClose }: LogoutProps) {
 }
 
 interface Props {
-	i18nData: I18nData;
-	authOpen: boolean;
 	onAuthOpen: () => void;
 }
 
-export function AuthorizeSection({ i18nData, onAuthOpen }: Props) {
+export function AuthorizeSection({ onAuthOpen }: Props) {
+	const navT = useTranslations('navigation');
+	const authT = useTranslations('auth');
+
 	return (
 		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
 			<Card.Body gap={3}>
-				<TertiaryButton onClick={onAuthOpen}>{i18nData.authorize}</TertiaryButton>
+				<TertiaryButton onClick={onAuthOpen}>{authT('authorize')}</TertiaryButton>
 
 				<Card.Description color='main' textStyle='xs' textAlign='center'>
-					{i18nData.authorizeDetails}
+					{navT('sidebar.authorizeDetails')}
 				</Card.Description>
 			</Card.Body>
 		</Card.Root>

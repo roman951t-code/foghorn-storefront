@@ -11,10 +11,8 @@ import {
 	PhoneSignUpSchema,
 } from 'formValidationSchemas/phoneSignUpSchema';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
-import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
-import dynamic from 'next/dynamic';
-
-const PhoneConfirmation = dynamic(() => import('./PhoneConfirmation'));
+import { phoneSignUpAction } from '@/actions/auth/phoneSignUpAction';
+import { useSession } from '../providers/SessionProvider';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;
@@ -26,41 +24,40 @@ const MAX_CHARACTERS = 60;
 export default function PhoneSignUp({ i18nData, disabled }: PhoneAuthProps) {
 	const schema = useMemo(() => createPhoneSignUpSchema(i18nData), [i18nData]);
 
+	const { refresh } = useSession();
 	const [authError, setAuthError] = useState('');
 	const [isPending, setIsPending] = useState(false);
-	const [isSubmitted, setSubmitted] = useState(false);
 
 	const {
 		register,
-		watch,
 		handleSubmit,
 		formState: { errors },
 	} = useForm<PhoneSignUpSchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 	const registerWithMask = useHookFormMask(register);
 
-	const watchedName = watch('name');
-	const watchedPhone = watch('phone');
-
 	const onSubmit = async (formData: PhoneSignUpSchema) => {
 		setIsPending(true);
+		setAuthError('');
 
 		try {
-			const result = await sendVerifyPhoneAction(null, formData);
+			const result = await phoneSignUpAction(null, formData);
 
 			if (!result?.success) {
-				setAuthError(result?.message!);
+				setAuthError(result?.message || i18nData.userRegisterFail);
+				return;
 			}
+
+			await refresh();
+
+			const bc = new BroadcastChannel('auth');
+			bc.postMessage('session-updated');
+			bc.close();
 		} catch {
 			setAuthError(i18nData.invalidFormData);
 		} finally {
 			setIsPending(false);
-			setSubmitted(true);
 		}
 	};
-
-	if (isSubmitted) {
-		return <PhoneConfirmation i18nData={i18nData} name={watchedName} phone={watchedPhone} signup />;
-	}
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>

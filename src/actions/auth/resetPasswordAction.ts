@@ -8,7 +8,7 @@ export async function resetPasswordAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	const schema = await getResetPassSchema();
 	const validatedFormData = schema.safeParse(formData);

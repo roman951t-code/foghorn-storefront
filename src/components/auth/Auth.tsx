@@ -1,8 +1,7 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Box, VStack } from '@chakra-ui/react';
 import CenteredModal from '@/components/dialogs/CenteredModal';
-import type { I18nData } from '@/types/i18n';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useSession } from '../providers/SessionProvider';
@@ -10,21 +9,127 @@ import { PrimaryButton } from '../reusable/buttons/ActionButton';
 import Signup from './Signup';
 import Login from './Login';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import type { I18nData } from '@/types/i18n';
 
 const emptyCart = '/assets/images/emptyCart.png';
 
+const authKeys = [
+	'name',
+	'phone',
+	'authorize',
+	'continueWith',
+	'logOut',
+	'email',
+	'password',
+	'continue',
+	'rememberPass',
+	'resetPassAction',
+	'accept',
+	'acceptTerms',
+	'signUp',
+	'phoneNumber',
+	'backToLogin',
+	'register',
+	'continueWithEmail',
+	'sendOtp',
+	'confirmPassword',
+	'continueWithPhone',
+	'resendAfter',
+	'resendCode',
+	'phoneConfirmation',
+	'emailConfirmation',
+	'confirmPhone',
+	'confirmEmail',
+	'activationCodeSent',
+	'signUpCodeSent',
+	'continuePurchases',
+	'returnCongrats',
+	'preferredNotificationWay',
+	'pin',
+	'toPost',
+	'hiUser',
+	'toNewPost',
+	'editEmailCodeSent',
+	'editPhone',
+	'resetPassConfirm',
+	'emailConfirmed',
+	'resetPassCodeSent',
+	'renewPass',
+	'saveNewPass',
+	'editEmail',
+	'save',
+	'shipmentAddress',
+	'newPass',
+	'passUpdated',
+	'sendVerifEmail',
+	'close',
+	'middleName',
+	'nameUpdated',
+	'notifUpdated',
+	'lastName',
+	'authToOrder',
+	'yourContacts',
+];
+
+const validationKeys = [
+	'wrongEmail',
+	'emailRequired',
+	'inputMaxLength',
+	'passwordRequired',
+	'passwordMin',
+	'userLoginFail',
+	'passwordMax',
+	'passwordUppercase',
+	'passwordLowercase',
+	'editEmailFail',
+	'passwordAlphabetic',
+	'passwordUnderscore',
+	'phoneRequired',
+	'invalidPhone',
+	'invalidFormData',
+	'smsSendFailed',
+	'userExists',
+	'userRegisterFail',
+	'passwordsNotMatch',
+	'nameMinLength',
+	'pinRequired',
+	'userNotFound',
+	'refreshTokenError',
+	'alreadyVerified',
+	'verificationFailed',
+	'emailNotVerifiedError',
+	'pinLength',
+	'invalidOtp',
+	'otpExpired',
+	'tooManyAttempts',
+	'lastNameRequired',
+	'middleNameRequired',
+	'emailNotVerified',
+	'preferedNotifFailed',
+	'editNameFail',
+	'setNewPassFail',
+];
+
 interface Props {
-	i18nData: I18nData;
 	trigger?: React.JSX.Element;
 	isOpen?: boolean;
 	setIsOpen?: (value: boolean) => void;
 }
 
-export default function Auth({ i18nData, trigger, isOpen, setIsOpen }: Props) {
+export default function Auth({ trigger, isOpen, setIsOpen }: Props) {
+	const authT = useTranslations('auth');
+	const validT = useTranslations('validation');
 	const { session, refresh } = useSession();
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const emailSignIn = searchParams?.get('email-sign-in') === 'true';
+
+	const i18nData = useMemo<I18nData>(() => {
+		const authEntries = authKeys.map((key) => [key, authT(key)]);
+		const validationEntries = validationKeys.map((key) => [key, validT(key)]);
+		return Object.fromEntries([...authEntries, ...validationEntries]);
+	}, [authT, validT]);
 
 	const [showSignup, setShowSignup] = useState(false);
 	const [isAuthOpen, setAuthOpen] = useState(false);

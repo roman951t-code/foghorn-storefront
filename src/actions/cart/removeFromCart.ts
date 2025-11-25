@@ -10,7 +10,7 @@ interface RemoveCartItemParams {
 }
 
 export async function removeFromCart({ productId }: RemoveCartItemParams) {
-	const t = await getTranslations('Cart');
+	const t = await getTranslations('cart');
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
 

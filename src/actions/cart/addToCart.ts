@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
 export async function addToCart(productIds: string | string[]) {
-	const t = await getTranslations('Cart');
+	const t = await getTranslations('cart');
 
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;

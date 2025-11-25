@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Flex, Text, VStack, HStack, Icon } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
@@ -26,7 +26,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 		}
 		hoverTimeout.current = setTimeout(() => {
 			setActiveCategory(category);
-		}, 350);
+		}, 200);
 	};
 
 	const handleMouseLeave = () => {

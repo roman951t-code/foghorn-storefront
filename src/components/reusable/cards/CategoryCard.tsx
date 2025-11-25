@@ -16,7 +16,7 @@ export default function CategoryCard({
 	products,
 	viewAllHref,
 }: CategoryCardProps) {
-	const t = useTranslations('Products');
+	const t = useTranslations('products');
 
 	return (
 		<Card.Root

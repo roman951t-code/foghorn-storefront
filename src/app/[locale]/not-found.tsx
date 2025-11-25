@@ -4,7 +4,7 @@ import { HiColorSwatch } from 'react-icons/hi';
 import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 
 export default function NotFoundPage() {
-	const t = useTranslations('NotFoundPage');
+	const t = useTranslations('pages');
 
 	return (
 		<AbsoluteCenter>
@@ -14,9 +14,9 @@ export default function NotFoundPage() {
 						<HiColorSwatch />
 					</EmptyState.Indicator>
 					<VStack textAlign='center'>
-						<EmptyState.Title>{t('title')}</EmptyState.Title>
+						<EmptyState.Title>{t('notFound.title')}</EmptyState.Title>
 						<LocaleNavLink href='/' textDecoration='underline' textUnderlineOffset='3px'>
-							{t('hint')}
+							{t('notFound.hint')}
 						</LocaleNavLink>
 					</VStack>
 				</EmptyState.Content>

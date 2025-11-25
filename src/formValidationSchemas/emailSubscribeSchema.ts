@@ -18,7 +18,7 @@ export const createEmailSubscribeSchema = (t: I18nData) =>
 	emailSubscribeSchema(t as Parameters<typeof emailSubscribeSchema>[0]);
 
 export async function getEmailSubscribeSchema() {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	return emailSubscribeSchema({
 		emailRequired: t('emailRequired'),

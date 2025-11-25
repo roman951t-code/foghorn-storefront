@@ -17,8 +17,8 @@ export async function sendVerifyEmailAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string }> {
-	const t = await getTranslations('Validation');
-	const authT = await getTranslations('Auth');
+	const t = await getTranslations('validation');
+	const authT = await getTranslations('auth');
 
 	const schema = await emailSubscribeSchema({
 		emailRequired: t('emailRequired'),

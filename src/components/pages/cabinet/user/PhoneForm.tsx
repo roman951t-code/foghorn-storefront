@@ -2,14 +2,13 @@ import { Input, Field, Stack, Fieldset, VStack } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
-import CenteredModal from '@/components/dialogs/CenteredModal';
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useHookFormMask } from 'use-mask-input';
 import z from 'zod';
-import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
 import { PhoneSchemaData } from 'formValidationSchemas/accountSchema';
-import PhoneUpdate from './PhoneUpdate';
+import { updatePhoneNumberAction } from '@/actions/auth/updatePhoneNumberAction';
+import { toaster } from '@/components/reusable/chakra/toaster';
 
 interface Props {
 	i18nData: I18nData;
@@ -38,13 +37,11 @@ type FormValues = {
 export default function PhoneForm({ i18nData, userPhone, schema, refreshSession }: Props) {
 	const fieldOrientation = { base: 'vertical' as const, md: 'horizontal' as const };
 
-	const [isOpen, setIsOpen] = useState(false);
 	const [authError, setAuthError] = useState('');
 	const [isPending, setIsPending] = useState(false);
 
 	const {
 		register,
-		watch,
 		getValues,
 		handleSubmit,
 		formState: { errors },
@@ -57,15 +54,18 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 
 	const onSubmit = async (formData: PhoneSchemaData) => {
 		setIsPending(true);
+		setAuthError('');
 
 		try {
-			const result = await sendVerifyPhoneAction(null, formData);
+			const result = await updatePhoneNumberAction(null, formData);
 
 			if (!result?.success) {
-				setAuthError(result?.message!);
+				setAuthError(result?.message || i18nData.invalidFormData);
+				return;
 			}
 
-			setIsOpen(true);
+			toaster.success({ title: i18nData.phoneUpdated, duration: 5000 });
+			await refreshSession();
 		} catch {
 			setAuthError(i18nData.invalidFormData);
 		} finally {
@@ -73,59 +73,41 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 		}
 	};
 
-	const watchPhone = watch('phone');
-
 	return (
-		<>
-			<form onSubmit={handleSubmit(onSubmit)}>
-				<Fieldset.Root size='lg' invalid>
-					<Fieldset.Content>
-						<Field.Root
-							orientation={fieldOrientation}
-							justifyContent='center'
-							invalid={!!errors.phone}
-						>
-							<Field.Label maxH='20px'>{i18nData.phone}</Field.Label>
-							<Stack w='full' direction={{ base: 'column', sm: 'row' } as any} gap='4'>
-								<VStack w='full' alignItems='flex-start'>
-									<Input
-										{...registerWithMask('phone', ['380999999999', '999999999'], {
-											required: i18nData.phoneRequired,
-										})}
-										type='text'
-										variant='outline'
-										size='md'
-										maxLength={17}
-									/>
-									<Field.ErrorText>{errors.phone?.message || authError}</Field.ErrorText>
-								</VStack>
-								<SecondaryButton
-									type='submit'
-									loading={isPending}
-									mt={{ base: '2', sm: '0' }}
-									onClick={() => onSubmit(getValues())}
-								>
-									{i18nData.save}
-								</SecondaryButton>
-							</Stack>
-						</Field.Root>
-					</Fieldset.Content>
-				</Fieldset.Root>
-			</form>
-			<CenteredModal
-				closeOnInteractOutside={false}
-				title={i18nData.editPhone}
-				size='sm'
-				open={isOpen}
-				setIsOpen={setIsOpen}
-			>
-				<PhoneUpdate
-					i18nData={i18nData}
-					phone={watchPhone}
-					onCloseAction={() => setIsOpen(false)}
-					refreshSession={refreshSession}
-				/>
-			</CenteredModal>
-		</>
+		<form onSubmit={handleSubmit(onSubmit)}>
+			<Fieldset.Root size='lg' invalid>
+				<Fieldset.Content>
+					<Field.Root
+						orientation={fieldOrientation}
+						justifyContent='center'
+						invalid={!!errors.phone || !!authError}
+					>
+						<Field.Label maxH='20px'>{i18nData.phone}</Field.Label>
+						<Stack w='full' direction={{ base: 'column', sm: 'row' } as any} gap='4'>
+							<VStack w='full' alignItems='flex-start'>
+								<Input
+									{...registerWithMask('phone', ['380999999999', '999999999'], {
+										required: i18nData.phoneRequired,
+									})}
+									type='text'
+									variant='outline'
+									size='md'
+									maxLength={17}
+								/>
+								<Field.ErrorText>{errors.phone?.message || authError}</Field.ErrorText>
+							</VStack>
+							<SecondaryButton
+								type='submit'
+								loading={isPending}
+								mt={{ base: '2', sm: '0' }}
+								onClick={() => onSubmit(getValues())}
+							>
+								{i18nData.save}
+							</SecondaryButton>
+						</Stack>
+					</Field.Root>
+				</Fieldset.Content>
+			</Fieldset.Root>
+		</form>
 	);
 }

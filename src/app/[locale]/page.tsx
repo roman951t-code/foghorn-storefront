@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 export default async function Main() {
-	const genT = await getTranslations('General');
-	const prodT = await getTranslations('Products');
-	const authT = await getTranslations('Auth');
-	const validT = await getTranslations('Validation');
+	const genT = await getTranslations('common');
+	const prodT = await getTranslations('products');
+	const authT = await getTranslations('auth');
+	const validT = await getTranslations('validation');
 
 	const i18nData = extractI18nData(genT, ['seeCategory', 'seeAll']);
 

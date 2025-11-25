@@ -8,10 +8,10 @@ import WishlistPagination from '@/components/pages/cabinet/wishlist/WishlistPagi
 import WishListCount from '@/components/pages/cabinet/wishlist/WishlistCount';
 
 export default function Wishlist() {
-	const t = useTranslations('Sidebar');
-	const prodT = useTranslations('Products');
-	const genT = useTranslations('General');
-	const wishT = useTranslations('Wishlist');
+	const navT = useTranslations('navigation');
+	const prodT = useTranslations('products');
+	const genT = useTranslations('common');
+	const wishT = useTranslations('wishlist');
 
 	const i18nData = {
 		new: prodT('new'),
@@ -22,7 +22,7 @@ export default function Wishlist() {
 	return (
 		<VStack>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
-				{t('wishList')}
+				{navT('sidebar.wishList')}
 			</Heading>
 
 			<HStack w='100%' mt='6' justifyContent='space-between' alignItems='flex-start'>

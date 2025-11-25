@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
 export async function removeFromWishList(productId: string) {
-	const t = await getTranslations('Wishlist');
+	const t = await getTranslations('wishlist');
 
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;

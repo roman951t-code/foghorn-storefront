@@ -6,7 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 
 export async function clearCart() {
-	const t = await getTranslations('Cart');
+	const t = await getTranslations('cart');
 
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;

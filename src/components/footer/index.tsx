@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import MediaContacts from '@/components/reusable/links/MediaContacts';
 
 export default function Footer() {
-	const t = useTranslations('General');
+	const t = useTranslations('common');
 
 	return (
 		<Box as='footer' bg='bg.secondary' mt='12' px={4}>

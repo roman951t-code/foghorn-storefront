@@ -1,6 +1,6 @@
 import { Stack, Icon } from '@chakra-ui/react';
 import { FiHeart } from 'react-icons/fi';
-import { IoBagCheckOutline, IoChatboxEllipsesOutline } from 'react-icons/io5';
+import { IoBagCheckOutline } from 'react-icons/io5';
 import { useTranslations } from 'next-intl';
 import { LuUserRoundCheck, LuUserRoundCog } from 'react-icons/lu';
 import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function UserLinks({ userName, onClose }: Props) {
-	const t = useTranslations('Sidebar');
+	const navT = useTranslations('navigation');
 
 	const handleClose = () => {
 		if (onClose) onClose();
@@ -31,35 +31,28 @@ export default function UserLinks({ userName, onClose }: Props) {
 				<Icon size='md' mr='2' verticalAlign='top'>
 					<IoBagCheckOutline />
 				</Icon>
-				{t('myOrders')}
+				{navT('sidebar.myOrders')}
 			</LocaleNavLink>
 
 			<LocaleNavLink href='/cabinet/feedback' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
 					<VscFeedback />
 				</Icon>
-				{t('myFeedback')}
+				{navT('sidebar.myFeedback')}
 			</LocaleNavLink>
 
 			<LocaleNavLink href='/cabinet/wishlist' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
 					<FiHeart />
 				</Icon>
-				{t('wishList')}
+				{navT('sidebar.wishList')}
 			</LocaleNavLink>
 
 			<LocaleNavLink href='/cabinet/reviewed' onClick={handleClose}>
 				<Icon size='md' mr='2' verticalAlign='top'>
 					<LuUserRoundCheck />
 				</Icon>
-				{t('reviewedProducts')}
-			</LocaleNavLink>
-
-			<LocaleNavLink href='/cabinet/chat' onClick={handleClose}>
-				<Icon size='md' mr='2' verticalAlign='top'>
-					<IoChatboxEllipsesOutline />
-				</Icon>
-				{t('chat')}
+				{navT('sidebar.reviewedProducts')}
 			</LocaleNavLink>
 		</Stack>
 	);

@@ -12,7 +12,7 @@ import { useCatalog } from '@/components/providers/CatalogProvider';
 import { BsChevronRight } from 'react-icons/bs';
 
 export default function CatalogDrawer() {
-	const t = useTranslations('General');
+	const t = useTranslations('common');
 	const { categories } = useCatalog();
 
 	return (

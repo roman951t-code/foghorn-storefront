@@ -26,7 +26,7 @@ export const createNewPassSchema = (t: I18nData) =>
 	setNewPassSchema(t as Parameters<typeof setNewPassSchema>[0]);
 
 export async function getNewPassSchema() {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	return setNewPassSchema({
 		passwordRequired: t('passwordRequired'),

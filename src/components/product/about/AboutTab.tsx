@@ -33,10 +33,10 @@ interface Props {
 }
 
 export default function AboutTab({ product, category, subcategory, averageRating }: Props) {
-	const cartT = useTranslations('Cart');
-	const headT = useTranslations('Header');
-	const prodT = useTranslations('Products');
-	const wishT = useTranslations('Wishlist');
+	const cartT = useTranslations('cart');
+	const navT = useTranslations('navigation');
+	const prodT = useTranslations('products');
+	const wishT = useTranslations('wishlist');
 
 	const shareI18nData = {
 		pressToCopy: prodT('pressToCopy'),
@@ -48,7 +48,7 @@ export default function AboutTab({ product, category, subcategory, averageRating
 		cart: cartT('cart'),
 		emptyCart: cartT('emptyCart'),
 		emptyCartDescr: cartT('emptyCartDescr'),
-		order: headT('order'),
+		order: navT('header.order'),
 		totalAmount: prodT('totalAmount'),
 		numOfProducts: prodT('numOfProducts'),
 		buyText: cartT('buy'),

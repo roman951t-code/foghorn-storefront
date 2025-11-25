@@ -7,7 +7,7 @@ import { LocaleNavLink } from '../links/LocaleNavLink';
 const img1 = '/assets/images/temp/1.webp';
 
 export function SidebarCheckoutCard() {
-	const t = useTranslations('General');
+	const t = useTranslations('common');
 	return (
 		<Card.Root gap={4} py={1} border='none' bg='bg.tertiary'>
 			<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
@@ -53,7 +53,7 @@ export function SidebarCheckoutCard() {
 }
 
 export function FullCheckoutCard() {
-	const t = useTranslations('General');
+	const t = useTranslations('common');
 	return (
 		<Card.Root
 			minWidth='200px'

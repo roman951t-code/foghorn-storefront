@@ -20,9 +20,9 @@ type Props = {
 };
 
 export default function ProductCard({ product }: Props) {
-	const t = useTranslations('Products');
-	const cartT = useTranslations('Cart');
-	const wishT = useTranslations('Wishlist');
+	const t = useTranslations('products');
+	const cartT = useTranslations('cart');
+	const wishT = useTranslations('wishlist');
 	const discount = product?.discountPrice ? product?.basePrice! - product?.discountPrice : 0;
 	const isInStock = product?.inStock;
 

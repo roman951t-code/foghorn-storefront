@@ -14,12 +14,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 export default async function AboutUs() {
-	const t = await getTranslations('Sidebar');
+	const t = await getTranslations('navigation');
 
 	return (
 		<Stack gap={6} p={4} pt={1}>
 			<Heading as='h1' size='3xl' fontWeight='normal' w='100%'>
-				{t('aboutUs')}
+				{t('sidebar.aboutUs')}
 			</Heading>
 
 			<Text whiteSpace='pre-line'>{aboutData.content}</Text>

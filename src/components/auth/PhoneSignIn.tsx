@@ -11,10 +11,8 @@ import {
 	PhoneSignInSchema,
 } from 'formValidationSchemas/phoneSignInSchema';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
-import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
-import dynamic from 'next/dynamic';
-
-const PhoneConfirmation = dynamic(() => import('./PhoneConfirmation'));
+import { phoneSignInAction } from '@/actions/auth/phoneSignInAction';
+import { useSession } from '../providers/SessionProvider';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;
@@ -30,40 +28,40 @@ type FormValues = {
 export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 	const schema = useMemo(() => createPhoneSignInSchema(i18nData), [i18nData]);
 
+	const { refresh } = useSession();
 	const [authError, setAuthError] = useState('');
 	const [isPending, setIsPending] = useState(false);
-	const [isSubmitted, setSubmitted] = useState(false);
 
 	const {
 		register,
-		watch,
 		handleSubmit,
 		formState: { errors },
 	} = useForm<FormValues>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 	const registerWithMask = useHookFormMask(register);
 
-	const watchedPhone = watch('phone');
-
 	const onSubmit = async (formData: PhoneSignInSchema) => {
 		setIsPending(true);
+		setAuthError('');
 
 		try {
-			const result = await sendVerifyPhoneAction(null, formData);
+			const result = await phoneSignInAction(null, formData);
 
 			if (!result?.success) {
-				setAuthError(result?.message!);
+				setAuthError(result?.message || i18nData.userLoginFail);
+				return;
 			}
+
+			await refresh();
+
+			const bc = new BroadcastChannel('auth');
+			bc.postMessage('session-updated');
+			bc.close();
 		} catch (err) {
 			setAuthError(i18nData.invalidFormData);
 		} finally {
 			setIsPending(false);
-			setSubmitted(true);
 		}
 	};
-
-	if (isSubmitted) {
-		return <PhoneConfirmation i18nData={i18nData} phone={watchedPhone} signup={false} />;
-	}
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>

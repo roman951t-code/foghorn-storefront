@@ -3,18 +3,14 @@ import { Tabs, Icon } from '@chakra-ui/react';
 import { FiHeart } from 'react-icons/fi';
 import { LuUserRoundCog } from 'react-icons/lu';
 import { IoBagCheckOutline } from 'react-icons/io5';
-import { IoChatboxEllipsesOutline } from 'react-icons/io5';
 import { VscFeedback } from 'react-icons/vsc';
 import { LuUserRoundCheck } from 'react-icons/lu';
-import type { I18nData } from '@/types/i18n';
 import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
 import { useSession } from '@/components/providers/SessionProvider';
+import { useTranslations } from 'next-intl';
 
-interface Props {
-	i18nData: I18nData;
-}
-
-export default function TabsList({ i18nData }: Props) {
+export default function TabsList() {
+	const navT = useTranslations('navigation');
 	const { session } = useSession();
 
 	return (
@@ -32,7 +28,7 @@ export default function TabsList({ i18nData }: Props) {
 					<Icon size='md'>
 						<IoBagCheckOutline />
 					</Icon>
-					{i18nData.myOrders}
+					{navT('sidebar.myOrders')}
 				</LocaleNavLink>
 			</Tabs.Trigger>
 			<Tabs.Trigger value={'feedback'} color='main' fontWeight='normal' fontSize='md' asChild>
@@ -40,7 +36,7 @@ export default function TabsList({ i18nData }: Props) {
 					<Icon size='md'>
 						<VscFeedback />
 					</Icon>
-					{i18nData.myFeedback}
+					{navT('sidebar.myFeedback')}
 				</LocaleNavLink>
 			</Tabs.Trigger>
 			<Tabs.Trigger value={'wishlist'} color='main' fontWeight='normal' fontSize='md' asChild>
@@ -48,7 +44,7 @@ export default function TabsList({ i18nData }: Props) {
 					<Icon size='md'>
 						<FiHeart />
 					</Icon>
-					{i18nData.wishList}
+					{navT('sidebar.wishList')}
 				</LocaleNavLink>
 			</Tabs.Trigger>
 			<Tabs.Trigger value={'reviewed'} color='main' fontWeight='normal' fontSize='md' asChild>
@@ -56,15 +52,7 @@ export default function TabsList({ i18nData }: Props) {
 					<Icon size='md'>
 						<LuUserRoundCheck />
 					</Icon>
-					{i18nData.reviewedProducts}
-				</LocaleNavLink>
-			</Tabs.Trigger>
-			<Tabs.Trigger value={'chat'} color='main' fontWeight='normal' fontSize='md' asChild>
-				<LocaleNavLink href='/cabinet/chat' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md'>
-						<IoChatboxEllipsesOutline />
-					</Icon>
-					{i18nData.chat}
+					{navT('sidebar.reviewedProducts')}
 				</LocaleNavLink>
 			</Tabs.Trigger>
 		</Tabs.List>

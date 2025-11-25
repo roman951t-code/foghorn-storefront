@@ -2,17 +2,15 @@
 
 import { Fieldset, Highlight, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import type { I18nData } from '@/types/i18n';
 import CenteredModal from '../dialogs/CenteredModal';
 import { useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { toaster } from '../reusable/chakra/toaster';
+import { useTranslations } from 'next-intl';
 
-interface ResetPassProps {
-	i18nData: I18nData;
-}
-
-export default function UpdateEmailModal({ i18nData }: ResetPassProps) {
+export default function UpdateEmailModal() {
+	const authT = useTranslations('auth');
+	const validT = useTranslations('validation');
 	const searchParams = useSearchParams();
 	const { data: session } = authClient.useSession();
 
@@ -20,9 +18,9 @@ export default function UpdateEmailModal({ i18nData }: ResetPassProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
 	const errorMap: Record<string, string> = {
-		'Invalid password': i18nData.invalidFormData,
-		'User not found': i18nData.userNotFound,
-		'Too many attempts': i18nData.tooManyAttempts,
+		'Invalid password': validT('invalidFormData'),
+		'User not found': validT('userNotFound'),
+		'Too many attempts': validT('tooManyAttempts'),
 	};
 
 	useEffect(() => {
@@ -37,7 +35,7 @@ export default function UpdateEmailModal({ i18nData }: ResetPassProps) {
 
 				if (error) {
 					const messageKey = error?.message ?? '';
-					const message = errorMap[messageKey] || i18nData.editEmailFail;
+					const message = errorMap[messageKey] || validT('editEmailFail');
 					toaster.error({
 						title: message,
 						duration: 5000,
@@ -56,7 +54,7 @@ export default function UpdateEmailModal({ i18nData }: ResetPassProps) {
 	return (
 		<CenteredModal
 			closeOnInteractOutside={false}
-			title={i18nData.editEmail}
+			title={authT('editEmail')}
 			trigger={null}
 			size='md'
 			open={isOpen}
@@ -66,13 +64,13 @@ export default function UpdateEmailModal({ i18nData }: ResetPassProps) {
 				<Fieldset.Content>
 					{session?.user.email && (
 						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
-							{i18nData.toNewPost}
+							{authT('toNewPost')}
 
 							<Highlight query={session?.user.email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
 								{session?.user.email}
 							</Highlight>
 
-							<Text color='fg.muted'>{i18nData.editEmailCodeSent}</Text>
+							<Text color='fg.muted'>{authT('editEmailCodeSent')}</Text>
 						</Fieldset.HelperText>
 					)}
 				</Fieldset.Content>

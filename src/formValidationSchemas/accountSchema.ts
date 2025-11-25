@@ -47,7 +47,7 @@ export const createAccountSchema = (t: I18nData) =>
 	accountSchemaShape(t as Parameters<typeof accountSchemaShape>[0]);
 
 export async function getAccountSchemas() {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	const shape = accountSchemaShape({
 		nameRequired: t('nameRequired'),

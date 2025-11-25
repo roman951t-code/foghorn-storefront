@@ -15,7 +15,7 @@ import { SidebarCheckoutCard, FullCheckoutCard } from '@/components/reusable/car
 import AcceptOrderBtn from './AcceptOrderBtn';
 
 export default function OrderInfo() {
-	const t = useTranslations('Products');
+	const t = useTranslations('products');
 
 	return (
 		<Flex

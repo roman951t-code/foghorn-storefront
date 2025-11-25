@@ -20,7 +20,7 @@ type Props = {
 export default function FeedbackTab({ i18nData, averageRating, deleteReviewFail }: Props) {
 	const { reviews, handleRemoveAction } = useReviews();
 	const { session } = useSession();
-	const prodT = useTranslations('Products');
+	const prodT = useTranslations('products');
 
 	const userId = session?.user?.id;
 

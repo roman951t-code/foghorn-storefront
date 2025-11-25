@@ -20,8 +20,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 	const productData = await getProductNameBySlug(productSlug);
 	if (!productData) notFound();
 
-	const t = await getTranslations('Metadata');
-	const title = t('product', { product: productData.name });
+	const t = await getTranslations('pages');
+	const title = t('metadata.product', { product: productData.name });
 
 	return {
 		title,
@@ -37,7 +37,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 
 	if (!productData) notFound();
 
-	const t = await getTranslations('Products');
+	const t = await getTranslations('products');
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>

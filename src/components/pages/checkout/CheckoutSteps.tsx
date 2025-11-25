@@ -12,8 +12,8 @@ import ShipmentStep from './ShipmentStep';
 import PaymentStep from './PaymentStep';
 
 export default function CheckoutSteps() {
-	const t = useTranslations('Products');
-	const authT = useTranslations('Auth');
+	const t = useTranslations('products');
+	const authT = useTranslations('auth');
 
 	return (
 		<VStack mt='4' w='100%'>

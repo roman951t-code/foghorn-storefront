@@ -5,13 +5,13 @@ import Pagination from '@/components/reusable/Pagination';
 import { TertiaryButton } from '@/components/reusable/buttons/ActionButton';
 
 export default function Reviewed() {
-	const t = useTranslations('Sidebar');
-	const genT = useTranslations('General');
+	const navT = useTranslations('navigation');
+	const genT = useTranslations('common');
 
 	return (
 		<VStack w='100%'>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
-				{t('reviewedProducts')}
+				{navT('sidebar.reviewedProducts')}
 			</Heading>
 			<TertiaryButton
 				w={{ base: 'full', xs: '140px' }}

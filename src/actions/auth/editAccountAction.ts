@@ -17,7 +17,7 @@ export async function editAccountAction(
 	_: unknown,
 	formData: { schemaName: SchemaName; email: string }
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	const schema = (await getAccountSchemas())[formData.schemaName];
 	const validatedFormData = schema.safeParse(formData);
@@ -45,7 +45,7 @@ export async function editNameAction(
 	_: unknown,
 	formData: NameSchemaData & { email: string }
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	const schema = (await getAccountSchemas()).nameSchema;
 

@@ -4,12 +4,12 @@ import FeedbackCard from '@/components/reusable/cards/FeedbackCard';
 import Pagination from '@/components/reusable/Pagination';
 
 export default function Feedback() {
-	const t = useTranslations('Sidebar');
+	const t = useTranslations('navigation');
 
 	return (
 		<VStack w='100%'>
 			<Heading as='h2' size='2xl' fontWeight='normal' w='100%' mb='4'>
-				{t('myFeedback')}
+				{t('sidebar.myFeedback')}
 			</Heading>
 			<FeedbackCard />
 			<FeedbackCard feedback='fff' />

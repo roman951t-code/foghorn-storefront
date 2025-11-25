@@ -8,7 +8,7 @@ import { headers } from 'next/headers';
 export async function removeFeedback(
 	productId: string
 ): Promise<{ success: boolean; message?: string }> {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});

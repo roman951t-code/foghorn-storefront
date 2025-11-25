@@ -7,7 +7,7 @@ import { Radio, RadioGroup } from '@/components/reusable/chakra/radio';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function QuickFilters({ maxProductPrice }: { maxProductPrice: number }) {
-	const t = useTranslations('Products');
+	const t = useTranslations('products');
 	const router = useRouter();
 	const searchParams = useSearchParams();
 

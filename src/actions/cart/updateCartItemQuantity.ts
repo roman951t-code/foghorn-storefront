@@ -14,7 +14,7 @@ export async function updateCartItemQuantity({
 	productId,
 	quantity,
 }: UpdateCartItemQuantityParams) {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
 

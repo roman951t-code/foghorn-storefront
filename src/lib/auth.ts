@@ -33,7 +33,7 @@ export const auth = betterAuth({
 		enabled: true,
 		requireEmailVerification: true,
 		sendResetPassword: async ({ user, url, token }, request) => {
-			const t = await getTranslations('Auth');
+			const t = await getTranslations('auth');
 
 			await resend.emails.send({
 				from: 'Acme <onboarding@resend.dev>',
@@ -71,7 +71,7 @@ ${url}`,
 		emailOTP({
 			overrideDefaultEmailVerification: true,
 			async sendVerificationOTP({ email, otp, type }) {
-				const t = await getTranslations('Auth');
+				const t = await getTranslations('auth');
 
 				if (type === 'sign-in') {
 					// Send the OTP for sign in

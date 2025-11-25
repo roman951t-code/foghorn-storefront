@@ -1,18 +1,19 @@
 import { Button, CloseButton, Dialog, Portal, Text } from '@chakra-ui/react';
-import { I18nData } from '@/types/i18n';
 import { AlertButton } from '../reusable/buttons/ActionButton';
 import { deleteUserAction } from '@/actions/auth/deleteUserAction';
 import { authClient } from '@/lib/auth-client';
 import { useSession } from '../providers/SessionProvider';
 import { useState } from 'react';
 import { toaster } from '../reusable/chakra/toaster';
+import { useTranslations } from 'next-intl';
 
 interface Props {
 	onCloseAction: () => void;
-	i18nData: I18nData;
 }
 
-export function DeleteAccount({ i18nData, onCloseAction }: Props) {
+export function DeleteAccount({ onCloseAction }: Props) {
+	const authT = useTranslations('auth');
+	const validT = useTranslations('validation');
 	const [open, setOpen] = useState(false);
 	const [pending, setPending] = useState(false);
 	const { refresh } = useSession();
@@ -40,7 +41,7 @@ export function DeleteAccount({ i18nData, onCloseAction }: Props) {
 			}
 		} catch {
 			toaster.error({
-				title: i18nData?.deleteFailed,
+				title: validT('deleteFailed'),
 				duration: 5000,
 			});
 		} finally {
@@ -52,7 +53,7 @@ export function DeleteAccount({ i18nData, onCloseAction }: Props) {
 		<Dialog.Root role='alertdialog' lazyMount open={open} onOpenChange={(e) => setOpen(e.open)}>
 			<Dialog.Trigger asChild>
 				<AlertButton mt='8' w='full'>
-					{i18nData.deleteAccount}
+					{authT('deleteAccount')}
 				</AlertButton>
 			</Dialog.Trigger>
 			<Portal>
@@ -60,17 +61,17 @@ export function DeleteAccount({ i18nData, onCloseAction }: Props) {
 				<Dialog.Positioner>
 					<Dialog.Content bg='bg.tertiary'>
 						<Dialog.Header>
-							<Dialog.Title>{i18nData.areYouSure}</Dialog.Title>
+							<Dialog.Title>{authT('areYouSure')}</Dialog.Title>
 						</Dialog.Header>
 						<Dialog.Body>
 							<Text fontSize='15px' lineHeight='1.45'>
-								{i18nData.confirmDeleteAcc}
+								{authT('confirmDeleteAcc')}
 							</Text>
 						</Dialog.Body>
 						<Dialog.Footer>
 							<Dialog.ActionTrigger asChild>
 								<Button color='main' variant='outline' border='1px solid ' borderColor='border'>
-									{i18nData.close}
+									{authT('close')}
 								</Button>
 							</Dialog.ActionTrigger>
 							<Button
@@ -82,7 +83,7 @@ export function DeleteAccount({ i18nData, onCloseAction }: Props) {
 									_dark: 'solid',
 								}}
 							>
-								{i18nData.deleteAccount}
+								{authT('deleteAccount')}
 							</Button>
 						</Dialog.Footer>
 						<Dialog.CloseTrigger

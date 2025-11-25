@@ -34,7 +34,7 @@ export const createFeedbackSchema = (t: I18nData) =>
 	feedbackSchemaShape(t as Parameters<typeof feedbackSchemaShape>[0]);
 
 export async function getFeedbackSchema() {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	return feedbackSchemaShape({
 		nameRequired: t('nameRequired'),

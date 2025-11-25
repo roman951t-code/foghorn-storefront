@@ -18,7 +18,7 @@ export const createResetPassSchema = (t: I18nData) =>
 	resetPassSchemaShape(t as Parameters<typeof resetPassSchemaShape>[0]);
 
 export async function getResetPassSchema() {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	return resetPassSchemaShape({
 		emailRequired: t('emailRequired'),

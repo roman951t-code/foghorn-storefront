@@ -28,7 +28,7 @@ export const createPhoneSignUpSchema = (t: I18nData) =>
 	phoneSignUpSchemaShape(t as Parameters<typeof phoneSignUpSchemaShape>[0]);
 
 export async function getPhoneSignUpSchema() {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	return phoneSignUpSchemaShape({
 		phoneRequired: t('phoneRequired'),

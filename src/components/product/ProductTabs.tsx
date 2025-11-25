@@ -3,8 +3,6 @@ import { Tabs } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { ReviewProvider } from '../providers/ReviewProvider';
-import { extractI18nData } from '@/utils/i18nUtils';
-import { authLocData, validLocData } from '@/data/localized';
 
 const AboutTab = dynamic(() => import('./about/AboutTab'));
 const CharacteristicsTab = dynamic(() => import('./CharacteristicsTab'));
@@ -18,29 +16,23 @@ interface Props {
 }
 
 export default function ProductTabs({ tab = 'about', product, category, subcategory }: Props) {
-	const authT = useTranslations('Auth');
-	const genT = useTranslations('General');
-	const prodT = useTranslations('Products');
-	const validT = useTranslations('Validation');
-
-	const authI18nData = extractI18nData(authT, authLocData);
-	const validI18nData = extractI18nData(validT, validLocData);
+	const authT = useTranslations('auth');
+	const genT = useTranslations('common');
+	const prodT = useTranslations('products');
+	const validT = useTranslations('validation');
 
 	const i18nData = {
-		...authI18nData,
-		...validI18nData,
-		authToOrder: authT('authToOrder'),
-		authorize: authT('authorize'),
-		yourContacts: authT('yourContacts'),
 		name: authT('name'),
+		lastName: authT('lastName'),
+		email: authT('email'),
 		rate: prodT('rate'),
 		leaveFeedback: prodT('leaveFeedback'),
 		myRate: prodT('myRate'),
 		send: genT('send'),
-		invalidFormData: validT('invalidFormData'),
 		advantages: prodT('advantages'),
 		disAdvantages: prodT('disAdvantages'),
 		addReviewFail: validT('addReviewFail'),
+		invalidFormData: validT('invalidFormData'),
 		feedbackMinLength: validT('feedbackMinLength'),
 		feedbackMaxLength: validT('feedbackMaxLength'),
 	};

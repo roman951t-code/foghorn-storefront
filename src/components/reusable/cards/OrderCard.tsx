@@ -34,10 +34,10 @@ const items = [
 ];
 
 export default function OrderCard() {
-	const authT = useTranslations('Auth');
-	const genT = useTranslations('General');
-	const prodT = useTranslations('Products');
-	const validT = useTranslations('Validation');
+	const authT = useTranslations('auth');
+	const genT = useTranslations('common');
+	const prodT = useTranslations('products');
+	const validT = useTranslations('validation');
 
 	const i18nData = {
 		name: authT('name'),

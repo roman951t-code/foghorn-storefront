@@ -12,9 +12,9 @@ export async function unsubscribeNewsletterAction(
 	_: unknown,
 	formData: { email: string }
 ): Promise<{ success: boolean; message?: string }> {
-	const genT = await getTranslations('General');
-	const authT = await getTranslations('Auth');
-	const t = await getTranslations('Validation');
+	const commonT = await getTranslations('common');
+	const authT = await getTranslations('auth');
+	const t = await getTranslations('validation');
 
 	const session = await auth.api.getSession({
 		headers: await headers(),
@@ -48,10 +48,10 @@ export async function unsubscribeNewsletterAction(
 		await resend.emails.send({
 			from: 'Acme <onboarding@resend.dev>',
 			to: [formData.email],
-			subject: genT('unsubscribeProcedure'),
+			subject: commonT('unsubscribeProcedure'),
 			text: `${authT('hiUser')} ${
 				session?.user?.name ?? ''
-			},\n\n${genT('unsubscribedSuccessfully')}}`,
+			},\n\n${commonT('unsubscribedSuccessfully')}}`,
 		});
 
 		return { success: true };

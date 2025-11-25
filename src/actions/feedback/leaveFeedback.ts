@@ -10,7 +10,7 @@ export async function leaveFeedback(
 	formData: FeedbackSchema,
 	productId: string
 ): Promise<{ success: boolean; message?: string }> {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	const schema = await getFeedbackSchema();
 

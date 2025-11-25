@@ -6,7 +6,7 @@ import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 export async function mergeWishListData(localItems: { id: string }[]) {
-	const t = await getTranslations('Wishlist');
+	const t = await getTranslations('wishlist');
 
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;

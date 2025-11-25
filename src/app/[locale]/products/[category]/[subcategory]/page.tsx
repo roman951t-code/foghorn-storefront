@@ -35,8 +35,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	const subcategoryData = await getSubcategoryNameBySlug(subcategory);
 	if (!subcategoryData) notFound();
 
-	const t = await getTranslations('Metadata');
-	const title = t('category', { category: subcategoryData.subcategoryName });
+	const t = await getTranslations('pages');
+	const title = t('metadata.category', { category: subcategoryData.subcategoryName });
 
 	return {
 		title,
@@ -51,8 +51,8 @@ export default async function Subcategory({ params, searchParams }: Params) {
 	const page = parseInt(searchData.page || '1', 10);
 	const offset = (page - 1) * PRODUCTS_PER_PAGE;
 
-	const t = await getTranslations('Products');
-	const sidebarT = await getTranslations('Sidebar');
+	const t = await getTranslations('products');
+	const sidebarT = await getTranslations('navigation');
 
 	const minPrice = searchData?.min ? parseFloat(searchData?.min) : undefined;
 	const maxPrice = searchData?.max ? parseFloat(searchData?.max) : undefined;
@@ -106,7 +106,7 @@ export default async function Subcategory({ params, searchParams }: Params) {
 				<FiltersSidebar
 					filters={subcategoryFilters}
 					maxProductPrice={subcategoryData.maxProductPrice}
-					btnText={sidebarT('filters')}
+					btnText={sidebarT('sidebar.filters')}
 				/>
 			</Flex>
 			<FiltersTags />

@@ -14,10 +14,10 @@ export async function loadClientMessages(namespaces: string[]) {
 }
 
 export async function getLocalizedMetadata(locale: string, pageKey: string): Promise<Metadata> {
-	const t = await getTranslations({ locale, namespace: 'Metadata' });
+	const t = await getTranslations({ locale, namespace: 'pages' });
 
-	const title = t(`${pageKey}.title`);
-	const description = t(`${pageKey}.description`);
+	const title = t(`metadata.${pageKey}.title`);
+	const description = t(`metadata.${pageKey}.description`);
 
 	return {
 		title,

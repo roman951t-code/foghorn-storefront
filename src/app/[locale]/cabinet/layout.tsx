@@ -7,7 +7,6 @@ import TabsProvider from '@/components/pages/cabinet/TabsProvider';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
 
 type Params = {
 	params: { locale: string };
@@ -20,13 +19,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 interface Props {
 	children: ReactNode;
-	params: { locale: 'ua' | 'ru' };
+	params: { locale: 'ua' | 'us' };
 }
 
 export default async function CabinetLayout({ children }: Props) {
-	const sideT = await getTranslations('Sidebar');
-	const authT = await getTranslations('Auth');
-
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -35,39 +31,26 @@ export default async function CabinetLayout({ children }: Props) {
 		redirect('/');
 	}
 
-	const i18nData = {
-		myOrders: sideT('myOrders'),
-		myFeedback: sideT('myFeedback'),
-		wishList: sideT('wishList'),
-		reviewedProducts: sideT('reviewedProducts'),
-		chat: sideT('chat'),
-		authorize: authT('authorize'),
-		logOut: authT('logOut'),
-	};
-
 	return (
 		<TabsProvider>
 			<>
 				<Box bg='bg.tertiary' zIndex='1' rounded='md'>
-					<TabsList i18nData={i18nData} />
+					<TabsList />
 				</Box>
 				<Flex px='4'>
 					<Tabs.Content w='full' value='cabinet'>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content w='full' value={'orders'}>
+					<Tabs.Content w='full' value='orders'>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content w='full' value={'feedback'}>
+					<Tabs.Content w='full' value='feedback'>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content w='full' value={'wishlist'}>
+					<Tabs.Content w='full' value='wishlist'>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content w='full' value={'reviewed'}>
-						{children}
-					</Tabs.Content>
-					<Tabs.Content w='full' value={'chat'}>
+					<Tabs.Content w='full' value='reviewed'>
 						{children}
 					</Tabs.Content>
 				</Flex>

@@ -23,8 +23,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 		notFound();
 	}
 
-	const t = await getTranslations('Metadata');
-	const title = t('category', { category: category.name });
+	const t = await getTranslations('pages');
+	const title = t('metadata.category', { category: category.name });
 
 	return {
 		title,

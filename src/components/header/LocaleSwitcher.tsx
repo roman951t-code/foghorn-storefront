@@ -7,7 +7,7 @@ import { useLocale } from 'next-intl';
 const languages = createListCollection({
 	items: [
 		{ value: 'ua', label: 'Українська', flag: '🇺🇦' },
-		{ value: 'en', label: 'English (US)', flag: '🇺🇸' },
+		{ value: 'us', label: 'English (US)', flag: '🇺🇸' },
 	],
 	itemToString: (item) => `${item.flag} ${item.label}`,
 	itemToValue: (item) => item.value,
@@ -16,11 +16,11 @@ const languages = createListCollection({
 export default function LocaleSwitcher() {
 	const pathname = usePathname();
 	const router = useRouter();
-	const locale = useLocale() as 'ua' | 'ru';
+	const locale = useLocale() as 'ua' | 'us';
 
 	const changeLocale = (details: { value: string[] }) => {
 		const newLocale = details.value?.[0]?.toLowerCase();
-		if (newLocale === 'ua' || newLocale === 'ru') {
+		if (newLocale === 'ua' || newLocale === 'us') {
 			router.replace(pathname, { locale: newLocale });
 		}
 	};

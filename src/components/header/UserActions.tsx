@@ -2,7 +2,6 @@ import { FiUser } from 'react-icons/fi';
 import { IconButton } from '@chakra-ui/react';
 import Auth from '../auth/Auth';
 import CartModal from './CartModal';
-import { I18nData } from '@/types/i18n';
 import Favourite from './Favourite';
 import { useTranslations } from 'next-intl';
 import UpdateEmailModal from '../auth/UpdateEmailModal';
@@ -21,16 +20,16 @@ const AuthBtn = () => (
 	</IconButton>
 );
 
-export default function UserActions({ i18nData }: { i18nData: I18nData }) {
-	const cartT = useTranslations('Cart');
-	const headT = useTranslations('Header');
-	const prodT = useTranslations('Products');
+export default function UserActions() {
+	const cartT = useTranslations('cart');
+	const navT = useTranslations('navigation');
+	const prodT = useTranslations('products');
 
 	const cartI18nData = {
 		cart: cartT('cart'),
 		emptyCart: cartT('emptyCart'),
 		emptyCartDescr: cartT('emptyCartDescr'),
-		order: headT('order'),
+		order: navT('header.order'),
 		totalAmount: prodT('totalAmount'),
 		numOfProducts: prodT('numOfProducts'),
 		cartRemoveFailed: cartT('cartRemoveFailed'),
@@ -38,8 +37,8 @@ export default function UserActions({ i18nData }: { i18nData: I18nData }) {
 
 	return (
 		<>
-			<Auth trigger={<AuthBtn />} i18nData={i18nData} />
-			<UpdateEmailModal i18nData={i18nData} />
+			<Auth trigger={<AuthBtn />} />
+			<UpdateEmailModal />
 			<Favourite />
 			<CartModal i18nData={cartI18nData} />
 		</>

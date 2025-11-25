@@ -6,7 +6,7 @@ import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 export async function mergeCartData(localItems: { id: string; quantity: number }[]) {
-	const t = await getTranslations('Cart');
+	const t = await getTranslations('cart');
 
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;

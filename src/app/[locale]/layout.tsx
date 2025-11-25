@@ -26,7 +26,7 @@ import { inter, montserrat, roboto } from '@/lib/fonts';
 
 interface Props {
 	children: ReactNode;
-	params: { locale: 'ua' | 'ru' };
+	params: { locale: 'ua' | 'us' };
 }
 
 export default async function Layout({ children, params }: Props) {
@@ -36,12 +36,14 @@ export default async function Layout({ children, params }: Props) {
 	}
 
 	const messages = await loadClientMessages([
-		'General',
-		'Auth',
-		'Products',
-		'Cart',
-		'Sidebar',
-		'Wishlist',
+		'common',
+		'auth',
+		'validation',
+		'products',
+		'cart',
+		'navigation',
+		'wishlist',
+		'pages',
 	]);
 
 	const session = await auth.api.getSession({ headers: await headers() });

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 export default function FiltersTags() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
-	const t = useTranslations('Products');
+	const t = useTranslations('products');
 
 	const minPrice = searchParams.get('min');
 	const maxPrice = searchParams.get('max');

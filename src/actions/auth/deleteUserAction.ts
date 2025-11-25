@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
 export async function deleteUserAction(): Promise<{ success: boolean; message?: string }> {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	const session = await auth.api.getSession({
 		headers: await headers(),

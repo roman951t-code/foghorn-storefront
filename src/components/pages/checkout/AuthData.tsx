@@ -47,7 +47,6 @@ export default function AuthData({ i18nData }: { i18nData: I18nData }) {
 					{i18nData.authToOrder}
 				</Heading>
 				<Auth
-					i18nData={i18nData}
 					trigger={
 						<PrimaryButton w='220px' type='submit'>
 							<FiUserCheck />

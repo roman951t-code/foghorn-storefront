@@ -9,7 +9,7 @@ export async function setNotificationMethodAction(
 	_: unknown,
 	formData: { notificationMethod: 'email' | 'phone' }
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	const session = await auth.api.getSession({
 		headers: await headers(),

@@ -34,7 +34,7 @@ export const createEmailSignInSchema = (t: I18nData) =>
 	emailSignInSchemaShape(t as Parameters<typeof emailSignInSchemaShape>[0]);
 
 export async function getEmailSignInSchema() {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	return emailSignInSchemaShape({
 		emailRequired: t('emailRequired'),

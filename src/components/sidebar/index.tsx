@@ -17,12 +17,12 @@ import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import MediaContacts from '@/components/reusable/links/MediaContacts';
 import Image from 'next/image';
 import { useSession } from '../providers/SessionProvider';
-import { I18nData } from '@/types/i18n';
 import Auth from '../auth/Auth';
 import { AuthorizeSection, LogoutSection } from './AuthorizeSection';
 import UserLinks from './UserLinks';
 import CollapsibleLinks from './CollapsibleLinks';
 import { DeleteAccount } from './DeleteAccount';
+import { useTranslations } from 'next-intl';
 
 const logoBig = '/assets/images/logoBig.webp';
 const logoHeight = 36;
@@ -40,7 +40,8 @@ const Logo = () => (
 	</Link>
 );
 
-export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
+export default function SidePanel() {
+	const navT = useTranslations('navigation');
 	const [open, setOpen] = useState(false);
 	const [authOpen, setAuthOpen] = useState(false);
 	const { session } = useSession();
@@ -93,11 +94,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 								</>
 							) : (
 								<>
-									<AuthorizeSection
-										i18nData={i18nData}
-										authOpen={authOpen}
-										onAuthOpen={onAuthOpen}
-									/>
+									<AuthorizeSection authOpen={authOpen} onAuthOpen={onAuthOpen} />
 									<Separator borderColor='border.light' my='5' />
 								</>
 							)}
@@ -120,7 +117,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 										</QrCode.Frame>
 									</QrCode.Root>
 									<Card.Description color='main' textStyle='sm' textAlign='left'>
-										{i18nData.lexikoProposal}
+										{navT('sidebar.lexikoProposal')}
 									</Card.Description>
 								</Card.Body>
 							</Card.Root>
@@ -131,7 +128,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 
 							{session?.session && (
 								<>
-									<DeleteAccount i18nData={i18nData} onCloseAction={onClose} />
+									<DeleteAccount onCloseAction={onClose} />
 								</>
 							)}
 						</Box>
@@ -151,7 +148,7 @@ export default function SidePanel({ i18nData }: { i18nData: I18nData }) {
 					/>
 				</DrawerContent>
 			</DrawerRoot>
-			<Auth i18nData={i18nData} isOpen={authOpen} setIsOpen={setAuthOpen} />
+			<Auth isOpen={authOpen} setIsOpen={setAuthOpen} />
 		</>
 	);
 }

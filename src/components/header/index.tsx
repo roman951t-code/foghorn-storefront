@@ -6,37 +6,13 @@ import SearchInput from './SearchInput';
 import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
 import UserActions from './UserActions';
 import Logo from './Logo';
-import { extractI18nData } from '@/utils/i18nUtils';
-import { authLocData, validLocData } from '@/data/localized';
 import { ColorModeButton } from '../reusable/chakra/color-mode';
 import { Toaster } from '../reusable/chakra/toaster';
 
 export default function Header() {
-	const genT = useTranslations('General');
-	const t = useTranslations('Header');
-	const authT = useTranslations('Auth');
-	const validT = useTranslations('Validation');
-	const sideT = useTranslations('Sidebar');
-	const prodT = useTranslations('Products');
-
-	const authI18nData = extractI18nData(authT, authLocData);
-	const validI18nData = extractI18nData(validT, validLocData);
-
-	const i18nData = {
-		...authI18nData,
-		...validI18nData,
-	};
-
-	const i18nSidebar = {
-		...i18nData,
-		lexikoProposal: sideT('lexikoProposal'),
-		authorizeDetails: sideT('authorizeDetails'),
-		authorize: authT('authorize'),
-		deleteAccount: authT('deleteAccount'),
-		areYouSure: authT('areYouSure'),
-		confirmDeleteAcc: authT('confirmDeleteAcc'),
-		deleteFailed: validT('deleteFailed'),
-	};
+	const commonT = useTranslations('common');
+	const navT = useTranslations('navigation');
+	const prodT = useTranslations('products');
 
 	return (
 		<Box
@@ -63,19 +39,19 @@ export default function Header() {
 					borderStyle={{ smToMd: 'dotted' }}
 				>
 					<Flex align='center' gap={4}>
-						<Sidebar i18nData={i18nSidebar} />
+						<Sidebar />
 						<Logo />
 					</Flex>
 					<SearchInput
 						hideBelow='md'
-						placeholder={t('search')}
-						notFound={genT('resultsNotFound')}
+						placeholder={navT('header.search')}
+						notFound={commonT('resultsNotFound')}
 						products={prodT('products')}
-						seeAll={genT('seeAll')}
+						seeAll={commonT('seeAll')}
 						categories={prodT('categories')}
 					/>
 					<Flex align='center' gap={3}>
-						<UserActions i18nData={i18nData} />
+						<UserActions />
 						<LocaleSwitcher />
 						<ColorModeButton />
 					</Flex>
@@ -92,9 +68,9 @@ export default function Header() {
 				>
 					<CatalogBtn hideBelow='sm' fullText={false} />
 					<SearchInput
-						placeholder={t('search')}
-						seeAll={genT('seeAll')}
-						notFound={genT('resultsNotFound')}
+						placeholder={navT('header.search')}
+						seeAll={commonT('seeAll')}
+						notFound={commonT('resultsNotFound')}
 						products={prodT('products')}
 						categories={prodT('categories')}
 					/>

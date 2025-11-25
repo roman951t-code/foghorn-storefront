@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function CollapsibleLinks({ onClose }: Props) {
-	const t = useTranslations('Sidebar');
+	const navT = useTranslations('navigation');
 
 	const handleClick = () => {
 		if (onClose) onClose();
@@ -26,43 +26,43 @@ export default function CollapsibleLinks({ onClose }: Props) {
 			onValueChange={() => {}}
 		>
 			<AccordionItem value='info' borderBottomColor='border.light'>
-				<AccordionItemTrigger>{t('info')}</AccordionItemTrigger>
+				<AccordionItemTrigger>{navT('sidebar.info')}</AccordionItemTrigger>
 				<AccordionItemContent>
 					<LocaleNavLink href='/about-us' onClick={handleClick}>
-						{t('aboutUs')}
+						{navT('sidebar.aboutUs')}
 					</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/public-offer' onClick={handleClick}>
-						{t('publicOffer')}
+						{navT('sidebar.publicOffer')}
 					</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/faq' onClick={handleClick}>
-						{t('faq')}
+						{navT('sidebar.faq')}
 					</LocaleNavLink>
 				</AccordionItemContent>
 			</AccordionItem>
 			<AccordionItem value='clients' borderBottomColor='border.light'>
-				<AccordionItemTrigger>{t('clients')}</AccordionItemTrigger>
+				<AccordionItemTrigger>{navT('sidebar.clients')}</AccordionItemTrigger>
 				<AccordionItemContent>
 					<LocaleNavLink href='/shipping-terms' onClick={handleClick}>
-						{t('shippingTerms')}
+						{navT('sidebar.shippingTerms')}
 					</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/guarantee' onClick={handleClick}>
-						{t('guarantee')}
+						{navT('sidebar.guarantee')}
 					</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/return-refund' onClick={handleClick}>
-						{t('returnRefund')}
+						{navT('sidebar.returnRefund')}
 					</LocaleNavLink>
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/terms' onClick={handleClick}>
-						{t('terms')}
+						{navT('sidebar.terms')}
 					</LocaleNavLink>
 				</AccordionItemContent>
 			</AccordionItem>

@@ -60,7 +60,7 @@ export const createEmailSignUpSchema = (t: I18nData) =>
 	emailSignUpSchemaShape(t as Parameters<typeof emailSignUpSchemaShape>[0]);
 
 export async function getEmailSignUpSchema() {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	return emailSignUpSchemaShape({
 		emailRequired: t('emailRequired'),

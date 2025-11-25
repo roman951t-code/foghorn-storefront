@@ -31,7 +31,7 @@ export const createConfirmResetPassSchema = (t: I18nData) =>
 	resetConfirmResetPassSchema(t as Parameters<typeof resetConfirmResetPassSchema>[0]);
 
 export async function getConfirmResetPassSchema() {
-	const t = await getTranslations('Validation');
+	const t = await getTranslations('validation');
 
 	return resetConfirmResetPassSchema({
 		pinRequired: t('pinRequired'),
