@@ -20,7 +20,7 @@ import { useSession } from '../providers/SessionProvider';
 import { createFeedbackSchema, FeedbackSchema } from 'formValidationSchemas/feedbackSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toaster } from '../reusable/chakra/toaster';
-import { useReviews } from '../providers/ReviewProvider';
+import { useReviews } from '../providers/useReviews';
 
 interface Props {
 	i18nData: I18nData;
@@ -86,6 +86,7 @@ export default function FeedbackModal({ i18nData }: Props) {
 
 	return (
 		<CenteredModal
+			dialogId='feedback-modal'
 			open={isOpen}
 			setIsOpen={setIsOpen}
 			title={i18nData.leaveFeedback}

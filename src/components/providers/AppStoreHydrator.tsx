@@ -1,0 +1,99 @@
+'use client';
+
+import { useEffect, useRef, type ReactNode } from 'react';
+import type { CatalogCategory, SubcategoryProduct } from '@/types/product';
+import type { CartData } from '@/types/cart';
+import { useCatalogStore } from '@/stores/catalogStore';
+import { useCartStore } from '@/stores/cartStore';
+import { useWishListStore } from '@/stores/wishListStore';
+
+type Props = {
+	categories: CatalogCategory[];
+	cartData: CartData;
+	cartProductIds: { success?: boolean; productIds?: string[] };
+	wishListData: SubcategoryProduct[];
+	wishListIds: { success?: boolean; productIds: string[] };
+	isLoggedIn: boolean;
+	children?: ReactNode;
+};
+
+export function AppStoreHydrator({
+	categories,
+	cartData,
+	cartProductIds,
+	wishListData,
+	wishListIds,
+	isLoggedIn,
+	children,
+}: Props) {
+	const setCategories = useCatalogStore((state) => state.setCategories);
+
+	const setCartInitial = useCartStore((state) => state.setInitialData);
+	const setCartLoggedIn = useCartStore((state) => state.setIsLoggedIn);
+	const hydrateGuestCart = useCartStore((state) => state.hydrateGuestCart);
+	const mergeGuestCart = useCartStore((state) => state.mergeGuestIntoServer);
+
+	const setWishInitial = useWishListStore((state) => state.setInitialData);
+	const setWishLoggedIn = useWishListStore((state) => state.setIsLoggedIn);
+	const hydrateGuestWish = useWishListStore((state) => state.hydrateGuestWishlist);
+	const mergeGuestWish = useWishListStore((state) => state.mergeGuestWishlistIntoServer);
+
+	const prevLoggedInRef = useRef(isLoggedIn);
+
+	// Catalog
+	useEffect(() => {
+		setCategories(categories);
+	}, [categories, setCategories]);
+
+	// Cart init + login flag
+	useEffect(() => {
+		const ids = cartProductIds?.success ? cartProductIds.productIds ?? [] : [];
+		setCartInitial(cartData, ids);
+	}, [cartData, cartProductIds, setCartInitial]);
+
+	useEffect(() => {
+		setCartLoggedIn(isLoggedIn);
+	}, [isLoggedIn, setCartLoggedIn]);
+
+	// Wishlist init + login flag
+	useEffect(() => {
+		const ids = wishListIds?.success ? wishListIds.productIds ?? [] : [];
+		setWishInitial(wishListData, ids);
+	}, [setWishInitial, wishListData, wishListIds]);
+
+	useEffect(() => {
+		setWishLoggedIn(isLoggedIn);
+	}, [isLoggedIn, setWishLoggedIn]);
+
+	// Handle Google auth merge
+	useEffect(() => {
+		if (!isLoggedIn) return;
+		const url = new URL(window.location.href);
+		if (url.searchParams.get('auth') === 'google') {
+			(async () => {
+				await Promise.all([mergeGuestCart(), mergeGuestWish()]);
+				url.searchParams.delete('auth');
+				window.history.replaceState(
+					{},
+					'',
+					url.pathname + (url.search ? `?${url.searchParams.toString()}` : '')
+				);
+			})();
+		}
+	}, [isLoggedIn, mergeGuestCart, mergeGuestWish]);
+
+	// Login/logout transitions
+	useEffect(() => {
+		const wasLogged = prevLoggedInRef.current;
+		if (!wasLogged && isLoggedIn) {
+			mergeGuestCart();
+			mergeGuestWish();
+		} else if (wasLogged && !isLoggedIn) {
+			hydrateGuestCart();
+			hydrateGuestWish();
+		}
+		prevLoggedInRef.current = isLoggedIn;
+	}, [hydrateGuestCart, hydrateGuestWish, isLoggedIn, mergeGuestCart, mergeGuestWish]);
+
+	return <>{children}</>;
+}

@@ -1,10 +1,9 @@
-import React from 'react';
 import { FiTrash2 } from 'react-icons/fi';
 import { IconButton, Text, Flex, Card, Badge } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavLink } from '../links/LocaleNavLink';
 import { StepperInput } from '../chakra/stepper-input';
-import { useCart } from '@/components/providers/CartProvider';
+import { useCart } from '@/components/providers/useCart';
 import { toaster } from '../chakra/toaster';
 import { I18nData } from '@/types/i18n';
 import { CartProduct } from '@/types/cart';

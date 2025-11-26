@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button, Stack } from '@chakra-ui/react';
 import { FcGoogle } from 'react-icons/fc';
 import type { I18nData } from '@/types/i18n';

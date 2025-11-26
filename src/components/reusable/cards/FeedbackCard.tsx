@@ -1,4 +1,3 @@
-import React from 'react';
 import {
 	Text,
 	Stack,
@@ -93,11 +92,12 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 					<Accordion.ItemBody p='0' pt='4'>
 						<Flex justifyContent='space-between' mt='6'>
 							<Stack>
-								<Heading size='md'> Roman Onyshchenko</Heading>
-								<Rating
-									colorPalette={{ base: 'orange', _dark: 'yellow' }}
-									readOnly
-									size='xs'
+									<Heading size='md'> Roman Onyshchenko</Heading>
+									<Rating
+										id='feedback-card-rating'
+										colorPalette={{ base: 'orange', _dark: 'yellow' }}
+										readOnly
+										size='xs'
 									defaultValue={5}
 								/>
 							</Stack>

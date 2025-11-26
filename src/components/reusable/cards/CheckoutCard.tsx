@@ -1,4 +1,3 @@
-import React from 'react';
 import { Text, VStack, Card, Badge, Separator, Flex, Group, Stat } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';

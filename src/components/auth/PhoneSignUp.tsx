@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Input, Stack, Field, Fieldset } from '@chakra-ui/react';
 import { useHookFormMask } from 'use-mask-input';
 import { useForm } from 'react-hook-form';
@@ -13,13 +13,12 @@ import {
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
 import { phoneSignUpAction } from '@/actions/auth/phoneSignUpAction';
 import { useSession } from '../providers/SessionProvider';
+import { PHONE_INPUT_MASKS, MAX_NAME_LENGTH } from '@/constants/auth';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;
 	disabled?: boolean;
 }
-
-const MAX_CHARACTERS = 60;
 
 export default function PhoneSignUp({ i18nData, disabled }: PhoneAuthProps) {
 	const schema = useMemo(() => createPhoneSignUpSchema(i18nData), [i18nData]);
@@ -69,7 +68,7 @@ export default function PhoneSignUp({ i18nData, disabled }: PhoneAuthProps) {
 								{i18nData.name}
 								<Field.RequiredIndicator />
 							</Field.Label>
-							<Input fontSize='md' {...register('name')} maxLength={MAX_CHARACTERS} />
+							<Input fontSize='md' {...register('name')} maxLength={MAX_NAME_LENGTH} />
 							<Field.ErrorText>{errors.name?.message}</Field.ErrorText>
 						</Field.Root>
 
@@ -80,7 +79,7 @@ export default function PhoneSignUp({ i18nData, disabled }: PhoneAuthProps) {
 							</Field.Label>
 
 							<Input
-								{...registerWithMask('phone', ['380999999999', '999999999'], {
+								{...registerWithMask('phone', PHONE_INPUT_MASKS, {
 									required: i18nData.phoneRequired,
 								})}
 								type='text'

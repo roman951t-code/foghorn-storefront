@@ -16,12 +16,12 @@ export const emailSignInSchemaShape = (t: {
 }) =>
 	z.object({
 		email: z
-			.string({ required_error: t.emailRequired })
+			.string({ message: t.emailRequired })
 			.max(60, { message: t.inputMaxLength })
 			.email({ message: t.wrongEmail }),
 
 		password: z
-			.string({ required_error: t.passwordRequired })
+			.string({ message: t.passwordRequired })
 			.min(8, { message: t.passwordMin })
 			.max(12, { message: t.passwordMax })
 			.regex(/[A-Z]/, { message: t.passwordUppercase })

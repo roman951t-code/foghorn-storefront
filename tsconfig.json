@@ -1,73 +1,47 @@
 {
-  "compilerOptions": {
-    "baseUrl": "src/",
-    "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "noUnusedLocals": true,
-    "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@/styles/*": [
-        "styles/*"
-      ],
-      "@/components/*": [
-        "components/*"
-      ],
-      "@/assets/*": [
-        "assets/*"
-      ],
-      "@/i18n/*": [
-        "i18n/*"
-      ],
-      "@/data/*": [
-        "data/*"
-      ],
-      "@/types/*": [
-        "types/*"
-      ],
-      "@/actions/*": [
-        "actions/*"
-      ],
-      "@/schemas/*": [
-        "schemas/*"
-      ],
-      "@/utils/*": [
-        "utils/*"
-      ],
-      "@/lib/*": [
-        "lib/*"
-      ]
-    }
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+	"compilerOptions": {
+		"baseUrl": "src/",
+		"target": "ES2017",
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"allowJs": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"noEmit": true,
+		"noUnusedLocals": true,
+		"esModuleInterop": true,
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"jsx": "react-jsx",
+		"incremental": true,
+		"plugins": [
+			{
+				"name": "next"
+			}
+		],
+		"paths": {
+			"@/*": ["./src/*"],
+			"@/styles/*": ["styles/*"],
+			"@/components/*": ["components/*"],
+			"@/assets/*": ["assets/*"],
+			"@/i18n/*": ["i18n/*"],
+			"@/data/*": ["data/*"],
+			"@/types/*": ["types/*"],
+			"@/actions/*": ["actions/*"],
+			"@/schemas/*": ["schemas/*"],
+			"@/utils/*": ["utils/*"],
+			"@/stores/*": ["stores/*"],
+			"@/lib/*": ["lib/*"],
+			"@/constants/*": ["constants/*"]
+		}
+	},
+	"include": [
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		".next/types/**/*.ts",
+		".next/dev/types/**/*.ts"
+	],
+	"exclude": ["node_modules"]
 }

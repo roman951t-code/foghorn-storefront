@@ -4,7 +4,7 @@ import { IconButton, Float, Circle } from '@chakra-ui/react';
 import { useSession } from '../providers/SessionProvider';
 import { Link } from '@/i18n/routing';
 import { FiHeart } from 'react-icons/fi';
-import { useWishList } from '../providers/WishListProvider';
+import { useWishList } from '../providers/useWishList';
 
 export default function Favourite() {
 	const { session } = useSession();

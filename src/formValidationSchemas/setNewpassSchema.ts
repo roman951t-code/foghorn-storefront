@@ -13,7 +13,7 @@ export const setNewPassSchema = (t: {
 }) =>
 	z.object({
 		password: z
-			.string({ required_error: t.passwordRequired })
+			.string({ message: t.passwordRequired })
 			.min(8, { message: t.passwordMin })
 			.max(12, { message: t.passwordMax })
 			.regex(/[A-Z]/, { message: t.passwordUppercase })

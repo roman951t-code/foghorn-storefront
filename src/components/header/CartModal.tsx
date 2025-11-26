@@ -9,7 +9,7 @@ import { I18nData } from '@/types/i18n';
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
 import CartWithProducts from './CartWithProducts';
 import { LuCheck } from 'react-icons/lu';
-import { useCart } from '@/components/providers/CartProvider';
+import { useCart } from '@/components/providers/useCart';
 
 const emptyCart = '/assets/images/emptyCart.png';
 
@@ -58,6 +58,7 @@ export default function CartModal({ i18nData, triggerType, isInCart }: Props) {
 
 	return (
 		<CenteredModal
+			dialogId='cart-modal'
 			title={i18nData.cart}
 			trigger={
 				triggerType === 'button' ? (

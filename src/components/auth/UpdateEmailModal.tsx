@@ -53,6 +53,7 @@ export default function UpdateEmailModal() {
 
 	return (
 		<CenteredModal
+			dialogId='update-email-modal'
 			closeOnInteractOutside={false}
 			title={authT('editEmail')}
 			trigger={null}

@@ -77,6 +77,7 @@ export default function EmailForm({ i18nData, userEmail, emailForm, isEmailVerif
 					</VStack>
 					<VStack alignItems='stretch'>
 						<CenteredModal
+							dialogId='email-form-verify-modal'
 							closeOnInteractOutside={false}
 							title={i18nData.editEmail}
 							trigger={

@@ -4,7 +4,7 @@ import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
 import { LocaleNavButton } from '../reusable/links/LocaleNavLink';
 import { I18nData } from '@/types/i18n';
 import { Dispatch, SetStateAction } from 'react';
-import { useCart } from '../providers/CartProvider';
+import { useCart } from '../providers/useCart';
 
 interface Props {
 	i18nData: I18nData;

@@ -49,8 +49,21 @@ export function DeleteAccount({ onCloseAction }: Props) {
 		}
 	};
 
+	const ids = {
+		trigger: 'delete-account-trigger',
+		content: 'delete-account-content',
+		title: 'delete-account-title',
+		description: 'delete-account-description',
+	};
+
 	return (
-		<Dialog.Root role='alertdialog' lazyMount open={open} onOpenChange={(e) => setOpen(e.open)}>
+		<Dialog.Root
+			role='alertdialog'
+			lazyMount
+			open={open}
+			onOpenChange={(e) => setOpen(e.open)}
+			ids={ids}
+		>
 			<Dialog.Trigger asChild>
 				<AlertButton mt='8' w='full'>
 					{authT('deleteAccount')}

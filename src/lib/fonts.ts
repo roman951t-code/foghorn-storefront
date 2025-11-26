@@ -1,21 +1,23 @@
 // fonts.ts
-import { Inter, Montserrat, Roboto } from 'next/font/google';
+import { Montserrat, Noto_Sans, Open_Sans } from 'next/font/google';
 
-export const inter = Inter({
+export const openSans = Open_Sans({
 	subsets: ['latin', 'cyrillic'],
+	weight: ['400', '500', '600', '700'],
 	display: 'swap',
-	variable: '--font-inter',
+	variable: '--font-open-sans',
 });
 
 export const montserrat = Montserrat({
 	subsets: ['latin', 'cyrillic'],
+	weight: ['500', '600', '700'],
 	display: 'swap',
 	variable: '--font-montserrat',
 });
 
-export const roboto = Roboto({
+export const notoSans = Noto_Sans({
 	subsets: ['latin', 'cyrillic'],
-	weight: ['400', '500', '700'],
+	weight: ['400', '500', '600', '700'],
 	display: 'swap',
-	variable: '--font-roboto',
+	variable: '--font-noto-sans',
 });

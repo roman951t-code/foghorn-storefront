@@ -5,7 +5,7 @@ import { toaster } from '@/components/reusable/chakra/toaster';
 import { useState } from 'react';
 import { I18nData } from '@/types/i18n';
 import CartModal from '@/components/header/CartModal';
-import { useCart } from '@/components/providers/CartProvider';
+import { useCart } from '@/components/providers/useCart';
 import { Product } from '@/types/product';
 import { PrimaryButton } from '@/components/reusable/buttons/ActionButton';
 

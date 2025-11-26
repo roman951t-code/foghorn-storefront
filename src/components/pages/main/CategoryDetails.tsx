@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Box, Flex, Text, VStack, Heading, Wrap, Badge } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
 import { LocaleNavLink, LocaleNavButton } from '@/components/reusable/links/LocaleNavLink';
@@ -20,7 +19,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 			<Wrap gap={12} justify='flex-start' position='relative' w={{ base: '100%', lg: '75%' }}>
 				{category.children?.map((subcategory) => (
 					<Box key={subcategory.id} maxW='32%'>
-						<Text fontWeight='semibold' textStyle='lg' mb={4}>
+						<Text ml='1' fontWeight='semibold' textStyle='lg' mb={4}>
 							{subcategory.name}
 						</Text>
 

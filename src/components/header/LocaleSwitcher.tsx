@@ -33,6 +33,7 @@ export default function LocaleSwitcher() {
 			collection={languages}
 			size='sm'
 			w='174px'
+			mx='2.5'
 			defaultValue={[locale]}
 			onValueChange={changeLocale}
 		>

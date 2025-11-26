@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, PinInput, Highlight, Fieldset, Text, Field } from '@chakra-ui/react';
 import type { I18nData } from '@/types/i18n';
 import { formatTime } from '@/utils/generalUtils';

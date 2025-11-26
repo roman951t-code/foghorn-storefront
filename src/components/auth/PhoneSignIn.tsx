@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Input, Stack, Field, Fieldset } from '@chakra-ui/react';
 import { useHookFormMask } from 'use-mask-input';
 import { useForm } from 'react-hook-form';
@@ -13,17 +13,13 @@ import {
 import { PrimaryButton } from '../reusable/buttons/ActionButton';
 import { phoneSignInAction } from '@/actions/auth/phoneSignInAction';
 import { useSession } from '../providers/SessionProvider';
+import { PHONE_INPUT_MASKS } from '@/constants/auth';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;
 	disabled?: boolean;
 	isSignup?: boolean;
 }
-
-type FormValues = {
-	name?: string;
-	phone: string;
-};
 
 export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 	const schema = useMemo(() => createPhoneSignInSchema(i18nData), [i18nData]);
@@ -36,7 +32,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<FormValues>({ mode: 'onSubmit', resolver: zodResolver(schema) });
+	} = useForm<PhoneSignInSchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 	const registerWithMask = useHookFormMask(register);
 
 	const onSubmit = async (formData: PhoneSignInSchema) => {
@@ -75,7 +71,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 							</Field.Label>
 
 							<Input
-								{...registerWithMask('phone', ['380999999999', '999999999'], {
+								{...registerWithMask('phone', PHONE_INPUT_MASKS, {
 									required: i18nData.phoneRequired,
 								})}
 								type='text'

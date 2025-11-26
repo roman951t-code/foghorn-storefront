@@ -1,5 +1,6 @@
 import { RatingGroup } from '@chakra-ui/react';
 import * as React from 'react';
+import { useId, useMemo } from 'react';
 
 export interface RatingProps extends RatingGroup.RootProps {
 	icon?: React.ReactElement;
@@ -8,9 +9,12 @@ export interface RatingProps extends RatingGroup.RootProps {
 }
 
 export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(function Rating(props, ref) {
-	const { icon, count = 5, label, ...rest } = props;
+	const { icon, count = 5, label, id, ...rest } = props;
+	const autoId = useId();
+	const resolvedId = useMemo(() => id || `rating-${autoId}`, [id, autoId]);
+
 	return (
-		<RatingGroup.Root ref={ref} count={count} {...rest}>
+		<RatingGroup.Root ref={ref} count={count} id={resolvedId} {...rest}>
 			{label && <RatingGroup.Label>{label}</RatingGroup.Label>}
 			<RatingGroup.HiddenInput />
 			<RatingGroup.Control>

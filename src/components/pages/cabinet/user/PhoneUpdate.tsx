@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, PinInput, Highlight, Fieldset, Text, Field } from '@chakra-ui/react';
 import type { I18nData } from '@/types/i18n';
 import { formatTime } from '@/utils/generalUtils';
@@ -12,7 +12,7 @@ import {
 } from 'formValidationSchemas/phoneVerifySchema';
 import { authClient } from '@/lib/auth-client';
 import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
-import { toaster } from '@/components/reusable/chakra/toaster';
+import { showSuccessToast } from '@/constants/toasts';
 
 interface Props {
 	i18nData: I18nData;
@@ -88,10 +88,7 @@ export default function PhoneUpdate({ phone, i18nData, refreshSession, onCloseAc
 				setVerifyError(message);
 				return;
 			} else {
-				toaster.success({
-					title: i18nData.phoneUpdated,
-					duration: 5000,
-				});
+				showSuccessToast(i18nData.phoneUpdated);
 				onCloseAction();
 
 				await refreshSession();

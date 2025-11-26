@@ -12,17 +12,17 @@ export const feedbackSchemaShape = (t: {
 }) =>
 	z.object({
 		name: z
-			.string({ required_error: t.nameRequired })
+			.string({ message: t.nameRequired })
 			.min(2, { message: t.nameRequired })
 			.max(60, { message: t.inputMaxLength })
 			.nonempty(),
 		lastName: z
-			.string({ required_error: t.lastNameRequired })
+			.string({ message: t.lastNameRequired })
 			.min(2, { message: t.lastNameRequired })
 			.max(60, { message: t.inputMaxLength })
 			.nonempty(),
 		feedback: z
-			.string({ required_error: t.feedbackRequired })
+			.string({ message: t.feedbackRequired })
 			.min(5, { message: t.feedbackMinLength })
 			.max(500, { message: t.feedbackMaxLength }),
 		advantages: z.string().max(200, { message: t.feedbackMaxLength }).optional(),

@@ -11,8 +11,16 @@ interface Props {
 	resetModal: () => void;
 }
 export default function ImageModal({ image, resetModal }: Props) {
+	const ids = {
+		trigger: 'image-modal-trigger',
+		content: 'image-modal-content',
+		title: 'image-modal-title',
+		description: 'image-modal-description',
+	};
+
 	return (
 		<DialogRoot
+			ids={ids}
 			open={!!image}
 			placement='center'
 			size='cover'

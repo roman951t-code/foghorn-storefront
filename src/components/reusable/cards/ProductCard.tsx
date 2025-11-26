@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link, Icon } from '@chakra-ui/react';
@@ -11,8 +11,8 @@ import { IoBagCheckOutline } from 'react-icons/io5';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
-import { useCart } from '@/components/providers/CartProvider';
-import { useWishList } from '@/components/providers/WishListProvider';
+import { useCart } from '@/components/providers/useCart';
+import { useWishList } from '@/components/providers/useWishList';
 import { BsBagHeart } from 'react-icons/bs';
 
 type Props = {
@@ -181,7 +181,12 @@ export default function ProductCard({ product }: Props) {
 				</LinkBox>
 
 				<HStack gap='4' mt='1'>
-					<Rating readOnly size='xs' defaultValue={product.averageRating ?? 0} />
+					<Rating
+						id={`product-card-rating-${product.id}`}
+						readOnly
+						size='xs'
+						defaultValue={product.averageRating ?? 0}
+					/>
 					<Link
 						href={`/products/${product.fullSlug}/?tab=feedback`}
 						variant='underline'

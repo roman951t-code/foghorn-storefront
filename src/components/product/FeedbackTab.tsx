@@ -3,8 +3,9 @@ import { Card, Flex, Stack, Heading, Separator, DataList, IconButton } from '@ch
 import { Rating } from '../reusable/chakra/rating';
 import { Tooltip } from '../ui/tooltip';
 import DateWithLocale from '../reusable/DateWithLocale';
-import { useReviews } from '../providers/ReviewProvider';
+import { useReviews, useInitReviews } from '../providers/useReviews';
 import { I18nData } from '@/types/i18n';
+import type { Review } from '@/types/product';
 import { useTranslations } from 'next-intl';
 import FeedbackModal from './FeedbackModal';
 import { FiTrash2 } from 'react-icons/fi';
@@ -15,10 +16,19 @@ type Props = {
 	averageRating: number;
 	i18nData: I18nData;
 	deleteReviewFail: string;
+	productId: string;
+	reviews: Review[];
 };
 
-export default function FeedbackTab({ i18nData, averageRating, deleteReviewFail }: Props) {
-	const { reviews, handleRemoveAction } = useReviews();
+export default function FeedbackTab({
+	i18nData,
+	averageRating,
+	deleteReviewFail,
+	productId,
+	reviews,
+}: Props) {
+	useInitReviews(productId, reviews);
+	const { reviews: storeReviews, handleRemoveAction } = useReviews();
 	const { session } = useSession();
 	const prodT = useTranslations('products');
 
@@ -52,15 +62,17 @@ export default function FeedbackTab({ i18nData, averageRating, deleteReviewFail 
 							<DataList.Root orientation='horizontal'>
 								<DataList.Item>
 									<DataList.ItemLabel fontSize='md' fontWeight='medium' color='main'>
-										{reviews.length > 0 ? `${prodT('feedbackTotal')}:` : prodT('feedbackAbsent')}
+										{storeReviews.length > 0
+											? `${prodT('feedbackTotal')}:`
+											: prodT('feedbackAbsent')}
 									</DataList.ItemLabel>
-									{reviews.length > 0 && (
+									{storeReviews.length > 0 && (
 										<DataList.ItemValue>
-											<Heading size='md'>{reviews.length}</Heading>
+											<Heading size='md'>{storeReviews.length}</Heading>
 										</DataList.ItemValue>
 									)}
 								</DataList.Item>
-								{reviews.length > 0 && (
+								{storeReviews.length > 0 && (
 									<DataList.Item>
 										<DataList.ItemLabel fontSize='md' fontWeight='medium' color='main'>
 											{`${prodT('averageFeedback')}:`}
@@ -96,7 +108,7 @@ export default function FeedbackTab({ i18nData, averageRating, deleteReviewFail 
 				</Card.Header>
 			</Card.Root>
 
-			{reviews.map((review) => (
+			{storeReviews.map((review) => (
 				<Card.Root
 					key={review.id}
 					size='sm'

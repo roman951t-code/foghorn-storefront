@@ -5,9 +5,10 @@ const config = defineConfig({
 	theme: {
 		tokens: {
 			fonts: {
-				body: { value: 'var(--font-roboto), sans-serif' },
-				heading: { value: 'var(--font-montserrat), sans-serif' },
-				link: { value: 'var(--font-inter), sans-serif' },
+				body: { value: '"SF NS", -apple-system, system-ui, sans-serif' },
+				heading: { value: 'var(--font-montserrat), var(--font-open-sans), system-ui, sans-serif' },
+				link: { value: 'var(--font-noto-sans), var(--font-open-sans), system-ui, sans-serif' },
+				ui: { value: '"SF NS", -apple-system, system-ui, sans-serif' },
 			},
 		},
 		breakpoints: {
@@ -150,6 +151,8 @@ const config = defineConfig({
 			display: 'flex',
 			flexDirection: 'column',
 			minWidth: '350px',
+			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',
+			textRendering: 'optimizeLegibility',
 		},
 
 		form: {
@@ -159,15 +162,25 @@ const config = defineConfig({
 			display: 'inline',
 		},
 		a: {
-			fontFamily: 'var(--font-montserrat), sans-serif',
+			fontFamily: 'var(--font-noto-sans), var(--font-open-sans), system-ui, sans-serif',
+			fontWeight: 500,
+			fontSize: 16,
 		},
 		'h1,h2,h3,h4,h5,h6': {
-			fontFamily: 'var(--font-montserrat), sans-serif',
+			fontFamily: 'var(--font-montserrat), var(--font-open-sans), system-ui, sans-serif',
 		},
-		'p, span': {
-			fontFamily: 'var(--font-inter), sans-serif',
+		'p, span, li': {
+			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',
+			fontWeight: 500,
+			// lineHeight: '1.5',
 		},
-		'.productsSlider .swiper-button-prev, .productsSlider .swiper-button-next': {
+		'.chakra-stat__valueText': {
+			fontFamily: 'system-ui',
+		},
+		'label, button, input, textarea, select, small': {
+			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',
+		},
+		'.swiper-button-prev,.swiper-button-next': {
 			color: 'var(--chakra-colors-fg) !important',
 		},
 		'.thumbsSlider .swiper-button-prev:after, .thumbsSlider .swiper-button-next:after': {
@@ -185,6 +198,12 @@ const config = defineConfig({
 			height: '90px !important',
 			width: '30px !important',
 		},
+		'.thumbsSlider .swiper-button-prev .swiper-navigation-icon, .thumbsSlider .swiper-button-next .swiper-navigation-icon':
+			{
+				height: '60px !important',
+				width: '20px !important',
+			},
+
 		'.ReactModal__Overlay': {
 			opacity: 0,
 			transition: 'opacity 150ms ease-in-out',

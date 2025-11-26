@@ -1,7 +1,7 @@
 'use client';
 import { SimpleGrid, Box, EmptyState } from '@chakra-ui/react';
 import ProductCard from '@/components/reusable/cards/ProductCard';
-import { useWishList } from '@/components/providers/WishListProvider';
+import { useWishList } from '@/components/providers/useWishList';
 import { HiColorSwatch } from 'react-icons/hi';
 
 export default function WishList({ emptyText }: { emptyText: string }) {

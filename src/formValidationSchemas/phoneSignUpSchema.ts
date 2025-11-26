@@ -11,13 +11,13 @@ export const phoneSignUpSchemaShape = (t: {
 }) =>
 	z.object({
 		name: z
-			.string({ required_error: t.nameRequired })
+			.string({ message: t.nameRequired })
 			.min(2, { message: t.nameMinLength })
 			.max(60, { message: t.inputMaxLength })
 			.nonempty(),
 
 		phone: z
-			.string({ required_error: t.phoneRequired })
+			.string({ message: t.phoneRequired })
 			.transform((val) => val.replace(/\D/g, ''))
 			.refine((val) => val.length === 12 && val.startsWith('380'), {
 				message: t.invalidPhone,

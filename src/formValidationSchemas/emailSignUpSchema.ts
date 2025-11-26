@@ -20,17 +20,17 @@ export const emailSignUpSchemaShape = (t: {
 	z
 		.object({
 			name: z
-				.string({ required_error: t.nameRequired })
+				.string({ message: t.nameRequired })
 				.min(2, { message: t.nameMinLength })
 				.max(60, { message: t.inputMaxLength })
 				.nonempty(),
 			email: z
-				.string({ required_error: t.emailRequired })
+				.string({ message: t.emailRequired })
 				.max(60, { message: t.inputMaxLength })
 				.email({ message: t.wrongEmail }),
 
 			password: z
-				.string({ required_error: t.passwordRequired })
+				.string({ message: t.passwordRequired })
 				.min(8, { message: t.passwordMin })
 				.max(12, { message: t.passwordMax })
 				.regex(/[A-Z]/, { message: t.passwordUppercase })
@@ -38,7 +38,7 @@ export const emailSignUpSchemaShape = (t: {
 				.regex(/[a-zA-Z]/, { message: t.passwordAlphabetic })
 				.regex(/_/, { message: t.passwordUnderscore }),
 			confirmPassword: z
-				.string({ required_error: t.passwordRequired })
+				.string({ message: t.passwordRequired })
 				.min(8, { message: t.passwordMin })
 				.max(12, { message: t.passwordMax })
 				.regex(/[A-Z]/, { message: t.passwordUppercase })

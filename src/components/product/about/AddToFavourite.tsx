@@ -2,7 +2,7 @@
 import { FiHeart } from 'react-icons/fi';
 import { Icon, IconButton } from '@chakra-ui/react';
 import { useSession } from '../../providers/SessionProvider';
-import { useWishList } from '@/components/providers/WishListProvider';
+import { useWishList } from '@/components/providers/useWishList';
 import { toaster } from '@/components/reusable/chakra/toaster';
 import { BsBagHeart } from 'react-icons/bs';
 import { Product } from '@/types/product';

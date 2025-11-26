@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { SubcategoryProduct } from './product';
 
 export type CartProduct = {
@@ -25,7 +26,7 @@ export type CartContextType = {
 };
 
 export type CartProviderProps = {
-	children: React.ReactNode;
+	children: ReactNode;
 	cartData: CartData;
 	cartProductIds: { success?: boolean; productIds?: string[] };
 };

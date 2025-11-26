@@ -9,7 +9,7 @@ export const resetPassSchemaShape = (t: {
 }) =>
 	z.object({
 		email: z
-			.string({ required_error: t.emailRequired })
+			.string({ message: t.emailRequired })
 			.max(60, { message: t.inputMaxLength })
 			.email({ message: t.wrongEmail }),
 	});

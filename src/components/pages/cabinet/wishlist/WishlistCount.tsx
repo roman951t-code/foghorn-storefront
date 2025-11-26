@@ -1,5 +1,5 @@
 'use client';
-import { useWishList } from '@/components/providers/WishListProvider';
+import { useWishList } from '@/components/providers/useWishList';
 import { Highlight, Text } from '@chakra-ui/react';
 
 type Props = {

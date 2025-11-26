@@ -189,6 +189,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 							</Field.Root>
 						</Fieldset.Root>
 						<CenteredModal
+							dialogId='subscribe-modal'
 							closeOnInteractOutside={false}
 							title={i18nData.subscribeProcedure}
 							trigger={<SubscribeButton subscribeText={i18nData.subscribe} isPending={isPending} />}

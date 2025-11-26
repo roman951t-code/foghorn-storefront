@@ -5,34 +5,17 @@ import { SecondaryButton } from '@/components/reusable/buttons/ActionButton';
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useHookFormMask } from 'use-mask-input';
-import z from 'zod';
-import { PhoneSchemaData } from 'formValidationSchemas/accountSchema';
+import { PhoneSchemaData, type AccountSchemas } from 'formValidationSchemas/accountSchema';
 import { updatePhoneNumberAction } from '@/actions/auth/updatePhoneNumberAction';
-import { toaster } from '@/components/reusable/chakra/toaster';
+import { PHONE_INPUT_MASKS } from '@/constants/auth';
+import { showSuccessToast } from '@/constants/toasts';
 
 interface Props {
 	i18nData: I18nData;
 	userPhone: string;
 	refreshSession: () => void;
-	schema: z.ZodObject<
-		{
-			phone: z.ZodEffects<z.ZodEffects<z.ZodString, string, string>, string, string>;
-		},
-		'strip',
-		z.ZodTypeAny,
-		{
-			phone: string;
-		},
-		{
-			phone: string;
-		}
-	>;
+	schema: AccountSchemas['phoneSchema'];
 }
-
-type FormValues = {
-	name?: string;
-	phone: string;
-};
 
 export default function PhoneForm({ i18nData, userPhone, schema, refreshSession }: Props) {
 	const fieldOrientation = { base: 'vertical' as const, md: 'horizontal' as const };
@@ -42,14 +25,14 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 
 	const {
 		register,
-		getValues,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<FormValues>({
+	} = useForm<PhoneSchemaData>({
 		mode: 'onSubmit',
 		defaultValues: { phone: userPhone },
 		resolver: zodResolver(schema),
 	});
+
 	const registerWithMask = useHookFormMask(register);
 
 	const onSubmit = async (formData: PhoneSchemaData) => {
@@ -64,7 +47,7 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 				return;
 			}
 
-			toaster.success({ title: i18nData.phoneUpdated, duration: 5000 });
+			showSuccessToast(i18nData.phoneUpdated);
 			await refreshSession();
 		} catch {
 			setAuthError(i18nData.invalidFormData);
@@ -86,7 +69,7 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 						<Stack w='full' direction={{ base: 'column', sm: 'row' } as any} gap='4'>
 							<VStack w='full' alignItems='flex-start'>
 								<Input
-									{...registerWithMask('phone', ['380999999999', '999999999'], {
+									{...registerWithMask('phone', PHONE_INPUT_MASKS, {
 										required: i18nData.phoneRequired,
 									})}
 									type='text'
@@ -96,12 +79,7 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 								/>
 								<Field.ErrorText>{errors.phone?.message || authError}</Field.ErrorText>
 							</VStack>
-							<SecondaryButton
-								type='submit'
-								loading={isPending}
-								mt={{ base: '2', sm: '0' }}
-								onClick={() => onSubmit(getValues())}
-							>
+							<SecondaryButton type='submit' loading={isPending} mt={{ base: '2', sm: '0' }}>
 								{i18nData.save}
 							</SecondaryButton>
 						</Stack>

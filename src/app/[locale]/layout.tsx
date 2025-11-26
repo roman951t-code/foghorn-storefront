@@ -13,16 +13,14 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ColorModeProvider } from '@/components/reusable/chakra/color-mode';
-import { CatalogProvider } from '@/components/providers/CatalogProvider';
-import { CartProvider } from '@/components/providers/CartProvider';
 import { getCartItems } from '@/actions/cart/getCartItems';
 import { getCartProductIds } from '@/actions/cart/getCartProductIds';
 import { getCatalog } from '@/actions/products/getCatalog';
 import { CartData } from '@/types/cart';
 import { getWishListProducts } from '@/actions/wishlist/getWishListProducts';
 import { getWishListProductIds } from '@/actions/wishlist/getWishListProductIds';
-import { WishListProvider } from '@/components/providers/WishListProvider';
-import { inter, montserrat, roboto } from '@/lib/fonts';
+import { montserrat, notoSans, openSans } from '@/lib/fonts';
+import { AppStoreHydrator } from '@/components/providers/AppStoreHydrator';
 
 interface Props {
 	children: ReactNode;
@@ -66,29 +64,26 @@ export default async function Layout({ children, params }: Props) {
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
-			<body className={`${inter.variable} ${montserrat.variable} ${roboto.variable}`}>
+		<body className={`${openSans.variable} ${montserrat.variable} ${notoSans.variable}`}>
 				<ColorModeProvider>
 					<ChakraUIProvider>
 						<Box display='flex' flexDirection='column' minHeight='100vh' gap='6' bg='bg.primary'>
 							<SessionProvider initialSession={session}>
 								<NextIntlClientProvider messages={messages}>
-									<CatalogProvider categories={catalogResponse.catalog}>
-										<CartProvider
-											cartData={success ? restCartData : emptyCartData}
-											cartProductIds={cartProductIds}
-										>
-											<WishListProvider
-												wishListData={wishListData?.products ?? []}
-												wishListIds={wishListIds}
-											>
-												<Header />
-												<Box as='main' w='full' maxW='1444px' flex='1' mx='auto'>
-													{children}
-													<ToTop />
-												</Box>
-											</WishListProvider>
-										</CartProvider>
-									</CatalogProvider>
+									<AppStoreHydrator
+										categories={catalogResponse.catalog}
+										cartData={success ? restCartData : emptyCartData}
+										cartProductIds={cartProductIds}
+										wishListData={wishListData?.products ?? []}
+										wishListIds={wishListIds}
+										isLoggedIn={!!userId}
+									>
+										<Header />
+										<Box as='main' w='full' maxW='1444px' flex='1' mx='auto'>
+											{children}
+											<ToTop />
+										</Box>
+									</AppStoreHydrator>
 								</NextIntlClientProvider>
 								<Footer />
 							</SessionProvider>

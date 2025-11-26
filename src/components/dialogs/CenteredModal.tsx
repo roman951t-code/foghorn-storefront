@@ -1,6 +1,7 @@
 'use client';
 
-import React, { ReactNode, JSX } from 'react';
+import { useMemo } from 'react';
+import type { ReactNode, JSX } from 'react';
 import {
 	DialogBody,
 	DialogCloseTrigger,
@@ -21,6 +22,7 @@ interface Props {
 	closeOnInteractOutside?: boolean;
 	size?: ConditionalValue<'lg' | 'sm' | 'md' | 'xl' | 'xs' | 'cover' | 'full' | undefined>;
 	setIsOpen: any;
+	dialogId?: string;
 }
 
 export default function CenteredModal({
@@ -31,9 +33,35 @@ export default function CenteredModal({
 	closeOnInteractOutside = false,
 	setIsOpen,
 	open,
+	dialogId,
 }: Props) {
+	const baseId = useMemo(
+		() =>
+			dialogId ||
+			`dialog-${title
+				.toString()
+				.toLowerCase()
+				.replace(/[^a-z0-9]+/g, '-')
+				.replace(/^-+|-+$/g, '')}`,
+		[dialogId, title]
+	);
+
+	const idBase = baseId || 'dialog';
+
+	const ids = useMemo(
+		() => ({
+			trigger: `${idBase}-trigger`,
+			content: `${idBase}-content`,
+			title: `${idBase}-title`,
+			description: `${idBase}-description`,
+		}),
+		[idBase]
+	);
+
 	return (
 		<DialogRoot
+			id={idBase}
+			ids={ids}
 			open={open}
 			onOpenChange={(e) => setIsOpen(e.open)}
 			unmountOnExit

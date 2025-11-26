@@ -2,8 +2,16 @@
 
 import dynamic from 'next/dynamic';
 import { Box, HStack, Skeleton, useBreakpointValue } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { FreeMode, Navigation, Thumbs, Pagination } from 'swiper/modules';
+import type { Swiper as SwiperType } from 'swiper';
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import 'swiper/css/navigation';
+import 'swiper/css/thumbs';
+import 'swiper/css/pagination';
 
 const ImageModal = dynamic(() => import('./ImageModal'));
 
@@ -36,7 +44,7 @@ export default function ProductThumbsSlider() {
 }
 
 function ThumbsSliderInternal() {
-	const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
+	const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const isSmallScreen = useBreakpointValue({ base: true, md: false });
 
@@ -58,15 +66,6 @@ function ThumbsSliderInternal() {
 
 	const resetImage = () => setSelectedImage(null);
 
-	const { Swiper, SwiperSlide } = require('swiper/react');
-	const { FreeMode, Navigation, Thumbs, Pagination } = require('swiper/modules');
-
-	require('swiper/css');
-	require('swiper/css/free-mode');
-	require('swiper/css/navigation');
-	require('swiper/css/thumbs');
-	require('swiper/css/pagination');
-
 	return (
 		<>
 			<Swiper
@@ -75,7 +74,7 @@ function ThumbsSliderInternal() {
 				navigation
 				spaceBetween={0}
 				pagination={pagination}
-				thumbs={{ swiper: thumbsSwiper }}
+				thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
 				modules={[FreeMode, Navigation, Thumbs, Pagination]}
 				className='thumbsSlider'
 			>
@@ -86,6 +85,7 @@ function ThumbsSliderInternal() {
 							width='100%'
 							height={{ base: '400px', md: '700px' }}
 							cursor='pointer'
+							userSelect='none'
 						>
 							<Image
 								src={src}
@@ -93,6 +93,7 @@ function ThumbsSliderInternal() {
 								fill
 								style={{ objectFit: 'contain' }}
 								sizes='(max-width: 768px) 100vw, 50vw'
+								draggable={false}
 							/>
 						</Box>
 					</SwiperSlide>
@@ -101,7 +102,7 @@ function ThumbsSliderInternal() {
 
 			<Box hideBelow='md' mt={4}>
 				<Swiper
-					onSwiper={setThumbsSwiper}
+					onSwiper={(swiper) => setThumbsSwiper(swiper)}
 					loop
 					spaceBetween={4}
 					slidesPerView={4}
@@ -109,16 +110,24 @@ function ThumbsSliderInternal() {
 					watchSlidesProgress
 					modules={[FreeMode, Navigation, Thumbs]}
 					className='thumbsSlider2'
+					style={{ userSelect: 'none' }}
 				>
 					{images.map((src, index) => (
 						<SwiperSlide key={index}>
-							<Box position='relative' width='100%' height='100px' cursor='pointer'>
+							<Box
+								position='relative'
+								width='100%'
+								height='100px'
+								cursor='pointer'
+								userSelect='none'
+							>
 								<Image
 									src={src}
 									alt={`Product thumbnail ${index + 1}`}
 									fill
 									style={{ objectFit: 'contain' }}
 									sizes='(max-width: 768px) 25vw, 10vw'
+									draggable={false}
 								/>
 							</Box>
 						</SwiperSlide>

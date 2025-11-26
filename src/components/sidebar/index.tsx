@@ -22,7 +22,6 @@ import { AuthorizeSection, LogoutSection } from './AuthorizeSection';
 import UserLinks from './UserLinks';
 import CollapsibleLinks from './CollapsibleLinks';
 import { DeleteAccount } from './DeleteAccount';
-import { useTranslations } from 'next-intl';
 
 const logoBig = '/assets/images/logoBig.webp';
 const logoHeight = 36;
@@ -41,7 +40,6 @@ const Logo = () => (
 );
 
 export default function SidePanel() {
-	const navT = useTranslations('navigation');
 	const [open, setOpen] = useState(false);
 	const [authOpen, setAuthOpen] = useState(false);
 	const { session } = useSession();
@@ -83,53 +81,45 @@ export default function SidePanel() {
 					</DrawerHeader>
 
 					<Box flex='1' overflowY='auto' display='flex' flexDirection='column' height='100dvh'>
-						<Box px={4} my={4} h='100%' overflowY='auto'>
+						<Box
+							px={4}
+							my={4}
+							h='100%'
+							overflowY='auto'
+							display='flex'
+							flexDirection='column'
+							gap='5'
+						>
 							<CatalogBtn fullText />
-							<Separator borderColor='border.light' my='5' />
+							<Separator borderColor='border.light' />
 
 							{session?.session ? (
 								<>
 									<LogoutSection onClose={onClose} />
-									<Separator borderColor='border.light' my='5' />
+									<Separator borderColor='border.light' />
 								</>
 							) : (
 								<>
-									<AuthorizeSection authOpen={authOpen} onAuthOpen={onAuthOpen} />
-									<Separator borderColor='border.light' my='5' />
+									<AuthorizeSection onAuthOpen={onAuthOpen} />
+									<Separator borderColor='border.light' />
 								</>
 							)}
 
 							{session?.session && (
 								<>
 									<UserLinks userName={session.user?.name} onClose={onClose} />
-									<Separator borderColor='border.light' my='5' />
+									<Separator borderColor='border.light' />
 								</>
 							)}
 
-							<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' mt='4'>
-								<Card.Body gap='4'>
-									<QrCode.Root
-										value='https://play.google.com/store/apps/details?id=com.lexiko&hl=uk'
-										m='auto'
-									>
-										<QrCode.Frame>
-											<QrCode.Pattern />
-										</QrCode.Frame>
-									</QrCode.Root>
-									<Card.Description color='main' textStyle='sm' textAlign='left'>
-										{navT('sidebar.lexikoProposal')}
-									</Card.Description>
-								</Card.Body>
-							</Card.Root>
-
-							<Separator borderColor='border.light' my='5' />
+							<Separator borderColor='border.light' />
 
 							<CollapsibleLinks onClose={onClose} />
 
 							{session?.session && (
-								<>
+								<Box mt='auto' pt='4'>
 									<DeleteAccount onCloseAction={onClose} />
-								</>
+								</Box>
 							)}
 						</Box>
 

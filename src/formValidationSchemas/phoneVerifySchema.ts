@@ -5,7 +5,7 @@ import type { I18nData } from '@/types/i18n';
 export const phoneVerifySchemaShape = (t: { pinRequired: string; pinLength: string }) =>
 	z.object({
 		otp: z
-			.array(z.string().min(1), { required_error: t.pinRequired })
+			.array(z.string().min(1), { message: t.pinRequired })
 			.length(6, { message: t.pinLength }),
 	});
 

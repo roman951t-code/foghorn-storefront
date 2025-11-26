@@ -5,7 +5,7 @@ import type { I18nData } from '@/types/i18n';
 export const phoneSignInSchemaShape = (t: { phoneRequired: string; invalidPhone: string }) =>
 	z.object({
 		phone: z
-			.string({ required_error: t.phoneRequired })
+			.string({ message: t.phoneRequired })
 			.transform((val) => val.replace(/\D/g, ''))
 			.refine((val) => val.length === 12 && val.startsWith('380'), {
 				message: t.invalidPhone,

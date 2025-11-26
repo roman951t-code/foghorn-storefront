@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type JSX } from 'react';
 import { Box, VStack } from '@chakra-ui/react';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import Image from 'next/image';
@@ -112,7 +112,7 @@ const validationKeys = [
 ];
 
 interface Props {
-	trigger?: React.JSX.Element;
+	trigger?: JSX.Element;
 	isOpen?: boolean;
 	setIsOpen?: (value: boolean) => void;
 }
@@ -182,6 +182,7 @@ export default function Auth({ trigger, isOpen, setIsOpen }: Props) {
 
 	return (
 		<CenteredModal
+			dialogId='auth-modal'
 			closeOnInteractOutside={false}
 			title={`${title}`}
 			trigger={trigger}

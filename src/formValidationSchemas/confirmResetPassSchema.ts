@@ -15,10 +15,10 @@ export const resetConfirmResetPassSchema = (t: {
 }) =>
 	z.object({
 		otp: z
-			.array(z.string().min(1), { required_error: t.pinRequired })
+			.array(z.string().min(1), { message: t.pinRequired })
 			.length(6, { message: t.pinLength }),
 		password: z
-			.string({ required_error: t.passwordRequired })
+			.string({ message: t.passwordRequired })
 			.min(8, { message: t.passwordMin })
 			.max(12, { message: t.passwordMax })
 			.regex(/[A-Z]/, { message: t.passwordUppercase })

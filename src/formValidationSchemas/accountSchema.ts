@@ -16,26 +16,26 @@ export const accountSchemaShape = (t: {
 	lastNameRequired: string;
 }) => ({
 	name: z
-		.string({ required_error: t.nameRequired })
+		.string({ message: t.nameRequired })
 		.min(2, { message: t.nameMinLength })
 		.max(60, { message: t.inputMaxLength })
 		.nonempty(),
 	middleName: z
-		.string({ required_error: t.middleNameRequired })
+		.string({ message: t.middleNameRequired })
 		.min(2, { message: t.nameMinLength })
 		.max(60, { message: t.inputMaxLength })
 		.nonempty(),
 	lastName: z
-		.string({ required_error: t.lastNameRequired })
+		.string({ message: t.lastNameRequired })
 		.min(2, { message: t.nameMinLength })
 		.max(60, { message: t.inputMaxLength })
 		.nonempty(),
 	email: z
-		.string({ required_error: t.emailRequired })
+		.string({ message: t.emailRequired })
 		.max(60, { message: t.inputMaxLength })
 		.email({ message: t.wrongEmail }),
 	phone: z
-		.string({ required_error: t.phoneRequired })
+		.string({ message: t.phoneRequired })
 		.transform((val) => val.replace(/\D/g, ''))
 		.refine((val) => val.length === 12 && val.startsWith('380'), {
 			message: t.invalidPhone,

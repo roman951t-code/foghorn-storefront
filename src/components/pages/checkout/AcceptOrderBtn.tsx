@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 import { IoMdCheckmarkCircleOutline } from 'react-icons/io';
 import { useSession } from '@/components/providers/SessionProvider';
 import { PrimaryButton } from '@/components/reusable/buttons/ActionButton';

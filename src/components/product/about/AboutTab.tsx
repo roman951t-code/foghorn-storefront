@@ -162,6 +162,7 @@ export default function AboutTab({ product, category, subcategory, averageRating
 
 					<HStack gap='4'>
 						<Rating
+							id={`about-rating-${product.id}`}
 							colorPalette={{ base: 'orange', _dark: 'yellow' }}
 							readOnly
 							size='xs'

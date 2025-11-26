@@ -1,0 +1,3 @@
+export const PHONE_INPUT_MASKS = ['380999999999', '999999999'];
+
+export const MAX_NAME_LENGTH = 60;
