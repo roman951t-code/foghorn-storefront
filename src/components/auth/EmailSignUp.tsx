@@ -9,8 +9,8 @@ import {
 	EmailSignUpSchema,
 } from 'formValidationSchemas/emailSignUpSchema';
 import type { I18nData } from '@/types/i18n';
-import { PrimaryButton } from '../reusable/buttons/ActionButton';
-import { PasswordInput } from '../reusable/chakra/password-input';
+import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
+import { PasswordInput } from '@/components/ui/chakra/password-input';
 import EmailConfirmation from './EmailConfirmation';
 import { sendRegisterEmailAction } from '@/actions/auth/sendRegisterEmailAction';
 

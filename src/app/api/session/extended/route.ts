@@ -1,4 +1,5 @@
 import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 
@@ -16,6 +17,10 @@ export async function GET() {
 		}
 
 		const { user, ...rest } = session;
+		const socialAccount = await prisma.account.findFirst({
+			where: { userId: user.id, providerId: 'google' },
+			select: { id: true },
+		});
 
 		return NextResponse.json({
 			...rest,
@@ -30,6 +35,7 @@ export async function GET() {
 				notificationMethod: user.notificationMethod,
 				emailVerified: user.emailVerified,
 				subscribed: user.subscribed,
+				isGoogleUser: !!socialAccount,
 			},
 		});
 	} catch (error) {

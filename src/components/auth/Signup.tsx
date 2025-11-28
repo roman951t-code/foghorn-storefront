@@ -6,7 +6,7 @@ import { IoMailOutline } from 'react-icons/io5';
 import { IoMdArrowBack, IoMdPhonePortrait } from 'react-icons/io';
 import { Link } from '@/i18n/routing';
 import { signIn } from '@/lib/auth-client';
-import { TertiaryButton } from '../reusable/buttons/ActionButton';
+import { TertiaryButton } from '@/components/ui/buttons/ActionButton';
 import PhoneSignUp from './PhoneSignUp';
 import EmailSignUp from './EmailSignUp';
 

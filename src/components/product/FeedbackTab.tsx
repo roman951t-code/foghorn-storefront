@@ -1,8 +1,8 @@
 'use client';
 import { Card, Flex, Stack, Heading, Separator, DataList, IconButton } from '@chakra-ui/react';
-import { Rating } from '../reusable/chakra/rating';
+import { Rating } from '@/components/ui/chakra/rating';
 import { Tooltip } from '../ui/tooltip';
-import DateWithLocale from '../reusable/DateWithLocale';
+import DateWithLocale from '@/components/ui/DateWithLocale';
 import { useReviews, useInitReviews } from '../providers/useReviews';
 import { I18nData } from '@/types/i18n';
 import type { Review } from '@/types/product';
@@ -10,7 +10,8 @@ import { useTranslations } from 'next-intl';
 import FeedbackModal from './FeedbackModal';
 import { FiTrash2 } from 'react-icons/fi';
 import { useSession } from '../providers/SessionProvider';
-import { toaster } from '../reusable/chakra/toaster';
+import { showToaster } from '@/constants/toasts';
+import { toasterMessages } from '@/data/toasterMessages';
 
 type Props = {
 	averageRating: number;
@@ -39,10 +40,10 @@ export default function FeedbackTab({
 			const { success } = await handleRemoveAction();
 
 			if (!success) {
-				toaster.error({ title: deleteReviewFail, duration: 5000 });
+				showToaster('error', toasterMessages.reviewDeleteFailed(deleteReviewFail));
 			}
 		} catch {
-			toaster.error({ title: deleteReviewFail, duration: 5000 });
+			showToaster('error', toasterMessages.reviewDeleteFailed(deleteReviewFail));
 		}
 	};
 

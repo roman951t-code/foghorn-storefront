@@ -6,7 +6,7 @@ import CenteredModal from '@/components/dialogs/CenteredModal';
 import Image from 'next/image';
 import { useState } from 'react';
 import { I18nData } from '@/types/i18n';
-import { PrimaryButton } from '../reusable/buttons/ActionButton';
+import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 import CartWithProducts from './CartWithProducts';
 import { LuCheck } from 'react-icons/lu';
 import { useCart } from '@/components/providers/useCart';

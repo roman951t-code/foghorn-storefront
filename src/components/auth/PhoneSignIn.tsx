@@ -10,7 +10,7 @@ import {
 	createPhoneSignInSchema,
 	PhoneSignInSchema,
 } from 'formValidationSchemas/phoneSignInSchema';
-import { PrimaryButton } from '../reusable/buttons/ActionButton';
+import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 import { phoneSignInAction } from '@/actions/auth/phoneSignInAction';
 import { useSession } from '../providers/SessionProvider';
 import { PHONE_INPUT_MASKS } from '@/constants/auth';

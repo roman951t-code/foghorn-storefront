@@ -1,5 +1,5 @@
 import { FiUser } from 'react-icons/fi';
-import { IconButton } from '@chakra-ui/react';
+import { Box, IconButton } from '@chakra-ui/react';
 import Auth from '../auth/Auth';
 import CartModal from './CartModal';
 import Favourite from './Favourite';
@@ -39,7 +39,9 @@ export default function UserActions() {
 		<>
 			<Auth trigger={<AuthBtn />} />
 			<UpdateEmailModal />
-			<Favourite />
+			<Box hideBelow='sm'>
+				<Favourite />
+			</Box>
 			<CartModal i18nData={cartI18nData} />
 		</>
 	);

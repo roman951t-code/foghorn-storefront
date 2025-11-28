@@ -28,7 +28,9 @@ function loadGuestCart(): CartProduct[] {
 	}
 }
 
-async function fetchCartFromApi() {
+type CartApiResponse = { success: boolean; items: CartProduct[]; guest?: boolean };
+
+async function fetchCartFromApi(): Promise<CartApiResponse> {
 	const res = await fetch('/api/cart', { cache: 'no-store' });
 	if (!res.ok) return { success: false, items: [] };
 	return res.json();
@@ -186,7 +188,7 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 
 			const res = await updateCartItemQuantity({ productId, quantity });
 
-			if (!res.success || (res as any).guest) {
+			if (!res.success || res.guest) {
 				set({ cartData: { ...get().cartData, items: prevItems } });
 				return { success: false };
 			}

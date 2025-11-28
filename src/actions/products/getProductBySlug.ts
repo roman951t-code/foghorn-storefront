@@ -56,5 +56,5 @@ export const getProductBySlug = unstable_cache(
 		};
 	},
 	['product-by-slug'],
-	{ revalidate: 300, tags: ['products'] }
+	{ revalidate: 90, tags: ['products'] }
 );

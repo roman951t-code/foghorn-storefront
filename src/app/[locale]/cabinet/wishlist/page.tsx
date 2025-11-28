@@ -1,11 +1,11 @@
 import { VStack, HStack, Heading, IconButton, Icon } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { IoShareSocialOutline } from 'react-icons/io5';
-import WishList from '@/components/pages/cabinet/wishlist/WishList';
-import ProductsFilter from '@/components/pages/cabinet/wishlist/ProductsFilter';
+import WishList from '../_components/wishlist/WishList';
+import ProductsFilter from '../_components/wishlist/ProductsFilter';
 import { FiTrash2 } from 'react-icons/fi';
-import WishlistPagination from '@/components/pages/cabinet/wishlist/WishlistPagination';
-import WishListCount from '@/components/pages/cabinet/wishlist/WishlistCount';
+import WishlistPagination from '../_components/wishlist/WishlistPagination';
+import WishListCount from '../_components/wishlist/WishlistCount';
 
 export default function Wishlist() {
 	const navT = useTranslations('navigation');

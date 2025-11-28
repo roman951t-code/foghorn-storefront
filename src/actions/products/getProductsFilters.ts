@@ -39,7 +39,7 @@ export const getSubcategoryFilters = unstable_cache(
 	['product-filters'],
 	{
 		tags: ['product'],
-		revalidate: 300,
+		revalidate: 1200,
 	}
 );
 
@@ -68,37 +68,33 @@ export const getTagFilters = unstable_cache(
 			.filter((attr) => attr.values.length > 0);
 	},
 	['tag-filters'],
-	{ tags: ['product'] }
+	{ tags: ['product'], revalidate: 1200 }
 );
 
-export const getSearchFilters = unstable_cache(
-	async (searchQuery: string) => {
-		const attributes = await prisma.productAttribute.findMany({
-			select: {
-				id: true,
-				name: true,
-				products: {
-					where: {
-						product: {
-							name: { contains: searchQuery, mode: 'insensitive' },
-						},
+export async function getSearchFilters(searchQuery: string) {
+	const attributes = await prisma.productAttribute.findMany({
+		select: {
+			id: true,
+			name: true,
+			products: {
+				where: {
+					product: {
+						name: { contains: searchQuery, mode: 'insensitive' },
 					},
-					select: { value: true },
 				},
+				select: { value: true },
 			},
-		});
+		},
+	});
 
-		return attributes
-			.map((attr) => {
-				const uniqueValues = [...new Set(attr.products.map((p) => p.value))];
-				return {
-					id: attr.id,
-					name: attr.name,
-					values: uniqueValues,
-				};
-			})
-			.filter((attr) => attr.values.length > 0);
-	},
-	['search-filters'],
-	{ tags: ['product'], revalidate: 300 }
-);
+	return attributes
+		.map((attr) => {
+			const uniqueValues = [...new Set(attr.products.map((p) => p.value))];
+			return {
+				id: attr.id,
+				name: attr.name,
+				values: uniqueValues,
+			};
+		})
+		.filter((attr) => attr.values.length > 0);
+}

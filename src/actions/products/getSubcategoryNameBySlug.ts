@@ -23,6 +23,6 @@ export const getSubcategoryNameBySlug = unstable_cache(
 	['subcategory-name'],
 	{
 		tags: ['subcategory'],
-		revalidate: 300,
+		revalidate: 3600,
 	}
 );

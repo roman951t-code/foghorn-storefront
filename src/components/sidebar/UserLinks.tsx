@@ -3,7 +3,7 @@ import { FiHeart } from 'react-icons/fi';
 import { IoBagCheckOutline } from 'react-icons/io5';
 import { useTranslations } from 'next-intl';
 import { LuUserRoundCheck, LuUserRoundCog } from 'react-icons/lu';
-import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
+import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { VscFeedback } from 'react-icons/vsc';
 
 interface Props {

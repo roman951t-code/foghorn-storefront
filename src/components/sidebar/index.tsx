@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Card, IconButton, QrCode, Separator } from '@chakra-ui/react';
+import { Box, IconButton, Separator } from '@chakra-ui/react';
 import { FiMenu } from 'react-icons/fi';
 import {
 	DrawerBackdrop,
@@ -10,11 +10,11 @@ import {
 	DrawerHeader,
 	DrawerRoot,
 	DrawerTrigger,
-} from '@/components/reusable/chakra/drawer';
+} from '@/components/ui/chakra/drawer';
 import { useState } from 'react';
 import { Link } from '@/i18n/routing';
-import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
-import MediaContacts from '@/components/reusable/links/MediaContacts';
+import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
+import MediaContacts from '@/components/ui/links/MediaContacts';
 import Image from 'next/image';
 import { useSession } from '../providers/SessionProvider';
 import Auth from '../auth/Auth';

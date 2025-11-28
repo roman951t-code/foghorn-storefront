@@ -1,6 +1,6 @@
 import { Flex, Group, Box, Heading } from '@chakra-ui/react';
-import CheckoutSteps from '@/components/pages/checkout/CheckoutSteps';
-import OrderInfo from '@/components/pages/checkout/OrderInfo';
+import CheckoutSteps from './_components/CheckoutSteps';
+import OrderInfo from './_components/OrderInfo';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
 import { getTranslations } from 'next-intl/server';

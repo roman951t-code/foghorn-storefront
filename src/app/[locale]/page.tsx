@@ -1,8 +1,8 @@
 import { Flex, Box } from '@chakra-ui/react';
 import CatalogPanel from '@/components/pages/main/CatalogPanel';
 import ProductsSection from '@/components/pages/main/ProductsSection';
-import SubscribeSection from '@/components/reusable/SubscribeSection';
-import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
+import SubscribeSection from '@/components/ui/sections/SubscribeSection';
+import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import { extractI18nData, getLocalizedMetadata } from '@/utils/i18nUtils';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -27,6 +27,7 @@ export default async function Main() {
 	const subscribeI18nData = {
 		subscribeInfo: genT('subscribeInfo'),
 		email: authT('email'),
+		verifyEmail: authT('verifyEmail'),
 		subscribeProcedure: genT('subscribeProcedure'),
 		emailConfirmation: authT('emailConfirmation'),
 		toPost: authT('toPost'),
@@ -35,6 +36,7 @@ export default async function Main() {
 		resendAfter: authT('resendAfter'),
 		resendCode: authT('resendCode'),
 		emailUpdated: authT('emailUpdated'),
+		emailNotVerifiedError: validT('emailNotVerifiedError'),
 		subscribe: genT('subscribe'),
 		subscribed: genT('subscribed'),
 		unsubscribe: genT('unsubscribe'),
@@ -44,6 +46,9 @@ export default async function Main() {
 		editEmailFail: validT('editEmailFail'),
 		invalidFormData: validT('invalidFormData'),
 		unsubscribeFail: validT('unsubscribeFail'),
+		emailRequired: validT('emailRequired'),
+		inputMaxLength: validT('inputMaxLength'),
+		wrongEmail: validT('wrongEmail'),
 	};
 
 	return (

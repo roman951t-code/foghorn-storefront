@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import Breadcrumbs from '@/components/reusable/links/Breadcrumbs';
+import Breadcrumbs from '@/components/ui/links/Breadcrumbs';
 import { Heading, Stack } from '@chakra-ui/react';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { getCategoryData } from '@/actions/products/getCategoryData';
-import CategoryCards from '@/components/pages/products/CategoryCards';
+import CategoryCards from './_components/CategoryCards';
 
 type Params = {
 	params: { locale: string; category: string };

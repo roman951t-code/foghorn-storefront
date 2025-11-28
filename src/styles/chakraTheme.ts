@@ -172,7 +172,6 @@ const config = defineConfig({
 		'p, span, li': {
 			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',
 			fontWeight: 500,
-			// lineHeight: '1.5',
 		},
 		'.chakra-stat__valueText': {
 			fontFamily: 'system-ui',
@@ -200,8 +199,8 @@ const config = defineConfig({
 		},
 		'.thumbsSlider .swiper-button-prev .swiper-navigation-icon, .thumbsSlider .swiper-button-next .swiper-navigation-icon':
 			{
-				height: '60px !important',
-				width: '20px !important',
+				height: '52px !important',
+				width: '16px !important',
 			},
 
 		'.ReactModal__Overlay': {

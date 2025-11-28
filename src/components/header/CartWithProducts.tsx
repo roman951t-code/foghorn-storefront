@@ -1,7 +1,7 @@
 import { FiTrash2, FiShoppingCart } from 'react-icons/fi';
 import { IconButton, Stack, Flex, Icon, Stat, VStack, Highlight, Text } from '@chakra-ui/react';
-import CartOrderCard from '@/components/reusable/cards/CartOrderCard';
-import { LocaleNavButton } from '../reusable/links/LocaleNavLink';
+import CartOrderCard from '@/components/cart/CartOrderCard';
+import { LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
 import { I18nData } from '@/types/i18n';
 import { Dispatch, SetStateAction } from 'react';
 import { useCart } from '../providers/useCart';

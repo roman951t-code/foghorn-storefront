@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { EmptyState, VStack, AbsoluteCenter } from '@chakra-ui/react';
 import { HiColorSwatch } from 'react-icons/hi';
-import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
+import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 
 export default function NotFoundPage() {
 	const t = useTranslations('pages');

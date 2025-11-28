@@ -10,7 +10,7 @@ import {
 	DialogTrigger,
 	DialogHeader,
 	DialogTitle,
-} from '@/components/reusable/chakra/dialog';
+} from '@/components/ui/chakra/dialog';
 
 type ConditionalValue<T> = T | { base?: T; sm?: T; md?: T; lg?: T; xl?: T };
 
@@ -21,7 +21,7 @@ interface Props {
 	open?: boolean;
 	closeOnInteractOutside?: boolean;
 	size?: ConditionalValue<'lg' | 'sm' | 'md' | 'xl' | 'xs' | 'cover' | 'full' | undefined>;
-	setIsOpen: any;
+	setIsOpen: (isOpen: boolean) => void;
 	dialogId?: string;
 }
 

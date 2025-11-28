@@ -1,6 +1,7 @@
 'use server';
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
+import { Prisma } from '@prisma/client';
 
 export async function getProductsBySearchQuery(
 	searchQuery: string,
@@ -42,7 +43,7 @@ export async function getProductsBySearchQuery(
 			}))
 		: [];
 
-	const whereClause: any = {
+	const whereClause: Prisma.ProductWhereInput = {
 		name: { contains: searchQuery, mode: 'insensitive' },
 		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
@@ -93,7 +94,7 @@ export async function getProductsBySearchQuery(
 		}
 	}
 
-	const orderByClause: any[] = (() => {
+	const orderByClause: Prisma.ProductOrderByWithRelationInput[] = (() => {
 		switch (orderBy) {
 			case 'new':
 				return [{ createdAt: 'desc' }];

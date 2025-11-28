@@ -3,7 +3,7 @@ import { Card } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { useSession } from '../providers/SessionProvider';
 import { redirect } from 'next/navigation';
-import { TertiaryButton } from '../reusable/buttons/ActionButton';
+import { TertiaryButton } from '@/components/ui/buttons/ActionButton';
 
 interface LogoutProps {
 	onClose: () => void;

@@ -10,16 +10,15 @@ export default function Logo() {
 	const logoSrc =
 		useBreakpointValue({
 			base: logoSmall,
-			sm: logoBig,
-			md: logoSmall,
+			md: logoBig,
 			lg: logoBig,
 		}) || logoBig;
 
 	const logoWidth =
 		useBreakpointValue({
 			base: 36,
-			sm: 170,
-			md: 36,
+			sm: 36,
+			md: 170,
 			lg: 170,
 		}) || 170;
 

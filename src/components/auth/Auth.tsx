@@ -5,7 +5,7 @@ import CenteredModal from '@/components/dialogs/CenteredModal';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useSession } from '../providers/SessionProvider';
-import { PrimaryButton } from '../reusable/buttons/ActionButton';
+import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 import Signup from './Signup';
 import Login from './Login';
 import { useRouter } from 'next/navigation';

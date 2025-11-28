@@ -1,9 +1,9 @@
 import { Tabs, Box, Flex } from '@chakra-ui/react';
 import { ReactNode } from 'react';
-import TabsList from '@/components/pages/cabinet/TabsHeaders';
+import TabsList from './_components/TabsHeaders';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
-import TabsProvider from '@/components/pages/cabinet/TabsProvider';
+import TabsProvider from './_components/TabsProvider';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';

@@ -1,17 +1,17 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import Breadcrumbs from '@/components/reusable/links/Breadcrumbs';
-import ProductsGrid from '@/components/pages/products/ProductsGrid';
+import Breadcrumbs from '@/components/ui/links/Breadcrumbs';
+import ProductsGrid from '../../_components/ProductsGrid';
 import { Flex, Heading, Box, Group, VStack, Text, Highlight, Separator } from '@chakra-ui/react';
-import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
-import QuickFilters from '@/components/pages/products/QuickFilters';
-import Filters from '@/components/pages/products/Filters';
-import FiltersSidebar from '@/components/pages/products/FiltersSidebar';
+import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
+import QuickFilters from '../../_components/QuickFilters';
+import Filters from '../../_components/Filters';
+import FiltersSidebar from '../../_components/FiltersSidebar';
 import ProductsSection from '@/components/pages/main/ProductsSection';
-import FiltersTags from '@/components/pages/products/FiltersTags';
+import FiltersTags from '../../_components/FiltersTags';
 import { getProductsBySubcategorySlug } from '@/actions/products/getProductsBySubcategorySlug';
 import { Metadata } from 'next';
-import Pagination from '@/components/reusable/Pagination';
+import Pagination from '@/components/ui/Pagination';
 import { getSubcategoryNameBySlug } from '@/actions/products/getSubcategoryNameBySlug';
 import { getSubcategoryFilters } from '@/actions/products/getProductsFilters';
 

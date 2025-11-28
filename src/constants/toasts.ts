@@ -1,6 +1,15 @@
-import { toaster } from '@/components/reusable/chakra/toaster';
+import { toaster } from '@/components/ui/chakra/toaster';
 
 export const DEFAULT_TOAST_DURATION = 5000;
 
-export const showSuccessToast = (title: string) =>
-	toaster.success({ title, duration: DEFAULT_TOAST_DURATION });
+export type ToastType = 'success' | 'error';
+
+export const showToaster = (
+	type: ToastType,
+	text?: string | null,
+	duration = DEFAULT_TOAST_DURATION
+) => {
+	if (!text) return;
+
+	toaster[type]({ title: text, duration });
+};

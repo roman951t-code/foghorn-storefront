@@ -1,6 +1,6 @@
 'use client';
 import { Combobox, Highlight, Icon, Tag, useComboboxContext } from '@chakra-ui/react';
-import { LocaleNavLink, LocaleSearchLink } from '../reusable/links/LocaleNavLink';
+import { LocaleNavLink, LocaleSearchLink } from '@/components/ui/links/LocaleNavLink';
 import { FiSearch } from 'react-icons/fi';
 import { SearchProductItem, SearchSubcategoryItem } from '@/types/product';
 

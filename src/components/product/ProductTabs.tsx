@@ -16,7 +16,7 @@ interface Props {
 	category: string;
 	subcategory: string;
 	tab?: string;
-	product: Product;
+	product: NonNullable<Product>;
 }
 
 export default function ProductTabs({ tab = 'about', product, category, subcategory }: Props) {

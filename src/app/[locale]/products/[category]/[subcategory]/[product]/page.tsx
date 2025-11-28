@@ -1,7 +1,5 @@
-import Breadcrumbs from '@/components/reusable/links/Breadcrumbs';
+import Breadcrumbs from '@/components/ui/links/Breadcrumbs';
 import { Flex } from '@chakra-ui/react';
-import ProductsSection from '@/components/pages/main/ProductsSection';
-import SubscribeSection from '@/components/reusable/SubscribeSection';
 import ProductTabs from '@/components/product/ProductTabs';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
@@ -37,8 +35,6 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 
 	if (!productData) notFound();
 
-	const t = await getTranslations('products');
-
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>
 			<Breadcrumbs
@@ -51,8 +47,6 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 			/>
 
 			<ProductTabs tab={tab} product={productData} category={category} subcategory={subcategory} />
-			{/* <ProductsSection title={t('similar')} mb='0' /> */}
-			{/* <SubscribeSection /> */}
 		</Flex>
 	);
 }

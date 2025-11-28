@@ -13,8 +13,8 @@ import { authClient } from '@/lib/auth-client';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useSession } from '../providers/SessionProvider';
-import { PrimaryButton, TertiaryButton } from '../reusable/buttons/ActionButton';
-import { PasswordInput } from '../reusable/chakra/password-input';
+import { PrimaryButton, TertiaryButton } from '@/components/ui/buttons/ActionButton';
+import { PasswordInput } from '@/components/ui/chakra/password-input';
 
 interface EmailAuthProps {
 	i18nData: I18nData;

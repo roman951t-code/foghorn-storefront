@@ -1,10 +1,11 @@
 import { Button, CloseButton, Dialog, Portal, Text } from '@chakra-ui/react';
-import { AlertButton } from '../reusable/buttons/ActionButton';
+import { AlertButton } from '@/components/ui/buttons/ActionButton';
 import { deleteUserAction } from '@/actions/auth/deleteUserAction';
 import { authClient } from '@/lib/auth-client';
 import { useSession } from '../providers/SessionProvider';
 import { useState } from 'react';
-import { toaster } from '../reusable/chakra/toaster';
+import { showToaster } from '@/constants/toasts';
+import { toasterMessages } from '@/data/toasterMessages';
 import { useTranslations } from 'next-intl';
 
 interface Props {
@@ -34,16 +35,13 @@ export function DeleteAccount({ onCloseAction }: Props) {
 
 				onCloseAction();
 			} else {
-				toaster.error({
-					title: result?.message,
-					duration: 5000,
-				});
+				showToaster(
+					'error',
+					toasterMessages.deleteAccountFailed(result?.message, validT)
+				);
 			}
 		} catch {
-			toaster.error({
-				title: validT('deleteFailed'),
-				duration: 5000,
-			});
+			showToaster('error', toasterMessages.deleteAccountFailed(null, validT));
 		} finally {
 			setPending(false);
 		}

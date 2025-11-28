@@ -12,8 +12,9 @@ import {
 } from 'formValidationSchemas/confirmResetPassSchema';
 import { resetPasswordAction } from '@/actions/auth/resetPasswordAction';
 import { authClient } from '@/lib/auth-client';
-import { toaster } from '../reusable/chakra/toaster';
-import { PasswordInput } from '../reusable/chakra/password-input';
+import { showToaster } from '@/constants/toasts';
+import { toasterMessages } from '@/data/toasterMessages';
+import { PasswordInput } from '@/components/ui/chakra/password-input';
 
 interface Props {
 	i18nData: I18nData;
@@ -107,10 +108,7 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 				setVerifyError(message);
 				return;
 			} else {
-				toaster.success({
-					title: i18nData.passUpdated,
-					duration: 5000,
-				});
+				showToaster('success', toasterMessages.passwordUpdated(i18nData));
 
 				backToLogin();
 			}

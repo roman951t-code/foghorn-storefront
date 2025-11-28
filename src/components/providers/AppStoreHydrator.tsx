@@ -6,6 +6,7 @@ import type { CartData } from '@/types/cart';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishListStore } from '@/stores/wishListStore';
+import { useSession } from './SessionProvider';
 
 type Props = {
 	categories: CatalogCategory[];
@@ -39,6 +40,9 @@ export function AppStoreHydrator({
 	const mergeGuestWish = useWishListStore((state) => state.mergeGuestWishlistIntoServer);
 
 	const prevLoggedInRef = useRef(isLoggedIn);
+	const { session } = useSession();
+	const currentUserId = session?.user?.id ?? null;
+	const prevUserIdRef = useRef<string | null>(currentUserId);
 
 	// Catalog
 	useEffect(() => {
@@ -94,6 +98,47 @@ export function AppStoreHydrator({
 		}
 		prevLoggedInRef.current = isLoggedIn;
 	}, [hydrateGuestCart, hydrateGuestWish, isLoggedIn, mergeGuestCart, mergeGuestWish]);
+
+	// Handle user switching: fetch fresh cart/wishlist per user
+	useEffect(() => {
+		const prevUserId = prevUserIdRef.current;
+
+		const fetchServerCart = async () => {
+			try {
+				const res = await fetch('/api/cart', { cache: 'no-store' });
+				if (!res.ok) return;
+				const data = await res.json();
+				if (data?.success && Array.isArray(data.items)) {
+					setCartInitial({ items: data.items }, data.items.map((item: any) => item.id));
+				}
+			} catch {
+				// noop
+			}
+		};
+
+		if (currentUserId && currentUserId !== prevUserId) {
+			setCartLoggedIn(true);
+			setWishLoggedIn(true);
+			fetchServerCart();
+		}
+
+		if (!currentUserId && prevUserId) {
+			setCartLoggedIn(false);
+			setWishLoggedIn(false);
+			hydrateGuestCart();
+			hydrateGuestWish();
+		}
+
+		prevUserIdRef.current = currentUserId;
+	}, [
+		currentUserId,
+		hydrateGuestCart,
+		hydrateGuestWish,
+		setCartInitial,
+		setCartLoggedIn,
+		setWishLoggedIn,
+		mergeGuestCart,
+	]);
 
 	return <>{children}</>;
 }

@@ -13,13 +13,14 @@ import { VscFeedback } from 'react-icons/vsc';
 import CenteredModal from '@/components/dialogs/CenteredModal';
 import { Controller, useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
-import { PrimaryButton, SecondaryButton } from '../reusable/buttons/ActionButton';
+import { PrimaryButton, SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { useMemo, useState } from 'react';
 import Auth from '../auth/Auth';
 import { useSession } from '../providers/SessionProvider';
 import { createFeedbackSchema, FeedbackSchema } from 'formValidationSchemas/feedbackSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toaster } from '../reusable/chakra/toaster';
+import { showToaster } from '@/constants/toasts';
+import { toasterMessages } from '@/data/toasterMessages';
 import { useReviews } from '../providers/useReviews';
 
 interface Props {
@@ -60,12 +61,12 @@ export default function FeedbackModal({ i18nData }: Props) {
 			const { success } = await handleReviewAction(formData);
 
 			if (!success) {
-				toaster.error({ title: i18nData.addReviewFail, duration: 5000 });
+				showToaster('error', toasterMessages.reviewAddFailed(i18nData));
 			} else {
 				setIsOpen(false);
 			}
 		} catch (err) {
-			toaster.error({ title: i18nData.addReviewFail, duration: 5000 });
+			showToaster('error', toasterMessages.reviewAddFailed(i18nData));
 		} finally {
 			setIsPending(false);
 		}
@@ -74,7 +75,6 @@ export default function FeedbackModal({ i18nData }: Props) {
 	if (!session?.session) {
 		return (
 			<Auth
-				i18nData={i18nData}
 				trigger={
 					<SecondaryButton>
 						<VscFeedback /> {i18nData.leaveFeedback}

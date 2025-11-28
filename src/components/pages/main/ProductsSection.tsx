@@ -1,6 +1,6 @@
 import { Heading, Flex, FlexProps } from '@chakra-ui/react';
-import ProductsSlider from '@/components/reusable/slider/ProductsSlider';
-import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
+import ProductsSlider from '@/components/product/slider/ProductsSlider';
+import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 
 interface Props extends FlexProps {
 	title: string;

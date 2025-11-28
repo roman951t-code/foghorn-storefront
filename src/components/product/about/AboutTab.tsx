@@ -1,4 +1,4 @@
-import ProductThumbsSlider from '@/components/reusable/slider/ProductThumbsSlider';
+import ProductThumbsSlider from '@/components/product/slider/ProductThumbsSlider';
 import { useTranslations } from 'next-intl';
 import {
 	Heading,
@@ -18,12 +18,14 @@ import {
 	Icon,
 } from '@chakra-ui/react';
 import { MdOutlineManageSearch } from 'react-icons/md';
-import ShareProduct from './ShareProduct';
-import { Rating } from '../../reusable/chakra/rating';
-import { LocaleNavButton } from '../../reusable/links/LocaleNavLink';
+import dynamic from 'next/dynamic';
+import { Rating } from '@/components/ui/chakra/rating';
+import { LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
 import AddToFavourite from './AddToFavourite';
 import AddToCartButton from './AddToCartButton';
 import { Product } from '@/types/product';
+
+const ShareProduct = dynamic(() => import('./ShareProduct'), { ssr: false });
 
 interface Props {
 	product: Product;
@@ -70,7 +72,7 @@ export default function AboutTab({ product, category, subcategory, averageRating
 				<Box
 					maxW={{ base: '90vw', md: '86vw', lg: '600px' }}
 					minW={{ base: '340px', md: '440px', lg: '500px' }}
-					w='100%'
+					w='full'
 					bg='bg.tertiary'
 					pb='4'
 					rounded='md'

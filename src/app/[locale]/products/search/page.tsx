@@ -1,18 +1,19 @@
 import { getTranslations } from 'next-intl/server';
 import { Flex, Heading, Box, Group, VStack, Highlight, Text } from '@chakra-ui/react';
-import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
-import QuickFilters from '@/components/pages/products/QuickFilters';
-import Filters from '@/components/pages/products/Filters';
-import FiltersSidebar from '@/components/pages/products/FiltersSidebar';
+import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
+import QuickFilters from '../_components/QuickFilters';
+import Filters from '../_components/Filters';
+import FiltersSidebar from '../_components/FiltersSidebar';
 import ProductsSection from '@/components/pages/main/ProductsSection';
-import FiltersTags from '@/components/pages/products/FiltersTags';
-import ProductsGrid from '@/components/pages/products/ProductsGrid';
-import Pagination from '@/components/reusable/Pagination';
+import FiltersTags from '../_components/FiltersTags';
+import ProductsGrid from '../_components/ProductsGrid';
+import Pagination from '@/components/ui/Pagination';
 import { Metadata } from 'next';
 import { getProductsBySearchQuery } from '@/actions/products/getProductsBySearchQuery';
 import { getProductsByTag } from '@/actions/products/getProductsByTag';
-import SearchCategories from '@/components/pages/products/SearchCategories';
+import SearchCategories from '../_components/SearchCategories';
 import { getSearchFilters, getTagFilters } from '@/actions/products/getProductsFilters';
+import { Filter, SubcategoryInfo, SubcategoryProduct } from '@/types/product';
 
 type Params = {
 	searchParams: {
@@ -59,9 +60,9 @@ export default async function SearchProducts({ searchParams }: Params) {
 	if (inStockParam === 'true') inStock = true;
 	if (inStockParam === 'false') inStock = false;
 
-	let products: any[] = [];
-	let filters: any[] = [];
-	let subcategories: any[] = [];
+	let products: SubcategoryProduct[] = [];
+	let filters: Filter[] | null = [];
+	let subcategories: SubcategoryInfo[] = [];
 	let totalCount = 0;
 	let maxProductPrice = 0;
 	const excluded = ['searchQuery', 'tag', 'page', 'search', 'min', 'max', 'inStock', 'orderBy'];

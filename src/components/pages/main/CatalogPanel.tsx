@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Flex, Text, VStack, HStack, Icon } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
-import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
+import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import CategoryDetails from './CategoryDetails';
 import Promo from './Promo';
 import type { I18nData } from '@/types/i18n';
@@ -38,7 +38,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 	};
 
 	return (
-		<Flex position='relative' rounded='md' gap={2} onMouseLeave={handleMouseLeave}>
+		<Flex position='relative' rounded='md' gap={2} onMouseLeave={handleMouseLeave} minH='472px'>
 			<VStack
 				minW='280px'
 				w='280px'

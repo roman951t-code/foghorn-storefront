@@ -26,7 +26,7 @@ export async function editAccountAction(
 		return { success: false, message: t('invalidFormData') };
 	}
 
-	const { email } = validatedFormData.data as any;
+	const { email } = formData;
 
 	try {
 		const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -36,7 +36,7 @@ export async function editAccountAction(
 		}
 
 		return { success: true };
-	} catch (error: any) {
+	} catch (error: unknown) {
 		return { success: false, message: t(errors[formData.schemaName]) };
 	}
 }
@@ -75,7 +75,7 @@ export async function editNameAction(
 		});
 
 		return { success: true };
-	} catch (error: any) {
+	} catch (error: unknown) {
 		return { success: false, message: t(errors.nameSchema) };
 	}
 }

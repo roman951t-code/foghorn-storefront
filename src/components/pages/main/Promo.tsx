@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { Flex, HStack, Text, useBreakpointValue } from '@chakra-ui/react';
-import { LoadingPromoSkeleton } from '@/components/reusable/Skeleton';
+import { LoadingPromoSkeleton } from '@/components/ui/Skeleton';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 

@@ -31,5 +31,5 @@ export const getCatalog = unstable_cache(
 		return { success: true, catalog };
 	},
 	['catalog'],
-	{ revalidate: 300 }
+	{ revalidate: 3600 }
 );

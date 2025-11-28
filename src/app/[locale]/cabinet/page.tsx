@@ -1,6 +1,6 @@
 import { VStack, Heading } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import PersonalDataForm from '@/components/pages/cabinet/user/PersonalDataForm';
+import PersonalDataForm from './_components/user/PersonalDataForm';
 import { extractI18nData } from '@/utils/i18nUtils';
 
 const accountAuthKeys = [
@@ -8,7 +8,6 @@ const accountAuthKeys = [
 	'email',
 	'phone',
 	'shipmentAddress',
-	'preferredNotificationWay',
 	'save',
 	'editEmail',
 	'editPhone',
@@ -24,7 +23,6 @@ const accountAuthKeys = [
 	'phoneUpdated',
 	'confirmEmail',
 	'middleName',
-	'notifUpdated',
 	'sendVerifEmail',
 	'hiUser',
 	'lastName',
@@ -47,7 +45,6 @@ const accountValidKeys = [
 	'editNameFail',
 	'editEmailFail',
 	'lastNameRequired',
-	'preferedNotifFailed',
 	'tooManyAttempts',
 	'middleNameRequired',
 	'emailNotVerifiedError',

@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import CenteredModal from '../dialogs/CenteredModal';
 import { useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
-import { toaster } from '../reusable/chakra/toaster';
+import { showToaster } from '@/constants/toasts';
+import { toasterMessages } from '@/data/toasterMessages';
 import { useTranslations } from 'next-intl';
 
 export default function UpdateEmailModal() {
@@ -36,10 +37,7 @@ export default function UpdateEmailModal() {
 				if (error) {
 					const messageKey = error?.message ?? '';
 					const message = errorMap[messageKey] || validT('editEmailFail');
-					toaster.error({
-						title: message,
-						duration: 5000,
-					});
+					showToaster('error', toasterMessages.updateEmailFailed(message));
 				} else {
 					setIsOpen(true);
 				}

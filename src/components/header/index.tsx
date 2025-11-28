@@ -3,11 +3,11 @@ import { useTranslations } from 'next-intl';
 import Sidebar from '../sidebar';
 import LocaleSwitcher from './LocaleSwitcher';
 import SearchInput from './SearchInput';
-import CatalogBtn from '@/components/reusable/buttons/CatalogBtn';
+import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import UserActions from './UserActions';
 import Logo from './Logo';
-import { ColorModeButton } from '../reusable/chakra/color-mode';
-import { Toaster } from '../reusable/chakra/toaster';
+import { ColorModeButton } from '@/components/ui/chakra/color-mode';
+import { Toaster } from '@/components/ui/chakra/toaster';
 
 export default function Header() {
 	const commonT = useTranslations('common');
@@ -40,24 +40,26 @@ export default function Header() {
 				>
 					<Flex align='center' gap={4}>
 						<Sidebar />
-						<Logo />
+						<Box hideBelow='xs'>
+							<Logo />
+						</Box>
 					</Flex>
 					<SearchInput
-						hideBelow='md'
+						hideBelow='lg'
 						placeholder={navT('header.search')}
 						notFound={commonT('resultsNotFound')}
 						products={prodT('products')}
 						seeAll={commonT('seeAll')}
 						categories={prodT('categories')}
 					/>
-					<Flex align='center' gap={3}>
+					<Flex align='center' gap={4}>
 						<UserActions />
 						<LocaleSwitcher />
 						<ColorModeButton />
 					</Flex>
 				</Flex>
 				<Flex
-					hideFrom='md'
+					hideFrom='lg'
 					justify='flex-end'
 					p='4px'
 					align='center'

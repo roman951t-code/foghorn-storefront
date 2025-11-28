@@ -105,10 +105,17 @@ ${otp}`,
 					subscribed: true,
 				},
 			});
+
+			const socialAccount = await prisma.account.findFirst({
+				where: { userId: user.id, providerId: 'google' },
+				select: { id: true },
+			});
+
 			return {
 				user: {
 					...user,
 					...dbUser,
+					isGoogleUser: !!socialAccount,
 				},
 				session,
 			};

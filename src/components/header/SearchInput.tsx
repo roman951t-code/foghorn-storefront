@@ -104,11 +104,10 @@ export default function SearchInput({
 				onInputValueChange={(e) => setInputValue(e.inputValue)}
 				positioning={{ flip: false, gutter: 2 }}
 			>
-				<Combobox.Control roundedLeft='md' fontSize='sm' minWidth='284px' bg='bg'>
+				<Combobox.Control roundedLeft='md' fontSize='md' minW='284px'>
 					<Combobox.Input
 						placeholder={placeholder}
-						_placeholder={{ fontSize: 'sm' }}
-						fontSize='sm'
+						fontSize='md'
 						roundedRight='0'
 						_focus={{
 							border: '1px solid',

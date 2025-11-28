@@ -3,9 +3,9 @@ import {
 	AccordionItemContent,
 	AccordionItemTrigger,
 	AccordionRoot,
-} from '@/components/reusable/chakra/accordion';
+} from '@/components/ui/chakra/accordion';
 import { useTranslations } from 'next-intl';
-import { LocaleNavLink } from '@/components/reusable/links/LocaleNavLink';
+import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { Icon } from '@chakra-ui/react';
 import {
 	FiInfo,

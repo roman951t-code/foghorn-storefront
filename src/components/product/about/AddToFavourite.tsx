@@ -3,7 +3,8 @@ import { FiHeart } from 'react-icons/fi';
 import { Icon, IconButton } from '@chakra-ui/react';
 import { useSession } from '../../providers/SessionProvider';
 import { useWishList } from '@/components/providers/useWishList';
-import { toaster } from '@/components/reusable/chakra/toaster';
+import { showToaster } from '@/constants/toasts';
+import { toasterMessages } from '@/data/toasterMessages';
 import { BsBagHeart } from 'react-icons/bs';
 import { Product } from '@/types/product';
 
@@ -27,10 +28,10 @@ export default function AddToFavourite({ wishlistUpdateFailed, product }: Props)
 			const result = await handleWishAdd(product);
 
 			if (!result.success) {
-				toaster.error({ title: wishlistUpdateFailed, duration: 5000 });
+				showToaster('error', toasterMessages.wishlistUpdateFailed(wishlistUpdateFailed));
 			}
 		} catch {
-			toaster.error({ title: wishlistUpdateFailed, duration: 5000 });
+			showToaster('error', toasterMessages.wishlistUpdateFailed(wishlistUpdateFailed));
 		}
 	};
 
@@ -39,10 +40,10 @@ export default function AddToFavourite({ wishlistUpdateFailed, product }: Props)
 			const result = await handleWishRemove(product.id);
 
 			if (!result.success) {
-				toaster.error({ title: wishlistUpdateFailed, duration: 5000 });
+				showToaster('error', toasterMessages.wishlistUpdateFailed(wishlistUpdateFailed));
 			}
 		} catch {
-			toaster.error({ title: wishlistUpdateFailed, duration: 5000 });
+			showToaster('error', toasterMessages.wishlistUpdateFailed(wishlistUpdateFailed));
 		}
 	};
 

@@ -1,7 +1,6 @@
 import { VStack, Heading } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import OrderCard from '@/components/reusable/cards/OrderCard';
-import Pagination from '@/components/reusable/Pagination';
+import OrderCard from '@/components/orders/OrderCard';
 
 export default function Orders() {
 	const t = useTranslations('navigation');
@@ -12,7 +11,6 @@ export default function Orders() {
 				{t('sidebar.myOrders')}
 			</Heading>
 			<OrderCard />
-			{/* <Pagination /> */}
 		</VStack>
 	);
 }

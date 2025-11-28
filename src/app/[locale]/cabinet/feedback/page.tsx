@@ -1,7 +1,6 @@
 import { VStack, Heading } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import FeedbackCard from '@/components/reusable/cards/FeedbackCard';
-import Pagination from '@/components/reusable/Pagination';
+import FeedbackCard from '@/components/feedback/FeedbackCard';
 
 export default function Feedback() {
 	const t = useTranslations('navigation');
@@ -14,7 +13,6 @@ export default function Feedback() {
 			<FeedbackCard />
 			<FeedbackCard feedback='fff' />
 			<FeedbackCard />
-			{/* <Pagination /> */}
 		</VStack>
 	);
 }
