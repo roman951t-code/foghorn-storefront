@@ -6,12 +6,7 @@ import { LuCreditCard } from 'react-icons/lu';
 import { usePaymentInputs } from 'react-payment-inputs';
 import cardImages, { type CardImages } from 'react-payment-inputs/images';
 import { RiAppleFill, RiBankCardFill, RiPaypalFill } from 'react-icons/ri';
-
-const items = [
-	{ value: 'paypal', title: 'Paypal', icon: <RiPaypalFill /> },
-	{ value: 'apple-pay', title: 'Apple Pay', icon: <RiAppleFill /> },
-	{ value: 'card', title: 'Card', icon: <RiBankCardFill /> },
-];
+import { useTranslations } from 'next-intl';
 
 const images = cardImages as unknown as CardImages;
 
@@ -25,8 +20,14 @@ const CardImage = (props: ReturnType<typeof usePaymentInputs>) => {
 };
 
 export default function PaymentStep() {
+	const t = useTranslations('checkout');
 	const payment = usePaymentInputs();
 	const [selectedPayment, setSelectedPayment] = useState('paypal');
+	const items = [
+		{ value: 'paypal', title: t('payment.paypal'), icon: <RiPaypalFill /> },
+		{ value: 'apple-pay', title: t('payment.applePay'), icon: <RiAppleFill /> },
+		{ value: 'card', title: t('payment.card'), icon: <RiBankCardFill /> },
+	];
 
 	return (
 		<>

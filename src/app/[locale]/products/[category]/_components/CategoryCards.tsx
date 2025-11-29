@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import CategoryCard from '@/components/product/cards/CategoryCard';
+import CategoryCard from '@/features/product/cards/CategoryCard';
 import { LoadingSkeleton } from '@/components/ui/Skeleton';
 import type { CatalogCategory } from '@/types/product';
 import { Wrap } from '@chakra-ui/react';

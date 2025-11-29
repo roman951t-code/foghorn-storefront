@@ -1,6 +1,6 @@
 'use client';
 import { IoMdCheckmarkCircleOutline } from 'react-icons/io';
-import { useSession } from '@/components/providers/SessionProvider';
+import { useSession } from '@/providers/SessionProvider';
 import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 import { ButtonProps } from '@chakra-ui/react';
 

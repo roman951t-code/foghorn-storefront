@@ -1,6 +1,6 @@
 import { VStack, Heading } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import OrderCard from '@/components/orders/OrderCard';
+import OrderCard from '@/features/orders/OrderCard';
 
 export default function Orders() {
 	const t = useTranslations('navigation');

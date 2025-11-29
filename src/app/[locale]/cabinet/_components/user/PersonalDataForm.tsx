@@ -10,13 +10,13 @@ import {
 	NameSchemaData,
 } from 'formValidationSchemas/accountSchema';
 import { z } from 'zod';
-import { useSession } from '@/components/providers/SessionProvider';
+import { useSession } from '@/providers/SessionProvider';
 import AddressForm from './AddressForm';
 import { editAccountAction, editNameAction } from '@/actions/auth/editAccountAction';
 import NameForm from './NameForm';
 import EmailForm from './EmailForm';
 import PhoneForm from './PhoneForm';
-import { showToaster } from '@/constants/toasts';
+import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 
 interface Props {

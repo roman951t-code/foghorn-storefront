@@ -1,4 +1,4 @@
-import { VStack, Heading } from '@chakra-ui/react';
+import { VStack, Heading, Spinner } from '@chakra-ui/react';
 import {
 	AccordionItem,
 	AccordionItemContent,
@@ -6,10 +6,19 @@ import {
 	AccordionRoot,
 } from '@/components/ui/chakra/accordion';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
 
 import AuthStep from './AuthStep';
-import ShipmentStep from './ShipmentStep';
-import PaymentStep from './PaymentStep';
+
+const ShipmentStep = dynamic(() => import('./ShipmentStep'), {
+	loading: () => <Spinner size='md' />,
+	ssr: false,
+});
+
+const PaymentStep = dynamic(() => import('./PaymentStep'), {
+	loading: () => <Spinner size='md' />,
+	ssr: false,
+});
 
 export default function CheckoutSteps() {
 	const t = useTranslations('products');

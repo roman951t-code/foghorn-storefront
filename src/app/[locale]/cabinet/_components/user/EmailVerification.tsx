@@ -10,11 +10,11 @@ import {
 	createPhoneVerifySchema,
 	PhoneVerifySchema,
 } from 'formValidationSchemas/phoneVerifySchema';
-import { showToaster } from '@/constants/toasts';
+import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
 import { verifyEmailOtpAction } from '@/actions/auth/verifyEmailOtpAction';
-import { useSession } from '@/components/providers/SessionProvider';
+import { useSession } from '@/providers/SessionProvider';
 
 interface Props {
 	i18nData: I18nData;

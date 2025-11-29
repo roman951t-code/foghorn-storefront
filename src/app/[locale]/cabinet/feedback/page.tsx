@@ -1,6 +1,6 @@
 import { VStack, Heading } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import FeedbackCard from '@/components/feedback/FeedbackCard';
+import FeedbackCard from '@/features/feedback/FeedbackCard';
 
 export default function Feedback() {
 	const t = useTranslations('navigation');

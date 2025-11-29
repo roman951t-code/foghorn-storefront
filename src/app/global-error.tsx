@@ -1,6 +1,19 @@
 'use client';
 import { useEffect } from 'react';
 
+const messages = {
+	us: {
+		title: 'Something went wrong',
+		description: 'An unexpected error occurred. Please try again.',
+		tryAgain: 'Try again',
+	},
+	ua: {
+		title: 'Сталася помилка',
+		description: 'Виникла непередбачена помилка. Спробуйте ще раз.',
+		tryAgain: 'Спробувати ще раз',
+	},
+} as const;
+
 export default function GlobalError({
 	error,
 	reset,
@@ -12,13 +25,21 @@ export default function GlobalError({
 		console.error('Global error boundary caught:', error);
 	}, [error]);
 
+	const localeFromPath = () => {
+		if (typeof window === 'undefined') return 'us';
+		const [, locale] = window.location.pathname.split('/');
+		return locale === 'ua' ? 'ua' : 'us';
+	};
+
+	const copy = messages[localeFromPath()];
+
 	return (
 		<html>
 			<body>
-				<h2>⚠️ Something went wrong</h2>
-				<p>{error.message}</p>
+				<h2>⚠️ {copy.title}</h2>
+				<p>{copy.description}</p>
 				<button onClick={() => reset()} style={{ marginTop: '16px' }}>
-					🔁 Try again
+					🔁 {copy.tryAgain}
 				</button>
 			</body>
 		</html>

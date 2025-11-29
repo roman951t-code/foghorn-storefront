@@ -10,7 +10,7 @@ import {
 	Box,
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import { SidebarCheckoutCard, FullCheckoutCard } from '@/components/checkout/CheckoutCard';
+import { SidebarCheckoutCard, FullCheckoutCard } from '@/features/checkout/CheckoutCard';
 import AcceptOrderBtn from './AcceptOrderBtn';
 
 export default function OrderInfo() {

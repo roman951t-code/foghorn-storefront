@@ -8,7 +8,7 @@ import { useHookFormMask } from 'use-mask-input';
 import { PhoneSchemaData, type AccountSchemas } from 'formValidationSchemas/accountSchema';
 import { updatePhoneNumberAction } from '@/actions/auth/updatePhoneNumberAction';
 import { PHONE_INPUT_MASKS } from '@/constants/auth';
-import { showToaster } from '@/constants/toasts';
+import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 
 interface Props {

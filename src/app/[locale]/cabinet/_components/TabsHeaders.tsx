@@ -6,7 +6,7 @@ import { IoBagCheckOutline } from 'react-icons/io5';
 import { VscFeedback } from 'react-icons/vsc';
 import { LuUserRoundCheck } from 'react-icons/lu';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
-import { useSession } from '@/components/providers/SessionProvider';
+import { useSession } from '@/providers/SessionProvider';
 import { useTranslations } from 'next-intl';
 
 export default function TabsList() {

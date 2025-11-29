@@ -1,6 +1,6 @@
 import Breadcrumbs from '@/components/ui/links/Breadcrumbs';
 import { Flex } from '@chakra-ui/react';
-import ProductTabs from '@/components/product/ProductTabs';
+import ProductTabs from '@/features/product/ProductTabs';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
 import { getProductBySlug } from '@/actions/products/getProductBySlug';

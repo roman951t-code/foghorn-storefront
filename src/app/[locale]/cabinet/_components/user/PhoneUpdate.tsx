@@ -12,7 +12,7 @@ import {
 } from 'formValidationSchemas/phoneVerifySchema';
 import { authClient } from '@/lib/auth-client';
 import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
-import { showToaster } from '@/constants/toasts';
+import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 
 interface Props {

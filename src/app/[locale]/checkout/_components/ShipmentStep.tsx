@@ -1,13 +1,17 @@
+'use client';
+
 import { Icon, RadioCard, Stack } from '@chakra-ui/react';
 import { FaTruck } from 'react-icons/fa';
-
-const items = [
-	{ value: 'paypal', title: 'Нова Пошта', icon: <FaTruck /> },
-	{ value: 'apple-pay', title: 'УкрПошта', icon: <FaTruck /> },
-	{ value: 'card', title: 'Meest', icon: <FaTruck /> },
-];
+import { useTranslations } from 'next-intl';
 
 export default function ShipmentStep() {
+	const t = useTranslations('checkout');
+	const items = [
+		{ value: 'nova-poshta', title: t('shipment.novaPoshta'), icon: <FaTruck /> },
+		{ value: 'ukrposhta', title: t('shipment.ukrposhta'), icon: <FaTruck /> },
+		{ value: 'meest', title: t('shipment.meest'), icon: <FaTruck /> },
+	];
+
 	return (
 		<RadioCard.Root
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
@@ -20,8 +24,8 @@ export default function ShipmentStep() {
 					borderColor: 'var(--chakra-colors-fg) !important',
 				},
 			}}
-			>
-				<Stack direction={{ base: 'column', sm: 'row' }} gap='4'>
+		>
+			<Stack direction={{ base: 'column', sm: 'row' }} gap='4'>
 				{items.map((item) => (
 					<RadioCard.Item
 						key={item.value}

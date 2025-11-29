@@ -8,7 +8,7 @@ import { useState } from 'react';
 import type { I18nData } from '@/types/i18n';
 import { setNotificationMethodAction } from '@/actions/auth/setNotificationMethodAction';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
-import { showToaster } from '@/constants/toasts';
+import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 
 interface Props {

@@ -1,7 +1,7 @@
 import { Input, Field, VStack, Stack } from '@chakra-ui/react';
 import type { I18nData } from '@/types/i18n';
 import { UseFormReturn } from 'react-hook-form';
-import CenteredModal from '@/components/dialogs/CenteredModal';
+import CenteredModal from '@/components/ui/dialogs/CenteredModal';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { useState } from 'react';
 import EmailVerification from './EmailVerification';

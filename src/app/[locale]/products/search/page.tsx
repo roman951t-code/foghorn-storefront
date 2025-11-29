@@ -4,7 +4,7 @@ import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import QuickFilters from '../_components/QuickFilters';
 import Filters from '../_components/Filters';
 import FiltersSidebar from '../_components/FiltersSidebar';
-import ProductsSection from '@/components/pages/main/ProductsSection';
+import ProductsSection from '@/features/catalog/ProductsSection';
 import FiltersTags from '../_components/FiltersTags';
 import ProductsGrid from '../_components/ProductsGrid';
 import Pagination from '@/components/ui/Pagination';

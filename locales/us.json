@@ -20,6 +20,18 @@
 		"unsubscribedSuccessfully": "Subscription cancelled successfully",
 		"resultsNotFound": "No results found"
 	},
+	"checkout": {
+		"payment": {
+			"paypal": "PayPal",
+			"applePay": "Apple Pay",
+			"card": "Card"
+		},
+		"shipment": {
+			"novaPoshta": "Nova Poshta",
+			"ukrposhta": "Ukrposhta",
+			"meest": "Meest"
+		}
+	},
 	"navigation": {
 		"header": {
 			"search": "I'm looking for",
@@ -303,6 +315,19 @@
 			},
 			"category": "Products in category {category}",
 			"product": "{product} Buy online"
+		},
+		"errors": {
+			"ref": "Ref: {value}",
+			"actions": {
+				"tryAgain": "Try again",
+				"goHome": "Go home"
+			},
+			"checkoutUnavailableTitle": "Checkout is unavailable",
+			"checkoutUnavailableDesc": "Something went wrong while loading checkout. Please try again.",
+			"categoryUnavailableTitle": "Category is unavailable",
+			"categoryUnavailableDesc": "Something went wrong loading this category. Please retry or go back.",
+			"subcategoryUnavailableTitle": "Products are unavailable",
+			"subcategoryUnavailableDesc": "Something went wrong loading this subcategory. Please retry or go back."
 		}
 	}
 }

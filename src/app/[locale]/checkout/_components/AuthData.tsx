@@ -4,7 +4,7 @@ import { Flex, Heading, Card, VStack, Spinner } from '@chakra-ui/react';
 import { FiUserCheck } from 'react-icons/fi';
 import dynamic from 'next/dynamic';
 import { I18nData } from '@/types/i18n';
-import { useSession } from '@/components/providers/SessionProvider';
+import { useSession } from '@/providers/SessionProvider';
 import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 
 const PersonalDataForm = dynamic(() => import('../../cabinet/_components/user/PersonalDataForm'), {
@@ -12,7 +12,7 @@ const PersonalDataForm = dynamic(() => import('../../cabinet/_components/user/Pe
 	ssr: false,
 });
 
-const Auth = dynamic(() => import('@/components/auth/Auth'), {
+const Auth = dynamic(() => import('@/features/auth/Auth'), {
 	loading: () => <Spinner size='sm' />,
 	ssr: false,
 });
@@ -20,9 +20,9 @@ const Auth = dynamic(() => import('@/components/auth/Auth'), {
 export default function AuthData({ i18nData }: { i18nData: I18nData }) {
 	const { session } = useSession();
 
-	if (session === undefined) {
+	if (!session) {
 		return (
-			<Flex justifyContent='center' alignItems='center' w='100%'>
+			<Flex justifyContent='center' alignItems='center' w='full'>
 				<Spinner size='md' />
 			</Flex>
 		);

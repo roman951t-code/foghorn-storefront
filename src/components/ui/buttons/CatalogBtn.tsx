@@ -11,7 +11,7 @@ import {
 	DrawerRoot,
 	DrawerTrigger,
 } from '@/components/ui/chakra/drawer';
-import CatalogDrawer from '@/components/sidebar/CatalogDrawer';
+import CatalogDrawer from '@/components/layout/sidebar/CatalogDrawer';
 import { TbCategory2 } from 'react-icons/tb';
 import { PrimaryButton } from './ActionButton';
 

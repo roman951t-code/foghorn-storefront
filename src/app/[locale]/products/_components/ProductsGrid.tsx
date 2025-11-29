@@ -1,9 +1,7 @@
-'use client';
-
 import { SimpleGrid, Box, VStack } from '@chakra-ui/react';
 import { EmptyState } from '@chakra-ui/react';
 import { HiColorSwatch } from 'react-icons/hi';
-import ProductCard from '@/components/product/cards/ProductCard';
+import ProductCard from '@/features/product/cards/ProductCard';
 import { SubcategoryProduct } from '@/types/product';
 
 interface Props {

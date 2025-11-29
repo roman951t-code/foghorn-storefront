@@ -1,5 +1,5 @@
 'use client';
-import { useWishList } from '@/components/providers/useWishList';
+import { useWishList } from '@/hooks/useWishList';
 import Pagination from '@/components/ui/Pagination';
 
 const PRODUCTS_PER_PAGE = 4;

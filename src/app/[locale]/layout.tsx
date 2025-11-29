@@ -1,8 +1,8 @@
 import { ReactNode } from 'react';
-import ChakraUIProvider from '@/components/providers/ChakraUIProvider';
+import ChakraUIProvider from '@/providers/ChakraUIProvider';
 import { Box } from '@chakra-ui/react';
-import Header from '@/components/header';
-import Footer from '@/components/footer';
+import Header from '@/components/layout/header';
+import Footer from '@/components/layout/footer';
 import { hasLocale } from 'next-intl';
 import ToTop from '@/components/ui/buttons/ToTop';
 import { NextIntlClientProvider } from 'next-intl';
@@ -11,7 +11,7 @@ import { routing } from '@/i18n/routing';
 import { loadClientMessages } from '@/utils/i18nUtils';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import { SessionProvider } from '@/components/providers/SessionProvider';
+import { SessionProvider } from '@/providers/SessionProvider';
 import { ColorModeProvider } from '@/components/ui/chakra/color-mode';
 import { getCartItems } from '@/actions/cart/getCartItems';
 import { getCartProductIds } from '@/actions/cart/getCartProductIds';
@@ -20,7 +20,7 @@ import { CartData } from '@/types/cart';
 import { getWishListProducts } from '@/actions/wishlist/getWishListProducts';
 import { getWishListProductIds } from '@/actions/wishlist/getWishListProductIds';
 import { montserrat, notoSans, openSans } from '@/lib/fonts';
-import { AppStoreHydrator } from '@/components/providers/AppStoreHydrator';
+import { AppStoreHydrator } from '@/providers/AppStoreHydrator';
 
 interface Props {
 	children: ReactNode;
@@ -42,6 +42,8 @@ export default async function Layout({ children, params }: Props) {
 		'navigation',
 		'wishlist',
 		'pages',
+		'errors',
+		'checkout',
 	]);
 
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -64,7 +66,7 @@ export default async function Layout({ children, params }: Props) {
 
 	return (
 		<html lang={locale} suppressHydrationWarning>
-		<body className={`${openSans.variable} ${montserrat.variable} ${notoSans.variable}`}>
+			<body className={`${openSans.variable} ${montserrat.variable} ${notoSans.variable}`}>
 				<ColorModeProvider>
 					<ChakraUIProvider>
 						<Box display='flex' flexDirection='column' minHeight='100vh' gap='6' bg='bg.primary'>

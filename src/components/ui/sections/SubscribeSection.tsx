@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from '@/components/providers/SessionProvider';
+import { useSession } from '@/providers/SessionProvider';
 import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 import { I18nData } from '@/types/i18n';
 import { Heading, Flex, Field, Input, Fieldset } from '@chakra-ui/react';
@@ -8,7 +8,7 @@ import { IoMailOutline } from 'react-icons/io5';
 import { useMemo, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { showToaster } from '@/constants/toasts';
+import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import {
 	createEmailSubscribeSchema,
@@ -17,7 +17,7 @@ import {
 import { subscribeNewsletterAction } from '@/actions/newsletter/subscribeNewsletterAction';
 import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
 import { unsubscribeNewsletterAction } from '@/actions/newsletter/unsubscribeNewsletterAction';
-import CenteredModal from '@/components/dialogs/CenteredModal';
+import CenteredModal from '@/components/ui/dialogs/CenteredModal';
 import EmailVerification from 'app/[locale]/cabinet/_components/user/EmailVerification';
 
 type Props = {

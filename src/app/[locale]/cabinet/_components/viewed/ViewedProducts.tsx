@@ -1,5 +1,5 @@
 import { SimpleGrid, Box } from '@chakra-ui/react';
-import ProductCard, { type CardProduct } from '@/components/product/cards/ProductCard';
+import ProductCard, { type CardProduct } from '@/features/product/cards/ProductCard';
 
 export default function ViewedProducts() {
 	const placeholderProduct: CardProduct = {

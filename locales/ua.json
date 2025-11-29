@@ -20,6 +20,18 @@
 		"unsubscribedSuccessfully": "Підписка успішно скасована",
 		"resultsNotFound": "Результатів не знайдено"
 	},
+	"checkout": {
+		"payment": {
+			"paypal": "PayPal",
+			"applePay": "Apple Pay",
+			"card": "Картка"
+		},
+		"shipment": {
+			"novaPoshta": "Нова Пошта",
+			"ukrposhta": "Укрпошта",
+			"meest": "Meest"
+		}
+	},
 	"navigation": {
 		"header": {
 			"search": "Я шукаю",
@@ -303,6 +315,19 @@
 			},
 			"category": "Товари в категорії {category}",
 			"product": "{product} Купити онлайн"
+		},
+		"errors": {
+			"ref": "Код помилки: {value}",
+			"actions": {
+				"tryAgain": "Спробувати ще раз",
+				"goHome": "На головну"
+			},
+			"checkoutUnavailableTitle": "Оформлення зараз недоступне",
+			"checkoutUnavailableDesc": "Сталася помилка під час завантаження сторінки оформлення. Спробуйте ще раз.",
+			"categoryUnavailableTitle": "Категорія недоступна",
+			"categoryUnavailableDesc": "Сталася помилка під час завантаження категорії. Спробуйте ще раз або поверніться назад.",
+			"subcategoryUnavailableTitle": "Товари недоступні",
+			"subcategoryUnavailableDesc": "Сталася помилка під час завантаження цієї підкатегорії. Спробуйте ще раз або поверніться назад."
 		}
 	}
 }
