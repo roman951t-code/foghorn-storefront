@@ -1,10 +1,10 @@
 import { FiUser } from 'react-icons/fi';
 import { Box, IconButton } from '@chakra-ui/react';
-import Auth from '../auth/Auth';
 import CartModal from './CartModal';
 import Favourite from './Favourite';
 import { useTranslations } from 'next-intl';
-import UpdateEmailModal from '../auth/UpdateEmailModal';
+import UpdateEmailModal from '@/features/auth/UpdateEmailModal';
+import Auth from '@/features/auth/Auth';
 
 const AuthBtn = () => (
 	<IconButton

@@ -96,7 +96,7 @@ export default function ProductCard({ product }: Props) {
 			userSelect='none'
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			minW='200px'
-			maxW='240px'
+			maxW={{ base: 'full', sm: '240px' }}
 			w='full'
 			h='full'
 			border='1px solid'
@@ -162,27 +162,27 @@ export default function ProductCard({ product }: Props) {
 					</IconButton>
 				</Flex>
 
-					<ProductPreviewSlider imageUrl={product.imageUrl ?? null} />
+				<ProductPreviewSlider imageUrl={product.imageUrl ?? null} />
 
 				<LinkBox>
 					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='0.5' w='100%'>
-							<LocaleNavLink
-								href={`/products/${fullSlug}`}
-								textDecorationColor='main'
-								color='main'
-								variant='underline'
-							>
-								{name}
-							</LocaleNavLink>
+						<LocaleNavLink
+							href={`/products/${fullSlug}`}
+							textDecorationColor='main'
+							color='main'
+							variant='underline'
+						>
+							{name}
+						</LocaleNavLink>
 
-							{!isInStock && (
-								<Text color='main' fontSize='md' mt='3'>
-									{t('productIsOutOfStock')}
-								</Text>
-							)}
+						{!isInStock && (
+							<Text color='main' fontSize='md' mt='3'>
+								{t('productIsOutOfStock')}
+							</Text>
+						)}
 					</Card.Title>
 
-						<Text color='main' fontSize='2xl' mt='2'>
+					<Text color='main' fontSize='2xl' mt='2'>
 						{discountPrice ?? basePrice} ₴
 					</Text>
 

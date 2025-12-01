@@ -18,8 +18,10 @@ export const getCatalog = unstable_cache(
 								id: true,
 								name: true,
 								fullSlug: true,
+								imageUrl: true,
 							},
-							orderBy: { name: 'asc' },
+							where: { imageUrl: { not: null } },
+							orderBy: { createdAt: 'desc' },
 							take: 5,
 						},
 					},
@@ -30,6 +32,6 @@ export const getCatalog = unstable_cache(
 
 		return { success: true, catalog };
 	},
-	['catalog'],
+	['catalog', 'with-images-v2'],
 	{ revalidate: 3600 }
 );

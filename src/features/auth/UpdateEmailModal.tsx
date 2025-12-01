@@ -2,12 +2,12 @@
 
 import { Fieldset, Highlight, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import CenteredModal from '../dialogs/CenteredModal';
 import { useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { useTranslations } from 'next-intl';
+import CenteredModal from '@/components/ui/dialogs/CenteredModal';
 
 export default function UpdateEmailModal() {
 	const authT = useTranslations('auth');

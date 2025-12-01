@@ -5,6 +5,7 @@ import { customAlphabet } from 'nanoid';
 import { Decimal } from '@prisma/client/runtime/library';
 
 const prisma = new PrismaClient();
+type SeedProduct = { id: string; inStock: boolean; basePrice: Decimal };
 
 function createSlug(text: string) {
 	return slugify(text, { lower: true, strict: true });
@@ -22,6 +23,30 @@ const mainCategories = [
 	'Gaming',
 	'Monitors',
 ];
+
+const subcategoryImageKeywords: Record<string, string> = {
+	Smartphones: 'smartphone',
+	'Feature Phones': 'phone',
+	'Android Tablets': 'android-tablet',
+	iPads: 'ipad',
+	Ultrabooks: 'ultrabook',
+	'Gaming Laptops': 'gaming-laptop',
+	Chargers: 'charger',
+	Cables: 'cable',
+	'Fitness Trackers': 'fitness-tracker',
+	'Wear OS Watches': 'smartwatch',
+	Headphones: 'headphones',
+	Speakers: 'speaker',
+	Consoles: 'game-console',
+	Controllers: 'controller',
+	'4K Monitors': 'monitor',
+	'Gaming Monitors': 'gaming-monitor',
+};
+
+const getSubcategoryImage = (sub: string) => {
+	const keyword = subcategoryImageKeywords[sub] ?? 'technology';
+	return faker.image.urlLoremFlickr({ width: 1200, height: 800, category: keyword });
+};
 
 const subcategoriesMap: Record<string, string[]> = {
 	Phones: ['Smartphones', 'Feature Phones'],
@@ -68,7 +93,7 @@ async function main() {
 	);
 
 	const TAGS = ['popular', 'new', 'discount', 'promotional', 'viewed'];
-	const allProducts: any[] = [];
+const allProducts: SeedProduct[] = [];
 
 	// Categories + Products
 	for (const main of mainCategories) {
@@ -114,7 +139,7 @@ async function main() {
 						categoryName: main,
 						subcategoryName: sub,
 						description: faker.commerce.productDescription(),
-						imageUrl: `https://picsum.photos/seed/${nanoid()}/320/240`,
+						imageUrl: getSubcategoryImage(sub),
 						basePrice: price,
 						discountPrice,
 						stock,
@@ -170,11 +195,22 @@ async function main() {
 		}
 	}
 
-	await prisma.user.deleteMany({ where: { id: 'user-roman-951' } });
+	const seedUserId = 'user-roman-951';
+
+	// Clean up previous seed data for the seed user to avoid FK conflicts
+	await prisma.orderItem.deleteMany({ where: { order: { userId: seedUserId } } });
+	await prisma.order.deleteMany({ where: { userId: seedUserId } });
+	await prisma.review.deleteMany({ where: { userId: seedUserId } });
+	await prisma.wishlist.deleteMany({ where: { userId: seedUserId } });
+	await prisma.cartItem.deleteMany({ where: { cart: { userId: seedUserId } } });
+	await prisma.cart.deleteMany({ where: { userId: seedUserId } });
+	await prisma.session.deleteMany({ where: { userId: seedUserId } });
+	await prisma.account.deleteMany({ where: { userId: seedUserId } });
+	await prisma.user.deleteMany({ where: { id: seedUserId } });
 
 	const roman = await prisma.user.create({
 		data: {
-			id: 'user-roman-951',
+			id: seedUserId,
 			email: 'roman@mail.com',
 			name: 'Roman',
 			emailVerified: true,
@@ -220,7 +256,7 @@ async function main() {
 
 	// Orders
 	const orderedProducts = faker.helpers.arrayElements(allProducts, 2);
-	const total = orderedProducts.reduce((sum, p) => sum.add(p.basePrice), new Decimal(0));
+	const total = orderedProducts.reduce<Decimal>((sum, p) => sum.add(p.basePrice), new Decimal(0));
 
 	await prisma.order.create({
 		data: {

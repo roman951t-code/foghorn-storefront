@@ -18,8 +18,10 @@ export const getCategoryData = unstable_cache(
 								id: true,
 								name: true,
 								fullSlug: true,
+								imageUrl: true,
 							},
-							orderBy: { name: 'asc' },
+							where: { imageUrl: { not: null } },
+							orderBy: { createdAt: 'desc' },
 							take: 5,
 						},
 					},
@@ -33,6 +35,6 @@ export const getCategoryData = unstable_cache(
 			categoryData,
 		};
 	},
-	['category-data'],
+	['category-data', 'with-images-v2'],
 	{ revalidate: 3600, tags: ['categories'] }
 );

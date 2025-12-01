@@ -95,6 +95,12 @@ const config = defineConfig({
 					accent: {
 						value: '{colors.yellow.500}',
 					},
+					promoCard: {
+						value: {
+							base: 'rgb(234,236,238)',
+							_dark: '{colors.gray.800}',
+						},
+					},
 					button: {
 						value: {
 							base: '{colors.yellow.500}',

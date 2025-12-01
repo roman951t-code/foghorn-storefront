@@ -5,13 +5,14 @@ import { Flex, HStack, Text, useBreakpointValue } from '@chakra-ui/react';
 import { LoadingPromoSkeleton } from '@/components/ui/Skeleton';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
+import { Link } from '@/i18n/routing';
 
 import 'swiper/css';
 
-const promoTexts = [
-	{ id: 1, text: '🔥 Up to 50% off on all electronics!' },
-	{ id: 2, text: '🚚 Free shipping on orders over $100!' },
-	{ id: 3, text: '💳 Pay later with our flexible payment options!' },
+const promoCards = [
+	{ id: 'popular', text: '🔥 Up to 50% off on all electronics!', tag: 'popular' },
+	{ id: 'new', text: '🚚 Free shipping on orders over $100!', tag: 'new' },
+	{ id: 'discount', text: '💳 Pay later with our flexible payment options!', tag: 'discount' },
 ];
 
 const breakpoints = {
@@ -46,28 +47,37 @@ function PromoSlider() {
 			touchStartPreventDefault={false}
 			touchRatio={1}
 		>
-			{promoTexts.map((promo) => (
+			{promoCards.map((promo) => (
 				<SwiperSlide key={promo.id}>
-					<Flex
-						userSelect='none'
-						justify='center'
-						align='center'
-						cursor='pointer'
-						bg='transparent'
-						border='1px solid'
-						borderColor='border'
-						borderRadius='md'
-						height='472px'
-						width='100%'
-						color='main'
-						fontWeight='400'
-						fontSize='xl'
-						textAlign='center'
-						boxShadow='md'
-						p={6}
+					<Link
+						href={`/products/search/?tag=${promo.tag}`}
+						style={{ width: '100%', height: '100%', display: 'block' }}
 					>
-						<Text>{promo.text}</Text>
-					</Flex>
+						<Flex
+							userSelect='none'
+							justify='center'
+							align='center'
+							cursor='pointer'
+							bg='transparent'
+							border='1px solid'
+							borderColor='border'
+							borderRadius='md'
+							height='472px'
+							width='100%'
+							color='main'
+							fontWeight='400'
+							fontSize='xl'
+							textAlign='center'
+							boxShadow='md'
+							p={6}
+							transition='all 0.2s ease-in-out'
+							_hover={{ bg: 'bgHover.promoCard' }}
+							title={promo.text}
+							role='group'
+						>
+							<Text _groupHover={{ color: 'link' }}>{promo.text}</Text>
+						</Flex>
+					</Link>
 				</SwiperSlide>
 			))}
 		</Swiper>

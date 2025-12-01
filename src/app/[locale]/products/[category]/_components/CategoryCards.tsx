@@ -11,6 +11,7 @@ import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 
 function CategoryCardsInner({ category }: { category?: CatalogCategory }) {
+	console.log('category', category);
 	return (
 		<Wrap>
 			{category?.children.map((sub) => (
@@ -18,6 +19,7 @@ function CategoryCardsInner({ category }: { category?: CatalogCategory }) {
 					key={sub.id}
 					title={sub.name}
 					imageUrl={
+						sub.products[0]?.imageUrl ??
 						'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1770&q=80'
 					}
 					products={sub.products.map((product) => ({
