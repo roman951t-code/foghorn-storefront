@@ -15,6 +15,8 @@
 	margin-right: auto;
 	overflow: initial;
 	overflow-x: clip;
+	min-height: 124px;
+	align-content: center;
 }
 .productsSlider .swiper-slide {
 	display: flex;
@@ -45,10 +47,10 @@
 
 .productsSlider .productPreviewSwiper .swiper-button-prev {
 	right: initial;
-	left: 30%;
+	left: 28%;
 }
 .productsSlider .productPreviewSwiper .swiper-button-next {
-	right: 30%;
+	right: 28%;
 	left: initial;
 }
 

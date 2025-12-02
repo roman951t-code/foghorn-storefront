@@ -1,5 +1,5 @@
 import { Stack, Heading, Text } from '@chakra-ui/react';
-import shippingTermsData from '@/data/shippingTerms';
+import shippingTermsData from '@/data/staticPages/shippingTerms';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
 import { getTranslations } from 'next-intl/server';

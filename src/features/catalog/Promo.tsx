@@ -41,6 +41,7 @@ function PromoSlider() {
 			breakpoints={breakpoints}
 			modules={[Autoplay]}
 			autoplay={false}
+			loop
 			className='promoSlider'
 			grabCursor={true}
 			simulateTouch={true}
@@ -49,35 +50,32 @@ function PromoSlider() {
 		>
 			{promoCards.map((promo) => (
 				<SwiperSlide key={promo.id}>
-					<Link
-						href={`/products/search/?tag=${promo.tag}`}
-						style={{ width: '100%', height: '100%', display: 'block' }}
+					<Flex
+						userSelect='none'
+						justify='center'
+						align='center'
+						cursor='grab'
+						bg='transparent'
+						border='1px solid'
+						borderColor='border'
+						borderRadius='md'
+						height='472px'
+						width='100%'
+						color='main'
+						fontWeight='400'
+						fontSize='xl'
+						textAlign='center'
+						boxShadow='md'
+						p={6}
+						transition='all 0.2s ease-in-out'
+						_hover={{ bg: 'bgHover.promoCard' }}
+						title={promo.text}
+						role='group'
 					>
-						<Flex
-							userSelect='none'
-							justify='center'
-							align='center'
-							cursor='pointer'
-							bg='transparent'
-							border='1px solid'
-							borderColor='border'
-							borderRadius='md'
-							height='472px'
-							width='100%'
-							color='main'
-							fontWeight='400'
-							fontSize='xl'
-							textAlign='center'
-							boxShadow='md'
-							p={6}
-							transition='all 0.2s ease-in-out'
-							_hover={{ bg: 'bgHover.promoCard' }}
-							title={promo.text}
-							role='group'
-						>
-							<Text _groupHover={{ color: 'link' }}>{promo.text}</Text>
-						</Flex>
-					</Link>
+						<Text _groupHover={{ color: 'link' }}>
+							<Link href={`/products/search/?tag=${promo.tag}`}>{promo.text}</Link>
+						</Text>
+					</Flex>
 				</SwiperSlide>
 			))}
 		</Swiper>

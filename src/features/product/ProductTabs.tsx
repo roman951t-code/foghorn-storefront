@@ -20,8 +20,6 @@ interface Props {
 }
 
 export default function ProductTabs({ tab = 'about', product, category, subcategory }: Props) {
-	const authT = useTranslations('auth');
-	const genT = useTranslations('common');
 	const prodT = useTranslations('products');
 	const validT = useTranslations('validation');
 	const router = useRouter();
@@ -31,22 +29,6 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 	const availableTabs = useMemo(() => ['about', 'characteristics', 'feedback'], []);
 	const initialTab = availableTabs.includes(tab) ? tab : 'about';
 	const [selectedTab, setSelectedTab] = useState(initialTab);
-
-	const i18nData = {
-		name: authT('name'),
-		lastName: authT('lastName'),
-		email: authT('email'),
-		rate: prodT('rate'),
-		leaveFeedback: prodT('leaveFeedback'),
-		myRate: prodT('myRate'),
-		send: genT('send'),
-		advantages: prodT('advantages'),
-		disAdvantages: prodT('disAdvantages'),
-		addReviewFail: validT('addReviewFail'),
-		invalidFormData: validT('invalidFormData'),
-		feedbackMinLength: validT('feedbackMinLength'),
-		feedbackMaxLength: validT('feedbackMaxLength'),
-	};
 
 	if (!product) {
 		return null;
@@ -90,7 +72,6 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 			value: 'feedback',
 			content: (
 				<FeedbackTab
-					i18nData={i18nData}
 					averageRating={averageRating}
 					deleteReviewFail={validT('deleteReviewFail')}
 					productId={product.id}

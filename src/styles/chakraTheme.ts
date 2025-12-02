@@ -85,7 +85,10 @@ const config = defineConfig({
 						},
 					},
 					search: {
-						value: '{colors.gray.200}',
+						value: {
+							base: '{colors.gray.200}',
+							_dark: '{colors.gray.300}',
+						},
 					},
 				},
 				bgHover: {
@@ -253,47 +256,6 @@ const config = defineConfig({
 			textUnderlineOffset: '4px !important',
 			'--mix-textDecorationColor': 'color-mix(in srgb, currentColor 40%, transparent)',
 			textDecorationColor: 'var(--mix-textDecorationColor, currentColor) !important',
-		},
-		'.rce-container-input': {
-			backgroundColor: 'transparent !important',
-			minWidth: 'initial !important',
-			width: '100%',
-		},
-		'.rce-input': {
-			color: 'var(--chakra-colors-fg) !important',
-			paddingLeft: '12px !important',
-			borderStartEndRadius: '0 !important',
-			borderEndEndRadius: '0 !important',
-		},
-		'.rce-button': {
-			backgroundColor: 'var(--chakra-colors-bg-accent) !important',
-			color: 'var(--chakra-colors-black) !important',
-			fontSize: '14px !important',
-			fontWeight: '500 !important',
-			borderStartStartRadius: '0 !important',
-			borderEndStartRadius: '0 !important',
-			width: '120px',
-		},
-		'.rce-mbox': {
-			backgroundColor: 'var(--chakra-colors-bg) !important',
-			padding: '14px !important',
-			minWidth: '240px !important',
-		},
-		'.rce-mbox-left-notch, .rce-mbox-right-notch': {
-			fill: 'var(--chakra-colors-bg) !important',
-		},
-		'.rce-container-mbox': {
-			overflow: 'initial !important',
-		},
-		'.rce-mbox-text, .rce-mbox-title, .rce-mbox-time': {
-			fontSize: '14px !important',
-		},
-		'.rce-mbox-title': {
-			fontSize: '16px !important',
-			color: 'var(--chakra-colors-main-accent) !important',
-		},
-		'.rce-mbox-time': {
-			color: 'var(--chakra-colors-fg-muted) !important',
 		},
 		'.tabLink': {
 			height: '100%',

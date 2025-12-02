@@ -2,60 +2,17 @@ import { VStack, Heading } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import PersonalDataForm from './_components/user/PersonalDataForm';
 import { extractI18nData } from '@/utils/i18nUtils';
-
-const accountAuthKeys = [
-	'name',
-	'email',
-	'phone',
-	'shipmentAddress',
-	'save',
-	'editEmail',
-	'editPhone',
-	'toPost',
-	'emailConfirmation',
-	'resendAfter',
-	'resendCode',
-	'confirmPhone',
-	'editEmailCodeSent',
-	'nameUpdated',
-	'emailUpdated',
-	'sendOtp',
-	'phoneUpdated',
-	'confirmEmail',
-	'middleName',
-	'sendVerifEmail',
-	'hiUser',
-	'lastName',
-	'updateCodeSent',
-	'signUpCodeSent',
-	'newPass',
-];
-
-const accountValidKeys = [
-	'nameRequired',
-	'wrongEmail',
-	'emailRequired',
-	'phoneRequired',
-	'invalidPhone',
-	'invalidFormData',
-	'nameMinLength',
-	'userNotFound',
-	'addressMax',
-	'userLoginFail',
-	'editNameFail',
-	'editEmailFail',
-	'lastNameRequired',
-	'tooManyAttempts',
-	'middleNameRequired',
-	'emailNotVerifiedError',
-];
+import {
+	ACCOUNT_AUTH_MESSAGE_KEYS,
+	ACCOUNT_VALIDATION_MESSAGE_KEYS,
+} from '@/data/localeMessages/authMessages';
 
 export default function Cabinet() {
 	const authT = useTranslations('auth');
 	const validT = useTranslations('validation');
 
-	const validI18nData = extractI18nData(validT, accountValidKeys);
-	const authI18nData = extractI18nData(authT, accountAuthKeys);
+	const validI18nData = extractI18nData(validT, ACCOUNT_VALIDATION_MESSAGE_KEYS);
+	const authI18nData = extractI18nData(authT, ACCOUNT_AUTH_MESSAGE_KEYS);
 
 	const i18nData = {
 		...authI18nData,

@@ -24,11 +24,12 @@ import { LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
 import AddToFavourite from './AddToFavourite';
 import AddToCartButton from './AddToCartButton';
 import { Product } from '@/types/product';
+import { buildProductImages } from '@/utils/productImages';
 
 const ShareProduct = dynamic(() => import('./ShareProduct'), { ssr: false });
 
 interface Props {
-	product: Product;
+	product: NonNullable<Product>;
 	category: string;
 	subcategory: string;
 	averageRating: number;
@@ -54,16 +55,15 @@ export default function AboutTab({ product, category, subcategory, averageRating
 		totalAmount: prodT('totalAmount'),
 		numOfProducts: prodT('numOfProducts'),
 		buyText: cartT('buy'),
-		productInCartText: cartT('productIsInCart'),
-		cartUpdateFailed: cartT('cartUpdateFailed'),
+	productInCartText: cartT('productIsInCart'),
+	cartUpdateFailed: cartT('cartUpdateFailed'),
 	};
 
-	const discount = product?.discountPrice ? product.basePrice - product?.discountPrice : 0;
-
-	if (!product) return null;
+	const discount = product.discountPrice ? product.basePrice - product.discountPrice : 0;
+	const galleryImages = product.images && product.images.length > 0 ? product.images : buildProductImages(product.imageUrl ?? undefined, 4);
 
 	return (
-		<VStack gap='8' colorPalette='gray'>
+		<VStack gap='8' colorPalette='gray' userSelect='none'>
 			<Group
 				align={{ base: 'center', lg: 'flex-start' }}
 				flexDirection={{ base: 'column', lg: 'row' }}
@@ -77,7 +77,7 @@ export default function AboutTab({ product, category, subcategory, averageRating
 					pb='4'
 					rounded='md'
 				>
-					<ProductThumbsSlider />
+					<ProductThumbsSlider images={galleryImages} />
 				</Box>
 				<VStack gap='2' alignItems='flex-start'>
 					<Heading as='h1' size={{ base: '2xl', sm: '3xl' }} fontWeight='medium'>

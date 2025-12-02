@@ -1,3 +1,5 @@
+'use client';
+
 import { VStack, Heading, Spinner } from '@chakra-ui/react';
 import {
 	AccordionItem,

@@ -1,6 +1,7 @@
 'use server';
 import { prisma } from '@/lib/prisma';
 import { unstable_cache } from 'next/cache';
+import { buildProductImages } from '@/utils/productImages';
 
 export const getProductBySlug = unstable_cache(
 	async (slug: string) => {
@@ -44,10 +45,12 @@ export const getProductBySlug = unstable_cache(
 		});
 
 		if (!product) return null;
+		const images = buildProductImages(product.imageUrl ?? undefined, 4);
 		return {
 			...product,
 			basePrice: product.basePrice.toNumber(),
 			discountPrice: product.discountPrice?.toNumber() ?? null,
+			images,
 			attributes: product.attributes.map((a) => ({
 				name: a.attribute.name,
 				unit: a.attribute.unit,

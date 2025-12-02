@@ -43,9 +43,9 @@ const subcategoryImageKeywords: Record<string, string> = {
 	'Gaming Monitors': 'gaming-monitor',
 };
 
-const getSubcategoryImage = (sub: string) => {
+const getSubcategoryImage = (sub: string, seed: string) => {
 	const keyword = subcategoryImageKeywords[sub] ?? 'technology';
-	return faker.image.urlLoremFlickr({ width: 1200, height: 800, category: keyword });
+	return faker.image.urlLoremFlickr({ width: 900, height: 900, category: keyword }) + `?lock=${seed}`;
 };
 
 const subcategoriesMap: Record<string, string[]> = {
@@ -130,6 +130,7 @@ const allProducts: SeedProduct[] = [];
 				// Safe unique slug
 				const productSlug = createSlug(`${name}-${nanoid()}`);
 				const fullSlug = `${parentSlug}/${subSlug}/${productSlug}`;
+				const imageUrl = getSubcategoryImage(sub, productSlug);
 
 				const product = await prisma.product.create({
 					data: {
@@ -139,7 +140,7 @@ const allProducts: SeedProduct[] = [];
 						categoryName: main,
 						subcategoryName: sub,
 						description: faker.commerce.productDescription(),
-						imageUrl: getSubcategoryImage(sub),
+						imageUrl,
 						basePrice: price,
 						discountPrice,
 						stock,

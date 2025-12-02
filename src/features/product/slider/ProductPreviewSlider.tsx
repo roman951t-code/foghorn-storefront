@@ -9,8 +9,12 @@ import { EffectFlip, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-flip';
 import 'swiper/css/navigation';
+
 const img1 = '/assets/images/temp/1.webp';
 const img2 = '/assets/images/temp/2.webp';
+
+import { toPreviewImage } from '@/utils/productImages';
+
 function ProductPreviewSkeleton() {
 	return (
 		<HStack overflowX='hidden' overflowY='hidden' alignSelf='center'>
@@ -19,8 +23,9 @@ function ProductPreviewSkeleton() {
 	);
 }
 
-function ProductPreviewSwiper({ imageUrl }: { imageUrl: string | null }) {
-	const images = [imageUrl ?? img1, img1, img2];
+function ProductPreviewSwiper({ images }: { images: string[] }) {
+	const baseImages = images.length ? images : [img1, img2];
+	const previewImages = baseImages.map(toPreviewImage);
 
 	return (
 		<Swiper
@@ -29,7 +34,7 @@ function ProductPreviewSwiper({ imageUrl }: { imageUrl: string | null }) {
 			modules={[EffectFlip, Navigation]}
 			className='productPreviewSwiper'
 		>
-			{images.map((src, i) => (
+			{previewImages.map((src, i) => (
 				<SwiperSlide key={i}>
 					<Link href='#' variant='plain' _focus={{ outline: 'none' }}>
 						<Image
@@ -57,6 +62,6 @@ const DynamicProductPreviewSlider = dynamic(() => Promise.resolve(ProductPreview
 	loading: () => <ProductPreviewSkeleton />,
 });
 
-export default function ProductPreviewSlider({ imageUrl }: { imageUrl: string | null }) {
-	return <DynamicProductPreviewSlider imageUrl={imageUrl} />;
+export default function ProductPreviewSlider({ images }: { images: string[] }) {
+	return <DynamicProductPreviewSlider images={images} />;
 }

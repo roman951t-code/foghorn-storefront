@@ -1,5 +1,5 @@
 import { Stack, Heading, Text } from '@chakra-ui/react';
-import guaranteesData from '@/data/guarantees';
+import guaranteesData from '@/data/staticPages/guarantees';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
 import { getTranslations } from 'next-intl/server';

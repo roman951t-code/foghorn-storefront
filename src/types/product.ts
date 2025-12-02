@@ -17,6 +17,7 @@ export type SubcategoryProduct = {
 	categoryName: string;
 	subcategoryName: string;
 	imageUrl: string | null;
+	images: string[];
 	basePrice: number;
 	discountPrice: number | null;
 	inStock: boolean;

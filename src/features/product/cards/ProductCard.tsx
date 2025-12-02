@@ -16,6 +16,7 @@ import { useCart } from '@/hooks/useCart';
 import { useWishList } from '@/hooks/useWishList';
 import { BsBagHeart } from 'react-icons/bs';
 import { SubcategoryProduct } from '@/types/product';
+import { buildProductImages } from '@/utils/productImages';
 
 export type CardProduct = SubcategoryProduct & {
 	imageUrl?: string | null;
@@ -45,6 +46,9 @@ export default function ProductCard({ product }: Props) {
 	const [isLoading, setIsLoading] = useState(false);
 	const { productIds, handleAddItem } = useCart();
 	const { ids: wishListIds, handleWishAdd, handleWishRemove } = useWishList();
+	const previewImages = product.images?.length
+		? product.images
+		: buildProductImages(product.imageUrl).slice(0, 3);
 
 	if (!product) return null;
 
@@ -162,7 +166,7 @@ export default function ProductCard({ product }: Props) {
 					</IconButton>
 				</Flex>
 
-				<ProductPreviewSlider imageUrl={product.imageUrl ?? null} />
+				<ProductPreviewSlider images={previewImages} />
 
 				<LinkBox>
 					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='0.5' w='100%'>

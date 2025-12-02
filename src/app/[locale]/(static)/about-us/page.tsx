@@ -1,5 +1,5 @@
 import { Stack, Heading, Text } from '@chakra-ui/react';
-import aboutData from '@/data/about';
+import aboutData from '@/data/staticPages/about';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
 import { getTranslations } from 'next-intl/server';

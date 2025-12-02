@@ -11,7 +11,6 @@ export function useCart() {
 	const handleClearCart = useCartStore((state) => state.handleClearCart);
 	const handleUpdateQuantity = useCartStore((state) => state.handleUpdateQuantity);
 
-	// Memoize the combined object so components don't trigger re-subscribe loops.
 	return useMemo(
 		() => ({
 			cartData,

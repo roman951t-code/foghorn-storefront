@@ -1,5 +1,5 @@
 import { Stack, Heading, Text } from '@chakra-ui/react';
-import returnRefundData from '@/data/returnRefund';
+import returnRefundData from '@/data/staticPages/returnRefund';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
 import { getTranslations } from 'next-intl/server';

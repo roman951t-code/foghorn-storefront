@@ -11,105 +11,12 @@ import Login from './Login';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { I18nData } from '@/types/i18n';
+import {
+	ACCOUNT_VALIDATION_MESSAGE_KEYS,
+	AUTH_MESSAGE_KEYS,
+} from '@/data/localeMessages/authMessages';
 
 const emptyCart = '/assets/images/emptyCart.png';
-
-const authKeys = [
-	'name',
-	'phone',
-	'authorize',
-	'continueWith',
-	'logOut',
-	'email',
-	'password',
-	'continue',
-	'rememberPass',
-	'resetPassAction',
-	'accept',
-	'acceptTerms',
-	'signUp',
-	'phoneNumber',
-	'backToLogin',
-	'register',
-	'continueWithEmail',
-	'sendOtp',
-	'confirmPassword',
-	'continueWithPhone',
-	'resendAfter',
-	'resendCode',
-	'phoneConfirmation',
-	'emailConfirmation',
-	'confirmPhone',
-	'confirmEmail',
-	'activationCodeSent',
-	'signUpCodeSent',
-	'continuePurchases',
-	'returnCongrats',
-	'preferredNotificationWay',
-	'pin',
-	'toPost',
-	'hiUser',
-	'toNewPost',
-	'editEmailCodeSent',
-	'editPhone',
-	'resetPassConfirm',
-	'emailConfirmed',
-	'resetPassCodeSent',
-	'renewPass',
-	'saveNewPass',
-	'editEmail',
-	'save',
-	'shipmentAddress',
-	'newPass',
-	'passUpdated',
-	'sendVerifEmail',
-	'close',
-	'middleName',
-	'nameUpdated',
-	'notifUpdated',
-	'lastName',
-	'authToOrder',
-	'yourContacts',
-];
-
-const validationKeys = [
-	'wrongEmail',
-	'emailRequired',
-	'inputMaxLength',
-	'passwordRequired',
-	'passwordMin',
-	'userLoginFail',
-	'passwordMax',
-	'passwordUppercase',
-	'passwordLowercase',
-	'editEmailFail',
-	'passwordAlphabetic',
-	'passwordUnderscore',
-	'phoneRequired',
-	'invalidPhone',
-	'invalidFormData',
-	'smsSendFailed',
-	'userExists',
-	'userRegisterFail',
-	'passwordsNotMatch',
-	'nameMinLength',
-	'pinRequired',
-	'userNotFound',
-	'refreshTokenError',
-	'alreadyVerified',
-	'verificationFailed',
-	'emailNotVerifiedError',
-	'pinLength',
-	'invalidOtp',
-	'otpExpired',
-	'tooManyAttempts',
-	'lastNameRequired',
-	'middleNameRequired',
-	'emailNotVerified',
-	'preferedNotifFailed',
-	'editNameFail',
-	'setNewPassFail',
-];
 
 interface Props {
 	trigger?: JSX.Element;
@@ -126,8 +33,8 @@ export default function Auth({ trigger, isOpen, setIsOpen }: Props) {
 	const emailSignIn = searchParams?.get('email-sign-in') === 'true';
 
 	const i18nData = useMemo<I18nData>(() => {
-		const authEntries = authKeys.map((key) => [key, authT(key)]);
-		const validationEntries = validationKeys.map((key) => [key, validT(key)]);
+		const authEntries = AUTH_MESSAGE_KEYS.map((key) => [key, authT(key)]);
+		const validationEntries = ACCOUNT_VALIDATION_MESSAGE_KEYS.map((key) => [key, validT(key)]);
 		return Object.fromEntries([...authEntries, ...validationEntries]);
 	}, [authT, validT]);
 
@@ -177,8 +84,8 @@ export default function Auth({ trigger, isOpen, setIsOpen }: Props) {
 	const title = session?.session
 		? `${i18nData.returnCongrats}, ${session?.user?.name}!`
 		: showSignup
-			? i18nData.register
-			: i18nData.authorize;
+		? i18nData.register
+		: i18nData.authorize;
 
 	return (
 		<CenteredModal

@@ -4,7 +4,6 @@ import { Rating } from '@/components/ui/chakra/rating';
 import { Tooltip } from '@/components/ui/tooltip';
 import DateWithLocale from '@/components/ui/DateWithLocale';
 import { useReviews, useInitReviews } from '@/hooks/useReviews';
-import { I18nData } from '@/types/i18n';
 import type { Review } from '@/types/product';
 import { useTranslations } from 'next-intl';
 import FeedbackModal from './FeedbackModal';
@@ -15,14 +14,12 @@ import { toasterMessages } from '@/data/toasterMessages';
 
 type Props = {
 	averageRating: number;
-	i18nData: I18nData;
 	deleteReviewFail: string;
 	productId: string;
 	reviews: Review[];
 };
 
 export default function FeedbackTab({
-	i18nData,
 	averageRating,
 	deleteReviewFail,
 	productId,
@@ -104,7 +101,7 @@ export default function FeedbackTab({
 							</DataList.Root>
 						</Stack>
 
-						<FeedbackModal i18nData={i18nData} />
+						<FeedbackModal />
 					</Flex>
 				</Card.Header>
 			</Card.Root>

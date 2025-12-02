@@ -9,12 +9,12 @@ import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
 import { EmailSchema } from 'formValidationSchemas/emailSubscribeSchema';
 
 interface Props {
-isEmailVerified: boolean;
-userEmail: string;
-isGoogleUser?: boolean;
-emailForm: UseFormReturn<
-	{
-		email: string;
+	isEmailVerified: boolean;
+	userEmail: string;
+	isGoogleUser?: boolean;
+	emailForm: UseFormReturn<
+		{
+			email: string;
 		},
 		unknown,
 		{
@@ -39,10 +39,6 @@ export default function EmailForm({
 	const [newEmail, setNewEmail] = useState<string | null>(null);
 
 	const onSubmit = async (formData: EmailSchema) => {
-		// if (userEmail === data.email) {
-		// 	return;
-		// }
-
 		setIsPending(true);
 
 		try {

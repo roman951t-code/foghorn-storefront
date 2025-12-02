@@ -10,7 +10,6 @@ export function useWishList() {
 	const handleWishRemove = useWishListStore((state) => state.handleWishRemove);
 	const handleClear = useWishListStore((state) => state.handleClear);
 
-	// Memoize to keep a stable reference between renders.
 	return useMemo(
 		() => ({ items, ids, handleWishAdd, handleWishRemove, handleClear }),
 		[items, ids, handleWishAdd, handleWishRemove, handleClear]

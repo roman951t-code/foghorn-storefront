@@ -12,7 +12,6 @@ import {
 import { VscFeedback } from 'react-icons/vsc';
 import CenteredModal from '@/components/ui/dialogs/CenteredModal';
 import { Controller, useForm } from 'react-hook-form';
-import type { I18nData } from '@/types/i18n';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { useMemo, useState } from 'react';
 import Auth from '@/features/auth/Auth';
@@ -22,17 +21,37 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { useReviews } from '@/hooks/useReviews';
+import { useTranslations } from 'next-intl';
 
-interface Props {
-	i18nData: I18nData;
-}
+export default function FeedbackModal() {
+	const authT = useTranslations('auth');
+	const prodT = useTranslations('products');
+	const genT = useTranslations('common');
+	const validT = useTranslations('validation');
 
-export default function FeedbackModal({ i18nData }: Props) {
 	const { session } = useSession();
 	const [isOpen, setIsOpen] = useState(false);
 	const [isPending, setIsPending] = useState(false);
 
 	const { handleReviewAction } = useReviews();
+
+	const i18nData = useMemo(
+		() => ({
+			name: authT('name'),
+			lastName: authT('lastName'),
+			email: authT('email'),
+			rate: prodT('rate'),
+			advantages: prodT('advantages'),
+			disAdvantages: prodT('disAdvantages'),
+			leaveFeedback: prodT('leaveFeedback'),
+			myRate: prodT('myRate'),
+			invalidFormData: validT('invalidFormData'),
+			send: genT('send'),
+			feedbackMinLength: validT('feedbackMinLength'),
+			feedbackMaxLength: validT('feedbackMaxLength'),
+		}),
+		[authT, genT, prodT, validT]
+	);
 
 	const schema = useMemo(() => createFeedbackSchema(i18nData), [i18nData]);
 

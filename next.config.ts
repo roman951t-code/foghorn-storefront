@@ -22,7 +22,20 @@ const baseConfig: NextConfig = {
 	},
 
 	images: {
-		domains: ['images.unsplash.com', 'loremflickr.com', 'picsum.photos'],
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: 'images.unsplash.com',
+			},
+			{
+				protocol: 'https',
+				hostname: 'loremflickr.com',
+			},
+			{
+				protocol: 'https',
+				hostname: 'picsum.photos',
+			},
+		],
 	},
 	...(isProd && {
 		async headers() {

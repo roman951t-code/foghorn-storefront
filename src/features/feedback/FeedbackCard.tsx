@@ -10,14 +10,11 @@ import {
 	Box,
 	Accordion,
 } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
 import FeedbackModal from '@/features/product/FeedbackModal';
 import { FiTrash2 } from 'react-icons/fi';
 import Image from 'next/image';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { Rating } from '@/components/ui/chakra/rating';
-import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
-import { VscFeedback } from 'react-icons/vsc';
 
 const img1 = '/assets/images/temp/1.webp';
 
@@ -134,25 +131,6 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 }
 
 function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
-	const authT = useTranslations('auth');
-	const genT = useTranslations('common');
-	const prodT = useTranslations('products');
-	const validT = useTranslations('validation');
-
-	const i18nData = {
-		name: authT('name'),
-		email: authT('email'),
-		rate: prodT('rate'),
-		advantages: prodT('advantages'),
-		disAdvantages: prodT('disAdvantages'),
-		leaveFeedback: prodT('leaveFeedback'),
-		myRate: prodT('myRate'),
-		invalidFormData: validT('invalidFormData'),
-		send: genT('send'),
-		feedbackMinLength: validT('feedbackMinLength'),
-		feedbackMaxLength: validT('feedbackMaxLength'),
-	};
-
 	return (
 		<Card.Root
 			minWidth='200px'
@@ -203,18 +181,12 @@ function CardWithoutFeedback({ item }: { item: (typeof items)[0] }) {
 							</Text>
 						</Stack>
 					</Stack>
-					<Flex flex={1} justifyContent='flex-end' hideBelow='md'>
-						<FeedbackModal i18nData={i18nData} />
-						<SecondaryButton>
-							<VscFeedback /> {i18nData.leaveFeedback}
-						</SecondaryButton>
+					<Flex flex={1} alignSelf='flex-end' hideBelow='md'>
+						<FeedbackModal />
 					</Flex>
 				</Flex>
 				<Flex flex={1} justifyContent='flex-end' hideFrom='md'>
-					<FeedbackModal i18nData={i18nData} />
-					<SecondaryButton>
-						<VscFeedback /> {i18nData.leaveFeedback}
-					</SecondaryButton>
+					<FeedbackModal />
 				</Flex>
 			</Accordion.Item>
 		</Card.Root>

@@ -1,5 +1,5 @@
 import { Stack, List, Heading, Text } from '@chakra-ui/react';
-import faqData from '@/data/faq';
+import faqData from '@/data/staticPages/faq';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
 import { getTranslations } from 'next-intl/server';
