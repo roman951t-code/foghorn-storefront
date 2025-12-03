@@ -14,15 +14,26 @@ import {
 	FiTruck,
 	FiShield,
 	FiRefreshCcw,
+	FiHeart,
 } from 'react-icons/fi';
 import { MdGavel } from 'react-icons/md';
+import { IoBagCheckOutline } from 'react-icons/io5';
+import { LuUserRoundCheck, LuUserRoundCog } from 'react-icons/lu';
+import { VscFeedback } from 'react-icons/vsc';
 
 interface Props {
 	onClose: () => void;
+	userName?: string;
+	isAuthorized?: boolean;
 }
 
-export default function CollapsibleLinks({ onClose }: Props) {
+export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Props) {
 	const navT = useTranslations('navigation');
+	const defaultItems: string[] = ['info', 'clients'];
+
+	if (isAuthorized) {
+		defaultItems.unshift('cabinet');
+	}
 
 	const handleClick = () => {
 		if (onClose) onClose();
@@ -31,10 +42,55 @@ export default function CollapsibleLinks({ onClose }: Props) {
 	return (
 		<AccordionRoot
 			multiple
-			defaultValue={['info', 'clients']}
+			defaultValue={defaultItems}
 			collapsible={false}
 			onValueChange={() => {}}
 		>
+			{isAuthorized && (
+				<AccordionItem value='cabinet' borderBottomColor='border.light'>
+					<AccordionItemTrigger>{navT('sidebar.cabinet')}</AccordionItemTrigger>
+					<AccordionItemContent>
+						<LocaleNavLink href='/cabinet' onClick={handleClick}>
+							<Icon size='md' mr='2' verticalAlign='top'>
+								<LuUserRoundCog />
+							</Icon>
+							{userName ?? navT('sidebar.cabinet')}
+						</LocaleNavLink>
+					</AccordionItemContent>
+					<AccordionItemContent>
+						<LocaleNavLink href='/cabinet/orders' onClick={handleClick}>
+							<Icon size='md' mr='2' verticalAlign='top'>
+								<IoBagCheckOutline />
+							</Icon>
+							{navT('sidebar.myOrders')}
+						</LocaleNavLink>
+					</AccordionItemContent>
+					<AccordionItemContent>
+						<LocaleNavLink href='/cabinet/feedback' onClick={handleClick}>
+							<Icon size='md' mr='2' verticalAlign='top'>
+								<VscFeedback />
+							</Icon>
+							{navT('sidebar.myFeedback')}
+						</LocaleNavLink>
+					</AccordionItemContent>
+					<AccordionItemContent>
+						<LocaleNavLink href='/cabinet/wishlist' onClick={handleClick}>
+							<Icon size='md' mr='2' verticalAlign='top'>
+								<FiHeart />
+							</Icon>
+							{navT('sidebar.wishList')}
+						</LocaleNavLink>
+					</AccordionItemContent>
+					<AccordionItemContent>
+						<LocaleNavLink href='/cabinet/reviewed' onClick={handleClick}>
+							<Icon size='md' mr='2' verticalAlign='top'>
+								<LuUserRoundCheck />
+							</Icon>
+							{navT('sidebar.reviewedProducts')}
+						</LocaleNavLink>
+					</AccordionItemContent>
+				</AccordionItem>
+			)}
 			<AccordionItem value='info' borderBottomColor='border.light'>
 				<AccordionItemTrigger>{navT('sidebar.info')}</AccordionItemTrigger>
 				<AccordionItemContent>

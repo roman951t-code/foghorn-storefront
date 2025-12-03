@@ -4,8 +4,8 @@ import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import QuickFilters from '../_components/QuickFilters';
 import Filters from '../_components/Filters';
 import FiltersSidebar from '../_components/FiltersSidebar';
-import ProductsSection from '@/features/catalog/ProductsSection';
 import FiltersTags from '../_components/FiltersTags';
+import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
 import ProductsGrid from '../_components/ProductsGrid';
 import Pagination from '@/components/ui/Pagination';
 import { Metadata } from 'next';
@@ -13,7 +13,9 @@ import { getProductsBySearchQuery } from '@/actions/products/getProductsBySearch
 import { getProductsByTag } from '@/actions/products/getProductsByTag';
 import SearchCategories from '../_components/SearchCategories';
 import { getSearchFilters, getTagFilters } from '@/actions/products/getProductsFilters';
-import { Filter, SubcategoryInfo, SubcategoryProduct } from '@/types/product';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
+import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedProducts';
 
 type Params = {
 	searchParams: {
@@ -29,6 +31,17 @@ type Params = {
 
 const PRODUCTS_PER_PAGE = 12;
 
+const excludedParams = new Set([
+	'searchQuery',
+	'tag',
+	'page',
+	'search',
+	'min',
+	'max',
+	'inStock',
+	'orderBy',
+]);
+
 export async function generateMetadata({ searchParams }: Params): Promise<Metadata> {
 	const { searchQuery, tag } = await searchParams;
 	const t = await getTranslations('products');
@@ -41,43 +54,59 @@ export async function generateMetadata({ searchParams }: Params): Promise<Metada
 }
 
 export default async function SearchProducts({ searchParams }: Params) {
-	const { searchQuery = '', tag, page: pageParam = '1', min = 0, max = 0 } = await searchParams;
 	const searchData = await searchParams;
+	const {
+		searchQuery = '',
+		tag,
+		page: pageParam = '1',
+		min,
+		max,
+		inStock: inStockParam,
+		orderBy: orderByParam,
+	} = searchData;
+
 	const t = await getTranslations('products');
 	const sidebarT = await getTranslations('navigation');
 
-	const page = parseInt(pageParam, 10);
+	const page = Number.parseInt(pageParam, 10);
 	const offset = (page - 1) * PRODUCTS_PER_PAGE;
+	const minPrice = min ? Number.parseFloat(min) : undefined;
+	const maxPrice = max ? Number.parseFloat(max) : undefined;
+	const orderBy = orderByParam as 'new' | 'expensive' | 'cheap' | undefined;
+	const inStock = inStockParam === 'true' ? true : inStockParam === 'false' ? false : undefined;
 
-	const minPrice = min ? parseFloat(min) : undefined;
-	const maxPrice = max ? parseFloat(max) : undefined;
+	const dynamicFilters = Object.entries(searchData).reduce<Record<string, string[]>>(
+		(acc, [key, value]) => {
+			if (!value || excludedParams.has(key)) return acc;
+			acc[key] = acc[key] || [];
+			acc[key].push(value);
+			return acc;
+		},
+		{}
+	);
 
-	const orderBy = searchData?.orderBy as 'new' | 'expensive' | 'cheap' | undefined;
+	const buildViewedResponse = async () => {
+		const session = await auth.api.getSession({ headers: await headers() });
+		const userId = session?.user?.id;
+		const viewedProducts = userId ? await getRecentlyViewedProducts(userId, PRODUCTS_PER_PAGE) : [];
 
-	const inStockParam = searchData?.inStock;
-	let inStock: boolean | undefined = undefined;
+		const highestPrice = viewedProducts.reduce(
+			(max, p) => Math.max(max, p.discountPrice ?? p.basePrice ?? 0),
+			0
+		);
 
-	if (inStockParam === 'true') inStock = true;
-	if (inStockParam === 'false') inStock = false;
+		return {
+			products: viewedProducts,
+			filters: [],
+			subcategories: [],
+			totalCount: viewedProducts.length,
+			maxProductPrice: highestPrice,
+		};
+	};
 
-	let products: SubcategoryProduct[] = [];
-	let filters: Filter[] | null = [];
-	let subcategories: SubcategoryInfo[] = [];
-	let totalCount = 0;
-	let maxProductPrice = 0;
-	const excluded = ['searchQuery', 'tag', 'page', 'search', 'min', 'max', 'inStock', 'orderBy'];
-	const dynamicFilters: Record<string, string[]> = {};
-
-	for (const [key, value] of Object.entries(searchData)) {
-		if (!excluded.includes(key) && value) {
-			if (!dynamicFilters[key]) dynamicFilters[key] = [];
-			dynamicFilters[key].push(value);
-		}
-	}
-
-	if (tag) {
+	const buildTagResponse = async (tagValue: string) => {
 		const result = await getProductsByTag(
-			tag,
+			tagValue,
 			true,
 			PRODUCTS_PER_PAGE,
 			offset,
@@ -88,12 +117,16 @@ export default async function SearchProducts({ searchParams }: Params) {
 			dynamicFilters
 		);
 
-		filters = await getTagFilters(tag);
-		products = result.products;
-		subcategories = result?.subcategories;
-		totalCount = result?.totalCount;
-		maxProductPrice = result.maxProductPrice;
-	} else {
+		return {
+			products: result.products,
+			filters: await getTagFilters(tagValue),
+			subcategories: result?.subcategories ?? [],
+			totalCount: result?.totalCount ?? 0,
+			maxProductPrice: result.maxProductPrice,
+		};
+	};
+
+	const buildSearchResponse = async () => {
 		const result = await getProductsBySearchQuery(
 			searchQuery,
 			PRODUCTS_PER_PAGE,
@@ -105,12 +138,21 @@ export default async function SearchProducts({ searchParams }: Params) {
 			dynamicFilters
 		);
 
-		filters = await getSearchFilters(searchQuery);
-		products = result.products;
-		subcategories = result.subcategories;
-		totalCount = result.totalCount;
-		maxProductPrice = result.maxProductPrice;
-	}
+		return {
+			products: result.products,
+			filters: await getSearchFilters(searchQuery),
+			subcategories: result.subcategories,
+			totalCount: result.totalCount,
+			maxProductPrice: result.maxProductPrice,
+		};
+	};
+
+	const { products, filters, subcategories, totalCount, maxProductPrice } =
+		tag === 'viewed'
+			? await buildViewedResponse()
+			: tag
+			? await buildTagResponse(tag)
+			: await buildSearchResponse();
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
@@ -167,7 +209,7 @@ export default async function SearchProducts({ searchParams }: Params) {
 				</Box>
 			</Group>
 
-			<ProductsSection title={t('viewed')} tag='viewed' />
+			<ViewedProductsSection title={t('viewed')} tag='viewed' />
 		</Flex>
 	);
 }

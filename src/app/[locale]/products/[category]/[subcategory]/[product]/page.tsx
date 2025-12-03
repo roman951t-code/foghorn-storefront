@@ -6,6 +6,9 @@ import { Metadata } from 'next';
 import { getProductBySlug } from '@/actions/products/getProductBySlug';
 import { notFound } from 'next/navigation';
 import { getProductNameBySlug } from '@/actions/products/getProductNameBySlug';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
+import { trackProductView } from '@/actions/products/trackProductView';
 
 type Props = {
 	params: { category: string; subcategory: string; product: string };
@@ -32,8 +35,14 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 	const { tab } = await searchParams;
 
 	const productData = await getProductBySlug(product);
+	const session = await auth.api.getSession({ headers: await headers() });
+	const userId = session?.user?.id;
 
 	if (!productData) notFound();
+
+	if (userId) {
+		await trackProductView(userId, productData.id);
+	}
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>

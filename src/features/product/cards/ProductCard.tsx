@@ -112,7 +112,7 @@ export default function ProductCard({ product }: Props) {
 				borderColor: { base: 'orange', _dark: 'yellow' },
 			}}
 		>
-			<Flex direction='column' gap={2} p={4} pt='2' h='full'>
+			<Flex direction='column' gap={2} p={4} pt='2' h='full' justifyContent='space-between'>
 				<Flex align='center' justifyContent='space-between'>
 					{isInCart ? (
 						<Icon
@@ -166,10 +166,12 @@ export default function ProductCard({ product }: Props) {
 					</IconButton>
 				</Flex>
 
-				<ProductPreviewSlider images={previewImages} />
+				<LocaleNavLink href={`/products/${fullSlug}`} display='block'>
+					<ProductPreviewSlider images={previewImages} />
+				</LocaleNavLink>
 
 				<LinkBox>
-					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='0.5' w='100%'>
+					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='1' w='100%'>
 						<LocaleNavLink
 							href={`/products/${fullSlug}`}
 							textDecorationColor='main'

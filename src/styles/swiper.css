@@ -15,7 +15,7 @@
 	margin-right: auto;
 	overflow: initial;
 	overflow-x: clip;
-	min-height: 124px;
+	/* min-height: 124px; */
 	align-content: center;
 }
 .productsSlider .swiper-slide {
@@ -38,7 +38,7 @@
 }
 .productsSlider .swiper-button-prev,
 .productsSlider .swiper-button-next {
-	top: -28px;
+	top: -30px;
 }
 .productsSlider .swiper-button-prev svg,
 .productsSlider .swiper-button-next svg {
@@ -50,15 +50,15 @@
 	left: 28%;
 }
 .productsSlider .productPreviewSwiper .swiper-button-next {
-	right: 28%;
+	right: 24%;
 	left: initial;
 }
 
 .productsSlider .productPreviewSwiper .swiper-button-prev svg {
-	height: 28;
+	height: 24;
 }
 .productsSlider .productPreviewSwiper .swiper-button-next svg {
-	height: 28;
+	height: 24;
 }
 
 /* THUMBS SLIDER SWIPER */

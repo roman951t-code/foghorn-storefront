@@ -7,13 +7,13 @@ import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import QuickFilters from '../../_components/QuickFilters';
 import Filters from '../../_components/Filters';
 import FiltersSidebar from '../../_components/FiltersSidebar';
-import ProductsSection from '@/features/catalog/ProductsSection';
 import FiltersTags from '../../_components/FiltersTags';
 import { getProductsBySubcategorySlug } from '@/actions/products/getProductsBySubcategorySlug';
 import { Metadata } from 'next';
 import Pagination from '@/components/ui/Pagination';
 import { getSubcategoryNameBySlug } from '@/actions/products/getSubcategoryNameBySlug';
 import { getSubcategoryFilters } from '@/actions/products/getProductsFilters';
+import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
 
 type Params = {
 	params: { category: string; subcategory: string };
@@ -150,7 +150,7 @@ export default async function Subcategory({ params, searchParams }: Params) {
 				</Box>
 			</Group>
 
-			<ProductsSection title={t('viewed')} tag='viewed' />
+			<ViewedProductsSection title={t('viewed')} tag='viewed' />
 		</Flex>
 	);
 }

@@ -19,7 +19,6 @@ import Image from 'next/image';
 import { useSession } from '@/providers/SessionProvider';
 import Auth from '@/features/auth/Auth';
 import { AuthorizeSection, LogoutSection } from './AuthorizeSection';
-import UserLinks from './UserLinks';
 import CollapsibleLinks from './CollapsibleLinks';
 import { DeleteAccount } from './DeleteAccount';
 
@@ -105,16 +104,11 @@ export default function SidePanel() {
 								</>
 							)}
 
-							{session?.session && (
-								<>
-									<UserLinks userName={session.user?.name} onClose={onClose} />
-									<Separator borderColor='border.light' />
-								</>
-							)}
-
-							<Separator borderColor='border.light' />
-
-							<CollapsibleLinks onClose={onClose} />
+							<CollapsibleLinks
+								onClose={onClose}
+								isAuthorized={!!session?.session}
+								userName={session.user?.name}
+							/>
 
 							{session?.session && (
 								<Box mt='auto' pt='4'>

@@ -136,7 +136,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 	return (
 		<Flex
 			mt={24}
-			bg='bg.dark'
+			bg='bg.tertiary'
 			p={4}
 			rounded='md'
 			boxShadow='sm'

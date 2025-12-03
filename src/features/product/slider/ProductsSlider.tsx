@@ -26,7 +26,8 @@ function ProductsSkeletonFallback() {
 }
 
 type Props = {
-	tag: string;
+	tag?: string;
+	products?: SubcategoryProduct[];
 };
 
 function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
@@ -49,12 +50,28 @@ function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
 	);
 }
 
-export default function ProductsSlider({ tag }: Props) {
-	const [products, setProducts] = useState<SubcategoryProduct[]>([]);
-	const [loading, setLoading] = useState(true);
+export default function ProductsSlider({ tag, products: initialProducts }: Props) {
+	const [products, setProducts] = useState<SubcategoryProduct[]>(initialProducts ?? []);
+	const [loading, setLoading] = useState(!initialProducts);
 
 	useEffect(() => {
 		let mounted = true;
+
+		if (initialProducts) {
+			setProducts(initialProducts);
+			setLoading(false);
+			return () => {
+				mounted = false;
+			};
+		}
+
+		if (!tag) {
+			setLoading(false);
+			return () => {
+				mounted = false;
+			};
+		}
+
 		(async () => {
 			const data = await getProductsByTag(tag);
 			if (mounted) {
@@ -65,7 +82,7 @@ export default function ProductsSlider({ tag }: Props) {
 		return () => {
 			mounted = false;
 		};
-	}, [tag]);
+	}, [initialProducts, tag]);
 
 	if (loading) return <ProductsSkeletonFallback />;
 

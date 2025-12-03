@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { HStack, Skeleton, Link } from '@chakra-ui/react';
+import { HStack, Skeleton, Box } from '@chakra-ui/react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectFlip, Navigation } from 'swiper/modules';
@@ -36,7 +36,7 @@ function ProductPreviewSwiper({ images }: { images: string[] }) {
 		>
 			{previewImages.map((src, i) => (
 				<SwiperSlide key={i}>
-					<Link href='#' variant='plain' _focus={{ outline: 'none' }}>
+					<Box as='div' _focus={{ outline: 'none' }}>
 						<Image
 							priority
 							loading='eager'
@@ -46,11 +46,11 @@ function ProductPreviewSwiper({ images }: { images: string[] }) {
 							alt='Product photo'
 							style={{
 								borderRadius: '8px',
-								width: '110px',
+								width: '130px',
 								height: 'auto',
 							}}
 						/>
-					</Link>
+					</Box>
 				</SwiperSlide>
 			))}
 		</Swiper>

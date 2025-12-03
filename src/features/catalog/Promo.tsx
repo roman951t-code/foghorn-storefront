@@ -55,7 +55,7 @@ function PromoSlider() {
 						justify='center'
 						align='center'
 						cursor='grab'
-						bg='transparent'
+						bg='bg.tertiary'
 						border='1px solid'
 						borderColor='border'
 						borderRadius='md'

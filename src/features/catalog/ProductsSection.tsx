@@ -1,15 +1,17 @@
 import { Heading, Flex, FlexProps } from '@chakra-ui/react';
 import ProductsSlider from '@/features/product/slider/ProductsSlider';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
+import { SubcategoryProduct } from '@/types/product';
 
 interface Props extends FlexProps {
 	title: string;
-	tag: string;
+	tag?: string;
+	products?: SubcategoryProduct[];
 }
 
-export default function ProductsSection({ title, tag, ...restProps }: Props) {
+export default function ProductsSection({ title, tag, products, ...restProps }: Props) {
 	return (
-		<Flex gap={6} direction='column' mt={24} {...restProps}>
+		<Flex gap={6} direction='column' mt={24} userSelect='none' {...restProps}>
 			<Heading fontWeight='normal'>
 				<LocaleNavLink
 					href={`/products/search/?tag=${tag}`}
@@ -26,7 +28,7 @@ export default function ProductsSection({ title, tag, ...restProps }: Props) {
 					{title}
 				</LocaleNavLink>
 			</Heading>
-			<ProductsSlider tag={tag} />
+			<ProductsSlider tag={tag} products={products} />
 		</Flex>
 	);
 }
