@@ -25,7 +25,7 @@ export default function Logo() {
 	const logoHeight = 36;
 
 	return (
-		<Link href='/'>
+		<Link href='/' aria-label='Go to homepage'>
 			<Image
 				src={logoSrc}
 				alt='logo'

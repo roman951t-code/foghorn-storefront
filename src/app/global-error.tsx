@@ -34,11 +34,16 @@ export default function GlobalError({
 	const copy = messages[localeFromPath()];
 
 	return (
-		<html>
+		<html lang={localeFromPath()}>
 			<body>
 				<h2>⚠️ {copy.title}</h2>
 				<p>{copy.description}</p>
-				<button onClick={() => reset()} style={{ marginTop: '16px' }}>
+				<button
+					type='button'
+					aria-label={copy.tryAgain}
+					onClick={() => reset()}
+					style={{ marginTop: '16px' }}
+				>
 					🔁 {copy.tryAgain}
 				</button>
 			</body>

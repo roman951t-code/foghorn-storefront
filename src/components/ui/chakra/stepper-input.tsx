@@ -8,9 +8,10 @@ export interface StepperInputProps extends NumberInput.RootProps {
 
 export const StepperInput = React.forwardRef<HTMLDivElement, StepperInputProps>(
 	function StepperInput(props, ref) {
-		const { label, ...rest } = props;
+		const { label, 'aria-label': ariaLabel, ...rest } = props;
+		const resolvedLabel = ariaLabel ?? (typeof label === 'string' ? label : 'Quantity');
 		return (
-			<NumberInput.Root {...rest} unstyled ref={ref}>
+			<NumberInput.Root aria-label={resolvedLabel} {...rest} unstyled ref={ref}>
 				{label && <NumberInput.Label>{label}</NumberInput.Label>}
 				<HStack gap='1'>
 					<DecrementTrigger />
@@ -26,7 +27,7 @@ const DecrementTrigger = React.forwardRef<HTMLButtonElement, NumberInput.Decreme
 	function DecrementTrigger(props, ref) {
 		return (
 			<NumberInput.DecrementTrigger {...props} asChild ref={ref}>
-				<IconButton variant='outline' size='xs'>
+				<IconButton variant='outline' size='xs' aria-label='Decrease value'>
 					<LuMinus />
 				</IconButton>
 			</NumberInput.DecrementTrigger>
@@ -38,7 +39,7 @@ const IncrementTrigger = React.forwardRef<HTMLButtonElement, NumberInput.Increme
 	function IncrementTrigger(props, ref) {
 		return (
 			<NumberInput.IncrementTrigger {...props} asChild ref={ref}>
-				<IconButton variant='outline' size='xs'>
+				<IconButton variant='outline' size='xs' aria-label='Increase value'>
 					<LuPlus />
 				</IconButton>
 			</NumberInput.IncrementTrigger>

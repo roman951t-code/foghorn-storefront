@@ -33,9 +33,10 @@ interface Props {
 	category: string;
 	subcategory: string;
 	averageRating: number;
+	onTabChange?: (tab: 'about' | 'characteristics' | 'feedback') => void;
 }
 
-export default function AboutTab({ product, category, subcategory, averageRating }: Props) {
+export default function AboutTab({ product, category, subcategory, averageRating, onTabChange }: Props) {
 	const cartT = useTranslations('cart');
 	const navT = useTranslations('navigation');
 	const prodT = useTranslations('products');
@@ -55,12 +56,15 @@ export default function AboutTab({ product, category, subcategory, averageRating
 		totalAmount: prodT('totalAmount'),
 		numOfProducts: prodT('numOfProducts'),
 		buyText: cartT('buy'),
-	productInCartText: cartT('productIsInCart'),
-	cartUpdateFailed: cartT('cartUpdateFailed'),
+		productInCartText: cartT('productIsInCart'),
+		cartUpdateFailed: cartT('cartUpdateFailed'),
 	};
 
 	const discount = product.discountPrice ? product.basePrice - product.discountPrice : 0;
-	const galleryImages = product.images && product.images.length > 0 ? product.images : buildProductImages(product.imageUrl ?? undefined, 4);
+	const galleryImages =
+		product.images && product.images.length > 0
+			? product.images
+			: buildProductImages(product.imageUrl ?? undefined, 4);
 
 	return (
 		<VStack gap='8' colorPalette='gray' userSelect='none'>
@@ -177,6 +181,12 @@ export default function AboutTab({ product, category, subcategory, averageRating
 							fontSize='sm'
 							color='main'
 							_focus={{ outline: 'none' }}
+							onClick={(e) => {
+								if (onTabChange) {
+									e.preventDefault();
+									onTabChange('feedback');
+								}
+							}}
 						>
 							{prodT('feedback')} ({product.reviewCount ?? 0})
 						</Link>

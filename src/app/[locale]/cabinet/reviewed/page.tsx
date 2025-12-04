@@ -10,16 +10,16 @@ export default function Reviewed() {
 
 	return (
 		<VStack w='100%'>
-				<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
-					{navT('sidebar.reviewedProducts')}
-				</Heading>
-				<TertiaryButton
-					w={{ base: 'full', sm: '140px' }}
-					alignSelf='flex-end'
-					mt={{ base: '8', sm: '0' }}
-				>
-					{genT('clear')}
-				</TertiaryButton>
+			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
+				{navT('sidebar.reviewedProducts')}
+			</Heading>
+			<TertiaryButton
+				w={{ base: 'full', sm: '140px' }}
+				alignSelf='flex-end'
+				mt={{ base: '8', sm: '0' }}
+			>
+				{genT('clear')}
+			</TertiaryButton>
 
 			<Box as='section' w='100%'>
 				<ViewedProducts />

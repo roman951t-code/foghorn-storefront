@@ -10,7 +10,14 @@ export const extractI18nData = (
 
 export async function loadClientMessages(namespaces: string[]) {
 	const allMessages = await getMessages();
-	return pick(allMessages, namespaces);
+
+	// Ensure we always include requested namespaces, even if some are missing,
+	// to avoid runtime "missing namespace" errors in client components.
+	const picked = pick(allMessages, namespaces);
+	return namespaces.reduce<Record<string, unknown>>((acc, ns) => {
+		acc[ns] = picked?.[ns] ?? {};
+		return acc;
+	}, {});
 }
 
 export async function getLocalizedMetadata(locale: string, pageKey: string): Promise<Metadata> {

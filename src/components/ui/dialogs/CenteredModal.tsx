@@ -30,7 +30,7 @@ export default function CenteredModal({
 	children,
 	title,
 	size = 'lg',
-	closeOnInteractOutside = false,
+	closeOnInteractOutside = true,
 	setIsOpen,
 	open,
 	dialogId,

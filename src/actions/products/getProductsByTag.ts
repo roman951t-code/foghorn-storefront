@@ -63,20 +63,23 @@ export async function getProductsByTag<T extends boolean>(
 			fullSlug: true,
 			imageUrl: true,
 			basePrice: true,
-			categoryName: true,
-			subcategoryName: true,
 			discountPrice: true,
 			inStock: true,
 			reviews: { select: { rating: true } },
-			tags: true,
 			createdAt: true,
 		},
 	});
 
-	const productsWithPrice = productsQuery.map((p) => ({
-		...p,
-		effectivePrice: Number(p.discountPrice ?? p.basePrice ?? 0),
-	}));
+	const productsWithPrice = productsQuery.map((p) => {
+		const basePrice = Number(p.basePrice ?? 0);
+		const discountPrice = p.discountPrice != null ? Number(p.discountPrice) : null;
+		return {
+			...p,
+			basePrice,
+			discountPrice,
+			effectivePrice: Number(discountPrice ?? basePrice ?? 0),
+		};
+	});
 
 	let sortedProducts = [...productsWithPrice];
 	if (orderBy === 'new') {
@@ -93,17 +96,22 @@ export async function getProductsByTag<T extends boolean>(
 	}
 
 	const products: SubcategoryProduct[] = sortedProducts.map((product) => {
-		const ratings = product.reviews.map((r) => r.rating);
+		const ratings = product.reviews?.map((r) => r.rating) ?? [];
 		const averageRating = ratings.length
 			? ratings.reduce((sum, val) => sum + val, 0) / ratings.length
 			: 0;
 
 		return {
 			...product,
-			basePrice: Number(product.basePrice),
-			discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
+			id: product.id ?? '',
+			name: product.name ?? '',
+			fullSlug: product.fullSlug ?? '',
+			imageUrl: product.imageUrl ?? null,
+			inStock: !!product.inStock,
+			basePrice: Number(product.basePrice ?? 0),
+			discountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,
 			averageRating,
-			reviewCount: product.reviews.length,
+			reviewCount: product.reviews?.length ?? 0,
 		} as SubcategoryProduct;
 	});
 
@@ -135,13 +143,15 @@ export async function getProductsByTag<T extends boolean>(
 
 	const uniqueSubcategoriesMap = new Map<string, SubcategoryInfo>();
 	for (const p of allMatchingProducts) {
-		const subcategorySlug = p.category.slug;
+		const category = p.category;
+		if (!category?.slug) continue;
+		const subcategorySlug = category.slug;
 		if (!uniqueSubcategoriesMap.has(subcategorySlug)) {
 			uniqueSubcategoriesMap.set(subcategorySlug, {
-				categoryName: p.category.parent?.name || '',
-				categorySlug: p.category.parent?.slug || '',
-				subcategoryName: p.category.name,
-				subcategorySlug: p.category.slug,
+				categoryName: category.parent?.name || '',
+				categorySlug: category.parent?.slug || '',
+				subcategoryName: category.name || '',
+				subcategorySlug,
 			});
 		}
 	}

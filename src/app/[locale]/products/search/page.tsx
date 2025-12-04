@@ -185,7 +185,7 @@ export default async function SearchProducts({ searchParams }: Params) {
 					<CatalogBtn fullText />
 
 					<VStack p='4' justifyContent='flex-start'>
-						<Text w='full'>
+						<Text w='full' mb='1.5'>
 							<Highlight query={totalCount?.toString()} styles={{ fontWeight: 'semibold' }}>
 								{`${t('totalProducts')}: ${totalCount}`}
 							</Highlight>

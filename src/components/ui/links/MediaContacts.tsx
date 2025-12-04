@@ -12,7 +12,7 @@ export default function MediaContacts({ hideBelow }: Props) {
 		<Flex align='center' hideBelow={hideBelow} gap='4'>
 			<Link href='https://www.facebook.com'>
 				<IconButton
-					aria-label='Account'
+					aria-label='Visit Facebook page'
 					size='md'
 					variant='ghost'
 					color='main.lightOnly'
@@ -25,7 +25,7 @@ export default function MediaContacts({ hideBelow }: Props) {
 			</Link>
 			<Link href='https://www.instagram.com'>
 				<IconButton
-					aria-label='Account'
+					aria-label='Visit Instagram profile'
 					size='md'
 					variant='ghost'
 					color='main.lightOnly'
@@ -38,7 +38,7 @@ export default function MediaContacts({ hideBelow }: Props) {
 			</Link>
 			<Link href='https://www.viber.com'>
 				<IconButton
-					aria-label='Account'
+					aria-label='Open Viber'
 					size='md'
 					variant='ghost'
 					color='main.lightOnly'
@@ -51,7 +51,7 @@ export default function MediaContacts({ hideBelow }: Props) {
 			</Link>
 			<Link href='https://www.telegram.org'>
 				<IconButton
-					aria-label='Account'
+					aria-label='Open Telegram'
 					size='md'
 					variant='ghost'
 					color='main.lightOnly'
@@ -64,7 +64,7 @@ export default function MediaContacts({ hideBelow }: Props) {
 			</Link>
 			<Link href='https://www.facebook.com'>
 				<IconButton
-					aria-label='Account'
+					aria-label='Send email'
 					size='md'
 					variant='ghost'
 					color='main.lightOnly'

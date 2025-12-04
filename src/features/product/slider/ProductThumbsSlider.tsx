@@ -95,7 +95,7 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 								src={src}
 								alt={`Product photo ${index + 1}`}
 								fill
-								style={{ objectFit: 'contain' }}
+								style={{ objectFit: 'cover' }}
 								sizes='(max-width: 768px) 100vw, 50vw'
 								draggable={false}
 							/>

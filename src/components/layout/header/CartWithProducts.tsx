@@ -5,6 +5,7 @@ import { LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
 import { I18nData } from '@/types/i18n';
 import { Dispatch, SetStateAction } from 'react';
 import { useCart } from '@/hooks/useCart';
+import { calculateCartTotals } from '@/utils/cartTotals';
 
 interface Props {
 	i18nData: I18nData;
@@ -15,11 +16,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 	const { cartData, handleClearCart } = useCart();
 	const { items: cartItems } = cartData;
 
-	const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-	const totalPrice = cartItems.reduce((acc, item) => {
-		const price = item.discountPrice ?? item.basePrice;
-		return acc + price * item.quantity;
-	}, 0);
+	const { totalCount, discountedTotal } = calculateCartTotals(cartItems);
 
 	return (
 		<>
@@ -28,7 +25,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 					<VStack gap='4' alignItems='flex-start'>
 						<Stat.Root>
 							<Stat.Label fontSize='15px'>{i18nData.totalAmount}</Stat.Label>
-							<Stat.ValueText fontSize='3xl'>{`${totalPrice.toFixed(2)} ₴`}</Stat.ValueText>
+							<Stat.ValueText fontSize='3xl'>{`${discountedTotal.toFixed(2)} ₴`}</Stat.ValueText>
 						</Stat.Root>
 						<Text fontWeight='normal' fontSize='15px'>
 							{`${i18nData.numOfProducts}:  `}
@@ -44,7 +41,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 				</Flex>
 				<IconButton
 					onClick={handleClearCart}
-					aria-label='Trash'
+					aria-label='Clear cart'
 					variant='ghost'
 					rounded='full'
 					color='main.disabled'
@@ -61,7 +58,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 			</Flex>
 			<Stack direction='column' overflowY='auto' gap={4} mt={4} maxHeight='650px'>
 				{cartItems.map((item) => (
-					<CartOrderCard key={item?.id} product={item} i18nData={i18nData} />
+					<CartOrderCard key={item?.id} product={item} i18nData={i18nData} onNavigate={() => setIsOpen(false)} />
 				))}
 			</Stack>
 		</>

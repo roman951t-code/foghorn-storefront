@@ -89,6 +89,10 @@ export default function SearchCategories({ data, allCategories }: Props) {
 			{categoryList?.length > 5 && (
 				<>
 					<Link
+						as='button'
+						type='button'
+						aria-expanded={showAll}
+						aria-label={showAll ? 'Show fewer categories' : 'Show all categories'}
 						mt='2'
 						w='full'
 						gap='4'

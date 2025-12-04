@@ -28,6 +28,7 @@ export default function LocaleSwitcher() {
 	return (
 		<Select.Root
 			position='relative'
+			aria-label='Change language'
 			bg={{ base: 'gray.100', _dark: 'gray.800' }}
 			rounded='sm'
 			collection={languages}

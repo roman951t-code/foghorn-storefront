@@ -83,13 +83,15 @@ export async function getProductsBySearchQuery(
 	>();
 
 	for (const p of allMatchingProducts) {
-		const subcategorySlug = p.category.slug;
+		const category = p.category;
+		if (!category?.slug) continue;
+		const subcategorySlug = category.slug;
 		if (!uniqueSubcategoriesMap.has(subcategorySlug)) {
 			uniqueSubcategoriesMap.set(subcategorySlug, {
-				categoryName: p.category.parent?.name || '',
-				categorySlug: p.category.parent?.slug || '',
-				subcategoryName: p.category.name,
-				subcategorySlug: p.category.slug,
+				categoryName: category.parent?.name || '',
+				categorySlug: category.parent?.slug || '',
+				subcategoryName: category.name || '',
+				subcategorySlug,
 			});
 		}
 	}
@@ -123,22 +125,27 @@ export async function getProductsBySearchQuery(
 			discountPrice: true,
 			inStock: true,
 			reviews: { select: { rating: true } },
-			tags: true,
-			createdAt: true,
 		},
 	});
 
 	const productItems: SubcategoryProduct[] = products.map((product) => {
-		const ratings = product.reviews.map((r) => r.rating);
+		const ratings = product.reviews?.map((r) => r.rating) ?? [];
 		const averageRating =
 			ratings.length > 0 ? ratings.reduce((sum, val) => sum + val, 0) / ratings.length : 0;
 
 		return {
 			...product,
-			basePrice: Number(product.basePrice),
-			discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
+			id: product.id ?? '',
+			name: product.name ?? '',
+			fullSlug: product.fullSlug ?? '',
+			imageUrl: product.imageUrl ?? null,
+			categoryName: product.categoryName ?? '',
+			subcategoryName: product.subcategoryName ?? '',
+			inStock: !!product.inStock,
+			basePrice: Number(product.basePrice ?? 0),
+			discountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,
 			averageRating,
-			reviewCount: product.reviews.length,
+			reviewCount: product.reviews?.length ?? 0,
 		};
 	});
 

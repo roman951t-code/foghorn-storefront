@@ -16,7 +16,13 @@ export default function ProductsFilter({ i18nData }: Props) {
 	});
 
 	return (
-		<Select.Root collection={options} size='sm' width='240px' defaultValue={['new']}>
+		<Select.Root
+			collection={options}
+			size='sm'
+			width='240px'
+			defaultValue={['new']}
+			aria-label='Sort wishlist products'
+		>
 			<Select.HiddenSelect />
 			<Select.Control>
 				<Select.Trigger>

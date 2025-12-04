@@ -8,20 +8,26 @@ import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { I18nData } from '@/types/i18n';
 import { CartProduct } from '@/types/cart';
+import { buildProductImages } from '@/utils/productImages';
 
 interface Props {
 	product: CartProduct;
 	i18nData: I18nData;
+	onNavigate?: () => void;
 }
 
-const img1 = '/assets/images/temp/1.webp';
-
-export default function CartOrderCard({ product, i18nData }: Props) {
+export default function CartOrderCard({ product, i18nData, onNavigate }: Props) {
 	const { handleRemoveItem, handleUpdateQuantity } = useCart();
 
 	const discountAmount = product.discountPrice
 		? Number(product.basePrice) - Number(product.discountPrice)
 		: 0;
+	const previewImage =
+		buildProductImages(product.imageUrl)?.[0] || product.imageUrl || '/assets/images/temp/1.webp';
+	const productHref = `/products/${product.fullSlug}`;
+	const handleNavigate = () => {
+		if (typeof onNavigate === 'function') onNavigate();
+	};
 
 	const handleDelete = async () => {
 		const result = await handleRemoveItem(product.id);
@@ -64,20 +70,29 @@ export default function CartOrderCard({ product, i18nData }: Props) {
 					w='full'
 				>
 					<Flex alignItems='center' direction='row' w='100%'>
-						<Image
-							src={img1}
-							alt={product.name}
-							width={110}
-							height={110}
-							style={{ objectFit: 'contain', marginRight: '6px' }}
-						/>
-							<Flex direction='column' gap={3} pt={{ base: 2, sm: 0 }}>
+						<LocaleNavLink
+							href={productHref}
+							display='inline-block'
+							lineHeight='0'
+							mx='4'
+							onClick={handleNavigate}
+						>
+							<Image
+								src={previewImage}
+								alt={product.name}
+								width={110}
+								height={110}
+								style={{ objectFit: 'contain', borderRadius: '6px' }}
+							/>
+						</LocaleNavLink>
+						<Flex direction='column' gap={3} pt={{ base: 2, sm: 0 }}>
 							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
 								<LocaleNavLink
-									href={`/products/${product.fullSlug}`}
+									href={productHref}
 									textDecorationColor='main'
 									color='main'
 									variant='underline'
+									onClick={handleNavigate}
 								>
 									{product.name}
 								</LocaleNavLink>
@@ -123,11 +138,12 @@ export default function CartOrderCard({ product, i18nData }: Props) {
 							defaultValue={product.quantity?.toString() || '1'}
 							min={1}
 							size='xs'
+							aria-label='Quantity'
 							onValueChange={handleQuantityChange}
 						/>
 						<IconButton
 							mt='0'
-							aria-label='Trash'
+							aria-label='Remove item from cart'
 							variant='ghost'
 							rounded='full'
 							color='main.disabled'

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Product } from '@/types/product';
 import { Tabs } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
@@ -22,9 +22,7 @@ interface Props {
 export default function ProductTabs({ tab = 'about', product, category, subcategory }: Props) {
 	const prodT = useTranslations('products');
 	const validT = useTranslations('validation');
-	const router = useRouter();
 	const pathname = usePathname();
-	const searchParams = useSearchParams();
 
 	const availableTabs = useMemo(() => ['about', 'characteristics', 'feedback'], []);
 	const initialTab = availableTabs.includes(tab) ? tab : 'about';
@@ -40,14 +38,9 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 			: 0;
 
 	useEffect(() => {
-		const currentTab = searchParams.get('tab');
-		if (currentTab && availableTabs.includes(currentTab) && currentTab !== selectedTab) {
-			setSelectedTab(currentTab);
-		}
-		if (!currentTab && selectedTab !== 'about') {
-			setSelectedTab('about');
-		}
-	}, [searchParams, selectedTab, availableTabs]);
+		// Sync state if the tab from props changes (e.g., initial server render)
+		setSelectedTab(initialTab);
+	}, [initialTab]);
 
 	const items = [
 		{
@@ -59,6 +52,7 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 					category={category}
 					subcategory={subcategory}
 					averageRating={averageRating}
+					onTabChange={(nextTab) => handleTabChange(nextTab)}
 				/>
 			),
 		},
@@ -86,15 +80,17 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 
 		setSelectedTab(next);
 
-		const params = new URLSearchParams(searchParams.toString());
-		if (next === 'about') {
-			params.delete('tab');
-		} else {
-			params.set('tab', next);
+		if (typeof window !== 'undefined') {
+			const params = new URLSearchParams(window.location.search);
+			if (next === 'about') {
+				params.delete('tab');
+			} else {
+				params.set('tab', next);
+			}
+			const query = params.toString();
+			const nextUrl = `${pathname}${query ? `?${query}` : ''}`;
+			window.history.replaceState(null, '', nextUrl);
 		}
-
-		const query = params.toString();
-		router.replace(`${pathname}${query ? `?${query}` : ''}`, { scroll: false });
 	};
 
 	return (

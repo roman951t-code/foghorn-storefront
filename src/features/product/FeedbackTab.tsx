@@ -170,7 +170,7 @@ export default function FeedbackTab({
 								onClick={onRemoveFeedback}
 								alignSelf='flex-end'
 								justifySelf='flex-end'
-								aria-label='Trash'
+								aria-label='Delete review'
 								variant='ghost'
 								rounded='full'
 								color='main.disabled'

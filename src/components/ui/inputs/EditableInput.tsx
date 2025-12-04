@@ -14,6 +14,7 @@ export default function EditableInput({ defaultValue, onSubmit }: Props) {
 			<Editable.Preview textStyle='md' minW='110px' />
 			<Editable.Input
 				textAlign='left'
+				aria-label='Editable field input'
 				flex='1'
 				rounded='md'
 				fontSize='md'
@@ -28,17 +29,39 @@ export default function EditableInput({ defaultValue, onSubmit }: Props) {
 			/>
 			<Editable.Control>
 				<Editable.EditTrigger asChild>
-					<IconButton variant='ghost' size='xs' color='main' bg='bg' rounded='full' ml='2'>
+					<IconButton
+						variant='ghost'
+						size='xs'
+						color='main'
+						bg='bg'
+						rounded='full'
+						ml='2'
+						aria-label='Edit value'
+					>
 						<LuPencilLine />
 					</IconButton>
 				</Editable.EditTrigger>
 				<Editable.CancelTrigger asChild>
-					<IconButton variant='ghost' size='xs' color='main' bg='bg' rounded='full'>
+					<IconButton
+						variant='ghost'
+						size='xs'
+						color='main'
+						bg='bg'
+						rounded='full'
+						aria-label='Cancel editing'
+					>
 						<LuX />
 					</IconButton>
 				</Editable.CancelTrigger>
 				<Editable.SubmitTrigger asChild>
-					<IconButton variant='ghost' size='xs' color='main' bg='bg' rounded='full'>
+					<IconButton
+						variant='ghost'
+						size='xs'
+						color='main'
+						bg='bg'
+						rounded='full'
+						aria-label='Save value'
+					>
 						<LuCheck />
 					</IconButton>
 				</Editable.SubmitTrigger>

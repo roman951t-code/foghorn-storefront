@@ -54,6 +54,11 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 						fontSize='md'
 						h='38px'
 						minW='60px'
+						type='number'
+						inputMode='numeric'
+						aria-label='Minimum price'
+						min={0}
+						max={values[1]}
 						value={values[0]}
 						onChange={(e) => handleMinChange(e.target.value)}
 					/>
@@ -61,6 +66,11 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 						fontSize='md'
 						h='38px'
 						minW='60px'
+						type='number'
+						inputMode='numeric'
+						aria-label='Maximum price'
+						min={values[0]}
+						max={maxPrice.current}
 						value={values[1]}
 						onChange={(e) => handleMaxChange(e.target.value)}
 					/>
@@ -86,6 +96,7 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 				width='100%'
 				min={0}
 				max={Math.max(1, maxPrice.current)}
+				aria-label={[`${title} minimum`, `${title} maximum`]}
 				value={[
 					Math.max(0, Math.min(values[0], maxPrice.current)),
 					Math.max(0, Math.min(values[1], maxPrice.current)),

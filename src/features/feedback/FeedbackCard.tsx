@@ -100,7 +100,7 @@ function CardWithFeedback({ item }: { item: (typeof items)[0] }) {
 							</Stack>
 
 							<IconButton
-								aria-label='Cart'
+								aria-label='Delete feedback'
 								variant='ghost'
 								rounded='full'
 								color='main.disabled'

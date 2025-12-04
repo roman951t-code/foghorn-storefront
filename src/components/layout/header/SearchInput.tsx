@@ -107,6 +107,7 @@ export default function SearchInput({
 				<Combobox.Control roundedLeft='md' fontSize='md' minW='284px'>
 					<Combobox.Input
 						placeholder={placeholder}
+						aria-label={placeholder}
 						fontSize='md'
 						roundedRight='0'
 						_focus={{
@@ -116,7 +117,11 @@ export default function SearchInput({
 						}}
 					/>
 					<Combobox.IndicatorGroup pr='2'>
-						<Combobox.ClearTrigger _hover={{ cursor: 'pointer' }} mt='-1' />
+						<Combobox.ClearTrigger
+							aria-label='Clear search input'
+							_hover={{ cursor: 'pointer' }}
+							mt='-1'
+						/>
 						<Combobox.Trigger />
 					</Combobox.IndicatorGroup>
 				</Combobox.Control>

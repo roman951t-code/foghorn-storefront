@@ -17,7 +17,10 @@ export async function getProductsBySubcategorySlug(
 ) {
 	const subcategory = await prisma.productCategory.findUnique({
 		where: { slug },
-		include: { parent: true },
+		select: {
+			name: true,
+			parent: { select: { name: true } },
+		},
 	});
 
 	if (!subcategory) {
@@ -95,7 +98,6 @@ export async function getProductsBySubcategorySlug(
 			inStock: true,
 			reviews: { select: { rating: true } },
 			tags: true,
-			createdAt: true,
 		},
 	});
 
@@ -112,15 +114,22 @@ export async function getProductsBySubcategorySlug(
 	}
 
 	const products: SubcategoryProduct[] = finalProducts.map((p) => {
-		const ratings = p.reviews.map((r) => r.rating);
+		const ratings = p.reviews?.map((r) => r.rating) ?? [];
 		const averageRating = ratings.length ? ratings.reduce((s, v) => s + v, 0) / ratings.length : 0;
 
 		return {
 			...p,
-			basePrice: Number(p.basePrice),
-			discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
+			id: p.id ?? '',
+			name: p.name ?? '',
+			fullSlug: p.fullSlug ?? '',
+			imageUrl: p.imageUrl ?? null,
+			categoryName: p.categoryName ?? '',
+			subcategoryName: p.subcategoryName ?? '',
+			inStock: !!p.inStock,
+			basePrice: Number(p.basePrice ?? 0),
+			discountPrice: p.discountPrice != null ? Number(p.discountPrice) : null,
 			averageRating,
-			reviewCount: p.reviews.length,
+			reviewCount: p.reviews?.length ?? 0,
 		} as SubcategoryProduct;
 	});
 

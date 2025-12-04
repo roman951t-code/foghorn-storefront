@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { FiShoppingCart, FiHeart } from 'react-icons/fi';
+import { FiHeart } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link, Icon } from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
@@ -8,15 +8,15 @@ import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { Rating } from '@/components/ui/chakra/rating';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
-import { IoBagCheckOutline } from 'react-icons/io5';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 import { useCart } from '@/hooks/useCart';
 import { useWishList } from '@/hooks/useWishList';
-import { BsBagHeart } from 'react-icons/bs';
 import { SubcategoryProduct } from '@/types/product';
 import { buildProductImages } from '@/utils/productImages';
+import { MdOutlineShoppingCart, MdShoppingCart } from 'react-icons/md';
+import { FaHeart } from 'react-icons/fa';
 
 export type CardProduct = SubcategoryProduct & {
 	imageUrl?: string | null;
@@ -44,7 +44,7 @@ export default function ProductCard({ product }: Props) {
 	const discount = discountPrice ? basePrice - discountPrice : 0;
 
 	const [isLoading, setIsLoading] = useState(false);
-	const { productIds, handleAddItem } = useCart();
+	const { productIds, handleAddItem, handleRemoveItem } = useCart();
 	const { ids: wishListIds, handleWishAdd, handleWishRemove } = useWishList();
 	const previewImages = product.images?.length
 		? product.images
@@ -55,7 +55,7 @@ export default function ProductCard({ product }: Props) {
 	const isInCart = productIds.includes(product?.id);
 	const isInWishlist = wishListIds.includes(product?.id);
 
-	const addToCard = async () => {
+	const addToCart = async () => {
 		setIsLoading(true);
 
 		try {
@@ -66,6 +66,22 @@ export default function ProductCard({ product }: Props) {
 			}
 		} catch {
 			showToaster('error', toasterMessages.cartUpdateFailed(cartT));
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const removeFromCart = async () => {
+		setIsLoading(true);
+
+		try {
+			const result = await handleRemoveItem(product.id);
+
+			if (!result.success) {
+				showToaster('error', cartT('cartRemoveFailed'));
+			}
+		} catch {
+			showToaster('error', cartT('cartRemoveFailed'));
 		} finally {
 			setIsLoading(false);
 		}
@@ -114,34 +130,25 @@ export default function ProductCard({ product }: Props) {
 		>
 			<Flex direction='column' gap={2} p={4} pt='2' h='full' justifyContent='space-between'>
 				<Flex align='center' justifyContent='space-between'>
-					{isInCart ? (
-						<Icon
-							size='lg'
-							aria-label='Cart'
-							colorPalette='green'
-							color={{ base: 'colorPalette.600', _dark: 'colorPalette.500' }}
-						>
-							<IoBagCheckOutline />
+					<IconButton
+						loading={isLoading}
+						onClick={isInCart ? removeFromCart : addToCart}
+						aria-label='Cart add and remove'
+						variant='ghost'
+						disabled={!isInStock}
+						rounded='full'
+						colorPalette='green'
+						color={{ base: 'colorPalette.600', _dark: 'colorPalette.500' }}
+						transition='all 0.2s ease-in-out'
+						_hover={{
+							bg: 'colorPalette.600',
+							color: 'main.lightOnly',
+						}}
+					>
+						<Icon size='lg' aria-label='Wish'>
+							{isInCart ? <MdShoppingCart /> : <MdOutlineShoppingCart />}
 						</Icon>
-					) : (
-						<IconButton
-							loading={isLoading}
-							onClick={addToCard}
-							disabled={!isInStock}
-							aria-label='Cart'
-							variant='ghost'
-							rounded='full'
-							colorPalette='green'
-							color={{ base: 'colorPalette.600', _dark: 'colorPalette.500' }}
-							transition='all 0.2s ease-in-out'
-							_hover={{
-								bg: 'colorPalette.600',
-								color: 'main.lightOnly',
-							}}
-						>
-							<FiShoppingCart />
-						</IconButton>
-					)}
+					</IconButton>
 
 					<IconButton
 						onClick={isInWishlist ? removeFromWishList : addToWishList}
@@ -156,13 +163,7 @@ export default function ProductCard({ product }: Props) {
 							color: 'main.lightOnly',
 						}}
 					>
-						{isInWishlist ? (
-							<Icon size='md' aria-label='Wish'>
-								<BsBagHeart />
-							</Icon>
-						) : (
-							<FiHeart />
-						)}
+						{isInWishlist ? <FaHeart /> : <FiHeart />}
 					</IconButton>
 				</Flex>
 
@@ -171,7 +172,7 @@ export default function ProductCard({ product }: Props) {
 				</LocaleNavLink>
 
 				<LinkBox>
-					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='1' w='100%'>
+					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='1.5' w='100%'>
 						<LocaleNavLink
 							href={`/products/${fullSlug}`}
 							textDecorationColor='main'

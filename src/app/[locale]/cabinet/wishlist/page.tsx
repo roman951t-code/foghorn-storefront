@@ -32,7 +32,7 @@ export default function Wishlist() {
 					<HStack alignSelf='flex-end' gap='2'>
 						<IconButton
 							size='md'
-							aria-label='Cart'
+							aria-label='Share wishlist'
 							variant='ghost'
 							rounded='full'
 							colorPalette='orange'
@@ -49,7 +49,7 @@ export default function Wishlist() {
 						</IconButton>
 						<IconButton
 							size='md'
-							aria-label='Cart'
+							aria-label='Clear wishlist'
 							variant='ghost'
 							rounded='full'
 							colorPalette='gray'

@@ -24,7 +24,6 @@ export async function getRecentlyViewedProducts(userId: string, limit = 16) {
 					subcategoryName: true,
 					averageRating: true,
 					reviewCount: true,
-					tags: true,
 				},
 			},
 		},
@@ -35,9 +34,17 @@ export async function getRecentlyViewedProducts(userId: string, limit = 16) {
 			const p = entry.product;
 			if (!p) return null;
 			return {
-				...p,
-				basePrice: Number(p.basePrice),
-				discountPrice: p.discountPrice ? Number(p.discountPrice) : null,
+				id: p.id ?? '',
+				name: p.name ?? '',
+				fullSlug: p.fullSlug ?? '',
+				imageUrl: p.imageUrl ?? null,
+				categoryName: p.categoryName ?? '',
+				subcategoryName: p.subcategoryName ?? '',
+				inStock: !!p.inStock,
+				averageRating: p.averageRating ?? 0,
+				reviewCount: p.reviewCount ?? 0,
+				basePrice: Number(p.basePrice ?? 0),
+				discountPrice: p.discountPrice != null ? Number(p.discountPrice) : null,
 			} as SubcategoryProduct;
 		})
 		.filter(Boolean) as SubcategoryProduct[];
