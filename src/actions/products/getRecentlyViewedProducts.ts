@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 
-export async function getRecentlyViewedProducts(userId: string, limit = 16) {
+export async function getRecentlyViewedProducts(userId: string, limit = 32) {
 	if (!userId) return [];
 
 	const viewed = await prisma.recentlyViewed.findMany({

@@ -16,7 +16,7 @@ type ReviewStore = {
 		productId: string,
 		formData: FeedbackSchema,
 		userId?: string
-	) => Promise<{ success: boolean }>;
+	) => Promise<{ success: boolean; review?: Review }>;
 	handleRemoveAction: (productId: string, userId?: string) => Promise<{ success: boolean }>;
 };
 
@@ -79,7 +79,7 @@ export const useReviewStore = createBoundedStore<ReviewStore>((set, get) => ({
 				}));
 				return { success: false };
 			}
-			return { success: true };
+			return { success: true, review: optimistic };
 		} catch {
 			set((state) => ({
 				reviewsByProduct: {

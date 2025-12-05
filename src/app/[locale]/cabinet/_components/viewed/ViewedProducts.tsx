@@ -1,18 +1,25 @@
-import { SimpleGrid, Box } from '@chakra-ui/react';
+import { SimpleGrid, Box, EmptyState } from '@chakra-ui/react';
+import { HiOutlineEye } from 'react-icons/hi';
 import ProductCard, { type CardProduct } from '@/features/product/cards/ProductCard';
 
-export default function ViewedProducts() {
-	const placeholderProduct: CardProduct = {
-		id: 'placeholder',
-		imageUrl: null,
-		basePrice: 0,
-		discountPrice: null,
-		fullSlug: '#',
-		name: '',
-		inStock: false,
-		averageRating: 0,
-		reviewCount: 0,
-	};
+type Props = {
+	products: CardProduct[];
+	emptyText: string;
+};
+
+export default function ViewedProducts({ products, emptyText }: Props) {
+	if (!products.length) {
+		return (
+			<EmptyState.Root>
+				<EmptyState.Content>
+					<EmptyState.Indicator>
+						<HiOutlineEye />
+					</EmptyState.Indicator>
+					<EmptyState.Title>{emptyText}</EmptyState.Title>
+				</EmptyState.Content>
+			</EmptyState.Root>
+		);
+	}
 
 	return (
 		<SimpleGrid
@@ -22,9 +29,9 @@ export default function ViewedProducts() {
 			gapX='2'
 			gapY='4'
 		>
-			{new Array(9).fill(null).map((_, index) => (
-				<Box key={index}>
-					<ProductCard product={{ ...placeholderProduct, id: `placeholder-${index}` }} />
+			{products.map((product) => (
+				<Box key={product.id}>
+					<ProductCard product={product} />
 				</Box>
 			))}
 		</SimpleGrid>

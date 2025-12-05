@@ -261,6 +261,19 @@
 		"disAdvantages": "Disadvantages",
 		"all": "All"
 	},
+	"errors": {
+		"ref": "Ref: {value}",
+		"actions": {
+			"tryAgain": "Try again",
+			"goHome": "Go home"
+		},
+		"checkoutUnavailableTitle": "Checkout is unavailable",
+		"checkoutUnavailableDesc": "Something went wrong while loading checkout. Please try again.",
+		"categoryUnavailableTitle": "Category is unavailable",
+		"categoryUnavailableDesc": "Something went wrong loading this category. Please retry or go back.",
+		"subcategoryUnavailableTitle": "Products are unavailable",
+		"subcategoryUnavailableDesc": "Something went wrong loading this subcategory. Please retry or go back."
+	},
 	"pages": {
 		"main": {
 			"title": "Home"

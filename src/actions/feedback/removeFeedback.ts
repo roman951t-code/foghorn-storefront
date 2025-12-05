@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
+import { revalidateTag } from 'next/cache';
 
 export async function removeFeedback(
 	productId: string
@@ -19,14 +20,15 @@ export async function removeFeedback(
 	}
 
 	try {
-		await prisma.review.delete({
+		await prisma.review.deleteMany({
 			where: {
-				userId_productId: {
-					userId,
-					productId,
-				},
+				userId,
+				productId,
 			},
 		});
+
+		revalidateTag('products', 'default');
+		revalidateTag('product-by-slug', 'default');
 
 		return { success: true };
 	} catch (error: any) {

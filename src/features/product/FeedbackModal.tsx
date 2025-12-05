@@ -22,8 +22,16 @@ import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { useReviews } from '@/hooks/useReviews';
 import { useTranslations } from 'next-intl';
+import { useReviewStore } from '@/stores/reviewStore';
+import type { Review } from '@/types/product';
 
-export default function FeedbackModal() {
+type Props = {
+	productId?: string;
+	initialReviews?: Review[];
+	onSuccess?: (review: Review) => void;
+};
+
+export default function FeedbackModal({ productId, initialReviews, onSuccess }: Props) {
 	const authT = useTranslations('auth');
 	const prodT = useTranslations('products');
 	const genT = useTranslations('common');
@@ -34,6 +42,9 @@ export default function FeedbackModal() {
 	const [isPending, setIsPending] = useState(false);
 
 	const { handleReviewAction } = useReviews();
+	const setActiveProduct = useReviewStore((state) => state.setActiveProduct);
+	const setReviews = useReviewStore((state) => state.setReviews);
+	const clearActiveProduct = useReviewStore((state) => state.clearActiveProduct);
 
 	const i18nData = useMemo(
 		() => ({
@@ -66,23 +77,41 @@ export default function FeedbackModal() {
 		defaultValues: {
 			name: session?.user?.name || '',
 			lastName: session?.user?.lastName || '',
-			feedback: '',
-			advantages: '',
-			disAdvantages: '',
-			rating: 4.5,
+			feedback: initialReviews?.[0]?.comment ?? '',
+			advantages: initialReviews?.[0]?.advantages ?? '',
+			disAdvantages: initialReviews?.[0]?.disadvantages ?? '',
+			rating: initialReviews?.[0]?.rating ?? 4.5,
 		},
 	});
+
+	const handleModalChange = (nextOpen: boolean) => {
+		setIsOpen(nextOpen);
+		if (!nextOpen && productId) {
+			clearActiveProduct(productId);
+		}
+	};
+
+	const handleOpen = () => {
+		if (productId) {
+			setActiveProduct(productId);
+			setReviews(productId, initialReviews ?? []);
+		}
+		setIsOpen(true);
+	};
 
 	const onSubmit = async (formData: FeedbackSchema) => {
 		setIsPending(true);
 
 		try {
-			const { success } = await handleReviewAction(formData);
+			const { success, review } = await handleReviewAction(formData);
 
 			if (!success) {
 				showToaster('error', toasterMessages.reviewAddFailed(i18nData));
 			} else {
-				setIsOpen(false);
+				handleModalChange(false);
+				if (review) {
+					onSuccess?.(review);
+				}
 			}
 		} catch (err) {
 			showToaster('error', toasterMessages.reviewAddFailed(i18nData));
@@ -95,7 +124,7 @@ export default function FeedbackModal() {
 		return (
 			<Auth
 				trigger={
-					<SecondaryButton>
+					<SecondaryButton onClick={handleOpen}>
 						<VscFeedback /> {i18nData.leaveFeedback}
 					</SecondaryButton>
 				}
@@ -107,10 +136,10 @@ export default function FeedbackModal() {
 		<CenteredModal
 			dialogId='feedback-modal'
 			open={isOpen}
-			setIsOpen={setIsOpen}
+			setIsOpen={handleModalChange}
 			title={i18nData.leaveFeedback}
 			trigger={
-				<SecondaryButton>
+				<SecondaryButton onClick={handleOpen}>
 					<VscFeedback /> {i18nData.leaveFeedback}
 				</SecondaryButton>
 			}

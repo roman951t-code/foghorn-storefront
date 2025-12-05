@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 
-const MAX_RECENTLY_VIEWED = 16;
+const MAX_RECENTLY_VIEWED = 32;
 
 export async function trackProductView(userId: string, productId: string) {
 	if (!userId || !productId) return;

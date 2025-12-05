@@ -16,6 +16,7 @@ import { getSearchFilters, getTagFilters } from '@/actions/products/getProductsF
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedProducts';
+import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
 
 type Params = {
 	searchParams: {
@@ -28,8 +29,6 @@ type Params = {
 		orderBy?: 'new' | 'expensive' | 'cheap';
 	};
 };
-
-const PRODUCTS_PER_PAGE = 12;
 
 const excludedParams = new Set([
 	'searchQuery',

@@ -14,6 +14,7 @@ import Pagination from '@/components/ui/Pagination';
 import { getSubcategoryNameBySlug } from '@/actions/products/getSubcategoryNameBySlug';
 import { getSubcategoryFilters } from '@/actions/products/getProductsFilters';
 import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
+import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
 
 type Params = {
 	params: { category: string; subcategory: string };
@@ -26,8 +27,6 @@ type Params = {
 		orderBy?: 'new' | 'expensive' | 'cheap';
 	};
 };
-
-const PRODUCTS_PER_PAGE = 12;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	const { subcategory } = await params;

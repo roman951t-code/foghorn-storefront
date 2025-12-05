@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { FeedbackSchema, getFeedbackSchema } from 'formValidationSchemas/feedbackSchema';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
+import { revalidateTag } from 'next/cache';
 
 export async function leaveFeedback(
 	_: unknown,
@@ -69,6 +70,9 @@ export async function leaveFeedback(
 				disadvantages: formData.disAdvantages ?? null,
 			},
 		});
+
+		revalidateTag('products', 'default');
+		revalidateTag('product-by-slug', 'default');
 
 		return { success: true };
 	} catch (error: any) {

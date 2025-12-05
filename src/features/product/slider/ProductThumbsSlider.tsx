@@ -47,6 +47,7 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 	const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const isSmallScreen = useBreakpointValue({ base: true, md: false });
+	const thumbInstance = !isSmallScreen && thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null;
 
 	const galleryImages = images.length
 		? images
@@ -76,7 +77,7 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 				navigation
 				spaceBetween={0}
 				pagination={pagination}
-				thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
+				thumbs={{ swiper: thumbInstance ?? undefined }}
 				modules={[FreeMode, Navigation, Thumbs, Pagination]}
 				className='thumbsSlider'
 			>
@@ -112,7 +113,7 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 					slidesPerView={4}
 					freeMode
 					watchSlidesProgress
-					modules={[FreeMode, Navigation, Thumbs]}
+					modules={[FreeMode, Navigation]}
 					className='thumbsSlider2'
 					style={{ userSelect: 'none' }}
 				>
