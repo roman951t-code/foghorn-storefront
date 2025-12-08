@@ -28,7 +28,12 @@ export default function CheckoutSteps() {
 
 	return (
 		<VStack mt='4' w='100%'>
-			<AccordionRoot collapsible multiple defaultValue={['payment']} variant='plain'>
+			<AccordionRoot
+				collapsible
+				multiple
+				defaultValue={['contacts', 'shipment', 'payment']}
+				variant='plain'
+			>
 				<AccordionItem mb='3' value='contacts' borderBottomColor='border.light'>
 					<AccordionItemTrigger>
 						<Heading as='h2' size='2xl' fontWeight='normal'>

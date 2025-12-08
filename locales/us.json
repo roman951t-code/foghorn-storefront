@@ -21,6 +21,12 @@
 		"resultsNotFound": "No results found"
 	},
 	"checkout": {
+		"signinRequiredTitle": "Sign in to place your order",
+		"signinRequiredDesc": "Please sign in, complete your contact details, and choose shipment and payment options to finish checkout.",
+		"contactRequiredTitle": "Add contact details",
+		"contactRequiredDesc": "Please fill in your name, email, and phone number, then choose shipment and payment options to place the order.",
+		"orderCreated": "Order placed successfully",
+		"orderCreateFail": "Failed to place the order. Please try again.",
 		"payment": {
 			"paypal": "PayPal",
 			"applePay": "Apple Pay",
@@ -260,6 +266,19 @@
 		"advantages": "Advantages",
 		"disAdvantages": "Disadvantages",
 		"all": "All"
+	},
+	"orders": {
+		"empty": "You have no orders yet",
+		"orderNumber": "Order №",
+		"status": "Status",
+		"payment": "Payment",
+		"shipment": "Shipment",
+		"unit": "Unit price",
+		"pending": "Pending",
+		"paid": "Paid",
+		"shipped": "Shipped",
+		"delivered": "Delivered",
+		"cancelled": "Cancelled"
 	},
 	"errors": {
 		"ref": "Ref: {value}",

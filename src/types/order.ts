@@ -1,0 +1,26 @@
+export type OrderProduct = {
+	id: string;
+	name: string;
+	fullSlug: string;
+	imageUrl: string | null;
+};
+
+export type OrderItem = {
+	id: string;
+	productId: string;
+	quantity: number;
+	unitPrice: number;
+	price: number;
+	product: OrderProduct;
+};
+
+export type UserOrder = {
+	id: string;
+	total: number;
+	status: string;
+	createdAt: Date;
+	paymentMethod: string | null;
+	shipmentMethod: string | null;
+	items: OrderItem[];
+	orderNumber?: string | null;
+};

@@ -7,6 +7,7 @@ import { buildProductImages } from '@/utils/productImages';
 
 type CheckoutCardProps = {
 	product: CartProduct;
+	showSeparator?: boolean;
 };
 
 const getImage = (src?: string | null) =>
@@ -23,7 +24,7 @@ const usePriceParts = (product: CartProduct) => {
 	return { price, hasDiscount, discountAmount };
 };
 
-export function SidebarCheckoutCard({ product }: CheckoutCardProps) {
+export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutCardProps) {
 	const t = useTranslations('common');
 	const { price, hasDiscount, discountAmount } = usePriceParts(product);
 	const quantity = Math.max(1, product.quantity ?? 1);
@@ -74,12 +75,12 @@ export function SidebarCheckoutCard({ product }: CheckoutCardProps) {
 				</VStack>
 			</Group>
 
-			<Separator mb='2' color='border.dark' />
+			{showSeparator && <Separator mb='2' color='border.dark' />}
 		</Card.Root>
 	);
 }
 
-export function FullCheckoutCard({ product }: CheckoutCardProps) {
+export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCardProps) {
 	const t = useTranslations('common');
 	const { price, hasDiscount, discountAmount } = usePriceParts(product);
 	const quantity = Math.max(1, product.quantity ?? 1);
@@ -166,7 +167,7 @@ export function FullCheckoutCard({ product }: CheckoutCardProps) {
 				</Flex>
 			</Flex>
 
-			<Separator mb='4' color='border.dark' />
+			{showSeparator && <Separator mb='4' color='border.dark' />}
 		</Card.Root>
 	);
 }

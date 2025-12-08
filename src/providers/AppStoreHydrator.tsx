@@ -39,7 +39,7 @@ export function AppStoreHydrator({
 	const hydrateGuestWish = useWishListStore((state) => state.hydrateGuestWishlist);
 	const mergeGuestWish = useWishListStore((state) => state.mergeGuestWishlistIntoServer);
 
-	const prevLoggedInRef = useRef(isLoggedIn);
+	const prevLoggedInRef = useRef<boolean | null>(null);
 	const { session } = useSession();
 	const currentUserId = session?.user?.id ?? null;
 	const prevUserIdRef = useRef<string | null>(currentUserId);
@@ -89,6 +89,17 @@ export function AppStoreHydrator({
 	// Login/logout transitions
 	useEffect(() => {
 		const wasLogged = prevLoggedInRef.current;
+
+		// Initial mount: hydrate guest carts if user starts unauthenticated.
+		if (wasLogged === null) {
+			if (!isLoggedIn) {
+				hydrateGuestCart();
+				hydrateGuestWish();
+			}
+			prevLoggedInRef.current = isLoggedIn;
+			return;
+		}
+
 		if (!wasLogged && isLoggedIn) {
 			mergeGuestCart();
 			mergeGuestWish();
@@ -96,6 +107,7 @@ export function AppStoreHydrator({
 			hydrateGuestCart();
 			hydrateGuestWish();
 		}
+
 		prevLoggedInRef.current = isLoggedIn;
 	}, [hydrateGuestCart, hydrateGuestWish, isLoggedIn, mergeGuestCart, mergeGuestWish]);
 

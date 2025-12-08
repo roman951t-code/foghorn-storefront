@@ -13,7 +13,7 @@ type Props = ButtonProps & {
 export default function ClearViewedButton({ text, ...buttonProps }: Props) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
-	const { isDisabled, ...restProps } = buttonProps;
+	const { disabled, ...restProps } = buttonProps;
 
 	const handleClear = () => {
 		startTransition(async () => {
@@ -28,8 +28,8 @@ export default function ClearViewedButton({ text, ...buttonProps }: Props) {
 		<TertiaryButton
 			{...restProps}
 			onClick={handleClear}
-			isLoading={isPending}
-			isDisabled={isPending || isDisabled}
+			loading={isPending}
+			disabled={isPending || disabled}
 		>
 			{text}
 		</TertiaryButton>

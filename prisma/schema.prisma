@@ -244,6 +244,13 @@ model Order {
   id        String      @id @default(uuid())
   userId    String
   total     Decimal     @db.Decimal(10, 2)
+  paymentMethod   String?
+  shipmentMethod  String?
+  contactName     String?
+  contactLastName String?
+  contactMiddleName   String?
+  contactEmail    String?
+  contactPhone    String?
   status    OrderStatus @default(PENDING)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt

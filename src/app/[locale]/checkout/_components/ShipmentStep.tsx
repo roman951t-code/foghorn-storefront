@@ -3,9 +3,12 @@
 import { Icon, RadioCard, Stack } from '@chakra-ui/react';
 import { FaTruck } from 'react-icons/fa';
 import { useTranslations } from 'next-intl';
+import { useCheckoutStore } from '@/stores/checkoutStore';
 
 export default function ShipmentStep() {
 	const t = useTranslations('checkout');
+	const shipmentMethod = useCheckoutStore((state) => state.shipmentMethod);
+	const setShipmentMethod = useCheckoutStore((state) => state.setShipmentMethod);
 	const items = [
 		{ value: 'nova-poshta', title: t('shipment.novaPoshta'), icon: <FaTruck /> },
 		{ value: 'ukrposhta', title: t('shipment.ukrposhta'), icon: <FaTruck /> },
@@ -17,12 +20,17 @@ export default function ShipmentStep() {
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			orientation={{ base: 'vertical', sm: 'horizontal' }}
 			align='center'
-			defaultValue='paypal'
+			defaultValue='nova-poshta'
 			mt='4'
 			css={{
 				'& div[data-state="unchecked"] span': {
 					borderColor: 'var(--chakra-colors-fg) !important',
 				},
+			}}
+			value={shipmentMethod}
+			onChange={(event) => {
+				const value = (event.target as HTMLInputElement).value;
+				setShipmentMethod(value);
 			}}
 		>
 			<Stack direction={{ base: 'column', sm: 'row' }} gap='4'>

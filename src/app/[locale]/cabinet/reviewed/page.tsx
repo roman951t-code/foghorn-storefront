@@ -1,4 +1,4 @@
-import { VStack, Heading, Box } from '@chakra-ui/react';
+import { VStack, Box } from '@chakra-ui/react';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
 import ViewedProducts from '../_components/viewed/ViewedProducts';
@@ -7,6 +7,7 @@ import { auth } from '@/lib/auth';
 import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedProducts';
 import ClearViewedButton from '../_components/viewed/ClearViewedButton';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import CabinetSectionHeading from '../_components/CabinetSectionHeading';
 
 const VIEWED_LIMIT = 32;
 
@@ -38,9 +39,7 @@ export default async function Reviewed({ searchParams }: Props) {
 
 	return (
 		<VStack w='100%'>
-			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
-				{navT('sidebar.reviewedProducts')}
-			</Heading>
+			<CabinetSectionHeading title={navT('sidebar.reviewedProducts')} />
 	<ClearViewedButton
 		text={genT('clear')}
 		w={{ base: 'full', sm: '140px' }}

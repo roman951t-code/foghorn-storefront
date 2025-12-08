@@ -1,28 +1,14 @@
 'use client';
 
-import { Box, Group, Input, Icon, RadioCard, Stack, InputGroup, Show } from '@chakra-ui/react';
-import { useState } from 'react';
-import { LuCreditCard } from 'react-icons/lu';
-import { usePaymentInputs } from 'react-payment-inputs';
-import cardImages, { type CardImages } from 'react-payment-inputs/images';
+import { Icon, RadioCard, Stack } from '@chakra-ui/react';
 import { RiAppleFill, RiBankCardFill, RiPaypalFill } from 'react-icons/ri';
 import { useTranslations } from 'next-intl';
-
-const images = cardImages as unknown as CardImages;
-
-const CardImage = (props: ReturnType<typeof usePaymentInputs>) => {
-	const { meta, getCardImageProps } = props;
-	return (
-		<Show when={meta.cardType} fallback={<LuCreditCard size={16} aria-hidden='true' />}>
-			<svg {...getCardImageProps({ images })} />
-		</Show>
-	);
-};
+import { useCheckoutStore } from '@/stores/checkoutStore';
 
 export default function PaymentStep() {
 	const t = useTranslations('checkout');
-	const payment = usePaymentInputs();
-	const [selectedPayment, setSelectedPayment] = useState('paypal');
+	const selectedPayment = useCheckoutStore((state) => state.paymentMethod);
+	const setSelectedPayment = useCheckoutStore((state) => state.setPaymentMethod);
 	const items = [
 		{ value: 'paypal', title: t('payment.paypal'), icon: <RiPaypalFill /> },
 		{ value: 'apple-pay', title: t('payment.applePay'), icon: <RiAppleFill /> },
@@ -30,59 +16,45 @@ export default function PaymentStep() {
 	];
 
 	return (
-		<>
-			<RadioCard.Root
-				colorPalette={{ base: 'orange', _dark: 'yellow' }}
-				orientation={{ base: 'vertical', sm: 'horizontal' }}
-				align='center'
-				defaultValue='paypal'
-				mt='4'
-				css={{
-					'& div[data-state="unchecked"] span': {
-						borderColor: 'var(--chakra-colors-fg) !important',
-					},
-				}}
-				value={selectedPayment}
-				onChange={(event) => {
-					const value = (event.target as HTMLInputElement).value;
-					setSelectedPayment(value);
-				}}
-			>
-					<Stack direction={{ base: 'column', sm: 'row' }}>
-					{items.map((item) => (
-						<RadioCard.Item
-							key={item.value}
-							value={item.value}
-							boxShadow='none'
-							_hover={{ cursor: 'pointer' }}
-							bg='main'
-							justifyContent={{ base: 'initial', xl: 'center' }}
-							h={{ base: 'auto', xl: '48px' }}
-						>
-							<RadioCard.ItemHiddenInput />
-							<RadioCard.ItemControl>
-								<Icon fontSize='2xl' color='fg.muted'>
-									{item.icon}
-								</Icon>
-								<RadioCard.ItemText>{item.title}</RadioCard.ItemText>
-								<RadioCard.ItemIndicator />
-							</RadioCard.ItemControl>
-						</RadioCard.Item>
-					))}
-				</Stack>
-			</RadioCard.Root>
-
-			{selectedPayment === 'card' && (
-				<Box mt='8' spaceY='-1px'>
-					<InputGroup zIndex={{ _focusWithin: '1' }} endElement={<CardImage {...payment} />}>
-						<Input roundedBottom='0' {...payment.getCardNumberProps()} />
-					</InputGroup>
-					<Group w='full' attached>
-						<Input roundedTopLeft='0' {...payment.getExpiryDateProps()} />
-						<Input roundedTopRight='0' {...payment.getCVCProps()} />
-					</Group>
-				</Box>
-			)}
-		</>
+		<RadioCard.Root
+			colorPalette={{ base: 'orange', _dark: 'yellow' }}
+			orientation={{ base: 'vertical', sm: 'horizontal' }}
+			align='center'
+			defaultValue='paypal'
+			mt='4'
+			css={{
+				'& div[data-state="unchecked"] span': {
+					borderColor: 'var(--chakra-colors-fg) !important',
+				},
+			}}
+			value={selectedPayment}
+			onChange={(event) => {
+				const value = (event.target as HTMLInputElement).value;
+				setSelectedPayment(value);
+			}}
+		>
+			<Stack direction={{ base: 'column', sm: 'row' }} gap='4'>
+				{items.map((item) => (
+					<RadioCard.Item
+						key={item.value}
+						value={item.value}
+						boxShadow='none'
+						_hover={{ cursor: 'pointer' }}
+						bg='main'
+						justifyContent={{ base: 'initial', xl: 'center' }}
+						h={{ base: 'auto', xl: '48px' }}
+					>
+						<RadioCard.ItemHiddenInput />
+						<RadioCard.ItemControl>
+							<Icon fontSize='2xl' color='fg.muted'>
+								{item.icon}
+							</Icon>
+							<RadioCard.ItemText>{item.title}</RadioCard.ItemText>
+							<RadioCard.ItemIndicator />
+						</RadioCard.ItemControl>
+					</RadioCard.Item>
+				))}
+			</Stack>
+		</RadioCard.Root>
 	);
 }

@@ -1,17 +1,23 @@
 'use client';
+
+import { type ButtonProps } from '@chakra-ui/react';
 import { IoMdCheckmarkCircleOutline } from 'react-icons/io';
-import { useSession } from '@/providers/SessionProvider';
 import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
-import { ButtonProps } from '@chakra-ui/react';
 
 interface Props extends ButtonProps {
 	text: string;
+	disabledReason?: 'auth' | 'contacts' | 'empty' | null;
+	onAccept?: () => void;
 }
 
-export default function AcceptOrderBtn({ text, ...restProps }: Props) {
-	const { session } = useSession();
+export default function AcceptOrderBtn({ text, disabledReason, onAccept, ...restProps }: Props) {
 	return (
-		<PrimaryButton type='submit' disabled={!session?.session} {...restProps}>
+		<PrimaryButton
+			type='button'
+			disabled={!!disabledReason}
+			onClick={disabledReason ? undefined : onAccept}
+			{...restProps}
+		>
 			<IoMdCheckmarkCircleOutline />
 			{text}
 		</PrimaryButton>

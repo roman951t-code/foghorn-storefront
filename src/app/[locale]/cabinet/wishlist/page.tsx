@@ -1,10 +1,11 @@
-import { VStack, HStack, Heading, IconButton, Icon } from '@chakra-ui/react';
+import { VStack, HStack, IconButton, Icon } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { IoShareSocialOutline } from 'react-icons/io5';
 import WishList from '../_components/wishlist/WishList';
 import ProductsFilter from '../_components/wishlist/ProductsFilter';
 import { FiTrash2 } from 'react-icons/fi';
 import WishlistPagination from '../_components/wishlist/WishlistPagination';
+import CabinetSectionHeading from '../_components/CabinetSectionHeading';
 import WishListCount from '../_components/wishlist/WishlistCount';
 
 export default function Wishlist() {
@@ -21,9 +22,7 @@ export default function Wishlist() {
 
 	return (
 		<VStack>
-			<Heading as='h2' size='2xl' fontWeight='normal' w='100%'>
-				{navT('sidebar.wishList')}
-			</Heading>
+			<CabinetSectionHeading title={navT('sidebar.wishList')} />
 
 			<HStack w='100%' mt='6' justifyContent='space-between' alignItems='flex-start'>
 				<WishListCount totalProductsText={prodT('totalProducts')} unitsText={genT('units')} />

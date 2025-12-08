@@ -3,7 +3,7 @@ import { Fieldset, Wrap } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
-import { startTransition, useActionState, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
 	createAccountSchema,
 	EditNameActionPayload,
@@ -11,8 +11,7 @@ import {
 } from 'formValidationSchemas/accountSchema';
 import { z } from 'zod';
 import { useSession } from '@/providers/SessionProvider';
-import AddressForm from './AddressForm';
-import { editAccountAction, editNameAction } from '@/actions/auth/editAccountAction';
+import { editNameAction } from '@/actions/auth/editAccountAction';
 import NameForm from './NameForm';
 import EmailForm from './EmailForm';
 import PhoneForm from './PhoneForm';
@@ -42,15 +41,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	);
 	const emailSchema = useMemo(() => z.object({ email: schemaShape.email }), [schemaShape]);
 	const phoneSchema = useMemo(() => z.object({ phone: schemaShape.phone }), [schemaShape]);
-	const addressSchema = useMemo(
-		() => z.object({ shipmentAddress: schemaShape.shipmentAddress }),
-		[schemaShape]
-	);
-
-	const [addressError, addressAction, isAddressPending] = useActionState(
-		editAccountAction,
-		undefined
-	);
 
 	const nameForm = useForm({
 		defaultValues: {
@@ -64,13 +54,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	const emailForm = useForm({
 		defaultValues: { email: session?.user?.email },
 		resolver: zodResolver(emailSchema),
-	});
-
-	const addressForm = useForm({
-		defaultValues: {
-			shipmentAddress: 'Запорізька обл., м. Оріхів, вул. Запорізька, буд. 72, кв. 52',
-		},
-		resolver: zodResolver(addressSchema),
 	});
 
 	const refreshSession = async () => {
@@ -101,14 +84,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 		}
 	};
 
-	const handleAddressSubmit = async (data: { shipmentAddress: string }) => {
-		const payload = { schemaName: 'addressSchema' as 'addressSchema', email: userEmail };
-
-		startTransition(async () => {
-			await addressAction(payload);
-		});
-	};
-
 	return (
 		<Wrap gapX='4' gapY='8' mt='4' colorPalette={{ base: 'orange', _dark: 'yellow' }}>
 			<NameForm
@@ -126,28 +101,21 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					maxW='4xl'
 					css={{ '--field-label-width': '150px' }}
 				>
-						<EmailForm
-							isEmailVerified={session?.user?.emailVerified}
-							i18nData={i18nData}
-							emailForm={emailForm}
-							userEmail={userEmail}
-							isGoogleUser={isGoogleUser}
-						/>
+					<EmailForm
+						isEmailVerified={session?.user?.emailVerified}
+						i18nData={i18nData}
+						emailForm={emailForm}
+						userEmail={userEmail}
+						isGoogleUser={isGoogleUser}
+					/>
 					<PhoneForm
 						i18nData={i18nData}
 						userPhone={userPhone}
 						schema={phoneSchema}
 						refreshSession={refreshSession}
 					/>
-			<AddressForm
-				i18nData={i18nData}
-				addressForm={addressForm}
-				error={addressError}
-				pending={isAddressPending}
-				onSubmitAction={addressForm.handleSubmit(handleAddressSubmit)}
-			/>
-		</Fieldset.Content>
-	</Fieldset.Root>
+				</Fieldset.Content>
+			</Fieldset.Root>
 		</Wrap>
 	);
 }

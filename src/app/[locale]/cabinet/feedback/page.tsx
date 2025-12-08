@@ -1,9 +1,10 @@
-import { VStack, Heading } from '@chakra-ui/react';
+import { VStack } from '@chakra-ui/react';
 import { getTranslations } from 'next-intl/server';
 import Pagination from '@/components/ui/Pagination';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { getUserReviewedProducts } from '@/actions/feedback/getUserReviewedProducts';
 import UserFeedbackList from '../_components/feedback/UserFeedbackList';
+import CabinetSectionHeading from '../_components/CabinetSectionHeading';
 
 type Props = {
 	searchParams?: Promise<{
@@ -35,9 +36,7 @@ export default async function Feedback({ searchParams }: Props) {
 
 	return (
 		<VStack w='100%'>
-			<Heading as='h2' size='2xl' fontWeight='normal' w='100%' mb='4'>
-				{navT('sidebar.myFeedback')}
-			</Heading>
+			<CabinetSectionHeading title={navT('sidebar.myFeedback')} mb='8' />
 
 			<UserFeedbackList
 				items={normalizedItems}
