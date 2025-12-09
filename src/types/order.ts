@@ -1,3 +1,5 @@
+import type { IconType } from 'react-icons';
+
 export type OrderProduct = {
 	id: string;
 	name: string;
@@ -23,4 +25,12 @@ export type UserOrder = {
 	shipmentMethod: string | null;
 	items: OrderItem[];
 	orderNumber?: string | null;
+};
+
+export type OrderDetailTag = {
+	key: 'status' | 'payment' | 'shipment';
+	label: string;
+	value: string;
+	colorPalette?: string;
+	icon?: IconType | null;
 };

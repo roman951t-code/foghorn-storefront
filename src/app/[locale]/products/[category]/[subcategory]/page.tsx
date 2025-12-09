@@ -20,6 +20,7 @@ type Params = {
 	params: { category: string; subcategory: string };
 	searchParams: {
 		page?: string;
+		perPage?: string;
 		search?: string;
 		min?: string;
 		max?: string;
@@ -47,8 +48,11 @@ export default async function Subcategory({ params, searchParams }: Params) {
 	const { category, subcategory } = await params;
 	const searchData = await searchParams;
 
-	const page = parseInt(searchData.page || '1', 10);
-	const offset = (page - 1) * PRODUCTS_PER_PAGE;
+	const page = Math.max(1, parseInt(searchData.page || '1', 10) || 1);
+	const requestedPerPage = parseInt(searchData.perPage || `${PRODUCTS_PER_PAGE}`, 10);
+	const pageSize =
+		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
+	const offset = (page - 1) * pageSize;
 
 	const t = await getTranslations('products');
 	const sidebarT = await getTranslations('navigation');
@@ -65,7 +69,7 @@ export default async function Subcategory({ params, searchParams }: Params) {
 	if (inStockParam === 'true') inStock = true;
 	if (inStockParam === 'false') inStock = false;
 
-	const excluded = ['page', 'search', 'min', 'max', 'inStock', 'orderBy'];
+	const excluded = ['page', 'perPage', 'search', 'min', 'max', 'inStock', 'orderBy'];
 	const dynamicFilters: Record<string, string[]> = {};
 
 	for (const [key, value] of Object.entries(searchData)) {
@@ -78,7 +82,7 @@ export default async function Subcategory({ params, searchParams }: Params) {
 	const subcategoryFilters = await getSubcategoryFilters(subcategory);
 	const subcategoryData = await getProductsBySubcategorySlug(
 		subcategory,
-		PRODUCTS_PER_PAGE,
+		pageSize,
 		offset,
 		onlyInStock,
 		inStock,
@@ -142,8 +146,8 @@ export default async function Subcategory({ params, searchParams }: Params) {
 					<ProductsGrid products={subcategoryData.products} notFound={t('productsNotFound')} />
 					<Pagination
 						currentPage={page}
-						totalProductsCount={subcategoryData?.totalCount || 0}
-						productsPerPage={PRODUCTS_PER_PAGE}
+						totalItems={subcategoryData?.totalCount || 0}
+						pageSize={pageSize}
 						baseRoute={`/products/${category}/${subcategory}`}
 					/>
 				</Box>

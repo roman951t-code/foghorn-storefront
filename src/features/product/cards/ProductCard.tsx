@@ -128,7 +128,7 @@ export default function ProductCard({ product }: Props) {
 				borderColor: { base: 'orange', _dark: 'yellow' },
 			}}
 		>
-			<Flex direction='column' gap={2} p={4} pt='2' h='full' justifyContent='space-between'>
+			<Flex direction='column' gap={2} p={3} pt='2' h='full' justifyContent='space-between'>
 				<Flex align='center' justifyContent='space-between'>
 					<IconButton
 						loading={isLoading}
@@ -172,11 +172,18 @@ export default function ProductCard({ product }: Props) {
 				</LocaleNavLink>
 
 				<LinkBox>
-					<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' mt='1.5' w='100%'>
+					<Card.Title
+						fontWeight='medium'
+						textAlign={{ base: 'center', sm: 'left' }}
+						lineHeight='24px'
+						mt='1.5'
+						w='100%'
+					>
 						<LocaleNavLink
 							href={`/products/${fullSlug}`}
 							textDecorationColor='main'
 							color='main'
+							fontSize='17px'
 							variant='underline'
 						>
 							{name}
@@ -189,18 +196,35 @@ export default function ProductCard({ product }: Props) {
 						)}
 					</Card.Title>
 
-					<Text color='main' fontSize='2xl' mt='2'>
+					<Text
+						color='main'
+						fontSize='xl'
+						mt='2'
+						textWrap='wrap'
+						textAlign={{ base: 'center', sm: 'left' }}
+					>
 						{discountPrice ?? basePrice} ₴
+						{discount > 0 && (
+							<Text
+								as='span'
+								pl='2'
+								color='main.disabled'
+								fontSize='sm'
+								textDecoration='line-through'
+							>
+								{parseInt(basePrice.toFixed(2))}₴
+								<Badge
+									variant='solid'
+									color='main.lightOnly'
+									bg='main.tertiary'
+									fontWeight='bold'
+									ml='8px'
+								>
+									- {parseInt(discount.toFixed(2))}₴
+								</Badge>
+							</Text>
+						)}
 					</Text>
-
-					{discount > 0 && (
-						<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
-							{parseInt(basePrice.toFixed(2))}₴
-							<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' ml='12px'>
-								- {parseInt(discount.toFixed(2))}₴
-							</Badge>
-						</Text>
-					)}
 				</LinkBox>
 
 				<HStack gap='4' mt='1'>

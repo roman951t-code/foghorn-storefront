@@ -16,11 +16,10 @@ export default function AuthStep() {
 		...validI18nData,
 		authToOrder: authT('authToOrder'),
 		authorize: authT('authorize'),
-		yourContacts: authT('yourContacts'),
 	};
 
 	return (
-		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light' p='4'>
+		<Card.Root size='sm' bg='none' border='none' alignItems='flex-start'>
 			<AuthData i18nData={i18nData} />
 		</Card.Root>
 	);

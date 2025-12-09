@@ -41,12 +41,12 @@ function ProductPreviewSwiper({ images }: { images: string[] }) {
 							priority
 							loading='eager'
 							src={src}
-							width={320}
-							height={240}
+							width={300}
+							height={230}
 							alt='Product photo'
 							style={{
-								borderRadius: '8px',
-								width: '130px',
+								borderRadius: '6px',
+								width: '124px',
 								height: 'auto',
 							}}
 						/>

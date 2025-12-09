@@ -1,5 +1,3 @@
-'use client';
-
 import { Heading, type HeadingProps } from '@chakra-ui/react';
 import { ReactNode } from 'react';
 

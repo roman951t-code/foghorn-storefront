@@ -80,8 +80,8 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 							<Image
 								src={previewImage}
 								alt={product.name}
-								width={110}
-								height={110}
+								width={100}
+								height={100}
 								style={{ objectFit: 'contain', borderRadius: '6px' }}
 							/>
 						</LocaleNavLink>
@@ -117,7 +117,13 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 									</Text>
 								)}
 								{discountAmount > 0 && (
-									<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='4'>
+									<Badge
+										variant='solid'
+										color='main.lightOnly'
+										bg='main.tertiary'
+										fontWeight='bold'
+										ml='8px'
+									>
 										-{discountAmount} ₴
 									</Badge>
 								)}

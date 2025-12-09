@@ -82,7 +82,6 @@
 		"contacts": "Контактні дані",
 		"deliveryAddress": "Адреса доставки",
 		"personalData": "Особисті дані",
-		"yourContacts": "Ваші контактні дані",
 		"phone": "Мобільний телефон",
 		"rememberPass": "Пароль згадав",
 		"notSecure": "Ненадійний",
@@ -278,7 +277,15 @@
 		"paid": "Оплачено",
 		"shipped": "Відправлено",
 		"delivered": "Доставлено",
-		"cancelled": "Скасовано"
+		"cancelled": "Скасовано",
+		"repeatSuccess": "Товари з замовлення додані до кошика",
+		"repeatFailed": "Не вдалося повторити замовлення",
+		"repeatNotFound": "Замовлення не знайдено",
+		"repeatEmpty": "У замовленні немає товарів для повтору",
+		"repeatUnauthorized": "Увійдіть, щоб повторити замовлення"
+	},
+	"pagination": {
+		"perPage": "На сторінці"
 	},
 	"errors": {
 		"ref": "Код помилки: {value}",

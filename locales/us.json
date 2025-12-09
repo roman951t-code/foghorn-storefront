@@ -82,7 +82,6 @@
 		"contacts": "Contact details",
 		"deliveryAddress": "Delivery address",
 		"personalData": "Personal data",
-		"yourContacts": "Your contact details",
 		"phone": "Mobile phone",
 		"rememberPass": "I remember the password",
 		"notSecure": "Weak",
@@ -278,7 +277,15 @@
 		"paid": "Paid",
 		"shipped": "Shipped",
 		"delivered": "Delivered",
-		"cancelled": "Cancelled"
+		"cancelled": "Cancelled",
+		"repeatSuccess": "Order items added to your cart",
+		"repeatFailed": "Could not repeat this order",
+		"repeatNotFound": "Order not found",
+		"repeatEmpty": "This order has no items to repeat",
+		"repeatUnauthorized": "Sign in to repeat this order"
+	},
+	"pagination": {
+		"perPage": "Per page"
 	},
 	"errors": {
 		"ref": "Ref: {value}",

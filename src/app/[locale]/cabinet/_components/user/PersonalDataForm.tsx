@@ -85,7 +85,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	};
 
 	return (
-		<Wrap gapX='4' gapY='8' mt='4' colorPalette={{ base: 'orange', _dark: 'yellow' }}>
+		<Wrap gapX='4' gapY='8' mt='4' colorPalette='gray'>
 			<NameForm
 				i18nData={i18nData}
 				nameForm={nameForm}

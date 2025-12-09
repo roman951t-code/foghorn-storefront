@@ -7,13 +7,14 @@ import { auth } from '@/lib/auth';
 import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedProducts';
 import ClearViewedButton from '../_components/viewed/ClearViewedButton';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
-import CabinetSectionHeading from '../_components/CabinetSectionHeading';
+import CabinetSectionHeading from '../../../../components/ui/CabinetSectionHeading';
 
 const VIEWED_LIMIT = 32;
 
 type Props = {
 	searchParams?: Promise<{
 		page?: string;
+		perPage?: string;
 	}>;
 };
 
@@ -29,32 +30,35 @@ export default async function Reviewed({ searchParams }: Props) {
 	const viewedProducts = userId ? await getRecentlyViewedProducts(userId, VIEWED_LIMIT) : [];
 
 	const totalProductsCount = viewedProducts.length;
-	const totalPages = Math.max(1, Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE));
 	const params = await searchParams;
 	const pageParam = Number.parseInt(params?.page ?? '1', 10);
+	const requestedPerPage = Number.parseInt(params?.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
+	const pageSize =
+		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
+	const totalPages = Math.max(1, Math.ceil(totalProductsCount / pageSize));
 	let currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 	currentPage = Math.min(currentPage, totalPages);
-	const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-	const paginatedProducts = viewedProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+	const startIndex = (currentPage - 1) * pageSize;
+	const paginatedProducts = viewedProducts.slice(startIndex, startIndex + pageSize);
 
 	return (
 		<VStack w='100%'>
 			<CabinetSectionHeading title={navT('sidebar.reviewedProducts')} />
-	<ClearViewedButton
-		text={genT('clear')}
-		w={{ base: 'full', sm: '140px' }}
-		alignSelf='flex-end'
-		mt={{ base: '8', sm: '0' }}
-		isDisabled={!totalProductsCount}
-	/>
+			<ClearViewedButton
+				text={genT('clear')}
+				w={{ base: 'full', sm: '140px' }}
+				alignSelf='flex-end'
+				mt={{ base: '8', sm: '0' }}
+				disabled={!totalProductsCount}
+			/>
 
 			<Box as='section' w='100%'>
 				<ViewedProducts products={paginatedProducts} emptyText={productsT('productsNotFound')} />
 			</Box>
 			<Pagination
 				currentPage={currentPage}
-				totalProductsCount={totalProductsCount}
-				productsPerPage={PRODUCTS_PER_PAGE}
+				totalItems={totalProductsCount}
+				pageSize={pageSize}
 				baseRoute='/cabinet/reviewed'
 			/>
 		</VStack>

@@ -1,18 +1,35 @@
 import { VStack, HStack, IconButton, Icon } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
 import { IoShareSocialOutline } from 'react-icons/io5';
 import WishList from '../_components/wishlist/WishList';
 import ProductsFilter from '../_components/wishlist/ProductsFilter';
 import { FiTrash2 } from 'react-icons/fi';
 import WishlistPagination from '../_components/wishlist/WishlistPagination';
-import CabinetSectionHeading from '../_components/CabinetSectionHeading';
+import CabinetSectionHeading from '@/components/ui/CabinetSectionHeading';
 import WishListCount from '../_components/wishlist/WishlistCount';
+import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { getTranslations } from 'next-intl/server';
 
-export default function Wishlist() {
-	const navT = useTranslations('navigation');
-	const prodT = useTranslations('products');
-	const genT = useTranslations('common');
-	const wishT = useTranslations('wishlist');
+type Props = {
+	searchParams?: Promise<{
+		page?: string;
+		perPage?: string;
+	}>;
+};
+
+export default async function Wishlist({ searchParams }: Props) {
+	const [navT, prodT, genT, wishT] = await Promise.all([
+		getTranslations('navigation'),
+		getTranslations('products'),
+		getTranslations('common'),
+		getTranslations('wishlist'),
+	]);
+
+	const params = await searchParams;
+	const requestedPage = Number.parseInt(params?.page ?? '1', 10);
+	const requestedPerPage = Number.parseInt(params?.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
+	const pageSize =
+		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
+	const currentPage = Number.isNaN(requestedPage) || requestedPage < 1 ? 1 : requestedPage;
 
 	const i18nData = {
 		new: prodT('new'),
@@ -67,8 +84,8 @@ export default function Wishlist() {
 					<ProductsFilter i18nData={i18nData} />
 				</VStack>
 			</HStack>
-			<WishList emptyText={wishT('wishListEmpty')} />
-			<WishlistPagination />
+			<WishList emptyText={wishT('wishListEmpty')} currentPage={currentPage} pageSize={pageSize} />
+			<WishlistPagination currentPage={currentPage} pageSize={pageSize} />
 		</VStack>
 	);
 }

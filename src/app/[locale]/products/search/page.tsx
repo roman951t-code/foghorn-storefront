@@ -23,6 +23,7 @@ type Params = {
 		searchQuery?: string;
 		tag?: string;
 		page?: string;
+		perPage?: string;
 		min?: string;
 		max?: string;
 		inStock?: string;
@@ -34,6 +35,7 @@ const excludedParams = new Set([
 	'searchQuery',
 	'tag',
 	'page',
+	'perPage',
 	'search',
 	'min',
 	'max',
@@ -67,8 +69,12 @@ export default async function SearchProducts({ searchParams }: Params) {
 	const t = await getTranslations('products');
 	const sidebarT = await getTranslations('navigation');
 
-	const page = Number.parseInt(pageParam, 10);
-	const offset = (page - 1) * PRODUCTS_PER_PAGE;
+	const parsedPage = Number.parseInt(pageParam, 10);
+	const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+	const requestedPerPage = Number.parseInt(searchData.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
+	const pageSize =
+		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
+	const offset = (page - 1) * pageSize;
 	const minPrice = min ? Number.parseFloat(min) : undefined;
 	const maxPrice = max ? Number.parseFloat(max) : undefined;
 	const orderBy = orderByParam as 'new' | 'expensive' | 'cheap' | undefined;
@@ -87,7 +93,7 @@ export default async function SearchProducts({ searchParams }: Params) {
 	const buildViewedResponse = async () => {
 		const session = await auth.api.getSession({ headers: await headers() });
 		const userId = session?.user?.id;
-		const viewedProducts = userId ? await getRecentlyViewedProducts(userId, PRODUCTS_PER_PAGE) : [];
+		const viewedProducts = userId ? await getRecentlyViewedProducts(userId, pageSize) : [];
 
 		const highestPrice = viewedProducts.reduce(
 			(max, p) => Math.max(max, p.discountPrice ?? p.basePrice ?? 0),
@@ -107,7 +113,7 @@ export default async function SearchProducts({ searchParams }: Params) {
 		const result = await getProductsByTag(
 			tagValue,
 			true,
-			PRODUCTS_PER_PAGE,
+			pageSize,
 			offset,
 			minPrice,
 			maxPrice,
@@ -128,7 +134,7 @@ export default async function SearchProducts({ searchParams }: Params) {
 	const buildSearchResponse = async () => {
 		const result = await getProductsBySearchQuery(
 			searchQuery,
-			PRODUCTS_PER_PAGE,
+			pageSize,
 			offset,
 			minPrice,
 			maxPrice,
@@ -201,8 +207,8 @@ export default async function SearchProducts({ searchParams }: Params) {
 					<ProductsGrid products={products} notFound={t('productsNotFound')} />
 					<Pagination
 						currentPage={page}
-						totalProductsCount={totalCount}
-						productsPerPage={PRODUCTS_PER_PAGE}
+						totalItems={totalCount}
+						pageSize={pageSize}
 						baseRoute='/products/search/'
 					/>
 				</Box>

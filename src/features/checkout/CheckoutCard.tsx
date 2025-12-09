@@ -31,7 +31,7 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 	const productHref = `/products/${product.fullSlug}`;
 
 	return (
-		<Card.Root p='4' gap={4} py={1} border='none' bg='bg.tertiary'>
+		<Card.Root p='4' gap={4} py={1} border='none' bg='none'>
 			<Group p='0'>
 				<VStack mr='1'>
 					<LocaleNavLink href={productHref} display='inline-block' lineHeight='0'>
@@ -87,13 +87,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 	const productHref = `/products/${product.fullSlug}`;
 
 	return (
-		<Card.Root
-			minWidth='200px'
-			w='100%'
-			border='none'
-			bg='bg.tertiary'
-			transition='all 0.25s ease-in-out'
-		>
+		<Card.Root minWidth='200px' w='100%' border='none' bg='none' transition='all 0.25s ease-in-out'>
 			<Flex
 				align='center'
 				justifyContent='space-between'
@@ -110,8 +104,8 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 					<Flex alignItems='center' direction='row' w='full' gapX='2'>
 						<LocaleNavLink href={productHref} display='inline-block' lineHeight='0' mx='3'>
 							<Image
-								width={110}
-								height={110}
+								width={100}
+								height={100}
 								src={getImage(product.imageUrl)}
 								style={{ objectFit: 'contain', borderRadius: '6px', marginLeft: '4px' }}
 								alt={product.name}
@@ -149,7 +143,13 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 									</Text>
 								)}
 								{hasDiscount && (
-									<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='4'>
+									<Badge
+										variant='solid'
+										color='main.lightOnly'
+										bg='main.tertiary'
+										fontWeight='bold'
+										ml='8px'
+									>
 										-{discountAmount} ₴
 									</Badge>
 								)}

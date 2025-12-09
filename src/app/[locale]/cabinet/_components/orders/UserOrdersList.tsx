@@ -3,10 +3,9 @@
 import { Accordion, Card, EmptyState } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { FiPackage } from 'react-icons/fi';
-import type { UserOrder } from '@/types/order';
+import type { OrderDetailTag, UserOrder } from '@/types/order';
 import { OrderAccordionTrigger } from './OrderAccordionTrigger';
 import { OrderAccordionContent } from './OrderAccordionContent';
-import type { OrderDetailTag } from './orderAccordionTypes';
 import {
 	formatMethodLabel,
 	getOrderStatusLabel,
@@ -29,8 +28,6 @@ const statusColorPaletteMap: Record<string, string> = {
 
 export default function UserOrdersList({ orders, emptyText }: Props) {
 	const ordersT = useTranslations('orders');
-	const commonT = useTranslations('common');
-	const productsT = useTranslations('products');
 
 	if (!orders.length) {
 		return (
@@ -46,7 +43,7 @@ export default function UserOrdersList({ orders, emptyText }: Props) {
 	}
 
 	return (
-		<Accordion.Root collapsible multiple>
+		<Accordion.Root multiple>
 			{orders.map((order) => {
 				const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
 				const statusLabel = getOrderStatusLabel(order.status, ordersT);
@@ -83,7 +80,7 @@ export default function UserOrdersList({ orders, emptyText }: Props) {
 						borderColor='border.dark'
 						bg='bg.tertiary'
 						p='4'
-						mb='4'
+						mb='6'
 						key={order.id}
 					>
 						<Accordion.Item value={order.id} borderBottom='none'>
@@ -92,16 +89,9 @@ export default function UserOrdersList({ orders, emptyText }: Props) {
 								totalItems={totalItems}
 								thumbItems={thumbItems}
 								orderDetailTags={orderDetailTags}
-								commonT={commonT}
-								productsT={productsT}
 							/>
 
-							<OrderAccordionContent
-								order={order}
-								productsT={productsT}
-								ordersT={ordersT}
-								commonT={commonT}
-							/>
+							<OrderAccordionContent order={order} />
 						</Accordion.Item>
 					</Card.Root>
 				);

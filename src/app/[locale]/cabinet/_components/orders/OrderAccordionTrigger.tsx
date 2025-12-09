@@ -11,18 +11,16 @@ import {
 	VStack,
 } from '@chakra-ui/react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import DateWithLocale from '@/components/ui/DateWithLocale';
 import { buildProductImages, toPreviewImage } from '@/utils/productImages';
-import type { UserOrder } from '@/types/order';
-import type { OrderDetailTag, TranslateFn } from './orderAccordionTypes';
+import type { OrderDetailTag, UserOrder } from '@/types/order';
 
 type Props = {
 	order: UserOrder;
 	totalItems: number;
 	thumbItems: UserOrder['items'];
 	orderDetailTags: OrderDetailTag[];
-	commonT: TranslateFn;
-	productsT: TranslateFn;
 };
 
 export function OrderAccordionTrigger({
@@ -30,9 +28,10 @@ export function OrderAccordionTrigger({
 	totalItems,
 	thumbItems,
 	orderDetailTags,
-	commonT,
-	productsT,
 }: Props) {
+	const productsT = useTranslations('products');
+	const commonT = useTranslations('common');
+
 	return (
 		<Accordion.ItemTrigger w='full' p='0' cursor='pointer' flexDirection='column'>
 			<Flex
@@ -88,7 +87,12 @@ export function OrderAccordionTrigger({
 					</Tag.Label>
 				</Tag.Root>
 			</Flex>
-			<HStack gap='4' mt='4.5' flexWrap='wrap' w='full'>
+			<HStack
+				gap={{ base: '2', xs: '4' } as any}
+				mt={{ base: '2', xs: '4.5' } as any}
+				flexWrap='wrap'
+				w='full'
+			>
 				{orderDetailTags.map(({ key, label, value, colorPalette, icon }) => (
 					<Tag.Root
 						key={key}

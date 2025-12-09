@@ -45,6 +45,7 @@ export default async function Layout({ children, params }: Props) {
 		'errors',
 		'checkout',
 		'orders',
+		'pagination',
 	]);
 
 	const session = await auth.api.getSession({ headers: await headers() });

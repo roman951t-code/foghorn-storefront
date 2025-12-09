@@ -31,7 +31,7 @@ export default async function Checkout() {
 					as='aside'
 					w='27%'
 					minW='324px'
-					bg='bg.tertiary'
+					// bg='bg.tertiary'
 					boxShadow='sm'
 					rounded='sm'
 					hideBelow='lg'

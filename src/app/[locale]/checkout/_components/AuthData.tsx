@@ -1,6 +1,6 @@
 'use client';
 
-import { Flex, Heading, Card, VStack, Spinner } from '@chakra-ui/react';
+import { Flex, Heading, Card, Spinner } from '@chakra-ui/react';
 import { FiUserCheck } from 'react-icons/fi';
 import dynamic from 'next/dynamic';
 import { I18nData } from '@/types/i18n';
@@ -29,12 +29,7 @@ export default function AuthData({ i18nData }: { i18nData: I18nData }) {
 	}
 
 	return session?.session ? (
-		<VStack w='100%' gap='4' direction='column'>
-			<Heading as='h4' size='md' w='100%' textAlign='center'>
-				{i18nData.yourContacts}
-			</Heading>
-			<PersonalDataForm i18nData={i18nData} />
-		</VStack>
+		<PersonalDataForm i18nData={i18nData} />
 	) : (
 		<Card.Header p='0'>
 			<Flex

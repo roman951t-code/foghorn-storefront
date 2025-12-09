@@ -117,7 +117,7 @@ export default function OrderInfo() {
 					/>
 				))}
 			</Box>
-			<Box maxH='600px' overflowY='auto' hideFrom='lg'>
+			<Box maxH='600px' overflowY='auto' hideFrom='lg' shadow='sm'>
 				{cartItems.map((item, idx) => (
 					<FullCheckoutCard
 						key={item.id}
@@ -127,7 +127,7 @@ export default function OrderInfo() {
 				))}
 			</Box>
 
-			<VStack alignItems='flex-start' hideBelow='lg'>
+			<VStack mt='4' alignItems='flex-start' hideBelow='lg'>
 				<Text>
 					<Highlight query={`${totalCount} ${unitsLabel}`} styles={{ fontWeight: 'semibold' }}>
 						{productsLabel}

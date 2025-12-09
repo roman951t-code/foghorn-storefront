@@ -40,7 +40,6 @@ model EmailRegistrationCode {
   name      String
   password  String
   code      String
-  attempts  Int      @default(0)
   expiresAt DateTime
   createdAt DateTime @default(now())
 
@@ -52,7 +51,6 @@ model EmailVerificationCode {
   email     String
   userId    String
   code      String
-  attempts  Int      @default(0)
   expiresAt DateTime
   createdAt DateTime @default(now())
 
@@ -77,7 +75,6 @@ model User {
   wishlist  Wishlist[]
   reviews   Review[]
   cart      Cart?
-  cartItems String[]   @default([])
   recentlyViewed RecentlyViewed[]
 
   phoneNumber         String?
@@ -201,7 +198,6 @@ model Product {
   brand           Brand                   @relation(fields: [brandId], references: [id])
   category        ProductCategory         @relation(fields: [categoryId], references: [id])
   attributes      ProductAttributeValue[]
-  variants        ProductVariant[]
   orderItems      OrderItem[]
   wishlistedBy    Wishlist[]
   reviews         Review[]
@@ -228,18 +224,6 @@ model ProductAttributeValue {
   attribute   ProductAttribute @relation(fields: [attributeId], references: [id])
 }
 
-model ProductVariant {
-  id         String      @id @default(uuid())
-  productId  String
-  name       String
-  price      Decimal     @db.Decimal(10, 2)
-  stock      Int
-  sku        String      @unique
-  imageUrl   String?
-  product    Product     @relation(fields: [productId], references: [id])
-  orderItems OrderItem[] @relation("OrderVariantRelation")
-}
-
 model Order {
   id        String      @id @default(uuid())
   userId    String
@@ -262,13 +246,11 @@ model OrderItem {
   id        String          @id @default(uuid())
   orderId   String
   productId String
-  variantId String?
   quantity  Int
   price     Decimal         @db.Decimal(10, 2)
   unitPrice Decimal         @db.Decimal(10, 2)
   order     Order           @relation(fields: [orderId], references: [id])
   product   Product         @relation(fields: [productId], references: [id])
-  variant   ProductVariant? @relation("OrderVariantRelation", fields: [variantId], references: [id])
 }
 
 enum OrderStatus {

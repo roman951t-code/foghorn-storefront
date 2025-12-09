@@ -13,7 +13,7 @@ const config = defineConfig({
 		},
 		breakpoints: {
 			xs: '430px',
-			sm: '560px',
+			sm: '536px',
 			md: '768px',
 			lg: '960px',
 			xl: '1200px',
@@ -175,8 +175,8 @@ const config = defineConfig({
 			fontWeight: 500,
 			fontSize: 16,
 		},
-		'h1,h2,h3,h4,h5,h6': {
-			fontFamily: 'var(--font-montserrat), var(--font-open-sans), system-ui, sans-serif',
+		'h1,h2,h3,h4,h5,h6, .chakra-heading': {
+			fontFamily: 'var(--font-montserrat), var(--font-open-sans), system-ui, sans-serif !important',
 		},
 		'p, span, li': {
 			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',

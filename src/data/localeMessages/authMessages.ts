@@ -53,7 +53,6 @@ export const AUTH_MESSAGE_KEYS = [
 	'notifUpdated',
 	'lastName',
 	'authToOrder',
-	'yourContacts',
 ];
 
 export const VALIDATION_MESSAGE_KEYS = [
