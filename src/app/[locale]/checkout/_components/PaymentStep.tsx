@@ -1,7 +1,7 @@
 'use client';
 
 import { Icon, RadioCard, Stack } from '@chakra-ui/react';
-import { RiAppleFill, RiBankCardFill, RiPaypalFill } from 'react-icons/ri';
+import { RiBankCardFill, RiMoneyDollarCircleFill, RiPaypalFill } from 'react-icons/ri';
 import { useTranslations } from 'next-intl';
 import { useCheckoutStore } from '@/stores/checkoutStore';
 
@@ -11,7 +11,7 @@ export default function PaymentStep() {
 	const setSelectedPayment = useCheckoutStore((state) => state.setPaymentMethod);
 	const items = [
 		{ value: 'paypal', title: t('payment.paypal'), icon: <RiPaypalFill /> },
-		{ value: 'apple-pay', title: t('payment.applePay'), icon: <RiAppleFill /> },
+		{ value: 'cod', title: t('payment.cod'), icon: <RiMoneyDollarCircleFill /> },
 		{ value: 'card', title: t('payment.card'), icon: <RiBankCardFill /> },
 	];
 

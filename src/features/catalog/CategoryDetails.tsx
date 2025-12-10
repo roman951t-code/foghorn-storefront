@@ -14,6 +14,8 @@ interface Props {
 export default function CategoryDetails({ category, i18nData }: Props) {
 	if (!category) return null;
 
+	const categoryBg = category.imageUrl ?? '/assets/images/temp/1.webp';
+
 	return (
 		<Flex bg='bg.tertiary' overflowY='auto' rounded='sm' boxShadow='sm' w='100%' p={4}>
 			<Wrap gap={12} justify='flex-start' position='relative' w={{ base: '100%', lg: '75%' }}>
@@ -88,14 +90,17 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				_after={{
 					content: `""`,
 					position: 'absolute',
-					top: 0,
-					right: 0,
-					height: '100%',
-					width: '100%',
+					top: '30%',
+					left: '10%',
+					height: '180px',
+					width: '80%',
 					backgroundImage: {
-						base: 'url("/assets/images/temp/1.webp")',
-						_dark: ' url("/assets/images/logoTemp.webp")',
+						base: `url("${categoryBg}")`,
+						_dark: `url("${categoryBg}")`,
 					},
+					rounded: 'sm',
+					border: '1px solid',
+					borderColor: 'gray.500',
 					backgroundRepeat: 'no-repeat',
 					backgroundPosition: 'center',
 					backgroundSize: 'auto',
@@ -106,7 +111,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					{category.name}
 				</Heading>
 
-				<LocaleNavButton href={`/products/${category.slug}`} w='100%'>
+				<LocaleNavButton href={`/products/${category.slug}`} minW='240px'>
 					{i18nData.seeCategory}
 					<BsChevronRight />
 				</LocaleNavButton>

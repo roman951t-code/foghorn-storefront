@@ -10,6 +10,8 @@ type Props = {
 	searchParams?: Promise<{
 		page?: string;
 		perPage?: string;
+		payment?: string;
+		session_id?: string;
 	}>;
 };
 
@@ -20,9 +22,16 @@ export default async function Orders({ searchParams }: Props) {
 	]);
 
 	const params = await searchParams;
+	if (params?.payment === 'success' && params?.session_id) {
+		// Finalize Stripe payment on redirect
+		const { finalizeStripeOrder } = await import('@/actions/payments/finalizeStripeOrder');
+		await finalizeStripeOrder(params.session_id);
+	}
+
 	const requestedPage = Number.parseInt(params?.page ?? '1', 10);
 	const requestedPerPage = Number.parseInt(params?.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
-	const pageSize = Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
+	const pageSize =
+		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
 	const rawPage = Number.isNaN(requestedPage) || requestedPage < 1 ? 1 : requestedPage;
 	const offset = (rawPage - 1) * pageSize;
 
@@ -32,20 +41,20 @@ export default async function Orders({ searchParams }: Props) {
 
 	const normalizedOffset = (currentPage - 1) * pageSize;
 	const normalizedItems =
-		normalizedOffset === offset
-			? items
-			: (await getUserOrders(pageSize, normalizedOffset)).items;
+		normalizedOffset === offset ? items : (await getUserOrders(pageSize, normalizedOffset)).items;
 
 	return (
 		<VStack w='100%'>
 			<CabinetSectionHeading title={navT('sidebar.myOrders')} mb='8' />
 			<UserOrdersList orders={normalizedItems} emptyText={ordersT('empty')} />
-			<Pagination
-				currentPage={currentPage}
-				totalItems={totalCount}
-				pageSize={pageSize}
-				baseRoute='/cabinet/orders'
-			/>
+			{totalCount > 0 && (
+				<Pagination
+					currentPage={currentPage}
+					totalItems={totalCount}
+					pageSize={pageSize}
+					baseRoute='/cabinet/orders'
+				/>
+			)}
 		</VStack>
 	);
 }

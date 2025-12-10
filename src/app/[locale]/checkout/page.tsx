@@ -22,7 +22,7 @@ export default async function Checkout() {
 			<Heading as='h1' size='4xl' fontWeight='normal'>
 				{t('orderProcessing')}
 			</Heading>
-			<Group justifyContent='space-between' align='flex-start' gap='4'>
+			<Group justifyContent='space-between' align='flex-start' gapX='6'>
 				<Box as='section' w={{ base: '100%', lg: '73%' }}>
 					<CheckoutSteps />
 					<Box hideFrom='lg'>{<OrderInfo />}</Box>
@@ -31,7 +31,6 @@ export default async function Checkout() {
 					as='aside'
 					w='27%'
 					minW='324px'
-					// bg='bg.tertiary'
 					boxShadow='sm'
 					rounded='sm'
 					hideBelow='lg'

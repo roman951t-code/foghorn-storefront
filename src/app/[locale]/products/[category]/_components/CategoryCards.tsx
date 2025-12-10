@@ -11,9 +11,8 @@ import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 
 function CategoryCardsInner({ category }: { category?: CatalogCategory }) {
-	console.log('category', category);
 	return (
-		<Wrap>
+		<Wrap gap='4'>
 			{category?.children.map((sub) => (
 				<CategoryCard
 					key={sub.id}

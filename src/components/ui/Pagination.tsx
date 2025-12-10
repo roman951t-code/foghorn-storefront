@@ -87,6 +87,7 @@ export default function Pagination({
 			flexWrap='wrap'
 			gap='6'
 			colorPalette='gray'
+			mt='24'
 		>
 			<ChakraPagination.Root
 				pageSize={safePageSize}

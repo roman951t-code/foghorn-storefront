@@ -1,4 +1,4 @@
-import { RiAppleFill, RiBankCardFill, RiPaypalFill } from 'react-icons/ri';
+import { RiBankCardFill, RiMoneyDollarCircleFill, RiPaypalFill } from 'react-icons/ri';
 import { FaTruck } from 'react-icons/fa';
 
 export const getOrderStatusLabel = (status: string, t: (key: string) => string) => {
@@ -35,7 +35,7 @@ export const normalizeKey = (value?: string | null) =>
 export const getPaymentIcon = (value?: string | null) => {
 	const key = normalizeKey(value);
 	if (key === 'paypal') return RiPaypalFill;
-	if (key === 'apple-pay') return RiAppleFill;
+	if (key === 'cod') return RiMoneyDollarCircleFill;
 	if (key === 'card') return RiBankCardFill;
 	return null;
 };

@@ -2,7 +2,7 @@
 
 import { Accordion, Card, EmptyState } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import { FiPackage } from 'react-icons/fi';
+import { IoBagCheckOutline } from 'react-icons/io5';
 import type { OrderDetailTag, UserOrder } from '@/types/order';
 import { OrderAccordionTrigger } from './OrderAccordionTrigger';
 import { OrderAccordionContent } from './OrderAccordionContent';
@@ -34,7 +34,7 @@ export default function UserOrdersList({ orders, emptyText }: Props) {
 			<EmptyState.Root>
 				<EmptyState.Content>
 					<EmptyState.Indicator>
-						<FiPackage />
+						<IoBagCheckOutline />
 					</EmptyState.Indicator>
 					<EmptyState.Title>{emptyText}</EmptyState.Title>
 				</EmptyState.Content>

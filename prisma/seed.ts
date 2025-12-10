@@ -59,6 +59,23 @@ const subcategoriesMap: Record<string, string[]> = {
 	Monitors: ['4K Monitors', 'Gaming Monitors'],
 };
 
+const categoryImageKeywords: Record<string, string> = {
+	Phones: 'mobile',
+	Tablets: 'tablet',
+	Laptops: 'laptop',
+	Accessories: 'accessories',
+	Smartwatches: 'smartwatch',
+	Audio: 'audio',
+	Gaming: 'gaming',
+	Monitors: 'monitor',
+};
+
+const getCategoryImage = (name: string) => {
+	const keyword = categoryImageKeywords[name] ?? 'technology';
+	const seed = createSlug(name);
+	return faker.image.urlLoremFlickr({ width: 1200, height: 500, category: keyword }) + `?lock=${seed}`;
+};
+
 async function main() {
 	console.log('🌱 Seeding started...');
 
@@ -98,18 +115,20 @@ const allProducts: SeedProduct[] = [];
 	// Categories + Products
 	for (const main of mainCategories) {
 		const parentSlug = createSlug(main);
+		const parentImage = getCategoryImage(main);
 		const parent = await prisma.productCategory.upsert({
 			where: { slug: parentSlug },
-			update: {},
-			create: { name: main, slug: parentSlug },
+			update: { imageUrl: parentImage },
+			create: { name: main, slug: parentSlug, imageUrl: parentImage },
 		});
 
 		for (const sub of subcategoriesMap[main]) {
 			const subSlug = createSlug(sub);
+			const subImage = getCategoryImage(sub);
 			const subcategory = await prisma.productCategory.upsert({
 				where: { slug: subSlug },
-				update: {},
-				create: { name: sub, slug: subSlug, parentId: parent.id },
+				update: { parentId: parent.id, imageUrl: subImage },
+				create: { name: sub, slug: subSlug, parentId: parent.id, imageUrl: subImage },
 			});
 
 			const count = faker.number.int({ min: 3, max: 5 });

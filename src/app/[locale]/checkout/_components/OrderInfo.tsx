@@ -20,9 +20,10 @@ import { useSession } from '@/providers/SessionProvider';
 import DisabledCheckoutNotice from './DisabledCheckoutNotice';
 import { useCheckoutStore } from '@/stores/checkoutStore';
 import { createOrderAction } from '@/actions/createOrderAction';
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { showToaster } from '@/utils/toast';
 import { useRouter } from 'next/navigation';
+import { getStripe } from '@/utils/getStripe';
 
 export default function OrderInfo() {
 	const { session } = useSession();
@@ -30,7 +31,9 @@ export default function OrderInfo() {
 	const paymentMethod = useCheckoutStore((state) => state.paymentMethod);
 	const shipmentMethod = useCheckoutStore((state) => state.shipmentMethod);
 	const [isSubmitting, startTransition] = useTransition();
+	const [isStripeRedirecting, setIsStripeRedirecting] = useState(false);
 	const router = useRouter();
+	const isLoading = isSubmitting || isStripeRedirecting;
 
 	const isAuthorized = !!session?.session;
 	const user = session?.user;
@@ -83,6 +86,11 @@ export default function OrderInfo() {
 			quantity: Math.max(1, item.quantity ?? 1),
 		}));
 
+		if (paymentMethod === 'card') {
+			startStripeCheckout(orderItems);
+			return;
+		}
+
 		startTransition(() => {
 			(async () => {
 				const result = await createOrderAction(null, {
@@ -100,6 +108,54 @@ export default function OrderInfo() {
 				}
 			})();
 		});
+	};
+
+	const startStripeCheckout = async (orderItems: { productId: string; quantity: number }[]) => {
+		try {
+			setIsStripeRedirecting(true);
+
+			const origin = window.location.origin;
+			const response = await fetch('/api/payments/stripe', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					items: orderItems,
+					successUrl: `${origin}/cabinet/orders?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+					cancelUrl: `${origin}/checkout?cancelled=1`,
+				}),
+			});
+
+			const data = await response.json();
+			if (!response.ok) {
+				const message = data?.error ?? 'stripe_session_failed';
+				throw new Error(message);
+			}
+
+			const stripe = await getStripe();
+
+			if (stripe && data.sessionId) {
+				const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
+				if (error) {
+					throw new Error(error.message);
+				}
+				return;
+			}
+
+			if (data.url) {
+				window.location.href = data.url as string;
+				return;
+			}
+
+			throw new Error('stripe_redirect_failed');
+		} catch (error) {
+			console.error('Stripe checkout error', error);
+			const message = error instanceof Error ? error.message : 'stripe_session_failed';
+			showToaster('error', checkoutT('orderCreateFail') + ` (${message})`);
+		} finally {
+			setIsStripeRedirecting(false);
+		}
 	};
 
 	return (
@@ -157,7 +213,7 @@ export default function OrderInfo() {
 					w='100%'
 					mt='4'
 					disabledReason={disabledReason}
-					loading={isSubmitting}
+					loading={isLoading}
 					onAccept={handleAcceptOrder}
 				/>
 				<DisabledCheckoutNotice title={noticeTitle} description={noticeDescription} />
@@ -178,7 +234,7 @@ export default function OrderInfo() {
 					<AcceptOrderBtn
 						text={t('acceptOrder')}
 						disabledReason={disabledReason}
-						loading={isSubmitting}
+						loading={isLoading}
 						onAccept={handleAcceptOrder}
 					/>
 					<DisabledCheckoutNotice title={noticeTitle} description={noticeDescription} />

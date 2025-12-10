@@ -11,11 +11,13 @@ interface Props extends ButtonProps {
 }
 
 export default function AcceptOrderBtn({ text, disabledReason, onAccept, ...restProps }: Props) {
+	const isDisabled = !!disabledReason || !!restProps.isLoading;
+
 	return (
 		<PrimaryButton
 			type='button'
-			disabled={!!disabledReason}
-			onClick={disabledReason ? undefined : onAccept}
+			disabled={isDisabled}
+			onClick={isDisabled ? undefined : onAccept}
 			{...restProps}
 		>
 			<IoMdCheckmarkCircleOutline />

@@ -41,10 +41,10 @@ export default async function CategoryPage({ params }: Params) {
 	if (!category) notFound();
 
 	return (
-		<Stack mx={{ base: '12px', '2xl': 0 }} gap={16} direction='column' mb='6'>
+		<Stack mx={{ base: '12px', '2xl': 0 }} gap={16} direction='column'>
 			<Breadcrumbs categoryName={category?.name} categorySlug={category?.slug} />
 
-			<Stack gap='6'>
+			<Stack gapY='8'>
 				<Heading as='h1' size='3xl' fontWeight='medium'>
 					{category.name}
 				</Heading>

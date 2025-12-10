@@ -29,7 +29,7 @@
 		"orderCreateFail": "Не вдалося створити замовлення. Спробуйте ще раз.",
 		"payment": {
 			"paypal": "PayPal",
-			"applePay": "Apple Pay",
+			"cod": "Оплата при отриманні",
 			"card": "Картка"
 		},
 		"shipment": {
@@ -210,7 +210,8 @@
 	},
 	"wishlist": {
 		"wishlistUpdateFailed": "Не вдалось оновити список бажань",
-		"wishListEmpty": "Список бажань порожній"
+		"wishListEmpty": "Список бажань порожній",
+		"shareCopied": "Посилання на ваш Список бажань скопійовано. Ви можете поділитись ним із знайомими."
 	},
 	"products": {
 		"popular": "Популярні товари",
@@ -282,7 +283,12 @@
 		"repeatFailed": "Не вдалося повторити замовлення",
 		"repeatNotFound": "Замовлення не знайдено",
 		"repeatEmpty": "У замовленні немає товарів для повтору",
-		"repeatUnauthorized": "Увійдіть, щоб повторити замовлення"
+		"repeatUnauthorized": "Увійдіть, щоб повторити замовлення",
+		"cancelOrder": "Скасувати замовлення",
+		"deleteOrder": "Видалити замовлення",
+		"orderDeleteSuccess": "Замовлення видалено",
+		"orderDeleteFailed": "Не вдалося видалити це замовлення",
+		"orderDeleteUnauthorized": "Увійдіть, щоб змінювати замовлення"
 	},
 	"pagination": {
 		"perPage": "На сторінці"

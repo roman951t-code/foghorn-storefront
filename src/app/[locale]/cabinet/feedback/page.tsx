@@ -47,12 +47,14 @@ export default async function Feedback({ searchParams }: Props) {
 				deleteFailText={validT('deleteReviewFail')}
 			/>
 
-			<Pagination
-				currentPage={currentPage}
-				totalItems={totalCount}
-				pageSize={pageSize}
-				baseRoute='/cabinet/feedback'
-			/>
+			{totalCount > 0 && (
+				<Pagination
+					currentPage={currentPage}
+					totalItems={totalCount}
+					pageSize={pageSize}
+					baseRoute='/cabinet/feedback'
+				/>
+			)}
 		</VStack>
 	);
 }

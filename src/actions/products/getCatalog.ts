@@ -7,12 +7,17 @@ export const getCatalog = unstable_cache(
 	async () => {
 		const catalog = await prisma.productCategory.findMany({
 			where: { parentId: null },
-			include: {
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				imageUrl: true,
 				children: {
 					select: {
 						id: true,
 						name: true,
 						slug: true,
+						imageUrl: true,
 						products: {
 							select: {
 								id: true,

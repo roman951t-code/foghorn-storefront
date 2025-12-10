@@ -55,12 +55,14 @@ export default async function Reviewed({ searchParams }: Props) {
 			<Box as='section' w='100%'>
 				<ViewedProducts products={paginatedProducts} emptyText={productsT('productsNotFound')} />
 			</Box>
-			<Pagination
-				currentPage={currentPage}
-				totalItems={totalProductsCount}
-				pageSize={pageSize}
-				baseRoute='/cabinet/reviewed'
-			/>
+			{totalProductsCount > 0 && (
+				<Pagination
+					currentPage={currentPage}
+					totalItems={totalProductsCount}
+					pageSize={pageSize}
+					baseRoute='/cabinet/reviewed'
+				/>
+			)}
 		</VStack>
 	);
 }

@@ -1,5 +1,5 @@
 import { SimpleGrid, Box, EmptyState } from '@chakra-ui/react';
-import { HiOutlineEye } from 'react-icons/hi';
+import { LuUserRoundCheck } from 'react-icons/lu';
 import ProductCard, { type CardProduct } from '@/features/product/cards/ProductCard';
 
 type Props = {
@@ -13,7 +13,7 @@ export default function ViewedProducts({ products, emptyText }: Props) {
 			<EmptyState.Root>
 				<EmptyState.Content>
 					<EmptyState.Indicator>
-						<HiOutlineEye />
+						<LuUserRoundCheck />
 					</EmptyState.Indicator>
 					<EmptyState.Title>{emptyText}</EmptyState.Title>
 				</EmptyState.Content>

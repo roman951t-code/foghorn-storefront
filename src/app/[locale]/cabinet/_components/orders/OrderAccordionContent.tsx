@@ -1,10 +1,10 @@
 'use client';
 
+import { useTransition } from 'react';
 import { Accordion, Card, Flex, Separator, Stack, Stat, Text } from '@chakra-ui/react';
 import { BsArrowRepeat } from 'react-icons/bs';
-import { useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
+import { PrimaryButton, TertiaryButton } from '@/components/ui/buttons/ActionButton';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { buildProductImages, toPreviewImage } from '@/utils/productImages';
 import { repeatOrderAction } from '@/actions/repeatOrderAction';
@@ -12,6 +12,8 @@ import { useCartStore } from '@/stores/cartStore';
 import { showToaster } from '@/utils/toast';
 import Image from 'next/image';
 import type { UserOrder } from '@/types/order';
+import { useRouter } from 'next/navigation';
+import { deleteOrderAction } from '@/actions/deleteOrderAction';
 
 type Props = {
 	order: UserOrder;
@@ -22,10 +24,14 @@ export function OrderAccordionContent({ order }: Props) {
 	const ordersT = useTranslations('orders');
 	const commonT = useTranslations('common');
 	const setCartItems = useCartStore((state) => state.setCartItems);
-	const [isRepeating, startTransition] = useTransition();
+	const [isRepeating, startRepeatTransition] = useTransition();
+	const [isDeleting, startDeleteTransition] = useTransition();
+	const router = useRouter();
+	const isPendingStatus = (order.status ?? '').toLowerCase() === 'pending';
+	const deleteLabel = isPendingStatus ? ordersT('cancelOrder') : ordersT('deleteOrder');
 
 	const handleRepeatOrder = () => {
-		startTransition(async () => {
+		startRepeatTransition(async () => {
 			const result = await repeatOrderAction(order.id);
 
 			if (result.success) {
@@ -47,10 +53,40 @@ export function OrderAccordionContent({ order }: Props) {
 		});
 	};
 
+	const handleDeleteOrder = () => {
+		startDeleteTransition(async () => {
+			const result = await deleteOrderAction(order.id);
+
+			if (result.success) {
+				showToaster('success', ordersT('orderDeleteSuccess'));
+				router.refresh();
+			} else {
+				const key =
+					result.code === 'unauthorized'
+						? 'orderDeleteUnauthorized'
+						: 'orderDeleteFailed';
+				showToaster('error', ordersT(key));
+			}
+		});
+	};
+
 	return (
 		<Accordion.ItemContent>
 			<Accordion.ItemBody p='0' pt='4'>
-				<Flex justifyContent={{ base: 'center', xs: 'flex-end' } as any} mb='4'>
+				<Flex
+					justifyContent={{ base: 'space-between', xs: 'space-between' } as any}
+					alignItems='center'
+					gap='3'
+					flexWrap='wrap'
+					mb='4'
+				>
+					<TertiaryButton
+						onClick={handleDeleteOrder}
+						loading={isDeleting}
+						disabled={isDeleting}
+					>
+						{deleteLabel}
+					</TertiaryButton>
 					<PrimaryButton onClick={handleRepeatOrder} loading={isRepeating}>
 						<BsArrowRepeat />
 						{productsT('repeatOrder')}

@@ -1,19 +1,40 @@
 'use client';
 import { useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { SimpleGrid, Box, EmptyState } from '@chakra-ui/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { SimpleGrid, Box, EmptyState, VStack } from '@chakra-ui/react';
 import ProductCard from '@/features/product/cards/ProductCard';
 import { useWishList } from '@/hooks/useWishList';
-import { HiColorSwatch } from 'react-icons/hi';
+import { FiHeart } from 'react-icons/fi';
+import WishlistActions from './WishlistActions';
+import WishListCount from './WishlistCount';
 
 type Props = {
 	emptyText: string;
 	currentPage: number;
 	pageSize: number;
+	actionsSlot?: React.ReactNode;
+	totalProductsText?: string;
+	unitsText?: string;
+	shareCopiedText?: string;
+	sortI18n?: {
+		new: string;
+		expensiveToCheap: string;
+		cheapToExpensive: string;
+	};
 };
 
-export default function WishList({ emptyText, currentPage, pageSize }: Props) {
+export default function WishList({
+	emptyText,
+	currentPage,
+	pageSize,
+	actionsSlot,
+	totalProductsText,
+	unitsText,
+	shareCopiedText,
+	sortI18n,
+}: Props) {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const { items } = useWishList();
 
 	const safePageSize = Math.max(1, Math.floor(pageSize || 1));
@@ -31,33 +52,63 @@ export default function WishList({ emptyText, currentPage, pageSize }: Props) {
 		router.replace(`${window.location.pathname}?${searchParams.toString()}`);
 	}, [currentPage, router, safePage, safePageSize, totalItems]);
 
+	const sortedItems = useMemo(() => {
+		const orderBy = searchParams.get('orderBy');
+		const toPrice = (product: any) => Number(product.discountPrice ?? product.basePrice ?? 0);
+		if (orderBy === 'expensive') {
+			return [...items].sort((a, b) => toPrice(b) - toPrice(a));
+		}
+		if (orderBy === 'cheap') {
+			return [...items].sort((a, b) => toPrice(a) - toPrice(b));
+		}
+		return items;
+	}, [items, searchParams]);
+
 	const visibleItems = useMemo(() => {
 		const start = (safePage - 1) * safePageSize;
-		return items.slice(start, start + safePageSize);
-	}, [items, safePage, safePageSize]);
+		return sortedItems.slice(start, start + safePageSize);
+	}, [sortedItems, safePage, safePageSize]);
 
-	return totalItems ? (
-		<SimpleGrid
-			my='4'
-			className='productsSlider'
-			columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5, '2xl': 6 }}
-			gapX='2'
-			gapY='4'
-		>
-			{visibleItems.map((product) => (
-				<Box key={product.id}>
-					<ProductCard product={product} />
-				</Box>
-			))}
-		</SimpleGrid>
-	) : (
-		<EmptyState.Root>
-			<EmptyState.Content>
-				<EmptyState.Indicator>
-					<HiColorSwatch />
-				</EmptyState.Indicator>
-				<EmptyState.Title>{emptyText}</EmptyState.Title>
-			</EmptyState.Content>
-		</EmptyState.Root>
+	if (!totalItems) {
+		return (
+			<EmptyState.Root>
+				<EmptyState.Content>
+					<EmptyState.Indicator>
+						<FiHeart />
+					</EmptyState.Indicator>
+					<EmptyState.Title>{emptyText}</EmptyState.Title>
+				</EmptyState.Content>
+			</EmptyState.Root>
+		);
+	}
+
+	return (
+		<VStack w='100%' alignItems='stretch'>
+			{actionsSlot}
+			{totalProductsText && unitsText && shareCopiedText && sortI18n && (
+				<WishlistActions
+					i18nData={{
+						new: sortI18n.new,
+						expensiveToCheap: sortI18n.expensiveToCheap,
+						cheapToExpensive: sortI18n.cheapToExpensive,
+					}}
+					shareCopiedText={shareCopiedText}
+					countSlot={<WishListCount totalProductsText={totalProductsText} unitsText={unitsText} />}
+				/>
+			)}
+			<SimpleGrid
+				my='4'
+				className='productsSlider'
+				columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5, '2xl': 6 }}
+				gapX='2'
+				gapY='4'
+			>
+				{visibleItems.map((product) => (
+					<Box key={product.id}>
+						<ProductCard product={product} />
+					</Box>
+				))}
+			</SimpleGrid>
+		</VStack>
 	);
 }

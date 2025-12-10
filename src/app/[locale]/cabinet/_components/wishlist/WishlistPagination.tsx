@@ -33,6 +33,8 @@ export default function WishlistPagination({
 		router.replace(`${window.location.pathname}?${searchParams.toString()}`);
 	}, [currentPage, router, safePage, safePageSize, totalItems]);
 
+	if (!totalItems) return null;
+
 	return (
 		<Pagination
 			currentPage={safePage}

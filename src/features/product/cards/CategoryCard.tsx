@@ -22,7 +22,7 @@ export default function CategoryCard({
 		<Card.Root
 			variant='outline'
 			maxW={{ base: '100%', sm: '316px' }}
-			minW='240px'
+			minW='270px'
 			flex='1'
 			size='sm'
 			overflow='hidden'
@@ -32,7 +32,6 @@ export default function CategoryCard({
 			transition='all 0.25s ease-in-out'
 			_hover={{
 				borderColor: 'border',
-				cursor: 'pointer',
 			}}
 		>
 			<Card.Body gap='2'>

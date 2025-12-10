@@ -29,7 +29,7 @@
 		"orderCreateFail": "Failed to place the order. Please try again.",
 		"payment": {
 			"paypal": "PayPal",
-			"applePay": "Apple Pay",
+			"cod": "Cash on delivery",
 			"card": "Card"
 		},
 		"shipment": {
@@ -210,7 +210,8 @@
 	},
 	"wishlist": {
 		"wishlistUpdateFailed": "Failed to update wishlist",
-		"wishListEmpty": "Wishlist is empty"
+		"wishListEmpty": "Wishlist is empty",
+		"shareCopied": "Link to your wishlist copied. You can share it with friends."
 	},
 	"products": {
 		"popular": "Popular products",
@@ -282,7 +283,12 @@
 		"repeatFailed": "Could not repeat this order",
 		"repeatNotFound": "Order not found",
 		"repeatEmpty": "This order has no items to repeat",
-		"repeatUnauthorized": "Sign in to repeat this order"
+		"repeatUnauthorized": "Sign in to repeat this order",
+		"cancelOrder": "Cancel order",
+		"deleteOrder": "Delete order",
+		"orderDeleteSuccess": "Order removed",
+		"orderDeleteFailed": "Could not remove this order",
+		"orderDeleteUnauthorized": "Sign in to update your orders"
 	},
 	"pagination": {
 		"perPage": "Per page"

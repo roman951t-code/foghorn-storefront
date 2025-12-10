@@ -38,19 +38,19 @@ export default async function CabinetLayout({ children }: Props) {
 					<TabsList />
 				</Box>
 				<Flex px='4'>
-					<Tabs.Content w='full' value='cabinet'>
+					<Tabs.Content colorPalette='gray' w='full' value='cabinet'>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content w='full' value='orders'>
+					<Tabs.Content colorPalette='gray' w='full' value='orders'>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content w='full' value='feedback'>
+					<Tabs.Content colorPalette='gray' w='full' value='feedback'>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content w='full' value='wishlist'>
+					<Tabs.Content colorPalette='gray' w='full' value='wishlist'>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content w='full' value='reviewed'>
+					<Tabs.Content colorPalette='gray' w='full' value='reviewed'>
 						{children}
 					</Tabs.Content>
 				</Flex>

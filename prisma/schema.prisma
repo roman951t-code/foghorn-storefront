@@ -171,6 +171,7 @@ model ProductCategory {
   id       String            @id @default(uuid())
   name     String
   slug     String            @unique
+  imageUrl String?
   parentId String?
   parent   ProductCategory?  @relation("Subcategories", fields: [parentId], references: [id])
   children ProductCategory[] @relation("Subcategories")
@@ -230,6 +231,7 @@ model Order {
   total     Decimal     @db.Decimal(10, 2)
   paymentMethod   String?
   shipmentMethod  String?
+  stripeSessionId String?  @unique
   contactName     String?
   contactLastName String?
   contactMiddleName   String?
