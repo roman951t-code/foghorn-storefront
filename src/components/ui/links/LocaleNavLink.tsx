@@ -1,4 +1,8 @@
-import { Link as ChakraLink, type LinkProps as ChakraLinkProps, type ButtonProps } from '@chakra-ui/react';
+import {
+	Link as ChakraLink,
+	type LinkProps as ChakraLinkProps,
+	type ButtonProps,
+} from '@chakra-ui/react';
 import { Link } from '@/i18n/routing';
 import type { ReactNode } from 'react';
 import { PrimaryButton, SecondaryButton } from '../buttons/ActionButton';
@@ -35,6 +39,7 @@ export function LocaleNavLink({ href, children, ...props }: LocaleLinkProps) {
 		<Link href={href}>
 			<ChakraLink
 				as='span'
+				fontSize='15px'
 				transition='all .15s ease-in-out'
 				textDecorationColor='main'
 				_hover={{ color: 'link' }}

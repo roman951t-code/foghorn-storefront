@@ -1,4 +1,4 @@
-import { Tabs, Box, Flex } from '@chakra-ui/react';
+import { Tabs, Flex } from '@chakra-ui/react';
 import { ReactNode } from 'react';
 import TabsList from './_components/TabsHeaders';
 import { type Metadata } from 'next';
@@ -10,6 +10,17 @@ import { redirect } from 'next/navigation';
 
 type Params = {
 	params: { locale: string };
+};
+
+const tabAnimationProps = {
+	_open: {
+		animationName: 'fade-in, scale-in',
+		animationDuration: '300ms',
+	},
+	_closed: {
+		animationName: 'fade-out, scale-out',
+		animationDuration: '120ms',
+	},
 };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -34,23 +45,21 @@ export default async function CabinetLayout({ children }: Props) {
 	return (
 		<TabsProvider>
 			<>
-				<Box bg='bg.tertiary' zIndex='1' rounded='md'>
-					<TabsList />
-				</Box>
+				<TabsList />
 				<Flex px='4'>
-					<Tabs.Content colorPalette='gray' w='full' value='cabinet'>
+					<Tabs.Content colorPalette='gray' w='full' value='cabinet' {...tabAnimationProps}>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content colorPalette='gray' w='full' value='orders'>
+					<Tabs.Content colorPalette='gray' w='full' value='orders' {...tabAnimationProps}>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content colorPalette='gray' w='full' value='feedback'>
+					<Tabs.Content colorPalette='gray' w='full' value='feedback' {...tabAnimationProps}>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content colorPalette='gray' w='full' value='wishlist'>
+					<Tabs.Content colorPalette='gray' w='full' value='wishlist' {...tabAnimationProps}>
 						{children}
 					</Tabs.Content>
-					<Tabs.Content colorPalette='gray' w='full' value='reviewed'>
+					<Tabs.Content colorPalette='gray' w='full' value='reviewed' {...tabAnimationProps}>
 						{children}
 					</Tabs.Content>
 				</Flex>

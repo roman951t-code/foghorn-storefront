@@ -5,55 +5,62 @@ import { LuUserRoundCog } from 'react-icons/lu';
 import { IoBagCheckOutline } from 'react-icons/io5';
 import { VscFeedback } from 'react-icons/vsc';
 import { LuUserRoundCheck } from 'react-icons/lu';
-import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { useSession } from '@/providers/SessionProvider';
 import { useTranslations } from 'next-intl';
+
+const triggerProps = {
+	color: 'main',
+	fontWeight: 'normal',
+	fontSize: 'md',
+	display: 'inline-flex',
+	gap: 2,
+	flex: '0 1 auto',
+	justifyContent: 'center',
+};
 
 export default function TabsList() {
 	const navT = useTranslations('navigation');
 	const { session } = useSession();
 
 	return (
-		<Tabs.List mb='4' gap='2' hideBelow='xs' flexWrap='wrap' justifyContent='center'>
-			<Tabs.Trigger value='cabinet' color='main' fontWeight='normal' fontSize='md' asChild>
-				<LocaleNavLink href='/cabinet' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md'>
-						<LuUserRoundCog />
-					</Icon>
-					{session?.user?.name}
-				</LocaleNavLink>
+		<Tabs.List
+			my='4'
+			gapX='4'
+			rowGap='3'
+			hideBelow='xs'
+			flexWrap='wrap'
+			justifyContent='center'
+			w='full'
+		>
+			<Tabs.Trigger value='cabinet' {...triggerProps}>
+				<Icon size='md'>
+					<LuUserRoundCog />
+				</Icon>
+				{session?.user?.name}
 			</Tabs.Trigger>
-			<Tabs.Trigger value={'orders'} color='main' fontWeight='normal' fontSize='md' asChild>
-				<LocaleNavLink href='/cabinet/orders' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md'>
-						<IoBagCheckOutline />
-					</Icon>
-					{navT('sidebar.myOrders')}
-				</LocaleNavLink>
+			<Tabs.Trigger value={'orders'} {...triggerProps}>
+				<Icon size='md'>
+					<IoBagCheckOutline />
+				</Icon>
+				{navT('sidebar.myOrders')}
 			</Tabs.Trigger>
-			<Tabs.Trigger value={'feedback'} color='main' fontWeight='normal' fontSize='md' asChild>
-				<LocaleNavLink href='/cabinet/feedback' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md'>
-						<VscFeedback />
-					</Icon>
-					{navT('sidebar.myFeedback')}
-				</LocaleNavLink>
+			<Tabs.Trigger value={'feedback'} {...triggerProps}>
+				<Icon size='md'>
+					<VscFeedback />
+				</Icon>
+				{navT('sidebar.myFeedback')}
 			</Tabs.Trigger>
-			<Tabs.Trigger value={'wishlist'} color='main' fontWeight='normal' fontSize='md' asChild>
-				<LocaleNavLink href='/cabinet/wishlist' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md'>
-						<FiHeart />
-					</Icon>
-					{navT('sidebar.wishList')}
-				</LocaleNavLink>
+			<Tabs.Trigger value={'wishlist'} {...triggerProps}>
+				<Icon size='md'>
+					<FiHeart />
+				</Icon>
+				{navT('sidebar.wishList')}
 			</Tabs.Trigger>
-			<Tabs.Trigger value={'reviewed'} color='main' fontWeight='normal' fontSize='md' asChild>
-				<LocaleNavLink href='/cabinet/reviewed' _hover={{ textDecoration: 'none' }}>
-					<Icon size='md'>
-						<LuUserRoundCheck />
-					</Icon>
-					{navT('sidebar.reviewedProducts')}
-				</LocaleNavLink>
+			<Tabs.Trigger value={'reviewed'} {...triggerProps}>
+				<Icon size='md'>
+					<LuUserRoundCheck />
+				</Icon>
+				{navT('sidebar.reviewedProducts')}
 			</Tabs.Trigger>
 		</Tabs.List>
 	);

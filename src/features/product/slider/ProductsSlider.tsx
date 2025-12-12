@@ -3,6 +3,7 @@
 import { HStack } from '@chakra-ui/react';
 import { LoadingSkeleton } from '@/components/ui/Skeleton';
 import ProductCard from '@/features/product/cards/ProductCard';
+import dynamic from 'next/dynamic';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import { useEffect, useState } from 'react';
@@ -50,6 +51,11 @@ function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
 	);
 }
 
+const DynamicProductsSwiper = dynamic(() => Promise.resolve(ProductsSwiper), {
+	ssr: false,
+	loading: () => <ProductsSkeletonFallback />,
+});
+
 export default function ProductsSlider({ tag, products: initialProducts }: Props) {
 	const [products, setProducts] = useState<SubcategoryProduct[]>(initialProducts ?? []);
 	const [loading, setLoading] = useState(!initialProducts);
@@ -86,5 +92,5 @@ export default function ProductsSlider({ tag, products: initialProducts }: Props
 
 	if (loading) return <ProductsSkeletonFallback />;
 
-	return products.length > 0 ? <ProductsSwiper products={products} /> : null;
+	return products.length > 0 ? <DynamicProductsSwiper products={products} /> : null;
 }

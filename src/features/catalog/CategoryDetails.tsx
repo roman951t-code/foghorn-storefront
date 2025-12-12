@@ -1,6 +1,7 @@
 'use client';
 
 import { Box, Flex, Text, VStack, Heading, Wrap, Badge } from '@chakra-ui/react';
+import Image from 'next/image';
 import { BsChevronRight } from 'react-icons/bs';
 import { LocaleNavLink, LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
 import type { I18nData } from '@/types/i18n';
@@ -87,31 +88,30 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				zIndex={10}
 				p={4}
 				hideBelow='lg'
-				_after={{
-					content: `""`,
-					position: 'absolute',
-					top: '30%',
-					left: '10%',
-					height: '180px',
-					width: '80%',
-					backgroundImage: {
-						base: `url("${categoryBg}")`,
-						_dark: `url("${categoryBg}")`,
-					},
-					rounded: 'sm',
-					border: '1px solid',
-					borderColor: 'gray.500',
-					backgroundRepeat: 'no-repeat',
-					backgroundPosition: 'center',
-					backgroundSize: 'auto',
-					zIndex: -1,
-				}}
 			>
-				<Heading color='main' size='2xl' fontWeight='medium' borderBottom='1px solid' pb='1'>
+				<Heading
+					color='main'
+					size='2xl'
+					fontWeight='medium'
+					borderBottom='1px solid'
+					pb='1'
+					zIndex={1}
+				>
 					{category.name}
 				</Heading>
+				<Image
+					src={categoryBg}
+					alt={category.name}
+					fill
+					sizes='240px'
+					style={{
+						objectFit: 'contain',
+						padding: '0 16px',
+					}}
+					priority
+				/>
 
-				<LocaleNavButton href={`/products/${category.slug}`} minW='240px'>
+				<LocaleNavButton href={`/products/${category.slug}`} minW='240px' zIndex={1}>
 					{i18nData.seeCategory}
 					<BsChevronRight />
 				</LocaleNavButton>

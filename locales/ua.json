@@ -231,6 +231,8 @@
 		"shipment": "Доставка",
 		"guarantee": "Гарантія",
 		"description": "Опис",
+		"guaranteeText": "Повернення товару належної якості не передбачено згідно із Законом про захист прав споживачів. Гарантійне обслуговування доступне в авторизованих сервісних центрах.",
+		"descriptionText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed aliquet arcu, ac facilisis magna. Maecenas et lectus et leo volutpat condimentum.",
 		"productIsPresent": "Товар в наявності",
 		"productIsOutOfStock": "Товар відсутній",
 		"lookSimilar": "Шукати схожі",

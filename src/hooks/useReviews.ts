@@ -36,7 +36,7 @@ export function useReviews() {
 			handleReviewAction: (formData: FeedbackSchema) =>
 				activeProductId
 					? handleReviewAction(activeProductId, formData, userId)
-					: Promise.resolve({ success: false }),
+					: Promise.resolve({ success: false, review: undefined }),
 			handleRemoveAction: () =>
 				activeProductId ? handleRemoveAction(activeProductId, userId) : Promise.resolve({ success: false }),
 		}),

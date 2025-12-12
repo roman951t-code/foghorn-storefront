@@ -5,8 +5,8 @@ import { useSession } from '@/providers/SessionProvider';
 import { useWishList } from '@/hooks/useWishList';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
-import { BsBagHeart } from 'react-icons/bs';
 import { Product } from '@/types/product';
+import { FaHeart } from 'react-icons/fa';
 
 interface Props {
 	wishlistUpdateFailed: string;
@@ -63,7 +63,7 @@ export default function AddToFavourite({ wishlistUpdateFailed, product }: Props)
 		>
 			{isInWishlist ? (
 				<Icon size='md' aria-label='Wish'>
-					<BsBagHeart />
+					<FaHeart />
 				</Icon>
 			) : (
 				<FiHeart />

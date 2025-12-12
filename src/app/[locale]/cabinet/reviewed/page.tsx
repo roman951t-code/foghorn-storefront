@@ -40,22 +40,24 @@ export default async function Reviewed({ searchParams }: Props) {
 	currentPage = Math.min(currentPage, totalPages);
 	const startIndex = (currentPage - 1) * pageSize;
 	const paginatedProducts = viewedProducts.slice(startIndex, startIndex + pageSize);
+	const hasViewedProducts = totalProductsCount > 0;
 
 	return (
 		<VStack w='100%'>
 			<CabinetSectionHeading title={navT('sidebar.reviewedProducts')} />
-			<ClearViewedButton
-				text={genT('clear')}
-				w={{ base: 'full', sm: '140px' }}
-				alignSelf='flex-end'
-				mt={{ base: '8', sm: '0' }}
-				disabled={!totalProductsCount}
-			/>
+			{hasViewedProducts && (
+				<ClearViewedButton
+					text={genT('clear')}
+					w={{ base: 'full', sm: '140px' }}
+					alignSelf='flex-end'
+					mt={{ base: '8', sm: '0' }}
+				/>
+			)}
 
 			<Box as='section' w='100%'>
 				<ViewedProducts products={paginatedProducts} emptyText={productsT('productsNotFound')} />
 			</Box>
-			{totalProductsCount > 0 && (
+			{hasViewedProducts && (
 				<Pagination
 					currentPage={currentPage}
 					totalItems={totalProductsCount}

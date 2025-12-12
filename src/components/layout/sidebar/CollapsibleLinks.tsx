@@ -48,10 +48,12 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 		>
 			{isAuthorized && (
 				<AccordionItem value='cabinet' borderBottomColor='border.light'>
-					<AccordionItemTrigger>{navT('sidebar.cabinet')}</AccordionItemTrigger>
+					<AccordionItemTrigger fontSize='17px' mb='2'>
+						{navT('sidebar.cabinet')}
+					</AccordionItemTrigger>
 					<AccordionItemContent>
 						<LocaleNavLink href='/cabinet' onClick={handleClick}>
-							<Icon size='md' mr='2' verticalAlign='top'>
+							<Icon size='md' mr='2'>
 								<LuUserRoundCog />
 							</Icon>
 							{userName ?? navT('sidebar.cabinet')}
@@ -59,7 +61,7 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 					</AccordionItemContent>
 					<AccordionItemContent>
 						<LocaleNavLink href='/cabinet/orders' onClick={handleClick}>
-							<Icon size='md' mr='2' verticalAlign='top'>
+							<Icon size='md' mr='2'>
 								<IoBagCheckOutline />
 							</Icon>
 							{navT('sidebar.myOrders')}
@@ -67,7 +69,7 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 					</AccordionItemContent>
 					<AccordionItemContent>
 						<LocaleNavLink href='/cabinet/feedback' onClick={handleClick}>
-							<Icon size='md' mr='2' verticalAlign='top'>
+							<Icon size='md' mr='2'>
 								<VscFeedback />
 							</Icon>
 							{navT('sidebar.myFeedback')}
@@ -75,7 +77,7 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 					</AccordionItemContent>
 					<AccordionItemContent>
 						<LocaleNavLink href='/cabinet/wishlist' onClick={handleClick}>
-							<Icon size='md' mr='2' verticalAlign='top'>
+							<Icon size='md' mr='2'>
 								<FiHeart />
 							</Icon>
 							{navT('sidebar.wishList')}
@@ -83,7 +85,7 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 					</AccordionItemContent>
 					<AccordionItemContent>
 						<LocaleNavLink href='/cabinet/reviewed' onClick={handleClick}>
-							<Icon size='md' mr='2' verticalAlign='top'>
+							<Icon size='md' mr='2'>
 								<LuUserRoundCheck />
 							</Icon>
 							{navT('sidebar.reviewedProducts')}
@@ -92,10 +94,12 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 				</AccordionItem>
 			)}
 			<AccordionItem value='info' borderBottomColor='border.light'>
-				<AccordionItemTrigger>{navT('sidebar.info')}</AccordionItemTrigger>
+				<AccordionItemTrigger fontSize='17px' mb='2'>
+					{navT('sidebar.info')}
+				</AccordionItemTrigger>
 				<AccordionItemContent>
 					<LocaleNavLink href='/about-us' onClick={handleClick}>
-						<Icon size='md' mr='2' verticalAlign='top'>
+						<Icon size='md' mr='2'>
 							<FiInfo />
 						</Icon>
 						{navT('sidebar.aboutUs')}
@@ -103,7 +107,7 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/public-offer' onClick={handleClick}>
-						<Icon size='md' mr='2' verticalAlign='top'>
+						<Icon size='md' mr='2'>
 							<FiFileText />
 						</Icon>
 						{navT('sidebar.publicOffer')}
@@ -111,7 +115,7 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/faq' onClick={handleClick}>
-						<Icon size='md' mr='2' verticalAlign='top'>
+						<Icon size='md' mr='2'>
 							<FiHelpCircle />
 						</Icon>
 						{navT('sidebar.faq')}
@@ -119,10 +123,12 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 				</AccordionItemContent>
 			</AccordionItem>
 			<AccordionItem value='clients' borderBottomColor='border.light'>
-				<AccordionItemTrigger>{navT('sidebar.clients')}</AccordionItemTrigger>
+				<AccordionItemTrigger fontSize='17px' mb='2'>
+					{navT('sidebar.clients')}
+				</AccordionItemTrigger>
 				<AccordionItemContent>
 					<LocaleNavLink href='/shipping-terms' onClick={handleClick}>
-						<Icon size='md' mr='2' verticalAlign='top'>
+						<Icon size='md' mr='2'>
 							<FiTruck />
 						</Icon>
 						{navT('sidebar.shippingTerms')}
@@ -130,7 +136,7 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/guarantee' onClick={handleClick}>
-						<Icon size='md' mr='2' verticalAlign='top'>
+						<Icon size='md' mr='2'>
 							<FiShield />
 						</Icon>
 						{navT('sidebar.guarantee')}
@@ -138,7 +144,7 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/return-refund' onClick={handleClick}>
-						<Icon size='md' mr='2' verticalAlign='top'>
+						<Icon size='md' mr='2'>
 							<FiRefreshCcw />
 						</Icon>
 						{navT('sidebar.returnRefund')}
@@ -146,7 +152,7 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 				</AccordionItemContent>
 				<AccordionItemContent>
 					<LocaleNavLink href='/terms' onClick={handleClick}>
-						<Icon size='md' mr='2' verticalAlign='top'>
+						<Icon size='md' mr='2'>
 							<MdGavel />
 						</Icon>
 						{navT('sidebar.terms')}

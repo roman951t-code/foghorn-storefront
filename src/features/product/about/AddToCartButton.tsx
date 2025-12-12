@@ -42,7 +42,7 @@ export default function AddToCartButton({ i18nData, product }: AddToCartButtonPr
 	return (
 		<>
 			{!isInCart && (
-				<PrimaryButton w='200px' onClick={handleAdd} loading={isLoading}>
+				<PrimaryButton fontSize='15px' gapX='3' w='200px' onClick={handleAdd} loading={isLoading}>
 					<FiShoppingCart />
 					{i18nData.buyText}
 				</PrimaryButton>

@@ -170,8 +170,8 @@ const config = defineConfig({
 		svg: {
 			display: 'inline',
 		},
-		a: {
-			fontFamily: 'var(--font-noto-sans), var(--font-open-sans), system-ui, sans-serif',
+		'a, a > span, button.chakra-tabs__trigger': {
+			fontFamily: 'var(--font-montserrat), var(--font-open-sans), system-ui, sans-serif !important',
 			fontWeight: 500,
 			fontSize: 16,
 		},
@@ -240,8 +240,8 @@ const config = defineConfig({
 			textAlign: 'center !important',
 			lineHeight: '20px !important',
 			fontSize: '12px !important',
-			color: 'var(--chakra-colors-bg-subtle) !important',
-			backgroundColor: 'var(--chakra-colors-bg-inverted) !important',
+			color: 'black !important',
+			backgroundColor: 'white !important',
 			opacity: '.8 !important',
 		},
 		'.thumbsSlider .swiper-pagination-bullet-active': {
@@ -250,6 +250,7 @@ const config = defineConfig({
 		},
 		'.thumbsSlider .swiper-pagination': {
 			bottom: '0 !important',
+			marginBottom: '12px',
 		},
 		'.chakra-tabs__trigger:is([aria-selected=true], [data-selected])[data-orientation=vertical]': {
 			textDecoration: 'underline',

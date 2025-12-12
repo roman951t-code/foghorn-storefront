@@ -47,7 +47,8 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 	const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const isSmallScreen = useBreakpointValue({ base: true, md: false });
-	const thumbInstance = !isSmallScreen && thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null;
+	const thumbInstance =
+		!isSmallScreen && thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null;
 
 	const galleryImages = images.length
 		? images
@@ -62,7 +63,7 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 		? {
 				clickable: true,
 				renderBullet: function (index: number, className: string) {
-					return `<span class="${className}">${index + 1}</span>`;
+					return `<span class="${className}" style="margin: 0 6px;">${index + 1}</span>`;
 				},
 		  }
 		: false;

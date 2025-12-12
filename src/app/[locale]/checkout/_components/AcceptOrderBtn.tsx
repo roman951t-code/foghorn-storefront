@@ -11,7 +11,7 @@ interface Props extends ButtonProps {
 }
 
 export default function AcceptOrderBtn({ text, disabledReason, onAccept, ...restProps }: Props) {
-	const isDisabled = !!disabledReason || !!restProps.isLoading;
+	const isDisabled = !!disabledReason || !!restProps.loading;
 
 	return (
 		<PrimaryButton

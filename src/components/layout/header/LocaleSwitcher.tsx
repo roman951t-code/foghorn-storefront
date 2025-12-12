@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Portal, Select, createListCollection } from '@chakra-ui/react';
+import { Box, Select, createListCollection } from '@chakra-ui/react';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 
@@ -53,18 +53,16 @@ export default function LocaleSwitcher() {
 				</Select.IndicatorGroup>
 			</Select.Control>
 
-			<Portal>
-				<Select.Positioner zIndex='tooltip' top='12px'>
-					<Select.Content fontSize='md' lineHeight='1.75'>
-						{languages.items.map((item) => (
-							<Select.Item cursor='pointer' item={item} key={item.value}>
-								{item.flag} {languages.stringifyItem(item)}
-								<Select.ItemIndicator />
-							</Select.Item>
-						))}
-					</Select.Content>
-				</Select.Positioner>
-			</Portal>
+			<Select.Positioner zIndex={1600} top='12px'>
+				<Select.Content fontSize='md' lineHeight='1.75'>
+					{languages.items.map((item) => (
+						<Select.Item cursor='pointer' item={item} key={item.value}>
+							{item.flag} {languages.stringifyItem(item)}
+							<Select.ItemIndicator />
+						</Select.Item>
+					))}
+				</Select.Content>
+			</Select.Positioner>
 		</Select.Root>
 	);
 }

@@ -10,14 +10,13 @@ import {
 	VStack,
 	Flex,
 	Tag,
-	Card,
-	Stack,
-	Separator,
 	Stat,
 	Status,
 	Icon,
 } from '@chakra-ui/react';
 import { MdOutlineManageSearch } from 'react-icons/md';
+import { RiPaypalFill, RiMoneyDollarCircleFill, RiBankCardFill } from 'react-icons/ri';
+import { FaTruck } from 'react-icons/fa';
 import dynamic from 'next/dynamic';
 import { Rating } from '@/components/ui/chakra/rating';
 import { LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
@@ -25,6 +24,7 @@ import AddToFavourite from './AddToFavourite';
 import AddToCartButton from './AddToCartButton';
 import { Product } from '@/types/product';
 import { buildProductImages } from '@/utils/productImages';
+import ProductDetails, { DetailOption } from './ProductDetails';
 
 const ShareProduct = dynamic(() => import('./ShareProduct'), { ssr: false });
 
@@ -36,11 +36,18 @@ interface Props {
 	onTabChange?: (tab: 'about' | 'characteristics' | 'feedback') => void;
 }
 
-export default function AboutTab({ product, category, subcategory, averageRating, onTabChange }: Props) {
+export default function AboutTab({
+	product,
+	category,
+	subcategory,
+	averageRating,
+	onTabChange,
+}: Props) {
 	const cartT = useTranslations('cart');
 	const navT = useTranslations('navigation');
 	const prodT = useTranslations('products');
 	const wishT = useTranslations('wishlist');
+	const checkoutT = useTranslations('checkout');
 
 	const shareI18nData = {
 		pressToCopy: prodT('pressToCopy'),
@@ -66,6 +73,18 @@ export default function AboutTab({ product, category, subcategory, averageRating
 			? product.images
 			: buildProductImages(product.imageUrl ?? undefined, 4);
 
+	const paymentOptions: DetailOption[] = [
+		{ key: 'paypal', label: checkoutT('payment.paypal'), icon: <RiPaypalFill /> },
+		{ key: 'cod', label: checkoutT('payment.cod'), icon: <RiMoneyDollarCircleFill /> },
+		{ key: 'card', label: checkoutT('payment.card'), icon: <RiBankCardFill /> },
+	];
+
+	const shipmentOptions: DetailOption[] = [
+		{ key: 'novaPoshta', label: checkoutT('shipment.novaPoshta'), icon: <FaTruck /> },
+		{ key: 'ukrposhta', label: checkoutT('shipment.ukrposhta'), icon: <FaTruck /> },
+		{ key: 'meest', label: checkoutT('shipment.meest'), icon: <FaTruck /> },
+	];
+
 	return (
 		<VStack gap='8' colorPalette='gray' userSelect='none'>
 			<Group
@@ -78,7 +97,7 @@ export default function AboutTab({ product, category, subcategory, averageRating
 					minW={{ base: '340px', md: '440px', lg: '500px' }}
 					w='full'
 					bg='bg.tertiary'
-					pb='4'
+					mb='4'
 					rounded='md'
 				>
 					<ProductThumbsSlider images={galleryImages} />
@@ -144,13 +163,7 @@ export default function AboutTab({ product, category, subcategory, averageRating
 
 							{discount > 0 && (
 								<Badge colorPalette='gray'>
-									<Box
-										as='span'
-										color='main.disabled'
-										fontSize='sm'
-										textDecoration='line-through'
-										marginLeft='1'
-									>
+									<Box as='span' color='main.disabled' fontSize='sm' textDecoration='line-through'>
 										{parseInt(product.basePrice.toFixed(2))}₴
 										<Badge
 											variant='solid'
@@ -191,59 +204,18 @@ export default function AboutTab({ product, category, subcategory, averageRating
 							{prodT('feedback')} ({product.reviewCount ?? 0})
 						</Link>
 					</HStack>
-					<Stack w='100%' gap='4' mt='6'>
-						<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
-							<Card.Header>
-								<Heading size='md'> Секция плейсхолдер</Heading>
-							</Card.Header>
-							<Card.Body>
-								Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
-								Ipsum has been the industry's standard dummy text ever since the 1500s, when an
-								unknown printer took a galley of type and scrambled it to make a type specimen book.
-							</Card.Body>
-						</Card.Root>
-
-						<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
-							<Card.Header>
-								<Heading size='md'> {prodT('payment')}</Heading>
-							</Card.Header>
-							<Card.Body>
-								Картою онлайн, Оплата під час отримання товару, Оплата карткою у відділенні, Apple
-								Pay, Google Pay, Безготівковими для юридичних осіб, Безготівковий для фізичних осіб
-							</Card.Body>
-						</Card.Root>
-
-						<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
-							<Card.Header>
-								<Heading size='md'> {prodT('shipment')}</Heading>
-							</Card.Header>
-							<Card.Body>Доставка кур'єром Нової Пошти</Card.Body>
-						</Card.Root>
-
-						<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
-							<Card.Header>
-								<Heading size='md'> {prodT('guarantee')}</Heading>
-							</Card.Header>
-							<Card.Body>
-								Законом про захист прав споживачів не передбачено повернення цього товару належної
-								якості.
-							</Card.Body>
-						</Card.Root>
-					</Stack>
+					<ProductDetails
+						paymentTitle={prodT('payment')}
+						shipmentTitle={prodT('shipment')}
+						guaranteeTitle={prodT('guarantee')}
+						descriptionTitle={prodT('description')}
+						guaranteeText={prodT('guaranteeText')}
+						descriptionText={prodT('descriptionText')}
+						paymentOptions={paymentOptions}
+						shipmentOptions={shipmentOptions}
+					/>
 				</VStack>
 			</Group>
-			<Separator borderColor='border.dark' />
-			<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
-				<Card.Header>
-					<Heading size='lg'> {prodT('description')}</Heading>
-				</Card.Header>
-				<Card.Body>
-					It has survived not only five centuries, but also the leap into electronic typesetting,
-					remaining essentially unchanged. It was popularised in the 1960s with the release of
-					Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing
-					software like Aldus PageMaker including versions of Lorem Ipsum.
-				</Card.Body>
-			</Card.Root>
 		</VStack>
 	);
 }
