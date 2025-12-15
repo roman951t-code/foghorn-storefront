@@ -15,7 +15,7 @@ interface Props {
 export default function CategoryDetails({ category, i18nData }: Props) {
 	if (!category) return null;
 
-	const categoryBg = category.imageUrl ?? '/assets/images/temp/1.webp';
+	const categoryBg = category.imageUrl ?? '/assets/images/temp/1Big.webp';
 
 	return (
 		<Flex bg='bg.tertiary' overflowY='auto' rounded='sm' boxShadow='sm' w='100%' p={4}>
@@ -99,17 +99,20 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				>
 					{category.name}
 				</Heading>
-				<Image
-					src={categoryBg}
-					alt={category.name}
-					fill
-					sizes='240px'
-					style={{
-						objectFit: 'contain',
-						padding: '0 16px',
-					}}
-					priority
-				/>
+				<Box position='relative' w='full' h='240px' mt={4}>
+					<Image
+						key={categoryBg}
+						src={categoryBg}
+						alt={category.name}
+						fill
+						sizes='240px'
+						style={{
+							objectFit: 'contain',
+							padding: '0 16px',
+						}}
+						priority
+					/>
+				</Box>
 
 				<LocaleNavButton href={`/products/${category.slug}`} minW='240px' zIndex={1}>
 					{i18nData.seeCategory}

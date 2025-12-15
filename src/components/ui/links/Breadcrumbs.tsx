@@ -1,7 +1,7 @@
 import { BreadcrumbLink, BreadcrumbRoot } from '@/components/ui/chakra/breadcrumb';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import { LocaleNavLink } from './LocaleNavLink';
-import { Badge } from '@chakra-ui/react';
+import { Badge, Button } from '@chakra-ui/react';
 
 interface Props {
 	category?: string;
@@ -75,15 +75,18 @@ export default function Breadcrumbs({
 			<CatalogBtn
 				fullText={false}
 				trigger={
-					<Badge
+					<Button
+						size='sm'
 						variant='outline'
-						size='md'
 						borderWidth='0.5px'
 						bg='bg.tertiary'
 						boxShadow='none'
 						px='1.5'
 						py='1'
 						borderColor='border.light'
+						aria-label='Open catalog'
+						height='32px'
+						minW='auto'
 					>
 						<BreadcrumbLink
 							wordBreak='break-word'
@@ -101,7 +104,7 @@ export default function Breadcrumbs({
 						>
 							Каталог
 						</BreadcrumbLink>
-					</Badge>
+					</Button>
 				}
 			/>
 

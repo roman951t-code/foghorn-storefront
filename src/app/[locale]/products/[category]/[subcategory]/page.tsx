@@ -143,7 +143,11 @@ export default async function Subcategory({ params, searchParams }: Params) {
 				</Box>
 
 				<Box as='section' w={{ base: '100%', lg: '80%' }}>
-					<ProductsGrid products={subcategoryData.products} notFound={t('productsNotFound')} />
+					<ProductsGrid
+						products={subcategoryData.products}
+						notFound={t('productsNotFound')}
+						limit={pageSize}
+					/>
 					<Pagination
 						currentPage={page}
 						totalItems={subcategoryData?.totalCount || 0}

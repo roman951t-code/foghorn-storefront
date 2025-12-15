@@ -27,6 +27,8 @@ interface Props {
 	params: { locale: 'ua' | 'us' };
 }
 
+const toHtmlLang = (locale: 'ua' | 'us') => (locale === 'ua' ? 'uk' : 'en-US');
+
 export default async function Layout({ children, params }: Props) {
 	const { locale } = await params;
 	if (!hasLocale(routing.locales, locale)) {
@@ -66,8 +68,10 @@ export default async function Layout({ children, params }: Props) {
 	const emptyCartData: CartData = { items: [] };
 	const { success, ...restCartData } = cartResponse;
 
+	const htmlLang = toHtmlLang(locale);
+
 	return (
-		<html lang={locale} suppressHydrationWarning>
+		<html lang={htmlLang} suppressHydrationWarning>
 			<body className={`${openSans.variable} ${montserrat.variable} ${notoSans.variable}`}>
 				<ColorModeProvider>
 					<ChakraUIProvider>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, IconButton, Separator } from '@chakra-ui/react';
+import { Box, IconButton } from '@chakra-ui/react';
 import { FiMenu } from 'react-icons/fi';
 import {
 	DrawerBackdrop,
@@ -81,26 +81,23 @@ export default function SidePanel() {
 
 					<Box flex='1' overflowY='auto' display='flex' flexDirection='column' height='100dvh'>
 						<Box
-							px={4}
+							px={6}
 							my={4}
 							h='100%'
 							overflowY='auto'
 							display='flex'
 							flexDirection='column'
-							gap='5'
+							gapY='8'
 						>
 							<CatalogBtn fullText />
-							<Separator borderColor='border.light' />
 
 							{session?.session ? (
 								<>
 									<LogoutSection onClose={onClose} />
-									<Separator borderColor='border.light' />
 								</>
 							) : (
 								<>
 									<AuthorizeSection onAuthOpen={onAuthOpen} />
-									<Separator borderColor='border.light' />
 								</>
 							)}
 

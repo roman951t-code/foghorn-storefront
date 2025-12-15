@@ -2,6 +2,7 @@
 
 import { Box, Select, createListCollection } from '@chakra-ui/react';
 import { usePathname, useRouter } from '@/i18n/routing';
+import { useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
 
 const languages = createListCollection({
@@ -16,19 +17,23 @@ const languages = createListCollection({
 export default function LocaleSwitcher() {
 	const pathname = usePathname();
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const locale = useLocale() as 'ua' | 'us';
+	const label = 'Change language';
 
 	const changeLocale = (details: { value: string[] }) => {
 		const newLocale = details.value?.[0]?.toLowerCase();
 		if (newLocale === 'ua' || newLocale === 'us') {
-			router.replace(pathname, { locale: newLocale });
+			const search = searchParams.toString();
+			const destination = search ? `${pathname}?${search}` : pathname;
+			router.replace(destination, { locale: newLocale });
 		}
 	};
 
 	return (
 		<Select.Root
 			position='relative'
-			aria-label='Change language'
+			aria-label={label}
 			bg={{ base: 'gray.100', _dark: 'gray.800' }}
 			rounded='sm'
 			collection={languages}
@@ -38,9 +43,10 @@ export default function LocaleSwitcher() {
 			defaultValue={[locale]}
 			onValueChange={changeLocale}
 		>
+			<Select.Label srOnly>{label}</Select.Label>
 			<Select.HiddenSelect />
 			<Select.Control>
-				<Select.Trigger borderColor='border.light' cursor='pointer' px='2'>
+				<Select.Trigger borderColor='border.light' cursor='pointer' px='2' aria-label={label}>
 					<Select.ValueText fontSize='md' placeholder='-'>
 						{languages.items.find((item) => item.value === locale)?.flag}
 						<Box as='span' ml='2'>

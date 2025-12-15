@@ -1,5 +1,57 @@
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react';
 
+const thumbNavAfterStyles = {
+	color: 'var(--chakra-colors-bg-inverted) !important',
+	fontSize: '24px !important',
+	backgroundColor: 'transparent',
+	padding: '8px',
+	borderRadius: '60%',
+};
+
+const thumbNavButtonStyles = {
+	backgroundColor: 'bg',
+	borderWidth: '0.5px',
+	borderRadius: '6px',
+	borderColor: 'var(--chakra-colors-border-light)',
+	height: '90px !important',
+	width: '30px !important',
+};
+
+const thumbNavIconStyles = {
+	height: '52px !important',
+	width: '16px !important',
+};
+
+const thumbPaginationBullet = {
+	width: '20px !important',
+	height: '20px !important',
+	textAlign: 'center !important',
+	lineHeight: '20px !important',
+	fontSize: '12px !important',
+	color: 'black !important',
+	backgroundColor: 'white !important',
+	opacity: '.8 !important',
+	margin: '0 6px !important',
+};
+
+const thumbPaginationBulletActive = {
+	backgroundColor: 'var(--chakra-colors-main-accent) !important',
+	opacity: '1 !important',
+};
+
+const thumbPaginationBulletMobile = {
+	width: '28px !important',
+	height: '28px !important',
+	lineHeight: '28px !important',
+	fontSize: '14px !important',
+	margin: '0 8px !important',
+};
+
+const thumbFocusOutline = {
+	outline: '2px solid var(--chakra-colors-main-accent)',
+	outlineOffset: '4px',
+};
+
 const config = defineConfig({
 	strictTokens: false,
 	theme: {
@@ -234,7 +286,7 @@ const config = defineConfig({
 		'.chakra-checkbox__control[data-state="unchecked"]': {
 			color: 'var(--chakra-colors-fg) !important',
 		},
-		'.thumbsSlider .swiper-pagination-bullet': {
+		'.thumbsSlider .swiper-pagination-bullet, .thumbsSlider-pagination .swiper-pagination-bullet': {
 			width: '20px !important',
 			height: '20px !important',
 			textAlign: 'center !important',
@@ -243,14 +295,37 @@ const config = defineConfig({
 			color: 'black !important',
 			backgroundColor: 'white !important',
 			opacity: '.8 !important',
+			margin: '0 6px !important',
 		},
-		'.thumbsSlider .swiper-pagination-bullet-active': {
-			backgroundColor: 'var(--chakra-colors-main-accent) !important',
-			opacity: '1 !important',
-		},
+		'.thumbsSlider .swiper-pagination-bullet-active, .thumbsSlider-pagination .swiper-pagination-bullet-active':
+			{
+				backgroundColor: 'var(--chakra-colors-main-accent) !important',
+				opacity: '1 !important',
+			},
+		'.thumbsSlider .swiper-button-prev:focus-visible, .thumbsSlider .swiper-button-next:focus-visible, .thumbsSlider .swiper-pagination-bullet:focus-visible':
+			{
+				outline: '2px solid var(--chakra-colors-main-accent)',
+				outlineOffset: '4px',
+			},
 		'.thumbsSlider .swiper-pagination': {
 			bottom: '0 !important',
 			marginBottom: '12px',
+		},
+		'.thumbsSlider-pagination': {
+			display: 'flex',
+			justifyContent: 'center',
+			alignItems: 'center',
+			marginTop: '12px',
+		},
+		'@media screen and (max-width: 767px)': {
+			'.thumbsSlider .swiper-pagination-bullet, .thumbsSlider-pagination .swiper-pagination-bullet':
+				{
+					width: '28px !important',
+					height: '28px !important',
+					lineHeight: '28px !important',
+					fontSize: '14px !important',
+					margin: '0 8px !important',
+				},
 		},
 		'.chakra-tabs__trigger:is([aria-selected=true], [data-selected])[data-orientation=vertical]': {
 			textDecoration: 'underline',

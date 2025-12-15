@@ -8,9 +8,10 @@ import { SubcategoryProduct } from '@/types/product';
 interface Props {
 	products: SubcategoryProduct[];
 	notFound: string;
+	limit?: number;
 }
 
-export default function ProductsGrid({ products, notFound }: Props) {
+export default function ProductsGrid({ products, notFound, limit }: Props) {
 	if (!products || products.length === 0) {
 		return (
 			<EmptyState.Root>
@@ -43,6 +44,8 @@ export default function ProductsGrid({ products, notFound }: Props) {
 	else if (is630) columns = 3;
 	else if (is450) columns = 2;
 
+	const visibleProducts = limit ? products.slice(0, limit) : products;
+
 	return (
 		<SimpleGrid
 			className='productsSlider'
@@ -51,7 +54,7 @@ export default function ProductsGrid({ products, notFound }: Props) {
 			rowGap={4}
 			px={{ base: 1, sm: 0 }}
 		>
-			{products.map((product) => (
+			{visibleProducts.map((product) => (
 				<Box key={product.id}>
 					<ProductCard product={product} />
 				</Box>

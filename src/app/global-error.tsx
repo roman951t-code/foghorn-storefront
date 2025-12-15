@@ -31,10 +31,12 @@ export default function GlobalError({
 		return locale === 'ua' ? 'ua' : 'us';
 	};
 
-	const copy = messages[localeFromPath()];
+	const locale = localeFromPath();
+	const htmlLang = locale === 'ua' ? 'uk' : 'en-US';
+	const copy = messages[locale];
 
 	return (
-		<html lang={localeFromPath()}>
+		<html lang={htmlLang}>
 			<body>
 				<h2>⚠️ {copy.title}</h2>
 				<p>{copy.description}</p>

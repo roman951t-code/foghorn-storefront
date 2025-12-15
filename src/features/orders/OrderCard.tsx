@@ -161,11 +161,9 @@ export default function OrderCard() {
 												</Badge>
 											</Text>
 										</Flex>
-										<Stat.Root alignSelf='flex-end' color='main'>
-											<Stat.ValueText textStyle='md' minW='42px'>
-												{`x 2${genT('units')}`}
-											</Stat.ValueText>
-										</Stat.Root>
+										<Text as='span' alignSelf='flex-end' color='main' fontWeight='semibold' minW='56px'>
+											{`x 2${genT('units')}`}
+										</Text>
 									</Flex>
 
 									<Separator color='border.dark' />
@@ -207,11 +205,9 @@ export default function OrderCard() {
 												</Badge>
 											</Text>
 										</Flex>
-										<Stat.Root alignSelf='flex-end' color='main'>
-											<Stat.ValueText textStyle='md' minW='42px'>
-												{`x 2${genT('units')}`}
-											</Stat.ValueText>
-										</Stat.Root>
+										<Text as='span' alignSelf='flex-end' color='main' fontWeight='semibold' minW='56px'>
+											{`x 2${genT('units')}`}
+										</Text>
 									</Flex>
 								</Stack>
 							</Accordion.ItemBody>

@@ -10,10 +10,15 @@ import 'swiper/css';
 import 'swiper/css/effect-flip';
 import 'swiper/css/navigation';
 
+import { toPreviewImage } from '@/utils/productImages';
+
+type ProductPreviewSliderProps = {
+	images: string[];
+	productName?: string;
+};
+
 const img1 = '/assets/images/temp/1.webp';
 const img2 = '/assets/images/temp/2.webp';
-
-import { toPreviewImage } from '@/utils/productImages';
 
 function ProductPreviewSkeleton() {
 	return (
@@ -23,9 +28,10 @@ function ProductPreviewSkeleton() {
 	);
 }
 
-function ProductPreviewSwiper({ images }: { images: string[] }) {
+function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps) {
 	const baseImages = images.length ? images : [img1, img2];
 	const previewImages = baseImages.map(toPreviewImage);
+	const altText = productName ? `${productName} photo` : 'Product photo';
 
 	return (
 		<Swiper
@@ -43,7 +49,7 @@ function ProductPreviewSwiper({ images }: { images: string[] }) {
 							src={src}
 							width={300}
 							height={230}
-							alt='Product photo'
+							alt={altText}
 							style={{
 								borderRadius: '6px',
 								width: '124px',
@@ -57,11 +63,14 @@ function ProductPreviewSwiper({ images }: { images: string[] }) {
 	);
 }
 
-const DynamicProductPreviewSlider = dynamic(() => Promise.resolve(ProductPreviewSwiper), {
-	ssr: false,
-	loading: () => <ProductPreviewSkeleton />,
-});
+const DynamicProductPreviewSlider = dynamic(
+	() => Promise.resolve(ProductPreviewSwiper),
+	{
+		ssr: false,
+		loading: () => <ProductPreviewSkeleton />,
+	}
+);
 
-export default function ProductPreviewSlider({ images }: { images: string[] }) {
-	return <DynamicProductPreviewSlider images={images} />;
+export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
+	return <DynamicProductPreviewSlider {...props} />;
 }

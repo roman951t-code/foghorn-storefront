@@ -44,6 +44,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 				spaceX='4'
 				colorPalette='gray'
 				w='100%'
+				orientation='vertical'
 			>
 				<VStack gap='4' alignItems='flex-start'>
 					<Radio w='100%' value='new' _hover={{ cursor: 'pointer' }}>
@@ -72,6 +73,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 				spaceX='4'
 				colorPalette='gray'
 				w='100%'
+				orientation='vertical'
 			>
 				<VStack gap='4' alignItems='flex-start'>
 					<Radio w='100%' value='all' _hover={{ cursor: 'pointer' }}>

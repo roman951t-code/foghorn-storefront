@@ -62,9 +62,7 @@ export function OrderAccordionContent({ order }: Props) {
 				router.refresh();
 			} else {
 				const key =
-					result.code === 'unauthorized'
-						? 'orderDeleteUnauthorized'
-						: 'orderDeleteFailed';
+					result.code === 'unauthorized' ? 'orderDeleteUnauthorized' : 'orderDeleteFailed';
 				showToaster('error', ordersT(key));
 			}
 		});
@@ -72,7 +70,7 @@ export function OrderAccordionContent({ order }: Props) {
 
 	return (
 		<Accordion.ItemContent>
-			<Accordion.ItemBody p='0' pt='4'>
+			<Accordion.ItemBody p='0' pt='4' mt='2'>
 				<Flex
 					justifyContent={{ base: 'space-between', xs: 'space-between' } as any}
 					alignItems='center'
@@ -80,11 +78,7 @@ export function OrderAccordionContent({ order }: Props) {
 					flexWrap='wrap'
 					mb='4'
 				>
-					<TertiaryButton
-						onClick={handleDeleteOrder}
-						loading={isDeleting}
-						disabled={isDeleting}
-					>
+					<TertiaryButton onClick={handleDeleteOrder} loading={isDeleting} disabled={isDeleting}>
 						{deleteLabel}
 					</TertiaryButton>
 					<PrimaryButton onClick={handleRepeatOrder} loading={isRepeating}>
@@ -137,11 +131,16 @@ export function OrderAccordionContent({ order }: Props) {
 											{ordersT('unit')}: {item.unitPrice.toFixed(2)} ₴
 										</Text>
 									</Flex>
-									<Stat.Root alignSelf={{ base: 'center', sm: 'flex-end' }} color='main' mr='4'>
-										<Stat.ValueText textStyle='md' minW='42px'>
-											{`x ${item.quantity}${commonT('units')}`}
-										</Stat.ValueText>
-									</Stat.Root>
+									<Text
+										alignSelf={{ base: 'center', sm: 'flex-end' }}
+										color='main'
+										mr='4'
+										textStyle='md'
+										as='span'
+										minW='56px'
+									>
+										{`x ${item.quantity}${commonT('units')}`}
+									</Text>
 								</Flex>
 
 								{idx < order.items.length - 1 && <Separator my='4' color='border.dark' />}

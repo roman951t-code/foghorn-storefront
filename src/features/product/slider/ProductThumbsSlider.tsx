@@ -2,10 +2,10 @@
 
 import dynamic from 'next/dynamic';
 import { Box, HStack, Skeleton, useBreakpointValue } from '@chakra-ui/react';
-import { useState } from 'react';
+import { KeyboardEvent, useState } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { FreeMode, Navigation, Thumbs, Pagination } from 'swiper/modules';
+import { FreeMode, Navigation, Thumbs, Pagination, A11y, Keyboard } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/free-mode';
@@ -14,6 +14,11 @@ import 'swiper/css/thumbs';
 import 'swiper/css/pagination';
 
 const ImageModal = dynamic(() => import('./ImageModal'));
+
+type ProductThumbsSliderProps = {
+	images: string[];
+	productName?: string;
+};
 
 function ThumbsSliderSkeleton() {
 	const isSmallScreen = useBreakpointValue({ base: true, md: false });
@@ -39,16 +44,17 @@ const DynamicProductThumbsSlider = dynamic(() => Promise.resolve(ThumbsSliderInt
 	loading: () => <ThumbsSliderSkeleton />,
 });
 
-export default function ProductThumbsSlider({ images }: { images: string[] }) {
-	return <DynamicProductThumbsSlider images={images} />;
+export default function ProductThumbsSlider(props: ProductThumbsSliderProps) {
+	return <DynamicProductThumbsSlider {...props} />;
 }
 
-function ThumbsSliderInternal({ images }: { images: string[] }) {
+function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps) {
 	const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const isSmallScreen = useBreakpointValue({ base: true, md: false });
 	const thumbInstance =
 		!isSmallScreen && thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null;
+	const accessibleName = productName ?? 'product';
 
 	const galleryImages = images.length
 		? images
@@ -69,6 +75,12 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 		: false;
 
 	const resetImage = () => setSelectedImage(null);
+	const handleSlideKeyOpen = (src: string) => (event: KeyboardEvent<HTMLDivElement>) => {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			setSelectedImage(src);
+		}
+	};
 
 	return (
 		<>
@@ -78,12 +90,31 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 				navigation
 				spaceBetween={0}
 				pagination={pagination}
+				keyboard={{ enabled: true, onlyInViewport: true }}
 				thumbs={{ swiper: thumbInstance ?? undefined }}
-				modules={[FreeMode, Navigation, Thumbs, Pagination]}
+				a11y={{
+					enabled: true,
+					containerMessage: `Image gallery for ${accessibleName}`,
+					containerRoleDescriptionMessage: 'Product media carousel',
+					itemRoleDescriptionMessage: 'Slide',
+					slideLabelMessage: 'Image {{index}} of {{slidesLength}}',
+					prevSlideMessage: 'Previous product image',
+					nextSlideMessage: 'Next product image',
+					paginationBulletMessage: 'Go to product image {{index}}',
+				}}
+				modules={[FreeMode, Navigation, Thumbs, Pagination, A11y, Keyboard]}
 				className='thumbsSlider'
+				aria-label={`Image gallery for ${accessibleName}`}
 			>
 				{galleryImages.map((src, index) => (
-					<SwiperSlide key={index} onClick={() => setSelectedImage(src)}>
+					<SwiperSlide
+						key={index}
+						onClick={() => setSelectedImage(src)}
+						role='button'
+						tabIndex={0}
+						onKeyDown={handleSlideKeyOpen(src)}
+						aria-label={`Open larger view of ${accessibleName} image ${index + 1}`}
+					>
 						<Box
 							position='relative'
 							width='100%'
@@ -95,7 +126,7 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 						>
 							<Image
 								src={src}
-								alt={`Product photo ${index + 1}`}
+								alt={`${accessibleName} photo ${index + 1}`}
 								fill
 								style={{ objectFit: 'cover' }}
 								sizes='(max-width: 768px) 100vw, 50vw'
@@ -114,12 +145,32 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 					slidesPerView={4}
 					freeMode
 					watchSlidesProgress
-					modules={[FreeMode, Navigation]}
+					modules={[FreeMode, Navigation, A11y]}
 					className='thumbsSlider2'
 					style={{ userSelect: 'none' }}
+					a11y={{
+						enabled: true,
+						containerMessage: `Thumbnail carousel for ${accessibleName}`,
+						itemRoleDescriptionMessage: 'Thumbnail',
+						slideLabelMessage: 'Thumbnail {{index}} of {{slidesLength}}',
+						prevSlideMessage: 'Previous thumbnail',
+						nextSlideMessage: 'Next thumbnail',
+					}}
+					aria-label={`Thumbnail carousel for ${accessibleName}`}
 				>
 					{galleryImages.map((src, index) => (
-						<SwiperSlide key={index}>
+						<SwiperSlide
+							key={index}
+							role='button'
+							tabIndex={0}
+							aria-label={`View ${accessibleName} image ${index + 1}`}
+							onKeyDown={(event) => {
+								if (event.key === 'Enter' || event.key === ' ') {
+									event.preventDefault();
+									thumbInstance?.slideToLoop(index);
+								}
+							}}
+						>
 							<Box
 								position='relative'
 								width='94%'
@@ -130,7 +181,7 @@ function ThumbsSliderInternal({ images }: { images: string[] }) {
 							>
 								<Image
 									src={src}
-									alt={`Product thumbnail ${index + 1}`}
+									alt={`${accessibleName} thumbnail ${index + 1}`}
 									fill
 									style={{
 										objectFit: 'cover',

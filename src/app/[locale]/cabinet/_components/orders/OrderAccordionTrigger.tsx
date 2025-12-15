@@ -23,12 +23,7 @@ type Props = {
 	orderDetailTags: OrderDetailTag[];
 };
 
-export function OrderAccordionTrigger({
-	order,
-	totalItems,
-	thumbItems,
-	orderDetailTags,
-}: Props) {
+export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDetailTags }: Props) {
 	const productsT = useTranslations('products');
 	const commonT = useTranslations('common');
 
@@ -87,46 +82,48 @@ export function OrderAccordionTrigger({
 					</Tag.Label>
 				</Tag.Root>
 			</Flex>
-			<HStack
-				gap={{ base: '2', xs: '4' } as any}
-				mt={{ base: '2', xs: '4.5' } as any}
-				flexWrap='wrap'
-				w='full'
-			>
-				{orderDetailTags.map(({ key, label, value, colorPalette, icon }) => (
-					<Tag.Root
-						key={key}
-						variant='surface'
-						borderWidth='0.5px'
-						boxShadow='none'
-						bg='bg.tertiary'
-						borderColor='border.light'
-						size='lg'
-						color='main'
-						py='1.5'
-						mt={{ base: 4, sm: 0 }}
-					>
-						<Tag.Label fontSize='sm'>
-							{key === 'status' ? (
-								<Status.Root size='md' gap='2.5'>
-									<Status.Indicator colorPalette={colorPalette ?? 'gray'} />
-									<Text as='span' fontWeight='semibold'>
-										{label}: {value}
-									</Text>
-								</Status.Root>
-							) : (
-								<HStack gapX='2.5' alignItems='center'>
-									{icon ? <Icon as={icon} size='md' color='fg.muted' /> : null}
-									<Text as='span' fontWeight='semibold'>
-										{label}: {value}
-									</Text>
-								</HStack>
-							)}
-						</Tag.Label>
-					</Tag.Root>
-				))}
+			<HStack justifyContent='space-between'>
+				<HStack
+					gap={{ base: '2', xs: '4' } as any}
+					mt={{ base: '2', xs: '4.5' } as any}
+					flexWrap='wrap'
+					w='full'
+				>
+					{orderDetailTags.map(({ key, label, value, colorPalette, icon }) => (
+						<Tag.Root
+							key={key}
+							variant='surface'
+							borderWidth='0.5px'
+							boxShadow='none'
+							bg='bg.tertiary'
+							borderColor='border.light'
+							size='lg'
+							color='main'
+							py='1.5'
+							mt={{ base: 4, sm: 0 }}
+						>
+							<Tag.Label fontSize='sm'>
+								{key === 'status' ? (
+									<Status.Root size='md' gap='2.5'>
+										<Status.Indicator colorPalette={colorPalette ?? 'gray'} />
+										<Text as='span' fontWeight='semibold'>
+											{label}: {value}
+										</Text>
+									</Status.Root>
+								) : (
+									<HStack gapX='2.5' alignItems='center'>
+										{icon ? <Icon as={icon} size='md' color='fg.muted' /> : null}
+										<Text as='span' fontWeight='semibold'>
+											{label}: {value}
+										</Text>
+									</HStack>
+								)}
+							</Tag.Label>
+						</Tag.Root>
+					))}
+				</HStack>
+				<Accordion.ItemIndicator alignSelf='flex-end' />
 			</HStack>
-			<Accordion.ItemIndicator alignSelf='flex-end' />
 		</Accordion.ItemTrigger>
 	);
 }

@@ -81,7 +81,13 @@ export default function CatalogPanel({ i18nData }: Props) {
 			</VStack>
 
 			{!activeCategory && <Promo />}
-			{activeCategory && <CategoryDetails category={activeCategory} i18nData={i18nData} />}
+			{activeCategory && (
+				<CategoryDetails
+					key={activeCategory.id}
+					category={activeCategory}
+					i18nData={i18nData}
+				/>
+			)}
 		</Flex>
 	);
 }

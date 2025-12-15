@@ -10,7 +10,6 @@ import {
 	VStack,
 	Flex,
 	Tag,
-	Stat,
 	Status,
 	Icon,
 } from '@chakra-ui/react';
@@ -100,7 +99,7 @@ export default function AboutTab({
 					mb='4'
 					rounded='md'
 				>
-					<ProductThumbsSlider images={galleryImages} />
+					<ProductThumbsSlider images={galleryImages} productName={product.name} />
 				</Box>
 				<VStack gap='2' alignItems='flex-start'>
 					<Heading as='h1' size={{ base: '2xl', sm: '3xl' }} fontWeight='medium'>
@@ -141,43 +140,36 @@ export default function AboutTab({
 							</Tag.Label>
 						</Tag.Root>
 					</Flex>
-					<Stat.Root my='3'>
-						<Flex flexWrap='wrap' alignItems='center' gap='4'>
-							{product.inStock ? (
-								<AddToCartButton i18nData={cartI18nData} product={product} />
-							) : (
-								<LocaleNavButton
-									href={`/products/${category}/${subcategory}?search=similar`}
-									w='200px'
-								>
-									<Icon size='lg'>
-										<MdOutlineManageSearch />
-									</Icon>
-									{prodT('lookSimilar')}
-								</LocaleNavButton>
-							)}
+					<Flex flexWrap='wrap' alignItems='center' gap='4' my='3'>
+						{product.inStock ? (
+							<AddToCartButton i18nData={cartI18nData} product={product} />
+						) : (
+							<LocaleNavButton
+								href={`/products/${category}/${subcategory}?search=similar`}
+								w='200px'
+							>
+								<Icon size='lg'>
+									<MdOutlineManageSearch />
+								</Icon>
+								{prodT('lookSimilar')}
+							</LocaleNavButton>
+						)}
 
-							<Stat.ValueText w='auto' fontSize='3xl'>
-								{product?.discountPrice ?? product.basePrice} ₴
-							</Stat.ValueText>
+						<Box as='span' fontSize='3xl' fontWeight='semibold'>
+							{product?.discountPrice ?? product.basePrice} ₴
+						</Box>
 
-							{discount > 0 && (
-								<Badge colorPalette='gray'>
-									<Box as='span' color='main.disabled' fontSize='sm' textDecoration='line-through'>
-										{parseInt(product.basePrice.toFixed(2))}₴
-										<Badge
-											variant='solid'
-											color='main.lightOnly'
-											bg='main.tertiary'
-											marginLeft='12px'
-										>
-											- {parseInt(discount.toFixed(2))}₴
-										</Badge>
-									</Box>
-								</Badge>
-							)}
-						</Flex>
-					</Stat.Root>
+						{discount > 0 && (
+							<Badge colorPalette='gray'>
+								<Box as='span' color='main' fontSize='sm' textDecoration='line-through'>
+									{parseInt(product.basePrice.toFixed(2))}₴
+									<Badge variant='solid' color='black' bg='main.secondary' marginLeft='12px'>
+										- {parseInt(discount.toFixed(2))}₴
+									</Badge>
+								</Box>
+							</Badge>
+						)}
+					</Flex>
 
 					<HStack gap='4'>
 						<Rating

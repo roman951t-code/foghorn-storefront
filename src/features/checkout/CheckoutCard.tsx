@@ -43,11 +43,9 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 							alt={product.name}
 						/>
 					</LocaleNavLink>
-					<Stat.Root>
-						<Stat.ValueText textStyle='md' minW='42px'>
-							{`x ${quantity}${t('units')}`}
-						</Stat.ValueText>
-					</Stat.Root>
+					<Text as='span' textStyle='md' minW='56px' fontWeight='semibold'>
+						{`x ${quantity}${t('units')}`}
+					</Text>
 				</VStack>
 
 				<VStack alignItems='flex-start' mt='-2'>
@@ -67,7 +65,7 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 					{hasDiscount && (
 						<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
 							{product.basePrice} ₴
-							<Badge variant='solid' color='main.lightOnly' bg='main.tertiary' marginLeft='10px'>
+							<Badge variant='solid' color='black' bg='main.secondary' marginLeft='10px'>
 								- {discountAmount}₴
 							</Badge>
 						</Text>

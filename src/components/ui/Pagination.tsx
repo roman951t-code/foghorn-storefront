@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState, useTransition } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
 	ButtonGroup,
 	HStack,
@@ -32,6 +32,9 @@ export default function Pagination({
 }: PaginationProps) {
 	const t = useTranslations('pagination');
 	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+	const [_, startTransition] = useTransition();
 	const clampPageSize = (val: number) => Math.min(32, Math.max(1, Math.floor(val)));
 	const safePageSize = useMemo(() => clampPageSize(pageSize || 1), [pageSize]);
 	const totalPages = useMemo(
@@ -45,39 +48,26 @@ export default function Pagination({
 		setInputValue(safePageSize.toString());
 	}, [safePageSize]);
 
-	const resolveBasePath = () => {
-		if (typeof window === 'undefined') return baseRoute;
-
-		const currentPath = window.location.pathname;
-		if (!baseRoute) return currentPath;
-		if (!baseRoute.startsWith('/')) return baseRoute;
-
-		const currentParts = currentPath.split('/').filter(Boolean);
-		const maybeLocale = currentParts[0];
-		const baseParts = baseRoute.split('/').filter(Boolean);
-
-		if (!maybeLocale) return baseRoute;
-		if (baseParts[0] === maybeLocale) return baseRoute;
-
-		return `/${[maybeLocale, ...baseParts].join('/')}`;
-	};
-
 	const buildUrl = (page: number, size: number) => {
-		const searchParams = new URLSearchParams(window.location.search);
-		searchParams.set(pageParam, page.toString());
-		searchParams.set(pageSizeParam, size.toString());
-		const basePath = resolveBasePath();
-		return `${basePath}?${searchParams.toString()}`;
+		const params = new URLSearchParams(searchParams.toString());
+		params.set(pageParam, page.toString());
+		params.set(pageSizeParam, size.toString());
+		const basePath = baseRoute || pathname;
+		return `${basePath}?${params.toString()}`;
 	};
 
 	const applyPageSize = (value: number) => {
 		const normalized = clampPageSize(Number.isFinite(value) ? value : safePageSize);
-		router.push(buildUrl(1, normalized));
+		startTransition(() => {
+			router.push(buildUrl(1, normalized), { scroll: false });
+		});
 	};
 
 	const goToPage = (page: number) => {
 		const targetPage = Math.min(Math.max(1, page), totalPages);
-		router.push(buildUrl(targetPage, safePageSize));
+		startTransition(() => {
+			router.push(buildUrl(targetPage, safePageSize), { scroll: false });
+		});
 	};
 
 	return (
@@ -153,9 +143,11 @@ export default function Pagination({
 							}
 						}}
 						maxW='70px'
+						aria-label={t('perPage')}
 					>
+						<NumberInput.Label srOnly>{t('perPage')}</NumberInput.Label>
 						<NumberInput.Control />
-						<NumberInput.Input fontSize='15px' inputMode='numeric' />
+						<NumberInput.Input fontSize='15px' inputMode='numeric' aria-label={t('perPage')} />
 					</NumberInput.Root>
 				</HStack>
 			</HStack>

@@ -1,4 +1,4 @@
-import { Card, Badge, VStack } from '@chakra-ui/react';
+import { Card, Badge, VStack, Flex } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavButton, LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { useTranslations } from 'next-intl';
@@ -35,7 +35,7 @@ export default function CategoryCard({
 			}}
 		>
 			<Card.Body gap='2'>
-				<Card.Title fontWeight='medium' textStyle='2xl' textAlign='center'>
+				<Card.Title as='h2' fontWeight='medium' textStyle='2xl' textAlign='center'>
 					{title}
 				</Card.Title>
 
@@ -68,13 +68,23 @@ export default function CategoryCard({
 				</VStack>
 			</Card.Body>
 
-			<Card.Footer justifyContent='center'>
-				<LocaleNavButton href={viewAllHref} mb='1'>
+			<Flex justifyContent='center'>
+				<LocaleNavButton
+					href={viewAllHref}
+					minW='200px'
+					aria-label={`${t('seeProducts')} ${title}`}
+				>
 					{t('seeProducts')}
 				</LocaleNavButton>
-			</Card.Footer>
+			</Flex>
 
-			<Image height={186} width={316} src={imageUrl} alt={title} style={{ width: '100%' }} />
+			<Image
+				height={186}
+				width={316}
+				src={imageUrl}
+				alt={title}
+				style={{ maxHeight: '200px', objectFit: 'fill', marginTop: '28px' }}
+			/>
 		</Card.Root>
 	);
 }

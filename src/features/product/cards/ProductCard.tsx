@@ -167,8 +167,8 @@ export default function ProductCard({ product }: Props) {
 					</IconButton>
 				</Flex>
 
-				<LocaleNavLink href={`/products/${fullSlug}`} display='block'>
-					<ProductPreviewSlider images={previewImages} />
+				<LocaleNavLink href={`/products/${fullSlug}`} display='block' aria-label={name}>
+					<ProductPreviewSlider images={previewImages} productName={name} />
 				</LocaleNavLink>
 
 				<LinkBox>
@@ -178,6 +178,7 @@ export default function ProductCard({ product }: Props) {
 						lineHeight='24px'
 						mt='1.5'
 						w='100%'
+						as='span'
 					>
 						<LocaleNavLink
 							href={`/products/${fullSlug}`}
@@ -205,21 +206,9 @@ export default function ProductCard({ product }: Props) {
 					>
 						{discountPrice ?? basePrice} ₴
 						{discount > 0 && (
-							<Text
-								as='span'
-								pl='2'
-								color='main.disabled'
-								fontSize='sm'
-								textDecoration='line-through'
-							>
+							<Text as='span' pl='2' color='main' fontSize='sm' textDecoration='line-through'>
 								{parseInt(basePrice.toFixed(2))}₴
-								<Badge
-									variant='solid'
-									color='main.lightOnly'
-									bg='main.tertiary'
-									fontWeight='bold'
-									ml='8px'
-								>
+								<Badge variant='solid' color='black' bg='main.secondary' fontWeight='bold' ml='8px'>
 									- {parseInt(discount.toFixed(2))}₴
 								</Badge>
 							</Text>
@@ -238,6 +227,7 @@ export default function ProductCard({ product }: Props) {
 						href={`/products/${fullSlug}/?tab=feedback`}
 						variant='underline'
 						fontSize='sm'
+						aria-label={`${t('feedback')} (${product.reviewCount ?? 0}) — ${name}`}
 						color='main'
 						_focus={{ outline: 'none' }}
 					>

@@ -35,7 +35,9 @@ export default function FiltersTags() {
 
 	const dynamicFilters: { key: string; value: string }[] = [];
 	searchParams.forEach((value, key) => {
-		if (!['searchQuery', 'tag', 'page', 'min', 'max', 'inStock', 'orderBy'].includes(key)) {
+		if (
+			!['searchQuery', 'tag', 'page', 'perPage', 'min', 'max', 'inStock', 'orderBy'].includes(key)
+		) {
 			dynamicFilters.push({ key, value });
 		}
 	});
@@ -67,7 +69,7 @@ export default function FiltersTags() {
 							{minPrice} ₴ – {maxPrice} ₴
 						</Tag.Label>
 						<Tag.EndElement onClick={clearFilters}>
-							<Tag.CloseTrigger cursor='pointer' />
+							<Tag.CloseTrigger cursor='pointer' aria-label={t('clearFilters')} />
 						</Tag.EndElement>
 					</Tag.Root>
 				)}
@@ -89,7 +91,10 @@ export default function FiltersTags() {
 							{inStockFilter === 'true' ? t('productIsPresent') : t('productIsOutOfStock')}
 						</Tag.Label>
 						<Tag.EndElement onClick={() => clearParam('inStock')}>
-							<Tag.CloseTrigger cursor='pointer' />
+							<Tag.CloseTrigger
+								cursor='pointer'
+								aria-label={t('clearFilters') + ' ' + t('products.inStock')}
+							/>
 						</Tag.EndElement>
 					</Tag.Root>
 				)}
@@ -109,7 +114,7 @@ export default function FiltersTags() {
 					>
 						<Tag.Label>{orderBy}</Tag.Label>
 						<Tag.EndElement onClick={() => clearParam('orderBy')}>
-							<Tag.CloseTrigger cursor='pointer' />
+							<Tag.CloseTrigger cursor='pointer' aria-label={t('clearFilters')} />
 						</Tag.EndElement>
 					</Tag.Root>
 				)}
@@ -132,7 +137,10 @@ export default function FiltersTags() {
 							{key}: {value}
 						</Tag.Label>
 						<Tag.EndElement onClick={() => clearParam(key, value)}>
-							<Tag.CloseTrigger cursor='pointer' />
+							<Tag.CloseTrigger
+								cursor='pointer'
+								aria-label={`${t('clearFilters')} ${key}: ${value}`}
+							/>
 						</Tag.EndElement>
 					</Tag.Root>
 				))}

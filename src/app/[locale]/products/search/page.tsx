@@ -204,13 +204,15 @@ export default async function SearchProducts({ searchParams }: Params) {
 				</Box>
 
 				<Box as='section' w={{ base: '100%', lg: '80%' }}>
-					<ProductsGrid products={products} notFound={t('productsNotFound')} />
-					<Pagination
-						currentPage={page}
-						totalItems={totalCount}
-						pageSize={pageSize}
-						baseRoute='/products/search/'
-					/>
+					<ProductsGrid products={products} notFound={t('productsNotFound')} limit={pageSize} />
+					<Flex justifyContent='center'>
+						<Pagination
+							currentPage={page}
+							totalItems={totalCount}
+							pageSize={pageSize}
+							baseRoute='/products/search/'
+						/>
+					</Flex>
 				</Box>
 			</Group>
 

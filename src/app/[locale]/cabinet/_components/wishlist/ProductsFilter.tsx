@@ -36,6 +36,7 @@ export default function ProductsFilter({ i18nData }: Props) {
 	};
 
 	const current = searchParams.get('orderBy') || 'new';
+	const label = 'Sort wishlist products';
 
 	return (
 		<Select.Root
@@ -45,11 +46,12 @@ export default function ProductsFilter({ i18nData }: Props) {
 			minW='200px'
 			value={[current]}
 			onValueChange={handleChange}
-			aria-label='Sort wishlist products'
+			aria-label={label}
 		>
+			<Select.Label srOnly>{label}</Select.Label>
 			<Select.HiddenSelect />
 			<Select.Control>
-				<Select.Trigger>
+				<Select.Trigger aria-label={label}>
 					<Select.ValueText />
 				</Select.Trigger>
 				<Select.IndicatorGroup>

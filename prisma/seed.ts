@@ -13,6 +13,19 @@ function createSlug(text: string) {
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6);
 
+const fallbackProductImages = [
+	'/assets/images/temp/1Big.webp',
+	'/assets/images/temp/2Big.webp',
+	'/assets/images/temp/3Big.webp',
+	'/assets/images/temp/4Big.webp',
+];
+
+const fallbackCategoryImages = [
+	'/assets/images/temp/2Big.webp',
+	'/assets/images/temp/3Big.webp',
+	'/assets/images/temp/4Big.webp',
+];
+
 const mainCategories = [
 	'Phones',
 	'Tablets',
@@ -23,30 +36,6 @@ const mainCategories = [
 	'Gaming',
 	'Monitors',
 ];
-
-const subcategoryImageKeywords: Record<string, string> = {
-	Smartphones: 'smartphone',
-	'Feature Phones': 'phone',
-	'Android Tablets': 'android-tablet',
-	iPads: 'ipad',
-	Ultrabooks: 'ultrabook',
-	'Gaming Laptops': 'gaming-laptop',
-	Chargers: 'charger',
-	Cables: 'cable',
-	'Fitness Trackers': 'fitness-tracker',
-	'Wear OS Watches': 'smartwatch',
-	Headphones: 'headphones',
-	Speakers: 'speaker',
-	Consoles: 'game-console',
-	Controllers: 'controller',
-	'4K Monitors': 'monitor',
-	'Gaming Monitors': 'gaming-monitor',
-};
-
-const getSubcategoryImage = (sub: string, seed: string) => {
-	const keyword = subcategoryImageKeywords[sub] ?? 'technology';
-	return faker.image.urlLoremFlickr({ width: 900, height: 900, category: keyword }) + `?lock=${seed}`;
-};
 
 const subcategoriesMap: Record<string, string[]> = {
 	Phones: ['Smartphones', 'Feature Phones'],
@@ -60,21 +49,65 @@ const subcategoriesMap: Record<string, string[]> = {
 };
 
 const categoryImageKeywords: Record<string, string> = {
-	Phones: 'mobile',
+	Phones: 'smartphone',
 	Tablets: 'tablet',
 	Laptops: 'laptop',
-	Accessories: 'accessories',
+	Accessories: 'tech-accessories',
 	Smartwatches: 'smartwatch',
-	Audio: 'audio',
-	Gaming: 'gaming',
-	Monitors: 'monitor',
+	Audio: 'headphones',
+	Gaming: 'game-console',
+	Monitors: 'computer-monitor',
 };
 
-const getCategoryImage = (name: string) => {
-	const keyword = categoryImageKeywords[name] ?? 'technology';
-	const seed = createSlug(name);
-	return faker.image.urlLoremFlickr({ width: 1200, height: 500, category: keyword }) + `?lock=${seed}`;
+const subcategoryImageKeywords: Record<string, string> = {
+	Smartphones: 'smartphone',
+	'Feature Phones': 'basic-phone',
+	'Android Tablets': 'android-tablet',
+	iPads: 'ipad-tablet',
+	Ultrabooks: 'ultrabook',
+	'Gaming Laptops': 'gaming-laptop',
+	Chargers: 'device-charger',
+	Cables: 'charging-cable',
+	'Fitness Trackers': 'fitness-tracker',
+	'Wear OS Watches': 'smartwatch',
+	Headphones: 'headphones',
+	Speakers: 'bluetooth-speaker',
+	Consoles: 'game-console',
+	Controllers: 'game-controller',
+	'4K Monitors': '4k-monitor',
+	'Gaming Monitors': 'gaming-monitor',
 };
+
+function stablePick<T>(items: T[], seed: string) {
+	const hash = seed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+	return items[hash % items.length];
+}
+
+function buildKeywordImage(keyword: string, width: number, height: number, seed: string) {
+	const normalizedKeyword = encodeURIComponent(keyword.toLowerCase().replace(/\s+/g, '-'));
+	return `https://picsum.photos/seed/${normalizedKeyword}-${seed}/${width}/${height}`;
+}
+
+const getCategoryImage = (name: string) => {
+	const keyword = categoryImageKeywords[name] ?? subcategoryImageKeywords[name] ?? 'tech-gadgets';
+	const seed = createSlug(name);
+	return buildKeywordImage(keyword, 1200, 500, seed) || stablePick(fallbackCategoryImages, seed);
+};
+
+const getSubcategoryImage = (sub: string, seed: string) => {
+	const keyword = subcategoryImageKeywords[sub] ?? categoryImageKeywords[sub] ?? 'tech-gadgets';
+	return buildKeywordImage(keyword, 900, 900, seed) || stablePick(fallbackProductImages, seed);
+};
+
+function needsImageReplacement(url?: string | null) {
+	if (!url) return true;
+	try {
+		const hostname = new URL(url).hostname;
+		return !(hostname.includes('picsum.photos') || hostname.includes('loremflickr.com'));
+	} catch {
+		return true;
+	}
+}
 
 async function main() {
 	console.log('🌱 Seeding started...');
@@ -86,7 +119,7 @@ async function main() {
 		create: {
 			name: 'TechBrand',
 			slug: 'techbrand',
-			logoUrl: faker.image.avatar(),
+			logoUrl: 'https://picsum.photos/seed/techbrand-logo/160/160',
 		},
 	});
 
@@ -110,7 +143,7 @@ async function main() {
 	);
 
 	const TAGS = ['popular', 'new', 'discount', 'promotional', 'viewed'];
-const allProducts: SeedProduct[] = [];
+	const allProducts: SeedProduct[] = [];
 
 	// Categories + Products
 	for (const main of mainCategories) {
@@ -124,7 +157,7 @@ const allProducts: SeedProduct[] = [];
 
 		for (const sub of subcategoriesMap[main]) {
 			const subSlug = createSlug(sub);
-			const subImage = getCategoryImage(sub);
+			const subImage = getSubcategoryImage(sub, subSlug);
 			const subcategory = await prisma.productCategory.upsert({
 				where: { slug: subSlug },
 				update: { parentId: parent.id, imageUrl: subImage },
@@ -187,6 +220,46 @@ const allProducts: SeedProduct[] = [];
 		}
 	}
 
+	// Backfill any existing categories/products with missing or unsupported images
+	const categoriesNeedingImages = await prisma.productCategory.findMany({
+		where: {},
+		select: { id: true, name: true, slug: true, parentId: true, imageUrl: true },
+	});
+
+	for (const cat of categoriesNeedingImages) {
+		if (needsImageReplacement(cat.imageUrl)) {
+			const newImage = cat.parentId
+				? getSubcategoryImage(cat.name, cat.slug)
+				: getCategoryImage(cat.name);
+			await prisma.productCategory.update({
+				where: { id: cat.id },
+				data: { imageUrl: newImage },
+			});
+		}
+	}
+
+	const productsNeedingImages = await prisma.product.findMany({
+		where: {},
+		select: { id: true, slug: true, categoryName: true, subcategoryName: true, imageUrl: true },
+	});
+
+	for (const product of productsNeedingImages) {
+		if (needsImageReplacement(product.imageUrl)) {
+			const seed = product.slug ?? product.id;
+			const keyword =
+				subcategoryImageKeywords[product.subcategoryName] ??
+				categoryImageKeywords[product.categoryName] ??
+				'tech-gadgets';
+
+			await prisma.product.update({
+				where: { id: product.id },
+				data: {
+					imageUrl: buildKeywordImage(keyword, 900, 900, seed),
+				},
+			});
+		}
+	}
+
 	// Assign tags
 	for (const tag of TAGS) {
 		const inStockProducts = allProducts.filter((p) => p.inStock);
@@ -236,7 +309,7 @@ const allProducts: SeedProduct[] = [];
 			emailVerified: true,
 			phoneNumber: '+380951234567',
 			phoneNumberVerified: true,
-			image: faker.image.avatar(),
+			image: 'https://picsum.photos/seed/roman-user/160/160',
 		},
 	});
 
