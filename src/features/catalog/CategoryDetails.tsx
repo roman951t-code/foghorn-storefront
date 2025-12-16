@@ -99,18 +99,17 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				>
 					{category.name}
 				</Heading>
-				<Box position='relative' w='full' h='240px' mt={4}>
+				<Box position='relative' w='full' aspectRatio='1' mt={4} overflow='hidden' rounded='sm'>
 					<Image
 						key={categoryBg}
 						src={categoryBg}
 						alt={category.name}
 						fill
-						sizes='240px'
+						sizes='(min-width: 80em) 260px, 240px'
 						style={{
-							objectFit: 'contain',
-							padding: '0 16px',
+							objectFit: 'cover',
 						}}
-						priority
+						loading='lazy'
 					/>
 				</Box>
 

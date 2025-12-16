@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Tabs } from '@chakra-ui/react';
+import { CABINET_TAB_ROUTE_SUFFIXES, type CabinetTabValue } from '@/constants/cabinetTabs';
 
 export default function TabsProvider({ children }: { children: ReactNode }) {
 	const router = useRouter();
@@ -23,14 +24,8 @@ export default function TabsProvider({ children }: { children: ReactNode }) {
 		if (!nextValue) return;
 		setValue(nextValue);
 
-		const routes: Record<string, string> = {
-			cabinet: baseCabinetPath,
-			orders: `${baseCabinetPath}/orders`,
-			feedback: `${baseCabinetPath}/feedback`,
-			wishlist: `${baseCabinetPath}/wishlist`,
-			reviewed: `${baseCabinetPath}/reviewed`,
-		};
-		const nextRoute = routes[nextValue];
+		const suffix = CABINET_TAB_ROUTE_SUFFIXES[nextValue as CabinetTabValue];
+		const nextRoute = suffix !== undefined ? `${baseCabinetPath}${suffix}` : undefined;
 		if (nextRoute && nextRoute !== pathname) {
 			router.replace(nextRoute);
 		}

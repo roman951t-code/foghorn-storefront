@@ -15,9 +15,12 @@ import { getSubcategoryNameBySlug } from '@/actions/products/getSubcategoryNameB
 import { getSubcategoryFilters } from '@/actions/products/getProductsFilters';
 import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { SUBCATEGORY_FILTER_EXCLUDED_KEYS } from '@/constants/products';
+import { buildLanguageAlternates } from '@/utils/seo';
+import type { AppLocale } from '@/constants/locales';
 
 type Params = {
-	params: { category: string; subcategory: string };
+	params: { category: string; subcategory: string; locale: AppLocale };
 	searchParams: {
 		page?: string;
 		perPage?: string;
@@ -29,18 +32,25 @@ type Params = {
 	};
 };
 
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
-	const { subcategory } = await params;
+export async function generateMetadata({ params, searchParams }: Params): Promise<Metadata> {
+	const { category, subcategory, locale } = await params;
+	const resolvedSearch = await searchParams;
 
 	const subcategoryData = await getSubcategoryNameBySlug(subcategory);
 	if (!subcategoryData) notFound();
 
 	const t = await getTranslations('pages');
 	const title = t('metadata.category', { category: subcategoryData.subcategoryName });
+	const description = t('metadata.categoryDescription', { category: subcategoryData.subcategoryName });
 
 	return {
 		title,
-		description: '',
+		description,
+		alternates: buildLanguageAlternates(
+			locale,
+			`/products/${category}/${subcategory}`,
+			resolvedSearch ?? undefined
+		),
 	};
 }
 
@@ -69,7 +79,7 @@ export default async function Subcategory({ params, searchParams }: Params) {
 	if (inStockParam === 'true') inStock = true;
 	if (inStockParam === 'false') inStock = false;
 
-	const excluded = ['page', 'perPage', 'search', 'min', 'max', 'inStock', 'orderBy'];
+	const excluded = SUBCATEGORY_FILTER_EXCLUDED_KEYS;
 	const dynamicFilters: Record<string, string[]> = {};
 
 	for (const [key, value] of Object.entries(searchData)) {

@@ -12,18 +12,11 @@ import {
 	getPaymentIcon,
 	getShipmentIcon,
 } from '@/utils/orderUtils';
+import { ORDER_STATUS_COLOR_PALETTE_MAP } from '@/constants/orders';
 
 type Props = {
 	orders: UserOrder[];
 	emptyText: string;
-};
-
-const statusColorPaletteMap: Record<string, string> = {
-	pending: 'yellow',
-	paid: 'blue',
-	shipped: 'blue',
-	delivered: 'green',
-	cancelled: 'red',
 };
 
 export default function UserOrdersList({ orders, emptyText }: Props) {
@@ -48,7 +41,7 @@ export default function UserOrdersList({ orders, emptyText }: Props) {
 				const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
 				const statusLabel = getOrderStatusLabel(order.status, ordersT);
 				const statusColorPalette =
-					statusColorPaletteMap[order.status?.toLowerCase() ?? 'pending'] ?? 'gray';
+					ORDER_STATUS_COLOR_PALETTE_MAP[order.status?.toLowerCase() ?? 'pending'] ?? 'gray';
 				const thumbItems = Array.from(
 					new Map(order.items.map((item) => [item.product.id, item])).values()
 				).slice(0, 4);

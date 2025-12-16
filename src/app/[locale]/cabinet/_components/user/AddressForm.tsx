@@ -2,6 +2,7 @@ import { Input, Field, VStack, Stack } from '@chakra-ui/react';
 import { UseFormReturn } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
+import { FIELD_ORIENTATION_MD } from '@/constants/forms';
 
 interface Props {
 	addressForm: UseFormReturn<
@@ -26,12 +27,10 @@ export default function AddressForm({
 	addressForm,
 	onSubmitAction,
 }: Props) {
-	const fieldOrientation = { base: 'vertical' as const, md: 'horizontal' as const };
-
 	return (
 		<form onSubmit={onSubmitAction}>
 			<Field.Root
-				orientation={fieldOrientation}
+				orientation={FIELD_ORIENTATION_MD}
 				invalid={!!addressForm.formState.errors.shipmentAddress}
 				justifyContent='center'
 				required

@@ -1,18 +1,7 @@
 'use client';
 import { useEffect } from 'react';
-
-const messages = {
-	us: {
-		title: 'Something went wrong',
-		description: 'An unexpected error occurred. Please try again.',
-		tryAgain: 'Try again',
-	},
-	ua: {
-		title: 'Сталася помилка',
-		description: 'Виникла непередбачена помилка. Спробуйте ще раз.',
-		tryAgain: 'Спробувати ще раз',
-	},
-} as const;
+import { GLOBAL_ERROR_MESSAGES } from '@/constants/errors';
+import { DEFAULT_LOCALE, LOCALE_TO_HTML_LANG, type AppLocale } from '@/constants/locales';
 
 export default function GlobalError({
 	error,
@@ -26,14 +15,14 @@ export default function GlobalError({
 	}, [error]);
 
 	const localeFromPath = () => {
-		if (typeof window === 'undefined') return 'us';
+		if (typeof window === 'undefined') return DEFAULT_LOCALE;
 		const [, locale] = window.location.pathname.split('/');
-		return locale === 'ua' ? 'ua' : 'us';
+		return locale === 'uk' || locale === 'en' ? (locale as AppLocale) : DEFAULT_LOCALE;
 	};
 
 	const locale = localeFromPath();
-	const htmlLang = locale === 'ua' ? 'uk' : 'en-US';
-	const copy = messages[locale];
+	const htmlLang = LOCALE_TO_HTML_LANG[locale] ?? LOCALE_TO_HTML_LANG[DEFAULT_LOCALE];
+	const copy = GLOBAL_ERROR_MESSAGES[locale] ?? GLOBAL_ERROR_MESSAGES[DEFAULT_LOCALE];
 
 	return (
 		<html lang={htmlLang}>

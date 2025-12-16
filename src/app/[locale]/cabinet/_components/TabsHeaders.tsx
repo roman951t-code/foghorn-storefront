@@ -1,22 +1,8 @@
 'use client';
 import { Tabs, Icon } from '@chakra-ui/react';
-import { FiHeart } from 'react-icons/fi';
-import { LuUserRoundCog } from 'react-icons/lu';
-import { IoBagCheckOutline } from 'react-icons/io5';
-import { VscFeedback } from 'react-icons/vsc';
-import { LuUserRoundCheck } from 'react-icons/lu';
 import { useSession } from '@/providers/SessionProvider';
 import { useTranslations } from 'next-intl';
-
-const triggerProps = {
-	color: 'main',
-	fontWeight: 'normal',
-	fontSize: 'md',
-	display: 'inline-flex',
-	gap: 2,
-	flex: '0 1 auto',
-	justifyContent: 'center',
-};
+import { CABINET_TABS, CABINET_TAB_TRIGGER_PROPS } from '@/constants/cabinetTabs';
 
 export default function TabsList() {
 	const navT = useTranslations('navigation');
@@ -32,36 +18,17 @@ export default function TabsList() {
 			justifyContent='center'
 			w='full'
 		>
-			<Tabs.Trigger value='cabinet' {...triggerProps}>
-				<Icon size='md'>
-					<LuUserRoundCog />
-				</Icon>
-				{session?.user?.name}
-			</Tabs.Trigger>
-			<Tabs.Trigger value={'orders'} {...triggerProps}>
-				<Icon size='md'>
-					<IoBagCheckOutline />
-				</Icon>
-				{navT('sidebar.myOrders')}
-			</Tabs.Trigger>
-			<Tabs.Trigger value={'feedback'} {...triggerProps}>
-				<Icon size='md'>
-					<VscFeedback />
-				</Icon>
-				{navT('sidebar.myFeedback')}
-			</Tabs.Trigger>
-			<Tabs.Trigger value={'wishlist'} {...triggerProps}>
-				<Icon size='md'>
-					<FiHeart />
-				</Icon>
-				{navT('sidebar.wishList')}
-			</Tabs.Trigger>
-			<Tabs.Trigger value={'reviewed'} {...triggerProps}>
-				<Icon size='md'>
-					<LuUserRoundCheck />
-				</Icon>
-				{navT('sidebar.reviewedProducts')}
-			</Tabs.Trigger>
+			{CABINET_TABS.map((tab) => {
+				const IconComponent = tab.icon;
+				const label = tab.usesName ? session?.user?.name ?? navT(tab.labelKey) : navT(tab.labelKey);
+
+				return (
+					<Tabs.Trigger key={tab.value} value={tab.value} {...CABINET_TAB_TRIGGER_PROPS}>
+						<Icon as={IconComponent} size='md' />
+						{label}
+					</Tabs.Trigger>
+				);
+			})}
 		</Tabs.List>
 	);
 }

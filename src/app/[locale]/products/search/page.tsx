@@ -17,8 +17,11 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedProducts';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { buildLanguageAlternates } from '@/utils/seo';
+import type { AppLocale } from '@/constants/locales';
 
 type Params = {
+	params: { locale: AppLocale };
 	searchParams: {
 		searchQuery?: string;
 		tag?: string;
@@ -43,14 +46,19 @@ const excludedParams = new Set([
 	'orderBy',
 ]);
 
-export async function generateMetadata({ searchParams }: Params): Promise<Metadata> {
-	const { searchQuery, tag } = await searchParams;
+export async function generateMetadata({ params, searchParams }: Params): Promise<Metadata> {
+	const resolvedSearch = await searchParams;
+	const { searchQuery, tag } = resolvedSearch;
+	const { locale } = await params;
 	const t = await getTranslations('products');
 	const title = t('searchQueryResults', { searchQuery: tag ? t(tag) : searchQuery || '' });
+	const pagesT = await getTranslations('pages');
+	const description = pagesT('metadata.searchDescription', { query: tag ? t(tag) : searchQuery || '' });
 
 	return {
 		title,
-		description: '',
+		description,
+		alternates: buildLanguageAlternates(locale, '/products/search', resolvedSearch ?? undefined),
 	};
 }
 

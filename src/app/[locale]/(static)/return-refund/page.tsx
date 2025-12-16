@@ -10,7 +10,7 @@ type Params = {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	const { locale } = await params;
-	return getLocalizedMetadata(locale, 'returnRefund');
+	return getLocalizedMetadata(locale, 'returnRefund', { pathname: '/return-refund' });
 }
 
 export default async function ReturnRefund() {

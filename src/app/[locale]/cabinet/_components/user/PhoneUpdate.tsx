@@ -14,6 +14,7 @@ import { authClient } from '@/lib/auth-client';
 import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
+import { buildPhoneVerificationErrorMap } from '@/constants/auth';
 
 interface Props {
 	i18nData: I18nData;
@@ -68,12 +69,7 @@ export default function PhoneUpdate({ phone, i18nData, refreshSession, onCloseAc
 	const onSubmit = async (formData: PhoneVerifySchema) => {
 		setIsPending(true);
 
-		const errorMap: Record<string, string> = {
-			'OTP not found': i18nData.invalidOtp,
-			'OTP expired': i18nData.otpExpired,
-			'User not found': i18nData.userNotFound,
-			'Too many attempts': i18nData.tooManyAttempts,
-		};
+		const errorMap = buildPhoneVerificationErrorMap(i18nData);
 
 		try {
 			const { error } = await authClient.phoneNumber.verify({

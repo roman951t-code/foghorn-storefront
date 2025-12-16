@@ -7,6 +7,11 @@ import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import { extractI18nData, getLocalizedMetadata } from '@/utils/i18nUtils';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import {
+	SUBSCRIBE_AUTH_KEYS,
+	SUBSCRIBE_COMMON_KEYS,
+	SUBSCRIBE_VALIDATION_KEYS,
+} from '@/constants/subscribe';
 
 type Params = {
 	params: { locale: string };
@@ -14,7 +19,7 @@ type Params = {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	const { locale } = await params;
-	return getLocalizedMetadata(locale, 'main');
+	return getLocalizedMetadata(locale, 'main', { pathname: '/' });
 }
 
 export default async function Main() {
@@ -26,30 +31,9 @@ export default async function Main() {
 	const i18nData = extractI18nData(genT, ['seeCategory', 'seeAll']);
 
 	const subscribeI18nData = {
-		subscribeInfo: genT('subscribeInfo'),
-		email: authT('email'),
-		verifyEmail: authT('verifyEmail'),
-		subscribeProcedure: genT('subscribeProcedure'),
-		emailConfirmation: authT('emailConfirmation'),
-		toPost: authT('toPost'),
-		signUpCodeSent: authT('signUpCodeSent'),
-		confirmEmail: authT('confirmEmail'),
-		resendAfter: authT('resendAfter'),
-		resendCode: authT('resendCode'),
-		emailUpdated: authT('emailUpdated'),
-		emailNotVerifiedError: validT('emailNotVerifiedError'),
-		subscribe: genT('subscribe'),
-		subscribed: genT('subscribed'),
-		unsubscribe: genT('unsubscribe'),
-		subscribeFail: validT('subscribeFail'),
-		subscribedSuccessfully: genT('subscribedSuccessfully'),
-		unsubscribedSuccessfully: genT('unsubscribedSuccessfully'),
-		editEmailFail: validT('editEmailFail'),
-		invalidFormData: validT('invalidFormData'),
-		unsubscribeFail: validT('unsubscribeFail'),
-		emailRequired: validT('emailRequired'),
-		inputMaxLength: validT('inputMaxLength'),
-		wrongEmail: validT('wrongEmail'),
+		...extractI18nData(genT, [...SUBSCRIBE_COMMON_KEYS]),
+		...extractI18nData(authT, [...SUBSCRIBE_AUTH_KEYS]),
+		...extractI18nData(validT, [...SUBSCRIBE_VALIDATION_KEYS]),
 	};
 
 	return (

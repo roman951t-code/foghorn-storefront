@@ -10,6 +10,7 @@ import { setNotificationMethodAction } from '@/actions/auth/setNotificationMetho
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
+import { FIELD_ORIENTATION_MD } from '@/constants/forms';
 
 interface Props {
 	userEmail: string;
@@ -68,7 +69,7 @@ export default function PreferredDeliveryForm({
 					maxW='4xl'
 				>
 					<Field.Root
-						orientation={{ base: 'vertical', md: 'horizontal' }}
+						orientation={FIELD_ORIENTATION_MD}
 						invalid={!!form.formState.errors.notificationMethod}
 						gap='4'
 						justifyContent='center'

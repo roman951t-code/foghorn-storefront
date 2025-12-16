@@ -91,7 +91,7 @@ function buildKeywordImage(keyword: string, width: number, height: number, seed:
 const getCategoryImage = (name: string) => {
 	const keyword = categoryImageKeywords[name] ?? subcategoryImageKeywords[name] ?? 'tech-gadgets';
 	const seed = createSlug(name);
-	return buildKeywordImage(keyword, 1200, 500, seed) || stablePick(fallbackCategoryImages, seed);
+	return buildKeywordImage(keyword, 900, 900, seed) || stablePick(fallbackCategoryImages, seed);
 };
 
 const getSubcategoryImage = (sub: string, seed: string) => {

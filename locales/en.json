@@ -363,7 +363,10 @@
 				"description": "View your orders, reviews, favorite products and personal information."
 			},
 			"category": "Products in category {category}",
-			"product": "{product} Buy online"
+			"categoryDescription": "Browse featured and new items in the {category} category. Pick a product and check out online.",
+			"product": "{product} Buy online",
+			"productDescription": "{product}. Shop online with warranty and fast delivery. {description}",
+			"searchDescription": "Search results for: {query}. Find the right item and order online."
 		},
 		"errors": {
 			"ref": "Ref: {value}",

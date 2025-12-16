@@ -14,8 +14,6 @@ export default function AuthStep() {
 	const i18nData = {
 		...authI18nData,
 		...validI18nData,
-		authToOrder: authT('authToOrder'),
-		authorize: authT('authorize'),
 	};
 
 	return (

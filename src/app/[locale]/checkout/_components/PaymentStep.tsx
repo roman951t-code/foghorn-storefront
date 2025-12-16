@@ -1,19 +1,18 @@
 'use client';
 
 import { Icon, RadioCard, Stack } from '@chakra-ui/react';
-import { RiBankCardFill, RiMoneyDollarCircleFill, RiPaypalFill } from 'react-icons/ri';
 import { useTranslations } from 'next-intl';
 import { useCheckoutStore } from '@/stores/checkoutStore';
+import { PAYMENT_OPTIONS } from '@/data/checkout/options';
 
 export default function PaymentStep() {
 	const t = useTranslations('checkout');
 	const selectedPayment = useCheckoutStore((state) => state.paymentMethod);
 	const setSelectedPayment = useCheckoutStore((state) => state.setPaymentMethod);
-	const items = [
-		{ value: 'paypal', title: t('payment.paypal'), icon: <RiPaypalFill /> },
-		{ value: 'cod', title: t('payment.cod'), icon: <RiMoneyDollarCircleFill /> },
-		{ value: 'card', title: t('payment.card'), icon: <RiBankCardFill /> },
-	];
+	const items = PAYMENT_OPTIONS.map((option) => ({
+		...option,
+		title: t(option.labelKey),
+	}));
 
 	return (
 		<RadioCard.Root
@@ -46,9 +45,7 @@ export default function PaymentStep() {
 					>
 						<RadioCard.ItemHiddenInput />
 						<RadioCard.ItemControl>
-							<Icon fontSize='2xl' color='fg.muted'>
-								{item.icon}
-							</Icon>
+							<Icon as={item.icon} fontSize='2xl' color='fg.muted' />
 							<RadioCard.ItemText>{item.title}</RadioCard.ItemText>
 							<RadioCard.ItemIndicator />
 						</RadioCard.ItemControl>

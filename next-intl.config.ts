@@ -1,9 +1,9 @@
 export default {
-	locales: ['ua', 'us'],
-	defaultLocale: 'ua',
+	locales: ['uk', 'en'],
+	defaultLocale: 'uk',
 	localePrefix: 'as-needed',
 	messages: {
-		ua: () => import('./locales/ua.json'),
-		us: () => import('./locales/us.json'),
+		uk: () => import('./locales/uk.json'),
+		en: () => import('./locales/en.json'),
 	},
 };

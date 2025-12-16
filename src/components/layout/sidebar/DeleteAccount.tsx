@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { useTranslations } from 'next-intl';
+import { DELETE_ACCOUNT_DIALOG_IDS } from '@/constants/dialogs';
 
 interface Props {
 	onCloseAction: () => void;
@@ -47,20 +48,13 @@ export function DeleteAccount({ onCloseAction }: Props) {
 		}
 	};
 
-	const ids = {
-		trigger: 'delete-account-trigger',
-		content: 'delete-account-content',
-		title: 'delete-account-title',
-		description: 'delete-account-description',
-	};
-
 	return (
 		<Dialog.Root
 			role='alertdialog'
 			lazyMount
 			open={open}
 			onOpenChange={(e) => setOpen(e.open)}
-			ids={ids}
+			ids={DELETE_ACCOUNT_DIALOG_IDS}
 		>
 			<Dialog.Trigger asChild>
 				<AlertButton mt='8' w='full'>

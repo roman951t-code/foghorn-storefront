@@ -2,6 +2,7 @@ import { Input, Field, VStack, Fieldset } from '@chakra-ui/react';
 import { UseFormReturn } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
+import { FIELD_ORIENTATION_SM } from '@/constants/forms';
 
 interface Props {
 	nameForm: UseFormReturn<
@@ -22,8 +23,6 @@ interface Props {
 }
 
 export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) {
-	const fieldOrientation = { base: 'vertical' as const, sm: 'horizontal' as const };
-
 	return (
 		<form onSubmit={onSubmitAction}>
 			<Fieldset.Root size='lg' alignItems='center'>
@@ -37,7 +36,7 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 					maxW='4xl'
 				>
 					<Field.Root
-						orientation={fieldOrientation}
+						orientation={FIELD_ORIENTATION_SM}
 						invalid={!!nameForm.formState.errors.name}
 						gap='4'
 						justifyContent='center'
@@ -56,7 +55,7 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 					</Field.Root>
 
 					<Field.Root
-						orientation={fieldOrientation}
+						orientation={FIELD_ORIENTATION_SM}
 						invalid={!!nameForm.formState.errors.lastName}
 						gap='4'
 						justifyContent='center'
@@ -75,7 +74,7 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 					</Field.Root>
 
 					<Field.Root
-						orientation={fieldOrientation}
+						orientation={FIELD_ORIENTATION_SM}
 						invalid={!!nameForm.formState.errors.middleName}
 						gap='4'
 						justifyContent='center'

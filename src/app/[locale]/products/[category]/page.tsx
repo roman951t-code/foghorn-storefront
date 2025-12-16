@@ -6,13 +6,15 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { getCategoryData } from '@/actions/products/getCategoryData';
 import CategoryCards from './_components/CategoryCards';
+import { buildLanguageAlternates } from '@/utils/seo';
+import type { AppLocale } from '@/constants/locales';
 
 type Params = {
-	params: { locale: string; category: string };
+	params: { locale: AppLocale; category: string };
 };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-	const { category: categorySlug } = await params;
+	const { category: categorySlug, locale } = await params;
 
 	const category = await prisma.productCategory.findUnique({
 		where: { slug: categorySlug },
@@ -25,10 +27,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 	const t = await getTranslations('pages');
 	const title = t('metadata.category', { category: category.name });
+	const description = t('metadata.categoryDescription', { category: category.name });
 
 	return {
 		title,
-		description: '',
+		description,
+		alternates: buildLanguageAlternates(locale, `/products/${categorySlug}`),
 	};
 }
 

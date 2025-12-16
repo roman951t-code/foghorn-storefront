@@ -9,29 +9,56 @@ import { getProductNameBySlug } from '@/actions/products/getProductNameBySlug';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { trackProductView } from '@/actions/products/trackProductView';
+import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
+import type { AppLocale } from '@/constants/locales';
+import Script from 'next/script';
 
 type Props = {
-	params: { category: string; subcategory: string; product: string };
+	params: { category: string; subcategory: string; product: string; locale: AppLocale };
 	searchParams: { tab?: string };
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-	const { product: productSlug } = await params;
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+	const { product: productSlug, category, subcategory, locale } = await params;
+	const resolvedSearch = await searchParams;
 
 	const productData = await getProductNameBySlug(productSlug);
 	if (!productData) notFound();
 
 	const t = await getTranslations('pages');
 	const title = t('metadata.product', { product: productData.name });
+	const description = t('metadata.productDescription', {
+		product: productData.name,
+		description: productData.description ?? '',
+	});
+	const alternates = buildLanguageAlternates(locale, `/products/${category}/${subcategory}/${productSlug}`, {
+		...(resolvedSearch?.tab ? { tab: resolvedSearch.tab } : {}),
+	});
+	const image =
+		productData.imageUrl && (productData.imageUrl.startsWith('http') ? productData.imageUrl : absoluteUrl(productData.imageUrl));
 
 	return {
 		title,
-		description: '',
+		description,
+		alternates,
+		openGraph: {
+			title,
+			description,
+			type: 'website',
+			url: alternates?.canonical,
+			...(image && { images: [image] }),
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title,
+			description,
+			...(image && { images: [image] }),
+		},
 	};
 }
 
 export default async function ProductDetail({ params, searchParams }: Props) {
-	const { category, subcategory, product } = await params;
+	const { category, subcategory, product, locale } = await params;
 	const { tab } = await searchParams;
 
 	const productData = await getProductBySlug(product);
@@ -44,18 +71,126 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 		await trackProductView(userId, productData.id);
 	}
 
-	return (
-		<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>
-			<Breadcrumbs
-				categorySlug={category}
-				subcategorySlug={subcategory}
-				categoryName={productData?.categoryName}
-				subcategoryName={productData?.subcategoryName}
-				productSlug={productData?.slug}
-				productName={productData?.name}
-			/>
+	const canonicalPath = localizePath(locale, `/products/${category}/${subcategory}/${product}`);
+	const canonicalUrl = absoluteUrl(canonicalPath);
 
-			<ProductTabs tab={tab} product={productData} category={category} subcategory={subcategory} />
-		</Flex>
+	const toAbsoluteImage = (url?: string | null) => {
+		if (!url) return undefined;
+		return url.startsWith('http') ? url : absoluteUrl(url);
+	};
+
+	const images = (productData.images ?? [])
+		.map((src) => toAbsoluteImage(src))
+		.filter(Boolean) as string[];
+	const primaryImage = images[0] ?? toAbsoluteImage(productData.imageUrl);
+	const price = productData.discountPrice ?? productData.basePrice;
+	const availability = productData.inStock
+		? 'https://schema.org/InStock'
+		: 'https://schema.org/OutOfStock';
+
+	const reviewsJsonLd =
+		productData.reviews && productData.reviews.length > 0
+			? productData.reviews.slice(0, 3).map((review) => ({
+					'@type': 'Review',
+					reviewBody:
+						review.comment ??
+						[review.advantages, review.disadvantages].filter(Boolean).join('. ') ??
+						'',
+					datePublished: review.createdAt?.toISOString?.() ?? undefined,
+					author: {
+						'@type': 'Person',
+						name: [review.user?.name, review.user?.lastName].filter(Boolean).join(' ').trim() || 'Customer',
+					},
+					reviewRating: {
+						'@type': 'Rating',
+						ratingValue: review.rating,
+						bestRating: 5,
+						worstRating: 1,
+					},
+			  }))
+			: [];
+
+	const breadcrumbsJsonLd = {
+		'@context': 'https://schema.org',
+		'@type': 'BreadcrumbList',
+		itemListElement: [
+			{
+				'@type': 'ListItem',
+				position: 1,
+				name: 'Home',
+				item: absoluteUrl(localizePath(locale, '/')),
+			},
+			{
+				'@type': 'ListItem',
+				position: 2,
+				name: productData.categoryName,
+				item: absoluteUrl(localizePath(locale, `/products/${category}`)),
+			},
+			{
+				'@type': 'ListItem',
+				position: 3,
+				name: productData.subcategoryName,
+				item: absoluteUrl(localizePath(locale, `/products/${category}/${subcategory}`)),
+			},
+			{
+				'@type': 'ListItem',
+				position: 4,
+				name: productData.name,
+				item: canonicalUrl,
+			},
+		],
+	};
+
+	const productJsonLd = {
+		'@context': 'https://schema.org',
+		'@type': 'Product',
+		name: productData.name,
+		description: productData.description ?? productData.name,
+		image: images.length ? images : primaryImage ? [primaryImage] : [],
+		sku: productData.productCode,
+		brand: {
+			'@type': 'Brand',
+			name: productData.brand?.name ?? 'Online Store',
+		},
+		offers: {
+			'@type': 'Offer',
+			url: canonicalUrl,
+			price: price ?? undefined,
+			priceCurrency: 'UAH',
+			availability,
+			itemCondition: 'https://schema.org/NewCondition',
+		},
+		...(productData.reviewCount > 0 && {
+			aggregateRating: {
+				'@type': 'AggregateRating',
+				ratingValue: productData.averageRating,
+				reviewCount: productData.reviewCount,
+			},
+		}),
+		...(reviewsJsonLd.length > 0 && { review: reviewsJsonLd }),
+	};
+
+	return (
+		<>
+			<Script id='product-schema' type='application/ld+json'>
+				{JSON.stringify(productJsonLd)}
+			</Script>
+			<Script id='breadcrumbs-schema' type='application/ld+json'>
+				{JSON.stringify(breadcrumbsJsonLd)}
+			</Script>
+
+			<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>
+				<Breadcrumbs
+					categorySlug={category}
+					subcategorySlug={subcategory}
+					categoryName={productData?.categoryName}
+					subcategoryName={productData?.subcategoryName}
+					productSlug={productData?.slug}
+					productName={productData?.name}
+				/>
+
+				<ProductTabs tab={tab} product={productData} category={category} subcategory={subcategory} />
+			</Flex>
+		</>
 	);
 }

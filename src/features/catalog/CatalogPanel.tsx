@@ -82,11 +82,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 
 			{!activeCategory && <Promo />}
 			{activeCategory && (
-				<CategoryDetails
-					key={activeCategory.id}
-					category={activeCategory}
-					i18nData={i18nData}
-				/>
+				<CategoryDetails key={activeCategory.id} category={activeCategory} i18nData={i18nData} />
 			)}
 		</Flex>
 	);

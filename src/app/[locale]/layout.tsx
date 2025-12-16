@@ -16,18 +16,24 @@ import { ColorModeProvider } from '@/components/ui/chakra/color-mode';
 import { getCartItems } from '@/actions/cart/getCartItems';
 import { getCartProductIds } from '@/actions/cart/getCartProductIds';
 import { getCatalog } from '@/actions/products/getCatalog';
-import { CartData } from '@/types/cart';
 import { getWishListProducts } from '@/actions/wishlist/getWishListProducts';
 import { getWishListProductIds } from '@/actions/wishlist/getWishListProductIds';
 import { montserrat, notoSans, openSans } from '@/lib/fonts';
 import { AppStoreHydrator } from '@/providers/AppStoreHydrator';
+import { LOCALE_TO_HTML_LANG, DEFAULT_LOCALE } from '@/constants/locales';
+import { EMPTY_CART_DATA } from '@/constants/cart';
+import type { AppLocale } from '@/constants/locales';
+import type { Metadata } from 'next';
+import { APP_URL } from '@/utils/seo';
+
+export const metadata: Metadata = {
+	metadataBase: new URL(APP_URL),
+};
 
 interface Props {
 	children: ReactNode;
-	params: { locale: 'ua' | 'us' };
+	params: { locale: AppLocale };
 }
-
-const toHtmlLang = (locale: 'ua' | 'us') => (locale === 'ua' ? 'uk' : 'en-US');
 
 export default async function Layout({ children, params }: Props) {
 	const { locale } = await params;
@@ -65,10 +71,9 @@ export default async function Layout({ children, params }: Props) {
 		? await getWishListProductIds(userId)
 		: { success: false, productIds: [] };
 
-	const emptyCartData: CartData = { items: [] };
 	const { success, ...restCartData } = cartResponse;
 
-	const htmlLang = toHtmlLang(locale);
+	const htmlLang = LOCALE_TO_HTML_LANG[locale] ?? LOCALE_TO_HTML_LANG[DEFAULT_LOCALE];
 
 	return (
 		<html lang={htmlLang} suppressHydrationWarning>
@@ -80,7 +85,7 @@ export default async function Layout({ children, params }: Props) {
 								<NextIntlClientProvider messages={messages}>
 									<AppStoreHydrator
 										categories={catalogResponse.catalog}
-										cartData={success ? restCartData : emptyCartData}
+										cartData={success ? restCartData : EMPTY_CART_DATA}
 										cartProductIds={cartProductIds}
 										wishListData={wishListData?.products ?? []}
 										wishListIds={wishListIds}

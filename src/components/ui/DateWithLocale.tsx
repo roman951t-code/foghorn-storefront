@@ -1,15 +1,13 @@
 'use client';
 import { Text } from '@chakra-ui/react';
 import { useLocale } from 'next-intl';
-
-const localeMap = {
-	ua: 'uk-UA',
-	ru: 'ru-RU',
-} as const;
+import { DEFAULT_LOCALE, LOCALE_TO_INTL_MAP } from '@/constants/locales';
 
 export default function DateWithLocale({ date }: { date: string | Date }) {
 	const locale = useLocale();
-	const intlLocale = localeMap[locale as keyof typeof localeMap];
+	const intlLocale =
+		LOCALE_TO_INTL_MAP[locale as keyof typeof LOCALE_TO_INTL_MAP] ??
+		LOCALE_TO_INTL_MAP[DEFAULT_LOCALE];
 
 	const formattedDate = new Date(date)
 		.toLocaleDateString(intlLocale, {

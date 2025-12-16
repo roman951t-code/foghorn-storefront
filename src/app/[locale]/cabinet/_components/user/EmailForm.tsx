@@ -7,6 +7,7 @@ import { useState } from 'react';
 import EmailVerification from './EmailVerification';
 import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
 import { EmailSchema } from 'formValidationSchemas/emailSubscribeSchema';
+import { FIELD_ORIENTATION_MD } from '@/constants/forms';
 
 interface Props {
 	isEmailVerified: boolean;
@@ -31,8 +32,6 @@ export default function EmailForm({
 	isEmailVerified,
 	isGoogleUser,
 }: Props) {
-	const fieldOrientation = { base: 'vertical' as const, md: 'horizontal' as const };
-
 	const [isPending, setIsPending] = useState(false);
 	const [verifyEmailOpen, setVerifyEmailOpen] = useState(false);
 	const [error, setError] = useState('');
@@ -62,7 +61,7 @@ export default function EmailForm({
 
 	return (
 		<form onSubmit={emailForm.handleSubmit(onSubmit)}>
-			<Field.Root orientation={fieldOrientation} invalid={isInvalid} justifyContent='center'>
+			<Field.Root orientation={FIELD_ORIENTATION_MD} invalid={isInvalid} justifyContent='center'>
 				<Field.Label maxH='20px'>{i18nData.email}</Field.Label>
 
 				<Stack w='full' direction={{ base: 'column', sm: 'row' } as const} gap='4'>

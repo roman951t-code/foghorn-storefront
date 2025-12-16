@@ -4,6 +4,8 @@ import WishlistPagination from '../_components/wishlist/WishlistPagination';
 import CabinetSectionHeading from '@/components/ui/CabinetSectionHeading';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { getTranslations } from 'next-intl/server';
+import { extractI18nData } from '@/utils/i18nUtils';
+import { WISHLIST_SORT_KEYS } from '@/constants/products';
 
 type Props = {
 	searchParams?: Promise<{
@@ -27,11 +29,7 @@ export default async function Wishlist({ searchParams }: Props) {
 		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
 	const currentPage = Number.isNaN(requestedPage) || requestedPage < 1 ? 1 : requestedPage;
 
-	const i18nData = {
-		new: prodT('new'),
-		expensiveToCheap: prodT('expensiveToCheap'),
-		cheapToExpensive: prodT('cheapToExpensive'),
-	};
+	const sortI18n = extractI18nData(prodT, [...WISHLIST_SORT_KEYS]);
 	const shareCopiedText = wishT('shareCopied');
 
 	return (
@@ -44,7 +42,7 @@ export default async function Wishlist({ searchParams }: Props) {
 				totalProductsText={prodT('totalProducts')}
 				unitsText={genT('units')}
 				shareCopiedText={shareCopiedText}
-				sortI18n={i18nData}
+				sortI18n={sortI18n}
 			/>
 			<WishlistPagination currentPage={currentPage} pageSize={pageSize} />
 		</VStack>

@@ -1,19 +1,18 @@
 'use client';
 
 import { Icon, RadioCard, Stack } from '@chakra-ui/react';
-import { FaTruck } from 'react-icons/fa';
 import { useTranslations } from 'next-intl';
 import { useCheckoutStore } from '@/stores/checkoutStore';
+import { SHIPMENT_OPTIONS } from '@/data/checkout/options';
 
 export default function ShipmentStep() {
 	const t = useTranslations('checkout');
 	const shipmentMethod = useCheckoutStore((state) => state.shipmentMethod);
 	const setShipmentMethod = useCheckoutStore((state) => state.setShipmentMethod);
-	const items = [
-		{ value: 'nova-poshta', title: t('shipment.novaPoshta'), icon: <FaTruck /> },
-		{ value: 'ukrposhta', title: t('shipment.ukrposhta'), icon: <FaTruck /> },
-		{ value: 'meest', title: t('shipment.meest'), icon: <FaTruck /> },
-	];
+	const items = SHIPMENT_OPTIONS.map((option) => ({
+		...option,
+		title: t(option.labelKey),
+	}));
 
 	return (
 		<RadioCard.Root
@@ -46,9 +45,7 @@ export default function ShipmentStep() {
 					>
 						<RadioCard.ItemHiddenInput />
 						<RadioCard.ItemControl>
-							<Icon fontSize='2xl' color='fg.muted'>
-								{item.icon}
-							</Icon>
+							<Icon as={item.icon} fontSize='2xl' color='fg.muted' />
 							<RadioCard.ItemText>{item.title}</RadioCard.ItemText>
 							<RadioCard.ItemIndicator />
 						</RadioCard.ItemControl>

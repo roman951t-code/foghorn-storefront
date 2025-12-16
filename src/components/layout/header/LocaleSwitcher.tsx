@@ -4,12 +4,10 @@ import { Box, Select, createListCollection } from '@chakra-ui/react';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
+import { LANGUAGE_OPTIONS, LOCALE_SWITCHER_LABEL } from '@/constants/locales';
 
 const languages = createListCollection({
-	items: [
-		{ value: 'ua', label: 'Укр', flag: '🇺🇦' },
-		{ value: 'us', label: 'Eng', flag: '🇺🇸' },
-	],
+	items: LANGUAGE_OPTIONS,
 	itemToString: (item) => item.label,
 	itemToValue: (item) => item.value,
 });
@@ -18,12 +16,12 @@ export default function LocaleSwitcher() {
 	const pathname = usePathname();
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const locale = useLocale() as 'ua' | 'us';
-	const label = 'Change language';
+	const locale = useLocale() as 'uk' | 'en';
+	const label = LOCALE_SWITCHER_LABEL;
 
 	const changeLocale = (details: { value: string[] }) => {
 		const newLocale = details.value?.[0]?.toLowerCase();
-		if (newLocale === 'ua' || newLocale === 'us') {
+		if (newLocale === 'uk' || newLocale === 'en') {
 			const search = searchParams.toString();
 			const destination = search ? `${pathname}?${search}` : pathname;
 			router.replace(destination, { locale: newLocale });

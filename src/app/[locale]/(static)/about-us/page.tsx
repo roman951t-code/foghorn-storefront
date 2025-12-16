@@ -10,7 +10,7 @@ type Params = {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	const { locale } = await params;
-	return getLocalizedMetadata(locale, 'aboutUs');
+	return getLocalizedMetadata(locale, 'aboutUs', { pathname: '/about-us' });
 }
 
 export default async function AboutUs() {

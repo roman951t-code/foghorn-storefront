@@ -12,6 +12,7 @@ export const getProductBySlug = unstable_cache(
 				name: true,
 				fullSlug: true,
 				slug: true,
+				description: true,
 				imageUrl: true,
 				basePrice: true,
 				discountPrice: true,
@@ -21,6 +22,7 @@ export const getProductBySlug = unstable_cache(
 				reviewCount: true,
 				categoryName: true,
 				subcategoryName: true,
+				brand: { select: { name: true } },
 				attributes: {
 					select: {
 						attribute: { select: { name: true, unit: true } },

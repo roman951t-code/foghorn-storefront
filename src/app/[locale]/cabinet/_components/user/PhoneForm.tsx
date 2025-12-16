@@ -10,6 +10,7 @@ import { updatePhoneNumberAction } from '@/actions/auth/updatePhoneNumberAction'
 import { PHONE_INPUT_MASKS } from '@/constants/auth';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
+import { FIELD_ORIENTATION_MD } from '@/constants/forms';
 
 interface Props {
 	i18nData: I18nData;
@@ -19,8 +20,6 @@ interface Props {
 }
 
 export default function PhoneForm({ i18nData, userPhone, schema, refreshSession }: Props) {
-	const fieldOrientation = { base: 'vertical' as const, md: 'horizontal' as const };
-
 	const [authError, setAuthError] = useState('');
 	const [isPending, setIsPending] = useState(false);
 
@@ -62,7 +61,7 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 			<Fieldset.Root size='lg' invalid>
 				<Fieldset.Content>
 					<Field.Root
-						orientation={fieldOrientation}
+						orientation={FIELD_ORIENTATION_MD}
 						justifyContent='center'
 						invalid={!!errors.phone || !!authError}
 					>

@@ -2,6 +2,7 @@
 import { HStack, Tag, Wrap } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { FILTER_TAG_EXCLUDED_KEYS } from '@/constants/products';
 
 export default function FiltersTags() {
 	const searchParams = useSearchParams();
@@ -35,9 +36,7 @@ export default function FiltersTags() {
 
 	const dynamicFilters: { key: string; value: string }[] = [];
 	searchParams.forEach((value, key) => {
-		if (
-			!['searchQuery', 'tag', 'page', 'perPage', 'min', 'max', 'inStock', 'orderBy'].includes(key)
-		) {
+		if (!FILTER_TAG_EXCLUDED_KEYS.includes(key)) {
 			dynamicFilters.push({ key, value });
 		}
 	});

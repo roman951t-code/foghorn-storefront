@@ -5,6 +5,7 @@ import Favourite from './Favourite';
 import { useTranslations } from 'next-intl';
 import UpdateEmailModal from '@/features/auth/UpdateEmailModal';
 import Auth from '@/features/auth/Auth';
+import { getCartModalI18nData } from '@/constants/cart';
 
 const AuthBtn = () => (
 	<IconButton
@@ -25,15 +26,7 @@ export default function UserActions() {
 	const navT = useTranslations('navigation');
 	const prodT = useTranslations('products');
 
-	const cartI18nData = {
-		cart: cartT('cart'),
-		emptyCart: cartT('emptyCart'),
-		emptyCartDescr: cartT('emptyCartDescr'),
-		order: navT('header.order'),
-		totalAmount: prodT('totalAmount'),
-		numOfProducts: prodT('numOfProducts'),
-		cartRemoveFailed: cartT('cartRemoveFailed'),
-	};
+	const cartI18nData = getCartModalI18nData(cartT, navT, prodT);
 
 	return (
 		<>

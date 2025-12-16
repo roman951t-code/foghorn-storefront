@@ -11,7 +11,10 @@ type Params = {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	const { locale } = await params;
-	return getLocalizedMetadata(locale, 'checkout');
+	return getLocalizedMetadata(locale, 'checkout', {
+		pathname: '/checkout',
+		robots: { index: false, follow: false },
+	});
 }
 
 export default async function Checkout() {
