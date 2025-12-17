@@ -208,7 +208,13 @@ export default function ProductCard({ product }: Props) {
 						{discount > 0 && (
 							<Text as='span' pl='2' color='main' fontSize='sm' textDecoration='line-through'>
 								{parseInt(basePrice.toFixed(2))}₴
-								<Badge variant='solid' color='black' bg='main.secondary' fontWeight='bold' ml='8px'>
+								<Badge
+									variant='solid'
+									color='black'
+									bg='main.secondary'
+									fontWeight='semibold'
+									ml='8px'
+								>
 									- {parseInt(discount.toFixed(2))}₴
 								</Badge>
 							</Text>

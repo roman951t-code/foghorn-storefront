@@ -3,7 +3,7 @@ import type { I18nData } from '@/types/i18n';
 import { UseFormReturn } from 'react-hook-form';
 import CenteredModal from '@/components/ui/dialogs/CenteredModal';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import EmailVerification from './EmailVerification';
 import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
 import { EmailSchema } from 'formValidationSchemas/emailSubscribeSchema';
@@ -32,6 +32,8 @@ export default function EmailForm({
 	isEmailVerified,
 	isGoogleUser,
 }: Props) {
+	const emailId = useId();
+
 	const [isPending, setIsPending] = useState(false);
 	const [verifyEmailOpen, setVerifyEmailOpen] = useState(false);
 	const [error, setError] = useState('');
@@ -62,11 +64,14 @@ export default function EmailForm({
 	return (
 		<form onSubmit={emailForm.handleSubmit(onSubmit)}>
 			<Field.Root orientation={FIELD_ORIENTATION_MD} invalid={isInvalid} justifyContent='center'>
-				<Field.Label maxH='20px'>{i18nData.email}</Field.Label>
+				<Field.Label maxH='20px' htmlFor={emailId}>
+					{i18nData.email}
+				</Field.Label>
 
 				<Stack w='full' direction={{ base: 'column', sm: 'row' } as const} gap='4'>
 					<VStack w='full' alignItems='flex-start'>
 						<Input
+							id={emailId}
 							{...emailForm.register('email')}
 							variant='outline'
 							size='md'

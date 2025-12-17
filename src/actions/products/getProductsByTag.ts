@@ -7,6 +7,7 @@ import {
 	SubcategoryInfo,
 	SubcategoryProduct,
 } from '@/types/product';
+import { buildProductImages } from '@/utils/productImages';
 
 export async function getProductsByTag<T extends boolean>(
 	tag: string,
@@ -107,6 +108,7 @@ export async function getProductsByTag<T extends boolean>(
 			name: product.name ?? '',
 			fullSlug: product.fullSlug ?? '',
 			imageUrl: product.imageUrl ?? null,
+			images: buildProductImages(product.imageUrl ?? undefined, 4),
 			inStock: !!product.inStock,
 			basePrice: Number(product.basePrice ?? 0),
 			discountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,

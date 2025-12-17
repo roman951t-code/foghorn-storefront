@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import type { CatalogCategory, SubcategoryProduct } from '@/types/product';
 import type { CartData } from '@/types/cart';
 import { useCatalogStore } from '@/stores/catalogStore';
@@ -50,22 +50,22 @@ export function AppStoreHydrator({
 	}, [categories, setCategories]);
 
 	// Cart init + login flag
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const ids = cartProductIds?.success ? cartProductIds.productIds ?? [] : [];
 		setCartInitial(cartData, ids);
 	}, [cartData, cartProductIds, setCartInitial]);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		setCartLoggedIn(isLoggedIn);
 	}, [isLoggedIn, setCartLoggedIn]);
 
 	// Wishlist init + login flag
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const ids = wishListIds?.success ? wishListIds.productIds ?? [] : [];
 		setWishInitial(wishListData, ids);
 	}, [setWishInitial, wishListData, wishListIds]);
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		setWishLoggedIn(isLoggedIn);
 	}, [isLoggedIn, setWishLoggedIn]);
 

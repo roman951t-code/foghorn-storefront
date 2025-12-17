@@ -1,57 +1,5 @@
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react';
 
-const thumbNavAfterStyles = {
-	color: 'var(--chakra-colors-bg-inverted) !important',
-	fontSize: '24px !important',
-	backgroundColor: 'transparent',
-	padding: '8px',
-	borderRadius: '60%',
-};
-
-const thumbNavButtonStyles = {
-	backgroundColor: 'bg',
-	borderWidth: '0.5px',
-	borderRadius: '6px',
-	borderColor: 'var(--chakra-colors-border-light)',
-	height: '90px !important',
-	width: '30px !important',
-};
-
-const thumbNavIconStyles = {
-	height: '52px !important',
-	width: '16px !important',
-};
-
-const thumbPaginationBullet = {
-	width: '20px !important',
-	height: '20px !important',
-	textAlign: 'center !important',
-	lineHeight: '20px !important',
-	fontSize: '12px !important',
-	color: 'black !important',
-	backgroundColor: 'white !important',
-	opacity: '.8 !important',
-	margin: '0 6px !important',
-};
-
-const thumbPaginationBulletActive = {
-	backgroundColor: 'var(--chakra-colors-main-accent) !important',
-	opacity: '1 !important',
-};
-
-const thumbPaginationBulletMobile = {
-	width: '28px !important',
-	height: '28px !important',
-	lineHeight: '28px !important',
-	fontSize: '14px !important',
-	margin: '0 8px !important',
-};
-
-const thumbFocusOutline = {
-	outline: '2px solid var(--chakra-colors-main-accent)',
-	outlineOffset: '4px',
-};
-
 const config = defineConfig({
 	strictTokens: false,
 	theme: {
@@ -251,12 +199,12 @@ const config = defineConfig({
 			borderRadius: '60%',
 		},
 		'.thumbsSlider .swiper-button-prev, .thumbsSlider .swiper-button-next': {
-			backgroundColor: 'bg',
+			backgroundColor: 'bg.tertiary',
 			borderWidth: '0.5px',
 			borderRadius: '6px',
 			borderColor: 'var(--chakra-colors-border-light)',
-			height: '90px !important',
-			width: '30px !important',
+			height: '88px !important',
+			width: '28px !important',
 		},
 		'.thumbsSlider .swiper-button-prev .swiper-navigation-icon, .thumbsSlider .swiper-button-next .swiper-navigation-icon':
 			{
@@ -296,6 +244,13 @@ const config = defineConfig({
 			backgroundColor: 'white !important',
 			opacity: '.8 !important',
 			margin: '0 6px !important',
+			'@media screen and (max-width: 767px)': {
+				width: '28px !important',
+				height: '28px !important',
+				lineHeight: '28px !important',
+				fontSize: '14px !important',
+				margin: '0 8px !important',
+			},
 		},
 		'.thumbsSlider .swiper-pagination-bullet-active, .thumbsSlider-pagination .swiper-pagination-bullet-active':
 			{
@@ -307,30 +262,20 @@ const config = defineConfig({
 				outline: '2px solid var(--chakra-colors-main-accent)',
 				outlineOffset: '4px',
 			},
-		'.thumbsSlider .swiper-pagination': {
-			bottom: '0 !important',
-			marginBottom: '12px',
-		},
-		'.thumbsSlider-pagination': {
-			display: 'flex',
-			justifyContent: 'center',
-			alignItems: 'center',
-			marginTop: '12px',
-		},
-		'@media screen and (max-width: 767px)': {
-			'.thumbsSlider .swiper-pagination-bullet, .thumbsSlider-pagination .swiper-pagination-bullet':
-				{
-					width: '28px !important',
-					height: '28px !important',
-					lineHeight: '28px !important',
-					fontSize: '14px !important',
-					margin: '0 8px !important',
-				},
-		},
-		'.chakra-tabs__trigger:is([aria-selected=true], [data-selected])[data-orientation=vertical]': {
-			textDecoration: 'underline',
-			textUnderlineOffset: '4px !important',
-			'--mix-textDecorationColor': 'color-mix(in srgb, currentColor 40%, transparent)',
+	'.thumbsSlider .swiper-pagination': {
+		bottom: '0 !important',
+		marginBottom: '12px',
+	},
+	'.thumbsSlider-pagination': {
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		marginTop: '12px',
+	},
+	'.chakra-tabs__trigger:is([aria-selected=true], [data-selected])[data-orientation=vertical]': {
+		textDecoration: 'underline',
+		textUnderlineOffset: '4px !important',
+		'--mix-textDecorationColor': 'color-mix(in srgb, currentColor 40%, transparent)',
 			textDecorationColor: 'var(--mix-textDecorationColor, currentColor) !important',
 		},
 		'.tabLink': {

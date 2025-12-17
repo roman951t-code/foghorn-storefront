@@ -1,4 +1,4 @@
-import { Box, Card, Heading, HStack, Stack, Tag, Text, VStack, Wrap } from '@chakra-ui/react';
+import { Box, Card, Heading, HStack, Stack, Tag, Text, Wrap } from '@chakra-ui/react';
 import { ReactNode } from 'react';
 
 export type DetailOption = {

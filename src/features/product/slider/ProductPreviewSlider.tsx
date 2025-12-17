@@ -4,10 +4,9 @@ import dynamic from 'next/dynamic';
 import { HStack, Skeleton, Box } from '@chakra-ui/react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { EffectFlip, Navigation } from 'swiper/modules';
+import { Navigation } from 'swiper/modules';
 
 import 'swiper/css';
-import 'swiper/css/effect-flip';
 import 'swiper/css/navigation';
 
 import { toPreviewImage } from '@/utils/productImages';
@@ -34,31 +33,32 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 	const altText = productName ? `${productName} photo` : 'Product photo';
 
 	return (
-		<Swiper
-			effect='flip'
-			navigation
-			modules={[EffectFlip, Navigation]}
-			className='productPreviewSwiper'
-		>
-			{previewImages.map((src, i) => (
-				<SwiperSlide key={i}>
-					<Box as='div' _focus={{ outline: 'none' }}>
-						<Image
-							priority
-							loading='eager'
-							src={src}
-							width={300}
-							height={230}
-							alt={altText}
-							style={{
-								borderRadius: '6px',
-								width: '124px',
-								height: 'auto',
-							}}
-						/>
-					</Box>
-				</SwiperSlide>
-			))}
+		<Swiper navigation modules={[Navigation]} className='productPreviewSwiper'>
+			{previewImages.map((src, i) => {
+				const isFirst = i === 0;
+				return (
+					<SwiperSlide key={i}>
+						<Box as='div' _focus={{ outline: 'none' }}>
+							<Image
+								loading={isFirst ? undefined : 'lazy'}
+								src={src}
+								width={120}
+								height={120}
+								alt={altText}
+								priority={isFirst}
+								fetchPriority={isFirst ? 'high' : undefined}
+								style={{
+									borderRadius: '6px',
+									width: '118px',
+									height: '118px',
+									objectFit: 'cover',
+								}}
+								sizes='(max-width: 768px) 35vw, 120px'
+							/>
+						</Box>
+					</SwiperSlide>
+				);
+			})}
 		</Swiper>
 	);
 }

@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { SimpleGrid, Box, EmptyState, VStack } from '@chakra-ui/react';
 import ProductCard from '@/features/product/cards/ProductCard';
 import { useWishList } from '@/hooks/useWishList';
+import { LoadingSkeleton } from '@/components/ui/Skeleton';
 import { FiHeart } from 'react-icons/fi';
 import WishlistActions from './WishlistActions';
 import WishListCount from './WishlistCount';
@@ -35,7 +36,7 @@ export default function WishList({
 }: Props) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const { items } = useWishList();
+	const { items, isHydrated } = useWishList();
 
 	const safePageSize = Math.max(1, Math.floor(pageSize || 1));
 	const totalItems = items?.length ?? 0;
@@ -68,6 +69,26 @@ export default function WishList({
 		const start = (safePage - 1) * safePageSize;
 		return sortedItems.slice(start, start + safePageSize);
 	}, [sortedItems, safePage, safePageSize]);
+
+	if (!isHydrated) {
+		return (
+			<SimpleGrid
+				mt='8'
+				mb='4'
+				className='productsSlider'
+				columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5, '2xl': 6 }}
+				gapX='2'
+				gapY='4'
+				w='100%'
+			>
+				{Array.from({ length: safePageSize }).map((_, index) => (
+					<Box key={`wishlist-skeleton-${index}`}>
+						<LoadingSkeleton />
+					</Box>
+				))}
+			</SimpleGrid>
+		);
+	}
 
 	if (!totalItems) {
 		return (

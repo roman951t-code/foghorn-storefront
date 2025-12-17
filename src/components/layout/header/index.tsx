@@ -34,6 +34,7 @@ export default function Header() {
 					maxWidth='1444px'
 					pt='4px'
 					pb='8px'
+					minH='52px'
 					borderBottom={{ smToMd: '1px solid' }}
 					borderColor={{ smToMd: 'border.light' }}
 					borderStyle={{ smToMd: 'dotted' }}
@@ -67,6 +68,7 @@ export default function Header() {
 					width='100%'
 					maxWidth='1444px'
 					gap={{ base: 0, sm: 4 }}
+					minH='48px'
 				>
 					<CatalogBtn hideBelow='sm' fullText={false} />
 					<SearchInput

@@ -1,5 +1,6 @@
 import { Input, Field, VStack, Fieldset } from '@chakra-ui/react';
 import { UseFormReturn } from 'react-hook-form';
+import { useId } from 'react';
 import type { I18nData } from '@/types/i18n';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { FIELD_ORIENTATION_SM } from '@/constants/forms';
@@ -23,6 +24,10 @@ interface Props {
 }
 
 export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) {
+	const nameId = useId();
+	const lastNameId = useId();
+	const middleNameId = useId();
+
 	return (
 		<form onSubmit={onSubmitAction}>
 			<Fieldset.Root size='lg' alignItems='center'>
@@ -42,12 +47,12 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 						justifyContent='center'
 						required
 					>
-						<Field.Label maxH='20px'>
+						<Field.Label maxH='20px' htmlFor={nameId}>
 							{i18nData.name} <Field.RequiredIndicator />
 						</Field.Label>
 
 						<VStack w='full' maxW='3xl'>
-							<Input {...nameForm.register('name')} variant='outline' size='md' />
+							<Input id={nameId} {...nameForm.register('name')} variant='outline' size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.name?.message?.toString()}
 							</Field.ErrorText>
@@ -61,12 +66,12 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 						justifyContent='center'
 						required
 					>
-						<Field.Label maxH='20px'>
+						<Field.Label maxH='20px' htmlFor={lastNameId}>
 							{i18nData.lastName} <Field.RequiredIndicator />
 						</Field.Label>
 
 						<VStack w='full' maxW='3xl'>
-							<Input {...nameForm.register('lastName')} variant='outline' size='md' />
+							<Input id={lastNameId} {...nameForm.register('lastName')} variant='outline' size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.lastName?.message?.toString()}
 							</Field.ErrorText>
@@ -80,13 +85,13 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 						justifyContent='center'
 						required
 					>
-						<Field.Label maxH='20px'>
+						<Field.Label maxH='20px' htmlFor={middleNameId}>
 							{i18nData.middleName}
 							<Field.RequiredIndicator />
 						</Field.Label>
 
 						<VStack w='full' maxW='3xl'>
-							<Input {...nameForm.register('middleName')} variant='outline' size='md' />
+							<Input id={middleNameId} {...nameForm.register('middleName')} variant='outline' size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.middleName?.message?.toString()}
 							</Field.ErrorText>

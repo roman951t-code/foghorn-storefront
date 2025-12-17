@@ -30,6 +30,7 @@ export default async function Reviewed({ searchParams }: Props) {
 	const viewedProducts = userId ? await getRecentlyViewedProducts(userId, VIEWED_LIMIT) : [];
 
 	const totalProductsCount = viewedProducts.length;
+	const hasViewedProducts = totalProductsCount > 0;
 	const params = await searchParams;
 	const pageParam = Number.parseInt(params?.page ?? '1', 10);
 	const requestedPerPage = Number.parseInt(params?.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
@@ -40,7 +41,6 @@ export default async function Reviewed({ searchParams }: Props) {
 	currentPage = Math.min(currentPage, totalPages);
 	const startIndex = (currentPage - 1) * pageSize;
 	const paginatedProducts = viewedProducts.slice(startIndex, startIndex + pageSize);
-	const hasViewedProducts = totalProductsCount > 0;
 
 	return (
 		<VStack w='100%'>

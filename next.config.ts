@@ -1,6 +1,5 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
-
 const isProd = process.env.NODE_ENV === 'production';
 
 const cspHeader = `
@@ -20,6 +19,7 @@ const baseConfig: NextConfig = {
 	experimental: {
 		optimizePackageImports: ['@chakra-ui/react'],
 	},
+	productionBrowserSourceMaps: true,
 
 	images: {
 		remotePatterns: [
@@ -37,21 +37,29 @@ const baseConfig: NextConfig = {
 			},
 		],
 	},
-	...(isProd && {
-		async headers() {
-			return [
-				{
-					source: '/(.*)',
-					headers: [
-						{
-							key: 'Content-Security-Policy',
-							value: cspHeader.replace(/\n/g, ''),
-						},
-					],
-				},
-			];
-		},
-	}),
+	async headers() {
+		if (!isProd) return [];
+
+		return [
+			{
+				source: '/(.*)',
+				headers: [
+					{
+						key: 'Content-Security-Policy',
+						value: cspHeader.replace(/\n/g, ''),
+					},
+					{
+						key: 'Cross-Origin-Opener-Policy',
+						value: 'same-origin',
+					},
+					{
+						key: 'X-Frame-Options',
+						value: 'DENY',
+					},
+				],
+			},
+		];
+	},
 	logging: {
 		fetches: {
 			fullUrl: true,

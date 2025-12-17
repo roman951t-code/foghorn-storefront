@@ -6,8 +6,9 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { getCategoryData } from '@/actions/products/getCategoryData';
 import CategoryCards from './_components/CategoryCards';
-import { buildLanguageAlternates } from '@/utils/seo';
+import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
 import type { AppLocale } from '@/constants/locales';
+import Script from 'next/script';
 
 type Params = {
 	params: { locale: AppLocale; category: string };
@@ -37,24 +38,48 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 export default async function CategoryPage({ params }: Params) {
-	const { category: categorySlug } = await params;
+	const { category: categorySlug, locale } = await params;
 	const categoryDataResponse = await getCategoryData();
 
 	const category = categoryDataResponse.categoryData.find((cat) => cat.slug === categorySlug);
 
 	if (!category) notFound();
 
+	const breadcrumbsJsonLd = {
+		'@context': 'https://schema.org',
+		'@type': 'BreadcrumbList',
+		itemListElement: [
+			{
+				'@type': 'ListItem',
+				position: 1,
+				name: 'Home',
+				item: absoluteUrl(localizePath(locale, '/')),
+			},
+			{
+				'@type': 'ListItem',
+				position: 2,
+				name: category.name,
+				item: absoluteUrl(localizePath(locale, `/products/${category.slug}`)),
+			},
+		],
+	};
+
 	return (
-		<Stack mx={{ base: '12px', '2xl': 0 }} gap={16} direction='column'>
-			<Breadcrumbs categoryName={category?.name} categorySlug={category?.slug} />
+		<>
+			<Script id='category-breadcrumbs-schema' type='application/ld+json'>
+				{JSON.stringify(breadcrumbsJsonLd)}
+			</Script>
+			<Stack mx={{ base: '12px', '2xl': 0 }} gap={16} direction='column'>
+				<Breadcrumbs categoryName={category?.name} categorySlug={category?.slug} />
 
-			<Stack gapY='8'>
-				<Heading as='h1' size='3xl' fontWeight='medium'>
-					{category.name}
-				</Heading>
+				<Stack gapY='8'>
+					<Heading as='h1' size='3xl' fontWeight='medium'>
+						{category.name}
+					</Heading>
 
-				<CategoryCards category={category} />
+					<CategoryCards category={category} />
+				</Stack>
 			</Stack>
-		</Stack>
+		</>
 	);
 }

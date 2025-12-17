@@ -157,18 +157,23 @@ export default function AboutTab({
 
 						<Box as='span' fontSize='3xl' fontWeight='semibold'>
 							{product?.discountPrice ?? product.basePrice} ₴
+							{discount > 0 && (
+								<Badge colorPalette='gray'>
+									<Box as='span' color='main' fontSize='sm' textDecoration='line-through'>
+										{parseInt(product.basePrice.toFixed(2))}₴
+										<Badge
+											variant='solid'
+											fontWeight='semibold'
+											color='black'
+											bg='main.secondary'
+											marginLeft='12px'
+										>
+											- {parseInt(discount.toFixed(2))}₴
+										</Badge>
+									</Box>
+								</Badge>
+							)}
 						</Box>
-
-						{discount > 0 && (
-							<Badge colorPalette='gray'>
-								<Box as='span' color='main' fontSize='sm' textDecoration='line-through'>
-									{parseInt(product.basePrice.toFixed(2))}₴
-									<Badge variant='solid' color='black' bg='main.secondary' marginLeft='12px'>
-										- {parseInt(discount.toFixed(2))}₴
-									</Badge>
-								</Box>
-							</Badge>
-						)}
 					</Flex>
 
 					<HStack gap='4'>

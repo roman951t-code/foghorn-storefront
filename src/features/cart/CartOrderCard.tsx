@@ -111,7 +111,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 										color='main.disabled'
 										fontSize='sm'
 										textDecoration='line-through'
-										marginLeft='3'
+										marginLeft='2'
 									>
 										{product.basePrice} ₴
 									</Text>
@@ -119,9 +119,9 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 								{discountAmount > 0 && (
 									<Badge
 										variant='solid'
-										color='main.lightOnly'
-										bg='main.tertiary'
-										fontWeight='bold'
+										color='black'
+										bg='main.secondary'
+										fontWeight='semibold'
 										ml='8px'
 									>
 										-{discountAmount} ₴

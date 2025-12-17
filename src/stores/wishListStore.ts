@@ -37,7 +37,9 @@ type WishListStore = {
 	items: SubcategoryProduct[];
 	ids: string[];
 	isLoggedIn: boolean;
+	isHydrated: boolean;
 	setIsLoggedIn: (loggedIn: boolean) => void;
+	setIsHydrated: (hydrated: boolean) => void;
 	setItems: (items: SubcategoryProduct[]) => void;
 	setIds: (ids: string[]) => void;
 	setInitialData: (items: SubcategoryProduct[], ids: string[]) => void;
@@ -52,31 +54,39 @@ export const useWishListStore = createBoundedStore<WishListStore>((set, get) => 
 	items: [],
 	ids: [],
 	isLoggedIn: false,
+	isHydrated: false,
 	setIsLoggedIn: (loggedIn) => set({ isLoggedIn: loggedIn }),
-	setItems: (items) => set({ items, ids: items.map((p) => p.id) }),
-	setIds: (ids) => set({ ids }),
-	setInitialData: (items, ids) => set({ items, ids: ids?.length ? ids : items.map((p) => p.id) }),
+	setIsHydrated: (hydrated) => set({ isHydrated: hydrated }),
+	setItems: (items) => set({ items, ids: items.map((p) => p.id), isHydrated: true }),
+	setIds: (ids) => set({ ids, isHydrated: true }),
+	setInitialData: (items, ids) =>
+		set({ items, ids: ids?.length ? ids : items.map((p) => p.id), isHydrated: true }),
 	hydrateGuestWishlist: () => {
 		const guest = loadGuestWishlist();
-		set({ items: guest, ids: guest.map((p) => p.id) });
+		set({ items: guest, ids: guest.map((p) => p.id), isHydrated: true });
 	},
 	mergeGuestWishlistIntoServer: async () => {
 		const local = loadGuestWishlist();
 		if (local.length === 0) return;
 
-		set({ items: local, ids: local.map((p) => p.id) });
+		set({ items: local, ids: local.map((p) => p.id), isHydrated: true });
 
 		await mergeWishListData(local.map(({ id }) => ({ id })));
 		localStorage.removeItem(LOCAL_STORAGE_KEY);
 
 		const fresh = await fetchWishDataFromApi();
-		if (fresh?.products) set({ items: fresh.products, ids: fresh.products.map((p: SubcategoryProduct) => p.id) });
+		if (fresh?.products)
+			set({
+				items: fresh.products,
+				ids: fresh.products.map((p: SubcategoryProduct) => p.id),
+				isHydrated: true,
+			});
 	},
 	handleWishAdd: async (product) => {
 		if (!product) return { success: false };
 
 		if (get().isLoggedIn) {
-			set((state) => ({ items: [...state.items, product], ids: [...state.ids, product.id] }));
+			set((state) => ({ items: [...state.items, product], ids: [...state.ids, product.id], isHydrated: true }));
 
 			const res = await addToWishList(product.id);
 
@@ -84,6 +94,7 @@ export const useWishListStore = createBoundedStore<WishListStore>((set, get) => 
 				set((state) => ({
 					items: state.items.filter((p) => p.id !== product.id),
 					ids: state.ids.filter((id) => id !== product.id),
+					isHydrated: true,
 				}));
 				return { success: false };
 			}
@@ -92,7 +103,7 @@ export const useWishListStore = createBoundedStore<WishListStore>((set, get) => 
 			set((state) => {
 				const updated = [...state.items, product];
 				saveGuestWishlist(updated);
-				return { items: updated, ids: [...state.ids, product.id] };
+				return { items: updated, ids: [...state.ids, product.id], isHydrated: true };
 			});
 			return { success: true };
 		}
@@ -105,11 +116,12 @@ export const useWishListStore = createBoundedStore<WishListStore>((set, get) => 
 			set((state) => ({
 				items: state.items.filter((p) => p.id !== productId),
 				ids: state.ids.filter((id) => id !== productId),
+				isHydrated: true,
 			}));
 
 			const res = await removeFromWishList(productId);
 			if (!res.success) {
-				set({ items: prevItems, ids: prevIds });
+				set({ items: prevItems, ids: prevIds, isHydrated: true });
 				return { success: false };
 			}
 			return { success: true };
@@ -117,7 +129,7 @@ export const useWishListStore = createBoundedStore<WishListStore>((set, get) => 
 			set((state) => {
 				const updated = state.items.filter((p) => p.id !== productId);
 				saveGuestWishlist(updated);
-				return { items: updated, ids: state.ids.filter((id) => id !== productId) };
+				return { items: updated, ids: state.ids.filter((id) => id !== productId), isHydrated: true };
 			});
 			return { success: true };
 		}
@@ -127,16 +139,16 @@ export const useWishListStore = createBoundedStore<WishListStore>((set, get) => 
 			const prevItems = get().items;
 			const prevIds = get().ids;
 
-			set({ items: [], ids: [] });
+			set({ items: [], ids: [], isHydrated: true });
 
 			const res = await clearWishlist();
 			if (!res.success) {
-				set({ items: prevItems, ids: prevIds });
+				set({ items: prevItems, ids: prevIds, isHydrated: true });
 				return { success: false };
 			}
 			return { success: true };
 		} else {
-			set({ items: [], ids: [] });
+			set({ items: [], ids: [], isHydrated: true });
 			saveGuestWishlist([]);
 			return { success: true };
 		}

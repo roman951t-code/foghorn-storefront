@@ -2,7 +2,7 @@ import { Input, Field, Stack, Fieldset, VStack } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useHookFormMask } from 'use-mask-input';
 import { PhoneSchemaData, type AccountSchemas } from 'formValidationSchemas/accountSchema';
@@ -22,6 +22,7 @@ interface Props {
 export default function PhoneForm({ i18nData, userPhone, schema, refreshSession }: Props) {
 	const [authError, setAuthError] = useState('');
 	const [isPending, setIsPending] = useState(false);
+	const phoneId = useId();
 
 	const {
 		register,
@@ -60,18 +61,21 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 		<form onSubmit={handleSubmit(onSubmit)}>
 			<Fieldset.Root size='lg' invalid>
 				<Fieldset.Content>
-					<Field.Root
-						orientation={FIELD_ORIENTATION_MD}
-						justifyContent='center'
-						invalid={!!errors.phone || !!authError}
-					>
-						<Field.Label maxH='20px'>{i18nData.phone}</Field.Label>
-						<Stack w='full' direction={{ base: 'column', sm: 'row' } as const} gap='4'>
-							<VStack w='full' alignItems='flex-start'>
-								<Input
-									{...registerWithMask('phone', PHONE_INPUT_MASKS, {
-										required: i18nData.phoneRequired,
-									})}
+						<Field.Root
+							orientation={FIELD_ORIENTATION_MD}
+							justifyContent='center'
+							invalid={!!errors.phone || !!authError}
+						>
+							<Field.Label maxH='20px' htmlFor={phoneId}>
+								{i18nData.phone}
+							</Field.Label>
+							<Stack w='full' direction={{ base: 'column', sm: 'row' } as const} gap='4'>
+								<VStack w='full' alignItems='flex-start'>
+									<Input
+										id={phoneId}
+										{...registerWithMask('phone', PHONE_INPUT_MASKS, {
+											required: i18nData.phoneRequired,
+										})}
 									type='text'
 									variant='outline'
 									size='md'

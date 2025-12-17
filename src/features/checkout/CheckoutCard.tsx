@@ -65,7 +65,13 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 					{hasDiscount && (
 						<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
 							{product.basePrice} ₴
-							<Badge variant='solid' color='black' bg='main.secondary' marginLeft='10px'>
+							<Badge
+								variant='solid'
+								color='black'
+								bg='main.secondary'
+								fontWeight='semibold'
+								marginLeft='10px'
+							>
 								- {discountAmount}₴
 							</Badge>
 						</Text>
@@ -135,7 +141,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 										color='main.disabled'
 										fontSize='sm'
 										textDecoration='line-through'
-										marginLeft='3'
+										marginLeft='2'
 									>
 										{product.basePrice} ₴
 									</Text>
@@ -143,9 +149,9 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 								{hasDiscount && (
 									<Badge
 										variant='solid'
-										color='main.lightOnly'
-										bg='main.tertiary'
-										fontWeight='bold'
+										color='black'
+										bg='main.secondary'
+										fontWeight='semibold'
 										ml='8px'
 									>
 										-{discountAmount} ₴

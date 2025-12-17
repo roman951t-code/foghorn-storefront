@@ -81,7 +81,9 @@ export default function PhoneUpdate({ phone, i18nData, refreshSession, onCloseAc
 
 			if (error) {
 				const messageKey = error?.message ?? '';
-				const message = errorMap[messageKey] || i18nData.userRegisterFail;
+				const message =
+					(messageKey && messageKey in errorMap ? errorMap[messageKey as keyof typeof errorMap] : null) ||
+					i18nData.userRegisterFail;
 				setVerifyError(message);
 				return;
 			} else {

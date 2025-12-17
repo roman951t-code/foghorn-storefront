@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
+import { buildProductImages } from '@/utils/productImages';
 
 export async function getProductsBySubcategorySlug(
 	slug: string,
@@ -123,6 +124,7 @@ export async function getProductsBySubcategorySlug(
 			name: p.name ?? '',
 			fullSlug: p.fullSlug ?? '',
 			imageUrl: p.imageUrl ?? null,
+			images: buildProductImages(p.imageUrl ?? undefined, 4),
 			categoryName: p.categoryName ?? '',
 			subcategoryName: p.subcategoryName ?? '',
 			inStock: !!p.inStock,

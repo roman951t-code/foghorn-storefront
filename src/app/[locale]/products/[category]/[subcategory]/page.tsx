@@ -16,8 +16,9 @@ import { getSubcategoryFilters } from '@/actions/products/getProductsFilters';
 import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { SUBCATEGORY_FILTER_EXCLUDED_KEYS } from '@/constants/products';
-import { buildLanguageAlternates } from '@/utils/seo';
+import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
 import type { AppLocale } from '@/constants/locales';
+import Script from 'next/script';
 
 type Params = {
 	params: { category: string; subcategory: string; locale: AppLocale };
@@ -55,7 +56,7 @@ export async function generateMetadata({ params, searchParams }: Params): Promis
 }
 
 export default async function Subcategory({ params, searchParams }: Params) {
-	const { category, subcategory } = await params;
+	const { category, subcategory, locale } = await params;
 	const searchData = await searchParams;
 
 	const page = Math.max(1, parseInt(searchData.page || '1', 10) || 1);
@@ -104,8 +105,36 @@ export default async function Subcategory({ params, searchParams }: Params) {
 
 	if (!subcategoryData) notFound();
 
+	const breadcrumbsJsonLd = {
+		'@context': 'https://schema.org',
+		'@type': 'BreadcrumbList',
+		itemListElement: [
+			{
+				'@type': 'ListItem',
+				position: 1,
+				name: 'Home',
+				item: absoluteUrl(localizePath(locale, '/')),
+			},
+			{
+				'@type': 'ListItem',
+				position: 2,
+				name: subcategoryData.categoryName,
+				item: absoluteUrl(localizePath(locale, `/products/${category}`)),
+			},
+			{
+				'@type': 'ListItem',
+				position: 3,
+				name: subcategoryData.subcategoryName,
+				item: absoluteUrl(localizePath(locale, `/products/${category}/${subcategory}`)),
+			},
+		],
+	};
+
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
+			<Script id='subcategory-breadcrumbs-schema' type='application/ld+json'>
+				{JSON.stringify(breadcrumbsJsonLd)}
+			</Script>
 			<Breadcrumbs
 				categorySlug={category}
 				subcategorySlug={subcategory}

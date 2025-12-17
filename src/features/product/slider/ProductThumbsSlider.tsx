@@ -106,35 +106,41 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 				className='thumbsSlider'
 				aria-label={`Image gallery for ${accessibleName}`}
 			>
-				{galleryImages.map((src, index) => (
-					<SwiperSlide
-						key={index}
-						onClick={() => setSelectedImage(src)}
-						role='button'
-						tabIndex={0}
-						onKeyDown={handleSlideKeyOpen(src)}
-						aria-label={`Open larger view of ${accessibleName} image ${index + 1}`}
-					>
-						<Box
-							position='relative'
-							width='100%'
-							height={{ base: '400px', md: '700px' }}
-							cursor='pointer'
-							userSelect='none'
-							overflow='hidden'
-							rounded='sm'
+				{galleryImages.map((src, index) => {
+					const isFirst = index === 0;
+					return (
+						<SwiperSlide
+							key={index}
+							onClick={() => setSelectedImage(src)}
+							role='button'
+							tabIndex={0}
+							onKeyDown={handleSlideKeyOpen(src)}
+							aria-label={`Open larger view of ${accessibleName} image ${index + 1}`}
 						>
-							<Image
-								src={src}
-								alt={`${accessibleName} photo ${index + 1}`}
-								fill
-								style={{ objectFit: 'cover' }}
-								sizes='(max-width: 768px) 100vw, 50vw'
-								draggable={false}
-							/>
-						</Box>
-					</SwiperSlide>
-				))}
+							<Box
+								position='relative'
+								width='100%'
+								height={{ base: '400px', md: '700px' }}
+								cursor='pointer'
+								userSelect='none'
+								overflow='hidden'
+								rounded='sm'
+							>
+						<Image
+							src={src}
+							alt={`${accessibleName} photo ${index + 1}`}
+							fill
+							priority={isFirst}
+							fetchPriority={isFirst ? 'high' : undefined}
+							quality={68}
+							style={{ objectFit: 'cover' }}
+							sizes='(max-width: 768px) 100vw, 50vw'
+							draggable={false}
+						/>
+							</Box>
+						</SwiperSlide>
+					);
+				})}
 			</Swiper>
 
 			<Box hideBelow='md' mt={4}>

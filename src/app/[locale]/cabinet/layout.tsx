@@ -1,4 +1,4 @@
-import { Tabs, Flex } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import { ReactNode } from 'react';
 import TabsList from './_components/TabsHeaders';
 import { type Metadata } from 'next';
@@ -7,8 +7,8 @@ import TabsProvider from './_components/TabsProvider';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { TAB_ANIMATION_PROPS } from '@/constants/cabinetTabs';
 import type { AppLocale } from '@/constants/locales';
+import TabsContentRenderer from './_components/TabsContentRenderer';
 
 type Params = {
 	params: { locale: string };
@@ -41,21 +41,7 @@ export default async function CabinetLayout({ children }: Props) {
 			<>
 				<TabsList />
 				<Flex px='4'>
-					<Tabs.Content colorPalette='gray' w='full' value='cabinet' {...TAB_ANIMATION_PROPS}>
-						{children}
-					</Tabs.Content>
-					<Tabs.Content colorPalette='gray' w='full' value='orders' {...TAB_ANIMATION_PROPS}>
-						{children}
-					</Tabs.Content>
-					<Tabs.Content colorPalette='gray' w='full' value='feedback' {...TAB_ANIMATION_PROPS}>
-						{children}
-					</Tabs.Content>
-					<Tabs.Content colorPalette='gray' w='full' value='wishlist' {...TAB_ANIMATION_PROPS}>
-						{children}
-					</Tabs.Content>
-					<Tabs.Content colorPalette='gray' w='full' value='reviewed' {...TAB_ANIMATION_PROPS}>
-						{children}
-					</Tabs.Content>
+					<TabsContentRenderer>{children}</TabsContentRenderer>
 				</Flex>
 			</>
 		</TabsProvider>

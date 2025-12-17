@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { Accordion, Card, Flex, Separator, Stack, Stat, Text } from '@chakra-ui/react';
+import { Accordion, Card, Flex, Separator, Stack, Text } from '@chakra-ui/react';
 import { BsArrowRepeat } from 'react-icons/bs';
 import { useTranslations } from 'next-intl';
 import { PrimaryButton, TertiaryButton } from '@/components/ui/buttons/ActionButton';
