@@ -53,7 +53,9 @@ export async function generateMetadata({ params, searchParams }: Params): Promis
 	const t = await getTranslations('products');
 	const title = t('searchQueryResults', { searchQuery: tag ? t(tag) : searchQuery || '' });
 	const pagesT = await getTranslations('pages');
-	const description = pagesT('metadata.searchDescription', { query: tag ? t(tag) : searchQuery || '' });
+	const description = pagesT('metadata.searchDescription', {
+		query: tag ? t(tag) : searchQuery || '',
+	});
 
 	return {
 		title,
@@ -213,14 +215,14 @@ export default async function SearchProducts({ searchParams }: Params) {
 
 				<Box as='section' w={{ base: '100%', lg: '80%' }}>
 					<ProductsGrid products={products} notFound={t('productsNotFound')} limit={pageSize} />
-					<Flex justifyContent='center'>
-						<Pagination
-							currentPage={page}
-							totalItems={totalCount}
-							pageSize={pageSize}
-							baseRoute='/products/search/'
-						/>
-					</Flex>
+					{/* <Flex justifyContent='center'> */}
+					<Pagination
+						currentPage={page}
+						totalItems={totalCount}
+						pageSize={pageSize}
+						baseRoute='/products/search/'
+					/>
+					{/* </Flex> */}
 				</Box>
 			</Group>
 

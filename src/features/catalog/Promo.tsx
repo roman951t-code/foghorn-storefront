@@ -51,7 +51,6 @@ function PromoSlider() {
 			{promoCards.map((promo) => (
 				<SwiperSlide key={promo.id}>
 					<Flex
-						userSelect='none'
 						justify='center'
 						align='center'
 						cursor='grab'

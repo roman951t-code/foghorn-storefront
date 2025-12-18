@@ -55,6 +55,8 @@ export async function generateMetadata({ params, searchParams }: Params): Promis
 	};
 }
 
+export const revalidate = 120;
+
 export default async function Subcategory({ params, searchParams }: Params) {
 	const { category, subcategory, locale } = await params;
 	const searchData = await searchParams;

@@ -34,7 +34,7 @@ export default function ClearWishlistButton() {
 			onClick={onClear}
 			disabled={isPending}
 		>
-			<Icon size='md'>
+			<Icon size='lg'>
 				<FiTrash2 />
 			</Icon>
 		</IconButton>

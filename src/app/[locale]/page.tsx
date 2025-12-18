@@ -22,6 +22,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	return getLocalizedMetadata(locale, 'main', { pathname: '/' });
 }
 
+export const revalidate = 60;
+
 export default async function Main() {
 	const genT = await getTranslations('common');
 	const prodT = await getTranslations('products');

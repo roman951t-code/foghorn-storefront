@@ -72,7 +72,7 @@ export default function Pagination({
 
 	return (
 		<HStack
-			justifyContent='space-between'
+			justifyContent='center'
 			alignItems='center'
 			flexWrap='wrap'
 			gap='6'

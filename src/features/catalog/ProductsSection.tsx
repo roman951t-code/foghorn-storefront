@@ -11,7 +11,7 @@ interface Props extends FlexProps {
 
 export default function ProductsSection({ title, tag, products, ...restProps }: Props) {
 	return (
-		<Flex gap={6} direction='column' mt={24} userSelect='none' {...restProps}>
+		<Flex gap={6} direction='column' mt={24} {...restProps}>
 			<Heading fontWeight='normal'>
 				<LocaleNavLink
 					href={`/products/search/?tag=${tag}`}

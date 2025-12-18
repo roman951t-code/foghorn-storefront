@@ -37,6 +37,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	};
 }
 
+export const revalidate = 120;
+
 export default async function CategoryPage({ params }: Params) {
 	const { category: categorySlug, locale } = await params;
 	const categoryDataResponse = await getCategoryData();

@@ -122,7 +122,6 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 								width='100%'
 								height={{ base: '400px', md: '700px' }}
 								cursor='pointer'
-								userSelect='none'
 								overflow='hidden'
 								rounded='sm'
 							>
@@ -153,7 +152,6 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 					watchSlidesProgress
 					modules={[FreeMode, Navigation, A11y]}
 					className='thumbsSlider2'
-					style={{ userSelect: 'none' }}
 					a11y={{
 						enabled: true,
 						containerMessage: `Thumbnail carousel for ${accessibleName}`,
@@ -182,7 +180,6 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 								width='94%'
 								height='90px'
 								cursor='pointer'
-								userSelect='none'
 								overflow='hidden'
 							>
 								<Image

@@ -1,4 +1,3 @@
-import { Flex } from '@chakra-ui/react';
 import {
 	DrawerBackdrop,
 	DrawerBody,
@@ -29,12 +28,10 @@ export default function FiltersSidebar({ btnText, maxProductPrice, filters }: Pr
 					{btnText}
 				</SecondaryButton>
 			</DrawerTrigger>
-			<DrawerContent bg='bg.tertiary' w='280px'>
-				<DrawerBody>
-					<Flex flexDirection='column' h='100%' justifyContent='center'>
-						<QuickFilters maxProductPrice={maxProductPrice} />
-						<Filters filters={filters} />
-					</Flex>
+			<DrawerContent bg='bg.tertiary' w='280px' h='100%'>
+				<DrawerBody flexDirection='column' py='8' alignContent='center'>
+					<QuickFilters maxProductPrice={maxProductPrice} />
+					<Filters filters={filters} />
 				</DrawerBody>
 				<DrawerCloseTrigger
 					color='main'

@@ -82,7 +82,7 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 					</Tag.Label>
 				</Tag.Root>
 			</Flex>
-			<HStack justifyContent='space-between'>
+			<HStack justifyContent='space-between' w='full'>
 				<HStack
 					gap={{ base: '2', xs: '4' } as any}
 					mt={{ base: '2', xs: '4.5' } as any}

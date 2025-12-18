@@ -2,11 +2,11 @@
 
 import { useCallback, useTransition } from 'react';
 import { HStack, IconButton, Icon, Wrap } from '@chakra-ui/react';
-import { IoShareSocialOutline } from 'react-icons/io5';
 import ProductsFilter from './ProductsFilter';
 import ClearWishlistButton from './ClearWishlistButton';
 import { showToaster } from '@/utils/toast';
 import type { I18nData } from '@/types/i18n';
+import { LuShare2 } from 'react-icons/lu';
 
 type Props = {
 	i18nData: I18nData;
@@ -51,7 +51,7 @@ export default function WishlistActions({ i18nData, shareCopiedText, countSlot }
 						disabled={isSharing}
 					>
 						<Icon size='lg'>
-							<IoShareSocialOutline />
+							<LuShare2 />
 						</Icon>
 					</IconButton>
 					<ClearWishlistButton />

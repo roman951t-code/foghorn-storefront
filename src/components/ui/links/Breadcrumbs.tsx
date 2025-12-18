@@ -26,8 +26,8 @@ function CustomBreadcrumbLink({ href, children }: { href: string; children: Reac
 				wordBreak='break-word'
 				fontSize='15px'
 				transition='all .15s ease-in-out'
-				textDecorationColor='main'
-				color='main'
+				textDecorationColor='main.breadcrumb'
+				color='main.breadcrumb'
 				_hover={{ color: 'link', cursor: 'pointer' }}
 				_focus={{ outline: 'none' }}
 			>
@@ -41,7 +41,7 @@ function BreadcrumbCurrentLink({ children }: { children: React.ReactNode }) {
 	return (
 		<BreadcrumbLink
 			wordBreak='break-word'
-			color='fg'
+			color='main.breadcrumb'
 			cursor='default'
 			fontWeight='medium'
 			fontSize='15px'
@@ -93,12 +93,12 @@ export default function Breadcrumbs({
 							fontSize='15px'
 							transition='all .15s ease-in-out'
 							textDecoration='none'
-							color='main'
+							color='main.breadcrumb'
 							_hover={{
 								color: 'link',
 								cursor: 'pointer',
 								textDecoration: 'underline',
-								textDecorationColor: 'main',
+								textDecorationColor: 'main.breadcrumb',
 							}}
 							_focus={{ outline: 'none' }}
 						>

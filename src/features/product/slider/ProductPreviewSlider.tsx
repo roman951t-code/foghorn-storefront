@@ -33,7 +33,7 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 	const altText = productName ? `${productName} photo` : 'Product photo';
 
 	return (
-		<Swiper navigation modules={[Navigation]} className='productPreviewSwiper'>
+		<Swiper navigation loop modules={[Navigation]} className='productPreviewSwiper'>
 			{previewImages.map((src, i) => {
 				const isFirst = i === 0;
 				return (
@@ -49,8 +49,8 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 								fetchPriority={isFirst ? 'high' : undefined}
 								style={{
 									borderRadius: '6px',
-									width: '118px',
-									height: '118px',
+									width: '150px',
+									height: '150px',
 									objectFit: 'cover',
 								}}
 								sizes='(max-width: 768px) 35vw, 120px'
@@ -63,13 +63,10 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 	);
 }
 
-const DynamicProductPreviewSlider = dynamic(
-	() => Promise.resolve(ProductPreviewSwiper),
-	{
-		ssr: false,
-		loading: () => <ProductPreviewSkeleton />,
-	}
-);
+const DynamicProductPreviewSlider = dynamic(() => Promise.resolve(ProductPreviewSwiper), {
+	ssr: false,
+	loading: () => <ProductPreviewSkeleton />,
+});
 
 export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 	return <DynamicProductPreviewSlider {...props} />;

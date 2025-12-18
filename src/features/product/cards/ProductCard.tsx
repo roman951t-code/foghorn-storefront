@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { FiHeart } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link, Icon } from '@chakra-ui/react';
@@ -42,6 +42,7 @@ export default function ProductCard({ product }: Props) {
 	const name = product.name ?? '';
 	const isInStock = product.inStock ?? false;
 	const discount = discountPrice ? basePrice - discountPrice : 0;
+	const ratingId = useId();
 
 	const [isLoading, setIsLoading] = useState(false);
 	const { productIds, handleAddItem, handleRemoveItem } = useCart();
@@ -113,11 +114,9 @@ export default function ProductCard({ product }: Props) {
 
 	return (
 		<Card.Root
-			userSelect='none'
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
-			minW='200px'
-			maxW={{ base: 'full', sm: '240px' }}
 			w='full'
+			minW='250px'
 			h='full'
 			border='1px solid'
 			borderColor='border.dark'
@@ -171,15 +170,8 @@ export default function ProductCard({ product }: Props) {
 					<ProductPreviewSlider images={previewImages} productName={name} />
 				</LocaleNavLink>
 
-				<LinkBox>
-					<Card.Title
-						fontWeight='medium'
-						textAlign={{ base: 'center', sm: 'left' }}
-						lineHeight='24px'
-						mt='1.5'
-						w='100%'
-						as='span'
-					>
+				<LinkBox mt='2' textAlign={{ base: 'center', sm: 'left' }}>
+					<Card.Title fontWeight='medium' w='100%' as='span'>
 						<LocaleNavLink
 							href={`/products/${fullSlug}`}
 							textDecorationColor='main'
@@ -222,9 +214,9 @@ export default function ProductCard({ product }: Props) {
 					</Text>
 				</LinkBox>
 
-				<HStack gap='4' mt='1'>
+				<HStack gap='4' mt='1' justifyContent={{ base: 'center', sm: 'flex-start' }}>
 					<Rating
-						id={`product-card-rating-${product.id}`}
+						id={`product-card-rating-${product.id}-${ratingId}`}
 						readOnly
 						size='xs'
 						defaultValue={product.averageRating ?? 0}

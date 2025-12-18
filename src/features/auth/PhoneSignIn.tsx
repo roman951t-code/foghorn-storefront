@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import { Input, Stack, Field, Fieldset } from '@chakra-ui/react';
-import { useHookFormMask } from 'use-mask-input';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +13,7 @@ import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 import { phoneSignInAction } from '@/actions/auth/phoneSignInAction';
 import { useSession } from '@/providers/SessionProvider';
 import { PHONE_INPUT_MASKS } from '@/constants/auth';
+import { useMaskedInput } from '@/hooks/useMaskedInput';
 
 interface PhoneAuthProps {
 	i18nData: I18nData;
@@ -33,7 +33,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 		handleSubmit,
 		formState: { errors },
 	} = useForm<PhoneSignInSchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
-	const registerWithMask = useHookFormMask(register);
+	const registerWithMask = useMaskedInput(register);
 
 	const onSubmit = async (formData: PhoneSignInSchema) => {
 		setIsPending(true);

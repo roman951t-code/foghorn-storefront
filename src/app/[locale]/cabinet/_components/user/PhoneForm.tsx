@@ -4,13 +4,13 @@ import type { I18nData } from '@/types/i18n';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { useId, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useHookFormMask } from 'use-mask-input';
 import { PhoneSchemaData, type AccountSchemas } from 'formValidationSchemas/accountSchema';
 import { updatePhoneNumberAction } from '@/actions/auth/updatePhoneNumberAction';
 import { PHONE_INPUT_MASKS } from '@/constants/auth';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { FIELD_ORIENTATION_MD } from '@/constants/forms';
+import { useMaskedInput } from '@/hooks/useMaskedInput';
 
 interface Props {
 	i18nData: I18nData;
@@ -34,7 +34,7 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 		resolver: zodResolver(schema),
 	});
 
-	const registerWithMask = useHookFormMask(register);
+	const registerWithMask = useMaskedInput(register);
 
 	const onSubmit = async (formData: PhoneSchemaData) => {
 		setIsPending(true);

@@ -36,6 +36,7 @@ const baseConfig: NextConfig = {
 				hostname: 'picsum.photos',
 			},
 		],
+		qualities: [68, 75],
 	},
 	async headers() {
 		if (!isProd) return [];

@@ -121,6 +121,7 @@ const config = defineConfig({
 					tertiary: { value: '{colors.red.400}' },
 					accent: { value: '{colors.orange.400}' },
 					disabled: { value: '{colors.fg.muted}' },
+					breadcrumb: { value: '{colors.fg}' },
 				},
 				border: {
 					DEFAULT: {
@@ -163,7 +164,7 @@ const config = defineConfig({
 			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',
 			textRendering: 'optimizeLegibility',
 		},
-
+		img: { userSelect: 'none' },
 		form: {
 			width: '100%',
 		},
@@ -177,13 +178,16 @@ const config = defineConfig({
 		},
 		'h1,h2,h3,h4,h5,h6, .chakra-heading': {
 			fontFamily: 'var(--font-montserrat), var(--font-open-sans), system-ui, sans-serif !important',
+			userSelect: 'none',
 		},
 		'p, span, li': {
 			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',
 			fontWeight: 500,
+			userSelect: 'none',
 		},
 		'.chakra-stat__valueText': {
 			fontFamily: 'system-ui',
+			userSelect: 'none',
 		},
 		'label, button, input, textarea, select, small': {
 			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',
@@ -262,20 +266,20 @@ const config = defineConfig({
 				outline: '2px solid var(--chakra-colors-main-accent)',
 				outlineOffset: '4px',
 			},
-	'.thumbsSlider .swiper-pagination': {
-		bottom: '0 !important',
-		marginBottom: '12px',
-	},
-	'.thumbsSlider-pagination': {
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		marginTop: '12px',
-	},
-	'.chakra-tabs__trigger:is([aria-selected=true], [data-selected])[data-orientation=vertical]': {
-		textDecoration: 'underline',
-		textUnderlineOffset: '4px !important',
-		'--mix-textDecorationColor': 'color-mix(in srgb, currentColor 40%, transparent)',
+		'.thumbsSlider .swiper-pagination': {
+			bottom: '0 !important',
+			marginBottom: '12px',
+		},
+		'.thumbsSlider-pagination': {
+			display: 'flex',
+			justifyContent: 'center',
+			alignItems: 'center',
+			marginTop: '12px',
+		},
+		'.chakra-tabs__trigger:is([aria-selected=true], [data-selected])[data-orientation=vertical]': {
+			textDecoration: 'underline',
+			textUnderlineOffset: '4px !important',
+			'--mix-textDecorationColor': 'color-mix(in srgb, currentColor 40%, transparent)',
 			textDecorationColor: 'var(--mix-textDecorationColor, currentColor) !important',
 		},
 		'.tabLink': {

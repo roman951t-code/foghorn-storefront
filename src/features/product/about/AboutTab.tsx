@@ -85,7 +85,7 @@ export default function AboutTab({
 	];
 
 	return (
-		<VStack gap='8' colorPalette='gray' userSelect='none'>
+		<VStack gap='8' colorPalette='gray'>
 			<Group
 				align={{ base: 'center', lg: 'flex-start' }}
 				flexDirection={{ base: 'column', lg: 'row' }}
