@@ -53,7 +53,6 @@ export default function SubscribeSection({ i18nData }: Props) {
 	const { session, refresh } = useSession();
 
 	const [isTransition, startTransition] = useTransition();
-	const [isPending, setIsPending] = useState(false);
 	const [verifyEmailOpen, setVerifyEmailOpen] = useState(false);
 	const [verifyError, setVerifyError] = useState('');
 	const [newEmail, setNewEmail] = useState<string | null>(null);
@@ -63,7 +62,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<EmailSchema>({
 		defaultValues: { email: session?.user?.email ?? '' },
 		mode: 'onSubmit',
@@ -78,8 +77,6 @@ export default function SubscribeSection({ i18nData }: Props) {
 		// 	return;
 		// }
 
-		setIsPending(true);
-
 		try {
 			const result = await sendVerifyEmailAction(null, formData);
 
@@ -91,8 +88,6 @@ export default function SubscribeSection({ i18nData }: Props) {
 			}
 		} catch {
 			setVerifyError(i18nData.editEmailFail);
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -190,7 +185,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 							trigger={
 								<SubscribeButton
 									subscribeText={i18nData.verifyEmail}
-									isPending={isPending}
+									isPending={isSubmitting}
 									disabled={session?.user?.isGoogleUser && !session?.user?.emailVerified}
 								/>
 							}
@@ -201,7 +196,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 							<EmailVerification
 								email={newEmail!}
 								i18nData={i18nData}
-								onClose={() => setVerifyEmailOpen(false)}
+								onCloseAction={() => setVerifyEmailOpen(false)}
 							/>
 						</CenteredModal>
 					</Flex>

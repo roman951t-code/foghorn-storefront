@@ -28,10 +28,10 @@ import type { Review } from '@/types/product';
 type Props = {
 	productId?: string;
 	initialReviews?: Review[];
-	onSuccess?: (review: Review) => void;
+	onSuccessAction?: (review: Review) => void;
 };
 
-export default function FeedbackModal({ productId, initialReviews, onSuccess }: Props) {
+export default function FeedbackModal({ productId, initialReviews, onSuccessAction }: Props) {
 	const authT = useTranslations('auth');
 	const prodT = useTranslations('products');
 	const genT = useTranslations('common');
@@ -39,7 +39,6 @@ export default function FeedbackModal({ productId, initialReviews, onSuccess }: 
 
 	const { session } = useSession();
 	const [isOpen, setIsOpen] = useState(false);
-	const [isPending, setIsPending] = useState(false);
 
 	const { handleReviewAction } = useReviews();
 	const setActiveProduct = useReviewStore((state) => state.setActiveProduct);
@@ -70,7 +69,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccess }: 
 		register,
 		handleSubmit,
 		control,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<FeedbackSchema>({
 		mode: 'all',
 		resolver: zodResolver(schema),
@@ -100,8 +99,6 @@ export default function FeedbackModal({ productId, initialReviews, onSuccess }: 
 	};
 
 	const onSubmit = async (formData: FeedbackSchema) => {
-		setIsPending(true);
-
 		try {
 			const { success, review } = await handleReviewAction(formData);
 
@@ -110,13 +107,11 @@ export default function FeedbackModal({ productId, initialReviews, onSuccess }: 
 			} else {
 				handleModalChange(false);
 				if (review) {
-					onSuccess?.(review);
+					onSuccessAction?.(review);
 				}
 			}
 		} catch (err) {
 			showToaster('error', toasterMessages.reviewAddFailed(i18nData));
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -237,7 +232,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccess }: 
 							</Field.Root>
 						</Fieldset.Content>
 
-						<PrimaryButton w='100%' mt='8' type='submit' loading={isPending}>
+						<PrimaryButton w='100%' mt='8' type='submit' loading={isSubmitting} disabled={isSubmitting}>
 							{i18nData.send}
 						</PrimaryButton>
 					</Fieldset.Root>

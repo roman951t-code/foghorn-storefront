@@ -25,7 +25,6 @@ const MAX_CHARACTERS = 60;
 export default function EmailSignUp({ i18nData, disabled, backToLogin }: EmailAuthProps) {
 	const [isSubmitted, setSubmitted] = useState(false);
 	const [authError, setAuthError] = useState('');
-	const [isPending, setIsPending] = useState(false);
 
 	const schema = useMemo(() => createEmailSignUpSchema(i18nData), [i18nData]);
 
@@ -33,15 +32,13 @@ export default function EmailSignUp({ i18nData, disabled, backToLogin }: EmailAu
 		register,
 		getValues,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<EmailSignUpSchema>({
 		mode: 'onSubmit',
 		resolver: zodResolver(schema),
 	});
 
 	const onSubmit = async (formData: EmailSignUpSchema) => {
-		setIsPending(true);
-
 		try {
 			const result = await sendRegisterEmailAction(null, formData);
 
@@ -52,8 +49,6 @@ export default function EmailSignUp({ i18nData, disabled, backToLogin }: EmailAu
 			}
 		} catch {
 			setAuthError(i18nData.invalidFormData);
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -112,7 +107,7 @@ export default function EmailSignUp({ i18nData, disabled, backToLogin }: EmailAu
 					</Fieldset.Content>
 					<Fieldset.ErrorText>{authError}</Fieldset.ErrorText>
 
-					{isSubmitted && !authError && !isPending && (
+					{isSubmitted && !authError && !isSubmitting && (
 						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
 							{i18nData.toPost}
 							{formData?.email && (
@@ -125,7 +120,12 @@ export default function EmailSignUp({ i18nData, disabled, backToLogin }: EmailAu
 					)}
 				</Fieldset.Root>
 
-				<PrimaryButton w='100%' type='submit' loading={isPending} disabled={disabled}>
+				<PrimaryButton
+					w='100%'
+					type='submit'
+					loading={isSubmitting}
+					disabled={disabled || isSubmitting}
+				>
 					{i18nData.continue}
 				</PrimaryButton>
 			</Stack>

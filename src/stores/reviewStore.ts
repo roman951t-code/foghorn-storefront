@@ -25,11 +25,9 @@ export const useReviewStore = createBoundedStore<ReviewStore>((set, get) => ({
 	reviewsByProduct: {},
 	setActiveProduct: (productId) => set({ activeProductId: productId }),
 	clearActiveProduct: (productId) =>
-		set((state) => {
-			const next = { ...state.reviewsByProduct };
-			delete next[productId];
-			return { reviewsByProduct: next, activeProductId: state.activeProductId === productId ? undefined : state.activeProductId };
-		}),
+		set((state) => ({
+			activeProductId: state.activeProductId === productId ? undefined : state.activeProductId,
+		})),
 	setReviews: (productId, reviews) =>
 		set((state) => ({
 			reviewsByProduct: {

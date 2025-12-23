@@ -18,24 +18,24 @@ import { useSession } from '@/providers/SessionProvider';
 
 interface Props {
 	i18nData: I18nData;
-	onClose: () => void;
+	onCloseAction: () => void;
 	email: string;
 }
 
-export default function EmailVerification({ email, i18nData, onClose }: Props) {
+export default function EmailVerification({ email, i18nData, onCloseAction }: Props) {
 	const schema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
 
 	const { refresh } = useSession();
 
 	const [timer, setTimer] = useState(0);
 	const [verifyError, setVerifyError] = useState('');
-	const [isPending, setIsPending] = useState(false);
+	const [isResending, setIsResending] = useState(false);
 
 	const {
 		handleSubmit,
 		control,
 		reset,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<PhoneVerifySchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 
 	useEffect(() => {
@@ -58,7 +58,7 @@ export default function EmailVerification({ email, i18nData, onClose }: Props) {
 		reset();
 
 		setTimer(120);
-		setIsPending(true);
+		setIsResending(true);
 
 		try {
 			const result = await sendVerifyEmailAction(null, { email });
@@ -71,28 +71,25 @@ export default function EmailVerification({ email, i18nData, onClose }: Props) {
 		} catch {
 			setVerifyError(i18nData.editEmailFail);
 		} finally {
-			setIsPending(false);
+			setIsResending(false);
 		}
 	};
 
 	const onSubmit = async (formData: PhoneVerifySchema) => {
-		setIsPending(true);
 		try {
 			const result = await verifyEmailOtpAction(email, formData.otp.join(''));
 
 			if (!result?.success) {
 				setVerifyError(result?.message!);
 			} else {
-				showToaster('success', toasterMessages.emailUpdated(i18nData));
+					showToaster('success', toasterMessages.emailUpdated(i18nData));
 
-				await refresh();
-				onClose();
+					await refresh();
+					onCloseAction();
+				}
+			} catch {
+				setVerifyError(i18nData.invalidFormData);
 			}
-		} catch {
-			setVerifyError(i18nData.invalidFormData);
-		} finally {
-			setIsPending(false);
-		}
 	};
 
 	const formattedTime = formatTime(timer);
@@ -150,7 +147,8 @@ export default function EmailVerification({ email, i18nData, onClose }: Props) {
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'
 					variant='solid'
-					loading={isPending}
+					loading={isSubmitting}
+					disabled={isSubmitting || isResending}
 				>
 					{i18nData.confirmEmail}
 				</Button>
@@ -172,6 +170,8 @@ export default function EmailVerification({ email, i18nData, onClose }: Props) {
 						border='1px solid'
 						borderColor='border'
 						onClick={resendVerificationCode}
+						loading={isResending}
+						disabled={isResending || isSubmitting}
 					>
 						{i18nData.resendCode}
 					</Button>

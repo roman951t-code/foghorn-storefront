@@ -80,11 +80,11 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 						</Stack>
 					</Stack>
 					<Flex flex={1} alignSelf='flex-end' hideBelow='md'>
-						<FeedbackModal productId={product.id} onSuccess={onAddAction} />
+						<FeedbackModal productId={product.id} onSuccessAction={onAddAction} />
 					</Flex>
 				</Flex>
 				<Flex flex={1} justifyContent='flex-end' hideFrom='md'>
-					<FeedbackModal productId={product.id} onSuccess={onAddAction} />
+					<FeedbackModal productId={product.id} onSuccessAction={onAddAction} />
 				</Flex>
 			</Accordion.Item>
 		</Card.Root>

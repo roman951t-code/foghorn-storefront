@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { jsonNoStore } from '@/lib/response';
 
 export async function GET() {
 	try {
@@ -13,7 +13,7 @@ export async function GET() {
 		});
 
 		if (!session?.user?.id) {
-			return NextResponse.json(null, { status: 200 });
+			return jsonNoStore(null, { status: 200 });
 		}
 
 		const { user, ...rest } = session;
@@ -22,7 +22,7 @@ export async function GET() {
 			select: { id: true },
 		});
 
-		return NextResponse.json({
+		return jsonNoStore({
 			...rest,
 			user: {
 				id: user.id,
@@ -39,6 +39,6 @@ export async function GET() {
 			},
 		});
 	} catch (error) {
-		return NextResponse.json({ error: 'Failed to fetch session' }, { status: 500 });
+		return jsonNoStore({ error: 'Failed to fetch session' }, { status: 500 });
 	}
 }

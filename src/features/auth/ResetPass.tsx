@@ -22,7 +22,6 @@ export default function ResetPass({ i18nData, backToLogin }: ResetPassProps) {
 
 	const [isOtpSent, setOtpSent] = useState(false);
 	const [actionError, setActionError] = useState('');
-	const [isPending, setIsPending] = useState(false);
 
 	const {
 		register,
@@ -37,8 +36,6 @@ export default function ResetPass({ i18nData, backToLogin }: ResetPassProps) {
 	const onSubmit = async (formData: ResetPassSchema) => {
 		setOtpSent(true);
 
-		setIsPending(true);
-
 		try {
 			const result = await resetPasswordAction(null, formData);
 			if (!result?.success) {
@@ -46,15 +43,12 @@ export default function ResetPass({ i18nData, backToLogin }: ResetPassProps) {
 			}
 		} catch {
 			setActionError(i18nData.invalidFormData);
-		} finally {
-			setIsPending(false);
-			setOtpSent(true);
 		}
 	};
 
 	const formData = getValues();
 
-	const isOtpFormVisible = isOtpSent && !actionError && !isPending;
+	const isOtpFormVisible = isOtpSent && !actionError && !isSubmitting;
 
 	if (isOtpFormVisible) {
 		return (
@@ -83,7 +77,8 @@ export default function ResetPass({ i18nData, backToLogin }: ResetPassProps) {
 				<Button
 					w='100%'
 					type='submit'
-					loading={isSubmitting || isPending}
+					loading={isSubmitting}
+					disabled={isSubmitting}
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'
 					variant='solid'

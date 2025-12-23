@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Product } from '@/types/product';
 import { Tabs } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import type { Review } from '@/types/product';
+import { useReviewStore } from '@/stores/reviewStore';
+import { isProductTabValue, type ProductTabValue } from '@/constants/products';
 
 const AboutTab = dynamic(() => import('./about/AboutTab'));
 const CharacteristicsTab = dynamic(() => import('./CharacteristicsTab'));
@@ -26,50 +28,52 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
-	const availableTabs = useMemo(() => ['about', 'characteristics', 'feedback'], []);
-	const initialTab = availableTabs.includes(tab) ? tab : 'about';
-	const [selectedTab, setSelectedTab] = useState(initialTab);
+	const initialTab: ProductTabValue = tab && isProductTabValue(tab) ? tab : 'about';
+	const [selectedTab, setSelectedTab] = useState<ProductTabValue>(initialTab);
 
 	if (!product) {
 		return null;
 	}
 
+	const storeReviews = useReviewStore((state) => state.reviewsByProduct[product.id]);
+	const effectiveReviews = storeReviews ?? (product.reviews as Review[]);
+	const reviewCount = effectiveReviews?.length ?? product.reviewCount ?? 0;
 	const averageRating =
-		product.reviews.length > 0
-			? product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length
-			: 0;
+		reviewCount > 0
+			? effectiveReviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
+			: product.averageRating ?? 0;
 
-	// Keep local state in sync with URL query changes (e.g., browser back/forward).
 	useEffect(() => {
 		const urlTab = searchParams?.get('tab') ?? undefined;
-		const next = urlTab && availableTabs.includes(urlTab) ? urlTab : 'about';
+		const next: ProductTabValue = urlTab && isProductTabValue(urlTab) ? urlTab : 'about';
 		if (next !== selectedTab) {
 			setSelectedTab(next);
 		}
-	}, [availableTabs, searchParams, selectedTab]);
+	}, [searchParams, selectedTab]);
 
 	const items = [
 		{
 			title: prodT('about'),
-			value: 'about',
+			value: 'about' as const,
 			content: (
 				<AboutTab
 					product={product}
 					category={category}
 					subcategory={subcategory}
 					averageRating={averageRating}
+					reviewCount={reviewCount}
 					onTabChange={(nextTab) => handleTabChange(nextTab)}
 				/>
 			),
 		},
 		{
 			title: prodT('characteristics'),
-			value: 'characteristics',
+			value: 'characteristics' as const,
 			content: <CharacteristicsTab product={product} attributes={product.attributes} />,
 		},
 		{
 			title: prodT('feedback'),
-			value: 'feedback',
+			value: 'feedback' as const,
 			content: (
 				<FeedbackTab
 					averageRating={averageRating}
@@ -81,9 +85,7 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 		},
 	];
 
-	const handleTabChange = (next: string) => {
-		if (!availableTabs.includes(next)) return;
-
+	const handleTabChange = (next: ProductTabValue) => {
 		setSelectedTab(next);
 
 		const params = new URLSearchParams(searchParams?.toString());
@@ -101,7 +103,12 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 		<Tabs.Root
 			mt='8'
 			value={selectedTab}
-			onValueChange={(details) => handleTabChange(details.value as string)}
+			onValueChange={(details) => {
+				const next = details.value;
+				if (isProductTabValue(next)) {
+					handleTabChange(next);
+				}
+			}}
 			width='full'
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			lazyMount

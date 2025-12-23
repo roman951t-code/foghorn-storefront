@@ -10,14 +10,12 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 
 import { toPreviewImage } from '@/utils/productImages';
+import { ASSET_IMAGES } from '@/constants/assets';
 
 type ProductPreviewSliderProps = {
 	images: string[];
 	productName?: string;
 };
-
-const img1 = '/assets/images/temp/1.webp';
-const img2 = '/assets/images/temp/2.webp';
 
 function ProductPreviewSkeleton() {
 	return (
@@ -28,7 +26,7 @@ function ProductPreviewSkeleton() {
 }
 
 function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps) {
-	const baseImages = images.length ? images : [img1, img2];
+	const baseImages = images.length ? images : [ASSET_IMAGES.tempProduct1, ASSET_IMAGES.tempProduct2];
 	const previewImages = baseImages.map(toPreviewImage);
 	const altText = productName ? `${productName} photo` : 'Product photo';
 

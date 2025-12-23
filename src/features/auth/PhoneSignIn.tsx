@@ -26,17 +26,15 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 
 	const { refresh } = useSession();
 	const [authError, setAuthError] = useState('');
-	const [isPending, setIsPending] = useState(false);
 
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<PhoneSignInSchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 	const registerWithMask = useMaskedInput(register);
 
 	const onSubmit = async (formData: PhoneSignInSchema) => {
-		setIsPending(true);
 		setAuthError('');
 
 		try {
@@ -54,8 +52,6 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 			bc.close();
 		} catch (err) {
 			setAuthError(i18nData.invalidFormData);
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -85,7 +81,12 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 					<Fieldset.ErrorText>{authError}</Fieldset.ErrorText>
 				</Fieldset.Root>
 
-				<PrimaryButton w='100%' type='submit' loading={isPending} disabled={disabled}>
+				<PrimaryButton
+					w='100%'
+					type='submit'
+					loading={isSubmitting}
+					disabled={disabled || isSubmitting}
+				>
 					{i18nData.continue}
 				</PrimaryButton>
 			</Stack>

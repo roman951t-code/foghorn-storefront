@@ -1,9 +1,22 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 export async function GET(req: Request) {
+	const ip = getClientIp(req);
+	const rate = checkRateLimit({ key: `api:search:${ip}`, limit: 60, windowMs: 60_000 });
+	if (!rate.allowed) {
+		return NextResponse.json(
+			{ products: [], subcategories: [], error: 'rate_limited' },
+			{
+				status: 429,
+				headers: { 'Retry-After': String(rate.retryAfterSeconds) },
+			}
+		);
+	}
+
 	const { searchParams } = new URL(req.url);
-	const query = searchParams.get('q');
+	const query = searchParams.get('q')?.trim().slice(0, 64);
 
 	if (!query || query.length < 2) {
 		return NextResponse.json({ products: [], subcategories: [] });

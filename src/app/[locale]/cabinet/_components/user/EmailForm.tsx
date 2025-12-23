@@ -34,14 +34,11 @@ export default function EmailForm({
 }: Props) {
 	const emailId = useId();
 
-	const [isPending, setIsPending] = useState(false);
 	const [verifyEmailOpen, setVerifyEmailOpen] = useState(false);
 	const [error, setError] = useState('');
 	const [newEmail, setNewEmail] = useState<string | null>(null);
 
 	const onSubmit = async (formData: EmailSchema) => {
-		setIsPending(true);
-
 		try {
 			const result = await sendVerifyEmailAction(null, formData);
 
@@ -53,8 +50,6 @@ export default function EmailForm({
 			}
 		} catch {
 			setError(i18nData.editEmailFail);
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -96,9 +91,9 @@ export default function EmailForm({
 							trigger={
 								<SecondaryButton
 									type='submit'
-									loading={isPending}
+									loading={emailForm.formState.isSubmitting}
+									disabled={emailForm.formState.isSubmitting || isGoogleUser}
 									mt={{ base: '2', sm: '0' }}
-									disabled={isGoogleUser}
 								>
 									{i18nData.save}
 								</SecondaryButton>
@@ -110,7 +105,7 @@ export default function EmailForm({
 							<EmailVerification
 								email={newEmail!}
 								i18nData={i18nData}
-								onClose={() => setVerifyEmailOpen(false)}
+								onCloseAction={() => setVerifyEmailOpen(false)}
 							/>
 						</CenteredModal>
 					</VStack>

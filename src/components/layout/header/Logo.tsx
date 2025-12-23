@@ -2,17 +2,15 @@
 import { useBreakpointValue } from '@chakra-ui/react';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
-
-const logoBig = '/assets/images/logoBig.webp';
-const logoSmall = '/assets/images/logoSmall.webp';
+import { ASSET_IMAGES } from '@/constants/assets';
 
 export default function Logo() {
 	const logoSrc =
 		useBreakpointValue({
-			base: logoSmall,
-			md: logoBig,
-			lg: logoBig,
-		}) || logoBig;
+			base: ASSET_IMAGES.logoSmall,
+			md: ASSET_IMAGES.logoBig,
+			lg: ASSET_IMAGES.logoBig,
+		}) || ASSET_IMAGES.logoBig;
 
 	const logoWidth =
 		useBreakpointValue({

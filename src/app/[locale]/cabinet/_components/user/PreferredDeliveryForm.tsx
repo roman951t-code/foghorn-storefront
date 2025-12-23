@@ -4,7 +4,6 @@ import { Field, RadioCard, Stack, Icon, Fieldset } from '@chakra-ui/react';
 import { Controller, useForm } from 'react-hook-form';
 import { IoMailOutline } from 'react-icons/io5';
 import { IoMdPhonePortrait } from 'react-icons/io';
-import { useState } from 'react';
 import type { I18nData } from '@/types/i18n';
 import { setNotificationMethodAction } from '@/actions/auth/setNotificationMethodAction';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
@@ -16,7 +15,7 @@ interface Props {
 	userEmail: string;
 	userPhone: string;
 	userNotifMethod: 'email' | 'phone';
-	refreshSession: () => void;
+	refreshSessionAction: () => void;
 	i18nData: I18nData;
 }
 
@@ -29,9 +28,8 @@ export default function PreferredDeliveryForm({
 	userPhone,
 	i18nData,
 	userNotifMethod,
-	refreshSession,
+	refreshSessionAction,
 }: Props) {
-	const [isPending, setIsPending] = useState(false);
 	const form = useForm<NotificationFormValues>({
 		defaultValues: {
 			notificationMethod: userNotifMethod,
@@ -39,7 +37,6 @@ export default function PreferredDeliveryForm({
 	});
 
 	const onSubmit = async (data: NotificationFormValues) => {
-		setIsPending(true);
 		try {
 			const result = await setNotificationMethodAction(null, {
 				notificationMethod: data.notificationMethod as 'email' | 'phone',
@@ -47,14 +44,12 @@ export default function PreferredDeliveryForm({
 
 			if (result?.success) {
 				showToaster('success', toasterMessages.notificationUpdated(i18nData));
-				await refreshSession();
+				await refreshSessionAction();
 			} else {
 				showToaster('error', toasterMessages.notificationUpdateFailed(i18nData));
 			}
 		} catch {
 			showToaster('error', toasterMessages.notificationUpdateFailed(i18nData));
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -136,7 +131,8 @@ export default function PreferredDeliveryForm({
 
 										<SecondaryButton
 											type='submit'
-											loading={isPending}
+											loading={form.formState.isSubmitting}
+											disabled={form.formState.isSubmitting}
 											size='md'
 											maxW={{ base: 'full', sm: 'xs' }}
 											mt={{ base: '2', sm: '0' }}

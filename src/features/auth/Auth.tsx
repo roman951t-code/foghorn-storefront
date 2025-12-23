@@ -15,8 +15,7 @@ import {
 	ACCOUNT_VALIDATION_MESSAGE_KEYS,
 	AUTH_MESSAGE_KEYS,
 } from '@/data/localeMessages/authMessages';
-
-const emptyCart = '/assets/images/emptyCart.png';
+import { ASSET_IMAGES } from '@/constants/assets';
 
 interface Props {
 	trigger?: JSX.Element;
@@ -111,7 +110,7 @@ export default function Auth({ trigger, isOpen, setIsOpen }: Props) {
 				{session?.session && (
 					<VStack gap='8'>
 						<Image
-							src={emptyCart}
+							src={ASSET_IMAGES.emptyCart}
 							width='230'
 							height='230'
 							alt='empty cart'

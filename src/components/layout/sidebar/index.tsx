@@ -21,15 +21,15 @@ import Auth from '@/features/auth/Auth';
 import { AuthorizeSection, LogoutSection } from './AuthorizeSection';
 import CollapsibleLinks from './CollapsibleLinks';
 import { DeleteAccount } from './DeleteAccount';
+import { ASSET_IMAGES } from '@/constants/assets';
 
-const logoBig = '/assets/images/logoBig.webp';
 const logoHeight = 36;
 const logoWidth = 170;
 
 const Logo = () => (
 	<Link href='/'>
 		<Image
-			src={logoBig}
+			src={ASSET_IMAGES.logoBig}
 			width={logoWidth}
 			height={logoHeight}
 			style={{ width: 'auto', height: 'auto' }}

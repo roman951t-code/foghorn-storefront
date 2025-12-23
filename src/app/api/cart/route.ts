@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
+import { jsonNoStore } from '@/lib/response';
 
 export async function GET() {
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
 
 	if (!userId) {
-		return NextResponse.json({ success: false, items: [] }, { status: 401 });
+		return jsonNoStore({ success: false, items: [] }, { status: 401 });
 	}
 
 	try {
@@ -45,8 +45,8 @@ export async function GET() {
 				};
 			}) ?? [];
 
-		return NextResponse.json({ success: true, items: reshapedItems });
+		return jsonNoStore({ success: true, items: reshapedItems });
 	} catch (error) {
-		return NextResponse.json({ success: false, items: [] }, { status: 500 });
+		return jsonNoStore({ success: false, items: [] }, { status: 500 });
 	}
 }

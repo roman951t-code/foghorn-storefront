@@ -20,6 +20,9 @@ export async function getProductsByTag<T extends boolean>(
 	orderBy?: 'new' | 'expensive' | 'cheap',
 	filters?: Record<string, string[]>
 ): Promise<T extends true ? ProductsWithMeta : ProductsOnly> {
+	const safeLimit = Math.min(50, Math.max(1, Math.floor(limit || 1)));
+	const safeOffset = Math.max(0, Math.floor(offset || 0));
+
 	const priceFilter =
 		minPrice !== undefined && maxPrice !== undefined
 			? { gte: minPrice, lte: maxPrice }
@@ -40,10 +43,10 @@ export async function getProductsByTag<T extends boolean>(
 			}))
 		: [];
 
-		const whereClause: Prisma.ProductWhereInput = {
-			tags: { has: tag },
-			...(inStock !== undefined ? { inStock } : {}),
-			...(priceFilter
+	const whereClause: Prisma.ProductWhereInput = {
+		tags: { has: tag },
+		...(inStock !== undefined ? { inStock } : {}),
+		...(priceFilter
 			? {
 					OR: [
 						{ discountPrice: priceFilter },
@@ -54,10 +57,24 @@ export async function getProductsByTag<T extends boolean>(
 		...(dynamicConditions.length > 0 ? { AND: dynamicConditions } : {}),
 	};
 
-		const productsQuery = await prisma.product.findMany({
+	const orderByClause: Prisma.ProductOrderByWithRelationInput[] = (() => {
+		switch (orderBy) {
+			case 'new':
+				return [{ createdAt: 'desc' }];
+			case 'expensive':
+				return [{ basePrice: 'desc' }];
+			case 'cheap':
+				return [{ basePrice: 'asc' }];
+			default:
+				return [{ inStock: 'desc' }, { name: 'asc' }];
+		}
+	})();
+
+	const productsQuery = await prisma.product.findMany({
 		where: whereClause,
-		skip: fetchAll ? 0 : offset,
-		take: fetchAll ? undefined : Math.min(limit, 10),
+		orderBy: orderByClause,
+		skip: safeOffset,
+		take: safeLimit,
 		select: {
 			id: true,
 			name: true,
@@ -82,21 +99,7 @@ export async function getProductsByTag<T extends boolean>(
 		};
 	});
 
-	let sortedProducts = [...productsWithPrice];
-	if (orderBy === 'new') {
-		sortedProducts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-	} else if (orderBy === 'expensive') {
-		sortedProducts.sort((a, b) => b.effectivePrice - a.effectivePrice);
-	} else if (orderBy === 'cheap') {
-		sortedProducts.sort((a, b) => a.effectivePrice - b.effectivePrice);
-	} else {
-		sortedProducts.sort((a, b) => {
-			if (a.inStock !== b.inStock) return a.inStock ? -1 : 1;
-			return a.name.localeCompare(b.name);
-		});
-	}
-
-	const products: SubcategoryProduct[] = sortedProducts.map((product) => {
+	const products: SubcategoryProduct[] = productsWithPrice.map((product) => {
 		const ratings = product.reviews?.map((r) => r.rating) ?? [];
 		const averageRating = ratings.length
 			? ratings.reduce((sum, val) => sum + val, 0) / ratings.length
@@ -126,30 +129,30 @@ export async function getProductsByTag<T extends boolean>(
 		return { products, maxProductPrice } as T extends true ? ProductsWithMeta : ProductsOnly;
 	}
 
-	const allMatchingProducts = await prisma.product.findMany({
-		where: whereClause,
-		select: {
-			category: {
-				select: {
-					slug: true,
-					name: true,
-					parent: {
-						select: { slug: true, name: true },
+	const [totalCount, distinctCategories] = await prisma.$transaction([
+		prisma.product.count({ where: whereClause }),
+		prisma.product.findMany({
+			where: whereClause,
+			distinct: ['categoryId'],
+			select: {
+				category: {
+					select: {
+						slug: true,
+						name: true,
+						parent: { select: { slug: true, name: true } },
 					},
 				},
 			},
-		},
-	});
+		}),
+	]);
 
-	const totalCount = allMatchingProducts.length;
-
-	const uniqueSubcategoriesMap = new Map<string, SubcategoryInfo>();
-	for (const p of allMatchingProducts) {
+	const subcategoriesMap = new Map<string, SubcategoryInfo>();
+	for (const p of distinctCategories) {
 		const category = p.category;
 		if (!category?.slug) continue;
 		const subcategorySlug = category.slug;
-		if (!uniqueSubcategoriesMap.has(subcategorySlug)) {
-			uniqueSubcategoriesMap.set(subcategorySlug, {
+		if (!subcategoriesMap.has(subcategorySlug)) {
+			subcategoriesMap.set(subcategorySlug, {
 				categoryName: category.parent?.name || '',
 				categorySlug: category.parent?.slug || '',
 				subcategoryName: category.name || '',
@@ -161,7 +164,7 @@ export async function getProductsByTag<T extends boolean>(
 	return {
 		products,
 		totalCount,
-		subcategories: Array.from(uniqueSubcategoriesMap.values()),
+		subcategories: Array.from(subcategoriesMap.values()),
 		maxProductPrice,
 	} as T extends true ? ProductsWithMeta : ProductsOnly;
 }

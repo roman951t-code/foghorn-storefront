@@ -27,7 +27,6 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 
 	const [timer, setTimer] = useState(0);
 	const [verifyError, setVerifyError] = useState('');
-	const [isPending, setIsPending] = useState(false);
 
 	const { refresh } = useSession();
 
@@ -35,7 +34,7 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 		handleSubmit,
 		reset,
 		control,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<PhoneVerifySchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 
 	useEffect(() => {
@@ -70,8 +69,6 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 	};
 
 	const onSubmit = async (formData: PhoneVerifySchema) => {
-		setIsPending(true);
-
 		const errorMap: Record<string, string> = {
 			'OTP not found': i18nData.invalidOtp,
 			'OTP expired': i18nData.otpExpired,
@@ -105,8 +102,6 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 			bc.close();
 		} catch (err) {
 			setVerifyError(i18nData.invalidFormData);
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -160,7 +155,8 @@ export default function PhoneConfirmation({ name, phone, i18nData, signup }: Pro
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'
 					variant='solid'
-					loading={isPending}
+					loading={isSubmitting}
+					disabled={isSubmitting}
 				>
 					{i18nData.confirmPhone}
 				</Button>

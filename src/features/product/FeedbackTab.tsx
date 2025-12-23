@@ -86,16 +86,16 @@ export default function FeedbackTab({
 											openDelay={100}
 											closeDelay={100}
 										>
-											<DataList.ItemValue gapX='4' cursor='pointer'>
-												<Rating
-													size='xs'
-													colorPalette={{ base: 'orange', _dark: 'yellow' }}
-													readOnly
-													allowHalf
-													defaultValue={averageRating}
-												/>
-											</DataList.ItemValue>
-										</Tooltip>
+									<DataList.ItemValue gapX='4' cursor='pointer'>
+										<Rating
+											size='xs'
+											colorPalette={{ base: 'orange', _dark: 'yellow' }}
+											readOnly
+											allowHalf
+											value={averageRating}
+										/>
+									</DataList.ItemValue>
+								</Tooltip>
 									</DataList.Item>
 								)}
 							</DataList.Root>

@@ -1,15 +1,16 @@
-import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
 import { SubcategoryProduct } from '@/types/product';
+import { WISHLIST_TAG_PRIORITY } from '@/constants/products';
+import { jsonNoStore } from '@/lib/response';
 
 export async function GET() {
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
 
 	if (!userId) {
-		return NextResponse.json({ success: false, items: [] }, { status: 401 });
+		return jsonNoStore({ success: false, items: [] }, { status: 401 });
 	}
 
 	try {
@@ -34,8 +35,6 @@ export async function GET() {
 			},
 		});
 
-		const tagPriority = ['popular', 'new', 'discount', 'promotional'];
-
 		const products: SubcategoryProduct[] =
 			wishlist?.map(({ product }) => {
 				const ratings = product.reviews.map((r) => r.rating);
@@ -54,16 +53,20 @@ export async function GET() {
 		const sortedProducts =
 			products?.sort((a, b) => {
 				const aScore = Math.min(
-					...tagPriority.map((tag, i) => (a.tags?.includes(tag) ? i : tagPriority.length))
+					...WISHLIST_TAG_PRIORITY.map((tag, i) =>
+						a.tags?.includes(tag) ? i : WISHLIST_TAG_PRIORITY.length
+					)
 				);
 				const bScore = Math.min(
-					...tagPriority.map((tag, i) => (b.tags?.includes(tag) ? i : tagPriority.length))
+					...WISHLIST_TAG_PRIORITY.map((tag, i) =>
+						b.tags?.includes(tag) ? i : WISHLIST_TAG_PRIORITY.length
+					)
 				);
 				return aScore - bScore;
 			}) ?? [];
 
-		return NextResponse.json({ success: true, items: sortedProducts });
+		return jsonNoStore({ success: true, items: sortedProducts });
 	} catch (error) {
-		return NextResponse.json({ success: false, items: [] }, { status: 500 });
+		return jsonNoStore({ success: false, items: [] }, { status: 500 });
 	}
 }

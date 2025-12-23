@@ -21,13 +21,12 @@ interface Props {
 
 export default function PhoneForm({ i18nData, userPhone, schema, refreshSession }: Props) {
 	const [authError, setAuthError] = useState('');
-	const [isPending, setIsPending] = useState(false);
 	const phoneId = useId();
 
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<PhoneSchemaData>({
 		mode: 'onSubmit',
 		defaultValues: { phone: userPhone },
@@ -37,7 +36,6 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 	const registerWithMask = useMaskedInput(register);
 
 	const onSubmit = async (formData: PhoneSchemaData) => {
-		setIsPending(true);
 		setAuthError('');
 
 		try {
@@ -52,8 +50,6 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 			await refreshSession();
 		} catch {
 			setAuthError(i18nData.invalidFormData);
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -83,7 +79,12 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 								/>
 								<Field.ErrorText>{errors.phone?.message || authError}</Field.ErrorText>
 							</VStack>
-							<SecondaryButton type='submit' loading={isPending} mt={{ base: '2', sm: '0' }}>
+							<SecondaryButton
+								type='submit'
+								loading={isSubmitting}
+								disabled={isSubmitting}
+								mt={{ base: '2', sm: '0' }}
+							>
 								{i18nData.save}
 							</SecondaryButton>
 						</Stack>

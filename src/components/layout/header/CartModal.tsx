@@ -10,8 +10,7 @@ import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 import CartWithProducts from './CartWithProducts';
 import { LuCheck } from 'react-icons/lu';
 import { useCart } from '@/hooks/useCart';
-
-const emptyCart = '/assets/images/emptyCart.png';
+import { ASSET_IMAGES } from '@/constants/assets';
 
 type CartBtnProps = {
 	setIsOpen: (isOpen: boolean) => void;
@@ -79,7 +78,7 @@ export default function CartModal({ i18nData, triggerType, isInCart }: Props) {
 			{isCartEmpty ? (
 				<Stack direction='column' alignItems='center'>
 					<Image
-						src={emptyCart}
+						src={ASSET_IMAGES.emptyCart}
 						width={240}
 						height={240}
 						alt='empty cart'

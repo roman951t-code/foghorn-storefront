@@ -25,14 +25,13 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 
 	const [timer, setTimer] = useState(0);
 	const [verifyError, setVerifyError] = useState('');
-	const [isPending, setIsPending] = useState(false);
 
 	const { email } = resendData;
 
 	const {
 		handleSubmit,
 		control,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<PhoneVerifySchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 
 	useEffect(() => {
@@ -65,8 +64,6 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 	};
 
 	const onSubmit = async (formData: PhoneVerifySchema) => {
-		setIsPending(true);
-
 		try {
 			const result = await verifyEmailRegisterOtpAction(email, formData.otp.join(''));
 
@@ -83,8 +80,6 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 			}
 		} catch (err) {
 			setVerifyError(i18nData.invalidFormData);
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -138,7 +133,8 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'
 					variant='solid'
-					loading={isPending}
+					loading={isSubmitting}
+					disabled={isSubmitting}
 				>
 					{i18nData.confirmEmail}
 				</Button>

@@ -15,7 +15,7 @@ import SearchCategories from '../_components/SearchCategories';
 import { getSearchFilters, getTagFilters } from '@/actions/products/getProductsFilters';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedProducts';
+import { getRecentlyViewedProductsWithCount } from '@/actions/products/getRecentlyViewedProducts';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { buildLanguageAlternates } from '@/utils/seo';
 import type { AppLocale } from '@/constants/locales';
@@ -103,7 +103,10 @@ export default async function SearchProducts({ searchParams }: Params) {
 	const buildViewedResponse = async () => {
 		const session = await auth.api.getSession({ headers: await headers() });
 		const userId = session?.user?.id;
-		const viewedProducts = userId ? await getRecentlyViewedProducts(userId, pageSize) : [];
+		const viewed = userId
+			? await getRecentlyViewedProductsWithCount(userId, pageSize, offset)
+			: { products: [], totalCount: 0 };
+		const viewedProducts = viewed.products;
 
 		const highestPrice = viewedProducts.reduce(
 			(max, p) => Math.max(max, p.discountPrice ?? p.basePrice ?? 0),
@@ -114,7 +117,7 @@ export default async function SearchProducts({ searchParams }: Params) {
 			products: viewedProducts,
 			filters: [],
 			subcategories: [],
-			totalCount: viewedProducts.length,
+			totalCount: viewed.totalCount,
 			maxProductPrice: highestPrice,
 		};
 	};

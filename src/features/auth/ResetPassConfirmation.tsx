@@ -30,14 +30,13 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 	const [timer, setTimer] = useState(0);
 	const [verifyError, setVerifyError] = useState('');
 	const [isPassUpdated, setPassUpdated] = useState(false);
-	const [isPending, setIsPending] = useState(false);
 
 	const {
 		handleSubmit,
 		register,
 		control,
 		reset,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<ConfirmResetPassSchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 
 	useEffect(() => {
@@ -73,8 +72,6 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 	};
 
 	const onSubmit = async (formData: ConfirmResetPassSchema) => {
-		setIsPending(true);
-
 		const errorMap: Record<string, string> = {
 			'OTP not found': i18nData.invalidOtp,
 			'OTP expired': i18nData.otpExpired,
@@ -114,8 +111,6 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 			}
 		} catch {
 			setVerifyError(i18nData.setNewPassFail);
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -168,7 +163,7 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 						<Field.ErrorText>{errors.password?.message}</Field.ErrorText>
 					</Field.Root>
 				</Fieldset.Content>
-				{isPassUpdated && !isPending && (
+				{isPassUpdated && !isSubmitting && (
 					<>
 						<Alert.Root status='success' variant='solid' my='2' fontSize='15px'>
 							<Alert.Indicator />
@@ -179,7 +174,8 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 							w='100%'
 							mt='4'
 							type='submit'
-							loading={isPending}
+							loading={isSubmitting}
+							disabled={isSubmitting}
 							borderColor='border'
 							variant='outline'
 							onClick={backToLogin}
@@ -198,7 +194,8 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'
 					variant='solid'
-					loading={isPending}
+					loading={isSubmitting}
+					disabled={isSubmitting}
 				>
 					{i18nData.saveNewPass}
 				</Button>

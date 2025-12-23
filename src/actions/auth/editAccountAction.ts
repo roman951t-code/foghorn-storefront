@@ -3,6 +3,8 @@
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
 import { getAccountSchemas, NameSchemaData } from 'formValidationSchemas/accountSchema';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 type SchemaName = 'nameSchema' | 'emailSchema' | 'phoneSchema' | 'addressSchema';
 
@@ -19,6 +21,14 @@ export async function editAccountAction(
 ): Promise<{ success: boolean; message?: string } | undefined> {
 	const t = await getTranslations('validation');
 
+	const session = await auth.api.getSession({ headers: await headers() });
+	const userId = session?.user?.id;
+	const sessionEmail = session?.user?.email ?? null;
+
+	if (!userId) {
+		return { success: false, message: t('userNotFound') };
+	}
+
 	const schema = (await getAccountSchemas())[formData.schemaName];
 	const validatedFormData = schema.safeParse(formData);
 
@@ -27,9 +37,12 @@ export async function editAccountAction(
 	}
 
 	const { email } = formData;
+	if (sessionEmail && email !== sessionEmail) {
+		return { success: false, message: t('invalidFormData') };
+	}
 
 	try {
-		const existingUser = await prisma.user.findUnique({ where: { email } });
+		const existingUser = await prisma.user.findUnique({ where: { id: userId, email } });
 
 		if (!existingUser) {
 			return { success: false, message: t('userNotFound') };
@@ -47,6 +60,12 @@ export async function editNameAction(
 ): Promise<{ success: boolean; message?: string } | undefined> {
 	const t = await getTranslations('validation');
 
+	const session = await auth.api.getSession({ headers: await headers() });
+	const userId = session?.user?.id;
+	if (!userId) {
+		return { success: false, message: t('userNotFound') };
+	}
+
 	const schema = (await getAccountSchemas()).nameSchema;
 
 	const validatedFormData = schema.safeParse({
@@ -59,18 +78,11 @@ export async function editNameAction(
 		return { success: false, message: t('invalidFormData') };
 	}
 
-	const { email } = formData;
 	const { name, lastName, middleName } = validatedFormData.data;
 
 	try {
-		const existingUser = await prisma.user.findUnique({ where: { email } });
-
-		if (!existingUser) {
-			return { success: false, message: t('userNotFound') };
-		}
-
 		await prisma.user.update({
-			where: { email },
+			where: { id: userId },
 			data: { name, lastName, middleName },
 		});
 

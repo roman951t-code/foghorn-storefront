@@ -1,27 +1,26 @@
-import { Heading, Flex, FlexProps } from '@chakra-ui/react';
+'use client';
+
+import { Heading, Flex, type FlexProps } from '@chakra-ui/react';
 import ProductsSlider from '@/features/product/slider/ProductsSlider';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { SubcategoryProduct } from '@/types/product';
-import { getProductsByTag } from '@/actions/products/getProductsByTag';
 
 interface Props extends FlexProps {
 	title: string;
 	tag?: string;
 	products?: SubcategoryProduct[];
+	loading?: boolean;
+	skeletonLimit?: number;
 }
 
-export default async function ProductsSection({ title, tag, products, ...restProps }: Props) {
-	let resolvedProducts = products;
-
-	if (!resolvedProducts && tag) {
-		try {
-			const result = await getProductsByTag(tag);
-			resolvedProducts = result.products;
-		} catch {
-			resolvedProducts = [];
-		}
-	}
-
+export default function ProductsSectionClient({
+	title,
+	tag,
+	products,
+	loading,
+	skeletonLimit,
+	...restProps
+}: Props) {
 	return (
 		<Flex gap={6} direction='column' mt={24} {...restProps}>
 			<Heading fontWeight='normal'>
@@ -40,7 +39,7 @@ export default async function ProductsSection({ title, tag, products, ...restPro
 					{title}
 				</LocaleNavLink>
 			</Heading>
-			<ProductsSlider products={resolvedProducts ?? []} />
+			<ProductsSlider products={products} loading={loading} skeletonLimit={skeletonLimit} />
 		</Flex>
 	);
 }

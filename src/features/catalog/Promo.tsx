@@ -6,21 +6,10 @@ import { LoadingPromoSkeleton } from '@/components/ui/Skeleton';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import { Link } from '@/i18n/routing';
+import { PROMO_CARDS } from '@/data/navigation/promoCards';
+import { promoBreakpoints } from '@/data/breakpoints';
 
 import 'swiper/css';
-
-const promoCards = [
-	{ id: 'popular', text: '🔥 Up to 50% off on all electronics!', tag: 'popular' },
-	{ id: 'new', text: '🚚 Free shipping on orders over $100!', tag: 'new' },
-	{ id: 'discount', text: '💳 Pay later with our flexible payment options!', tag: 'discount' },
-];
-
-const breakpoints = {
-	690: { slidesPerView: 2 },
-	768: { slidesPerView: 1 },
-	1100: { slidesPerView: 2 },
-	1564: { slidesPerView: 3 },
-};
 
 function PromoSkeletonFallback() {
 	const skeletonCount = useBreakpointValue({ base: 1, sm: 2, md: 1, lg: 2 }) ?? 4;
@@ -38,7 +27,7 @@ function PromoSlider() {
 	return (
 		<Swiper
 			spaceBetween={6}
-			breakpoints={breakpoints}
+			breakpoints={promoBreakpoints}
 			modules={[Autoplay]}
 			autoplay={false}
 			loop
@@ -48,7 +37,7 @@ function PromoSlider() {
 			touchStartPreventDefault={false}
 			touchRatio={1}
 		>
-			{promoCards.map((promo) => (
+			{PROMO_CARDS.map((promo) => (
 				<SwiperSlide key={promo.id}>
 					<Flex
 						justify='center'

@@ -56,9 +56,7 @@ ${url}`,
 	},
 	plugins: [
 		phoneNumber({
-			sendOTP: ({ phoneNumber, code }, request) => {
-				console.log('code', code);
-			},
+			sendOTP: () => {},
 			signUpOnVerification: {
 				getTempEmail: (phoneNumber) => {
 					return `${phoneNumber.replace(/\D/g, '')}@mail`;

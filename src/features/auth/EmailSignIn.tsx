@@ -27,7 +27,6 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 	const router = useRouter();
 
 	const [authError, setAuthError] = useState('');
-	const [isPending, setIsPending] = useState(false);
 
 	const [forceOpen, setForceOpen] = useState(false);
 	const [isRestorePassOpen, setRestorePassOpen] = useState(false);
@@ -65,7 +64,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<EmailSchema>({
 		mode: 'onSubmit',
 		resolver: zodResolver(schema),
@@ -83,8 +82,6 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 	};
 
 	const onSubmit = async (formData: EmailSchema) => {
-		setIsPending(true);
-
 		try {
 			const result = await loginEmailAction(null, formData);
 
@@ -107,8 +104,6 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 			}
 		} catch (err) {
 			setAuthError(i18nData.invalidFormData);
-		} finally {
-			setIsPending(false);
 		}
 	};
 
@@ -145,7 +140,12 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 					)}
 				</Fieldset.Root>
 
-				<PrimaryButton w='100%' type='submit' loading={isPending} disabled={disabled}>
+				<PrimaryButton
+					w='100%'
+					type='submit'
+					loading={isSubmitting}
+					disabled={disabled || isSubmitting}
+				>
 					{i18nData.continue}
 				</PrimaryButton>
 

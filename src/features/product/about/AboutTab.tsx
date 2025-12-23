@@ -32,6 +32,7 @@ interface Props {
 	category: string;
 	subcategory: string;
 	averageRating: number;
+	reviewCount: number;
 	onTabChange?: (tab: 'about' | 'characteristics' | 'feedback') => void;
 }
 
@@ -40,6 +41,7 @@ export default function AboutTab({
 	category,
 	subcategory,
 	averageRating,
+	reviewCount,
 	onTabChange,
 }: Props) {
 	const cartT = useTranslations('cart');
@@ -181,8 +183,9 @@ export default function AboutTab({
 							id={`about-rating-${product.id}`}
 							colorPalette={{ base: 'orange', _dark: 'yellow' }}
 							readOnly
+							allowHalf
 							size='xs'
-							defaultValue={averageRating}
+							value={averageRating}
 						/>
 
 						<Link
@@ -198,7 +201,7 @@ export default function AboutTab({
 								}
 							}}
 						>
-							{prodT('feedback')} ({product.reviewCount ?? 0})
+							{prodT('feedback')} ({reviewCount})
 						</Link>
 					</HStack>
 					<ProductDetails

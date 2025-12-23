@@ -18,18 +18,9 @@ import { BsArrowRepeat } from 'react-icons/bs';
 import Image from 'next/image';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
+import { ORDER_CARD_MOCK_ITEMS, ORDER_CARD_MOCK_PRODUCT_IMAGES } from '@/data/orders/orderCardMock';
 
-const img1 = '/assets/images/temp/1.webp';
-const img2 = '/assets/images/temp/2.webp';
-
-const items = [
-	{
-		name: 'Alex',
-		bio: '',
-		image: 'https://i.pravatar.cc/150?u=a',
-		topRated: false,
-	},
-];
+const { img1, img2 } = ORDER_CARD_MOCK_PRODUCT_IMAGES;
 
 export default function OrderCard() {
 	const genT = useTranslations('common');
@@ -37,7 +28,7 @@ export default function OrderCard() {
 
 	return (
 		<Accordion.Root collapsible defaultValue={['b']} multiple>
-			{items.map((item, index) => (
+			{ORDER_CARD_MOCK_ITEMS.map((item, index) => (
 				<Card.Root
 					minWidth='200px'
 					w='100%'

@@ -1,34 +1,22 @@
 'use client';
 
-import { HStack } from '@chakra-ui/react';
-import { LoadingSkeleton } from '@/components/ui/Skeleton';
 import ProductCard from '@/features/product/cards/ProductCard';
 import dynamic from 'next/dynamic';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-import { useEffect, useState } from 'react';
+import ProductCardsSkeletonGrid from '@/components/ui/ProductCardsSkeletonGrid';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 
 import { productsBreakpoints } from '@/data/breakpoints';
-import { getProductsByTag } from '@/actions/products/getProductsByTag';
 import { SubcategoryProduct } from '@/types/product';
 
-function ProductsSkeletonFallback() {
-	return (
-		<HStack gap='4' mt='8' overflowX='auto'>
-			{Array.from({ length: 2 }).map((_, i) => (
-				<LoadingSkeleton key={i} />
-			))}
-		</HStack>
-	);
-}
-
 type Props = {
-	tag?: string;
-	products?: SubcategoryProduct[];
+	products?: SubcategoryProduct[] | null;
+	loading?: boolean;
+	skeletonLimit?: number;
 };
 
 function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
@@ -53,44 +41,11 @@ function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
 
 const DynamicProductsSwiper = dynamic(() => Promise.resolve(ProductsSwiper), {
 	ssr: false,
-	loading: () => <ProductsSkeletonFallback />,
+	loading: () => <ProductCardsSkeletonGrid />,
 });
 
-export default function ProductsSlider({ tag, products: initialProducts }: Props) {
-	const [products, setProducts] = useState<SubcategoryProduct[]>(initialProducts ?? []);
-	const [loading, setLoading] = useState(!initialProducts);
-
-	useEffect(() => {
-		let mounted = true;
-
-		if (initialProducts) {
-			setProducts(initialProducts);
-			setLoading(false);
-			return () => {
-				mounted = false;
-			};
-		}
-
-		if (!tag) {
-			setLoading(false);
-			return () => {
-				mounted = false;
-			};
-		}
-
-		(async () => {
-			const data = await getProductsByTag(tag);
-			if (mounted) {
-				setProducts(data?.products);
-				setLoading(false);
-			}
-		})();
-		return () => {
-			mounted = false;
-		};
-	}, [initialProducts, tag]);
-
-	if (loading) return <ProductsSkeletonFallback />;
-
+export default function ProductsSlider({ products, loading, skeletonLimit }: Props) {
+	if (loading) return <ProductCardsSkeletonGrid limit={skeletonLimit} />;
+	if (!products) return null;
 	return products.length > 0 ? <DynamicProductsSwiper products={products} /> : null;
 }

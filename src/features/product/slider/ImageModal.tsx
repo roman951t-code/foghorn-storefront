@@ -5,22 +5,16 @@ import {
 	DialogRoot,
 } from '@/components/ui/chakra/dialog';
 import { Image } from '@chakra-ui/react';
+import { IMAGE_MODAL_DIALOG_IDS } from '@/constants/dialogs';
 
 interface Props {
 	image: string | null;
 	resetModal: () => void;
 }
 export default function ImageModal({ image, resetModal }: Props) {
-	const ids = {
-		trigger: 'image-modal-trigger',
-		content: 'image-modal-content',
-		title: 'image-modal-title',
-		description: 'image-modal-description',
-	};
-
 	return (
 		<DialogRoot
-			ids={ids}
+			ids={IMAGE_MODAL_DIALOG_IDS}
 			open={!!image}
 			placement='center'
 			size='cover'
