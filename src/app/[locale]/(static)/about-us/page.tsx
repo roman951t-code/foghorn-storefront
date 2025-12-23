@@ -3,12 +3,9 @@ import aboutData from '@/data/staticPages/about';
 import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
 import { getTranslations } from 'next-intl/server';
+import { LocaleParams } from '@/types/routing';
 
-type Params = {
-	params: { locale: string };
-};
-
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
 	return getLocalizedMetadata(locale, 'aboutUs', { pathname: '/about-us' });
 }

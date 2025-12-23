@@ -27,7 +27,7 @@ function mapRecentlyViewedProducts(viewed: { product: any }[]): SubcategoryProdu
 
 export async function getRecentlyViewedProductsWithCount(
 	userId: string,
-	limit = 32,
+	limit = 10,
 	offset = 0
 ): Promise<{ products: SubcategoryProduct[]; totalCount: number }> {
 	if (!userId) return { products: [], totalCount: 0 };

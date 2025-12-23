@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import CategoryCard from '@/features/product/cards/CategoryCard';
-import { LoadingSkeleton } from '@/components/ui/Skeleton';
+import { Loading } from '@/components/ui/Skeleton';
 import type { CatalogCategory } from '@/types/product';
 import { Wrap } from '@chakra-ui/react';
 
@@ -34,7 +34,7 @@ function CategoryCardsInner({ category }: { category?: CatalogCategory }) {
 
 const DynamicCategoryCards = dynamic(() => Promise.resolve(CategoryCardsInner), {
 	ssr: false,
-	loading: () => <LoadingSkeleton />,
+	loading: () => <Loading />,
 });
 
 export default function CategoryCards({ category }: { category: CatalogCategory }) {

@@ -235,6 +235,7 @@
 		"descriptionText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed aliquet arcu, ac facilisis magna. Maecenas et lectus et leo volutpat condimentum.",
 		"productIsPresent": "Product in stock",
 		"productIsOutOfStock": "Product out of stock",
+		"inStock": "In stock",
 		"lookSimilar": "Find similar",
 		"productCode": "Product code",
 		"leaveFeedback": "Leave a review",

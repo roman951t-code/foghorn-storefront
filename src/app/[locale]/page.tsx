@@ -12,12 +12,9 @@ import {
 	SUBSCRIBE_COMMON_KEYS,
 	SUBSCRIBE_VALIDATION_KEYS,
 } from '@/constants/subscribe';
+import { LocaleParams } from '@/types/routing';
 
-type Params = {
-	params: { locale: string };
-};
-
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
 	return getLocalizedMetadata(locale, 'main', { pathname: '/' });
 }

@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import type { LocaleParam } from '@/types/routing';
 
 export const alt = 'Продукт';
 export const size = {
@@ -7,11 +8,11 @@ export const size = {
 };
 export const contentType = 'image/png';
 
-export default function Image({
-	params,
-}: {
-	params: { locale: string; categoryId: string; productId: string };
-}) {
+type Props = {
+	params: LocaleParam & { categoryId: string; productId: string };
+};
+
+export default function Image({ params }: Props) {
 	const { categoryId, productId } = params;
 
 	const title = `Категорія: ${categoryId}, Продукт: ${productId}`;

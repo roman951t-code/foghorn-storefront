@@ -1,4 +1,11 @@
-import { HStack, Skeleton, SkeletonCircle, SkeletonText, Stack } from '@chakra-ui/react';
+import {
+	HStack,
+	SimpleGrid,
+	Skeleton,
+	SkeletonCircle,
+	SkeletonText,
+	Stack,
+} from '@chakra-ui/react';
 
 export function LoadingPromoSkeleton() {
 	return (
@@ -21,5 +28,24 @@ export function LoadingSkeleton() {
 			</HStack>
 			<Skeleton height='220px' />
 		</Stack>
+	);
+}
+
+export function ProductPreviewSkeleton() {
+	return (
+		<HStack overflowX='hidden' overflowY='hidden' alignSelf='center'>
+			<Skeleton width='116px' height='116px' borderRadius='sm' />
+		</HStack>
+	);
+}
+
+export function Loading() {
+	return (
+		<SimpleGrid columns={2} columnGap='4' rowGap='4' mt='100px'>
+			<LoadingSkeleton />
+			<LoadingSkeleton />
+			<LoadingSkeleton />
+			<LoadingSkeleton />
+		</SimpleGrid>
 	);
 }

@@ -1,4 +1,4 @@
-const SQUARE_FULL = 700;
+const SQUARE_FULL = 900;
 const SQUARE_PREVIEW = 160;
 
 const updatePicsumPath = (url: URL, size: number, suffix?: string) => {

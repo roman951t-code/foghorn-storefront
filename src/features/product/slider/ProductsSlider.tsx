@@ -4,7 +4,6 @@ import ProductCard from '@/features/product/cards/ProductCard';
 import dynamic from 'next/dynamic';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-import ProductCardsSkeletonGrid from '@/components/ui/ProductCardsSkeletonGrid';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -12,11 +11,10 @@ import '@/styles/swiper.css';
 
 import { productsBreakpoints } from '@/data/breakpoints';
 import { SubcategoryProduct } from '@/types/product';
+import ProductCardsSkeletonGrid from '@/components/ui/ProductCardsSkeletonGrid';
 
 type Props = {
 	products?: SubcategoryProduct[] | null;
-	loading?: boolean;
-	skeletonLimit?: number;
 };
 
 function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
@@ -44,8 +42,6 @@ const DynamicProductsSwiper = dynamic(() => Promise.resolve(ProductsSwiper), {
 	loading: () => <ProductCardsSkeletonGrid />,
 });
 
-export default function ProductsSlider({ products, loading, skeletonLimit }: Props) {
-	if (loading) return <ProductCardsSkeletonGrid limit={skeletonLimit} />;
-	if (!products) return null;
-	return products.length > 0 ? <DynamicProductsSwiper products={products} /> : null;
+export default function ProductsSlider({ products }: Props) {
+	return <DynamicProductsSwiper products={products ?? []} />;
 }

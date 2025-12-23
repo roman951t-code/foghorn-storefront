@@ -69,6 +69,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 		register,
 		handleSubmit,
 		control,
+		reset,
 		formState: { errors, isSubmitting },
 	} = useForm<FeedbackSchema>({
 		mode: 'all',
@@ -110,6 +111,8 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 					onSuccessAction?.(review);
 				}
 			}
+
+			reset();
 		} catch (err) {
 			showToaster('error', toasterMessages.reviewAddFailed(i18nData));
 		}
@@ -232,7 +235,13 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 							</Field.Root>
 						</Fieldset.Content>
 
-						<PrimaryButton w='100%' mt='8' type='submit' loading={isSubmitting} disabled={isSubmitting}>
+						<PrimaryButton
+							w='100%'
+							mt='8'
+							type='submit'
+							loading={isSubmitting}
+							disabled={isSubmitting}
+						>
 							{i18nData.send}
 						</PrimaryButton>
 					</Fieldset.Root>

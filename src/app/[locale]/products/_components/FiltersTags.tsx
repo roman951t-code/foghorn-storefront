@@ -92,7 +92,7 @@ export default function FiltersTags() {
 						<Tag.EndElement onClick={() => clearParam('inStock')}>
 							<Tag.CloseTrigger
 								cursor='pointer'
-								aria-label={t('clearFilters') + ' ' + t('products.inStock')}
+								aria-label={t('clearFilters') + ' ' + t('inStock')}
 							/>
 						</Tag.EndElement>
 					</Tag.Root>

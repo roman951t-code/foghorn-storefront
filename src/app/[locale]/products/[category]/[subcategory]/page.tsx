@@ -17,23 +17,14 @@ import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { SUBCATEGORY_FILTER_EXCLUDED_KEYS } from '@/constants/products';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
-import type { AppLocale } from '@/constants/locales';
 import Script from 'next/script';
+import { ProductFiltersSearchParams, SubcategoryParams } from '@/types/routing';
 
-type Params = {
-	params: { category: string; subcategory: string; locale: AppLocale };
-	searchParams: {
-		page?: string;
-		perPage?: string;
-		search?: string;
-		min?: string;
-		max?: string;
-		inStock?: string;
-		orderBy?: 'new' | 'expensive' | 'cheap';
-	};
+type Props = SubcategoryParams & {
+	searchParams: ProductFiltersSearchParams;
 };
 
-export async function generateMetadata({ params, searchParams }: Params): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
 	const { category, subcategory, locale } = await params;
 	const resolvedSearch = await searchParams;
 
@@ -57,7 +48,7 @@ export async function generateMetadata({ params, searchParams }: Params): Promis
 
 export const revalidate = 120;
 
-export default async function Subcategory({ params, searchParams }: Params) {
+export default async function Subcategory({ params, searchParams }: Props) {
 	const { category, subcategory, locale } = await params;
 	const searchData = await searchParams;
 

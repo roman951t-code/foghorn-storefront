@@ -1,12 +1,5 @@
-import { LoadingSkeleton } from '@/components/ui/Skeleton';
-import { HStack } from '@chakra-ui/react';
+import { Loading as PageLoading } from '@/components/ui/Skeleton';
 
 export default function Loading() {
-	return (
-		<HStack gap='4' px='4' mt='25%'>
-			<LoadingSkeleton />
-			<LoadingSkeleton />
-			<LoadingSkeleton />
-		</HStack>
-	);
+	return <PageLoading />;
 }

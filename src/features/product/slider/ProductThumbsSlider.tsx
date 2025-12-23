@@ -27,7 +27,7 @@ function ThumbsSliderSkeleton() {
 
 	return (
 		<>
-			<Skeleton height={{ base: '400px', md: '700px' }} width='100%' />
+			<Skeleton height={{ base: '400px', md: '900px' }} width='100%' />
 			{!isSmallScreen && (
 				<HStack mt={4} p={4}>
 					{Array.from({ length: skeletonCount }).map((_, i) => (
@@ -125,17 +125,17 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 								overflow='hidden'
 								rounded='sm'
 							>
-						<Image
-							src={src}
-							alt={`${accessibleName} photo ${index + 1}`}
-							fill
-							priority={isFirst}
-							fetchPriority={isFirst ? 'high' : undefined}
-							quality={68}
-							style={{ objectFit: 'cover' }}
-							sizes='(max-width: 768px) 100vw, 50vw'
-							draggable={false}
-						/>
+								<Image
+									src={src}
+									alt={`${accessibleName} photo ${index + 1}`}
+									fill
+									priority={isFirst}
+									fetchPriority={isFirst ? 'high' : undefined}
+									quality={68}
+									style={{ objectFit: 'cover' }}
+									sizes='(max-width: 768px) 100vw, 50vw'
+									draggable={false}
+								/>
 							</Box>
 						</SwiperSlide>
 					);
@@ -175,13 +175,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 								}
 							}}
 						>
-							<Box
-								position='relative'
-								width='94%'
-								height='90px'
-								cursor='pointer'
-								overflow='hidden'
-							>
+							<Box position='relative' width='94%' height='90px' cursor='pointer' overflow='hidden'>
 								<Image
 									src={src}
 									alt={`${accessibleName} thumbnail ${index + 1}`}

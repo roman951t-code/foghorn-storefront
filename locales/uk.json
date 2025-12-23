@@ -235,6 +235,7 @@
 		"descriptionText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed aliquet arcu, ac facilisis magna. Maecenas et lectus et leo volutpat condimentum.",
 		"productIsPresent": "Товар в наявності",
 		"productIsOutOfStock": "Товар відсутній",
+		"inStock": "Є в наявності",
 		"lookSimilar": "Шукати схожі",
 		"productCode": "Код товару",
 		"leaveFeedback": "Залишити відгук",

@@ -76,7 +76,7 @@ export default function WishList({
 				mt='8'
 				mb='4'
 				className='productsSlider'
-				columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5, '2xl': 6 }}
+				columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
 				gapX='2'
 				gapY='4'
 				w='100%'

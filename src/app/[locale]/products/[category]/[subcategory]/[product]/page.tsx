@@ -10,13 +10,10 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { trackProductView } from '@/actions/products/trackProductView';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
-import type { AppLocale } from '@/constants/locales';
 import Script from 'next/script';
+import { ProductParams } from '@/types/routing';
 
-type Props = {
-	params: { category: string; subcategory: string; product: string; locale: AppLocale };
-	searchParams: { tab?: string };
-};
+type Props = ProductParams & { searchParams: { tab?: string } };
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
 	const { product: productSlug, category, subcategory, locale } = await params;
@@ -31,11 +28,18 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 		product: productData.name,
 		description: productData.description ?? '',
 	});
-	const alternates = buildLanguageAlternates(locale, `/products/${category}/${subcategory}/${productSlug}`, {
-		...(resolvedSearch?.tab ? { tab: resolvedSearch.tab } : {}),
-	});
+	const alternates = buildLanguageAlternates(
+		locale,
+		`/products/${category}/${subcategory}/${productSlug}`,
+		{
+			...(resolvedSearch?.tab ? { tab: resolvedSearch.tab } : {}),
+		}
+	);
 	const image =
-		productData.imageUrl && (productData.imageUrl.startsWith('http') ? productData.imageUrl : absoluteUrl(productData.imageUrl));
+		productData.imageUrl &&
+		(productData.imageUrl.startsWith('http')
+			? productData.imageUrl
+			: absoluteUrl(productData.imageUrl));
 
 	return {
 		title,
@@ -99,7 +103,9 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 					datePublished: review.createdAt?.toISOString?.() ?? undefined,
 					author: {
 						'@type': 'Person',
-						name: [review.user?.name, review.user?.lastName].filter(Boolean).join(' ').trim() || 'Customer',
+						name:
+							[review.user?.name, review.user?.lastName].filter(Boolean).join(' ').trim() ||
+							'Customer',
 					},
 					reviewRating: {
 						'@type': 'Rating',
@@ -189,7 +195,12 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 					productName={productData?.name}
 				/>
 
-				<ProductTabs tab={tab} product={productData} category={category} subcategory={subcategory} />
+				<ProductTabs
+					tab={tab}
+					product={productData}
+					category={category}
+					subcategory={subcategory}
+				/>
 			</Flex>
 		</>
 	);

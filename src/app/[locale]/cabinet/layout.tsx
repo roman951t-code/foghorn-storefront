@@ -7,14 +7,10 @@ import TabsProvider from './_components/TabsProvider';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import type { AppLocale } from '@/constants/locales';
 import TabsContentRenderer from './_components/TabsContentRenderer';
+import { LocaleParams } from '@/types/routing';
 
-type Params = {
-	params: { locale: string };
-};
-
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
 	return getLocalizedMetadata(locale, 'cabinet', {
 		pathname: '/cabinet',
@@ -22,10 +18,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 	});
 }
 
-interface Props {
-	children: ReactNode;
-	params: { locale: AppLocale };
-}
+type Props = LocaleParams & { children: ReactNode };
 
 export default async function CabinetLayout({ children }: Props) {
 	const session = await auth.api.getSession({

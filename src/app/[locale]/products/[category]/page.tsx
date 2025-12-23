@@ -7,14 +7,10 @@ import { notFound } from 'next/navigation';
 import { getCategoryData } from '@/actions/products/getCategoryData';
 import CategoryCards from './_components/CategoryCards';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
-import type { AppLocale } from '@/constants/locales';
 import Script from 'next/script';
+import { CategoryParams } from '@/types/routing';
 
-type Params = {
-	params: { locale: AppLocale; category: string };
-};
-
-export async function generateMetadata({ params }: Params): Promise<Metadata> {
+export async function generateMetadata({ params }: CategoryParams): Promise<Metadata> {
 	const { category: categorySlug, locale } = await params;
 
 	const category = await prisma.productCategory.findUnique({
@@ -39,7 +35,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export const revalidate = 120;
 
-export default async function CategoryPage({ params }: Params) {
+export default async function CategoryPage({ params }: CategoryParams) {
 	const { category: categorySlug, locale } = await params;
 	const categoryDataResponse = await getCategoryData();
 

@@ -17,5 +17,5 @@ export default async function ViewedProductsSection({ title, tag = 'viewed', lim
 	const viewed = await getRecentlyViewedProductsWithCount(userId, limit, 0);
 	if (!viewed.products.length) return null;
 
-	return <ProductsSection title={title} tag={tag} products={viewed.products} />;
+	return <ProductsSection title={title} tag={tag} products={viewed.products} limit={limit} />;
 }

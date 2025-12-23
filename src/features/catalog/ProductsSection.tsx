@@ -1,26 +1,28 @@
 import { Heading, Flex, FlexProps } from '@chakra-ui/react';
 import ProductsSlider from '@/features/product/slider/ProductsSlider';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
-import { SubcategoryProduct } from '@/types/product';
 import { getProductsByTag } from '@/actions/products/getProductsByTag';
+import { SubcategoryProduct } from '@/types/product';
 
 interface Props extends FlexProps {
 	title: string;
-	tag?: string;
+	tag: string;
 	products?: SubcategoryProduct[];
+	limit?: number;
 }
 
-export default async function ProductsSection({ title, tag, products, ...restProps }: Props) {
-	let resolvedProducts = products;
+export default async function ProductsSection({
+	title,
+	tag,
+	products: providedProducts,
+	limit = 10,
+	...restProps
+}: Props) {
+	const { products = [] } = providedProducts
+		? { products: providedProducts }
+		: await getProductsByTag(tag, false, limit);
 
-	if (!resolvedProducts && tag) {
-		try {
-			const result = await getProductsByTag(tag);
-			resolvedProducts = result.products;
-		} catch {
-			resolvedProducts = [];
-		}
-	}
+	if (!products.length) return null;
 
 	return (
 		<Flex gap={6} direction='column' mt={24} {...restProps}>
@@ -40,7 +42,7 @@ export default async function ProductsSection({ title, tag, products, ...restPro
 					{title}
 				</LocaleNavLink>
 			</Heading>
-			<ProductsSlider products={resolvedProducts ?? []} />
+			<ProductsSlider products={products} />
 		</Flex>
 	);
 }

@@ -18,20 +18,10 @@ import { headers } from 'next/headers';
 import { getRecentlyViewedProductsWithCount } from '@/actions/products/getRecentlyViewedProducts';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { buildLanguageAlternates } from '@/utils/seo';
-import type { AppLocale } from '@/constants/locales';
+import { LocaleParams, ProductFiltersSearchParams } from '@/types/routing';
 
-type Params = {
-	params: { locale: AppLocale };
-	searchParams: {
-		searchQuery?: string;
-		tag?: string;
-		page?: string;
-		perPage?: string;
-		min?: string;
-		max?: string;
-		inStock?: string;
-		orderBy?: 'new' | 'expensive' | 'cheap';
-	};
+type Props = LocaleParams & {
+	searchParams: ProductFiltersSearchParams;
 };
 
 const excludedParams = new Set([
@@ -46,7 +36,7 @@ const excludedParams = new Set([
 	'orderBy',
 ]);
 
-export async function generateMetadata({ params, searchParams }: Params): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
 	const resolvedSearch = await searchParams;
 	const { searchQuery, tag } = resolvedSearch;
 	const { locale } = await params;
@@ -64,7 +54,7 @@ export async function generateMetadata({ params, searchParams }: Params): Promis
 	};
 }
 
-export default async function SearchProducts({ searchParams }: Params) {
+export default async function SearchProducts({ searchParams }: Props) {
 	const searchData = await searchParams;
 	const {
 		searchQuery = '',
@@ -218,14 +208,12 @@ export default async function SearchProducts({ searchParams }: Params) {
 
 				<Box as='section' w={{ base: '100%', lg: '80%' }}>
 					<ProductsGrid products={products} notFound={t('productsNotFound')} limit={pageSize} />
-					{/* <Flex justifyContent='center'> */}
 					<Pagination
 						currentPage={page}
 						totalItems={totalCount}
 						pageSize={pageSize}
 						baseRoute='/products/search/'
 					/>
-					{/* </Flex> */}
 				</Box>
 			</Group>
 
