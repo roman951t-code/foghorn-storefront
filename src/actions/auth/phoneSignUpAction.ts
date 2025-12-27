@@ -9,12 +9,12 @@ export async function phoneSignUpAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 	const schema = await getPhoneSignUpSchema();
 	const validated = schema.safeParse(formData);
 
 	if (!validated.success) {
-		return { success: false, message: t('invalidFormData') };
+		return { success: false, message: validationT('invalidFormData') };
 	}
 
 	const { phone, name } = validated.data;
@@ -43,14 +43,14 @@ export async function phoneSignUpAction(
 	} catch (error: any) {
 		const messageKey = error?.body?.message ?? error?.message ?? '';
 		const errorMap: Record<string, string> = {
-			'Phone number already exists': t('userExists'),
-			'Too many requests': t('tooManyRequests'),
-			'OTP not found': t('userRegisterFail'),
+			'Phone number already exists': validationT('userExists'),
+			'Too many requests': validationT('tooManyRequests'),
+			'OTP not found': validationT('userRegisterFail'),
 		};
 
 		return {
 			success: false,
-			message: errorMap[messageKey] || t('userRegisterFail'),
+			message: errorMap[messageKey] || validationT('userRegisterFail'),
 		};
 	}
 }

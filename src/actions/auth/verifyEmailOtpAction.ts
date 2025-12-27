@@ -6,7 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
 
 export async function verifyEmailOtpAction(email: string, code: string) {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	const session = await auth.api.getSession({
 		headers: await headers(),
@@ -23,7 +23,7 @@ export async function verifyEmailOtpAction(email: string, code: string) {
 	});
 
 	if (!record) {
-		return { success: false, message: t('otpExpired') };
+		return { success: false, message: validationT('otpExpired') };
 	}
 
 	try {
@@ -36,6 +36,6 @@ export async function verifyEmailOtpAction(email: string, code: string) {
 
 		return { success: true };
 	} catch {
-		return { success: false, message: t('verificationFailed') };
+		return { success: false, message: validationT('verificationFailed') };
 	}
 }

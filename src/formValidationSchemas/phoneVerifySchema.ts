@@ -13,11 +13,11 @@ export const createPhoneVerifySchema = (t: I18nData) =>
 	phoneVerifySchemaShape(t as Parameters<typeof phoneVerifySchemaShape>[0]);
 
 export async function getPhoneVerifySchema() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	return phoneVerifySchemaShape({
-		pinRequired: t('pinRequired'),
-		pinLength: t('pinLength'),
+		pinRequired: validationT('pinRequired'),
+		pinLength: validationT('pinLength'),
 	});
 }
 

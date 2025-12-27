@@ -5,8 +5,9 @@ import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
 import { phoneNumber, emailOTP, customSession } from 'better-auth/plugins';
 import { prisma } from './prisma';
+import { env } from '@/config/env';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(env.RESEND_API_KEY);
 
 export const auth = betterAuth({
 	user: {
@@ -22,26 +23,26 @@ export const auth = betterAuth({
 	}),
 	session: {
 		expiresIn: 60 * 60 * 24 * 7,
-		updateAge: 60 * 60 * 24,
-		cookieCache: {
-			enabled: true,
-			maxAge: 5 * 60,
-			secure: process.env.NODE_ENV === 'production',
-		},
+			updateAge: 60 * 60 * 24,
+			cookieCache: {
+				enabled: true,
+				maxAge: 5 * 60,
+				secure: env.NODE_ENV === 'production',
+			},
 	},
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: true,
 		sendResetPassword: async ({ user, url, token }, request) => {
-			const t = await getTranslations('auth');
+			const authT = await getTranslations('auth');
 
 			await resend.emails.send({
 				from: 'Acme <onboarding@resend.dev>',
 				to: [user.email],
-				subject: t('resetPass'),
-				text: `${t('hiUser')} ${user?.name || ''},
+				subject: authT('resetPass'),
+				text: `${authT('hiUser')} ${user?.name || ''},
 
-${t('clickToResetPass')}:
+${authT('clickToResetPass')}:
 
 ${url}`,
 			});
@@ -50,8 +51,8 @@ ${url}`,
 	socialProviders: {
 		google: {
 			prompt: 'select_account',
-			clientId: process.env.GOOGLE_CLIENT_ID as string,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+			clientId: env.GOOGLE_CLIENT_ID as string,
+			clientSecret: env.GOOGLE_CLIENT_SECRET as string,
 		},
 	},
 	plugins: [
@@ -69,7 +70,7 @@ ${url}`,
 		emailOTP({
 			overrideDefaultEmailVerification: true,
 			async sendVerificationOTP({ email, otp, type }) {
-				const t = await getTranslations('auth');
+				const authT = await getTranslations('auth');
 
 				if (type === 'sign-in') {
 					// Send the OTP for sign in
@@ -79,10 +80,10 @@ ${url}`,
 					await resend.emails.send({
 						from: 'Acme <onboarding@resend.dev>',
 						to: [email],
-						subject: t('resetPass'),
-						text: `${t('hiUser')} ${email || ''},
+						subject: authT('resetPass'),
+						text: `${authT('hiUser')} ${email || ''},
 
-${t('otpToResetPass')}:
+${authT('otpToResetPass')}:
 
 ${otp}`,
 					});

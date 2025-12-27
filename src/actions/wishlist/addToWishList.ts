@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
 export async function addToWishList(productId: string) {
-	const t = await getTranslations('wishlist');
+	const wishlistT = await getTranslations('wishlist');
 
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
@@ -36,6 +36,15 @@ export async function addToWishList(productId: string) {
 			return { success: true };
 		}
 
+		const product = await prisma.product.findUnique({
+			where: { id: productId },
+			select: { id: true, inStock: true },
+		});
+
+		if (!product || !product.inStock) {
+			return { success: false, message: wishlistT('wishlistUpdateFailed') };
+		}
+
 		await prisma.wishlist.create({
 			data: {
 				userId,
@@ -45,6 +54,6 @@ export async function addToWishList(productId: string) {
 
 		return { success: true };
 	} catch (error) {
-		return { success: false, message: t('wishlistUpdateFailed') };
+		return { success: false, message: wishlistT('wishlistUpdateFailed') };
 	}
 }

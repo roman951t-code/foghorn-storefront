@@ -2,10 +2,13 @@
 
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export async function getWishListProducts(
 	userId: string
 ): Promise<{ products: SubcategoryProduct[] }> {
+	noStore();
+
 	if (!userId) return { products: [] };
 
 	const wishlist = await prisma.wishlist.findMany({

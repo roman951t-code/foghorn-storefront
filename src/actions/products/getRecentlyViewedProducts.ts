@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
+import { unstable_noStore as noStore } from 'next/cache';
 
 function mapRecentlyViewedProducts(viewed: { product: any }[]): SubcategoryProduct[] {
 	return viewed
@@ -30,6 +31,8 @@ export async function getRecentlyViewedProductsWithCount(
 	limit = 10,
 	offset = 0
 ): Promise<{ products: SubcategoryProduct[]; totalCount: number }> {
+	noStore();
+
 	if (!userId) return { products: [], totalCount: 0 };
 
 	const safeLimit = Math.min(50, Math.max(1, Math.floor(limit || 1)));
@@ -66,6 +69,8 @@ export async function getRecentlyViewedProductsWithCount(
 }
 
 export async function getRecentlyViewedProducts(userId: string, limit = 32, offset = 0) {
+	noStore();
+
 	const { products } = await getRecentlyViewedProductsWithCount(userId, limit, offset);
 	return products;
 }

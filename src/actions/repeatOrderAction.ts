@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import type { CartProduct } from '@/types/cart';
 
+const MAX_ITEM_QUANTITY = 99;
+
 type RepeatOrderResult =
 	| { success: true; items: CartProduct[] }
 	| { success: false; code: 'unauthorized' | 'not-found' | 'empty' | 'failed' };
@@ -35,7 +37,18 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 			return { success: false, code: 'empty' };
 		}
 
-		const items = await prisma.$transaction(async (tx) => {
+		const productIds = Array.from(new Set(order.items.map((item) => item.productId)));
+		const products = await prisma.product.findMany({
+			where: { id: { in: productIds } },
+			select: {
+				id: true,
+				stock: true,
+				inStock: true,
+			},
+		});
+		const productMap = new Map(products.map((p) => [p.id, p]));
+
+		const result = await prisma.$transaction(async (tx) => {
 			const cart = await tx.cart.upsert({
 				where: { userId },
 				update: {},
@@ -47,24 +60,41 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 				cart.items.map((item) => [item.productId, { id: item.id, quantity: item.quantity }])
 			);
 
+			let added = false;
+
 			for (const item of order.items) {
+				const product = productMap.get(item.productId);
+				if (!product || !product.inStock || !product.stock) continue;
+
+				const desiredQty = Math.max(1, Math.min(MAX_ITEM_QUANTITY, item.quantity));
 				const existing = existingByProduct.get(item.productId);
 
 				if (existing) {
-					const newQuantity = existing.quantity + item.quantity;
+					const newQuantity = Math.min(
+						product.stock,
+						Math.min(MAX_ITEM_QUANTITY, existing.quantity + desiredQty)
+					);
+					if (newQuantity <= existing.quantity) continue;
+
 					await tx.cartItem.update({
 						where: { id: existing.id },
 						data: { quantity: newQuantity },
 					});
 					existingByProduct.set(item.productId, { ...existing, quantity: newQuantity });
+					added = true;
 				} else {
-					await tx.cartItem.create({
+					const quantityToInsert = Math.min(product.stock, desiredQty);
+					if (quantityToInsert < 1) continue;
+
+					const created = await tx.cartItem.create({
 						data: {
 							cartId: cart.id,
 							productId: item.productId,
-							quantity: item.quantity,
+							quantity: quantityToInsert,
 						},
 					});
+					existingByProduct.set(item.productId, { id: created.id, quantity: quantityToInsert });
+					added = true;
 				}
 			}
 
@@ -84,7 +114,7 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 				},
 			});
 
-			return cartItems.map(({ product, quantity }) => ({
+			const items = cartItems.map(({ product, quantity }) => ({
 				id: product.id,
 				name: product.name,
 				fullSlug: product.fullSlug,
@@ -93,9 +123,15 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 				discountPrice: product.discountPrice?.toNumber?.() ?? null,
 				quantity,
 			}));
+
+			return { items, added };
 		});
 
-		return { success: true, items };
+		if (!result.added) {
+			return { success: false, code: 'failed' };
+		}
+
+		return { success: true, items: result.items };
 	} catch (error) {
 		return { success: false, code: 'failed' };
 	}

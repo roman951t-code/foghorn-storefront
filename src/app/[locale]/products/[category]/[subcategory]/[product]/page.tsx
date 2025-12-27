@@ -22,9 +22,9 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const productData = await getProductNameBySlug(productSlug);
 	if (!productData) notFound();
 
-	const t = await getTranslations('pages');
-	const title = t('metadata.product', { product: productData.name });
-	const description = t('metadata.productDescription', {
+	const pagesT = await getTranslations('pages');
+	const title = pagesT('metadata.product', { product: productData.name });
+	const description = pagesT('metadata.productDescription', {
 		product: productData.name,
 		description: productData.description ?? '',
 	});
@@ -65,8 +65,11 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 	const { category, subcategory, product, locale } = await params;
 	const { tab } = await searchParams;
 
-	const productData = await getProductBySlug(product);
-	const session = await auth.api.getSession({ headers: await headers() });
+	const headersList = await headers();
+	const [productData, session] = await Promise.all([
+		getProductBySlug(product),
+		auth.api.getSession({ headers: headersList }),
+	]);
 	const userId = session?.user?.id;
 
 	if (!productData) notFound();

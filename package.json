@@ -6,7 +6,9 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"test": "node tests/getProductsFilters.test.js",
+		"profile:search": "node --loader ts-node/esm scripts/profile-search.ts"
 	},
 	"prisma": {
 		"seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

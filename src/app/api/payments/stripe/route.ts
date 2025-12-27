@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
+import { unstable_noStore as noStore } from 'next/cache';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
 import { auth } from '@/lib/auth';
 import { isSameOriginRequest } from '@/lib/csrf';
+import { env } from '@/config/env';
 import type Stripe from 'stripe';
 
 type LineItemPayload = { productId: string; quantity: number };
 
-const currency = process.env.STRIPE_CURRENCY ?? 'usd';
+const currency = env.STRIPE_CURRENCY ?? 'usd';
 
 function resolveSafeRedirectUrl(
 	value: unknown,
@@ -30,13 +33,28 @@ function resolveSafeRedirectUrl(
 }
 
 export async function POST(req: NextRequest) {
+	noStore();
+
+	const bodySchema = z.object({
+		items: z
+			.array(
+				z.object({
+					productId: z.string().min(1, 'productId_required'),
+					quantity: z.number().int().positive().max(99, 'quantity_too_high'),
+				})
+			)
+			.min(1, 'items_required'),
+		successUrl: z.string().url().optional(),
+		cancelUrl: z.string().url().optional(),
+	});
+
 	try {
 		if (!stripe) {
 			return NextResponse.json({ error: 'stripe_not_configured' }, { status: 500 });
 		}
 
 		const appOrigin = (() => {
-			const raw = process.env.NEXT_PUBLIC_APP_URL;
+			const raw = env.NEXT_PUBLIC_APP_URL;
 			if (!raw) return req.nextUrl.origin;
 			try {
 				return new URL(raw).origin;
@@ -57,31 +75,29 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
 		}
 
-		const body = await req.json().catch(() => null);
-		const items: LineItemPayload[] = Array.isArray(body?.items) ? body.items : [];
-
-		if (!items.length) {
-			return NextResponse.json({ error: 'no_items' }, { status: 400 });
+		const parsed = bodySchema.safeParse(await req.json().catch(() => null));
+		if (!parsed.success) {
+			return NextResponse.json({ error: 'invalid_payload' }, { status: 400 });
 		}
 
-		const sanitizedItems = items
-			.map((item) => ({
-				productId: String(item.productId ?? '').trim(),
-				quantity: Math.max(1, Math.floor(item.quantity ?? 1)),
-			}))
-			.filter((item) => item.productId);
+		const items: LineItemPayload[] = parsed.data.items.map((item) => ({
+			productId: item.productId.trim(),
+			quantity: Math.max(1, Math.floor(item.quantity)),
+		}));
 
-		const uniqueIds = Array.from(new Set(sanitizedItems.map((item) => item.productId)));
+		const uniqueIds = Array.from(new Set(items.map((item) => item.productId)));
 		const products = await prisma.product.findMany({
 			where: { id: { in: uniqueIds } },
-			select: { id: true, name: true, basePrice: true, discountPrice: true },
+			select: { id: true, name: true, basePrice: true, discountPrice: true, stock: true, inStock: true },
 		});
 		const productMap = new Map(products.map((p) => [p.id, p]));
 
-		const lineItems = sanitizedItems
+		const lineItems = items
 			.map((item) => {
 				const product = productMap.get(item.productId);
-				if (!product) return null;
+				if (!product || !product.inStock) return null;
+				const availableStock = product.stock ?? 0;
+				if (item.quantity > availableStock) return null;
 				const quantity = Math.max(1, Math.floor(item.quantity ?? 1));
 				const unitPrice = Number(product.discountPrice ?? product.basePrice ?? 0);
 				const unitAmount = Math.max(1, Math.round(unitPrice * 100));
@@ -101,11 +117,11 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'invalid_items' }, { status: 400 });
 		}
 
-		const successUrl = resolveSafeRedirectUrl(body?.successUrl, {
+		const successUrl = resolveSafeRedirectUrl(parsed.data.successUrl, {
 			origin: appOrigin,
 			fallbackPath: '/cabinet/orders?payment=success&session_id={CHECKOUT_SESSION_ID}',
 		});
-		const cancelUrl = resolveSafeRedirectUrl(body?.cancelUrl, {
+		const cancelUrl = resolveSafeRedirectUrl(parsed.data.cancelUrl, {
 			origin: appOrigin,
 			fallbackPath: '/checkout?cancelled=1',
 		});
@@ -120,7 +136,7 @@ export async function POST(req: NextRequest) {
 			customer_email: session.user?.email ?? undefined,
 			metadata: {
 				userId: session.user.id,
-				items: JSON.stringify(sanitizedItems),
+				items: JSON.stringify(items),
 			},
 		});
 

@@ -1,13 +1,16 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
-const isProd = process.env.NODE_ENV === 'production';
+import { env } from './src/config/env';
+const isProd = env.NODE_ENV === 'production';
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline';
-  style-src 'self' 'unsafe-inline';
-  img-src 'self' blob: data:;
+  script-src 'self' 'unsafe-inline' https://js.stripe.com;
+  style-src 'self' 'unsafe-inline' https:;
+  img-src 'self' data: blob: https:;
   font-src 'self' data:;
+  connect-src 'self' https://api.stripe.com;
+  frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
   object-src 'none';
   base-uri 'self';
   form-action 'self';

@@ -1,19 +1,20 @@
 import { ReactNode } from 'react';
-import ChakraUIProvider from '@/providers/ChakraUIProvider';
+import { unstable_noStore as noStore } from 'next/cache';
 import { Box } from '@chakra-ui/react';
+import { hasLocale } from 'next-intl';
+import { NextIntlClientProvider } from 'next-intl';
+import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
+import ChakraUIProvider from '@/providers/ChakraUIProvider';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
+import ToTop from '@/components/ui/buttons/ToTop';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/styles/swiper.css';
-import { hasLocale } from 'next-intl';
-import ToTop from '@/components/ui/buttons/ToTop';
-import { NextIntlClientProvider } from 'next-intl';
-import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { loadClientMessages } from '@/utils/i18nUtils';
 import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
 import { SessionProvider } from '@/providers/SessionProvider';
 import { ColorModeProvider } from '@/components/ui/chakra/color-mode';
 import { getCartItems } from '@/actions/cart/getCartItems';
@@ -39,12 +40,16 @@ interface Props {
 }
 
 export default async function Layout({ children, params }: Props) {
+	noStore();
+
 	const { locale } = await params;
 	if (!hasLocale(routing.locales, locale)) {
 		notFound();
 	}
 
-	const messages = await loadClientMessages([
+	const headersList = await headers();
+
+	const messagesPromise = loadClientMessages([
 		'common',
 		'auth',
 		'validation',
@@ -59,20 +64,32 @@ export default async function Layout({ children, params }: Props) {
 		'pagination',
 	]);
 
-	const session = await auth.api.getSession({ headers: await headers() });
+	const sessionPromise = auth.api.getSession({ headers: headersList });
+	const catalogPromise = getCatalog();
+
+	const [messages, session, catalogResponse] = await Promise.all([
+		messagesPromise,
+		sessionPromise,
+		catalogPromise,
+	]);
+
 	const userId = session?.user?.id ?? null;
 
-	const catalogResponse = await getCatalog();
+	const cartPromise = userId ? getCartItems(userId) : Promise.resolve({ success: true, items: [] });
+	const cartIdsPromise = userId
+		? getCartProductIds(userId)
+		: Promise.resolve({ success: false, productIds: [] });
+	const wishListPromise = userId ? getWishListProducts(userId) : Promise.resolve({ products: [] });
+	const wishListIdsPromise = userId
+		? getWishListProductIds(userId)
+		: Promise.resolve({ success: false, productIds: [] });
 
-	const cartResponse = userId ? await getCartItems(userId) : { success: true, items: [] };
-	const cartProductIds = userId
-		? await getCartProductIds(userId)
-		: { success: false, productIds: [] };
-
-	const wishListData = userId ? await getWishListProducts(userId) : { products: [] };
-	const wishListIds = userId
-		? await getWishListProductIds(userId)
-		: { success: false, productIds: [] };
+	const [cartResponse, cartProductIds, wishListData, wishListIds] = await Promise.all([
+		cartPromise,
+		cartIdsPromise,
+		wishListPromise,
+		wishListIdsPromise,
+	]);
 
 	const { success, ...restCartData } = cartResponse;
 

@@ -28,14 +28,14 @@ export const createPhoneSignUpSchema = (t: I18nData) =>
 	phoneSignUpSchemaShape(t as Parameters<typeof phoneSignUpSchemaShape>[0]);
 
 export async function getPhoneSignUpSchema() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	return phoneSignUpSchemaShape({
-		phoneRequired: t('phoneRequired'),
-		inputMaxLength: t('inputMaxLength'),
-		invalidPhone: t('invalidPhone'),
-		nameRequired: t('nameRequired'),
-		nameMinLength: t('nameMinLength'),
+		phoneRequired: validationT('phoneRequired'),
+		inputMaxLength: validationT('inputMaxLength'),
+		invalidPhone: validationT('invalidPhone'),
+		nameRequired: validationT('nameRequired'),
+		nameMinLength: validationT('nameMinLength'),
 	});
 }
 

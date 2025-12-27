@@ -6,7 +6,7 @@ import { decryptPassword } from '@/lib/crypto';
 import { getTranslations } from 'next-intl/server';
 
 export async function verifyEmailRegisterOtpAction(email: string, code: string) {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	const record = await prisma.emailRegistrationCode.findFirst({
 		where: {
@@ -18,7 +18,7 @@ export async function verifyEmailRegisterOtpAction(email: string, code: string) 
 	});
 
 	if (!record) {
-		return { success: false, message: t('otpExpired') };
+		return { success: false, message: validationT('otpExpired') };
 	}
 
 	try {
@@ -41,6 +41,6 @@ export async function verifyEmailRegisterOtpAction(email: string, code: string) 
 
 		return { success: true };
 	} catch {
-		return { success: false, message: t('userRegisterFail') };
+		return { success: false, message: validationT('userRegisterFail') };
 	}
 }

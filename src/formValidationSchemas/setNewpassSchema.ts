@@ -26,16 +26,16 @@ export const createNewPassSchema = (t: I18nData) =>
 	setNewPassSchema(t as Parameters<typeof setNewPassSchema>[0]);
 
 export async function getNewPassSchema() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	return setNewPassSchema({
-		passwordRequired: t('passwordRequired'),
-		passwordMin: t('passwordMin'),
-		passwordMax: t('passwordMax'),
-		passwordUppercase: t('passwordUppercase'),
-		passwordLowercase: t('passwordLowercase'),
-		passwordAlphabetic: t('passwordAlphabetic'),
-		passwordUnderscore: t('passwordUnderscore'),
+		passwordRequired: validationT('passwordRequired'),
+		passwordMin: validationT('passwordMin'),
+		passwordMax: validationT('passwordMax'),
+		passwordUppercase: validationT('passwordUppercase'),
+		passwordLowercase: validationT('passwordLowercase'),
+		passwordAlphabetic: validationT('passwordAlphabetic'),
+		passwordUnderscore: validationT('passwordUnderscore'),
 	});
 }
 

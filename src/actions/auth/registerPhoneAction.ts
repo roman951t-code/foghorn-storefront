@@ -7,7 +7,7 @@ export async function registerPhoneAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	const { phone, name } = formData as { name: string; phone: string };
 	const rawPhone = phone.replace(/\D/g, '');
@@ -22,7 +22,7 @@ export async function registerPhoneAction(
 	} catch {
 		return {
 			success: false,
-			message: t('userRegisterFail'),
+			message: validationT('userRegisterFail'),
 		};
 	}
 }

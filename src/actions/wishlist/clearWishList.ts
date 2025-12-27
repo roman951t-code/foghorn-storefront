@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
 export async function clearWishlist() {
-	const t = await getTranslations('wishlist');
+	const wishlistT = await getTranslations('wishlist');
 
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
@@ -22,6 +22,6 @@ export async function clearWishlist() {
 
 		return { success: true };
 	} catch (error) {
-		return { success: false, message: t('wishlistUpdateFailed') };
+		return { success: false, message: wishlistT('wishlistUpdateFailed') };
 	}
 }

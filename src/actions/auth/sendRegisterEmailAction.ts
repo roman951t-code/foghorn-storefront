@@ -5,8 +5,10 @@ import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
 import { getEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
 import { encryptPassword } from '@/lib/crypto';
+import { unstable_noStore as noStore } from 'next/cache';
+import { env } from '@/config/env';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(env.RESEND_API_KEY);
 
 function generateOtp() {
 	return Math.floor(100000 + Math.random() * 900000).toString();
@@ -16,13 +18,17 @@ export async function sendRegisterEmailAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string }> {
-	const t = await getTranslations('validation');
-	const authT = await getTranslations('auth');
+	noStore();
+
+	const [validationT, authT] = await Promise.all([
+		getTranslations('validation'),
+		getTranslations('auth'),
+	]);
 	const schema = await getEmailSignUpSchema();
 	const validated = schema.safeParse(formData);
 
 	if (!validated.success) {
-		return { success: false, message: t('invalidFormData') };
+		return { success: false, message: validationT('invalidFormData') };
 	}
 
 	const { email, password, name } = validated.data;
@@ -31,7 +37,7 @@ export async function sendRegisterEmailAction(
 		const existingUser = await prisma.user.findUnique({ where: { email } });
 
 		if (existingUser) {
-			return { success: false, message: t('userExists') };
+			return { success: false, message: validationT('userExists') };
 		}
 
 		await prisma.emailRegistrationCode.deleteMany({ where: { email } });
@@ -60,6 +66,6 @@ export async function sendRegisterEmailAction(
 
 		return { success: true };
 	} catch (error) {
-		return { success: false, message: t('userRegisterFail') };
+		return { success: false, message: validationT('userRegisterFail') };
 	}
 }

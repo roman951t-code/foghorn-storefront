@@ -11,7 +11,7 @@ export async function leaveFeedback(
 	formData: FeedbackSchema,
 	productId: string
 ): Promise<{ success: boolean; message?: string }> {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	const schema = await getFeedbackSchema();
 
@@ -21,13 +21,13 @@ export async function leaveFeedback(
 
 	const userId = session?.user?.id;
 	if (!userId) {
-		return { success: false, message: t('userNotFound') };
+		return { success: false, message: validationT('userNotFound') };
 	}
 
 	const validatedFormData = schema.safeParse(formData);
 
 	if (!validatedFormData.success) {
-		return { success: false, message: t('invalidFormData') };
+		return { success: false, message: validationT('invalidFormData') };
 	}
 
 	const { name, lastName } = validatedFormData.data;

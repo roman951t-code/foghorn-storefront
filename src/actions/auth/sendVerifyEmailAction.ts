@@ -6,8 +6,10 @@ import { getTranslations } from 'next-intl/server';
 import { emailSubscribeSchema } from 'formValidationSchemas/emailSubscribeSchema';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
+import { unstable_noStore as noStore } from 'next/cache';
+import { env } from '@/config/env';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(env.RESEND_API_KEY);
 
 function generateOtp() {
 	return Math.floor(100000 + Math.random() * 900000).toString();
@@ -17,18 +19,22 @@ export async function sendVerifyEmailAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string }> {
-	const t = await getTranslations('validation');
-	const authT = await getTranslations('auth');
+	noStore();
+
+	const [validationT, authT] = await Promise.all([
+		getTranslations('validation'),
+		getTranslations('auth'),
+	]);
 
 	const schema = await emailSubscribeSchema({
-		emailRequired: t('emailRequired'),
-		inputMaxLength: t('inputMaxLength'),
-		wrongEmail: t('wrongEmail'),
+		emailRequired: validationT('emailRequired'),
+		inputMaxLength: validationT('inputMaxLength'),
+		wrongEmail: validationT('wrongEmail'),
 	});
 	const validated = schema.safeParse(formData);
 
 	if (!validated.success) {
-		return { success: false, message: t('invalidFormData') };
+		return { success: false, message: validationT('invalidFormData') };
 	}
 
 	const { email } = validated.data;
@@ -39,7 +45,7 @@ export async function sendVerifyEmailAction(
 	const userId = session?.user?.id;
 
 	if (!userId) {
-		return { success: false, message: t('userNotFound') };
+		return { success: false, message: validationT('userNotFound') };
 	}
 
 	try {
@@ -67,6 +73,6 @@ export async function sendVerifyEmailAction(
 
 		return { success: true };
 	} catch (error) {
-		return { success: false, message: t('smsSendFailed') };
+		return { success: false, message: validationT('smsSendFailed') };
 	}
 }

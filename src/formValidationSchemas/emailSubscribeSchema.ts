@@ -18,12 +18,12 @@ export const createEmailSubscribeSchema = (t: I18nData) =>
 	emailSubscribeSchema(t as Parameters<typeof emailSubscribeSchema>[0]);
 
 export async function getEmailSubscribeSchema() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	return emailSubscribeSchema({
-		emailRequired: t('emailRequired'),
-		inputMaxLength: t('inputMaxLength'),
-		wrongEmail: t('wrongEmail'),
+		emailRequired: validationT('emailRequired'),
+		inputMaxLength: validationT('inputMaxLength'),
+		wrongEmail: validationT('wrongEmail'),
 	});
 }
 

@@ -18,12 +18,12 @@ export const createResetPassSchema = (t: I18nData) =>
 	resetPassSchemaShape(t as Parameters<typeof resetPassSchemaShape>[0]);
 
 export async function getResetPassSchema() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	return resetPassSchemaShape({
-		emailRequired: t('emailRequired'),
-		inputMaxLength: t('inputMaxLength'),
-		wrongEmail: t('wrongEmail'),
+		emailRequired: validationT('emailRequired'),
+		inputMaxLength: validationT('inputMaxLength'),
+		wrongEmail: validationT('wrongEmail'),
 	});
 }
 

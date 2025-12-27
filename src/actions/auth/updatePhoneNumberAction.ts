@@ -11,12 +11,12 @@ export async function updatePhoneNumberAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 	const { phoneSchema } = await getAccountSchemas();
 	const validated = phoneSchema.safeParse(formData);
 
 	if (!validated.success) {
-		return { success: false, message: t('invalidFormData') };
+		return { success: false, message: validationT('invalidFormData') };
 	}
 
 	const { phone } = validated.data;
@@ -26,7 +26,7 @@ export async function updatePhoneNumberAction(
 	const currentUserId = session?.user?.id;
 
 	if (!currentUserId) {
-		return { success: false, message: t('userNotFound') };
+		return { success: false, message: validationT('userNotFound') };
 	}
 
 	const existingUserWithPhone = await prisma.user.findUnique({
@@ -35,7 +35,7 @@ export async function updatePhoneNumberAction(
 	});
 
 	if (existingUserWithPhone && existingUserWithPhone.id !== currentUserId) {
-		return { success: false, message: t('userExists') };
+		return { success: false, message: validationT('userExists') };
 	}
 
 	try {
@@ -49,14 +49,14 @@ export async function updatePhoneNumberAction(
 	} catch (error: any) {
 		const messageKey = error?.body?.message ?? error?.message ?? '';
 		const errorMap: Record<string, string> = {
-			'Phone number already exists': t('userExists'),
-			'User not found': t('userNotFound'),
-			'Too many requests': t('tooManyRequests'),
+			'Phone number already exists': validationT('userExists'),
+			'User not found': validationT('userNotFound'),
+			'Too many requests': validationT('tooManyRequests'),
 		};
 
 		return {
 			success: false,
-			message: errorMap[messageKey] || t('userRegisterFail'),
+			message: errorMap[messageKey] || validationT('userRegisterFail'),
 		};
 	}
 }

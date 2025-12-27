@@ -40,11 +40,15 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const resolvedSearch = await searchParams;
 	const { searchQuery, tag } = resolvedSearch;
 	const { locale } = await params;
-	const t = await getTranslations('products');
-	const title = t('searchQueryResults', { searchQuery: tag ? t(tag) : searchQuery || '' });
-	const pagesT = await getTranslations('pages');
+	const [productsT, pagesT] = await Promise.all([
+		getTranslations('products'),
+		getTranslations('pages'),
+	]);
+	const title = productsT('searchQueryResults', {
+		searchQuery: tag ? productsT(tag) : searchQuery || '',
+	});
 	const description = pagesT('metadata.searchDescription', {
-		query: tag ? t(tag) : searchQuery || '',
+		query: tag ? productsT(tag) : searchQuery || '',
 	});
 
 	return {
@@ -66,8 +70,10 @@ export default async function SearchProducts({ searchParams }: Props) {
 		orderBy: orderByParam,
 	} = searchData;
 
-	const t = await getTranslations('products');
-	const sidebarT = await getTranslations('navigation');
+	const [productsT, navigationT] = await Promise.all([
+		getTranslations('products'),
+		getTranslations('navigation'),
+	]);
 
 	const parsedPage = Number.parseInt(pageParam, 10);
 	const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
@@ -113,21 +119,24 @@ export default async function SearchProducts({ searchParams }: Props) {
 	};
 
 	const buildTagResponse = async (tagValue: string) => {
-		const result = await getProductsByTag(
-			tagValue,
-			true,
-			pageSize,
-			offset,
-			minPrice,
-			maxPrice,
-			inStock,
-			orderBy,
-			dynamicFilters
-		);
+		const [result, tagFilters] = await Promise.all([
+			getProductsByTag(
+				tagValue,
+				true,
+				pageSize,
+				offset,
+				minPrice,
+				maxPrice,
+				inStock,
+				orderBy,
+				dynamicFilters
+			),
+			getTagFilters(tagValue),
+		]);
 
 		return {
 			products: result.products,
-			filters: await getTagFilters(tagValue),
+			filters: tagFilters,
 			subcategories: result?.subcategories ?? [],
 			totalCount: result?.totalCount ?? 0,
 			maxProductPrice: result.maxProductPrice,
@@ -135,20 +144,23 @@ export default async function SearchProducts({ searchParams }: Props) {
 	};
 
 	const buildSearchResponse = async () => {
-		const result = await getProductsBySearchQuery(
-			searchQuery,
-			pageSize,
-			offset,
-			minPrice,
-			maxPrice,
-			inStock,
-			orderBy,
-			dynamicFilters
-		);
+		const [result, searchFilters] = await Promise.all([
+			getProductsBySearchQuery(
+				searchQuery,
+				pageSize,
+				offset,
+				minPrice,
+				maxPrice,
+				inStock,
+				orderBy,
+				dynamicFilters
+			),
+			getSearchFilters(searchQuery),
+		]);
 
 		return {
 			products: result.products,
-			filters: await getSearchFilters(searchQuery),
+			filters: searchFilters,
 			subcategories: result.subcategories,
 			totalCount: result.totalCount,
 			maxProductPrice: result.maxProductPrice,
@@ -165,14 +177,16 @@ export default async function SearchProducts({ searchParams }: Props) {
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
 			<Heading as='h1' size='3xl' fontWeight='medium'>
-				{t('searchQueryResults', { searchQuery: tag ? t(tag) : searchQuery || '' })}
+				{productsT('searchQueryResults', {
+					searchQuery: tag ? productsT(tag) : searchQuery || '',
+				})}
 			</Heading>
 
 			<Flex hideFrom='lg' justifyContent='flex-end'>
 				<FiltersSidebar
 					filters={filters}
 					maxProductPrice={maxProductPrice}
-					btnText={sidebarT('sidebar.filters')}
+					btnText={navigationT('sidebar.filters')}
 				/>
 			</Flex>
 
@@ -195,11 +209,11 @@ export default async function SearchProducts({ searchParams }: Props) {
 					<VStack p='4' justifyContent='flex-start'>
 						<Text w='full' mb='1.5'>
 							<Highlight query={totalCount?.toString()} styles={{ fontWeight: 'semibold' }}>
-								{`${t('totalProducts')}: ${totalCount}`}
+								{`${productsT('totalProducts')}: ${totalCount}`}
 							</Highlight>
 						</Text>
 
-						<SearchCategories data={subcategories} allCategories={t('allCategories')} />
+						<SearchCategories data={subcategories} allCategories={productsT('allCategories')} />
 
 						<QuickFilters maxProductPrice={maxProductPrice} />
 						<Filters filters={filters} />
@@ -207,7 +221,11 @@ export default async function SearchProducts({ searchParams }: Props) {
 				</Box>
 
 				<Box as='section' w={{ base: '100%', lg: '80%' }}>
-					<ProductsGrid products={products} notFound={t('productsNotFound')} limit={pageSize} />
+					<ProductsGrid
+						products={products}
+						notFound={productsT('productsNotFound')}
+						limit={pageSize}
+					/>
 					<Pagination
 						currentPage={page}
 						totalItems={totalCount}
@@ -217,7 +235,7 @@ export default async function SearchProducts({ searchParams }: Props) {
 				</Box>
 			</Group>
 
-			<ViewedProductsSection title={t('viewed')} tag='viewed' />
+			<ViewedProductsSection title={productsT('viewed')} tag='viewed' />
 		</Flex>
 	);
 }

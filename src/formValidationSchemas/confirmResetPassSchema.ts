@@ -31,18 +31,18 @@ export const createConfirmResetPassSchema = (t: I18nData) =>
 	resetConfirmResetPassSchema(t as Parameters<typeof resetConfirmResetPassSchema>[0]);
 
 export async function getConfirmResetPassSchema() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	return resetConfirmResetPassSchema({
-		pinRequired: t('pinRequired'),
-		pinLength: t('pinLength'),
-		passwordRequired: t('passwordRequired'),
-		passwordMin: t('passwordMin'),
-		passwordMax: t('passwordMax'),
-		passwordUppercase: t('passwordUppercase'),
-		passwordLowercase: t('passwordLowercase'),
-		passwordAlphabetic: t('passwordAlphabetic'),
-		passwordUnderscore: t('passwordUnderscore'),
+		pinRequired: validationT('pinRequired'),
+		pinLength: validationT('pinLength'),
+		passwordRequired: validationT('passwordRequired'),
+		passwordMin: validationT('passwordMin'),
+		passwordMax: validationT('passwordMax'),
+		passwordUppercase: validationT('passwordUppercase'),
+		passwordLowercase: validationT('passwordLowercase'),
+		passwordAlphabetic: validationT('passwordAlphabetic'),
+		passwordUnderscore: validationT('passwordUnderscore'),
 	});
 }
 

@@ -9,13 +9,13 @@ export async function sendVerifyPhoneAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	const schema = await getPhoneSignInSchema();
 	const validatedFormData = schema.safeParse(formData);
 
 	if (!validatedFormData.success) {
-		return { success: false, message: t('invalidFormData') };
+		return { success: false, message: validationT('invalidFormData') };
 	}
 
 	const { phone } = validatedFormData.data;
@@ -37,13 +37,13 @@ export async function sendVerifyPhoneAction(
 		return { success: true };
 	} catch (error: any) {
 		const errorMap: Record<string, string> = {
-			'Too many requests': t('tooManyRequests'),
-			'Unknown error': t('smsSendFailed'),
+			'Too many requests': validationT('tooManyRequests'),
+			'Unknown error': validationT('smsSendFailed'),
 		};
 
 		return {
 			success: false,
-			message: errorMap[error?.body?.message ?? ''] || t('smsSendFailed'),
+			message: errorMap[error?.body?.message ?? ''] || validationT('smsSendFailed'),
 		};
 	}
 }

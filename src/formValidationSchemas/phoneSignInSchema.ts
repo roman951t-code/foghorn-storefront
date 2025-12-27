@@ -16,11 +16,11 @@ export const createPhoneSignInSchema = (t: I18nData) =>
 	phoneSignInSchemaShape(t as Parameters<typeof phoneSignInSchemaShape>[0]);
 
 export async function getPhoneSignInSchema() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	return phoneSignInSchemaShape({
-		phoneRequired: t('phoneRequired'),
-		invalidPhone: t('invalidPhone'),
+		phoneRequired: validationT('phoneRequired'),
+		invalidPhone: validationT('invalidPhone'),
 	});
 }
 

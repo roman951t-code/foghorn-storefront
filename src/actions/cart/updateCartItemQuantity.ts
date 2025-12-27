@@ -5,6 +5,8 @@ import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
+const MAX_ITEM_QUANTITY = 99;
+
 interface UpdateCartItemQuantityParams {
 	productId: string;
 	quantity: number;
@@ -14,7 +16,7 @@ export async function updateCartItemQuantity({
 	productId,
 	quantity,
 }: UpdateCartItemQuantityParams) {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
 
@@ -24,7 +26,7 @@ export async function updateCartItemQuantity({
 
 	const normalizedQty = Math.max(1, Math.floor(Number(quantity)));
 	if (!productId || !Number.isFinite(normalizedQty)) {
-		return { success: false, message: t('cartUpdateFailed') };
+		return { success: false, message: validationT('cartUpdateFailed') };
 	}
 
 	try {
@@ -34,21 +36,35 @@ export async function updateCartItemQuantity({
 		});
 
 		if (!cart) {
-			return { success: false, message: t('cartNotFound') };
+			return { success: false, message: validationT('cartNotFound') };
 		}
 
 		const existingItem = cart.items.find((item) => item.productId === productId);
 		if (!existingItem) {
-			return { success: false, message: t('productNotFoundInCart') };
+			return { success: false, message: validationT('productNotFoundInCart') };
+		}
+
+		const product = await prisma.product.findUnique({
+			where: { id: productId },
+			select: { stock: true, inStock: true },
+		});
+
+		if (!product || !product.inStock || !product.stock) {
+			return { success: false, message: validationT('cartUpdateFailed') };
+		}
+
+		const safeQty = Math.min(MAX_ITEM_QUANTITY, Math.min(product.stock, normalizedQty));
+		if (safeQty < 1) {
+			return { success: false, message: validationT('cartUpdateFailed') };
 		}
 
 		await prisma.cartItem.update({
 			where: { id: existingItem.id },
-			data: { quantity: normalizedQty },
+			data: { quantity: safeQty },
 		});
 
 		return { success: true };
 	} catch {
-		return { success: false, message: t('cartUpdateFailed') };
+		return { success: false, message: validationT('cartUpdateFailed') };
 	}
 }

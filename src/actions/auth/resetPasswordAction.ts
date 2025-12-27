@@ -8,13 +8,13 @@ export async function resetPasswordAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	const schema = await getResetPassSchema();
 	const validatedFormData = schema.safeParse(formData);
 
 	if (!validatedFormData.success) {
-		return { success: false, message: t('invalidFormData') };
+		return { success: false, message: validationT('invalidFormData') };
 	}
 
 	const { email } = validatedFormData.data;
@@ -29,15 +29,15 @@ export async function resetPasswordAction(
 		return { success: true };
 	} catch (error: any) {
 		const errorMap: Record<string, string> = {
-			'Invalid email': t('wrongEmail'),
-			'Missing email': t('emailRequired'),
-			'Too many requests': t('tooManyRequests'),
-			'Unknown error': t('setNewPassFail'),
+			'Invalid email': validationT('wrongEmail'),
+			'Missing email': validationT('emailRequired'),
+			'Too many requests': validationT('tooManyRequests'),
+			'Unknown error': validationT('setNewPassFail'),
 		};
 
 		return {
 			success: false,
-			message: errorMap[error?.body?.message ?? ''] || t('setNewPassFail'),
+			message: errorMap[error?.body?.message ?? ''] || validationT('setNewPassFail'),
 		};
 	}
 }

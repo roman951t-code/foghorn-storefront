@@ -13,12 +13,12 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 const faqs = faqData;
 
 export default async function FAQ() {
-	const t = await getTranslations('navigation');
+	const navigationT = await getTranslations('navigation');
 
 	return (
 		<Stack gap={6} p={4} pt={1}>
 			<Heading as='h1' size='3xl' fontWeight='normal' w='100%'>
-				{t('sidebar.faq')}
+				{navigationT('sidebar.faq')}
 			</Heading>
 
 			<List.Root gap='6' pl='4'>

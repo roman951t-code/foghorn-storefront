@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
+import { env } from '@/config/env';
 
-const secretKey = process.env.STRIPE_SECRET_KEY;
+const secretKey = env.STRIPE_SECRET_KEY;
 
 export const stripe =
 	secretKey && secretKey !== ''

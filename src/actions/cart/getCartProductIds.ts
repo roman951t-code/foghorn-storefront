@@ -1,8 +1,11 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export async function getCartProductIds(userId: string) {
+	noStore();
+
 	if (!userId) {
 		return { success: false, productIds: [] };
 	}

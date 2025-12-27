@@ -3,16 +3,19 @@
 import { unstable_cache } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 
-export const getSubcategoryFilters = unstable_cache(
-	async (subcategorySlug: string) => {
-		const subcategory = await prisma.productCategory.findUnique({
+type PrismaClientLike = typeof prisma;
+type CacheFn = typeof unstable_cache;
+
+function buildFilterFetchers(cache: CacheFn, db: PrismaClientLike) {
+	const fetchSubcategoryFilters = async (subcategorySlug: string) => {
+		const subcategory = await db.productCategory.findUnique({
 			where: { slug: subcategorySlug },
 			select: { id: true },
 		});
 
 		if (!subcategory) return null;
 
-		const attributes = await prisma.productAttribute.findMany({
+		const attributes = await db.productAttribute.findMany({
 			select: {
 				id: true,
 				name: true,
@@ -35,17 +38,10 @@ export const getSubcategoryFilters = unstable_cache(
 				};
 			})
 			.filter((attr) => attr.values.length > 0);
-	},
-	['product-filters'],
-	{
-		tags: ['product'],
-		revalidate: 1200,
-	}
-);
+	};
 
-export const getTagFilters = unstable_cache(
-	async (tag: string) => {
-		const attributes = await prisma.productAttribute.findMany({
+	const fetchTagFilters = async (tag: string) => {
+		const attributes = await db.productAttribute.findMany({
 			select: {
 				id: true,
 				name: true,
@@ -66,10 +62,27 @@ export const getTagFilters = unstable_cache(
 				};
 			})
 			.filter((attr) => attr.values.length > 0);
-	},
-	['tag-filters'],
-	{ tags: ['product'], revalidate: 1200 }
-);
+	};
+
+	const cachedSubcategoryFilters = cache(fetchSubcategoryFilters, ['product-filters'], {
+		tags: ['product'],
+		revalidate: 1200,
+	});
+
+	const cachedTagFilters = cache(fetchTagFilters, ['tag-filters'], {
+		tags: ['product'],
+		revalidate: 1200,
+	});
+
+	return {
+		getSubcategoryFilters: (subcategorySlug: string) => cachedSubcategoryFilters(subcategorySlug),
+		getTagFilters: (tag: string) => cachedTagFilters(tag),
+	};
+}
+
+const { getSubcategoryFilters, getTagFilters } = buildFilterFetchers(unstable_cache, prisma);
+
+export { getSubcategoryFilters, getTagFilters, buildFilterFetchers };
 
 export async function getSearchFilters(searchQuery: string) {
 	const attributes = await prisma.productAttribute.findMany({

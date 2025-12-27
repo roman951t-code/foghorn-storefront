@@ -1,7 +1,8 @@
 import { LOCALE_TO_HTML_LANG, type AppLocale } from '@/constants/locales';
 import { routing } from '@/i18n/routing';
+import { APP_URL } from '@/config/env';
 
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+export { APP_URL };
 
 export type AlternateSearchParams = Record<string, string | string[] | null | undefined>;
 

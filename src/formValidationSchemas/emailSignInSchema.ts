@@ -34,19 +34,19 @@ export const createEmailSignInSchema = (t: I18nData) =>
 	emailSignInSchemaShape(t as Parameters<typeof emailSignInSchemaShape>[0]);
 
 export async function getEmailSignInSchema() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	return emailSignInSchemaShape({
-		emailRequired: t('emailRequired'),
-		inputMaxLength: t('inputMaxLength'),
-		wrongEmail: t('wrongEmail'),
-		passwordRequired: t('passwordRequired'),
-		passwordMin: t('passwordMin'),
-		passwordMax: t('passwordMax'),
-		passwordUppercase: t('passwordUppercase'),
-		passwordLowercase: t('passwordLowercase'),
-		passwordAlphabetic: t('passwordAlphabetic'),
-		passwordUnderscore: t('passwordUnderscore'),
+		emailRequired: validationT('emailRequired'),
+		inputMaxLength: validationT('inputMaxLength'),
+		wrongEmail: validationT('wrongEmail'),
+		passwordRequired: validationT('passwordRequired'),
+		passwordMin: validationT('passwordMin'),
+		passwordMax: validationT('passwordMax'),
+		passwordUppercase: validationT('passwordUppercase'),
+		passwordLowercase: validationT('passwordLowercase'),
+		passwordAlphabetic: validationT('passwordAlphabetic'),
+		passwordUnderscore: validationT('passwordUnderscore'),
 	});
 }
 

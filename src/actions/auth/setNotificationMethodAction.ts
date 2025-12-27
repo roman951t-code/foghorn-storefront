@@ -9,14 +9,14 @@ export async function setNotificationMethodAction(
 	_: unknown,
 	formData: { notificationMethod: 'email' | 'phone' }
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
 
 	if (!session?.user?.email && !session?.user?.phoneNumber) {
-		return { success: false, message: t('userNotFound') };
+		return { success: false, message: validationT('userNotFound') };
 	}
 
 	try {
@@ -42,6 +42,6 @@ export async function setNotificationMethodAction(
 			return { success: true };
 		}
 	} catch (error) {
-		return { success: false, message: t('preferedNotifFailed') };
+		return { success: false, message: validationT('preferedNotifFailed') };
 	}
 }

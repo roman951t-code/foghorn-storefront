@@ -31,10 +31,10 @@ export async function getLocalizedMetadata(
 	pageKey: string,
 	options?: { pathname?: string; searchParams?: AlternateSearchParams; robots?: Metadata['robots'] }
 ): Promise<Metadata> {
-	const t = await getTranslations({ locale, namespace: 'pages' });
+	const pagesT = await getTranslations({ locale, namespace: 'pages' });
 
-	const title = t(`metadata.${pageKey}.title`);
-	const description = t(`metadata.${pageKey}.description`);
+	const title = pagesT(`metadata.${pageKey}.title`);
+	const description = pagesT(`metadata.${pageKey}.description`);
 
 	const alternates =
 		options?.pathname && locale

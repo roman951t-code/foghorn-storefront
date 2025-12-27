@@ -15,12 +15,12 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 }
 
 export default async function Checkout() {
-	const t = await getTranslations('products');
+	const productsT = await getTranslations('products');
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
 			<Heading as='h1' size='4xl' fontWeight='normal'>
-				{t('orderProcessing')}
+				{productsT('orderProcessing')}
 			</Heading>
 			<Group justifyContent='space-between' align='flex-start' gapX='6'>
 				<Box as='section' w={{ base: '100%', lg: '73%' }}>

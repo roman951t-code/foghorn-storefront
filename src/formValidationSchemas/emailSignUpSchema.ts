@@ -60,22 +60,22 @@ export const createEmailSignUpSchema = (t: I18nData) =>
 	emailSignUpSchemaShape(t as Parameters<typeof emailSignUpSchemaShape>[0]);
 
 export async function getEmailSignUpSchema() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	return emailSignUpSchemaShape({
-		emailRequired: t('emailRequired'),
-		inputMaxLength: t('inputMaxLength'),
-		wrongEmail: t('wrongEmail'),
-		passwordRequired: t('passwordRequired'),
-		passwordMin: t('passwordMin'),
-		passwordMax: t('passwordMax'),
-		passwordUppercase: t('passwordUppercase'),
-		passwordLowercase: t('passwordLowercase'),
-		passwordAlphabetic: t('passwordAlphabetic'),
-		passwordUnderscore: t('passwordUnderscore'),
-		passwordsNotMatch: t('passwordsNotMatch'),
-		nameRequired: t('nameRequired'),
-		nameMinLength: t('nameMinLength'),
+		emailRequired: validationT('emailRequired'),
+		inputMaxLength: validationT('inputMaxLength'),
+		wrongEmail: validationT('wrongEmail'),
+		passwordRequired: validationT('passwordRequired'),
+		passwordMin: validationT('passwordMin'),
+		passwordMax: validationT('passwordMax'),
+		passwordUppercase: validationT('passwordUppercase'),
+		passwordLowercase: validationT('passwordLowercase'),
+		passwordAlphabetic: validationT('passwordAlphabetic'),
+		passwordUnderscore: validationT('passwordUnderscore'),
+		passwordsNotMatch: validationT('passwordsNotMatch'),
+		nameRequired: validationT('nameRequired'),
+		nameMinLength: validationT('nameMinLength'),
 	});
 }
 

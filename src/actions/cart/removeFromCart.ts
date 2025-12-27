@@ -10,7 +10,7 @@ interface RemoveCartItemParams {
 }
 
 export async function removeFromCart({ productId }: RemoveCartItemParams) {
-	const t = await getTranslations('cart');
+	const cartT = await getTranslations('cart');
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
 
@@ -25,14 +25,14 @@ export async function removeFromCart({ productId }: RemoveCartItemParams) {
 		});
 
 		if (!cart) {
-			return { success: false, message: t('cartNotFound') };
+			return { success: false, message: cartT('cartNotFound') };
 		}
 
 		if (productId) {
 			const existingItem = cart.items.find((item) => item.productId === productId);
 
 			if (!existingItem) {
-				return { success: false, message: t('productNotFoundInCart') };
+				return { success: false, message: cartT('productNotFoundInCart') };
 			}
 
 			await prisma.cartItem.delete({
@@ -48,6 +48,6 @@ export async function removeFromCart({ productId }: RemoveCartItemParams) {
 			return { success: true };
 		}
 	} catch (error) {
-		return { success: false, message: t('cartUpdateFailed') };
+		return { success: false, message: cartT('cartUpdateFailed') };
 	}
 }

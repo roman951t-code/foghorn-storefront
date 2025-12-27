@@ -34,15 +34,15 @@ export const createFeedbackSchema = (t: I18nData) =>
 	feedbackSchemaShape(t as Parameters<typeof feedbackSchemaShape>[0]);
 
 export async function getFeedbackSchema() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	return feedbackSchemaShape({
-		nameRequired: t('nameRequired'),
-		lastNameRequired: t('lastNameRequired'),
-		feedbackRequired: t('feedbackRequired'),
-		inputMaxLength: t('inputMaxLength'),
-		feedbackMinLength: t('feedbackMinLength'),
-		feedbackMaxLength: t('feedbackMaxLength'),
+		nameRequired: validationT('nameRequired'),
+		lastNameRequired: validationT('lastNameRequired'),
+		feedbackRequired: validationT('feedbackRequired'),
+		inputMaxLength: validationT('inputMaxLength'),
+		feedbackMinLength: validationT('feedbackMinLength'),
+		feedbackMaxLength: validationT('feedbackMaxLength'),
 	});
 }
 

@@ -22,9 +22,9 @@ export async function generateMetadata({ params }: CategoryParams): Promise<Meta
 		notFound();
 	}
 
-	const t = await getTranslations('pages');
-	const title = t('metadata.category', { category: category.name });
-	const description = t('metadata.categoryDescription', { category: category.name });
+	const pagesT = await getTranslations('pages');
+	const title = pagesT('metadata.category', { category: category.name });
+	const description = pagesT('metadata.categoryDescription', { category: category.name });
 
 	return {
 		title,

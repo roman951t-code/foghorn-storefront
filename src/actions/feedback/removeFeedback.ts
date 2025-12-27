@@ -9,14 +9,14 @@ import { revalidateTag } from 'next/cache';
 export async function removeFeedback(
 	productId: string
 ): Promise<{ success: boolean; message?: string }> {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
 
 	const userId = session?.user?.id;
 	if (!userId) {
-		return { success: false, message: t('userNotFound') };
+		return { success: false, message: validationT('userNotFound') };
 	}
 
 	try {

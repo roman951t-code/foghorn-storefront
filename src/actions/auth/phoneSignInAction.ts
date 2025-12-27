@@ -9,12 +9,12 @@ export async function phoneSignInAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string } | undefined> {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 	const schema = await getPhoneSignInSchema();
 	const validated = schema.safeParse(formData);
 
 	if (!validated.success) {
-		return { success: false, message: t('invalidFormData') };
+		return { success: false, message: validationT('invalidFormData') };
 	}
 
 	const { phone } = validated.data;
@@ -26,7 +26,7 @@ export async function phoneSignInAction(
 	});
 
 	if (!existingUser) {
-		return { success: false, message: t('userNotFound') };
+		return { success: false, message: validationT('userNotFound') };
 	}
 
 	try {
@@ -40,13 +40,13 @@ export async function phoneSignInAction(
 	} catch (error: any) {
 		const messageKey = error?.body?.message ?? error?.message ?? '';
 		const errorMap: Record<string, string> = {
-			'Too many requests': t('tooManyRequests'),
-			'Unknown error': t('smsSendFailed'),
+			'Too many requests': validationT('tooManyRequests'),
+			'Unknown error': validationT('smsSendFailed'),
 		};
 
 		return {
 			success: false,
-			message: errorMap[messageKey] || t('userLoginFail'),
+			message: errorMap[messageKey] || validationT('userLoginFail'),
 		};
 	}
 }

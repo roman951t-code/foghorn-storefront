@@ -1,6 +1,11 @@
 import crypto from 'node:crypto';
+import { env } from '@/config/env';
 
-const KEY = Buffer.from(process.env.ENCRYPTION_KEY!, 'hex');
+if (!env.ENCRYPTION_KEY) {
+	throw new Error('ENCRYPTION_KEY is required');
+}
+
+const KEY = Buffer.from(env.ENCRYPTION_KEY, 'hex');
 
 const V1_PREFIX = 'v1';
 const V1_ALGORITHM = 'aes-256-gcm';

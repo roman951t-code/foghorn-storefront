@@ -6,7 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 
 export async function clearCart() {
-	const t = await getTranslations('cart');
+	const cartT = await getTranslations('cart');
 
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
@@ -22,7 +22,7 @@ export async function clearCart() {
 		});
 
 		if (!cart) {
-			return { success: false, message: t('cartNotFound') };
+			return { success: false, message: cartT('cartNotFound') };
 		}
 
 		await prisma.cartItem.deleteMany({
@@ -33,7 +33,7 @@ export async function clearCart() {
 	} catch (error) {
 		return {
 			success: false,
-			message: t('cartUpdateFailed'),
+			message: cartT('cartUpdateFailed'),
 		};
 	}
 }

@@ -47,20 +47,20 @@ export const createAccountSchema = (t: I18nData) =>
 	accountSchemaShape(t as Parameters<typeof accountSchemaShape>[0]);
 
 export async function getAccountSchemas() {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	const shape = accountSchemaShape({
-		nameRequired: t('nameRequired'),
-		nameMax: t('inputMaxLength'),
-		emailRequired: t('emailRequired'),
-		inputMaxLength: t('inputMaxLength'),
-		wrongEmail: t('wrongEmail'),
-		phoneRequired: t('phoneRequired'),
-		invalidPhone: t('invalidPhone'),
-		addressMax: t('inputMaxLength'),
-		nameMinLength: t('nameMinLength'),
-		middleNameRequired: t('middleNameRequired'),
-		lastNameRequired: t('lastNameRequired'),
+		nameRequired: validationT('nameRequired'),
+		nameMax: validationT('inputMaxLength'),
+		emailRequired: validationT('emailRequired'),
+		inputMaxLength: validationT('inputMaxLength'),
+		wrongEmail: validationT('wrongEmail'),
+		phoneRequired: validationT('phoneRequired'),
+		invalidPhone: validationT('invalidPhone'),
+		addressMax: validationT('inputMaxLength'),
+		nameMinLength: validationT('nameMinLength'),
+		middleNameRequired: validationT('middleNameRequired'),
+		lastNameRequired: validationT('lastNameRequired'),
 	});
 
 	return {

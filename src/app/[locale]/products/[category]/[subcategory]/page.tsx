@@ -31,9 +31,9 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const subcategoryData = await getSubcategoryNameBySlug(subcategory);
 	if (!subcategoryData) notFound();
 
-	const t = await getTranslations('pages');
-	const title = t('metadata.category', { category: subcategoryData.subcategoryName });
-	const description = t('metadata.categoryDescription', { category: subcategoryData.subcategoryName });
+	const pagesT = await getTranslations('pages');
+	const title = pagesT('metadata.category', { category: subcategoryData.subcategoryName });
+	const description = pagesT('metadata.categoryDescription', { category: subcategoryData.subcategoryName });
 
 	return {
 		title,
@@ -58,8 +58,10 @@ export default async function Subcategory({ params, searchParams }: Props) {
 		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
 	const offset = (page - 1) * pageSize;
 
-	const t = await getTranslations('products');
-	const sidebarT = await getTranslations('navigation');
+	const [productsT, navigationT] = await Promise.all([
+		getTranslations('products'),
+		getTranslations('navigation'),
+	]);
 
 	const minPrice = searchData?.min ? parseFloat(searchData?.min) : undefined;
 	const maxPrice = searchData?.max ? parseFloat(searchData?.max) : undefined;
@@ -83,8 +85,8 @@ export default async function Subcategory({ params, searchParams }: Props) {
 		}
 	}
 
-	const subcategoryFilters = await getSubcategoryFilters(subcategory);
-	const subcategoryData = await getProductsBySubcategorySlug(
+	const subcategoryFiltersPromise = getSubcategoryFilters(subcategory);
+	const subcategoryDataPromise = getProductsBySubcategorySlug(
 		subcategory,
 		pageSize,
 		offset,
@@ -95,6 +97,11 @@ export default async function Subcategory({ params, searchParams }: Props) {
 		orderBy,
 		dynamicFilters
 	);
+
+	const [subcategoryFilters, subcategoryData] = await Promise.all([
+		subcategoryFiltersPromise,
+		subcategoryDataPromise,
+	]);
 
 	if (!subcategoryData) notFound();
 
@@ -141,7 +148,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 				<FiltersSidebar
 					filters={subcategoryFilters}
 					maxProductPrice={subcategoryData.maxProductPrice}
-					btnText={sidebarT('sidebar.filters')}
+					btnText={navigationT('sidebar.filters')}
 				/>
 			</Flex>
 			<FiltersTags />
@@ -165,7 +172,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 								query={subcategoryData?.totalCount?.toString()}
 								styles={{ fontWeight: 'semibold' }}
 							>
-								{`${t('totalProducts')}: ${subcategoryData?.totalCount}`}
+								{`${productsT('totalProducts')}: ${subcategoryData?.totalCount}`}
 							</Highlight>
 						</Text>
 						<Separator color='border.light' w='full' my='2' />
@@ -177,7 +184,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 				<Box as='section' w={{ base: '100%', lg: '80%' }}>
 					<ProductsGrid
 						products={subcategoryData.products}
-						notFound={t('productsNotFound')}
+						notFound={productsT('productsNotFound')}
 						limit={pageSize}
 					/>
 					<Pagination
@@ -189,7 +196,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 				</Box>
 			</Group>
 
-			<ViewedProductsSection title={t('viewed')} tag='viewed' />
+			<ViewedProductsSection title={productsT('viewed')} tag='viewed' />
 		</Flex>
 	);
 }

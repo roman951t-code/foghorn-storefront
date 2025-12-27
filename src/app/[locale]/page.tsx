@@ -22,10 +22,12 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 export const revalidate = 60;
 
 export default async function Main() {
-	const genT = await getTranslations('common');
-	const prodT = await getTranslations('products');
-	const authT = await getTranslations('auth');
-	const validT = await getTranslations('validation');
+	const [genT, prodT, authT, validT] = await Promise.all([
+		getTranslations('common'),
+		getTranslations('products'),
+		getTranslations('auth'),
+		getTranslations('validation'),
+	]);
 
 	const i18nData = extractI18nData(genT, ['seeCategory', 'seeAll']);
 

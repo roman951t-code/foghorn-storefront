@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
 export async function deleteUserAction(): Promise<{ success: boolean; message?: string }> {
-	const t = await getTranslations('validation');
+	const validationT = await getTranslations('validation');
 
 	const session = await auth.api.getSession({
 		headers: await headers(),
@@ -14,7 +14,7 @@ export async function deleteUserAction(): Promise<{ success: boolean; message?: 
 	const userId = session?.user?.id;
 
 	if (!userId) {
-		return { success: false, message: t('userNotFound') };
+		return { success: false, message: validationT('userNotFound') };
 	}
 
 	try {
@@ -26,6 +26,6 @@ export async function deleteUserAction(): Promise<{ success: boolean; message?: 
 
 		return { success: true };
 	} catch (error) {
-		return { success: false, message: t('deleteFailed') };
+		return { success: false, message: validationT('deleteFailed') };
 	}
 }
