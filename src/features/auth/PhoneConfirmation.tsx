@@ -6,10 +6,7 @@ import type { I18nData } from '@/types/i18n';
 import { formatTime } from '@/utils/generalUtils';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-	createPhoneVerifySchema,
-	PhoneVerifySchema,
-} from 'formValidationSchemas/phoneVerifySchema';
+import { createPhoneVerifySchema, PhoneVerifySchema } from 'validationSchemas/phoneVerifySchema';
 import { authClient } from '@/lib/auth-client';
 import { useSession } from '@/providers/SessionProvider';
 import { registerPhoneAction } from '@/actions/auth/registerPhoneAction';

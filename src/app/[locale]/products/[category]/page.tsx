@@ -9,9 +9,11 @@ import CategoryCards from './_components/CategoryCards';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
 import Script from 'next/script';
 import { CategoryParams } from '@/types/routing';
+import { ensureParams } from '@/utils/validateParams';
+import { categoryParamsSchema } from 'validationSchemas/productParamsSchemas';
 
 export async function generateMetadata({ params }: CategoryParams): Promise<Metadata> {
-	const { category: categorySlug, locale } = await params;
+	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
 
 	const category = await prisma.productCategory.findUnique({
 		where: { slug: categorySlug },
@@ -36,7 +38,7 @@ export async function generateMetadata({ params }: CategoryParams): Promise<Meta
 export const revalidate = 120;
 
 export default async function CategoryPage({ params }: CategoryParams) {
-	const { category: categorySlug, locale } = await params;
+	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
 	const categoryDataResponse = await getCategoryData();
 
 	const category = categoryDataResponse.categoryData.find((cat) => cat.slug === categorySlug);

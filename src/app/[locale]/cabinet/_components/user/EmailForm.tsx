@@ -6,7 +6,7 @@ import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { useId, useState } from 'react';
 import EmailVerification from './EmailVerification';
 import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
-import { EmailSchema } from 'formValidationSchemas/emailSubscribeSchema';
+import { EmailSchema } from 'validationSchemas/emailSubscribeSchema';
 import { FIELD_ORIENTATION_MD } from '@/constants/forms';
 
 interface Props {

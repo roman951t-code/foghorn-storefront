@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { unstable_noStore as noStore } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
@@ -33,8 +32,6 @@ function resolveSafeRedirectUrl(
 }
 
 export async function POST(req: NextRequest) {
-	noStore();
-
 	const bodySchema = z.object({
 		items: z
 			.array(

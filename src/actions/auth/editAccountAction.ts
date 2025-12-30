@@ -1,8 +1,10 @@
 'use server';
 
+import 'server-only';
+
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
-import { getAccountSchemas, NameSchemaData } from 'formValidationSchemas/accountSchema';
+import { getAccountSchemas, NameSchemaData } from 'validationSchemas/accountSchema';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 

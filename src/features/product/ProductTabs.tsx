@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Product } from '@/types/product';
 import { Tabs } from '@chakra-ui/react';
@@ -28,8 +27,8 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
-	const initialTab: ProductTabValue = tab && isProductTabValue(tab) ? tab : 'about';
-	const [selectedTab, setSelectedTab] = useState<ProductTabValue>(initialTab);
+	const urlTab = searchParams?.get('tab') ?? tab;
+	const selectedTab: ProductTabValue = urlTab && isProductTabValue(urlTab) ? urlTab : 'about';
 
 	if (!product) {
 		return null;
@@ -43,51 +42,50 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 			? effectiveReviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
 			: product.averageRating ?? 0;
 
-	useEffect(() => {
-		const urlTab = searchParams?.get('tab') ?? undefined;
-		const next: ProductTabValue = urlTab && isProductTabValue(urlTab) ? urlTab : 'about';
-		if (next !== selectedTab) {
-			setSelectedTab(next);
-		}
-	}, [searchParams, selectedTab]);
+	const aboutContent =
+		selectedTab === 'about' ? (
+			<AboutTab
+				product={product}
+				category={category}
+				subcategory={subcategory}
+				averageRating={averageRating}
+				reviewCount={reviewCount}
+				onTabChange={(nextTab) => handleTabChange(nextTab)}
+			/>
+		) : null;
+	const characteristicsContent =
+		selectedTab === 'characteristics' ? (
+			<CharacteristicsTab attributes={product.attributes} />
+		) : null;
+	const feedbackContent =
+		selectedTab === 'feedback' ? (
+			<FeedbackTab
+				averageRating={averageRating}
+				deleteReviewFail={validT('deleteReviewFail')}
+				productId={product.id}
+				reviews={product.reviews as Review[]}
+			/>
+		) : null;
 
 	const items = [
 		{
 			title: prodT('about'),
 			value: 'about' as const,
-			content: (
-				<AboutTab
-					product={product}
-					category={category}
-					subcategory={subcategory}
-					averageRating={averageRating}
-					reviewCount={reviewCount}
-					onTabChange={(nextTab) => handleTabChange(nextTab)}
-				/>
-			),
+			content: aboutContent,
 		},
 		{
 			title: prodT('characteristics'),
 			value: 'characteristics' as const,
-			content: <CharacteristicsTab product={product} attributes={product.attributes} />,
+			content: characteristicsContent,
 		},
 		{
 			title: prodT('feedback'),
 			value: 'feedback' as const,
-			content: (
-				<FeedbackTab
-					averageRating={averageRating}
-					deleteReviewFail={validT('deleteReviewFail')}
-					productId={product.id}
-					reviews={product.reviews as Review[]}
-				/>
-			),
+			content: feedbackContent,
 		},
 	];
 
 	const handleTabChange = (next: ProductTabValue) => {
-		setSelectedTab(next);
-
 		const params = new URLSearchParams(searchParams?.toString());
 		if (next === 'about') {
 			params.delete('tab');

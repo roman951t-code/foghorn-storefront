@@ -3,7 +3,7 @@
 import { createBoundedStore } from './createBoundedStore';
 import { leaveFeedback } from '@/actions/feedback/leaveFeedback';
 import { removeFeedback } from '@/actions/feedback/removeFeedback';
-import type { FeedbackSchema } from 'formValidationSchemas/feedbackSchema';
+import type { FeedbackSchema } from 'validationSchemas/feedbackSchema';
 import type { Review } from '@/types/product';
 
 type ReviewStore = {

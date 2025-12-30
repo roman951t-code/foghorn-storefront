@@ -1,4 +1,6 @@
 'use server';
+import 'server-only';
+
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';

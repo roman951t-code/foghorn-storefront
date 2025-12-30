@@ -1,7 +1,9 @@
 'use server';
 
+import 'server-only';
+
 import { getTranslations } from 'next-intl/server';
-import { getResetPassSchema } from 'formValidationSchemas/resetPassSchema';
+import { getResetPassSchema } from 'validationSchemas/resetPassSchema';
 import { auth } from '@/lib/auth';
 
 export async function resetPasswordAction(

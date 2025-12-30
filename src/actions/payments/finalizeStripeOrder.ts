@@ -1,12 +1,16 @@
 'use server';
 
+import 'server-only';
+
 import { Prisma } from '@prisma/client';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
+import { env } from '@/config/env';
 import { normalizeOrder } from '../orderUtils';
 import type { UserOrder } from '@/types/order';
+import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 
 type Result =
 	| { success: true; order?: UserOrder }
@@ -207,5 +211,12 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 	}
 
 	const normalized = await normalizeOrder(order);
+	await sendOrderConfirmationEmail({
+		order: normalized,
+		email: session.user?.email ?? null,
+		name: session.user?.name ?? null,
+		headersList: requestHeaders,
+	});
+
 	return { success: true, order: normalized };
 }

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import type { I18nData } from '@/types/i18n';
 import { useMemo } from 'react';
 import { resetPasswordAction } from '@/actions/auth/resetPasswordAction';
-import { createResetPassSchema, ResetPassSchema } from 'formValidationSchemas/resetPassSchema';
+import { createResetPassSchema, ResetPassSchema } from 'validationSchemas/resetPassSchema';
 import ResetPassConfirmation from './ResetPassConfirmation';
 
 interface ResetPassProps {

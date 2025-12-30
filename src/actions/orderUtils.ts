@@ -1,5 +1,7 @@
 'use server';
 
+import 'server-only';
+
 import type { OrderItem, UserOrder } from '@/types/order';
 
 export async function normalizeOrder(order: any): Promise<UserOrder> {

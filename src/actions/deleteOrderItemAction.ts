@@ -1,5 +1,7 @@
 'use server';
 
+import 'server-only';
+
 import { Prisma } from '@prisma/client';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';

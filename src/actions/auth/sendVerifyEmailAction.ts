@@ -1,15 +1,13 @@
 'use server';
 
+import 'server-only';
+
 import { prisma } from '@/lib/prisma';
-import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
-import { emailSubscribeSchema } from 'formValidationSchemas/emailSubscribeSchema';
+import { emailSubscribeSchema } from 'validationSchemas/emailSubscribeSchema';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import { unstable_noStore as noStore } from 'next/cache';
-import { env } from '@/config/env';
-
-const resend = new Resend(env.RESEND_API_KEY);
+import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
 
 function generateOtp() {
 	return Math.floor(100000 + Math.random() * 900000).toString();
@@ -19,11 +17,10 @@ export async function sendVerifyEmailAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string }> {
-	noStore();
-
-	const [validationT, authT] = await Promise.all([
+	const [validationT, authT, emailsT] = await Promise.all([
 		getTranslations('validation'),
 		getTranslations('auth'),
+		getTranslations('emails'),
 	]);
 
 	const schema = await emailSubscribeSchema({
@@ -62,13 +59,24 @@ export async function sendVerifyEmailAction(
 			},
 		});
 
-		await resend.emails.send({
-			from: 'Acme <onboarding@resend.dev>',
-			to: [email],
+		const recipientName = session.user.name ?? email ?? emailsT('defaultRecipient');
+		const emailContent = renderEmailTemplate({
 			subject: authT('verifyEmail'),
-			text: `${authT('hiUser')} ${session.user.name ?? ''},\n\n${authT(
-				'otpToVerifyEmail'
-			)}:\n\n${otp}\n\n${authT('otpExpiresIn')}.`,
+			title: authT('verifyEmail'),
+			salutation: `${emailsT('greeting')} ${recipientName},`,
+			intro: [emailsT('otpVerifyIntro')],
+			detailRows: [{ label: emailsT('otpCodeLabel'), value: otp }],
+			outro: [emailsT('otpExpires'), emailsT('ignoreIfNotYou')],
+			footer: emailsT('signature'),
+			brandName: emailsT('brandName'),
+		});
+
+		await resendClient.emails.send({
+			from: DEFAULT_FROM,
+			to: [email],
+			subject: emailContent.subject,
+			html: emailContent.html,
+			text: emailContent.text,
 		});
 
 		return { success: true };

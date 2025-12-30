@@ -12,12 +12,22 @@ import { trackProductView } from '@/actions/products/trackProductView';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
 import Script from 'next/script';
 import { ProductParams } from '@/types/routing';
+import { ensureParams } from '@/utils/validateParams';
+import {
+	productParamsSchema,
+	productSearchParamsSchema,
+} from 'validationSchemas/productParamsSchemas';
 
 type Props = ProductParams & { searchParams: { tab?: string } };
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
-	const { product: productSlug, category, subcategory, locale } = await params;
-	const resolvedSearch = await searchParams;
+	const {
+		product: productSlug,
+		category,
+		subcategory,
+		locale,
+	} = ensureParams(productParamsSchema, await params);
+	const resolvedSearch = ensureParams(productSearchParamsSchema, await searchParams);
 
 	const productData = await getProductNameBySlug(productSlug);
 	if (!productData) notFound();
@@ -62,8 +72,11 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 }
 
 export default async function ProductDetail({ params, searchParams }: Props) {
-	const { category, subcategory, product, locale } = await params;
-	const { tab } = await searchParams;
+	const { category, subcategory, product, locale } = ensureParams(
+		productParamsSchema,
+		await params
+	);
+	const { tab } = ensureParams(productSearchParamsSchema, await searchParams);
 
 	const headersList = await headers();
 	const [productData, session] = await Promise.all([

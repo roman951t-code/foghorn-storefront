@@ -9,7 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	ConfirmResetPassSchema,
 	createConfirmResetPassSchema,
-} from 'formValidationSchemas/confirmResetPassSchema';
+} from 'validationSchemas/confirmResetPassSchema';
 import { resetPasswordAction } from '@/actions/auth/resetPasswordAction';
 import { authClient } from '@/lib/auth-client';
 import { showToaster } from '@/utils/toast';

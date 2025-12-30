@@ -6,10 +6,7 @@ import type { I18nData } from '@/types/i18n';
 import { formatTime } from '@/utils/generalUtils';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-	createPhoneVerifySchema,
-	PhoneVerifySchema,
-} from 'formValidationSchemas/phoneVerifySchema';
+import { createPhoneVerifySchema, PhoneVerifySchema } from 'validationSchemas/phoneVerifySchema';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
@@ -82,14 +79,14 @@ export default function EmailVerification({ email, i18nData, onCloseAction }: Pr
 			if (!result?.success) {
 				setVerifyError(result?.message!);
 			} else {
-					showToaster('success', toasterMessages.emailUpdated(i18nData));
+				showToaster('success', toasterMessages.emailUpdated(i18nData));
 
-					await refresh();
-					onCloseAction();
-				}
-			} catch {
-				setVerifyError(i18nData.invalidFormData);
+				await refresh();
+				onCloseAction();
 			}
+		} catch {
+			setVerifyError(i18nData.invalidFormData);
+		}
 	};
 
 	const formattedTime = formatTime(timer);

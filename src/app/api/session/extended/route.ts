@@ -2,11 +2,8 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
 import { jsonNoStore } from '@/lib/response';
-import { unstable_noStore as noStore } from 'next/cache';
 
 export async function GET() {
-	noStore();
-
 	try {
 		const session = await auth.api.getSession({
 			headers: await headers(),

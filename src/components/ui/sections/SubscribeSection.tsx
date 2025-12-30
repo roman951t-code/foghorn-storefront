@@ -10,10 +10,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
-import {
-	createEmailSubscribeSchema,
-	EmailSchema,
-} from 'formValidationSchemas/emailSubscribeSchema';
+import { createEmailSubscribeSchema, EmailSchema } from 'validationSchemas/emailSubscribeSchema';
 import { subscribeNewsletterAction } from '@/actions/newsletter/subscribeNewsletterAction';
 import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
 import { unsubscribeNewsletterAction } from '@/actions/newsletter/unsubscribeNewsletterAction';

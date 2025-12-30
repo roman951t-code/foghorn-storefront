@@ -1,7 +1,9 @@
 'use server';
+import 'server-only';
+
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { FeedbackSchema, getFeedbackSchema } from 'formValidationSchemas/feedbackSchema';
+import { FeedbackSchema, getFeedbackSchema } from 'validationSchemas/feedbackSchema';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { revalidateTag } from 'next/cache';

@@ -4,7 +4,7 @@ import type { I18nData } from '@/types/i18n';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { useId, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PhoneSchemaData, type AccountSchemas } from 'formValidationSchemas/accountSchema';
+import { PhoneSchemaData, type AccountSchemas } from 'validationSchemas/accountSchema';
 import { updatePhoneNumberAction } from '@/actions/auth/updatePhoneNumberAction';
 import { PHONE_INPUT_MASKS } from '@/constants/auth';
 import { showToaster } from '@/utils/toast';
@@ -57,21 +57,21 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 		<form onSubmit={handleSubmit(onSubmit)}>
 			<Fieldset.Root size='lg' invalid>
 				<Fieldset.Content>
-						<Field.Root
-							orientation={FIELD_ORIENTATION_MD}
-							justifyContent='center'
-							invalid={!!errors.phone || !!authError}
-						>
-							<Field.Label maxH='20px' htmlFor={phoneId}>
-								{i18nData.phone}
-							</Field.Label>
-							<Stack w='full' direction={{ base: 'column', sm: 'row' } as const} gap='4'>
-								<VStack w='full' alignItems='flex-start'>
-									<Input
-										id={phoneId}
-										{...registerWithMask('phone', PHONE_INPUT_MASKS, {
-											required: i18nData.phoneRequired,
-										})}
+					<Field.Root
+						orientation={FIELD_ORIENTATION_MD}
+						justifyContent='center'
+						invalid={!!errors.phone || !!authError}
+					>
+						<Field.Label maxH='20px' htmlFor={phoneId}>
+							{i18nData.phone}
+						</Field.Label>
+						<Stack w='full' direction={{ base: 'column', sm: 'row' } as const} gap='4'>
+							<VStack w='full' alignItems='flex-start'>
+								<Input
+									id={phoneId}
+									{...registerWithMask('phone', PHONE_INPUT_MASKS, {
+										required: i18nData.phoneRequired,
+									})}
 									type='text'
 									variant='outline'
 									size='md'

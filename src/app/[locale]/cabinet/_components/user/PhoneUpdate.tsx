@@ -6,10 +6,7 @@ import type { I18nData } from '@/types/i18n';
 import { formatTime } from '@/utils/generalUtils';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-	createPhoneVerifySchema,
-	PhoneVerifySchema,
-} from 'formValidationSchemas/phoneVerifySchema';
+import { createPhoneVerifySchema, PhoneVerifySchema } from 'validationSchemas/phoneVerifySchema';
 import { authClient } from '@/lib/auth-client';
 import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
 import { showToaster } from '@/utils/toast';
@@ -23,7 +20,12 @@ interface Props {
 	onCloseAction: () => void;
 }
 
-export default function PhoneUpdate({ phone, i18nData, refreshSessionAction, onCloseAction }: Props) {
+export default function PhoneUpdate({
+	phone,
+	i18nData,
+	refreshSessionAction,
+	onCloseAction,
+}: Props) {
 	const schema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
 
 	const [timer, setTimer] = useState(0);
@@ -79,8 +81,9 @@ export default function PhoneUpdate({ phone, i18nData, refreshSessionAction, onC
 			if (error) {
 				const messageKey = error?.message ?? '';
 				const message =
-					(messageKey && messageKey in errorMap ? errorMap[messageKey as keyof typeof errorMap] : null) ||
-					i18nData.userRegisterFail;
+					(messageKey && messageKey in errorMap
+						? errorMap[messageKey as keyof typeof errorMap]
+						: null) || i18nData.userRegisterFail;
 				setVerifyError(message);
 				return;
 			} else {

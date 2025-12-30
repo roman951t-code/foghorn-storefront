@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { unstable_noStore as noStore } from 'next/cache';
 import { Box } from '@chakra-ui/react';
 import { hasLocale } from 'next-intl';
 import { NextIntlClientProvider } from 'next-intl';
@@ -40,8 +39,6 @@ interface Props {
 }
 
 export default async function Layout({ children, params }: Props) {
-	noStore();
-
 	const { locale } = await params;
 	if (!hasLocale(routing.locales, locale)) {
 		notFound();

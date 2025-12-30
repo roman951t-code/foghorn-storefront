@@ -1,13 +1,15 @@
 'use server';
 
+import 'server-only';
+
 import { Prisma } from '@prisma/client';
 import { headers } from 'next/headers';
-import { unstable_noStore as noStore } from 'next/cache';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { normalizeOrder } from './orderUtils';
 import type { UserOrder } from '@/types/order';
+import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 
 type CreateOrderItemPayload = { productId: string; quantity: number };
 
@@ -38,14 +40,13 @@ export async function createOrderAction(
 	_: unknown,
 	payload: CreateOrderPayload
 ): Promise<CreateOrderResult> {
-	noStore();
-
 	const parsed = CreateOrderSchema.safeParse(payload);
 	if (!parsed.success) {
 		return { success: false, message: 'invalid-payload' };
 	}
 
-	const session = await auth.api.getSession({ headers: await headers() });
+	const requestHeaders = await headers();
+	const session = await auth.api.getSession({ headers: requestHeaders });
 	const userId = session?.user?.id;
 
 	if (!userId) {
@@ -170,6 +171,14 @@ export async function createOrderAction(
 		});
 
 		const normalized = await normalizeOrder(order);
+
+		await sendOrderConfirmationEmail({
+			order: normalized,
+			email: session.user?.email ?? null,
+			name: session.user?.name ?? null,
+			headersList: requestHeaders,
+		});
+
 		return { success: true, order: normalized };
 	} catch (error) {
 		return { success: false, message: 'order-create-failed' };

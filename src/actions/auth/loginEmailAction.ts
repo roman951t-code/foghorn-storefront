@@ -1,6 +1,8 @@
 'use server';
 
-import { getEmailSignInSchema } from 'formValidationSchemas/emailSignInSchema';
+import 'server-only';
+
+import { getEmailSignInSchema } from 'validationSchemas/emailSignInSchema';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
 

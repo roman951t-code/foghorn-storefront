@@ -1,42 +1,39 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
-import { unstable_cache } from 'next/cache';
+import 'server-only';
 
-export const getCatalog = unstable_cache(
-	async () => {
-		const catalog = await prisma.productCategory.findMany({
-			where: { parentId: null },
-			select: {
-				id: true,
-				name: true,
-				slug: true,
-				imageUrl: true,
-				children: {
-					select: {
-						id: true,
-						name: true,
-						slug: true,
-						imageUrl: true,
-						products: {
-							select: {
-								id: true,
-								name: true,
-								fullSlug: true,
-								imageUrl: true,
-							},
-							where: { imageUrl: { not: null } },
-							orderBy: { createdAt: 'desc' },
-							take: 5,
+import { prisma } from '@/lib/prisma';
+
+export async function getCatalog() {
+	const catalog = await prisma.productCategory.findMany({
+		where: { parentId: null },
+		select: {
+			id: true,
+			name: true,
+			slug: true,
+			imageUrl: true,
+			children: {
+				select: {
+					id: true,
+					name: true,
+					slug: true,
+					imageUrl: true,
+					products: {
+						select: {
+							id: true,
+							name: true,
+							fullSlug: true,
+							imageUrl: true,
 						},
+						where: { imageUrl: { not: null } },
+						orderBy: { createdAt: 'desc' },
+						take: 5,
 					},
 				},
 			},
-			orderBy: { name: 'asc' },
-		});
+		},
+		orderBy: { name: 'asc' },
+	});
 
-		return { success: true, catalog };
-	},
-	['catalog', 'with-images-v2'],
-	{ revalidate: 3600 }
-);
+	return { success: true, catalog };
+}

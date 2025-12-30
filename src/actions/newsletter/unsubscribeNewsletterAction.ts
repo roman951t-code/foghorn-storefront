@@ -1,16 +1,15 @@
 'use server';
 
+import 'server-only';
+
 import { prisma } from '@/lib/prisma';
-import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import { unstable_noStore as noStore } from 'next/cache';
-import { env } from '@/config/env';
 import { z } from 'zod';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
 
-const resend = new Resend(env.RESEND_API_KEY);
 const UnsubscribeSchema = z.object({
 	email: z.string().email(),
 });
@@ -19,12 +18,9 @@ export async function unsubscribeNewsletterAction(
 	_: unknown,
 	formData: { email: string }
 ): Promise<{ success: boolean; message?: string }> {
-	noStore();
-
-	const [commonT, authT, validationT] = await Promise.all([
-		getTranslations('common'),
-		getTranslations('auth'),
+	const [validationT, emailsT] = await Promise.all([
 		getTranslations('validation'),
+		getTranslations('emails'),
 	]);
 
 	const requestHeaders = await headers();
@@ -75,13 +71,23 @@ export async function unsubscribeNewsletterAction(
 			});
 		}
 
-		await resend.emails.send({
-			from: 'Acme <onboarding@resend.dev>',
+		const recipientName = session?.user?.name ?? emailsT('defaultRecipient');
+		const emailContent = renderEmailTemplate({
+			subject: emailsT('newsletterUnsubscribedSubject'),
+			title: emailsT('newsletterUnsubscribedSubject'),
+			salutation: `${emailsT('greeting')} ${recipientName},`,
+			intro: [emailsT('newsletterUnsubscribedIntro')],
+			outro: [emailsT('farewell'), emailsT('help')],
+			footer: emailsT('signature'),
+			brandName: emailsT('brandName'),
+		});
+
+		await resendClient.emails.send({
+			from: DEFAULT_FROM,
 			to: [formEmail],
-			subject: commonT('unsubscribeProcedure'),
-			text: `${authT('hiUser')} ${
-				session?.user?.name ?? ''
-			},\n\n${commonT('unsubscribedSuccessfully')}`,
+			subject: emailContent.subject,
+			html: emailContent.html,
+			text: emailContent.text,
 		});
 
 		return { success: true };

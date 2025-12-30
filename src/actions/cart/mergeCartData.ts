@@ -1,16 +1,15 @@
 'use server';
 
+import 'server-only';
+
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
-import { unstable_noStore as noStore } from 'next/cache';
 
 const MAX_ITEM_QUANTITY = 99;
 
 export async function mergeCartData(localItems: { id: string; quantity: number }[]) {
-	noStore();
-
 	const cartT = await getTranslations('cart');
 
 	const session = await auth.api.getSession({ headers: await headers() });

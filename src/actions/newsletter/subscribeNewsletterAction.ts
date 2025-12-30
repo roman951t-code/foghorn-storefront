@@ -1,16 +1,15 @@
 'use server';
 
+import 'server-only';
+
 import { prisma } from '@/lib/prisma';
-import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import { unstable_noStore as noStore } from 'next/cache';
-import { env } from '@/config/env';
 import { z } from 'zod';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
 
-const resend = new Resend(env.RESEND_API_KEY);
 const SubscribeSchema = z.object({
 	email: z.string().email(),
 	name: z.string().optional(),
@@ -20,12 +19,10 @@ export async function subscribeNewsletterAction(
 	_: unknown,
 	formData: { email: string; name?: string }
 ): Promise<{ success: boolean; message?: string }> {
-	noStore();
-
-	const [commonT, authT, validationT] = await Promise.all([
+	const [commonT, validationT, emailsT] = await Promise.all([
 		getTranslations('common'),
-		getTranslations('auth'),
 		getTranslations('validation'),
+		getTranslations('emails'),
 	]);
 
 	const requestHeaders = await headers();
@@ -76,13 +73,23 @@ export async function subscribeNewsletterAction(
 			data: { subscribed: true },
 		});
 
-		await resend.emails.send({
-			from: 'Acme <onboarding@resend.dev>',
+		const recipientName = session.user?.name ?? parsed.data.name ?? emailsT('defaultRecipient');
+		const emailContent = renderEmailTemplate({
+			subject: emailsT('newsletterSubscribedSubject'),
+			title: emailsT('newsletterSubscribedSubject'),
+			salutation: `${emailsT('greeting')} ${recipientName},`,
+			intro: [emailsT('newsletterSubscribedIntro')],
+			outro: [commonT('thanksForJoining'), emailsT('farewell'), emailsT('help')],
+			footer: emailsT('signature'),
+			brandName: emailsT('brandName'),
+		});
+
+		await resendClient.emails.send({
+			from: DEFAULT_FROM,
 			to: [formEmail],
-			subject: commonT('subscribeProcedure'),
-			text: `${authT('hiUser')} ${parsed.data.name ?? ''},\n\n${commonT(
-				'subscribedSuccessfully'
-			)}\n\n${commonT('thanksForJoining')}`,
+			subject: emailContent.subject,
+			html: emailContent.html,
+			text: emailContent.text,
 		});
 
 		return { success: true };

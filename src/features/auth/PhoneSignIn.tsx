@@ -5,10 +5,7 @@ import { Input, Stack, Field, Fieldset } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-	createPhoneSignInSchema,
-	PhoneSignInSchema,
-} from 'formValidationSchemas/phoneSignInSchema';
+import { createPhoneSignInSchema, PhoneSignInSchema } from 'validationSchemas/phoneSignInSchema';
 import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 import { phoneSignInAction } from '@/actions/auth/phoneSignInAction';
 import { useSession } from '@/providers/SessionProvider';

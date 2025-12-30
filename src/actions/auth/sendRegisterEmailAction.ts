@@ -1,14 +1,12 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
-import { Resend } from 'resend';
-import { getTranslations } from 'next-intl/server';
-import { getEmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
-import { encryptPassword } from '@/lib/crypto';
-import { unstable_noStore as noStore } from 'next/cache';
-import { env } from '@/config/env';
+import 'server-only';
 
-const resend = new Resend(env.RESEND_API_KEY);
+import { prisma } from '@/lib/prisma';
+import { getTranslations } from 'next-intl/server';
+import { getEmailSignUpSchema } from 'validationSchemas/emailSignUpSchema';
+import { encryptPassword } from '@/lib/crypto';
+import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
 
 function generateOtp() {
 	return Math.floor(100000 + Math.random() * 900000).toString();
@@ -18,11 +16,10 @@ export async function sendRegisterEmailAction(
 	_: unknown,
 	formData: unknown
 ): Promise<{ success: boolean; message?: string }> {
-	noStore();
-
-	const [validationT, authT] = await Promise.all([
+	const [validationT, authT, emailsT] = await Promise.all([
 		getTranslations('validation'),
 		getTranslations('auth'),
+		getTranslations('emails'),
 	]);
 	const schema = await getEmailSignUpSchema();
 	const validated = schema.safeParse(formData);
@@ -55,13 +52,24 @@ export async function sendRegisterEmailAction(
 			},
 		});
 
-		await resend.emails.send({
-			from: 'Acme <onboarding@resend.dev>',
-			to: [email],
+		const recipientName = name || emailsT('defaultRecipient');
+		const emailContent = renderEmailTemplate({
 			subject: authT('verifyEmail'),
-			text: `${authT('hiUser')} ${name},\n\n${authT('otpToVerifyEmail')}:\n\n${otp}\n\n${authT(
-				'otpExpiresIn'
-			)}.`,
+			title: authT('verifyEmail'),
+			salutation: `${emailsT('greeting')} ${recipientName},`,
+			intro: [emailsT('otpVerifyIntro')],
+			detailRows: [{ label: emailsT('otpCodeLabel'), value: otp }],
+			outro: [emailsT('otpExpires'), emailsT('ignoreIfNotYou')],
+			footer: emailsT('signature'),
+			brandName: emailsT('brandName'),
+		});
+
+		await resendClient.emails.send({
+			from: DEFAULT_FROM,
+			to: [email],
+			subject: emailContent.subject,
+			html: emailContent.html,
+			text: emailContent.text,
 		});
 
 		return { success: true };

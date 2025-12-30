@@ -1,9 +1,11 @@
 'use server';
 
+import 'server-only';
+
 import { auth } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
-import { getPhoneSignInSchema } from 'formValidationSchemas/phoneSignInSchema';
+import { getPhoneSignInSchema } from 'validationSchemas/phoneSignInSchema';
 
 export async function sendVerifyPhoneAction(
 	_: unknown,

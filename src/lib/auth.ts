@@ -1,13 +1,11 @@
 import { betterAuth } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { Resend } from 'resend';
 import { getTranslations } from 'next-intl/server';
 import { phoneNumber, emailOTP, customSession } from 'better-auth/plugins';
 import { prisma } from './prisma';
+import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
 import { env } from '@/config/env';
-
-const resend = new Resend(env.RESEND_API_KEY);
 
 export const auth = betterAuth({
 	user: {
@@ -30,24 +28,36 @@ export const auth = betterAuth({
 				secure: env.NODE_ENV === 'production',
 			},
 	},
-	emailAndPassword: {
-		enabled: true,
-		requireEmailVerification: true,
-		sendResetPassword: async ({ user, url, token }, request) => {
-			const authT = await getTranslations('auth');
+		emailAndPassword: {
+			enabled: true,
+			requireEmailVerification: true,
+			sendResetPassword: async ({ user, url, token }, request) => {
+				const [authT, emailsT] = await Promise.all([
+					getTranslations('auth'),
+					getTranslations('emails'),
+				]);
 
-			await resend.emails.send({
-				from: 'Acme <onboarding@resend.dev>',
-				to: [user.email],
-				subject: authT('resetPass'),
-				text: `${authT('hiUser')} ${user?.name || ''},
+				const recipientName = user?.name || user.email || emailsT('defaultRecipient');
+				const emailContent = renderEmailTemplate({
+					subject: authT('resetPass'),
+					title: authT('resetPass'),
+					salutation: `${emailsT('greeting')} ${recipientName},`,
+					intro: [emailsT('resetPassIntro')],
+					cta: { label: authT('resetPassAction'), url },
+					outro: [emailsT('ignoreIfNotYou'), emailsT('help')],
+					footer: emailsT('signature'),
+					brandName: emailsT('brandName'),
+				});
 
-${authT('clickToResetPass')}:
-
-${url}`,
-			});
+				await resendClient.emails.send({
+					from: DEFAULT_FROM,
+					to: [user.email],
+					subject: emailContent.subject,
+					html: emailContent.html,
+					text: emailContent.text,
+				});
+			},
 		},
-	},
 	socialProviders: {
 		google: {
 			prompt: 'select_account',
@@ -70,24 +80,38 @@ ${url}`,
 		emailOTP({
 			overrideDefaultEmailVerification: true,
 			async sendVerificationOTP({ email, otp, type }) {
-				const authT = await getTranslations('auth');
+				const [authT, emailsT] = await Promise.all([
+					getTranslations('auth'),
+					getTranslations('emails'),
+				]);
 
 				if (type === 'sign-in') {
-					// Send the OTP for sign in
-				} else if (type === 'email-verification') {
-					// Send the OTP for email verification
-				} else {
-					await resend.emails.send({
-						from: 'Acme <onboarding@resend.dev>',
-						to: [email],
-						subject: authT('resetPass'),
-						text: `${authT('hiUser')} ${email || ''},
-
-${authT('otpToResetPass')}:
-
-${otp}`,
-					});
+					return;
 				}
+
+				const isEmailVerification = type === 'email-verification';
+				const subject = isEmailVerification ? authT('verifyEmail') : authT('resetPass');
+				const intro = isEmailVerification ? emailsT('otpVerifyIntro') : emailsT('otpResetIntro');
+				const recipientName = email || emailsT('defaultRecipient');
+
+				const emailContent = renderEmailTemplate({
+					subject,
+					title: subject,
+					salutation: `${emailsT('greeting')} ${recipientName},`,
+					intro: [intro],
+					detailRows: [{ label: emailsT('otpCodeLabel'), value: otp }],
+					outro: [emailsT('otpExpires'), emailsT('ignoreIfNotYou')],
+					footer: emailsT('signature'),
+					brandName: emailsT('brandName'),
+				});
+
+				await resendClient.emails.send({
+					from: DEFAULT_FROM,
+					to: [email],
+					subject: emailContent.subject,
+					html: emailContent.html,
+					text: emailContent.text,
+				});
 			},
 		}),
 		customSession(async ({ user, session }) => {

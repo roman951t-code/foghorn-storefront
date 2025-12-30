@@ -6,12 +6,9 @@ import type { I18nData } from '@/types/i18n';
 import { formatTime } from '@/utils/generalUtils';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-	createPhoneVerifySchema,
-	PhoneVerifySchema,
-} from 'formValidationSchemas/phoneVerifySchema';
+import { createPhoneVerifySchema, PhoneVerifySchema } from 'validationSchemas/phoneVerifySchema';
 import { verifyEmailRegisterOtpAction } from '@/actions/auth/verifyEmailRegisterOtpAction';
-import { EmailSignUpSchema } from 'formValidationSchemas/emailSignUpSchema';
+import { EmailSignUpSchema } from 'validationSchemas/emailSignUpSchema';
 import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
 
 interface Props {

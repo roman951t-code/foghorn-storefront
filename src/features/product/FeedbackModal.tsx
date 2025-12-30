@@ -16,7 +16,7 @@ import { PrimaryButton, SecondaryButton } from '@/components/ui/buttons/ActionBu
 import { useMemo, useState } from 'react';
 import Auth from '@/features/auth/Auth';
 import { useSession } from '@/providers/SessionProvider';
-import { createFeedbackSchema, FeedbackSchema } from 'formValidationSchemas/feedbackSchema';
+import { createFeedbackSchema, FeedbackSchema } from 'validationSchemas/feedbackSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';

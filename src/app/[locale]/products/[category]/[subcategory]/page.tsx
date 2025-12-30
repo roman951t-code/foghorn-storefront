@@ -19,13 +19,15 @@ import { SUBCATEGORY_FILTER_EXCLUDED_KEYS } from '@/constants/products';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
 import Script from 'next/script';
 import { ProductFiltersSearchParams, SubcategoryParams } from '@/types/routing';
+import { ensureParams } from '@/utils/validateParams';
+import { subcategoryParamsSchema } from 'validationSchemas/productParamsSchemas';
 
 type Props = SubcategoryParams & {
 	searchParams: ProductFiltersSearchParams;
 };
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
-	const { category, subcategory, locale } = await params;
+	const { category, subcategory, locale } = ensureParams(subcategoryParamsSchema, await params);
 	const resolvedSearch = await searchParams;
 
 	const subcategoryData = await getSubcategoryNameBySlug(subcategory);
@@ -33,7 +35,9 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 	const pagesT = await getTranslations('pages');
 	const title = pagesT('metadata.category', { category: subcategoryData.subcategoryName });
-	const description = pagesT('metadata.categoryDescription', { category: subcategoryData.subcategoryName });
+	const description = pagesT('metadata.categoryDescription', {
+		category: subcategoryData.subcategoryName,
+	});
 
 	return {
 		title,
@@ -49,7 +53,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 export const revalidate = 120;
 
 export default async function Subcategory({ params, searchParams }: Props) {
-	const { category, subcategory, locale } = await params;
+	const { category, subcategory, locale } = ensureParams(subcategoryParamsSchema, await params);
 	const searchData = await searchParams;
 
 	const page = Math.max(1, parseInt(searchData.page || '1', 10) || 1);

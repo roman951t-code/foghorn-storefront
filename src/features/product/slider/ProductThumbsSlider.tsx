@@ -50,6 +50,7 @@ export default function ProductThumbsSlider(props: ProductThumbsSliderProps) {
 
 function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps) {
 	const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
+	const [mainSwiper, setMainSwiper] = useState<SwiperType | null>(null);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
 	const isSmallScreen = useBreakpointValue({ base: true, md: false });
 	const thumbInstance =
@@ -75,16 +76,21 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 		: false;
 
 	const resetImage = () => setSelectedImage(null);
+	const openImage = (fallbackIndex?: number) => {
+		const currentIndex = mainSwiper?.realIndex ?? fallbackIndex ?? 0;
+		setSelectedImage(galleryImages[currentIndex] ?? null);
+	};
 	const handleSlideKeyOpen = (src: string) => (event: KeyboardEvent<HTMLDivElement>) => {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
-			setSelectedImage(src);
+			openImage();
 		}
 	};
 
 	return (
 		<>
 			<Swiper
+				onSwiper={(swiper) => setMainSwiper(swiper)}
 				loop
 				zoom
 				navigation
@@ -111,7 +117,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 					return (
 						<SwiperSlide
 							key={index}
-							onClick={() => setSelectedImage(src)}
+							onClick={() => openImage(index)}
 							role='button'
 							tabIndex={0}
 							onKeyDown={handleSlideKeyOpen(src)}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import type { FeedbackSchema } from 'formValidationSchemas/feedbackSchema';
+import type { FeedbackSchema } from 'validationSchemas/feedbackSchema';
 import type { Review } from '@/types/product';
 import { useSession } from '@/providers/SessionProvider';
 import { useReviewStore } from '@/stores/reviewStore';
@@ -38,7 +38,9 @@ export function useReviews() {
 					? handleReviewAction(activeProductId, formData, userId)
 					: Promise.resolve({ success: false, review: undefined }),
 			handleRemoveAction: () =>
-				activeProductId ? handleRemoveAction(activeProductId, userId) : Promise.resolve({ success: false }),
+				activeProductId
+					? handleRemoveAction(activeProductId, userId)
+					: Promise.resolve({ success: false }),
 		}),
 		[activeProductId, handleRemoveAction, handleReviewAction, reviews, userId]
 	);

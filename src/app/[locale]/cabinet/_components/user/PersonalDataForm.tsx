@@ -8,7 +8,7 @@ import {
 	createAccountSchema,
 	EditNameActionPayload,
 	NameSchemaData,
-} from 'formValidationSchemas/accountSchema';
+} from 'validationSchemas/accountSchema';
 import { z } from 'zod';
 import { useSession } from '@/providers/SessionProvider';
 import { editNameAction } from '@/actions/auth/editAccountAction';

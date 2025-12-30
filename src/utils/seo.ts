@@ -1,8 +1,8 @@
 import { LOCALE_TO_HTML_LANG, type AppLocale } from '@/constants/locales';
 import { routing } from '@/i18n/routing';
-import { APP_URL } from '@/config/env';
+import { PUBLIC_APP_URL } from '@/config/publicEnv';
 
-export { APP_URL };
+export const APP_URL = PUBLIC_APP_URL;
 
 export type AlternateSearchParams = Record<string, string | string[] | null | undefined>;
 

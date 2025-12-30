@@ -1,12 +1,12 @@
 'use server';
 
-import { unstable_cache } from 'next/cache';
+import 'server-only';
+
 import { prisma } from '@/lib/prisma';
 
 type PrismaClientLike = typeof prisma;
-type CacheFn = typeof unstable_cache;
 
-function buildFilterFetchers(cache: CacheFn, db: PrismaClientLike) {
+async function buildFilterFetchers(db: PrismaClientLike) {
 	const fetchSubcategoryFilters = async (subcategorySlug: string) => {
 		const subcategory = await db.productCategory.findUnique({
 			where: { slug: subcategorySlug },
@@ -64,23 +64,13 @@ function buildFilterFetchers(cache: CacheFn, db: PrismaClientLike) {
 			.filter((attr) => attr.values.length > 0);
 	};
 
-	const cachedSubcategoryFilters = cache(fetchSubcategoryFilters, ['product-filters'], {
-		tags: ['product'],
-		revalidate: 1200,
-	});
-
-	const cachedTagFilters = cache(fetchTagFilters, ['tag-filters'], {
-		tags: ['product'],
-		revalidate: 1200,
-	});
-
 	return {
-		getSubcategoryFilters: (subcategorySlug: string) => cachedSubcategoryFilters(subcategorySlug),
-		getTagFilters: (tag: string) => cachedTagFilters(tag),
+		getSubcategoryFilters: (subcategorySlug: string) => fetchSubcategoryFilters(subcategorySlug),
+		getTagFilters: (tag: string) => fetchTagFilters(tag),
 	};
 }
 
-const { getSubcategoryFilters, getTagFilters } = buildFilterFetchers(unstable_cache, prisma);
+const { getSubcategoryFilters, getTagFilters } = await buildFilterFetchers(prisma);
 
 export { getSubcategoryFilters, getTagFilters, buildFilterFetchers };
 

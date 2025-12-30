@@ -5,7 +5,7 @@ import { Input, Stack, Field, Fieldset, Alert } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createEmailSignInSchema, EmailSchema } from 'formValidationSchemas/emailSignInSchema';
+import { createEmailSignInSchema, EmailSchema } from 'validationSchemas/emailSignInSchema';
 import type { I18nData } from '@/types/i18n';
 import ResetPass from './ResetPass';
 import { loginEmailAction } from '@/actions/auth/loginEmailAction';

@@ -4,10 +4,7 @@ import { Input, Stack, Field, Fieldset, Text, Highlight } from '@chakra-ui/react
 import { useForm } from 'react-hook-form';
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-	createEmailSignUpSchema,
-	EmailSignUpSchema,
-} from 'formValidationSchemas/emailSignUpSchema';
+import { createEmailSignUpSchema, EmailSignUpSchema } from 'validationSchemas/emailSignUpSchema';
 import type { I18nData } from '@/types/i18n';
 import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 import { PasswordInput } from '@/components/ui/chakra/password-input';

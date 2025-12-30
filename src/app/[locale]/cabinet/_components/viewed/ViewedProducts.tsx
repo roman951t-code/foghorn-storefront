@@ -28,6 +28,7 @@ export default function ViewedProducts({ products, emptyText }: Props) {
 			columns={{ base: 1, sm: 2, md: 2, lg: 3, xl: 4, '2xl': 5 }}
 			gapX='2'
 			gapY='4'
+			w='100%'
 		>
 			{products.map((product) => (
 				<Box key={product.id}>

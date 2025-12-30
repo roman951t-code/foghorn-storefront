@@ -1,9 +1,12 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Tabs } from '@chakra-ui/react';
 import { CABINET_TAB_ROUTE_SUFFIXES, type CabinetTabValue } from '@/constants/cabinetTabs';
+
+const isCabinetTabValue = (value: string): value is CabinetTabValue =>
+	value in CABINET_TAB_ROUTE_SUFFIXES;
 
 export default function TabsProvider({ children }: { children: ReactNode }) {
 	const router = useRouter();
@@ -12,21 +15,15 @@ export default function TabsProvider({ children }: { children: ReactNode }) {
 	const lastSegment = segments[segments.length - 1];
 	const locale = segments[0];
 	const baseCabinetPath = `/${[locale, 'cabinet'].filter(Boolean).join('/')}`;
-	const [value, setValue] = useState<string | null>(lastSegment);
 
-	useEffect(() => {
-		if (lastSegment !== value) {
-			setValue(lastSegment);
-		}
-	}, [lastSegment, value]);
+	const currentValue: CabinetTabValue = isCabinetTabValue(lastSegment) ? lastSegment : 'cabinet';
 
 	const handleValueChange = (nextValue: string | null) => {
-		if (!nextValue) return;
-		setValue(nextValue);
+		if (!nextValue || !isCabinetTabValue(nextValue)) return;
 
-		const suffix = CABINET_TAB_ROUTE_SUFFIXES[nextValue as CabinetTabValue];
-		const nextRoute = suffix !== undefined ? `${baseCabinetPath}${suffix}` : undefined;
-		if (nextRoute && nextRoute !== pathname) {
+		const suffix = CABINET_TAB_ROUTE_SUFFIXES[nextValue];
+		const nextRoute = `${baseCabinetPath}${suffix}`;
+		if (nextRoute !== pathname) {
 			router.replace(nextRoute);
 		}
 	};
@@ -34,7 +31,7 @@ export default function TabsProvider({ children }: { children: ReactNode }) {
 	return (
 		<Tabs.Root
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
-			value={value}
+			value={currentValue}
 			onValueChange={(e) => handleValueChange(e.value)}
 			orientation='horizontal'
 			width='full'

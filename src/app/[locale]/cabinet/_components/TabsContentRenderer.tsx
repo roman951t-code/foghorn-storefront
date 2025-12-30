@@ -34,28 +34,23 @@ export default function TabsContentRenderer({ children }: { children: ReactNode 
 		return isKnownTab && lastSegment ? lastSegment : 'cabinet';
 	}, [pathname]);
 
-	const renderSlot = (tabValue: CabinetTabValue) => {
-		const isActive = tabValue === currentTab;
-		return isActive ? (
-			<Suspense key={currentTab} fallback={<CabinetTabSkeleton />}>
-				{children}
-			</Suspense>
-		) : (
-			<CabinetTabSkeleton />
-		);
-	};
-
 	return (
 		<>
 			{CABINET_TABS.map((tab) => (
 				<Tabs.Content
 					key={tab.value}
+					value={tab.value}
 					colorPalette='gray'
 					w='full'
-					value={tab.value}
+					flex='1'
+					minW='0'
 					{...TAB_ANIMATION_PROPS}
 				>
-					{renderSlot(tab.value)}
+					{tab.value === currentTab ? (
+						<Suspense key={currentTab} fallback={<CabinetTabSkeleton />}>
+							{children}
+						</Suspense>
+					) : null}
 				</Tabs.Content>
 			))}
 		</>
