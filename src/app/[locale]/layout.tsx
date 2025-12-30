@@ -4,6 +4,7 @@ import { hasLocale } from 'next-intl';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
+import Script from 'next/script';
 import ChakraUIProvider from '@/providers/ChakraUIProvider';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
@@ -91,6 +92,14 @@ export default async function Layout({ children, params }: Props) {
 	const { success, ...restCartData } = cartResponse;
 
 	const htmlLang = LOCALE_TO_HTML_LANG[locale] ?? LOCALE_TO_HTML_LANG[DEFAULT_LOCALE];
+	const orgJsonLd = {
+		'@context': 'https://schema.org',
+		'@type': 'Organization',
+		name: 'Online Store',
+		url: APP_URL,
+		logo: `${APP_URL}/assets/images/logoBig.webp`,
+		sameAs: [] as string[],
+	};
 
 	return (
 		<html lang={htmlLang} suppressHydrationWarning>
@@ -108,6 +117,9 @@ export default async function Layout({ children, params }: Props) {
 										wishListIds={wishListIds}
 										isLoggedIn={!!userId}
 									>
+										<Script id='org-schema' type='application/ld+json'>
+											{JSON.stringify(orgJsonLd)}
+										</Script>
 										<Header />
 										<Box as='main' w='full' maxW='1444px' flex='1' mx='auto'>
 											{children}

@@ -1,10 +1,11 @@
 'use server';
 import 'server-only';
 
+import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { buildProductImages } from '@/utils/productImages';
 
-export async function getProductBySlug(slug: string) {
+async function fetchProductBySlug(slug: string) {
 	const product = await prisma.product.findUnique({
 		where: { slug },
 		select: {
@@ -59,4 +60,10 @@ export async function getProductBySlug(slug: string) {
 			value: a.value,
 		})),
 	};
+}
+
+export const getProductBySlugCached = cache(fetchProductBySlug);
+
+export async function getProductBySlug(slug: string) {
+	return fetchProductBySlug(slug);
 }

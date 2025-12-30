@@ -4,7 +4,7 @@ import { getMessages, getTranslations } from 'next-intl/server';
 import pick from 'lodash.pick';
 import { routing } from '@/i18n/routing';
 import type { AppLocale } from '@/constants/locales';
-import { buildLanguageAlternates, type AlternateSearchParams } from './seo';
+import { buildLanguageAlternates, type AlternateSearchParams, absoluteUrl } from './seo';
 
 export const extractI18nData = (
 	t: ReturnType<typeof useTranslations>,
@@ -35,6 +35,7 @@ export async function getLocalizedMetadata(
 
 	const title = pagesT(`metadata.${pageKey}.title`);
 	const description = pagesT(`metadata.${pageKey}.description`);
+	const defaultOgImage = absoluteUrl('/assets/images/logoBig.webp');
 
 	const alternates =
 		options?.pathname && locale
@@ -55,11 +56,13 @@ export async function getLocalizedMetadata(
 			description,
 			type: 'website',
 			url: alternates?.canonical,
+			images: [defaultOgImage],
 		},
 		twitter: {
 			card: 'summary_large_image',
 			title,
 			description,
+			images: [defaultOgImage],
 		},
 	};
 }

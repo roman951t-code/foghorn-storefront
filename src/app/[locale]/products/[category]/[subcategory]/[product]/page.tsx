@@ -1,11 +1,9 @@
 import Breadcrumbs from '@/components/ui/links/Breadcrumbs';
 import { Flex } from '@chakra-ui/react';
-import ProductTabs from '@/features/product/ProductTabs';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
-import { getProductBySlug } from '@/actions/products/getProductBySlug';
+import { getProductBySlugCached } from '@/actions/products/getProductBySlug';
 import { notFound } from 'next/navigation';
-import { getProductNameBySlug } from '@/actions/products/getProductNameBySlug';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { trackProductView } from '@/actions/products/trackProductView';
@@ -17,6 +15,7 @@ import {
 	productParamsSchema,
 	productSearchParamsSchema,
 } from 'validationSchemas/productParamsSchemas';
+import ProductTabs from '@/features/product/ProductTabs';
 
 type Props = ProductParams & { searchParams: { tab?: string } };
 
@@ -29,7 +28,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	} = ensureParams(productParamsSchema, await params);
 	const resolvedSearch = ensureParams(productSearchParamsSchema, await searchParams);
 
-	const productData = await getProductNameBySlug(productSlug);
+	const productData = await getProductBySlugCached(productSlug);
 	if (!productData) notFound();
 
 	const pagesT = await getTranslations('pages');
@@ -45,11 +44,13 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 			...(resolvedSearch?.tab ? { tab: resolvedSearch.tab } : {}),
 		}
 	);
+	const fallbackImage = absoluteUrl('/assets/images/logoBig.webp');
 	const image =
 		productData.imageUrl &&
 		(productData.imageUrl.startsWith('http')
 			? productData.imageUrl
 			: absoluteUrl(productData.imageUrl));
+	const ogImage = image ?? fallbackImage;
 
 	return {
 		title,
@@ -60,13 +61,13 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 			description,
 			type: 'website',
 			url: alternates?.canonical,
-			...(image && { images: [image] }),
+			images: [ogImage],
 		},
 		twitter: {
 			card: 'summary_large_image',
 			title,
 			description,
-			...(image && { images: [image] }),
+			images: [ogImage],
 		},
 	};
 }
@@ -80,7 +81,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 
 	const headersList = await headers();
 	const [productData, session] = await Promise.all([
-		getProductBySlug(product),
+		getProductBySlugCached(product),
 		auth.api.getSession({ headers: headersList }),
 	]);
 	const userId = session?.user?.id;

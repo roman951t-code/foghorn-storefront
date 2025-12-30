@@ -5,9 +5,10 @@ import { getTranslations } from 'next-intl/server';
 import { phoneNumber, emailOTP, customSession } from 'better-auth/plugins';
 import { prisma } from './prisma';
 import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
-import { env } from '@/config/env';
+import { APP_URL, env } from '@/config/env';
 
 export const auth = betterAuth({
+	baseURL: APP_URL,
 	user: {
 		changeEmail: {
 			enabled: true,
@@ -27,6 +28,15 @@ export const auth = betterAuth({
 				maxAge: 5 * 60,
 				secure: env.NODE_ENV === 'production',
 			},
+	},
+	advanced: {
+		useSecureCookies: env.NODE_ENV === 'production',
+		defaultCookieAttributes: {
+			sameSite: 'lax',
+			secure: env.NODE_ENV === 'production',
+			httpOnly: true,
+			path: '/',
+		},
 	},
 		emailAndPassword: {
 			enabled: true,

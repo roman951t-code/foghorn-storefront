@@ -1,11 +1,11 @@
 import { FiUser } from 'react-icons/fi';
 import { Box, IconButton } from '@chakra-ui/react';
-import CartModal from './CartModal';
 import Favourite from './Favourite';
 import { useTranslations } from 'next-intl';
 import UpdateEmailModal from '@/features/auth/UpdateEmailModal';
 import Auth from '@/features/auth/Auth';
 import { getCartModalI18nData } from '@/constants/cart';
+import CartModalLazy from './CartModalLazy';
 
 const AuthBtn = () => (
 	<IconButton
@@ -16,6 +16,7 @@ const AuthBtn = () => (
 		rounded='full'
 		colorPalette='blue'
 		bg={{ _hover: 'colorPalette.400' }}
+		_focusVisible={{ boxShadow: '0 0 0 2px var(--chakra-colors-blue-400)' }}
 	>
 		<FiUser />
 	</IconButton>
@@ -35,7 +36,7 @@ export default function UserActions() {
 			<Box hideBelow='sm'>
 				<Favourite />
 			</Box>
-			<CartModal i18nData={cartI18nData} />
+			<CartModalLazy i18nData={cartI18nData} />
 		</>
 	);
 }

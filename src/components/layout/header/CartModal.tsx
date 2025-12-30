@@ -28,6 +28,7 @@ const CartBtn = ({ setIsOpen, cartSize }: CartBtnProps) => (
 		rounded='full'
 		colorPalette='green'
 		bg={{ _hover: 'colorPalette.600' }}
+		_focusVisible={{ boxShadow: '0 0 0 2px var(--chakra-colors-green-400)' }}
 	>
 		{cartSize > 0 && (
 			<Float offset='0.5'>

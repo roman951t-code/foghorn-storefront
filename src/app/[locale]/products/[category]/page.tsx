@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: CategoryParams): Promise<Meta
 
 	const category = await prisma.productCategory.findUnique({
 		where: { slug: categorySlug },
-		select: { name: true },
+		select: { name: true, imageUrl: true },
 	});
 
 	if (!category) {
@@ -27,11 +27,27 @@ export async function generateMetadata({ params }: CategoryParams): Promise<Meta
 	const pagesT = await getTranslations('pages');
 	const title = pagesT('metadata.category', { category: category.name });
 	const description = pagesT('metadata.categoryDescription', { category: category.name });
+	const imageUrl = category.imageUrl
+		? absoluteUrl(category.imageUrl.startsWith('http') ? category.imageUrl : category.imageUrl)
+		: absoluteUrl('/assets/images/logoBig.webp');
 
 	return {
 		title,
 		description,
 		alternates: buildLanguageAlternates(locale, `/products/${categorySlug}`),
+		openGraph: {
+			title,
+			description,
+			type: 'website',
+			url: absoluteUrl(localizePath(locale, `/products/${categorySlug}`)),
+			images: [imageUrl],
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title,
+			description,
+			images: [imageUrl],
+		},
 	};
 }
 

@@ -17,7 +17,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getRecentlyViewedProductsWithCount } from '@/actions/products/getRecentlyViewedProducts';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
-import { buildLanguageAlternates } from '@/utils/seo';
+import { absoluteUrl, buildLanguageAlternates } from '@/utils/seo';
 import { LocaleParams, ProductFiltersSearchParams } from '@/types/routing';
 
 type Props = LocaleParams & {
@@ -50,11 +50,33 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const description = pagesT('metadata.searchDescription', {
 		query: tag ? productsT(tag) : searchQuery || '',
 	});
+	const alternates = buildLanguageAlternates(locale, '/products/search', resolvedSearch ?? undefined);
+	const tagImageMap: Record<string, string> = {
+		popular: '/assets/images/carousel1.webp',
+		new: '/assets/images/carousel2.webp',
+		discount: '/assets/images/carousel3.webp',
+		viewed: '/assets/images/logoSmall.webp',
+	};
+	const ogImagePath = tag ? tagImageMap[tag] ?? '/assets/images/logoBig.webp' : '/assets/images/logoBig.webp';
+	const ogImage = absoluteUrl(ogImagePath);
 
 	return {
 		title,
 		description,
-		alternates: buildLanguageAlternates(locale, '/products/search', resolvedSearch ?? undefined),
+		alternates,
+		openGraph: {
+			title,
+			description,
+			type: 'website',
+			url: alternates.canonical,
+			images: [ogImage],
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title,
+			description,
+			images: [ogImage],
+		},
 	};
 }
 

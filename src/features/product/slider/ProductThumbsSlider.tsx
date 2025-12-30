@@ -27,7 +27,7 @@ function ThumbsSliderSkeleton() {
 
 	return (
 		<>
-			<Skeleton height={{ base: '400px', md: '900px' }} width='100%' />
+			<Skeleton height={{ base: '400px', md: '700px' }} width='100%' />
 			{!isSmallScreen && (
 				<HStack mt={4} p={4}>
 					{Array.from({ length: skeletonCount }).map((_, i) => (
