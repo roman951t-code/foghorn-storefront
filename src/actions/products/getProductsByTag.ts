@@ -1,6 +1,7 @@
 'use server';
 import 'server-only';
 
+import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import {
@@ -10,6 +11,7 @@ import {
 	SubcategoryProduct,
 } from '@/types/product';
 import { buildProductImages } from '@/utils/productImages';
+import { PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 
 export async function getProductsByTag<T extends boolean>(
 	tag: string,
@@ -22,6 +24,10 @@ export async function getProductsByTag<T extends boolean>(
 	orderBy?: 'new' | 'expensive' | 'cheap',
 	filters?: Record<string, string[]>
 ): Promise<T extends true ? ProductsWithMeta : ProductsOnly> {
+	'use cache';
+	cacheLife('hours');
+	cacheTag(PRODUCT_LIST_CACHE_TAG);
+
 	const safeLimit = Math.min(50, Math.max(1, Math.floor(limit || 1)));
 	const safeOffset = Math.max(0, Math.floor(offset || 0));
 

@@ -2,10 +2,12 @@
 
 import 'server-only';
 
+import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
 import { buildProductImages } from '@/utils/productImages';
+import { PRODUCT_CATEGORY_CACHE_TAG, PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 
 export async function getProductsBySubcategorySlug(
 	slug: string,
@@ -18,6 +20,10 @@ export async function getProductsBySubcategorySlug(
 	orderBy?: 'new' | 'expensive' | 'cheap',
 	filters?: Record<string, string[]>
 ) {
+	'use cache';
+	cacheLife('hours');
+	cacheTag(PRODUCT_LIST_CACHE_TAG, PRODUCT_CATEGORY_CACHE_TAG);
+
 	const subcategory = await prisma.productCategory.findUnique({
 		where: { slug },
 		select: {

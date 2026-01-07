@@ -1,9 +1,11 @@
 'use server';
 import 'server-only';
 
+import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
+import { PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 
 export async function getProductsBySearchQuery(
 	searchQuery: string,
@@ -25,6 +27,10 @@ export async function getProductsBySearchQuery(
 	}[];
 	maxProductPrice: number;
 }> {
+	'use cache';
+	cacheLife('hours');
+	cacheTag(PRODUCT_LIST_CACHE_TAG);
+
 	const priceFilter =
 		minPrice !== undefined && maxPrice !== undefined
 			? { gte: minPrice, lte: maxPrice }

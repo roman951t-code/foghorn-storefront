@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
+import { useSearchParams } from 'next/navigation';
 import {
 	ButtonGroup,
 	HStack,
@@ -58,17 +59,18 @@ export default function Pagination({
 
 	const applyPageSize = (value: number) => {
 		const normalized = clampPageSize(Number.isFinite(value) ? value : safePageSize);
+		const nextTotalPages = Math.max(
+			1,
+			Math.ceil(Math.max(totalItems, 0) / Math.max(1, normalized))
+		);
+		const targetPage = Math.min(safePage, nextTotalPages);
 		startTransition(() => {
-			router.push(buildUrl(1, normalized), { scroll: false });
+			router.push(buildUrl(targetPage, normalized), { scroll: false });
 		});
 	};
 
-	const goToPage = (page: number) => {
-		const targetPage = Math.min(Math.max(1, page), totalPages);
-		startTransition(() => {
-			router.push(buildUrl(targetPage, safePageSize), { scroll: false });
-		});
-	};
+	const prevHref = buildUrl(Math.max(1, safePage - 1), safePageSize);
+	const nextHref = buildUrl(Math.min(totalPages, safePage + 1), safePageSize);
 
 	return (
 		<HStack
@@ -89,39 +91,49 @@ export default function Pagination({
 				justifyContent='center'
 			>
 				<ButtonGroup variant='ghost' size='md'>
-					<ChakraPagination.PrevTrigger asChild>
-						<IconButton
-							disabled={safePage === 1}
-							onClick={() => goToPage(safePage - 1)}
-							aria-label='Previous'
-						>
+					{safePage === 1 ? (
+						<IconButton aria-label='Previous' disabled opacity={0.5}>
 							<LuChevronLeft />
 						</IconButton>
-					</ChakraPagination.PrevTrigger>
+					) : (
+						<Link href={prevHref} prefetch scroll={false}>
+							<IconButton as='span' aria-label='Previous'>
+								<LuChevronLeft />
+							</IconButton>
+						</Link>
+					)}
 
 					<ChakraPagination.Items
 						render={(page) => (
-							<IconButton
+							<Link
 								key={page.value}
-								onClick={() => goToPage(page.value)}
-								variant={safePage === page.value ? 'outline' : 'ghost'}
-								borderColor={safePage === page.value ? 'border.dark' : 'transparent'}
-								aria-label={`Page ${page.value}`}
+								href={buildUrl(page.value, safePageSize)}
+								prefetch
+								scroll={false}
 							>
-								{page.value}
-							</IconButton>
+								<IconButton
+									as='span'
+									variant={safePage === page.value ? 'outline' : 'ghost'}
+									borderColor={safePage === page.value ? 'border.dark' : 'transparent'}
+									aria-label={`Page ${page.value}`}
+								>
+									{page.value}
+								</IconButton>
+							</Link>
 						)}
 					/>
 
-					<ChakraPagination.NextTrigger asChild>
-						<IconButton
-							disabled={safePage === totalPages}
-							onClick={() => goToPage(safePage + 1)}
-							aria-label='Next'
-						>
+					{safePage === totalPages ? (
+						<IconButton aria-label='Next' disabled opacity={0.5}>
 							<LuChevronRight />
 						</IconButton>
-					</ChakraPagination.NextTrigger>
+					) : (
+						<Link href={nextHref} prefetch scroll={false}>
+							<IconButton as='span' aria-label='Next'>
+								<LuChevronRight />
+							</IconButton>
+						</Link>
+					)}
 				</ButtonGroup>
 			</ChakraPagination.Root>
 

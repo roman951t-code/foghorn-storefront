@@ -5,5 +5,5 @@ const secretKey = env.STRIPE_SECRET_KEY;
 
 export const stripe =
 	secretKey && secretKey !== ''
-		? new Stripe(secretKey, { apiVersion: '2025-02-24.acacia' })
+		? new Stripe(secretKey, { apiVersion: '2025-12-15.clover' })
 		: null;

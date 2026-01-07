@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import bundleAnalyzer from '@next/bundle-analyzer';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { env } from './src/config/env';
 const isProd = env.NODE_ENV === 'production';
@@ -24,7 +25,7 @@ const baseConfig: NextConfig = {
 		optimizePackageImports: ['@chakra-ui/react', '@chakra-ui/icons', 'react-icons'],
 	},
 	productionBrowserSourceMaps: true,
-
+	cacheComponents: true,
 	images: {
 		remotePatterns: [
 			{
@@ -93,4 +94,10 @@ const baseConfig: NextConfig = {
 
 const withNextIntl = createNextIntlPlugin();
 
-export default withNextIntl(baseConfig);
+const withBundleAnalyzer = bundleAnalyzer({
+	enabled: process.env.ANALYZE === 'true',
+});
+
+const nextConfig = withNextIntl(withBundleAnalyzer(baseConfig));
+
+export default nextConfig;

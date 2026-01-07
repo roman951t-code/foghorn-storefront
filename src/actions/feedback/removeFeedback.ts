@@ -6,7 +6,8 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
-import { revalidateTag } from 'next/cache';
+import { revalidateTag, updateTag } from 'next/cache';
+import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
 
 export async function removeFeedback(
 	productId: string
@@ -29,8 +30,8 @@ export async function removeFeedback(
 			},
 		});
 
-		revalidateTag('products', 'default');
-		revalidateTag('product-by-slug', 'default');
+		await updateTag(productCacheTagById(productId));
+		await revalidateTag(PRODUCT_LIST_CACHE_TAG, 'default');
 
 		return { success: true };
 	} catch (error: any) {

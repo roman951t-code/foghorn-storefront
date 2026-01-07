@@ -5,12 +5,14 @@ import 'server-only';
 import { Prisma } from '@prisma/client';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
+import { revalidateTag, updateTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
 import { env } from '@/config/env';
 import { normalizeOrder } from '../orderUtils';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
+import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
 
 type Result =
 	| { success: true; order?: UserOrder }
@@ -211,6 +213,9 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 	}
 
 	const normalized = await normalizeOrder(order);
+	const productTags = uniqueIds.map((id) => productCacheTagById(id));
+	await Promise.all(productTags.map((tag) => updateTag(tag)));
+	await revalidateTag(PRODUCT_LIST_CACHE_TAG, 'default');
 	await sendOrderConfirmationEmail({
 		order: normalized,
 		email: session.user?.email ?? null,

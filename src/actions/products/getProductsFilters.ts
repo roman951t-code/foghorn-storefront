@@ -2,79 +2,80 @@
 
 import 'server-only';
 
+import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { PRODUCT_FILTERS_CACHE_TAG, PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 
-type PrismaClientLike = typeof prisma;
+export async function getSubcategoryFilters(subcategorySlug: string) {
+	'use cache';
+	cacheLife('hours');
+	cacheTag(PRODUCT_FILTERS_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
 
-async function buildFilterFetchers(db: PrismaClientLike) {
-	const fetchSubcategoryFilters = async (subcategorySlug: string) => {
-		const subcategory = await db.productCategory.findUnique({
-			where: { slug: subcategorySlug },
-			select: { id: true },
-		});
+	const subcategory = await prisma.productCategory.findUnique({
+		where: { slug: subcategorySlug },
+		select: { id: true },
+	});
 
-		if (!subcategory) return null;
+	if (!subcategory) return null;
 
-		const attributes = await db.productAttribute.findMany({
-			select: {
-				id: true,
-				name: true,
-				products: {
-					where: {
-						product: { categoryId: subcategory.id },
-					},
-					select: { value: true },
+	const attributes = await prisma.productAttribute.findMany({
+		select: {
+			id: true,
+			name: true,
+			products: {
+				where: {
+					product: { categoryId: subcategory.id },
 				},
+				select: { value: true },
 			},
-		});
+		},
+	});
 
-		return attributes
-			.map((attr) => {
-				const uniqueValues = [...new Set(attr.products.map((p) => p.value))];
-				return {
-					id: attr.id,
-					name: attr.name,
-					values: uniqueValues,
-				};
-			})
-			.filter((attr) => attr.values.length > 0);
-	};
-
-	const fetchTagFilters = async (tag: string) => {
-		const attributes = await db.productAttribute.findMany({
-			select: {
-				id: true,
-				name: true,
-				products: {
-					where: { product: { tags: { has: tag } } },
-					select: { value: true },
-				},
-			},
-		});
-
-		return attributes
-			.map((attr) => {
-				const uniqueValues = [...new Set(attr.products.map((p) => p.value))];
-				return {
-					id: attr.id,
-					name: attr.name,
-					values: uniqueValues,
-				};
-			})
-			.filter((attr) => attr.values.length > 0);
-	};
-
-	return {
-		getSubcategoryFilters: (subcategorySlug: string) => fetchSubcategoryFilters(subcategorySlug),
-		getTagFilters: (tag: string) => fetchTagFilters(tag),
-	};
+	return attributes
+		.map((attr) => {
+			const uniqueValues = [...new Set(attr.products.map((p) => p.value))];
+			return {
+				id: attr.id,
+				name: attr.name,
+				values: uniqueValues,
+			};
+		})
+		.filter((attr) => attr.values.length > 0);
 }
 
-const { getSubcategoryFilters, getTagFilters } = await buildFilterFetchers(prisma);
+export async function getTagFilters(tag: string) {
+	'use cache';
+	cacheLife('hours');
+	cacheTag(PRODUCT_FILTERS_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
 
-export { getSubcategoryFilters, getTagFilters, buildFilterFetchers };
+	const attributes = await prisma.productAttribute.findMany({
+		select: {
+			id: true,
+			name: true,
+			products: {
+				where: { product: { tags: { has: tag } } },
+				select: { value: true },
+			},
+		},
+	});
+
+	return attributes
+		.map((attr) => {
+			const uniqueValues = [...new Set(attr.products.map((p) => p.value))];
+			return {
+				id: attr.id,
+				name: attr.name,
+				values: uniqueValues,
+			};
+		})
+		.filter((attr) => attr.values.length > 0);
+}
 
 export async function getSearchFilters(searchQuery: string) {
+	'use cache';
+	cacheLife('hours');
+	cacheTag(PRODUCT_FILTERS_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
+
 	const attributes = await prisma.productAttribute.findMany({
 		select: {
 			id: true,

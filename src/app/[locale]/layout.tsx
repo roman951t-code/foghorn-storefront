@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, Suspense } from 'react';
 import { Box } from '@chakra-ui/react';
 import { hasLocale } from 'next-intl';
 import { NextIntlClientProvider } from 'next-intl';
@@ -18,10 +18,8 @@ import { auth } from '@/lib/auth';
 import { SessionProvider } from '@/providers/SessionProvider';
 import { ColorModeProvider } from '@/components/ui/chakra/color-mode';
 import { getCartItems } from '@/actions/cart/getCartItems';
-import { getCartProductIds } from '@/actions/cart/getCartProductIds';
 import { getCatalog } from '@/actions/products/getCatalog';
 import { getWishListProducts } from '@/actions/wishlist/getWishListProducts';
-import { getWishListProductIds } from '@/actions/wishlist/getWishListProductIds';
 import { montserrat, notoSans, openSans } from '@/lib/fonts';
 import { AppStoreHydrator } from '@/providers/AppStoreHydrator';
 import { LOCALE_TO_HTML_LANG, DEFAULT_LOCALE } from '@/constants/locales';
@@ -34,17 +32,24 @@ export const metadata: Metadata = {
 	metadataBase: new URL(APP_URL),
 };
 
+export function generateStaticParams() {
+	return routing.locales.map((locale) => ({ locale }));
+}
+
 interface Props {
 	children: ReactNode;
 	params: { locale: AppLocale };
 }
 
-export default async function Layout({ children, params }: Props) {
-	const { locale } = await params;
-	if (!hasLocale(routing.locales, locale)) {
-		notFound();
-	}
+function LayoutFallback() {
+	return <Box display='flex' flexDirection='column' minHeight='100vh' bg='bg.primary' />;
+}
 
+async function LayoutProviders({
+	children,
+}: {
+	children: ReactNode;
+}) {
 	const headersList = await headers();
 
 	const messagesPromise = loadClientMessages([
@@ -74,24 +79,16 @@ export default async function Layout({ children, params }: Props) {
 	const userId = session?.user?.id ?? null;
 
 	const cartPromise = userId ? getCartItems(userId) : Promise.resolve({ success: true, items: [] });
-	const cartIdsPromise = userId
-		? getCartProductIds(userId)
-		: Promise.resolve({ success: false, productIds: [] });
 	const wishListPromise = userId ? getWishListProducts(userId) : Promise.resolve({ products: [] });
-	const wishListIdsPromise = userId
-		? getWishListProductIds(userId)
-		: Promise.resolve({ success: false, productIds: [] });
 
-	const [cartResponse, cartProductIds, wishListData, wishListIds] = await Promise.all([
-		cartPromise,
-		cartIdsPromise,
-		wishListPromise,
-		wishListIdsPromise,
-	]);
+	const [cartResponse, wishListData] = await Promise.all([cartPromise, wishListPromise]);
 
 	const { success, ...restCartData } = cartResponse;
+	const cartProductIds = success
+		? { success: true, productIds: restCartData.items?.map((item) => item.id) ?? [] }
+		: { success: false, productIds: [] };
+	const wishListIds = { success: true, productIds: wishListData?.products?.map((p) => p.id) ?? [] };
 
-	const htmlLang = LOCALE_TO_HTML_LANG[locale] ?? LOCALE_TO_HTML_LANG[DEFAULT_LOCALE];
 	const orgJsonLd = {
 		'@context': 'https://schema.org',
 		'@type': 'Organization',
@@ -102,33 +99,48 @@ export default async function Layout({ children, params }: Props) {
 	};
 
 	return (
+		<SessionProvider initialSession={session}>
+			<NextIntlClientProvider messages={messages}>
+				<AppStoreHydrator
+					categories={catalogResponse.catalog}
+					cartData={success ? restCartData : EMPTY_CART_DATA}
+					cartProductIds={cartProductIds}
+					wishListData={wishListData?.products ?? []}
+					wishListIds={wishListIds}
+					isLoggedIn={!!userId}
+				>
+					<Script id='org-schema' type='application/ld+json'>
+						{JSON.stringify(orgJsonLd)}
+					</Script>
+					<Header />
+					<Box as='main' w='full' maxW='1444px' flex='1' mx='auto'>
+						{children}
+						<ToTop />
+					</Box>
+				</AppStoreHydrator>
+			</NextIntlClientProvider>
+			<Footer />
+		</SessionProvider>
+	);
+}
+
+export default async function Layout({ children, params }: Props) {
+	const { locale } = await params;
+	if (!hasLocale(routing.locales, locale)) {
+		notFound();
+	}
+
+	const htmlLang = LOCALE_TO_HTML_LANG[locale] ?? LOCALE_TO_HTML_LANG[DEFAULT_LOCALE];
+
+	return (
 		<html lang={htmlLang} suppressHydrationWarning>
 			<body className={`${openSans.variable} ${montserrat.variable} ${notoSans.variable}`}>
 				<ColorModeProvider>
 					<ChakraUIProvider>
 						<Box display='flex' flexDirection='column' minHeight='100vh' gap='6' bg='bg.primary'>
-							<SessionProvider initialSession={session}>
-								<NextIntlClientProvider messages={messages}>
-									<AppStoreHydrator
-										categories={catalogResponse.catalog}
-										cartData={success ? restCartData : EMPTY_CART_DATA}
-										cartProductIds={cartProductIds}
-										wishListData={wishListData?.products ?? []}
-										wishListIds={wishListIds}
-										isLoggedIn={!!userId}
-									>
-										<Script id='org-schema' type='application/ld+json'>
-											{JSON.stringify(orgJsonLd)}
-										</Script>
-										<Header />
-										<Box as='main' w='full' maxW='1444px' flex='1' mx='auto'>
-											{children}
-											<ToTop />
-										</Box>
-									</AppStoreHydrator>
-								</NextIntlClientProvider>
-								<Footer />
-							</SessionProvider>
+							<Suspense fallback={<LayoutFallback />}>
+								<LayoutProviders>{children}</LayoutProviders>
+							</Suspense>
 						</Box>
 					</ChakraUIProvider>
 				</ColorModeProvider>

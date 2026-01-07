@@ -1,9 +1,14 @@
 'use server';
 import 'server-only';
 
-import { cache } from 'react';
+import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { buildProductImages } from '@/utils/productImages';
+import {
+	PRODUCT_DETAIL_CACHE_TAG,
+	PRODUCT_LIST_CACHE_TAG,
+	productCacheTagById,
+} from '@/constants/products';
 
 async function fetchProductBySlug(slug: string) {
 	const product = await prisma.product.findUnique({
@@ -62,7 +67,18 @@ async function fetchProductBySlug(slug: string) {
 	};
 }
 
-export const getProductBySlugCached = cache(fetchProductBySlug);
+export async function getProductBySlugCached(slug: string) {
+	'use cache';
+	cacheLife('hours');
+	cacheTag(PRODUCT_DETAIL_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
+
+	const product = await fetchProductBySlug(slug);
+	if (product?.id) {
+		cacheTag(productCacheTagById(product.id));
+	}
+
+	return product;
+}
 
 export async function getProductBySlug(slug: string) {
 	return fetchProductBySlug(slug);

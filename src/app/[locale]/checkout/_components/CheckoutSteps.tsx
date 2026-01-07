@@ -1,6 +1,6 @@
 'use client';
 
-import { VStack, Heading, Spinner } from '@chakra-ui/react';
+import { VStack, Heading, Box } from '@chakra-ui/react';
 import {
 	AccordionItem,
 	AccordionItemContent,
@@ -9,16 +9,25 @@ import {
 } from '@/components/ui/chakra/accordion';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
+import { LoadingSkeleton } from '@/components/ui/Skeleton';
 
 import AuthStep from './AuthStep';
 
+function StepLoadingFallback() {
+	return (
+		<Box mt='4'>
+			<LoadingSkeleton />
+		</Box>
+	);
+}
+
 const ShipmentStep = dynamic(() => import('./ShipmentStep'), {
-	loading: () => <Spinner size='md' />,
+	loading: () => <StepLoadingFallback />,
 	ssr: false,
 });
 
 const PaymentStep = dynamic(() => import('./PaymentStep'), {
-	loading: () => <Spinner size='md' />,
+	loading: () => <StepLoadingFallback />,
 	ssr: false,
 });
 

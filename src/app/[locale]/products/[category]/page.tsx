@@ -51,8 +51,6 @@ export async function generateMetadata({ params }: CategoryParams): Promise<Meta
 	};
 }
 
-export const revalidate = 120;
-
 export default async function CategoryPage({ params }: CategoryParams) {
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
 	const categoryDataResponse = await getCategoryData();

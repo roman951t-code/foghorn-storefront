@@ -1,19 +1,28 @@
 'use client';
 
-import { Flex, Heading, Card, Spinner } from '@chakra-ui/react';
+import { Flex, Heading, Card } from '@chakra-ui/react';
 import { FiUserCheck } from 'react-icons/fi';
 import dynamic from 'next/dynamic';
 import { I18nData } from '@/types/i18n';
 import { useSession } from '@/providers/SessionProvider';
 import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
+import { LoadingSkeleton } from '@/components/ui/Skeleton';
+
+function AuthStepSkeleton() {
+	return (
+		<Flex justifyContent='center' alignItems='center' w='full'>
+			<LoadingSkeleton />
+		</Flex>
+	);
+}
 
 const PersonalDataForm = dynamic(() => import('../../cabinet/_components/user/PersonalDataForm'), {
-	loading: () => <Spinner size='sm' />,
+	loading: () => <AuthStepSkeleton />,
 	ssr: false,
 });
 
 const Auth = dynamic(() => import('@/features/auth/Auth'), {
-	loading: () => <Spinner size='sm' />,
+	loading: () => <AuthStepSkeleton />,
 	ssr: false,
 });
 
@@ -21,11 +30,7 @@ export default function AuthData({ i18nData }: { i18nData: I18nData }) {
 	const { session } = useSession();
 
 	if (!session) {
-		return (
-			<Flex justifyContent='center' alignItems='center' w='full'>
-				<Spinner size='md' />
-			</Flex>
-		);
+		return <AuthStepSkeleton />;
 	}
 
 	return session?.session ? (

@@ -23,7 +23,6 @@ import { createOrderAction } from '@/actions/createOrderAction';
 import { useState, useTransition } from 'react';
 import { showToaster } from '@/utils/toast';
 import { useRouter } from 'next/navigation';
-import { getStripe } from '@/utils/getStripe';
 
 export default function OrderInfo() {
 	const { session } = useSession();
@@ -133,22 +132,16 @@ export default function OrderInfo() {
 				throw new Error(message);
 			}
 
-			const stripe = await getStripe();
+			const checkoutUrl =
+				(typeof data.url === 'string' && data.url) ??
+				(data.sessionId ? `https://checkout.stripe.com/c/pay/${data.sessionId}` : null);
 
-			if (stripe && data.sessionId) {
-				const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
-				if (error) {
-					throw new Error(error.message);
-				}
-				return;
+			if (!checkoutUrl) {
+				throw new Error('stripe_redirect_failed');
 			}
 
-			if (data.url) {
-				window.location.href = data.url as string;
-				return;
-			}
-
-			throw new Error('stripe_redirect_failed');
+			window.location.assign(checkoutUrl);
+			return;
 		} catch (error) {
 			console.error('Stripe checkout error', error);
 			const message = error instanceof Error ? error.message : 'stripe_session_failed';

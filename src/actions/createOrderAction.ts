@@ -5,11 +5,13 @@ import 'server-only';
 import { Prisma } from '@prisma/client';
 import { headers } from 'next/headers';
 import { z } from 'zod';
+import { revalidateTag, updateTag } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { normalizeOrder } from './orderUtils';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
+import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
 
 type CreateOrderItemPayload = { productId: string; quantity: number };
 
@@ -171,6 +173,10 @@ export async function createOrderAction(
 		});
 
 		const normalized = await normalizeOrder(order);
+
+		const productTags = uniqueIds.map((id) => productCacheTagById(id));
+		await Promise.all(productTags.map((tag) => updateTag(tag)));
+		await revalidateTag(PRODUCT_LIST_CACHE_TAG, 'default');
 
 		await sendOrderConfirmationEmail({
 			order: normalized,

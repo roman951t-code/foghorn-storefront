@@ -95,7 +95,15 @@ export default function SearchInput({
 	);
 
 	return (
-		<Group flex='1' hideBelow={hideBelow} px={{ base: '0px', md: '20px' }} attached>
+		<Group
+			as='form'
+			role='search'
+			onSubmit={(event) => event.preventDefault()}
+			flex='1'
+			hideBelow={hideBelow}
+			px={{ base: '0px', md: '20px' }}
+			attached
+		>
 			<Combobox.Root
 				variant='subtle'
 				collection={collection}

@@ -2,9 +2,15 @@
 
 import 'server-only';
 
+import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { PRODUCT_CATEGORY_CACHE_TAG, PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 
 export async function getCategoryData() {
+	'use cache';
+	cacheLife('days');
+	cacheTag(PRODUCT_CATEGORY_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
+
 	const categoryData = await prisma.productCategory.findMany({
 		where: { parentId: null },
 		select: {

@@ -50,8 +50,6 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	};
 }
 
-export const revalidate = 120;
-
 export default async function Subcategory({ params, searchParams }: Props) {
 	const { category, subcategory, locale } = ensureParams(subcategoryParamsSchema, await params);
 	const searchData = await searchParams;
