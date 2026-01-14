@@ -8,7 +8,8 @@
 		"start": "next start",
 		"lint": "next lint",
 		"test": "node tests/getProductsFilters.test.js",
-		"profile:search": "node --loader ts-node/esm scripts/profile-search.ts"
+		"profile:search": "node --loader ts-node/esm scripts/profile-search.ts",
+		"admin:dev": "node --import tsx/esm src/admin/server.mts"
 	},
 	"prisma": {
 		"seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -45,7 +46,15 @@
 		"swiper": "^12.0.3",
 		"uuid": "^13.0.0",
 		"zod": "^4.2.1",
-		"zustand": "^5.0.9"
+		"zustand": "^5.0.9",
+		"adminjs": "7.8.17",
+		"@adminjs/express": "6.1.1",
+		"@adminjs/prisma": "5.0.4",
+		"express": "4.18.2",
+		"express-session": "1.17.3",
+		"express-formidable": "1.2.0",
+		"tslib": "2.8.1",
+		"dotenv": "17.2.3"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^10.1.0",
@@ -59,6 +68,9 @@
 		"eslint-config-next": "16.1.1",
 		"prisma": "^6.19.1",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"@types/express": "^4.17.21",
+		"@types/express-session": "^1.17.11",
+		"tsx": "4.21.0"
 	}
 }
