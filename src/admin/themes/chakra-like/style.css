@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
+
+:root {
+	--admin-font-stack: 'Open Sans', 'Roboto', 'Noto Sans', system-ui, sans-serif;
+}
+
+body,
+#app {
+	font-family: var(--admin-font-stack);
+}
+
+.adminjs_Badge {
+	background: rgb(255, 255, 255) !important;
+	border-color: rgb(148, 147, 147) !important;
+	color: #01130b !important;
+}
+
+.admin-home-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 14px;
+	border-radius: 999px;
+	border: 1px solid rgba(43, 108, 176, 0.2);
+	box-shadow: 0 8px 16px rgba(190, 205, 221, 0.14);
+	color: #1a202c;
+	font-weight: 600;
+	text-decoration: none;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-home-link:hover {
+	box-shadow: 0 8px 16px rgba(132, 156, 183, 0.14);
+}
+
+.admin-home-link .adminjs_Icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+.adminjs_ActionHeader > .adminjs_Box:last-child {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.adminjs_Box > .adminjs_Label {
+	margin-bottom: 12px;
+}
+
+@supports selector(:has(*)) {
+	.adminjs_ActionHeader .adminjs_Box:has(> .adminjs_ButtonGroupItem) {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px 12px;
+		margin-top: 6px;
+		margin-bottom: 12px;
+	}
+
+	.adminjs_ActionHeader .adminjs_Box:has(> .adminjs_ButtonGroupItem) > .adminjs_ButtonGroupItem {
+		margin-right: 0;
+	}
+}
+
+@media (max-width: 768px) {
+	[data-css='app-content'] {
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+}

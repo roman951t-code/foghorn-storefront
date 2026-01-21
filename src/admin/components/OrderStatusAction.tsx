@@ -101,9 +101,9 @@ export default function OrderStatusAction({ action, record, resource }: ActionPr
 						fontSize='md'
 						outline
 						style={{
-							background: '#EBF8FF',
-							borderColor: '#90CDF4',
-							color: '#2C5282',
+							background: '#C6F6D5',
+							borderColor: '#38A169',
+							color: '#22543D',
 						}}
 					>
 						{currentLabel}
@@ -129,9 +129,9 @@ export default function OrderStatusAction({ action, record, resource }: ActionPr
 							fontSize='md'
 							outline
 							style={{
-								background: '#EDF2F7',
-								borderColor: '#CBD5E0',
-								color: '#2D3748',
+								background: '#C6F6D5',
+								borderColor: '#38A169',
+								color: '#22543D',
 							}}
 						>
 							{nextLabel}

@@ -1,2 +1,2 @@
 export { enAdminLocale } from './en.mts';
-export { ukAdminLocale } from './uk.mts';
+export { uaAdminLocale } from './ua.mts';
