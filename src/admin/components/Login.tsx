@@ -26,6 +26,10 @@ const actionButtonStyle = {
 	color: 'black',
 };
 
+const labelStyle = {
+	fontSize: 14,
+};
+
 const getMessageText = (message: string, translateMessage: (key: string) => string) =>
 	message.split(' ').length > 1 ? message : translateMessage(message);
 
@@ -36,8 +40,8 @@ export default function Login() {
 	const message = props?.errorMessage ?? undefined;
 	const branding = windowState.REDUX_STATE?.branding ?? {};
 	const { translateComponent, translateMessage } = useTranslation();
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
+	const [email, setEmail] = useState('test@com');
+	const [password, setPassword] = useState('test');
 
 	const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
 		setEmail(event.target.value);
@@ -51,6 +55,7 @@ export default function Login() {
 		<Box
 			variant='grey'
 			flex
+			className='admin-login-page'
 			style={{
 				minHeight: '100%',
 				alignItems: 'center',
@@ -103,7 +108,9 @@ export default function Login() {
 						/>
 					) : null}
 					<FormGroup>
-						<Label required>{translateComponent('Login.properties.email')}</Label>
+						<Label required style={labelStyle}>
+							{translateComponent('Login.properties.email')}
+						</Label>
 						<Input
 							name='email'
 							type='email'
@@ -114,7 +121,9 @@ export default function Login() {
 						/>
 					</FormGroup>
 					<FormGroup>
-						<Label required>{translateComponent('Login.properties.password')}</Label>
+						<Label required style={labelStyle}>
+							{translateComponent('Login.properties.password')}
+						</Label>
 						<Input
 							type='password'
 							name='password'

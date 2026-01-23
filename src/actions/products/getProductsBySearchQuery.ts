@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
 import { PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
+import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 
 export async function getProductsBySearchQuery(
 	searchQuery: string,
@@ -31,6 +32,8 @@ export async function getProductsBySearchQuery(
 	cacheLife('hours');
 	cacheTag(PRODUCT_LIST_CACHE_TAG);
 
+	const now = new Date();
+
 	const priceFilter =
 		minPrice !== undefined && maxPrice !== undefined
 			? { gte: minPrice, lte: maxPrice }
@@ -53,12 +56,44 @@ export async function getProductsBySearchQuery(
 
 	const whereClause: Prisma.ProductWhereInput = {
 		name: { contains: searchQuery, mode: 'insensitive' },
+		status: 'ACTIVE',
 		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
 			? {
 					OR: [
-						{ discountPrice: priceFilter },
-						{ AND: [{ discountPrice: null }, { basePrice: priceFilter }] },
+						{
+							AND: [
+								{ discountPrice: { not: null } },
+								{
+									OR: [
+										{ discountStartAt: null, discountEndAt: null },
+										{ discountStartAt: { lte: now }, discountEndAt: { gt: now } },
+									],
+								},
+								{ discountPrice: priceFilter },
+							],
+						},
+						{
+							AND: [
+								{
+									OR: [
+										{ discountPrice: null },
+										{
+											AND: [
+												{ discountPrice: { not: null } },
+												{
+													OR: [
+														{ discountStartAt: { gt: now } },
+														{ discountEndAt: { lte: now } },
+													],
+												},
+											],
+										},
+									],
+								},
+								{ basePrice: priceFilter },
+							],
+						},
 					],
 				}
 			: {}),
@@ -131,6 +166,8 @@ export async function getProductsBySearchQuery(
 			categoryName: true,
 			subcategoryName: true,
 			discountPrice: true,
+			discountStartAt: true,
+			discountEndAt: true,
 			inStock: true,
 			reviews: { select: { rating: true } },
 		},
@@ -141,6 +178,14 @@ export async function getProductsBySearchQuery(
 		const averageRating =
 			ratings.length > 0 ? ratings.reduce((sum, val) => sum + val, 0) / ratings.length : 0;
 
+		const basePrice = Number(product.basePrice ?? 0);
+		const scheduledDiscountPrice = getEffectiveDiscountPrice(
+			basePrice,
+			product.discountPrice != null ? Number(product.discountPrice) : null,
+			product.discountStartAt ?? null,
+			product.discountEndAt ?? null
+		);
+
 		return {
 			...product,
 			id: product.id ?? '',
@@ -150,8 +195,8 @@ export async function getProductsBySearchQuery(
 			categoryName: product.categoryName ?? '',
 			subcategoryName: product.subcategoryName ?? '',
 			inStock: !!product.inStock,
-			basePrice: Number(product.basePrice ?? 0),
-			discountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,
+			basePrice,
+			discountPrice: scheduledDiscountPrice,
 			averageRating,
 			reviewCount: product.reviews?.length ?? 0,
 		};

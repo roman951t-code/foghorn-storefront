@@ -9,17 +9,46 @@ body,
 	font-family: var(--admin-font-stack);
 }
 
+.admin-login-page .adminjs_Label {
+	font-size: 14px !important;
+}
+
+.admin-login-page input,
+.admin-login-page .adminjs_Input {
+	font-size: 14px !important;
+}
+
+.adminjs_Label {
+	font-size: 14px !important;
+}
+
+.admin-filter-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 99;
+	background: rgba(15, 23, 42, 0.35);
+}
+
 .adminjs_Badge {
 	background: rgb(255, 255, 255) !important;
 	border-color: rgb(148, 147, 147) !important;
 	color: #01130b !important;
 }
 
+.admin-card--kpis .adminjs_Text,
+.admin-card--financial .adminjs_Text {
+	font-size: 16px !important;
+}
+
+.admin-card--financial .adminjs_Badge {
+	font-size: 16px !important;
+}
+
 .admin-home-link {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
-	padding: 6px 14px;
+	padding: 8px 14px;
 	border-radius: 999px;
 	border: 1px solid rgba(43, 108, 176, 0.2);
 	box-shadow: 0 8px 16px rgba(190, 205, 221, 0.14);
@@ -41,7 +70,7 @@ body,
 .adminjs_ActionHeader > .adminjs_Box:last-child {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: 18px;
 }
 
 .adminjs_Box > .adminjs_Label {
@@ -52,7 +81,7 @@ body,
 	.adminjs_ActionHeader .adminjs_Box:has(> .adminjs_ButtonGroupItem) {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 10px 12px;
+		gap: 18px 12px;
 		margin-top: 6px;
 		margin-bottom: 12px;
 	}
@@ -67,4 +96,44 @@ body,
 		padding-left: 12px;
 		padding-right: 12px;
 	}
+}
+
+button[data-css$='filter-drawer-button-apply'] {
+	border-color: white !important;
+	background: #facc15 !important;
+	color: black !important;
+}
+
+button[data-css$='filter-drawer-button-apply']:hover {
+	background: #eab308 !important;
+}
+
+button[data-css='Product-new-drawer-submit'],
+button[data-css='Product-edit-drawer-submit'] {
+	border-color: white !important;
+	background: #facc15 !important;
+	color: black !important;
+}
+
+button[data-css='Product-new-drawer-submit']:hover,
+button[data-css='Product-edit-drawer-submit']:hover {
+	background: #eab308 !important;
+}
+
+[data-css='Product-deleteProduct-button'] {
+	background: transparent !important;
+	color: #ef4444 !important;
+}
+
+[data-css='Product-deleteProduct-button']:hover {
+	color: #dc2626 !important;
+}
+
+[data-css='Order-deleteOrder-button'] {
+	color: #ef4444 !important;
+	background: transparent !important;
+}
+
+[data-css='Order-deleteOrder-button']:hover {
+	color: #dc2626 !important;
 }

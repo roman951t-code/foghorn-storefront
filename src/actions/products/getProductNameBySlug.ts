@@ -4,6 +4,7 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import {
 	PRODUCT_DETAIL_CACHE_TAG,
 	PRODUCT_LIST_CACHE_TAG,
@@ -15,8 +16,8 @@ export async function getProductNameBySlug(slug: string) {
 	cacheLife('hours');
 	cacheTag(PRODUCT_DETAIL_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
 
-	const product = await prisma.product.findUnique({
-		where: { slug },
+	const product = await prisma.product.findFirst({
+		where: { slug, status: 'ACTIVE' },
 		select: {
 			id: true,
 			name: true,
@@ -24,6 +25,8 @@ export async function getProductNameBySlug(slug: string) {
 			imageUrl: true,
 			basePrice: true,
 			discountPrice: true,
+			discountStartAt: true,
+			discountEndAt: true,
 		},
 	});
 
@@ -32,5 +35,15 @@ export async function getProductNameBySlug(slug: string) {
 	cacheTag(productCacheTagById(product.id));
 
 	const { id, ...rest } = product;
-	return rest;
+	const basePrice = product.basePrice.toNumber();
+	return {
+		...rest,
+		basePrice,
+		discountPrice: getEffectiveDiscountPrice(
+			basePrice,
+			product.discountPrice?.toNumber() ?? null,
+			product.discountStartAt ?? null,
+			product.discountEndAt ?? null
+		),
+	};
 }

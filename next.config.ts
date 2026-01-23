@@ -40,6 +40,10 @@ const baseConfig: NextConfig = {
 				protocol: 'https',
 				hostname: 'picsum.photos',
 			},
+			{
+				protocol: 'https',
+				hostname: 'fastly.picsum.photos',
+			},
 		],
 		qualities: [68, 75],
 	},

@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { revalidateTag, updateTag } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import { normalizeOrder } from './orderUtils';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
@@ -70,6 +71,8 @@ export async function createOrderAction(
 			imageUrl: true,
 			basePrice: true,
 			discountPrice: true,
+			discountStartAt: true,
+			discountEndAt: true,
 			stock: true,
 			inStock: true,
 		},
@@ -98,7 +101,14 @@ export async function createOrderAction(
 				return null;
 			}
 
-			const unitPrice = toCurrency(Number(product.discountPrice ?? product.basePrice ?? 0));
+			const basePrice = Number(product.basePrice ?? 0);
+			const scheduledDiscountPrice = getEffectiveDiscountPrice(
+				basePrice,
+				product.discountPrice != null ? Number(product.discountPrice) : null,
+				product.discountStartAt ?? null,
+				product.discountEndAt ?? null
+			);
+			const unitPrice = toCurrency(Number(scheduledDiscountPrice ?? basePrice));
 			const quantity = Math.max(1, item.quantity);
 			const price = toCurrency(unitPrice * quantity);
 			return {
@@ -116,6 +126,21 @@ export async function createOrderAction(
 
 	const total = orderItems.reduce((acc, item) => acc + item.price, 0);
 	const roundedTotal = Math.round(total * 100) / 100;
+
+	const buildCustomerName = (first: string | null | undefined, last: string | null | undefined) => {
+		const firstTrimmed = (first ?? '').trim();
+		const lastTrimmed = (last ?? '').trim();
+		if (!firstTrimmed && !lastTrimmed) return null;
+		if (!lastTrimmed) return firstTrimmed || null;
+		if (!firstTrimmed) return lastTrimmed || null;
+		if (firstTrimmed.toLocaleLowerCase().includes(lastTrimmed.toLocaleLowerCase())) {
+			return firstTrimmed;
+		}
+		return `${firstTrimmed} ${lastTrimmed}`;
+	};
+	const contactName = session.user?.name ?? null;
+	const contactLastName = session.user?.lastName ?? null;
+	const customerName = buildCustomerName(contactName, contactLastName);
 
 	try {
 		const order = await prisma.$transaction(async (tx) => {
@@ -139,8 +164,9 @@ export async function createOrderAction(
 					total: new Prisma.Decimal(roundedTotal.toFixed(2)),
 					paymentMethod: parsed.data.paymentMethod ?? null,
 					shipmentMethod: parsed.data.shipmentMethod ?? null,
-					contactName: session.user?.name ?? null,
-					contactLastName: session.user?.lastName ?? null,
+					customerName,
+					contactName,
+					contactLastName,
 					contactMiddleName: session.user?.middleName ?? null,
 					contactEmail: session.user?.email ?? null,
 					contactPhone: session.user?.phoneNumber ?? null,

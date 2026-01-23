@@ -3,14 +3,17 @@ declare module '@adminjs/design-system' {
 	export const Box: any;
 	export const Button: any;
 	export const CurrentUserNav: any;
+	export const Drawer: any;
+	export const DrawerContent: any;
+	export const DrawerFooter: any;
 	export const DropDown: any;
 	export const DropDownItem: any;
 	export const DropDownMenu: any;
 	export const DropDownTrigger: any;
 	export const FormGroup: any;
+	export const H3: any;
 	export const H1: any;
 	export const H2: any;
-	export const H3: any;
 	export const H4: any;
 	export const H5: any;
 	export const H6: any;
@@ -20,7 +23,13 @@ declare module '@adminjs/design-system' {
 	export const Input: any;
 	export const Label: any;
 	export const MessageBox: any;
+	export const Modal: any;
 	export const Select: any;
+	export const Table: any;
+	export const TableBody: any;
+	export const TableCell: any;
+	export const TableHead: any;
+	export const TableRow: any;
 	export const Text: any;
 	export const cssClass: any;
 }

@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
 import { Review, SubcategoryProduct } from '@/types/product';
+import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 
 export type UserReviewedProduct = {
 	product: SubcategoryProduct & { fullSlug: string };
@@ -36,6 +37,8 @@ export async function getUserReviewedProducts(limit: number, offset = 0) {
 						imageUrl: true,
 						basePrice: true,
 						discountPrice: true,
+						discountStartAt: true,
+						discountEndAt: true,
 						inStock: true,
 						categoryName: true,
 						subcategoryName: true,
@@ -59,7 +62,12 @@ export async function getUserReviewedProducts(limit: number, offset = 0) {
 				fullSlug: r.product.fullSlug,
 				imageUrl: r.product.imageUrl,
 				basePrice: Number(r.product.basePrice ?? 0),
-				discountPrice: r.product.discountPrice != null ? Number(r.product.discountPrice) : null,
+				discountPrice: getEffectiveDiscountPrice(
+					Number(r.product.basePrice ?? 0),
+					r.product.discountPrice != null ? Number(r.product.discountPrice) : null,
+					r.product.discountStartAt ?? null,
+					r.product.discountEndAt ?? null
+				),
 				inStock: !!r.product.inStock,
 				categoryName: r.product.categoryName,
 				subcategoryName: r.product.subcategoryName,

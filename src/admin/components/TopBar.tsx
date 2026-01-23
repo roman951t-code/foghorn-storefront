@@ -52,8 +52,9 @@ const Version = ({ versions }: { versions: Versions }) => {
 
 const LanguageSelect = () => {
 	const { i18n, translateComponent } = useTranslation();
-	const supportedLngs = i18n?.options?.supportedLngs ?? [];
-	const availableLanguages = supportedLngs.filter((lang) => lang !== 'cimode');
+	const supportedLngsRaw = i18n?.options?.supportedLngs;
+	const supportedLngs = Array.isArray(supportedLngsRaw) ? supportedLngsRaw : [];
+	const availableLanguages = supportedLngs.filter((lang: string) => lang !== 'cimode');
 
 	if (availableLanguages.length <= 1) {
 		return null;
@@ -92,6 +93,7 @@ export default function TopBar({ toggleSidebar }: TopBarProps) {
 	const versions = reduxState.versions;
 	const { translateMessage } = useTranslation();
 	const rootPath = paths?.rootPath ?? '/admin';
+	const logoutPath = paths?.logoutPath ?? `${rootPath}/logout`;
 	const homeLabel = translateMessage('admin-home');
 
 	return (
@@ -124,7 +126,7 @@ export default function TopBar({ toggleSidebar }: TopBarProps) {
 			</Box>
 			<Version versions={versions ?? {}} />
 			<LanguageSelect />
-			{session?.email ? <LoggedIn session={session} paths={paths ?? {}} /> : ''}
+			{session?.email ? <LoggedIn session={session} paths={{ logoutPath }} /> : null}
 		</Box>
 	);
 }

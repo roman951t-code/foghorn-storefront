@@ -189,6 +189,7 @@ async function main() {
 						name,
 						slug: productSlug,
 						fullSlug,
+						status: 'ACTIVE',
 						categoryName: main,
 						subcategoryName: sub,
 						description: faker.commerce.productDescription(),

@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
 import { buildProductImages } from '@/utils/productImages';
+import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import { PRODUCT_CATEGORY_CACHE_TAG, PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 
 export async function getProductsBySubcategorySlug(
@@ -51,6 +52,8 @@ export async function getProductsBySubcategorySlug(
 					? { lte: maxPrice }
 					: undefined;
 
+	const now = new Date();
+
 	const dynamicConditions = filters
 		? Object.entries(filters).map(([key, values]) => ({
 				attributes: {
@@ -64,13 +67,45 @@ export async function getProductsBySubcategorySlug(
 
 	const whereClause: Prisma.ProductWhereInput = {
 		category: { slug },
+		status: 'ACTIVE',
 		...(onlyInStock ? { inStock: true } : {}),
 		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
 			? {
 					OR: [
-						{ discountPrice: priceFilter },
-						{ AND: [{ discountPrice: null }, { basePrice: priceFilter }] },
+						{
+							AND: [
+								{ discountPrice: { not: null } },
+								{
+									OR: [
+										{ discountStartAt: null, discountEndAt: null },
+										{ discountStartAt: { lte: now }, discountEndAt: { gt: now } },
+									],
+								},
+								{ discountPrice: priceFilter },
+							],
+						},
+						{
+							AND: [
+								{
+									OR: [
+										{ discountPrice: null },
+										{
+											AND: [
+												{ discountPrice: { not: null } },
+												{
+													OR: [
+														{ discountStartAt: { gt: now } },
+														{ discountEndAt: { lte: now } },
+													],
+												},
+											],
+										},
+									],
+								},
+								{ basePrice: priceFilter },
+							],
+						},
 					],
 				}
 			: {}),
@@ -104,6 +139,8 @@ export async function getProductsBySubcategorySlug(
 			categoryName: true,
 			subcategoryName: true,
 			discountPrice: true,
+			discountStartAt: true,
+			discountEndAt: true,
 			inStock: true,
 			reviews: { select: { rating: true } },
 			tags: true,
@@ -126,6 +163,14 @@ export async function getProductsBySubcategorySlug(
 		const ratings = p.reviews?.map((r) => r.rating) ?? [];
 		const averageRating = ratings.length ? ratings.reduce((s, v) => s + v, 0) / ratings.length : 0;
 
+		const basePrice = Number(p.basePrice ?? 0);
+		const scheduledDiscountPrice = getEffectiveDiscountPrice(
+			basePrice,
+			p.discountPrice != null ? Number(p.discountPrice) : null,
+			p.discountStartAt ?? null,
+			p.discountEndAt ?? null
+		);
+
 		return {
 			...p,
 			id: p.id ?? '',
@@ -136,15 +181,22 @@ export async function getProductsBySubcategorySlug(
 			categoryName: p.categoryName ?? '',
 			subcategoryName: p.subcategoryName ?? '',
 			inStock: !!p.inStock,
-			basePrice: Number(p.basePrice ?? 0),
-			discountPrice: p.discountPrice != null ? Number(p.discountPrice) : null,
+			basePrice,
+			discountPrice: scheduledDiscountPrice,
 			averageRating,
 			reviewCount: p.reviews?.length ?? 0,
 		} as SubcategoryProduct;
 	});
 
 	const maxProductPrice = paginatedProducts.reduce((max, p) => {
-		const price = p.discountPrice ?? p.basePrice ?? 0;
+		const basePrice = Number(p.basePrice ?? 0);
+		const discountPrice = getEffectiveDiscountPrice(
+			basePrice,
+			p.discountPrice != null ? Number(p.discountPrice) : null,
+			p.discountStartAt ?? null,
+			p.discountEndAt ?? null
+		);
+		const price = discountPrice ?? basePrice;
 		return Math.max(max, Number(price));
 	}, 0);
 

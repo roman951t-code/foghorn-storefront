@@ -35,7 +35,7 @@ export async function getCatalog() {
 							fullSlug: true,
 							imageUrl: true,
 						},
-						where: { imageUrl: { not: null } },
+						where: { imageUrl: { not: null }, status: 'ACTIVE' },
 						orderBy: { createdAt: 'desc' },
 						take: 5,
 					},

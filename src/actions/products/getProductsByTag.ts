@@ -12,6 +12,7 @@ import {
 } from '@/types/product';
 import { buildProductImages } from '@/utils/productImages';
 import { PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
+import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 
 export async function getProductsByTag<T extends boolean>(
 	tag: string,
@@ -30,6 +31,7 @@ export async function getProductsByTag<T extends boolean>(
 
 	const safeLimit = Math.min(50, Math.max(1, Math.floor(limit || 1)));
 	const safeOffset = Math.max(0, Math.floor(offset || 0));
+	const now = new Date();
 
 	const priceFilter =
 		minPrice !== undefined && maxPrice !== undefined
@@ -53,12 +55,44 @@ export async function getProductsByTag<T extends boolean>(
 
 	const whereClause: Prisma.ProductWhereInput = {
 		tags: { has: tag },
+		status: 'ACTIVE',
 		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
 			? {
 					OR: [
-						{ discountPrice: priceFilter },
-						{ AND: [{ discountPrice: null }, { basePrice: priceFilter }] },
+						{
+							AND: [
+								{ discountPrice: { not: null } },
+								{
+									OR: [
+										{ discountStartAt: null, discountEndAt: null },
+										{ discountStartAt: { lte: now }, discountEndAt: { gt: now } },
+									],
+								},
+								{ discountPrice: priceFilter },
+							],
+						},
+						{
+							AND: [
+								{
+									OR: [
+										{ discountPrice: null },
+										{
+											AND: [
+												{ discountPrice: { not: null } },
+												{
+													OR: [
+														{ discountStartAt: { gt: now } },
+														{ discountEndAt: { lte: now } },
+													],
+												},
+											],
+										},
+									],
+								},
+								{ basePrice: priceFilter },
+							],
+						},
 					],
 				}
 			: {}),
@@ -90,6 +124,8 @@ export async function getProductsByTag<T extends boolean>(
 			imageUrl: true,
 			basePrice: true,
 			discountPrice: true,
+			discountStartAt: true,
+			discountEndAt: true,
 			inStock: true,
 			reviews: { select: { rating: true } },
 			createdAt: true,
@@ -98,7 +134,13 @@ export async function getProductsByTag<T extends boolean>(
 
 	const productsWithPrice = productsQuery.map((p) => {
 		const basePrice = Number(p.basePrice ?? 0);
-		const discountPrice = p.discountPrice != null ? Number(p.discountPrice) : null;
+		const discountPrice = getEffectiveDiscountPrice(
+			basePrice,
+			p.discountPrice != null ? Number(p.discountPrice) : null,
+			p.discountStartAt ?? null,
+			p.discountEndAt ?? null,
+			now
+		);
 		return {
 			...p,
 			basePrice,

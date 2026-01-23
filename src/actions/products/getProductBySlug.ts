@@ -4,6 +4,7 @@ import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { buildProductImages } from '@/utils/productImages';
+import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import {
 	PRODUCT_DETAIL_CACHE_TAG,
 	PRODUCT_LIST_CACHE_TAG,
@@ -11,8 +12,8 @@ import {
 } from '@/constants/products';
 
 async function fetchProductBySlug(slug: string) {
-	const product = await prisma.product.findUnique({
-		where: { slug },
+	const product = await prisma.product.findFirst({
+		where: { slug, status: 'ACTIVE' },
 		select: {
 			id: true,
 			name: true,
@@ -22,6 +23,8 @@ async function fetchProductBySlug(slug: string) {
 			imageUrl: true,
 			basePrice: true,
 			discountPrice: true,
+			discountStartAt: true,
+			discountEndAt: true,
 			productCode: true,
 			inStock: true,
 			averageRating: true,
@@ -54,10 +57,16 @@ async function fetchProductBySlug(slug: string) {
 
 	if (!product) return null;
 	const images = buildProductImages(product.imageUrl ?? undefined, 4);
+	const basePrice = product.basePrice.toNumber();
 	return {
 		...product,
-		basePrice: product.basePrice.toNumber(),
-		discountPrice: product.discountPrice?.toNumber() ?? null,
+		basePrice,
+		discountPrice: getEffectiveDiscountPrice(
+			basePrice,
+			product.discountPrice?.toNumber() ?? null,
+			product.discountStartAt ?? null,
+			product.discountEndAt ?? null
+		),
 		images,
 		attributes: product.attributes.map((a) => ({
 			name: a.attribute.name,

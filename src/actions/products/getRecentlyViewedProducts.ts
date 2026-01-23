@@ -4,12 +4,21 @@ import 'server-only';
 
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
+import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 
 function mapRecentlyViewedProducts(viewed: { product: any }[]): SubcategoryProduct[] {
 	return viewed
 		.map((entry) => {
 			const p = entry.product;
 			if (!p) return null;
+			const basePrice = Number(p.basePrice ?? 0);
+			const scheduledDiscountPrice = getEffectiveDiscountPrice(
+				basePrice,
+				p.discountPrice != null ? Number(p.discountPrice) : null,
+				p.discountStartAt ?? null,
+				p.discountEndAt ?? null
+			);
+
 			return {
 				id: p.id ?? '',
 				name: p.name ?? '',
@@ -20,8 +29,8 @@ function mapRecentlyViewedProducts(viewed: { product: any }[]): SubcategoryProdu
 				inStock: !!p.inStock,
 				averageRating: p.averageRating ?? 0,
 				reviewCount: p.reviewCount ?? 0,
-				basePrice: Number(p.basePrice ?? 0),
-				discountPrice: p.discountPrice != null ? Number(p.discountPrice) : null,
+				basePrice,
+				discountPrice: scheduledDiscountPrice,
 			} as SubcategoryProduct;
 		})
 		.filter(Boolean) as SubcategoryProduct[];
@@ -53,6 +62,8 @@ export async function getRecentlyViewedProductsWithCount(
 						imageUrl: true,
 						basePrice: true,
 						discountPrice: true,
+						discountStartAt: true,
+						discountEndAt: true,
 						inStock: true,
 						categoryName: true,
 						subcategoryName: true,

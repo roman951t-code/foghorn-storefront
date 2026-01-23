@@ -73,7 +73,7 @@ export default function Dashboard() {
 							variant='contained'
 							color='primary'
 							style={actionButtonStyle}
-							onClick={goTo('resources/Product')}
+							onClick={goTo('resources/Product/actions/new')}
 						>
 							{translateMessage('dashboard.primaryActions.products')}
 						</Button>

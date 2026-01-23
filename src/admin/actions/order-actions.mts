@@ -9,6 +9,43 @@ const stripe =
 		? new Stripe(stripeSecretKey, { apiVersion: '2025-12-15.clover' })
 		: null;
 
+const resolveAdminEmail = (currentAdmin: unknown): string | null => {
+	if (!currentAdmin || typeof currentAdmin !== 'object') {
+		return null;
+	}
+	const email = (currentAdmin as { email?: unknown }).email;
+	if (typeof email !== 'string' || email.trim() === '') {
+		return null;
+	}
+	return email;
+};
+
+const updateOrderStatusWithAudit = async (
+	orderId: string,
+	next: OrderStatus,
+	currentStatus: OrderStatus | undefined,
+	adminEmail: string | null
+) => {
+	if (currentStatus === next) {
+		return;
+	}
+	await prisma.$transaction([
+		prisma.order.update({
+			where: { id: orderId },
+			data: { status: next },
+		}),
+		prisma.orderAuditEntry.create({
+			data: {
+				orderId,
+				type: 'STATUS_CHANGE',
+				fromStatus: currentStatus ?? null,
+				toStatus: next,
+				adminEmail,
+			},
+		}),
+	]);
+};
+
 const makeStatusAction = (
 	next: OrderStatus,
 	allowedCurrent?: OrderStatus[]
@@ -26,10 +63,8 @@ const makeStatusAction = (
 			};
 		}
 		const orderId = record.param('id') as string;
-		await prisma.order.update({
-			where: { id: orderId },
-			data: { status: next },
-		});
+		const adminEmail = resolveAdminEmail(currentAdmin);
+		await updateOrderStatusWithAudit(orderId, next, currentStatus, adminEmail);
 		const updated = await resource.findOne(orderId);
 		return {
 			record: updated ? updated.toJSON(currentAdmin) : record.toJSON(currentAdmin),
@@ -52,10 +87,15 @@ const makeBulkStatusAction = (next: OrderStatus): ActionHandler<BulkActionRespon
 			};
 		}
 		try {
-			await prisma.order.updateMany({
-				where: { id: { in: ids } },
-				data: { status: next },
-			});
+			const adminEmail = resolveAdminEmail(currentAdmin);
+			const updates: Promise<void>[] = [];
+			for (const record of records) {
+				const orderId = record.param('id') as string | undefined;
+				if (!orderId) continue;
+				const currentStatus = record.param('status') as OrderStatus | undefined;
+				updates.push(updateOrderStatusWithAudit(orderId, next, currentStatus, adminEmail));
+			}
+			await Promise.all(updates);
 			const refreshed = await Promise.all(ids.map((id) => resource.findOne(id)));
 			const jsonRecords = refreshed
 				.filter(Boolean)
@@ -170,10 +210,8 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 		}
 	}
 
-	await prisma.order.update({
-		where: { id: orderId },
-		data: { status: 'CANCELLED' },
-	});
+	const adminEmail = resolveAdminEmail(currentAdmin);
+	await updateOrderStatusWithAudit(orderId, 'CANCELLED', currentStatus, adminEmail);
 	const updated = await resource.findOne(orderId);
 	return {
 		record: updated ? updated.toJSON(currentAdmin) : record.toJSON(currentAdmin),

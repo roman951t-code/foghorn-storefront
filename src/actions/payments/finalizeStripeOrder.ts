@@ -147,6 +147,21 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 
 	const decimalTotal = new Prisma.Decimal(calculatedTotal.toFixed(2));
 
+	const buildCustomerName = (first: string | null | undefined, last: string | null | undefined) => {
+		const firstTrimmed = (first ?? '').trim();
+		const lastTrimmed = (last ?? '').trim();
+		if (!firstTrimmed && !lastTrimmed) return null;
+		if (!lastTrimmed) return firstTrimmed || null;
+		if (!firstTrimmed) return lastTrimmed || null;
+		if (firstTrimmed.toLocaleLowerCase().includes(lastTrimmed.toLocaleLowerCase())) {
+			return firstTrimmed;
+		}
+		return `${firstTrimmed} ${lastTrimmed}`;
+	};
+	const contactName = session.user?.name ?? null;
+	const contactLastName = session.user?.lastName ?? null;
+	const customerName = buildCustomerName(contactName, contactLastName);
+
 	let order:
 		| Awaited<ReturnType<(typeof prisma)['order']['create']>>
 		| undefined;
@@ -176,8 +191,9 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 					paymentMethod: 'card',
 					shipmentMethod: null,
 					stripeSessionId: sessionId,
-					contactName: session.user?.name ?? null,
-					contactLastName: session.user?.lastName ?? null,
+					customerName,
+					contactName,
+					contactLastName,
 					contactMiddleName: session.user?.middleName ?? null,
 					contactEmail: session.user?.email ?? null,
 					contactPhone: session.user?.phoneNumber ?? null,
