@@ -55,6 +55,24 @@ const productNameListComponent = componentLoader.add(
 );
 const productListComponent = componentLoader.add('ProductList', path.join(adminDir, 'components', 'ProductList'));
 const productShowComponent = componentLoader.add('ProductShow', path.join(adminDir, 'components', 'ProductShow'));
+const productVariantMatrixComponent = componentLoader.add(
+	'ProductVariantMatrix',
+	path.join(adminDir, 'components', 'ProductVariantMatrix')
+);
+const productCsvImportExportActionComponent = componentLoader.add(
+	'ProductCsvImportExportAction',
+	path.join(adminDir, 'components', 'ProductCsvImportExportAction')
+);
+const productTagsEditComponent = componentLoader.add(
+	'ProductTagsEdit',
+	path.join(adminDir, 'components', 'ProductTagsEdit')
+);
+const productNewComponent = componentLoader.add('ProductNew', path.join(adminDir, 'components', 'ProductNew'));
+const productEditComponent = componentLoader.add('ProductEdit', path.join(adminDir, 'components', 'ProductEdit'));
+const productActivityTimelineComponent = componentLoader.add(
+	'ProductActivityTimeline',
+	path.join(adminDir, 'components', 'ProductActivityTimeline')
+);
 const productBulkSetCategoryActionComponent = componentLoader.add(
 	'ProductBulkSetCategoryAction',
 	path.join(adminDir, 'components', 'ProductBulkSetCategoryAction')
@@ -101,6 +119,12 @@ export {
 	productNameListComponent,
 	productListComponent,
 	productShowComponent,
+	productVariantMatrixComponent,
+	productCsvImportExportActionComponent,
+	productTagsEditComponent,
+	productNewComponent,
+	productEditComponent,
+	productActivityTimelineComponent,
 	productBulkSetCategoryActionComponent,
 	productBulkSetBrandActionComponent,
 	productBulkEditTagsActionComponent,

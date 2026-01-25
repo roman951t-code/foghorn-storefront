@@ -29,6 +29,18 @@ import ProductList from '../src/admin/components/ProductList'
 AdminJS.UserComponents.ProductList = ProductList
 import ProductShow from '../src/admin/components/ProductShow'
 AdminJS.UserComponents.ProductShow = ProductShow
+import ProductVariantMatrix from '../src/admin/components/ProductVariantMatrix'
+AdminJS.UserComponents.ProductVariantMatrix = ProductVariantMatrix
+import ProductCsvImportExportAction from '../src/admin/components/ProductCsvImportExportAction'
+AdminJS.UserComponents.ProductCsvImportExportAction = ProductCsvImportExportAction
+import ProductTagsEdit from '../src/admin/components/ProductTagsEdit'
+AdminJS.UserComponents.ProductTagsEdit = ProductTagsEdit
+import ProductNew from '../src/admin/components/ProductNew'
+AdminJS.UserComponents.ProductNew = ProductNew
+import ProductEdit from '../src/admin/components/ProductEdit'
+AdminJS.UserComponents.ProductEdit = ProductEdit
+import ProductActivityTimeline from '../src/admin/components/ProductActivityTimeline'
+AdminJS.UserComponents.ProductActivityTimeline = ProductActivityTimeline
 import ProductBulkSetCategoryAction from '../src/admin/components/ProductBulkSetCategoryAction'
 AdminJS.UserComponents.ProductBulkSetCategoryAction = ProductBulkSetCategoryAction
 import ProductBulkSetBrandAction from '../src/admin/components/ProductBulkSetBrandAction'

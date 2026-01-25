@@ -14,15 +14,16 @@ const toLocalInputValue = (value: string | null | undefined) => {
 };
 
 const formatMoney = (value: number, currency = 'UAH') => {
+	const safeValue = Number.isFinite(value) ? value : 0;
 	try {
 		return new Intl.NumberFormat(undefined, {
 			style: 'currency',
 			currency,
 			minimumFractionDigits: 2,
 			maximumFractionDigits: 2,
-		}).format(value);
+		}).format(safeValue);
 	} catch {
-		return value.toFixed(2);
+		return safeValue.toFixed(2);
 	}
 };
 

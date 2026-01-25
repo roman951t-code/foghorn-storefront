@@ -184,12 +184,17 @@ model ProductCategory {
   parent   ProductCategory?  @relation("Subcategories", fields: [parentId], references: [id])
   children ProductCategory[] @relation("Subcategories")
   products Product[]
+  attributeSet ProductAttributeSet?
 }
 
 model Product {
   id              String                  @id @default(uuid())
   name            String
   description     String?
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  openGraphImage  String?
   slug            String                  @unique
   status          ProductStatus           @default(DRAFT)
   imageUrl        String?
@@ -197,6 +202,7 @@ model Product {
   discountPrice   Decimal?                @db.Decimal(10, 2)
   discountStartAt DateTime?
   discountEndAt   DateTime?
+  currency        ProductCurrency         @default(UAH)
   productCode     String
   stock           Int
   inStock         Boolean                 @default(true)
@@ -210,14 +216,43 @@ model Product {
   brand           Brand                   @relation(fields: [brandId], references: [id])
   category        ProductCategory         @relation(fields: [categoryId], references: [id])
   attributes      ProductAttributeValue[]
+  variants        ProductVariant[]
   orderItems      OrderItem[]
   wishlistedBy    Wishlist[]
   reviews         Review[]
   cartItems       CartItem[]
   recentlyViewed  RecentlyViewed[]
+  auditEntries    ProductAuditEntry[]
   fullSlug        String @unique
   categoryName    String
   subcategoryName String
+}
+
+model ProductVariant {
+  id        String                   @id @default(uuid())
+  productId String
+  sku       String
+  price     Decimal                  @db.Decimal(10, 2)
+  stock     Int
+  createdAt DateTime                 @default(now())
+  updatedAt DateTime                 @updatedAt
+  product   Product                  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attributes ProductVariantAttribute[]
+
+  @@unique([productId, sku])
+  @@index([productId])
+}
+
+model ProductVariantAttribute {
+  id          String        @id @default(uuid())
+  variantId   String
+  attributeId String
+  value       String
+  variant     ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  attribute   ProductAttribute @relation(fields: [attributeId], references: [id])
+
+  @@unique([variantId, attributeId])
+  @@index([attributeId])
 }
 
 enum ProductStatus {
@@ -226,11 +261,41 @@ enum ProductStatus {
   ARCHIVED
 }
 
+enum ProductCurrency {
+  UAH
+  USD
+  EUR
+}
+
 model ProductAttribute {
   id       String                  @id @default(uuid())
   name     String                  @unique
   unit     String?
   products ProductAttributeValue[]
+  variantAttributes ProductVariantAttribute[]
+  attributeSetItems ProductAttributeSetItem[]
+}
+
+model ProductAttributeSet {
+  id         String                   @id @default(uuid())
+  name       String
+  categoryId String                   @unique
+  category   ProductCategory          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  items      ProductAttributeSetItem[]
+  createdAt  DateTime                 @default(now())
+  updatedAt  DateTime                 @updatedAt
+}
+
+model ProductAttributeSetItem {
+  id              String              @id @default(uuid())
+  attributeSetId  String
+  attributeId     String
+  sortOrder       Int                 @default(0)
+  attributeSet    ProductAttributeSet @relation(fields: [attributeSetId], references: [id], onDelete: Cascade)
+  attribute       ProductAttribute    @relation(fields: [attributeId], references: [id])
+
+  @@unique([attributeSetId, attributeId])
+  @@index([attributeId])
 }
 
 model ProductAttributeValue {
@@ -301,6 +366,27 @@ model OrderAuditEntry {
 
 enum OrderAuditType {
   STATUS_CHANGE
+  NOTE
+}
+
+model ProductAuditEntry {
+  id         String           @id @default(uuid())
+  productId  String
+  type       ProductAuditType
+  field      String?
+  fromValue  String?
+  toValue    String?
+  note       String?
+  adminEmail String?
+  createdAt  DateTime         @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, createdAt])
+}
+
+enum ProductAuditType {
+  FIELD_CHANGE
   NOTE
 }
 

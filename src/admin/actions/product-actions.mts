@@ -35,6 +35,19 @@ export const publishProduct: ActionHandler<RecordActionResponse> = async (_req, 
 			notice: { message: 'product-already-active', type: 'info' },
 		};
 	}
+	const product = await prisma.product.findUnique({
+		where: { id: productId },
+		select: { id: true, imageUrl: true },
+	});
+	if (!product) {
+		return { record: record.toJSON(currentAdmin), notice: { message: 'product-not-found', type: 'error' } };
+	}
+	if (!product.imageUrl) {
+		return {
+			record: record.toJSON(currentAdmin),
+			notice: { message: 'product-publish-image-required', type: 'error' },
+		};
+	}
 	await prisma.product.update({ where: { id: productId }, data: { status: 'ACTIVE' } });
 	const updated = await resource.findOne(productId);
 	return {
@@ -78,6 +91,10 @@ export const duplicateProduct: ActionHandler<RecordActionResponse> = async (_req
 			id: true,
 			name: true,
 			description: true,
+			metaTitle: true,
+			metaDescription: true,
+			canonicalUrl: true,
+			openGraphImage: true,
 			slug: true,
 			fullSlug: true,
 			imageUrl: true,
@@ -107,6 +124,10 @@ export const duplicateProduct: ActionHandler<RecordActionResponse> = async (_req
 			data: {
 				name: `${product.name} (Copy)`,
 				description: product.description,
+				metaTitle: product.metaTitle,
+				metaDescription: product.metaDescription,
+				canonicalUrl: product.canonicalUrl,
+				openGraphImage: product.openGraphImage,
 				slug: nextSlug,
 				fullSlug: nextFullSlug,
 				imageUrl: product.imageUrl,

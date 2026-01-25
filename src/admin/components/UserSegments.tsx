@@ -44,16 +44,16 @@ const formatDate = (value: string | null) => {
 };
 
 const formatMoney = (value: number | null) => {
-	if (value == null) return '-';
+	const safeValue = value == null || !Number.isFinite(value) ? 0 : value;
 	try {
 		return new Intl.NumberFormat(undefined, {
 			style: 'currency',
 			currency: 'UAH',
 			minimumFractionDigits: 2,
 			maximumFractionDigits: 2,
-		}).format(value);
+		}).format(safeValue);
 	} catch {
-		return value.toFixed(2);
+		return safeValue.toFixed(2);
 	}
 };
 
@@ -256,4 +256,3 @@ export default function UserSegments({ resource }: ActionProps) {
 		</Box>
 	);
 }
-

@@ -1,7 +1,11 @@
 import { prisma } from '../prisma.mts';
 import { archiveProduct, duplicateProduct, publishProduct } from '../actions/product-actions.mts';
+import { productVariantMatrix } from '../actions/product-variant-actions.mts';
 import { scheduleDiscount } from '../actions/product-discount-actions.mts';
 import { deleteProduct } from '../actions/product-delete-actions.mts';
+import { productKpis } from '../actions/product-kpi-actions.mts';
+import { productRelatedData } from '../actions/product-related-actions.mts';
+import { exportProductsCsv, importProductsCsv } from '../actions/product-csv-actions.mts';
 import {
 	bulkAdjustPrice,
 	bulkEditTags,
@@ -21,6 +25,11 @@ import {
 } from '../actions/order-actions.mts';
 import { financialBreakdown } from '../actions/order-financial-actions.mts';
 import { auditTimeline } from '../actions/order-audit-actions.mts';
+import {
+	captureProductAuditBeforeHook,
+	productActivityTimeline,
+	productAuditAfterHook,
+} from '../actions/product-activity-actions.mts';
 import { setFulfillment } from '../actions/order-fulfillment-actions.mts';
 import { packingSlip } from '../actions/order-packing-slip-actions.mts';
 import { userKpis } from '../actions/user-kpi-actions.mts';
@@ -41,6 +50,12 @@ import {
 	productNameListComponent,
 	productListComponent,
 	productShowComponent,
+	productVariantMatrixComponent,
+	productCsvImportExportActionComponent,
+	productTagsEditComponent,
+	productNewComponent,
+	productEditComponent,
+	productActivityTimelineComponent,
 	productBulkSetCategoryActionComponent,
 	productBulkSetBrandActionComponent,
 	productBulkEditTagsActionComponent,
@@ -52,6 +67,28 @@ import {
 } from '../config/components.mts';
 import { modelMap } from '../config/model-map.mts';
 import { disabled, hidden, readOnly, readOnlyActions } from '../config/property-options.mts';
+
+const mapAttributeSetItemPayload = async (request: any) => {
+	const payload = request?.payload ?? {};
+	if (!payload || typeof payload !== 'object') return request;
+	const next = { ...payload } as Record<string, any>;
+	const mapIdToReference = (idKey: string, relationKey: string) => {
+		const idValue = next[idKey];
+		if (typeof idValue === 'string' && idValue.trim()) {
+			if (!next[relationKey]) {
+				next[relationKey] = idValue;
+			}
+			delete next[idKey];
+		}
+	};
+	mapIdToReference('attributeSetId', 'attributeSet');
+	mapIdToReference('attributeId', 'attribute');
+	if (next.sortOrder !== undefined) {
+		const parsed = Number(next.sortOrder);
+		next.sortOrder = Number.isFinite(parsed) ? parsed : 0;
+	}
+	return { ...request, payload: next };
+};
 
 export const resources = [
 	{
@@ -67,24 +104,42 @@ export const resources = [
 				'status',
 				'basePrice',
 				'discountPrice',
+				'currency',
 				'stock',
 				'inStock',
 				'brand',
 				'category',
 				'updatedAt',
-				'imageUrl',
 			],
-			filterProperties: ['name', 'status', 'brand', 'category', 'inStock', 'stock', 'basePrice', 'discountPrice', 'imageUrl', 'updatedAt'],
+			filterProperties: ['name', 'status', 'brand', 'category', 'currency', 'inStock', 'stock', 'basePrice', 'discountPrice', 'imageUrl', 'updatedAt'],
 			properties: {
 				id: hidden,
 				name: {
 					components: { list: productNameListComponent },
 				},
+				metaTitle: { isVisible: { list: false, filter: false, show: true, edit: true } },
+				metaDescription: { isVisible: { list: false, filter: false, show: true, edit: true } },
+				canonicalUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
+				openGraphImage: { isVisible: { list: false, filter: false, show: true, edit: true } },
 				basePrice: { type: 'currency' },
 				discountPrice: { type: 'currency' },
+				currency: {
+					isRequired: true,
+					availableValues: [
+						{ value: 'UAH', label: 'UAH' },
+						{ value: 'USD', label: 'USD' },
+						{ value: 'EUR', label: 'EUR' },
+					],
+				},
 				discountStartAt: { isVisible: { list: false, filter: false, show: true, edit: false } },
 				discountEndAt: { isVisible: { list: false, filter: false, show: true, edit: false } },
 				imageUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
+				averageRating: { isVisible: { edit: false } },
+				reviewCount: { isVisible: { edit: false } },
+				fullSlug: { isVisible: { edit: false } },
+				tags: {
+					components: { edit: productTagsEditComponent },
+				},
 				status: {
 					isVisible: { list: true, filter: true, show: true, edit: false },
 					availableValues: [
@@ -139,11 +194,57 @@ export const resources = [
 					component: productBulkToggleInStockActionComponent,
 					handler: bulkToggleInStock,
 				},
-				new: { before: validateProductNewEdit },
-				edit: { before: validateProductNewEdit },
+				new: { before: validateProductNewEdit, component: productNewComponent },
+				edit: {
+					before: async (request: any, context: any) => {
+						await captureProductAuditBeforeHook(request, context);
+						return validateProductNewEdit(request, context);
+					},
+					after: productAuditAfterHook,
+					component: productEditComponent,
+				},
 				show: {
 					actionType: 'record',
 					component: productShowComponent,
+					custom: {
+						previewBaseUrl: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
+					},
+				},
+				activityTimeline: {
+					actionType: 'record',
+					icon: 'Activity',
+					component: productActivityTimelineComponent,
+					handler: productActivityTimeline,
+				},
+				variantMatrix: {
+					actionType: 'record',
+					icon: 'Grid',
+					component: productVariantMatrixComponent,
+					handler: productVariantMatrix,
+				},
+				importProductsCsv: {
+					actionType: 'resource',
+					icon: 'Upload',
+					component: productCsvImportExportActionComponent,
+					handler: importProductsCsv,
+				},
+				exportProductsCsv: {
+					actionType: 'resource',
+					isVisible: false,
+					component: false,
+					handler: exportProductsCsv,
+				},
+				productKpis: {
+					actionType: 'record',
+					isVisible: false,
+					component: false,
+					handler: productKpis,
+				},
+				productRelatedData: {
+					actionType: 'record',
+					isVisible: false,
+					component: false,
+					handler: productRelatedData,
 				},
 				publishProduct: {
 					actionType: 'record',
@@ -211,6 +312,30 @@ export const resources = [
 			navigation: 'Catalog',
 			properties: {
 				id: hidden,
+			},
+		},
+	},
+	{
+		resource: { model: modelMap.ProductAttributeSet, client: prisma },
+		options: {
+			navigation: 'Catalog',
+			properties: {
+				id: hidden,
+			},
+		},
+	},
+	{
+		resource: { model: modelMap.ProductAttributeSetItem, client: prisma },
+		options: {
+			navigation: 'Catalog',
+			properties: {
+				id: hidden,
+				attributeSetId: hidden,
+				attributeId: hidden,
+			},
+			actions: {
+				new: { before: mapAttributeSetItemPayload },
+				edit: { before: mapAttributeSetItemPayload },
 			},
 		},
 	},
