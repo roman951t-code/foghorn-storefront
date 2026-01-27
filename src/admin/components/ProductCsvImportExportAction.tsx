@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ChangeEvent } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import {
 	Box,
@@ -134,13 +134,13 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 				<Input
 					type='file'
 					accept='.csv,text/csv'
-					onChange={(event) => handleFile(event.target.files?.[0] ?? null)}
+					onChange={(event: ChangeEvent<HTMLInputElement>) => handleFile(event.target.files?.[0] ?? null)}
 				/>
 				<Box style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 					<input
 						type='checkbox'
 						checked={dryRun}
-						onChange={(event) => setDryRun(event.target.checked)}
+						onChange={(event: ChangeEvent<HTMLInputElement>) => setDryRun(event.target.checked)}
 					/>
 					<Text>{translateMessage('product-csv-dry-run')}</Text>
 				</Box>

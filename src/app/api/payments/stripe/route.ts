@@ -6,6 +6,7 @@ import { stripe } from '@/lib/stripe';
 import { auth } from '@/lib/auth';
 import { isSameOriginRequest } from '@/lib/csrf';
 import { env } from '@/config/env';
+import { isProductPublished } from '@/utils/publishSchedule';
 import type Stripe from 'stripe';
 
 type LineItemPayload = { productId: string; quantity: number };
@@ -85,14 +86,29 @@ export async function POST(req: NextRequest) {
 		const uniqueIds = Array.from(new Set(items.map((item) => item.productId)));
 		const products = await prisma.product.findMany({
 			where: { id: { in: uniqueIds } },
-			select: { id: true, name: true, basePrice: true, discountPrice: true, stock: true, inStock: true },
+			select: {
+				id: true,
+				name: true,
+				basePrice: true,
+				discountPrice: true,
+				stock: true,
+				inStock: true,
+				status: true,
+				publishStartAt: true,
+				publishEndAt: true,
+			},
 		});
 		const productMap = new Map(products.map((p) => [p.id, p]));
 
 		const lineItems = items
 			.map((item) => {
 				const product = productMap.get(item.productId);
-				if (!product || !product.inStock) return null;
+				if (
+					!product ||
+					!product.inStock ||
+					!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
+				)
+					return null;
 				const availableStock = product.stock ?? 0;
 				if (item.quantity > availableStock) return null;
 				const quantity = Math.max(1, Math.floor(item.quantity ?? 1));

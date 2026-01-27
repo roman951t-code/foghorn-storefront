@@ -90,12 +90,17 @@ const buildPreviewPath = (locale: string, fullSlug: string) => {
 
 export default function ProductShow(props: ActionProps) {
 	const { record, resource, action } = props;
-	const { translateAction, translateMessage, i18n } = useTranslation();
+	const { translateAction, translateLabel, translateMessage, i18n } = useTranslation();
 	const addNotice = useNotice();
 	const recordId = record?.id;
 	const name = String(record?.params?.name ?? '');
 	const imageUrl = (record?.params?.imageUrl as string | null | undefined) ?? null;
 	const status = String(record?.params?.status ?? '');
+	const statusLabel = useMemo(() => {
+		if (!status) return '';
+		const translated = translateLabel(`status.${status}`, resource.id);
+		return translated && translated !== `status.${status}` ? translated : status;
+	}, [resource.id, status, translateLabel]);
 	const fullSlug = String(record?.params?.fullSlug ?? '').trim();
 	const storefrontLocale = resolveStorefrontLocale(i18n?.language);
 	const previewPath = fullSlug ? buildPreviewPath(storefrontLocale, fullSlug) : '';
@@ -271,7 +276,7 @@ export default function ProductShow(props: ActionProps) {
 						>
 							{name || 'Product'}
 						</Text>
-						{status ? <Text color='grey60'>{status}</Text> : null}
+						{status ? <Text color='grey60'>{statusLabel}</Text> : null}
 					</Box>
 					<Button
 						variant='outlined'

@@ -181,10 +181,7 @@ const ProductSchema = z
 		currency: z.preprocess(
 			toUpperTrim,
 			z
-				.string({
-					required_error: 'product-validation-currency',
-					invalid_type_error: 'product-validation-currency',
-				})
+				.string()
 				.min(1, 'product-validation-currency')
 				.refine((value) => currencyValues.includes(value as (typeof currencyValues)[number]), 'product-validation-currency')
 		),

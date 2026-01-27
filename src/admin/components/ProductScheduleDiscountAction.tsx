@@ -29,11 +29,16 @@ const formatMoney = (value: number, currency = 'UAH') => {
 
 export default function ProductScheduleDiscountAction({ action, record, resource }: ActionProps) {
 	const addNotice = useNotice();
-	const { translateAction, translateMessage } = useTranslation();
+	const { translateAction, translateLabel, translateMessage } = useTranslation();
 
 	const productName = useMemo(() => String(record?.params?.name ?? ''), [record?.params?.name]);
 	const productSlug = useMemo(() => String(record?.params?.slug ?? ''), [record?.params?.slug]);
 	const productStatus = useMemo(() => String(record?.params?.status ?? ''), [record?.params?.status]);
+	const productStatusLabel = useMemo(() => {
+		if (!productStatus) return '';
+		const translated = translateLabel(`status.${productStatus}`, resource.id);
+		return translated && translated !== `status.${productStatus}` ? translated : productStatus;
+	}, [productStatus, resource.id, translateLabel]);
 	const basePrice = useMemo(() => Number(record?.params?.basePrice ?? 0), [record?.params?.basePrice]);
 	const initialDiscountPrice = useMemo(
 		() => (record?.params?.discountPrice != null ? String(record?.params?.discountPrice) : ''),
@@ -95,7 +100,7 @@ export default function ProductScheduleDiscountAction({ action, record, resource
 	const handleSave = async () => {
 		if (!record?.id || saving) return;
 		if (clientValidationError) {
-			addNotice({ message: clientValidationError, type: 'error' });
+			addNotice({ message: 'discount-window-invalid', type: 'error' });
 			return;
 		}
 		setSaving(true);
@@ -138,7 +143,7 @@ export default function ProductScheduleDiscountAction({ action, record, resource
 					<Text fontWeight='bold'>{productName}</Text>
 					<Text color='grey60'>
 						{productSlug ? `${productSlug}` : null}
-						{productStatus ? `${productSlug ? ' • ' : ''}${productStatus}` : null}
+						{productStatus ? `${productSlug ? ' • ' : ''}${productStatusLabel}` : null}
 					</Text>
 				</Box>
 			) : null}
@@ -178,7 +183,7 @@ export default function ProductScheduleDiscountAction({ action, record, resource
 							borderRadius: 8,
 							border: '1px solid #E2E8F0',
 							marginTop: 10,
-							fontSize: 14,
+							fontSize: 15,
 						}}
 					/>
 				</Box>
@@ -196,7 +201,7 @@ export default function ProductScheduleDiscountAction({ action, record, resource
 							borderRadius: 8,
 							border: '1px solid #E2E8F0',
 							marginTop: 10,
-							fontSize: 14,
+							fontSize: 15,
 						}}
 					/>
 				</Box>

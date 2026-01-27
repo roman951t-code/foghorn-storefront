@@ -8,6 +8,7 @@ import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
 import { buildProductImages } from '@/utils/productImages';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import { PRODUCT_CATEGORY_CACHE_TAG, PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 
 export async function getProductsBySubcategorySlug(
@@ -67,7 +68,6 @@ export async function getProductsBySubcategorySlug(
 
 	const whereClause: Prisma.ProductWhereInput = {
 		category: { slug },
-		status: 'ACTIVE',
 		...(onlyInStock ? { inStock: true } : {}),
 		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
@@ -109,7 +109,7 @@ export async function getProductsBySubcategorySlug(
 					],
 				}
 			: {}),
-		...(dynamicConditions.length > 0 ? { AND: dynamicConditions } : {}),
+		AND: [getPublishedProductWhere(now), ...(dynamicConditions.length > 0 ? dynamicConditions : [])],
 	};
 
 	const orderByClause: Prisma.ProductOrderByWithRelationInput[] = (() => {

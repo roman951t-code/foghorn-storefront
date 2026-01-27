@@ -1,13 +1,18 @@
+import type { PrismaClient } from '@prisma/client';
+import type { ResourceOptions } from 'adminjs';
 import { prisma } from '../prisma.mts';
 import { archiveProduct, duplicateProduct, publishProduct } from '../actions/product-actions.mts';
 import { productVariantMatrix } from '../actions/product-variant-actions.mts';
 import { scheduleDiscount } from '../actions/product-discount-actions.mts';
+import { schedulePublish } from '../actions/product-publish-schedule-actions.mts';
 import { deleteProduct } from '../actions/product-delete-actions.mts';
 import { productKpis } from '../actions/product-kpi-actions.mts';
+import { lowStockAlerts } from '../actions/product-low-stock-actions.mts';
 import { productRelatedData } from '../actions/product-related-actions.mts';
 import { exportProductsCsv, importProductsCsv } from '../actions/product-csv-actions.mts';
 import {
 	bulkAdjustPrice,
+	bulkAdjustStock,
 	bulkEditTags,
 	bulkSetBrand,
 	bulkSetCategory,
@@ -21,34 +26,45 @@ import {
 	markDelivered,
 	markPaid,
 	markShipped,
+	processReturn,
 	setStatus,
 } from '../actions/order-actions.mts';
 import { financialBreakdown } from '../actions/order-financial-actions.mts';
+import { orderItemsSummary } from '../actions/order-items-actions.mts';
 import { auditTimeline } from '../actions/order-audit-actions.mts';
+import { exportOrdersCsv } from '../actions/order-csv-actions.mts';
+import { syncOrderTotalsAfterDiscountChange } from '../actions/order-discount-actions.mts';
 import {
 	captureProductAuditBeforeHook,
 	productActivityTimeline,
 	productAuditAfterHook,
 } from '../actions/product-activity-actions.mts';
 import { setFulfillment } from '../actions/order-fulfillment-actions.mts';
-import { packingSlip } from '../actions/order-packing-slip-actions.mts';
-import { userKpis } from '../actions/user-kpi-actions.mts';
+import { bulkPackingSlips, packingSlip } from '../actions/order-packing-slip-actions.mts';
+import { attachUserListKpis, userKpis } from '../actions/user-kpi-actions.mts';
 import { updateUserAdminMeta } from '../actions/user-admin-actions.mts';
+import { revokeSession, userSessions } from '../actions/user-session-actions.mts';
 import { userSegments } from '../actions/user-segmentation-actions.mts';
 import { userRelatedData } from '../actions/user-related-actions.mts';
+import { reviewProductSummary } from '../actions/review-actions.mts';
 import { validateProductNewEdit } from '../validation/product-admin-validation.mts';
 import {
 	cancelOrderActionComponent,
 	orderAuditTimelineActionComponent,
 	orderFulfillmentActionComponent,
 	orderPackingSlipActionComponent,
+	orderReturnActionComponent,
+	orderBulkPackingSlipActionComponent,
+	orderCsvExportActionComponent,
 	orderShowComponent,
 	orderTotalListComponent,
 	orderTotalRangeFilterComponent,
 	selectFilterWithPlaceholderComponent,
 	productScheduleDiscountActionComponent,
+	productSchedulePublishActionComponent,
 	productNameListComponent,
 	productListComponent,
+	orderListComponent,
 	productShowComponent,
 	productVariantMatrixComponent,
 	productCsvImportExportActionComponent,
@@ -60,10 +76,12 @@ import {
 	productBulkSetBrandActionComponent,
 	productBulkEditTagsActionComponent,
 	productBulkAdjustPriceActionComponent,
+	productBulkAdjustStockActionComponent,
 	productBulkToggleInStockActionComponent,
 	userShowComponent,
 	userSegmentsComponent,
 	orderStatusActionComponent,
+	reviewShowComponent,
 } from '../config/components.mts';
 import { modelMap } from '../config/model-map.mts';
 import { disabled, hidden, readOnly, readOnlyActions } from '../config/property-options.mts';
@@ -90,6 +108,58 @@ const mapAttributeSetItemPayload = async (request: any) => {
 	return { ...request, payload: next };
 };
 
+const mapCouponPayload = async (request: any) => {
+	const payload = request?.payload ?? {};
+	if (!payload || typeof payload !== 'object') return request;
+	const next = { ...payload } as Record<string, any>;
+	const promotionId = next.promotionId;
+	if (typeof promotionId === 'string' && promotionId.trim()) {
+		if (!next.promotion) next.promotion = promotionId;
+		delete next.promotionId;
+	}
+	return { ...request, payload: next };
+};
+
+const mapOrderDiscountPayload = async (request: any) => {
+	const payload = request?.payload ?? {};
+	if (!payload || typeof payload !== 'object') return request;
+	const next = { ...payload } as Record<string, any>;
+	const mapIdToReference = (idKey: string, relationKey: string) => {
+		const idValue = next[idKey];
+		if (typeof idValue === 'string' && idValue.trim()) {
+			if (!next[relationKey]) {
+				next[relationKey] = idValue;
+			}
+			delete next[idKey];
+		}
+	};
+	mapIdToReference('orderId', 'order');
+	mapIdToReference('promotionId', 'promotion');
+	mapIdToReference('couponId', 'coupon');
+	return { ...request, payload: next };
+};
+
+type AdminResource = {
+	resource: { model: unknown; client: PrismaClient };
+	options: ResourceOptions;
+};
+
+const buildResource = (model: unknown, options: ResourceOptions): AdminResource => ({
+	resource: { model, client: prisma },
+	options,
+});
+
+const maybeResource = (model: unknown, options: ResourceOptions): AdminResource | null =>
+	model ? buildResource(model, options) : null;
+
+const isOrderStatus = (record: { param: (key: string) => unknown } | undefined, status: string) =>
+	String(record?.param('status') ?? '') === status;
+
+const isOrderStatusBlocked = (
+	record: { param: (key: string) => unknown } | undefined,
+	blocked: string[]
+) => blocked.includes(String(record?.param('status') ?? ''));
+
 export const resources = [
 	{
 		resource: { model: modelMap.Product, client: prisma },
@@ -101,17 +171,41 @@ export const resources = [
 			},
 			listProperties: [
 				'name',
+				'productCode',
 				'status',
 				'basePrice',
 				'discountPrice',
 				'currency',
 				'stock',
 				'inStock',
+				'tags',
 				'brand',
 				'category',
 				'updatedAt',
+				'discountStartAt',
+				'discountEndAt',
+				'publishStartAt',
+				'publishEndAt',
 			],
-			filterProperties: ['name', 'status', 'brand', 'category', 'currency', 'inStock', 'stock', 'basePrice', 'discountPrice', 'imageUrl', 'updatedAt'],
+			filterProperties: [
+				'name',
+				'productCode',
+				'status',
+				'brand',
+				'category',
+				'currency',
+				'inStock',
+				'stock',
+				'basePrice',
+				'discountPrice',
+				'discountStartAt',
+				'discountEndAt',
+				'publishStartAt',
+				'publishEndAt',
+				'tags',
+				'imageUrl',
+				'updatedAt',
+			],
 			properties: {
 				id: hidden,
 				name: {
@@ -131,8 +225,10 @@ export const resources = [
 						{ value: 'EUR', label: 'EUR' },
 					],
 				},
-				discountStartAt: { isVisible: { list: false, filter: false, show: true, edit: false } },
-				discountEndAt: { isVisible: { list: false, filter: false, show: true, edit: false } },
+				discountStartAt: { isVisible: { list: true, filter: true, show: true, edit: false } },
+				discountEndAt: { isVisible: { list: true, filter: true, show: true, edit: false } },
+				publishStartAt: { isVisible: { list: true, filter: true, show: true, edit: false } },
+				publishEndAt: { isVisible: { list: true, filter: true, show: true, edit: false } },
 				imageUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
 				averageRating: { isVisible: { edit: false } },
 				reviewCount: { isVisible: { edit: false } },
@@ -187,6 +283,13 @@ export const resources = [
 					component: productBulkAdjustPriceActionComponent,
 					handler: bulkAdjustPrice,
 				},
+				bulkAdjustStock: {
+					actionType: 'bulk',
+					icon: 'Package',
+					guard: 'product-bulk-adjust-stock',
+					component: productBulkAdjustStockActionComponent,
+					handler: bulkAdjustStock,
+				},
 				bulkToggleInStock: {
 					actionType: 'bulk',
 					icon: 'Package',
@@ -240,6 +343,12 @@ export const resources = [
 					component: false,
 					handler: productKpis,
 				},
+				lowStockAlerts: {
+					actionType: 'resource',
+					isVisible: false,
+					component: false,
+					handler: lowStockAlerts,
+				},
 				productRelatedData: {
 					actionType: 'record',
 					isVisible: false,
@@ -277,6 +386,13 @@ export const resources = [
 					guard: 'schedule-discount',
 					handler: scheduleDiscount,
 					component: productScheduleDiscountActionComponent,
+				},
+				schedulePublish: {
+					actionType: 'record',
+					icon: 'Calendar',
+					guard: 'schedule-publish',
+					handler: schedulePublish,
+					component: productSchedulePublishActionComponent,
 				},
 				deleteProduct: {
 					actionType: 'record',
@@ -386,6 +502,7 @@ export const resources = [
 				items: {
 					isVisible: { list: false, filter: false, show: true, edit: false },
 				},
+				discounts: hidden,
 				auditEntries: hidden,
 				carrier: {
 					isVisible: { list: false, filter: true, show: true, edit: false },
@@ -414,6 +531,17 @@ export const resources = [
 				status: {
 					components: { filter: selectFilterWithPlaceholderComponent },
 				},
+				refundAmount: {
+					type: 'currency',
+					components: { show: orderTotalListComponent },
+					isVisible: { list: false, filter: false, show: true, edit: false },
+				},
+				refundReason: {
+					isVisible: { list: false, filter: false, show: true, edit: false },
+				},
+				refundedAt: {
+					isVisible: { list: false, filter: false, show: true, edit: false },
+				},
 				stripeSessionId: {
 					isVisible: { list: false, filter: true, show: true, edit: false },
 				},
@@ -429,6 +557,10 @@ export const resources = [
 				new: { isAccessible: false },
 				edit: { isAccessible: false },
 				bulkDelete: { isAccessible: false },
+				list: {
+					actionType: 'resource',
+					component: orderListComponent,
+				},
 				show: {
 					actionType: 'record',
 					component: orderShowComponent,
@@ -439,10 +571,18 @@ export const resources = [
 					component: false,
 					handler: financialBreakdown,
 				},
+				orderItems: {
+					actionType: 'record',
+					isVisible: false,
+					component: false,
+					handler: orderItemsSummary,
+				},
 				markPaid: {
 					actionType: 'record',
 					icon: 'CreditCard',
 					guard: 'mark-paid',
+					isVisible: ({ record }: { record?: { param: (key: string) => unknown } }) =>
+						isOrderStatus(record, 'PENDING'),
 					handler: markPaid,
 					component: false,
 				},
@@ -450,6 +590,8 @@ export const resources = [
 					actionType: 'record',
 					icon: 'Truck',
 					guard: 'mark-shipped',
+					isVisible: ({ record }: { record?: { param: (key: string) => unknown } }) =>
+						isOrderStatus(record, 'PAID'),
 					handler: markShipped,
 					component: false,
 				},
@@ -457,6 +599,8 @@ export const resources = [
 					actionType: 'record',
 					icon: 'CheckCircle',
 					guard: 'mark-delivered',
+					isVisible: ({ record }: { record?: { param: (key: string) => unknown } }) =>
+						isOrderStatus(record, 'SHIPPED'),
 					handler: markDelivered,
 					component: false,
 				},
@@ -464,6 +608,8 @@ export const resources = [
 					actionType: 'record',
 					icon: 'XCircle',
 					guard: 'cancel-order',
+					isVisible: ({ record }: { record?: { param: (key: string) => unknown } }) =>
+						!isOrderStatusBlocked(record, ['CANCELLED', 'DELIVERED', 'RETURNED']),
 					component: cancelOrderActionComponent,
 					handler: cancelOrder,
 				},
@@ -473,6 +619,15 @@ export const resources = [
 					guard: 'move-next-status',
 					component: orderStatusActionComponent,
 					handler: setStatus,
+				},
+				processReturn: {
+					actionType: 'record',
+					icon: 'RotateCcw',
+					guard: 'process-return',
+					isVisible: ({ record }: { record?: { param: (key: string) => unknown } }) =>
+						!isOrderStatus(record, 'CANCELLED'),
+					component: orderReturnActionComponent,
+					handler: processReturn,
 				},
 				auditTimeline: {
 					actionType: 'record',
@@ -492,6 +647,19 @@ export const resources = [
 					icon: 'Printer',
 					component: orderPackingSlipActionComponent,
 					handler: packingSlip,
+				},
+				bulkPackingSlips: {
+					actionType: 'bulk',
+					icon: 'Printer',
+					guard: 'bulk-packing-slips',
+					component: orderBulkPackingSlipActionComponent,
+					handler: bulkPackingSlips,
+				},
+				exportOrdersCsv: {
+					actionType: 'resource',
+					icon: 'Download',
+					component: orderCsvExportActionComponent,
+					handler: exportOrdersCsv,
 				},
 				bulkMarkShipped: {
 					actionType: 'bulk',
@@ -518,6 +686,165 @@ export const resources = [
 			},
 		},
 	},
+	maybeResource(modelMap.Promotion, {
+		navigation: 'Marketing',
+		listProperties: [
+			'name',
+			'discountType',
+			'discountValue',
+			'isActive',
+			'startsAt',
+			'endsAt',
+			'createdAt',
+		],
+		filterProperties: ['name', 'discountType', 'isActive', 'startsAt', 'endsAt'],
+		properties: {
+			id: hidden,
+			name: {
+				description: 'promotion-hint-name',
+				custom: { tooltipDirection: 'right' },
+			},
+			description: {
+				description: 'promotion-hint-description',
+				custom: { tooltipDirection: 'right' },
+			},
+			discountType: {
+				availableValues: [
+					{ value: 'PERCENT', label: 'Percent' },
+					{ value: 'FIXED', label: 'Fixed amount' },
+				],
+				description: 'promotion-hint-discount-type',
+				custom: { tooltipDirection: 'right' },
+			},
+			discountValue: {
+				type: 'number',
+				props: { step: 0.01 },
+				description: 'promotion-hint-discount-value',
+				custom: { tooltipDirection: 'right' },
+			},
+			startsAt: {
+				description: 'promotion-hint-starts-at',
+				custom: { tooltipDirection: 'right' },
+			},
+			endsAt: {
+				description: 'promotion-hint-ends-at',
+				custom: { tooltipDirection: 'right' },
+			},
+			minOrderTotal: {
+				type: 'currency',
+				description: 'promotion-hint-min-order-total',
+				custom: { tooltipDirection: 'right' },
+			},
+			isActive: {
+				description: 'promotion-hint-is-active',
+				custom: { tooltipDirection: 'right' },
+			},
+			createdAt: readOnly,
+			updatedAt: readOnly,
+		},
+	}),
+	maybeResource(modelMap.Coupon, {
+		navigation: 'Marketing',
+		listProperties: [
+			'code',
+			'promotion',
+			'isActive',
+			'maxRedemptions',
+			'redemptionCount',
+			'startsAt',
+			'endsAt',
+			'createdAt',
+		],
+		filterProperties: ['code', 'promotion', 'isActive', 'startsAt', 'endsAt'],
+		properties: {
+			id: hidden,
+			code: {
+				description: 'coupon-hint-code',
+				custom: { tooltipDirection: 'right' },
+			},
+			promotionId: {
+				isVisible: { list: false, filter: false, show: true, edit: false },
+				description: 'coupon-hint-promotion',
+				custom: { tooltipDirection: 'right' },
+			},
+			promotion: {
+				isVisible: { list: true, filter: true, show: true, edit: true },
+				description: 'coupon-hint-promotion',
+				custom: { tooltipDirection: 'right' },
+			},
+			maxRedemptions: {
+				description: 'coupon-hint-max-redemptions',
+				custom: { tooltipDirection: 'right' },
+			},
+			redemptionCount: {
+				isVisible: { list: true, filter: false, show: true, edit: false },
+				description: 'coupon-hint-redemption-count',
+				custom: { tooltipDirection: 'right' },
+			},
+			startsAt: {
+				description: 'coupon-hint-starts-at',
+				custom: { tooltipDirection: 'right' },
+			},
+			endsAt: {
+				description: 'coupon-hint-ends-at',
+				custom: { tooltipDirection: 'right' },
+			},
+			isActive: {
+				description: 'coupon-hint-is-active',
+				custom: { tooltipDirection: 'right' },
+			},
+			createdAt: readOnly,
+			updatedAt: readOnly,
+		},
+		actions: {
+			new: { before: mapCouponPayload },
+			edit: { before: mapCouponPayload },
+		},
+	}),
+	maybeResource(modelMap.OrderDiscount, {
+		navigation: 'Sales',
+		listProperties: ['orderId', 'label', 'code', 'amount', 'createdAt'],
+		filterProperties: ['orderId', 'promotion', 'coupon', 'createdAt'],
+		properties: {
+			id: hidden,
+			label: {
+				description: 'order-discount-hint-label',
+			},
+			code: {
+				description: 'order-discount-hint-code',
+			},
+			amount: {
+				type: 'currency',
+				description: 'order-discount-hint-amount',
+			},
+			orderId: {
+				isVisible: { list: true, filter: true, show: true, edit: true },
+				description: 'order-discount-hint-order',
+			},
+			promotionId: {
+				isVisible: { list: false, filter: false, show: true, edit: false },
+				description: 'order-discount-hint-promotion',
+			},
+			couponId: {
+				isVisible: { list: false, filter: false, show: true, edit: false },
+				description: 'order-discount-hint-coupon',
+			},
+			promotion: {
+				isVisible: { list: false, filter: true, show: true, edit: true },
+				description: 'order-discount-hint-promotion',
+			},
+			coupon: {
+				isVisible: { list: false, filter: true, show: true, edit: true },
+				description: 'order-discount-hint-coupon',
+			},
+			createdAt: readOnly,
+		},
+		actions: {
+			new: { before: mapOrderDiscountPayload, after: syncOrderTotalsAfterDiscountChange },
+			edit: { before: mapOrderDiscountPayload, after: syncOrderTotalsAfterDiscountChange },
+			delete: { after: syncOrderTotalsAfterDiscountChange },
+		},
+	}),
 	{
 		resource: { model: modelMap.OrderItem, client: prisma },
 		options: {
@@ -552,6 +879,8 @@ export const resources = [
 			listProperties: [
 				'name',
 				'email',
+				'lifetimeValue',
+				'lastOrderDate',
 				'adminStatus',
 				'phoneNumber',
 				'emailVerified',
@@ -581,6 +910,15 @@ export const resources = [
 				adminNotes: {
 					isVisible: { list: false, filter: false, show: true, edit: false },
 				},
+				lifetimeValue: {
+					type: 'currency',
+					props: { intlConfig: { locale: 'uk-UA', currency: 'UAH' } },
+					isVisible: { list: true, filter: false, show: false, edit: false },
+				},
+				lastOrderDate: {
+					type: 'datetime',
+					isVisible: { list: true, filter: false, show: false, edit: false },
+				},
 				image: {
 					isVisible: { list: false, filter: false, show: true, edit: false },
 				},
@@ -594,6 +932,9 @@ export const resources = [
 			},
 			actions: {
 				...readOnlyActions,
+				list: {
+					after: attachUserListKpis,
+				},
 				userSegments: {
 					actionType: 'resource',
 					icon: 'Filter',
@@ -616,6 +957,18 @@ export const resources = [
 					component: false,
 					handler: userRelatedData,
 				},
+				userSessions: {
+					actionType: 'record',
+					isVisible: false,
+					component: false,
+					handler: userSessions,
+				},
+				revokeSession: {
+					actionType: 'record',
+					isVisible: false,
+					component: false,
+					handler: revokeSession,
+				},
 				updateUserAdminMeta: {
 					actionType: 'record',
 					isVisible: false,
@@ -633,6 +986,18 @@ export const resources = [
 				id: hidden,
 				createdAt: readOnly,
 			},
+			actions: {
+				show: {
+					actionType: 'record',
+					component: reviewShowComponent,
+				},
+				reviewProduct: {
+					actionType: 'record',
+					isVisible: false,
+					component: false,
+					handler: reviewProductSummary,
+				},
+			},
 		},
 	},
 	{
@@ -645,4 +1010,4 @@ export const resources = [
 			},
 		},
 	},
-];
+].filter(Boolean) as AdminResource[];

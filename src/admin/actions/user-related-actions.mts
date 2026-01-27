@@ -15,6 +15,7 @@ type RelatedReview = {
 	createdAt: string;
 	productId: string;
 	productName: string;
+	productImageUrl: string | null;
 };
 
 type RelatedProductRef = {
@@ -66,7 +67,7 @@ export const userRelatedData: ActionHandler<RecordActionResponse> = async (_req,
 				comment: true,
 				createdAt: true,
 				productId: true,
-				product: { select: { name: true } },
+				product: { select: { name: true, imageUrl: true } },
 			},
 			take: previewLimit,
 		}),
@@ -98,6 +99,7 @@ export const userRelatedData: ActionHandler<RecordActionResponse> = async (_req,
 			createdAt: review.createdAt.toISOString(),
 			productId: review.productId,
 			productName: review.product?.name ?? '-',
+			productImageUrl: review.product?.imageUrl ?? null,
 		})),
 		wishlist: wishlist.map((item) => ({
 			productId: item.productId,
@@ -116,4 +118,3 @@ export const userRelatedData: ActionHandler<RecordActionResponse> = async (_req,
 		payload,
 	};
 };
-

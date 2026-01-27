@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import {
 	Box,
@@ -352,7 +352,9 @@ export default function ProductVariantMatrix(props: ActionProps) {
 											placeholder={translateMessage('product-variant-values-placeholder')}
 											value={attr.valueText}
 											disabled={!attr.enabled}
-											onChange={(event) => handleAttributeValuesChange(attr.id, event.target.value)}
+											onChange={(event: ChangeEvent<HTMLInputElement>) =>
+												handleAttributeValuesChange(attr.id, event.target.value)
+											}
 										/>
 									</FormGroup>
 								</Box>
@@ -406,21 +408,27 @@ export default function ProductVariantMatrix(props: ActionProps) {
 											<TableCell>
 												<Input
 													value={variant.sku}
-													onChange={(event) => handleVariantChange(index, 'sku', event.target.value)}
+													onChange={(event: ChangeEvent<HTMLInputElement>) =>
+														handleVariantChange(index, 'sku', event.target.value)
+													}
 												/>
 											</TableCell>
 											<TableCell>
 												<Input
 													type='number'
 													value={variant.price}
-													onChange={(event) => handleVariantChange(index, 'price', event.target.value)}
+													onChange={(event: ChangeEvent<HTMLInputElement>) =>
+														handleVariantChange(index, 'price', event.target.value)
+													}
 												/>
 											</TableCell>
 											<TableCell>
 												<Input
 													type='number'
 													value={variant.stock}
-													onChange={(event) => handleVariantChange(index, 'stock', event.target.value)}
+													onChange={(event: ChangeEvent<HTMLInputElement>) =>
+														handleVariantChange(index, 'stock', event.target.value)
+													}
 												/>
 											</TableCell>
 										</TableRow>

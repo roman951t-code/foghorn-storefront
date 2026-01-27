@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
+import { isProductPublished } from '@/utils/publishSchedule';
 
 const MAX_ITEM_QUANTITY = 99;
 
@@ -34,7 +35,7 @@ export async function mergeCartData(localItems: { id: string; quantity: number }
 		const productIds = Array.from(new Set(normalizedItems.map((item) => item.id)));
 		const products = await prisma.product.findMany({
 			where: { id: { in: productIds } },
-			select: { id: true, stock: true, inStock: true },
+			select: { id: true, stock: true, inStock: true, status: true, publishStartAt: true, publishEndAt: true },
 		});
 		const productMap = new Map(products.map((p) => [p.id, p]));
 
@@ -52,7 +53,13 @@ export async function mergeCartData(localItems: { id: string; quantity: number }
 
 			for (const item of normalizedItems) {
 				const product = productMap.get(item.id);
-				if (!product || !product.inStock || !product.stock) continue;
+				if (
+					!product ||
+					!product.inStock ||
+					!product.stock ||
+					!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
+				)
+					continue;
 
 				const existing = existingByProduct.get(item.id);
 				const currentQty = existing?.quantity ?? 0;

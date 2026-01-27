@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
+import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 export async function mergeWishListData(localItems: { id: string }[]) {
 	const wishlistT = await getTranslations('wishlist');
@@ -29,7 +30,7 @@ export async function mergeWishListData(localItems: { id: string }[]) {
 		}
 
 		const products = await prisma.product.findMany({
-			where: { id: { in: normalizedIds }, inStock: true },
+			where: { id: { in: normalizedIds }, inStock: true, AND: [getPublishedProductWhere()] },
 			select: { id: true },
 		});
 		const validIds = new Set(products.map((p) => p.id));

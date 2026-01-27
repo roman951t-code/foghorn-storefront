@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ApiClient, type ActionProps, OriginalShow, useNotice, useTranslation } from 'adminjs';
 import {
 	Badge,
@@ -36,9 +36,19 @@ type UserRelatedPayload = {
 		createdAt: string;
 		productId: string;
 		productName: string;
+		productImageUrl: string | null;
 	}[];
 	wishlist: { productId: string; productName: string; createdAt: string }[];
 	recentlyViewed: { productId: string; productName: string; createdAt: string }[];
+};
+
+type UserSessionEntry = {
+	id: string;
+	createdAt: string;
+	updatedAt: string;
+	expiresAt: string;
+	ipAddress: string | null;
+	userAgent: string | null;
 };
 
 const formatMoney = (value: number, currency = 'UAH') => {
@@ -76,10 +86,14 @@ export default function UserShow(props: ActionProps) {
 	const recordId = record?.id;
 	const { translateMessage } = useTranslation();
 	const addNotice = useNotice();
+	const addNoticeRef = useRef(addNotice);
 	const [payload, setPayload] = useState<UserKpisPayload | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [related, setRelated] = useState<UserRelatedPayload | null>(null);
 	const [relatedLoading, setRelatedLoading] = useState(false);
+	const [sessions, setSessions] = useState<UserSessionEntry[] | null>(null);
+	const [sessionsLoading, setSessionsLoading] = useState(false);
+	const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
 	const [localRecord, setLocalRecord] = useState(record);
 	const [adminStatus, setAdminStatus] = useState<UserAdminStatus>('ACTIVE');
 	const [adminNotes, setAdminNotes] = useState('');
@@ -133,6 +147,38 @@ export default function UserShow(props: ActionProps) {
 			.finally(() => {
 				if (!isActive) return;
 				setRelatedLoading(false);
+			});
+		return () => {
+			isActive = false;
+		};
+	}, [recordId, resource.id]);
+
+	useEffect(() => {
+		addNoticeRef.current = addNotice;
+	}, [addNotice]);
+
+	useEffect(() => {
+		if (!recordId) return;
+		let isActive = true;
+		setSessionsLoading(true);
+		api.recordAction({
+			resourceId: resource.id,
+			recordId,
+			actionName: 'userSessions',
+			method: 'get',
+		})
+			.then((response) => {
+				if (!isActive) return;
+				setSessions((response.data.payload?.sessions ?? []) as UserSessionEntry[]);
+			})
+			.catch(() => {
+				if (!isActive) return;
+				addNoticeRef.current({ message: 'session-load-failed', type: 'error' });
+				setSessions([]);
+			})
+			.finally(() => {
+				if (!isActive) return;
+				setSessionsLoading(false);
 			});
 		return () => {
 			isActive = false;
@@ -200,6 +246,32 @@ export default function UserShow(props: ActionProps) {
 			addNotice({ message: 'user-admin-update-failed', type: 'error' });
 		} finally {
 			setSavingMeta(false);
+		}
+	};
+
+	const handleRevokeSession = async (sessionId: string) => {
+		if (!localRecord?.id || revokingSessionId) return;
+		setRevokingSessionId(sessionId);
+		try {
+			const formData = new FormData();
+			formData.append('sessionId', sessionId);
+			const response = await api.recordAction({
+				resourceId: resource.id,
+				recordId: localRecord.id,
+				actionName: 'revokeSession',
+				method: 'post',
+				data: formData,
+			});
+			if (response.data.notice) {
+				addNotice(response.data.notice);
+			}
+			if (response.data.notice?.type === 'success') {
+				setSessions((current) => (current ? current.filter((session) => session.id !== sessionId) : current));
+			}
+		} catch {
+			addNotice({ message: 'session-revoke-failed', type: 'error' });
+		} finally {
+			setRevokingSessionId(null);
 		}
 	};
 
@@ -274,6 +346,75 @@ export default function UserShow(props: ActionProps) {
 						{savingMeta ? translateMessage('customer-flags-saving') : translateMessage('customer-flags-save')}
 					</Button>
 				</Box>
+			</Box>
+
+			<Box
+				variant='white'
+				p='xxl'
+				borderRadius='xl'
+				boxShadow='sm'
+				mb='xl'
+				style={{ border: '1px solid #E2E8F0' }}
+			>
+				<Text fontWeight='bold' mb='sm'>
+					{translateMessage('customer-sessions')}
+				</Text>
+				<Text color='grey60' mb='lg'>
+					{translateMessage('customer-sessions-description')}
+				</Text>
+				{sessionsLoading || !sessions ? (
+					<Text color='grey60'>{translateMessage('customer-sessions-loading')}</Text>
+				) : sessions.length ? (
+					<Table>
+						<TableHead>
+							<TableRow>
+								<TableCell>{translateMessage('customer-sessions-created')}</TableCell>
+								<TableCell>{translateMessage('customer-sessions-updated')}</TableCell>
+								<TableCell>{translateMessage('customer-sessions-expires')}</TableCell>
+								<TableCell>{translateMessage('customer-sessions-ip')}</TableCell>
+								<TableCell>{translateMessage('customer-sessions-agent')}</TableCell>
+								<TableCell>{translateMessage('customer-sessions-revoke')}</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{sessions.map((session) => (
+								<TableRow key={session.id}>
+									<TableCell>{formatDate(session.createdAt)}</TableCell>
+									<TableCell>{formatDate(session.updatedAt)}</TableCell>
+									<TableCell>{formatDate(session.expiresAt)}</TableCell>
+									<TableCell>{session.ipAddress ?? '-'}</TableCell>
+									<TableCell>
+										<Text
+											style={{
+												maxWidth: 320,
+												whiteSpace: 'nowrap',
+												overflow: 'hidden',
+												textOverflow: 'ellipsis',
+											}}
+										>
+											{session.userAgent ?? '-'}
+										</Text>
+									</TableCell>
+									<TableCell>
+										<Button
+											variant='outlined'
+											size='sm'
+											onClick={() => handleRevokeSession(session.id)}
+											disabled={revokingSessionId === session.id}
+											style={{ borderColor: '#E53E3E', color: '#E53E3E' }}
+										>
+											{revokingSessionId === session.id
+												? translateMessage('customer-sessions-revoking')
+												: translateMessage('customer-sessions-revoke')}
+										</Button>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				) : (
+					<Text color='grey60'>{translateMessage('customer-sessions-empty')}</Text>
+				)}
 			</Box>
 
 			<Box
@@ -391,9 +532,37 @@ export default function UserShow(props: ActionProps) {
 										{related.reviews.map((review) => (
 											<TableRow key={review.id}>
 												<TableCell>
-													<a href={buildRecordShowHref('Product', review.productId)} style={{ fontWeight: 600 }}>
-														{review.productName}
-													</a>
+													<Box style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+														<Box
+															style={{
+																width: 50,
+																height: 50,
+																borderRadius: 10,
+																overflow: 'hidden',
+																background: '#F1F5F9',
+																display: 'flex',
+																alignItems: 'center',
+																justifyContent: 'center',
+																flexShrink: 0,
+															}}
+														>
+															{review.productImageUrl ? (
+																<img
+																	src={review.productImageUrl}
+																	alt={review.productName}
+																	loading='lazy'
+																	style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+																/>
+															) : (
+																<Text fontWeight='bold' color='grey60'>
+																	{review.productName?.slice(0, 1) ?? '?'}
+																</Text>
+															)}
+														</Box>
+														<a href={buildRecordShowHref('Product', review.productId)} style={{ fontWeight: 600 }}>
+															{review.productName}
+														</a>
+													</Box>
 												</TableCell>
 												<TableCell>{review.rating}</TableCell>
 												<TableCell>

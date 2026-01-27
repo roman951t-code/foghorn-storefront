@@ -4,6 +4,7 @@ import 'server-only';
 
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
+import { isProductPublished } from '@/utils/publishSchedule';
 
 export async function getWishListProducts(
 	userId: string
@@ -23,6 +24,9 @@ export async function getWishListProducts(
 					categoryName: true,
 					subcategoryName: true,
 					discountPrice: true,
+					status: true,
+					publishStartAt: true,
+					publishEndAt: true,
 					inStock: true,
 					reviews: { select: { rating: true } },
 					tags: true,
@@ -34,19 +38,30 @@ export async function getWishListProducts(
 	const tagPriority = ['popular', 'new', 'discount', 'promotional'];
 
 	const products: SubcategoryProduct[] =
-		wishlist?.map(({ product }) => {
+		wishlist?.reduce<SubcategoryProduct[]>((acc, { product }) => {
+			if (!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)) {
+				return acc;
+			}
 			const ratings = product.reviews.map((r) => r.rating);
 			const averageRating =
 				ratings.length > 0 ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length : 0;
 
-			return {
-				...product,
+			acc.push({
+				id: product.id,
+				name: product.name,
+				fullSlug: product.fullSlug,
+				imageUrl: product.imageUrl ?? null,
+				categoryName: product.categoryName ?? '',
+				subcategoryName: product.subcategoryName ?? '',
+				tags: product.tags ?? [],
+				inStock: product.inStock ?? false,
 				basePrice: Number(product.basePrice),
 				discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
 				averageRating,
 				reviewCount: product.reviews.length,
-			};
-		}) ?? [];
+			});
+			return acc;
+		}, []) ?? [];
 
 	const sortedProducts =
 		products?.sort((a, b) => {

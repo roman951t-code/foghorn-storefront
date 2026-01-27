@@ -2,6 +2,7 @@ import AdminJS from 'adminjs';
 import { Database, Resource } from '@adminjs/prisma';
 import { chakraTheme } from './config/theme.mts';
 import { componentLoader, dashboardComponent } from './config/components.mts';
+import { dashboardMetrics } from './actions/dashboard-actions.mts';
 import { translations } from './config/locale.mts';
 import { resources } from './resources/index.mts';
 
@@ -15,6 +16,7 @@ const admin = new AdminJS({
 	defaultTheme: chakraTheme.id,
 	dashboard: {
 		component: dashboardComponent,
+		handler: dashboardMetrics,
 	},
 	locale: {
 		language: 'en',

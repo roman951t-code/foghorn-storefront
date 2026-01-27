@@ -13,6 +13,7 @@ import {
 import { buildProductImages } from '@/utils/productImages';
 import { PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 export async function getProductsByTag<T extends boolean>(
 	tag: string,
@@ -55,7 +56,6 @@ export async function getProductsByTag<T extends boolean>(
 
 	const whereClause: Prisma.ProductWhereInput = {
 		tags: { has: tag },
-		status: 'ACTIVE',
 		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
 			? {
@@ -96,7 +96,7 @@ export async function getProductsByTag<T extends boolean>(
 					],
 				}
 			: {}),
-		...(dynamicConditions.length > 0 ? { AND: dynamicConditions } : {}),
+		AND: [getPublishedProductWhere(now), ...(dynamicConditions.length > 0 ? dynamicConditions : [])],
 	};
 
 	const orderByClause: Prisma.ProductOrderByWithRelationInput[] = (() => {

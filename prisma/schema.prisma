@@ -202,6 +202,8 @@ model Product {
   discountPrice   Decimal?                @db.Decimal(10, 2)
   discountStartAt DateTime?
   discountEndAt   DateTime?
+  publishStartAt  DateTime?
+  publishEndAt    DateTime?
   currency        ProductCurrency         @default(UAH)
   productCode     String
   stock           Int
@@ -267,6 +269,11 @@ enum ProductCurrency {
   EUR
 }
 
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
 model ProductAttribute {
   id       String                  @id @default(uuid())
   name     String                  @unique
@@ -307,6 +314,37 @@ model ProductAttributeValue {
   attribute   ProductAttribute @relation(fields: [attributeId], references: [id])
 }
 
+model Promotion {
+  id             String       @id @default(uuid())
+  name           String
+  description    String?
+  discountType   DiscountType
+  discountValue  Decimal      @db.Decimal(10, 2)
+  startsAt       DateTime?
+  endsAt         DateTime?
+  isActive       Boolean      @default(true)
+  minOrderTotal  Decimal?     @db.Decimal(10, 2)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  coupons        Coupon[]
+  orderDiscounts OrderDiscount[]
+}
+
+model Coupon {
+  id              String       @id @default(uuid())
+  code            String       @unique
+  promotionId     String
+  isActive        Boolean      @default(true)
+  maxRedemptions  Int?
+  redemptionCount Int          @default(0)
+  startsAt        DateTime?
+  endsAt          DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  promotion       Promotion    @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  orderDiscounts  OrderDiscount[]
+}
+
 model Order {
   id        String      @id @default(uuid())
   userId    String
@@ -323,11 +361,31 @@ model Order {
   contactEmail    String?
   contactPhone    String?
   status    OrderStatus @default(PENDING)
+  refundAmount Decimal? @db.Decimal(10, 2)
+  refundReason String?  @db.Text
+  refundedAt DateTime?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   items     OrderItem[]
+  discounts OrderDiscount[]
   auditEntries OrderAuditEntry[]
+}
+
+model OrderDiscount {
+  id          String      @id @default(uuid())
+  orderId     String
+  promotionId String?
+  couponId    String?
+  label       String?
+  code        String?
+  amount      Decimal     @db.Decimal(10, 2)
+  createdAt   DateTime    @default(now())
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  promotion   Promotion?  @relation(fields: [promotionId], references: [id], onDelete: SetNull)
+  coupon      Coupon?     @relation(fields: [couponId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
 }
 
 model OrderItem {
@@ -347,6 +405,7 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+  RETURNED
 }
 
 model OrderAuditEntry {

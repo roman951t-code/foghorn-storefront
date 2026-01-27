@@ -1,5 +1,5 @@
-import type { ActionHandler, RecordActionResponse } from 'adminjs';
-import { Prisma } from '@prisma/client';
+import type { ActionHandler, ActionResponse } from 'adminjs';
+import { Prisma, type ProductCurrency, type ProductStatus } from '@prisma/client';
 import { prisma } from '../prisma.mts';
 
 type CsvRowResult = {
@@ -112,8 +112,7 @@ const PRODUCT_HEADERS = [
 	'openGraphImage',
 ];
 
-export const exportProductsCsv: ActionHandler<RecordActionResponse> = async (_req, _res, context) => {
-	const { resource, currentAdmin } = context;
+export const exportProductsCsv: ActionHandler<ActionResponse> = async (_req, _res, _context) => {
 	const products = await prisma.product.findMany({
 		select: {
 			id: true,
@@ -169,7 +168,6 @@ export const exportProductsCsv: ActionHandler<RecordActionResponse> = async (_re
 	}
 
 	return {
-		record: resource?.toJSON?.(currentAdmin) as any,
 		payload: {
 			csv: buildCsv(rows),
 			filename: `products-${new Date().toISOString().slice(0, 10)}.csv`,
@@ -177,15 +175,13 @@ export const exportProductsCsv: ActionHandler<RecordActionResponse> = async (_re
 	};
 };
 
-export const importProductsCsv: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
-	const { resource, currentAdmin } = context;
+export const importProductsCsv: ActionHandler<ActionResponse> = async (req, _res, _context) => {
 	const payload = (req as { payload?: Record<string, unknown> }).payload ?? {};
 	const csvRaw = typeof payload.csv === 'string' ? payload.csv : '';
 	const dryRun = String(payload.dryRun ?? 'false') === 'true';
 
 	if (!csvRaw.trim()) {
 		return {
-			record: resource?.toJSON?.(currentAdmin) as any,
 			notice: { message: 'product-csv-empty', type: 'error' },
 		};
 	}
@@ -193,7 +189,6 @@ export const importProductsCsv: ActionHandler<RecordActionResponse> = async (req
 	const rows = parseCsv(csvRaw);
 	if (rows.length < 2) {
 		return {
-			record: resource?.toJSON?.(currentAdmin) as any,
 			notice: { message: 'product-csv-no-rows', type: 'error' },
 		};
 	}
@@ -288,40 +283,64 @@ export const importProductsCsv: ActionHandler<RecordActionResponse> = async (req
 			(slug && categoryName && subcategoryName
 				? `${toSlugPart(categoryName)}/${toSlugPart(subcategoryName)}/${toSlugPart(slug)}`
 				: undefined);
+		const statusValue = (get('status')?.toUpperCase() as ProductStatus | undefined) ?? undefined;
+		const currencyValue = (currency as ProductCurrency | undefined) ?? undefined;
 
 		try {
-			const data: Record<string, any> = {
-				name,
-				slug,
-				status: get('status')?.toUpperCase() || undefined,
-				basePrice: basePrice != null ? new Prisma.Decimal(basePrice) : undefined,
-				discountPrice: discountPrice != null ? new Prisma.Decimal(discountPrice) : undefined,
-				currency: currency || undefined,
-				stock: stock != null ? Math.trunc(stock) : undefined,
-				inStock: inStock ?? undefined,
-				productCode,
-				brandId,
-				categoryId,
-				categoryName,
-				subcategoryName,
-				fullSlug: fullSlugValue,
-				imageUrl: get('imageUrl') || undefined,
-				tags: tags.length ? tags : undefined,
-				metaTitle: get('metaTitle') || undefined,
-				metaDescription: get('metaDescription') || undefined,
-				canonicalUrl: get('canonicalUrl') || undefined,
-				openGraphImage: get('openGraphImage') || undefined,
-			};
-
-			Object.keys(data).forEach((key) => {
-				if (data[key] === undefined) delete data[key];
-			});
-
 			if (existingId) {
-				await prisma.product.update({ where: { id: existingId }, data });
+				const updateData: Prisma.ProductUncheckedUpdateInput = {
+					name,
+					slug,
+					status: statusValue,
+					basePrice: basePrice != null ? new Prisma.Decimal(basePrice) : undefined,
+					discountPrice: discountPrice != null ? new Prisma.Decimal(discountPrice) : undefined,
+					currency: currencyValue,
+					stock: stock != null ? Math.trunc(stock) : undefined,
+					inStock: inStock ?? undefined,
+					productCode,
+					brandId,
+					categoryId,
+					categoryName,
+					subcategoryName,
+					fullSlug: fullSlugValue,
+					imageUrl: get('imageUrl') || undefined,
+					tags: tags.length ? tags : undefined,
+					metaTitle: get('metaTitle') || undefined,
+					metaDescription: get('metaDescription') || undefined,
+					canonicalUrl: get('canonicalUrl') || undefined,
+					openGraphImage: get('openGraphImage') || undefined,
+				};
+				Object.keys(updateData).forEach((key) => {
+					if (updateData[key as keyof Prisma.ProductUncheckedUpdateInput] === undefined) {
+						delete updateData[key as keyof Prisma.ProductUncheckedUpdateInput];
+					}
+				});
+				await prisma.product.update({ where: { id: existingId }, data: updateData });
 				results.push({ row: i + 1, status: 'updated' });
 			} else {
-				await prisma.product.create({ data });
+				const createData: Prisma.ProductUncheckedCreateInput = {
+					name: name!,
+					slug: slug!,
+					status: statusValue,
+					basePrice: new Prisma.Decimal(basePrice!),
+					discountPrice: discountPrice != null ? new Prisma.Decimal(discountPrice) : undefined,
+					currency: currencyValue,
+					stock: Math.trunc(stock!),
+					inStock: inStock ?? true,
+					productCode: productCode!,
+					brandId: brandId!,
+					categoryId: categoryId!,
+					categoryName: categoryName!,
+					subcategoryName: subcategoryName!,
+					fullSlug: fullSlugValue!,
+					imageUrl: get('imageUrl') || undefined,
+					tags,
+					metaTitle: get('metaTitle') || undefined,
+					metaDescription: get('metaDescription') || undefined,
+					canonicalUrl: get('canonicalUrl') || undefined,
+					openGraphImage: get('openGraphImage') || undefined,
+				};
+				await prisma.product.create({ data: createData });
 				results.push({ row: i + 1, status: 'created' });
 			}
 		} catch {
@@ -334,7 +353,6 @@ export const importProductsCsv: ActionHandler<RecordActionResponse> = async (req
 	const errorCount = results.filter((r) => r.status === 'error').length;
 
 	return {
-		record: resource?.toJSON?.(currentAdmin) as any,
 		notice: {
 			message: dryRun ? 'product-csv-dry-run-complete' : 'product-csv-import-complete',
 			type: errorCount > 0 ? 'warning' : 'success',

@@ -4,6 +4,7 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import {
 	PRODUCT_CATALOG_CACHE_TAG,
 	PRODUCT_CATEGORY_CACHE_TAG,
@@ -35,7 +36,7 @@ export async function getCatalog() {
 							fullSlug: true,
 							imageUrl: true,
 						},
-						where: { imageUrl: { not: null }, status: 'ACTIVE' },
+						where: { imageUrl: { not: null }, AND: [getPublishedProductWhere()] },
 						orderBy: { createdAt: 'desc' },
 						take: 5,
 					},

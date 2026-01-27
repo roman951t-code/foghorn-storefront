@@ -9,6 +9,7 @@ import { revalidateTag, updateTag } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { isProductPublished } from '@/utils/publishSchedule';
 import { normalizeOrder } from './orderUtils';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
@@ -75,6 +76,9 @@ export async function createOrderAction(
 			discountEndAt: true,
 			stock: true,
 			inStock: true,
+			status: true,
+			publishStartAt: true,
+			publishEndAt: true,
 		},
 	});
 
@@ -90,7 +94,11 @@ export async function createOrderAction(
 	const orderItems = items
 		.map((item) => {
 			const product = productMap.get(item.productId);
-			if (!product || !product.inStock) {
+			if (
+				!product ||
+				!product.inStock ||
+				!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
+			) {
 				unavailable.push(item.productId);
 				return null;
 			}

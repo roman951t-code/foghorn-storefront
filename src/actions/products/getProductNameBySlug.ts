@@ -5,6 +5,7 @@ import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import {
 	PRODUCT_DETAIL_CACHE_TAG,
 	PRODUCT_LIST_CACHE_TAG,
@@ -17,7 +18,7 @@ export async function getProductNameBySlug(slug: string) {
 	cacheTag(PRODUCT_DETAIL_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
 
 	const product = await prisma.product.findFirst({
-		where: { slug, status: 'ACTIVE' },
+		where: { slug, AND: [getPublishedProductWhere()] },
 		select: {
 			id: true,
 			name: true,

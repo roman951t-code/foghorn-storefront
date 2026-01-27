@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
+import { isProductPublished } from '@/utils/publishSchedule';
 
 const MAX_ITEM_QUANTITY = 99;
 
@@ -48,10 +49,15 @@ export async function updateCartItemQuantity({
 
 		const product = await prisma.product.findUnique({
 			where: { id: productId },
-			select: { stock: true, inStock: true },
+			select: { stock: true, inStock: true, status: true, publishStartAt: true, publishEndAt: true },
 		});
 
-		if (!product || !product.inStock || !product.stock) {
+		if (
+			!product ||
+			!product.inStock ||
+			!product.stock ||
+			!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
+		) {
 			return { success: false, message: validationT('cartUpdateFailed') };
 		}
 

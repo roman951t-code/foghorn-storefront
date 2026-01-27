@@ -4,7 +4,7 @@ import { Badge, Box, Button, Icon, Label, Text } from '@adminjs/design-system';
 
 const api = new ApiClient();
 
-type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'RETURNED';
 
 type AuditEntry = {
 	id: string;

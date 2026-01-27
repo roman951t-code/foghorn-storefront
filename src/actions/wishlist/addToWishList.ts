@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
+import { isProductPublished } from '@/utils/publishSchedule';
 
 export async function addToWishList(productId: string) {
 	const wishlistT = await getTranslations('wishlist');
@@ -40,10 +41,10 @@ export async function addToWishList(productId: string) {
 
 		const product = await prisma.product.findUnique({
 			where: { id: productId },
-			select: { id: true, inStock: true },
+			select: { id: true, inStock: true, status: true, publishStartAt: true, publishEndAt: true },
 		});
 
-		if (!product || !product.inStock) {
+		if (!product || !product.inStock || !isProductPublished(product.status, product.publishStartAt, product.publishEndAt)) {
 			return { success: false, message: wishlistT('wishlistUpdateFailed') };
 		}
 

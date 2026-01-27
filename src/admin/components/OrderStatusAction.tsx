@@ -2,12 +2,12 @@ import { useMemo, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Badge, Box, Button, FormGroup, Select, Text } from '@adminjs/design-system';
 
-type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'RETURNED';
 type StatusOption = { value: OrderStatus; label: string };
 
 const api = new ApiClient();
 
-const statuses: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+const statuses: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED'];
 
 export default function OrderStatusAction({ action, record, resource }: ActionProps) {
 	const [localRecord, setLocalRecord] = useState(record);

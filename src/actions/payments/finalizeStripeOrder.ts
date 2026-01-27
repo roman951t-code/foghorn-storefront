@@ -10,6 +10,7 @@ import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
 import { env } from '@/config/env';
 import { normalizeOrder } from '../orderUtils';
+import { isProductPublished } from '@/utils/publishSchedule';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
@@ -97,6 +98,9 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 			discountPrice: true,
 			stock: true,
 			inStock: true,
+			status: true,
+			publishStartAt: true,
+			publishEndAt: true,
 		},
 	});
 
@@ -107,7 +111,11 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 	const orderItems = itemsPayload
 		.map((item) => {
 			const product = productMap.get(item.productId);
-			if (!product || !product.inStock) {
+			if (
+				!product ||
+				!product.inStock ||
+				!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
+			) {
 				unavailable.push(item.productId);
 				return null;
 			}

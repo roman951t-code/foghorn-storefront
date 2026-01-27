@@ -284,6 +284,78 @@ export const bulkAdjustPrice: ActionHandler<BulkActionResponse> = async (req, _r
 	}
 };
 
+export const bulkAdjustStock: ActionHandler<BulkActionResponse> = async (req, _res, context) => {
+	const { records, resource, currentAdmin } = context;
+	if (!records || !resource) throw new Error('Missing record context');
+
+	const method = getMethod(req);
+	if (method === 'get') {
+		return { records: records.map((r) => r.toJSON(currentAdmin)) };
+	}
+
+	const payload = (req as { payload?: Record<string, unknown> }).payload ?? {};
+	const mode = payload.mode;
+	const valueRaw = payload.value;
+	const syncInStock = String(payload.syncInStock ?? 'false') === 'true';
+
+	const value = typeof valueRaw === 'number' ? valueRaw : typeof valueRaw === 'string' ? Number(valueRaw) : NaN;
+	const isValidValue = Number.isFinite(value) && Number.isInteger(value);
+	if (
+		(mode !== 'set' && mode !== 'increase' && mode !== 'decrease') ||
+		!isValidValue ||
+		value < 0 ||
+		(mode !== 'set' && value <= 0)
+	) {
+		return {
+			records: records.map((r) => r.toJSON(currentAdmin)),
+			notice: { message: 'product-bulk-invalid', type: 'error' },
+		};
+	}
+
+	const ids = getRecordIds(records);
+	if (!ids.length) {
+		return { records: records.map((r) => r.toJSON(currentAdmin)), notice: { message: 'bulk-no-records', type: 'error' } };
+	}
+
+	const products = await prisma.product.findMany({
+		where: { id: { in: ids } },
+		select: { id: true, stock: true, inStock: true },
+	});
+
+	const normalizedValue = Math.trunc(value);
+
+	try {
+		await prisma.$transaction(
+			products.map((p) => {
+				const currentStock = Number(p.stock ?? 0);
+				const nextStock =
+					mode === 'set'
+						? normalizedValue
+						: mode === 'increase'
+							? currentStock + normalizedValue
+							: Math.max(0, currentStock - normalizedValue);
+				const data: { stock: number; inStock?: boolean } = {
+					stock: Math.trunc(nextStock),
+				};
+				if (syncInStock) {
+					data.inStock = nextStock > 0;
+				}
+				return prisma.product.update({ where: { id: p.id }, data });
+			})
+		);
+		const refreshed = await Promise.all(ids.map((id) => resource.findOne(id)));
+		return {
+			records: refreshed.filter(Boolean).map((r) => r!.toJSON(currentAdmin)),
+			notice: { message: 'product-bulk-updated', type: 'success', options: { count: ids.length } },
+		};
+	} catch {
+		return {
+			records: records.map((r) => r.toJSON(currentAdmin)),
+			notice: { message: 'product-bulk-failed', type: 'error' },
+		};
+	}
+};
+
 export const bulkToggleInStock: ActionHandler<BulkActionResponse> = async (req, _res, context) => {
 	const { records, resource, currentAdmin } = context;
 	if (!records || !resource) throw new Error('Missing record context');
@@ -324,4 +396,3 @@ export const bulkToggleInStock: ActionHandler<BulkActionResponse> = async (req, 
 		};
 	}
 };
-

@@ -23,7 +23,7 @@ const resolveRecordIds = (records: ActionProps['records']) => {
 
 export default function ProductBulkToggleInStockAction({ action, resource, records }: ActionProps) {
 	const addNotice = useNotice();
-	const { translateAction, translateMessage } = useTranslation();
+	const { translateAction, translateLabel, translateMessage } = useTranslation();
 
 	const recordIds = useMemo(() => resolveRecordIds(records), [records]);
 	const [mode, setMode] = useState<'toggle' | 'set'>('toggle');
@@ -76,8 +76,8 @@ export default function ProductBulkToggleInStockAction({ action, resource, recor
 				<FormGroup>
 					<Label>{translateMessage('product-bulk-stock-value')}</Label>
 					<Select value={value} onChange={(e: any) => setValue(String(e?.target?.value ?? 'true') as any)}>
-						<option value='true'>{translateMessage('labels.inStock.true')}</option>
-						<option value='false'>{translateMessage('labels.inStock.false')}</option>
+						<option value='true'>{translateLabel('inStock.true', resource.id)}</option>
+						<option value='false'>{translateLabel('inStock.false', resource.id)}</option>
 					</Select>
 				</FormGroup>
 			) : null}

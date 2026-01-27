@@ -9,7 +9,6 @@ import {
 	Icon,
 	Text,
 } from '@adminjs/design-system';
-import LoggedIn from './LoggedIn';
 
 type TopBarProps = {
 	toggleSidebar: () => void;
@@ -91,7 +90,7 @@ export default function TopBar({ toggleSidebar }: TopBarProps) {
 	const session = reduxState.session;
 	const paths = reduxState.paths;
 	const versions = reduxState.versions;
-	const { translateMessage } = useTranslation();
+	const { translateMessage, translateButton } = useTranslation();
 	const rootPath = paths?.rootPath ?? '/admin';
 	const logoutPath = paths?.logoutPath ?? `${rootPath}/logout`;
 	const homeLabel = translateMessage('admin-home');
@@ -126,7 +125,12 @@ export default function TopBar({ toggleSidebar }: TopBarProps) {
 			</Box>
 			<Version versions={versions ?? {}} />
 			<LanguageSelect />
-			{session?.email ? <LoggedIn session={session} paths={{ logoutPath }} /> : null}
+			{session?.email ? (
+				<a href={logoutPath} className='admin-home-link admin-logout-link'>
+					<Icon icon='LogOut' />
+					{translateButton('logout')}
+				</a>
+			) : null}
 		</Box>
 	);
 }

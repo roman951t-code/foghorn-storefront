@@ -5,12 +5,14 @@ import 'server-only';
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { isProductPublished } from '@/utils/publishSchedule';
 
 function mapRecentlyViewedProducts(viewed: { product: any }[]): SubcategoryProduct[] {
 	return viewed
 		.map((entry) => {
 			const p = entry.product;
 			if (!p) return null;
+			if (!isProductPublished(p.status, p.publishStartAt, p.publishEndAt)) return null;
 			const basePrice = Number(p.basePrice ?? 0);
 			const scheduledDiscountPrice = getEffectiveDiscountPrice(
 				basePrice,
@@ -64,6 +66,9 @@ export async function getRecentlyViewedProductsWithCount(
 						discountPrice: true,
 						discountStartAt: true,
 						discountEndAt: true,
+						status: true,
+						publishStartAt: true,
+						publishEndAt: true,
 						inStock: true,
 						categoryName: true,
 						subcategoryName: true,

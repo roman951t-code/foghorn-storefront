@@ -139,6 +139,45 @@ const refundStripeSession = async (stripeSessionId: string) => {
 	});
 };
 
+const refundStripeSessionAmount = async (stripeSessionId: string, amount: number) => {
+	if (!stripe) {
+		throw new Error('refund-unavailable');
+	}
+	const session = await stripe.checkout.sessions.retrieve(stripeSessionId, {
+		expand: ['payment_intent'],
+	});
+	if (session.payment_status !== 'paid') {
+		throw new Error('refund-unavailable');
+	}
+	const paymentIntent = session.payment_intent;
+	const paymentIntentId =
+		typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id;
+	if (!paymentIntentId) {
+		throw new Error('refund-unavailable');
+	}
+	const amountCents = Math.max(0, Math.round(amount * 100));
+	if (!amountCents) {
+		throw new Error('refund-unavailable');
+	}
+	await stripe.refunds.create({
+		payment_intent: paymentIntentId,
+		amount: amountCents,
+		reason: 'requested_by_customer',
+	});
+};
+
+const parseRefundAmount = (value: unknown): number | null => {
+	if (value == null) return null;
+	if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+	if (typeof value === 'string') {
+		const trimmed = value.trim();
+		if (!trimmed) return null;
+		const parsed = Number(trimmed);
+		return Number.isFinite(parsed) ? parsed : null;
+	}
+	return null;
+};
+
 export const setStatus: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
 	const { record, resource, currentAdmin } = context;
 	const payload = (req as { payload?: Record<string, unknown> }).payload ?? {};
@@ -152,7 +191,7 @@ export const setStatus: ActionHandler<RecordActionResponse> = async (req, _res, 
 			record: record.toJSON(currentAdmin),
 		};
 	}
-	const validStatuses: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+	const validStatuses: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED'];
 	if (!validStatuses.includes(requested)) {
 		return {
 			record: record.toJSON(currentAdmin),
@@ -182,7 +221,7 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 	const stripeSessionId = record.param('stripeSessionId') as string | null;
 	const currentStatus = record.param('status') as OrderStatus | undefined;
 
-	if (currentStatus === 'CANCELLED' || currentStatus === 'DELIVERED') {
+	if (currentStatus === 'CANCELLED' || currentStatus === 'DELIVERED' || currentStatus === 'RETURNED') {
 		return {
 			record: record.toJSON(currentAdmin),
 			notice: { message: 'order-not-cancellable', type: 'error' },
@@ -233,5 +272,122 @@ export const deleteOrder: ActionHandler<RecordActionResponse> = async (_req, _re
 	return {
 		record: record.toJSON(currentAdmin),
 		notice: { message: 'order-deleted', type: 'success' },
+	};
+};
+
+export const processReturn: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
+	const { record, resource, currentAdmin } = context;
+	const method = ((req as { method?: string }).method ?? 'get').toLowerCase();
+	const payload = (req as { payload?: Record<string, unknown> }).payload ?? {};
+
+	if (!record || !resource) {
+		throw new Error('Missing record context');
+	}
+
+	if (method === 'get') {
+		return {
+			record: record.toJSON(currentAdmin),
+		};
+	}
+
+	const orderId = record.param('id') as string;
+	const refundAmountRaw = parseRefundAmount(payload.refundAmount);
+	const refundReason =
+		typeof payload.refundReason === 'string' && payload.refundReason.trim()
+			? payload.refundReason.trim()
+			: null;
+
+	const order = await prisma.order.findUnique({
+		where: { id: orderId },
+		select: { total: true, stripeSessionId: true, status: true },
+	});
+
+	if (!order) {
+		return {
+			record: record.toJSON(currentAdmin),
+			notice: { message: 'order-not-found', type: 'error' },
+		};
+	}
+
+	if (order.status === 'CANCELLED') {
+		return {
+			record: record.toJSON(currentAdmin),
+			notice: { message: 'order-not-returnable', type: 'error' },
+		};
+	}
+
+	const total = Number(order.total ?? 0);
+	const refundAmount = refundAmountRaw ?? 0;
+	if (refundAmount < 0 || refundAmount > total) {
+		return {
+			record: record.toJSON(currentAdmin),
+			notice: { message: 'return-refund-invalid', type: 'error' },
+		};
+	}
+
+	if (refundAmount > 0) {
+		if (!order.stripeSessionId) {
+			return {
+				record: record.toJSON(currentAdmin),
+				notice: { message: 'refund-unavailable', type: 'error' },
+			};
+		}
+		try {
+			await refundStripeSessionAmount(order.stripeSessionId, refundAmount);
+		} catch (error) {
+			const message =
+				error instanceof Error && error.message === 'refund-unavailable'
+					? 'refund-unavailable'
+					: 'refund-failed';
+			return {
+				record: record.toJSON(currentAdmin),
+				notice: { message, type: 'error' },
+			};
+		}
+	}
+
+	const adminEmail = resolveAdminEmail(currentAdmin);
+	const nextStatus: OrderStatus = 'RETURNED';
+	const nextRefundAmount = refundAmountRaw ?? null;
+	const now = new Date();
+
+	const statusChanged = order.status !== nextStatus;
+	await prisma.$transaction(async (tx) => {
+		await tx.order.update({
+			where: { id: orderId },
+			data: {
+				status: nextStatus,
+				refundAmount: nextRefundAmount,
+				refundReason,
+				refundedAt: now,
+			},
+		});
+		if (statusChanged) {
+			await tx.orderAuditEntry.create({
+				data: {
+					orderId,
+					type: 'STATUS_CHANGE',
+					fromStatus: order.status as OrderStatus,
+					toStatus: nextStatus,
+					adminEmail,
+				},
+			});
+		}
+		if (refundReason || refundAmount > 0) {
+			await tx.orderAuditEntry.create({
+				data: {
+					orderId,
+					type: 'NOTE',
+					note: `Return processed: refund=${refundAmount.toFixed(2)}; reason=${refundReason ?? '-'}`,
+					adminEmail,
+				},
+			});
+		}
+	});
+
+	const updated = await resource.findOne(orderId);
+	return {
+		record: updated ? updated.toJSON(currentAdmin) : record.toJSON(currentAdmin),
+		notice: { message: 'return-processed', type: 'success' },
 	};
 };

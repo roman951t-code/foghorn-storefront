@@ -28,6 +28,18 @@ const orderPackingSlipActionComponent = componentLoader.add(
 	'OrderPackingSlipAction',
 	path.join(adminDir, 'components', 'OrderPackingSlipAction')
 );
+const orderReturnActionComponent = componentLoader.add(
+	'OrderReturnAction',
+	path.join(adminDir, 'components', 'OrderReturnAction')
+);
+const orderBulkPackingSlipActionComponent = componentLoader.add(
+	'OrderBulkPackingSlipAction',
+	path.join(adminDir, 'components', 'OrderBulkPackingSlipAction')
+);
+const orderCsvExportActionComponent = componentLoader.add(
+	'OrderCsvExportAction',
+	path.join(adminDir, 'components', 'OrderCsvExportAction')
+);
 const orderTotalListComponent = componentLoader.add(
 	'OrderTotalList',
 	path.join(adminDir, 'components', 'OrderTotalList')
@@ -49,11 +61,16 @@ const productScheduleDiscountActionComponent = componentLoader.add(
 	'ProductScheduleDiscountAction',
 	path.join(adminDir, 'components', 'ProductScheduleDiscountAction')
 );
+const productSchedulePublishActionComponent = componentLoader.add(
+	'ProductSchedulePublishAction',
+	path.join(adminDir, 'components', 'ProductSchedulePublishAction')
+);
 const productNameListComponent = componentLoader.add(
 	'ProductNameList',
 	path.join(adminDir, 'components', 'ProductNameList')
 );
 const productListComponent = componentLoader.add('ProductList', path.join(adminDir, 'components', 'ProductList'));
+const orderListComponent = componentLoader.add('OrderList', path.join(adminDir, 'components', 'OrderList'));
 const productShowComponent = componentLoader.add('ProductShow', path.join(adminDir, 'components', 'ProductShow'));
 const productVariantMatrixComponent = componentLoader.add(
 	'ProductVariantMatrix',
@@ -89,10 +106,15 @@ const productBulkAdjustPriceActionComponent = componentLoader.add(
 	'ProductBulkAdjustPriceAction',
 	path.join(adminDir, 'components', 'ProductBulkAdjustPriceAction')
 );
+const productBulkAdjustStockActionComponent = componentLoader.add(
+	'ProductBulkAdjustStockAction',
+	path.join(adminDir, 'components', 'ProductBulkAdjustStockAction')
+);
 const productBulkToggleInStockActionComponent = componentLoader.add(
 	'ProductBulkToggleInStockAction',
 	path.join(adminDir, 'components', 'ProductBulkToggleInStockAction')
 );
+const reviewShowComponent = componentLoader.add('ReviewShow', path.join(adminDir, 'components', 'ReviewShow'));
 const dashboardComponent = componentLoader.add(
 	'Dashboard',
 	path.join(adminDir, 'components', 'Dashboard')
@@ -101,6 +123,8 @@ componentLoader.override('Login', path.join(adminDir, 'components', 'Login'));
 componentLoader.override('LoggedIn', path.join(adminDir, 'components', 'LoggedIn'));
 componentLoader.override('TopBar', path.join(adminDir, 'components', 'TopBar'));
 componentLoader.override('FilterDrawer', path.join(adminDir, 'components', 'FilterDrawer'));
+componentLoader.override('DefaultBulkDeleteAction', path.join(adminDir, 'components', 'BulkDelete'));
+componentLoader.override('PropertyDescription', path.join(adminDir, 'components', 'PropertyDescription'));
 
 export {
 	componentLoader,
@@ -110,14 +134,19 @@ export {
 	orderShowComponent,
 	orderFulfillmentActionComponent,
 	orderPackingSlipActionComponent,
+	orderReturnActionComponent,
+	orderCsvExportActionComponent,
+	orderBulkPackingSlipActionComponent,
 	orderTotalListComponent,
 	orderTotalRangeFilterComponent,
 	selectFilterWithPlaceholderComponent,
 	userShowComponent,
 	userSegmentsComponent,
 	productScheduleDiscountActionComponent,
+	productSchedulePublishActionComponent,
 	productNameListComponent,
 	productListComponent,
+	orderListComponent,
 	productShowComponent,
 	productVariantMatrixComponent,
 	productCsvImportExportActionComponent,
@@ -129,6 +158,8 @@ export {
 	productBulkSetBrandActionComponent,
 	productBulkEditTagsActionComponent,
 	productBulkAdjustPriceActionComponent,
+	productBulkAdjustStockActionComponent,
 	productBulkToggleInStockActionComponent,
+	reviewShowComponent,
 	dashboardComponent,
 };

@@ -6,6 +6,7 @@ import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import type { CartProduct } from '@/types/cart';
+import { isProductPublished } from '@/utils/publishSchedule';
 
 const MAX_ITEM_QUANTITY = 99;
 
@@ -46,6 +47,9 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 				id: true,
 				stock: true,
 				inStock: true,
+				status: true,
+				publishStartAt: true,
+				publishEndAt: true,
 			},
 		});
 		const productMap = new Map(products.map((p) => [p.id, p]));
@@ -66,7 +70,13 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 
 			for (const item of order.items) {
 				const product = productMap.get(item.productId);
-				if (!product || !product.inStock || !product.stock) continue;
+				if (
+					!product ||
+					!product.inStock ||
+					!product.stock ||
+					!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
+				)
+					continue;
 
 				const desiredQty = Math.max(1, Math.min(MAX_ITEM_QUANTITY, item.quantity));
 				const existing = existingByProduct.get(item.productId);

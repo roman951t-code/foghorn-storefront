@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 export async function GET(req: Request) {
 	const ip = getClientIp(req);
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
 	const products = await prisma.product.findMany({
 		where: {
 			name: { contains: query, mode: 'insensitive' },
-			status: 'ACTIVE',
+			AND: [getPublishedProductWhere()],
 		},
 		orderBy: [{ stock: 'desc' }, { name: 'asc' }],
 		take: 7,

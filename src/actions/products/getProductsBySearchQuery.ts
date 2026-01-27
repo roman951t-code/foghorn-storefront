@@ -7,6 +7,7 @@ import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
 import { PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 export async function getProductsBySearchQuery(
 	searchQuery: string,
@@ -56,7 +57,6 @@ export async function getProductsBySearchQuery(
 
 	const whereClause: Prisma.ProductWhereInput = {
 		name: { contains: searchQuery, mode: 'insensitive' },
-		status: 'ACTIVE',
 		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
 			? {
@@ -97,7 +97,7 @@ export async function getProductsBySearchQuery(
 					],
 				}
 			: {}),
-		...(dynamicConditions.length > 0 ? { AND: dynamicConditions } : {}),
+		AND: [getPublishedProductWhere(now), ...(dynamicConditions.length > 0 ? dynamicConditions : [])],
 	};
 
 	const allMatchingProducts = await prisma.product.findMany({
