@@ -1,6 +1,7 @@
 import type { ActionHandler, ActionResponse } from 'adminjs';
 import { Prisma, type ProductCurrency, type ProductStatus } from '@prisma/client';
 import { prisma } from '../prisma.mts';
+import { logInventoryAdjustment, resolveInventoryAdminEmail, resolveInventoryReason } from './inventory-adjustment-actions.mts';
 
 type CsvRowResult = {
 	row: number;
@@ -175,10 +176,12 @@ export const exportProductsCsv: ActionHandler<ActionResponse> = async (_req, _re
 	};
 };
 
-export const importProductsCsv: ActionHandler<ActionResponse> = async (req, _res, _context) => {
+export const importProductsCsv: ActionHandler<ActionResponse> = async (req, _res, context) => {
 	const payload = (req as { payload?: Record<string, unknown> }).payload ?? {};
 	const csvRaw = typeof payload.csv === 'string' ? payload.csv : '';
 	const dryRun = String(payload.dryRun ?? 'false') === 'true';
+	const adminEmail = resolveInventoryAdminEmail(context.currentAdmin);
+	const importReason = resolveInventoryReason(payload.reason, 'CSV import');
 
 	if (!csvRaw.trim()) {
 		return {
@@ -288,6 +291,13 @@ export const importProductsCsv: ActionHandler<ActionResponse> = async (req, _res
 
 		try {
 			if (existingId) {
+				const shouldLogStock = stock != null;
+				const previousStock = shouldLogStock
+					? (await prisma.product.findUnique({
+							where: { id: existingId },
+							select: { stock: true },
+						}))?.stock ?? null
+					: null;
 				const updateData: Prisma.ProductUncheckedUpdateInput = {
 					name,
 					slug,
@@ -316,6 +326,16 @@ export const importProductsCsv: ActionHandler<ActionResponse> = async (req, _res
 					}
 				});
 				await prisma.product.update({ where: { id: existingId }, data: updateData });
+				if (shouldLogStock && previousStock != null && stock != null) {
+					await logInventoryAdjustment({
+						productId: existingId,
+						previousStock: Number(previousStock ?? 0),
+						nextStock: Math.trunc(stock),
+						reason: importReason,
+						source: 'CSV_IMPORT',
+						adminEmail,
+					});
+				}
 				results.push({ row: i + 1, status: 'updated' });
 			} else {
 				const createData: Prisma.ProductUncheckedCreateInput = {

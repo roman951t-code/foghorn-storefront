@@ -10,6 +10,9 @@ export const enAdminLocale = {
 	labels: {
 		Product: 'Product',
 		Catalog: 'Catalog',
+		Content: 'Content',
+		Banner: 'Banner',
+		Page: 'Page',
 		ProductCategory: 'Product Category',
 		Brand: 'Brand',
 		ProductAttribute: 'Product Attribute',
@@ -28,6 +31,10 @@ export const enAdminLocale = {
 		Review: 'Review',
 		NewsletterSubscription: 'Newsletter Subscription',
 		confirm: 'Confirm',
+		type: {
+			PAGE: 'Page',
+			BLOG: 'Blog',
+		},
 		status: {
 			PENDING: 'Pending',
 			PAID: 'Paid',
@@ -37,6 +44,7 @@ export const enAdminLocale = {
 			RETURNED: 'Returned',
 			DRAFT: 'Draft',
 			Draft: 'Draft',
+			PUBLISHED: 'Published',
 			ACTIVE: 'Active',
 			Active: 'Active',
 			ARCHIVED: 'Archived',
@@ -136,6 +144,7 @@ export const enAdminLocale = {
 		publishProduct: 'Publish product',
 		archiveProduct: 'Archive product',
 		duplicateProduct: 'Duplicate product',
+		duplicateBanner: 'Duplicate promo',
 		previewProduct: 'Preview product',
 		variantMatrix: 'Variant matrix',
 		scheduleDiscount: 'Schedule discount',
@@ -197,8 +206,10 @@ export const enAdminLocale = {
 		'order-items-line-total': 'Line total',
 		'promotion-hint-name': 'Internal name shown to admins (e.g. "Spring 2026 Sale").',
 		'promotion-hint-description': 'Optional internal note for this promotion.',
-		'promotion-hint-discount-type': 'Percent = % off the order total. Fixed amount = currency discount.',
-		'promotion-hint-discount-value': 'Percent value (e.g. 10 for 10%) or fixed amount (e.g. 50.00).',
+		'promotion-hint-discount-type':
+			'Percent = % off the order total. Fixed amount = currency discount.',
+		'promotion-hint-discount-value':
+			'Percent value (e.g. 10 for 10%) or fixed amount (e.g. 50.00).',
 		'promotion-hint-starts-at': 'Optional. When the promo becomes valid (leave empty = immediate).',
 		'promotion-hint-ends-at': 'Optional. When the promo expires (leave empty = no end date).',
 		'promotion-hint-min-order-total': 'Optional minimum order total required to apply the promo.',
@@ -210,7 +221,8 @@ export const enAdminLocale = {
 		'coupon-hint-starts-at': 'Optional. When the coupon becomes valid.',
 		'coupon-hint-ends-at': 'Optional. When the coupon expires.',
 		'coupon-hint-is-active': 'Turn off to disable without deleting.',
-		'order-discount-hint-label': 'Optional label shown in admin breakdown (e.g. "Manual adjustment").',
+		'order-discount-hint-label':
+			'Optional label shown in admin breakdown (e.g. "Manual adjustment").',
 		'order-discount-hint-code': 'Optional code shown in admin breakdown (e.g. coupon used).',
 		'order-discount-hint-amount': 'Discount amount applied to the order total.',
 		'order-discount-hint-order': 'Paste the Order ID from the Orders list.',
@@ -222,7 +234,8 @@ export const enAdminLocale = {
 		'order-discount-generic': 'Order discount',
 		'order-bulk-selected': '{{count}} orders selected',
 		'order-bulk-empty': 'No orders to print',
-		'order-csv-description': 'Export orders to CSV. Filters from the orders list are applied automatically.',
+		'order-csv-description':
+			'Export orders to CSV. Filters from the orders list are applied automatically.',
 		'order-csv-export': 'Export CSV',
 		'order-csv-exporting': 'Exporting...',
 		'order-csv-export-failed': 'Failed to export orders',
@@ -255,7 +268,8 @@ export const enAdminLocale = {
 		'customer-status': 'Account status',
 		'customer-status-change': 'Change status',
 		'customer-internal-notes': 'Internal notes',
-		'customer-internal-notes-placeholder': 'Write an internal note for this customer (only visible to admins)...',
+		'customer-internal-notes-placeholder':
+			'Write an internal note for this customer (only visible to admins)...',
 		'customer-flags-save': 'Save changes',
 		'customer-flags-saving': 'Saving...',
 		'customer-sessions': 'Sessions',
@@ -331,7 +345,8 @@ export const enAdminLocale = {
 		'user-segments-unverified': 'Unverified',
 		'user-segments-unverified-desc': 'Users who have not verified their email yet.',
 		'user-segments-high-spenders': 'High spenders',
-		'user-segments-high-spenders-desc': 'Users with lifetime spend ≥ {{min}} (paid+shipped+delivered orders).',
+		'user-segments-high-spenders-desc':
+			'Users with lifetime spend ≥ {{min}} (paid+shipped+delivered orders).',
 		'user-segments-inactive': 'Inactive',
 		'user-segments-inactive-desc': 'Users with no orders in the last {{days}} days.',
 		'product-views-title': 'Quick views',
@@ -405,11 +420,15 @@ export const enAdminLocale = {
 		'publish-product': 'Publish this product?',
 		'archive-product': 'Archive this product?',
 		'duplicate-product': 'Duplicate this product?',
+		'duplicate-banner': 'Duplicate this promo?',
 		'product-published': 'Product published',
 		'product-archived': 'Product archived',
 		'product-duplicated': 'Product duplicated',
 		'product-duplicate-failed': 'Failed to duplicate product',
 		'product-not-found': 'Product not found',
+		'banner-duplicated': 'Promo duplicated',
+		'banner-duplicate-failed': 'Failed to duplicate promo',
+		'banner-not-found': 'Promo not found',
 		'product-preview-missing-slug': 'Preview is unavailable: full slug is missing',
 		'product-variant-loading': 'Loading variant matrix...',
 		'product-variant-load-failed': 'Failed to load variant matrix',
@@ -434,7 +453,8 @@ export const enAdminLocale = {
 		'product-variant-attribute-not-allowed': 'Attribute is not allowed for this category template',
 		'product-variant-saved': 'Variants saved',
 		'product-variant-save-failed': 'Failed to save variants',
-		'product-csv-description': 'Upload a CSV to create/update products or export the current catalog.',
+		'product-csv-description':
+			'Upload a CSV to create/update products or export the current catalog.',
 		'product-csv-file-label': 'CSV file',
 		'product-csv-dry-run': 'Dry run (no data will be saved)',
 		'product-csv-export': 'Export CSV',
@@ -461,8 +481,10 @@ export const enAdminLocale = {
 		'product-csv-invalid-slug': 'Slug format is invalid',
 		'product-csv-missing-currency': 'Currency is required',
 		'product-csv-save-failed': 'Failed to save row',
-		'product-csv-dry-run-complete': 'Dry run completed ({{created}} create, {{updated}} update, {{errors}} errors)',
-		'product-csv-import-complete': 'Import completed ({{created}} create, {{updated}} update, {{errors}} errors)',
+		'product-csv-dry-run-complete':
+			'Dry run completed ({{created}} create, {{updated}} update, {{errors}} errors)',
+		'product-csv-import-complete':
+			'Import completed ({{created}} create, {{updated}} update, {{errors}} errors)',
 		'product-csv-summary': 'Results: {{created}} created, {{updated}} updated, {{errors}} errors',
 		'product-csv-row': 'Row',
 		'product-csv-status': 'Status',
@@ -485,15 +507,15 @@ export const enAdminLocale = {
 		'product-hint-metaTitle': 'Optional. Up to 70 characters (ideal for search results).',
 		'product-hint-metaDescription':
 			'Optional. Up to 320 characters. Summarize the product for search engines.',
-		'product-hint-canonicalUrl':
-			'Optional. Absolute URL to the preferred canonical product page.',
+		'product-hint-canonicalUrl': 'Optional. Absolute URL to the preferred canonical product page.',
 		'product-hint-openGraphImage':
 			'Optional. Absolute URL for social sharing preview (Open Graph).',
 		'product-hint-slug': 'Use lowercase letters/numbers and hyphens only (e.g. "iphone-14-pro").',
 		'product-hint-fullSlug':
 			'Format: "category/subcategory/slug" (3 parts). Lowercase letters/numbers and hyphens.',
 		'product-hint-categoryName': '2–120 characters. Usually matches the selected category name.',
-		'product-hint-subcategoryName': '2–120 characters. Usually matches the selected subcategory name.',
+		'product-hint-subcategoryName':
+			'2–120 characters. Usually matches the selected subcategory name.',
 		'product-hint-productCode': '3–64 characters. Letters, numbers, "_" and "-" only.',
 		'product-hint-basePrice': 'Required. Number greater than 0 (e.g. 1999.99).',
 		'product-hint-discountPrice':
@@ -505,7 +527,8 @@ export const enAdminLocale = {
 		'product-hint-currency': 'Required. Pick the currency for this product.',
 		'product-hint-stock': 'Required. Integer 0 or greater.',
 		'product-hint-inStock': 'Set to true if the product can be purchased, otherwise false.',
-		'product-hint-imageUrl': 'Optional for drafts. Required before publishing (full URL, max 2048 characters).',
+		'product-hint-imageUrl':
+			'Optional for drafts. Required before publishing (full URL, max 2048 characters).',
 		'product-hint-brand': 'Required. Select a brand from the list.',
 		'product-hint-category': 'Required. Select a category from the list.',
 		'product-hint-tags': 'Comma-separated list (e.g. "popular, discount").',
@@ -529,7 +552,8 @@ export const enAdminLocale = {
 		'publish-visibility-no': 'No',
 		'publish-schedule-save': 'Save schedule',
 		'publish-schedule-saving': 'Saving...',
-		'discount-window-invalid': 'Discount start/end are invalid (both required, start must be before end)',
+		'discount-window-invalid':
+			'Discount start/end are invalid (both required, start must be before end)',
 		'discount-price-required': 'Discount price is required when scheduling a window',
 		'discount-price-invalid': 'Discount price must be a number lower than base price',
 		'discount-base-price': 'Base price',
@@ -593,7 +617,8 @@ export const enAdminLocale = {
 		'Slug must be at least 3 characters': 'Slug must be at least 3 characters',
 		'Product code must be at least 3 characters': 'Product code must be at least 3 characters',
 		'Category name must be at least 2 characters': 'Category name must be at least 2 characters',
-		'Subcategory name must be at least 2 characters': 'Subcategory name must be at least 2 characters',
+		'Subcategory name must be at least 2 characters':
+			'Subcategory name must be at least 2 characters',
 		'Full slug is required (e.g. "phones/smartphones/iphone-14-pro")':
 			'Full slug is required (e.g. "phones/smartphones/iphone-14-pro")',
 		'Invalid input: expected number, received NaN': 'Invalid input: expected number, received NaN',
@@ -650,6 +675,24 @@ export const enAdminLocale = {
 		'product-activity-unknown-admin': 'Unknown admin',
 		'product-activity-field-change': '{{field}} changed',
 		'product-activity-field-unknown': 'Unknown field',
+		'inventory-history-title': 'Inventory adjustments',
+		'inventory-history-loading': 'Loading inventory history...',
+		'inventory-history-empty': 'No inventory adjustments yet.',
+		'inventory-history-date': 'Date',
+		'inventory-history-admin': 'Admin',
+		'inventory-history-unknown-admin': 'Unknown admin',
+		'inventory-history-reason': 'Reason',
+		'inventory-history-from': 'From',
+		'inventory-history-to': 'To',
+		'inventory-history-delta': 'Delta',
+		'inventory-history-source': 'Source',
+		'inventory-history-source-EDIT': 'Manual edit',
+		'inventory-history-source-BULK_ADJUST': 'Bulk adjust',
+		'inventory-history-source-CSV_IMPORT': 'CSV import',
+		'product-bulk-stock-adjust-reason': 'Reason for adjustment',
+		'product-bulk-stock-adjust-reason-placeholder': 'Explain why stock is being adjusted',
+		'product-csv-reason-label': 'Import reason',
+		'product-csv-reason-placeholder': 'Explain why this import adjusts stock',
 		dashboard: {
 			dailyFocus: {
 				title: 'Daily focus',
@@ -751,6 +794,10 @@ export const enAdminLocale = {
 		user: 'User',
 		total: 'Total',
 		name: 'Name',
+		title: 'Title',
+		placement: 'Placement',
+		type: 'Type',
+		publishedAt: 'Published At',
 		middleName: 'Middle Name',
 		lastName: 'Last Name',
 		description: 'Description',

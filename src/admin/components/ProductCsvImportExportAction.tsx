@@ -45,6 +45,7 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 	const addNotice = useNotice();
 	const [csvText, setCsvText] = useState('');
 	const [dryRun, setDryRun] = useState(true);
+	const [reason, setReason] = useState('');
 	const [results, setResults] = useState<CsvResult[]>([]);
 	const [loading, setLoading] = useState(false);
 
@@ -99,6 +100,7 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 			const formData = new FormData();
 			formData.append('csv', csvText);
 			formData.append('dryRun', String(dryRun));
+			formData.append('reason', reason);
 			const response = await api.resourceAction({
 				resourceId: resource.id,
 				actionName: action.name,
@@ -143,6 +145,14 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 						onChange={(event: ChangeEvent<HTMLInputElement>) => setDryRun(event.target.checked)}
 					/>
 					<Text>{translateMessage('product-csv-dry-run')}</Text>
+				</Box>
+				<Box>
+					<Label>{translateMessage('product-csv-reason-label')}</Label>
+					<Input
+						value={reason}
+						onChange={(event: ChangeEvent<HTMLInputElement>) => setReason(event.target.value)}
+						placeholder={translateMessage('product-csv-reason-placeholder')}
+					/>
 				</Box>
 				<Box style={{ display: 'flex', gap: 12 }}>
 					<Button variant='outlined' onClick={handleExport} disabled={loading}>

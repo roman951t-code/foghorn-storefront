@@ -1,5 +1,6 @@
 import type { ActionHandler, BulkActionResponse } from 'adminjs';
 import { prisma } from '../prisma.mts';
+import { logInventoryAdjustment, resolveInventoryAdminEmail, resolveInventoryReason } from './inventory-adjustment-actions.mts';
 
 type CategoryOption = { id: string; label: string };
 type BrandOption = { id: string; label: string };
@@ -297,6 +298,7 @@ export const bulkAdjustStock: ActionHandler<BulkActionResponse> = async (req, _r
 	const mode = payload.mode;
 	const valueRaw = payload.value;
 	const syncInStock = String(payload.syncInStock ?? 'false') === 'true';
+	const reasonRaw = payload.reason;
 
 	const value = typeof valueRaw === 'number' ? valueRaw : typeof valueRaw === 'string' ? Number(valueRaw) : NaN;
 	const isValidValue = Number.isFinite(value) && Number.isInteger(value);
@@ -312,6 +314,14 @@ export const bulkAdjustStock: ActionHandler<BulkActionResponse> = async (req, _r
 		};
 	}
 
+	const reasonFallback =
+		mode === 'set'
+			? 'Bulk stock set'
+			: mode === 'increase'
+				? 'Bulk stock increase'
+				: 'Bulk stock decrease';
+	const reason = resolveInventoryReason(reasonRaw, reasonFallback);
+
 	const ids = getRecordIds(records);
 	if (!ids.length) {
 		return { records: records.map((r) => r.toJSON(currentAdmin)), notice: { message: 'bulk-no-records', type: 'error' } };
@@ -323,26 +333,39 @@ export const bulkAdjustStock: ActionHandler<BulkActionResponse> = async (req, _r
 	});
 
 	const normalizedValue = Math.trunc(value);
+	const adminEmail = resolveInventoryAdminEmail(currentAdmin);
 
 	try {
-		await prisma.$transaction(
-			products.map((p) => {
-				const currentStock = Number(p.stock ?? 0);
-				const nextStock =
-					mode === 'set'
-						? normalizedValue
-						: mode === 'increase'
-							? currentStock + normalizedValue
-							: Math.max(0, currentStock - normalizedValue);
-				const data: { stock: number; inStock?: boolean } = {
-					stock: Math.trunc(nextStock),
-				};
-				if (syncInStock) {
-					data.inStock = nextStock > 0;
-				}
-				return prisma.product.update({ where: { id: p.id }, data });
-			})
-		);
+		const operations = products.flatMap((p) => {
+			const currentStock = Number(p.stock ?? 0);
+			const nextStock =
+				mode === 'set'
+					? normalizedValue
+					: mode === 'increase'
+						? currentStock + normalizedValue
+						: Math.max(0, currentStock - normalizedValue);
+			const data: { stock: number; inStock?: boolean } = {
+				stock: Math.trunc(nextStock),
+			};
+			if (syncInStock) {
+				data.inStock = nextStock > 0;
+			}
+			return [
+				prisma.product.update({ where: { id: p.id }, data }),
+				prisma.inventoryAdjustment.create({
+					data: {
+						productId: p.id,
+						source: 'BULK_ADJUST',
+						reason,
+						previousStock: Math.trunc(currentStock),
+						nextStock: Math.trunc(nextStock),
+						delta: Math.trunc(nextStock) - Math.trunc(currentStock),
+						adminEmail,
+					},
+				}),
+			];
+		});
+		await prisma.$transaction(operations);
 		const refreshed = await Promise.all(ids.map((id) => resource.findOne(id)));
 		return {
 			records: refreshed.filter(Boolean).map((r) => r!.toJSON(currentAdmin)),

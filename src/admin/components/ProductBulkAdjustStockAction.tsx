@@ -31,6 +31,7 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 	const [mode, setMode] = useState<Mode>('set');
 	const [value, setValue] = useState('');
 	const [syncInStock, setSyncInStock] = useState(true);
+	const [reason, setReason] = useState('');
 	const [saving, setSaving] = useState(false);
 
 	const title = translateAction(action.name, resource.id);
@@ -71,6 +72,7 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 			formData.append('mode', mode);
 			formData.append('value', value);
 			formData.append('syncInStock', String(syncInStock));
+			formData.append('reason', reason);
 			const response = await api.bulkAction({
 				resourceId: resource.id,
 				recordIds,
@@ -118,6 +120,27 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 					onChange={(e) => setValue(e.target.value)}
 					style={{
 						width: '100%',
+						padding: '10px 12px',
+						borderRadius: 8,
+						border: '1px solid #E2E8F0',
+						fontSize: 14,
+					}}
+				/>
+			</FormGroup>
+
+			<FormGroup>
+				<Label>{translateWithFallback('product-bulk-stock-adjust-reason', 'Reason for adjustment')}</Label>
+				<textarea
+					rows={3}
+					value={reason}
+					onChange={(e) => setReason(e.target.value)}
+					placeholder={translateWithFallback(
+						'product-bulk-stock-adjust-reason-placeholder',
+						'Explain why stock is being adjusted'
+					)}
+					style={{
+						width: '100%',
+						resize: 'vertical',
 						padding: '10px 12px',
 						borderRadius: 8,
 						border: '1px solid #E2E8F0',

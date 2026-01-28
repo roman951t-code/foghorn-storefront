@@ -86,10 +86,10 @@ export default function ProductList(props: ActionProps) {
 				borderRadius='xl'
 				boxShadow='sm'
 				mb='xl'
-				style={{ border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}
+				style={{ border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}
 			>
 				<Text fontWeight='bold'>{translateMessage('product-views-title')}</Text>
-				<Box style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+				<Box style={{ display: 'flex', gap: 16, rowGap: 14, flexWrap: 'wrap' }}>
 					{views.map((view) => (
 						<a key={view.key} href={buildListHref(resource.id, view.filters)}>
 							<Button variant='contained' color='primary' style={actionButtonStyle}>

@@ -225,6 +225,7 @@ model Product {
   cartItems       CartItem[]
   recentlyViewed  RecentlyViewed[]
   auditEntries    ProductAuditEntry[]
+  inventoryAdjustments InventoryAdjustment[]
   fullSlug        String @unique
   categoryName    String
   subcategoryName String
@@ -447,6 +448,70 @@ model ProductAuditEntry {
 enum ProductAuditType {
   FIELD_CHANGE
   NOTE
+}
+
+model InventoryAdjustment {
+  id           String                     @id @default(uuid())
+  productId    String
+  source       InventoryAdjustmentSource
+  reason       String
+  previousStock Int
+  nextStock     Int
+  delta         Int
+  adminEmail   String?
+  createdAt    DateTime                   @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, createdAt])
+}
+
+enum InventoryAdjustmentSource {
+  EDIT
+  BULK_ADJUST
+  CSV_IMPORT
+}
+
+model Banner {
+  id          String   @id @default(uuid())
+  title       String
+  subtitle    String?
+  imageUrl    String
+  linkLabel   String?
+  linkUrl     String?
+  placement   String   @default("home")
+  isActive    Boolean  @default(true)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Page {
+  id              String     @id @default(uuid())
+  title           String
+  slug            String     @unique
+  type            PageType   @default(PAGE)
+  status          PageStatus @default(DRAFT)
+  excerpt         String?
+  content         String?
+  coverImageUrl   String?
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  publishedAt     DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+enum PageType {
+  PAGE
+  BLOG
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
 }
 
 model RecentlyViewed {

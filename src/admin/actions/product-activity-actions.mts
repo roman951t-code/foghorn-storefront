@@ -1,6 +1,7 @@
 import type { ActionHandler, ActionRequest, ActionContext, RecordActionResponse } from 'adminjs';
 import { randomUUID } from 'crypto';
 import { prisma } from '../prisma.mts';
+import { logInventoryAdjustment, resolveInventoryReason } from './inventory-adjustment-actions.mts';
 
 type ProductAuditType = 'FIELD_CHANGE' | 'NOTE';
 
@@ -313,6 +314,32 @@ export const productAuditAfterHook = async (response: unknown, request: ActionRe
 		await logProductFieldChanges(context);
 	} catch {
 		// never block save on audit failures
+	}
+	try {
+		const record = context.record as any;
+		const productId = record?.param?.('id') as string | undefined;
+		const before = (context as any).__productAuditBefore as ProductSnapshot | undefined;
+		if (productId && before) {
+			const afterProduct = await prisma.product.findUnique({
+				where: { id: productId },
+				select: { stock: true },
+			});
+			if (afterProduct) {
+				const payload = (request as { payload?: Record<string, unknown> }).payload ?? {};
+				const reason = resolveInventoryReason(payload.inventoryReason, 'Manual stock edit');
+				const adminEmail = resolveAdminEmail(context.currentAdmin);
+				await logInventoryAdjustment({
+					productId,
+					previousStock: before.stock,
+					nextStock: Number(afterProduct.stock ?? 0),
+					reason,
+					source: 'EDIT',
+					adminEmail,
+				});
+			}
+		}
+	} catch {
+		// never block save on inventory history failures
 	}
 	return response;
 };

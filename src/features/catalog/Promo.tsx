@@ -6,7 +6,7 @@ import { LoadingPromoSkeleton } from '@/components/ui/Skeleton';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import { Link } from '@/i18n/routing';
-import { PROMO_CARDS } from '@/data/navigation/promoCards';
+import { PROMO_CARDS, type PromoCard } from '@/data/navigation/promoCards';
 import { promoBreakpoints } from '@/data/breakpoints';
 
 import 'swiper/css';
@@ -23,7 +23,13 @@ function PromoSkeletonFallback() {
 	);
 }
 
-function PromoSlider() {
+type PromoProps = {
+	promos?: PromoCard[];
+};
+
+function PromoSlider({ promos }: PromoProps) {
+	const cards = promos && promos.length > 0 ? promos : PROMO_CARDS;
+
 	return (
 		<Swiper
 			spaceBetween={6}
@@ -37,13 +43,17 @@ function PromoSlider() {
 			touchStartPreventDefault={false}
 			touchRatio={1}
 		>
-			{PROMO_CARDS.map((promo) => (
+			{cards.map((promo) => (
 				<SwiperSlide key={promo.id}>
 					<Flex
 						justify='center'
 						align='center'
 						cursor='grab'
 						bg='bg.tertiary'
+						bgImage={promo.imageUrl ? `url(${promo.imageUrl})` : undefined}
+						bgSize='cover'
+						position='center'
+						bgRepeat='no-repeat'
 						border='1px solid'
 						borderColor='border'
 						borderRadius='md'
@@ -56,12 +66,12 @@ function PromoSlider() {
 						boxShadow='md'
 						p={6}
 						transition='all 0.2s ease-in-out'
-						_hover={{ bg: 'bgHover.promoCard' }}
+						// _hover={{ bg: 'bgHover.promoCard' }}
 						title={promo.text}
 						role='group'
 					>
-						<Text _groupHover={{ color: 'link' }}>
-							<Link href={`/products/search/?tag=${promo.tag}`}>{promo.text}</Link>
+						<Text _groupHover={{ color: 'link' }} bg='bg' px='2' rounded='sm'>
+							{promo.href ? <Link href={promo.href}>{promo.text}</Link> : promo.text}
 						</Text>
 					</Flex>
 				</SwiperSlide>
@@ -70,11 +80,11 @@ function PromoSlider() {
 	);
 }
 
-const DynamicPromoSlider = dynamic(() => Promise.resolve(PromoSlider), {
+const DynamicPromoSlider = dynamic<PromoProps>(() => Promise.resolve(PromoSlider), {
 	ssr: false,
 	loading: () => <PromoSkeletonFallback />,
 });
 
-export default function Promo() {
-	return <DynamicPromoSlider />;
+export default function Promo({ promos }: PromoProps) {
+	return <DynamicPromoSlider promos={promos} />;
 }

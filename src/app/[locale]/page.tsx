@@ -13,6 +13,7 @@ import {
 	SUBSCRIBE_VALIDATION_KEYS,
 } from '@/constants/subscribe';
 import { LocaleParams } from '@/types/routing';
+import { getPromoCards } from '@/actions/content/getPromoCards';
 
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
@@ -20,11 +21,12 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 }
 
 export default async function Main() {
-	const [genT, prodT, authT, validT] = await Promise.all([
+	const [genT, prodT, authT, validT, promoCards] = await Promise.all([
 		getTranslations('common'),
 		getTranslations('products'),
 		getTranslations('auth'),
 		getTranslations('validation'),
+		getPromoCards('promo'),
 	]);
 
 	const i18nData = extractI18nData(genT, ['seeCategory', 'seeAll']);
@@ -40,7 +42,7 @@ export default async function Main() {
 			<Box hideFrom='sm' mb='24px'>
 				<CatalogBtn fullText />
 			</Box>
-			<CatalogPanel i18nData={i18nData} />
+			<CatalogPanel i18nData={i18nData} promoCards={promoCards} />
 			<ProductsSection title={prodT('popular')} tag='popular' />
 			<ProductsSection title={prodT('new')} tag='new' />
 			{/*<ProductsSection title={prodT('discount')} tag='discount' />

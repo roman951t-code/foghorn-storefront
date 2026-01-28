@@ -3,6 +3,7 @@ import { ApiClient, type ActionProps, OriginalShow, useNotice, useTranslation } 
 import { Box, Button, Icon, Modal, Table, TableBody, TableCell, TableHead, TableRow, Text } from '@adminjs/design-system';
 import { DEFAULT_LOCALE } from '../../constants/locales';
 import ProductActivityTimeline from './ProductActivityTimeline';
+import ProductInventoryHistory from './ProductInventoryHistory';
 
 const api = new ApiClient();
 
@@ -450,6 +451,8 @@ export default function ProductShow(props: ActionProps) {
 				actionNameOverride='activityTimeline'
 				titleOverride={translateMessage('product-activity-title')}
 			/>
+
+			<ProductInventoryHistory {...props} />
 
 			<OriginalShow {...props} record={sanitizedRecord ?? record} />
 		</Box>

@@ -10,6 +10,7 @@ import { productKpis } from '../actions/product-kpi-actions.mts';
 import { lowStockAlerts } from '../actions/product-low-stock-actions.mts';
 import { productRelatedData } from '../actions/product-related-actions.mts';
 import { exportProductsCsv, importProductsCsv } from '../actions/product-csv-actions.mts';
+import { inventoryAdjustmentHistory } from '../actions/inventory-adjustment-actions.mts';
 import {
 	bulkAdjustPrice,
 	bulkAdjustStock,
@@ -47,6 +48,7 @@ import { revokeSession, userSessions } from '../actions/user-session-actions.mts
 import { userSegments } from '../actions/user-segmentation-actions.mts';
 import { userRelatedData } from '../actions/user-related-actions.mts';
 import { reviewProductSummary } from '../actions/review-actions.mts';
+import { duplicateBanner } from '../actions/banner-actions.mts';
 import { validateProductNewEdit } from '../validation/product-admin-validation.mts';
 import {
 	cancelOrderActionComponent,
@@ -178,14 +180,9 @@ export const resources = [
 				'currency',
 				'stock',
 				'inStock',
-				'tags',
 				'brand',
 				'category',
 				'updatedAt',
-				'discountStartAt',
-				'discountEndAt',
-				'publishStartAt',
-				'publishEndAt',
 			],
 			filterProperties: [
 				'name',
@@ -355,6 +352,12 @@ export const resources = [
 					component: false,
 					handler: productRelatedData,
 				},
+				inventoryAdjustments: {
+					actionType: 'record',
+					isVisible: false,
+					component: false,
+					handler: inventoryAdjustmentHistory,
+				},
 				publishProduct: {
 					actionType: 'record',
 					icon: 'CheckCircle',
@@ -468,7 +471,14 @@ export const resources = [
 		resource: { model: modelMap.Order, client: prisma },
 		options: {
 			navigation: 'Sales',
-			listProperties: ['createdAt', 'customerName', 'status', 'total', 'paymentMethod', 'shipmentMethod'],
+			listProperties: [
+				'createdAt',
+				'customerName',
+				'status',
+				'total',
+				'paymentMethod',
+				'shipmentMethod',
+			],
 			sort: {
 				sortBy: 'createdAt',
 				direction: 'desc',
@@ -739,6 +749,42 @@ export const resources = [
 				description: 'promotion-hint-is-active',
 				custom: { tooltipDirection: 'right' },
 			},
+			createdAt: readOnly,
+			updatedAt: readOnly,
+		},
+	}),
+	maybeResource(modelMap.Banner, {
+		navigation: 'Content',
+		listProperties: ['title', 'placement', 'isActive', 'startsAt', 'endsAt', 'updatedAt'],
+		filterProperties: ['title', 'placement', 'isActive', 'startsAt', 'endsAt'],
+		properties: {
+			id: hidden,
+			imageUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			createdAt: readOnly,
+			updatedAt: readOnly,
+		},
+		actions: {
+			duplicateBanner: {
+				actionType: 'record',
+				icon: 'Copy',
+				guard: 'duplicate-banner',
+				handler: duplicateBanner,
+				component: false,
+			},
+		},
+	}),
+	maybeResource(modelMap.Page, {
+		navigation: 'Content',
+		listProperties: ['title', 'type', 'status', 'publishedAt', 'updatedAt'],
+		filterProperties: ['title', 'type', 'status', 'publishedAt'],
+		properties: {
+			id: hidden,
+			content: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			excerpt: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			coverImageUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			metaTitle: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			metaDescription: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			canonicalUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
 			createdAt: readOnly,
 			updatedAt: readOnly,
 		},

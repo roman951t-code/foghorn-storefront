@@ -4,22 +4,29 @@ import { type Metadata } from 'next';
 import { getLocalizedMetadata } from '@/utils/i18nUtils';
 import { getTranslations } from 'next-intl/server';
 import { LocaleParams } from '@/types/routing';
+import { getPageBySlug } from '@/actions/content/getPageBySlug';
+import { mergePageMetadata } from '@/utils/contentPage';
 
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
-	return getLocalizedMetadata(locale, 'aboutUs', { pathname: '/about-us' });
+	const base = await getLocalizedMetadata(locale, 'aboutUs', { pathname: '/about-us' });
+	const page = await getPageBySlug('about-us');
+	return mergePageMetadata(base, page);
 }
 
 export default async function AboutUs() {
 	const navigationT = await getTranslations('navigation');
+	const page = await getPageBySlug('about-us');
+	const pageTitle = page?.title?.trim() || navigationT('sidebar.aboutUs');
+	const content = page?.content ?? aboutData.content;
 
 	return (
 		<Stack gap={6} p={4} pt={1}>
 			<Heading as='h1' size='3xl' fontWeight='normal' w='100%'>
-				{navigationT('sidebar.aboutUs')}
+				{pageTitle}
 			</Heading>
 
-			<Text whiteSpace='pre-line'>{aboutData.content}</Text>
+			<Text whiteSpace='pre-line'>{content}</Text>
 		</Stack>
 	);
 }

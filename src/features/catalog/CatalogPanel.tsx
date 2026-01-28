@@ -9,12 +9,14 @@ import Promo from './Promo';
 import type { I18nData } from '@/types/i18n';
 import { useCatalog } from '@/providers/CatalogProvider';
 import type { CatalogCategory } from '@/types/product';
+import type { PromoCard } from '@/data/navigation/promoCards';
 
 interface Props {
 	i18nData: I18nData;
+	promoCards?: PromoCard[];
 }
 
-export default function CatalogPanel({ i18nData }: Props) {
+export default function CatalogPanel({ i18nData, promoCards }: Props) {
 	const { categories } = useCatalog();
 
 	const [activeCategory, setActiveCategory] = useState<CatalogCategory | null>(null);
@@ -80,7 +82,7 @@ export default function CatalogPanel({ i18nData }: Props) {
 				))}
 			</VStack>
 
-			{!activeCategory && <Promo />}
+			{!activeCategory && <Promo promos={promoCards} />}
 			{activeCategory && (
 				<CategoryDetails key={activeCategory.id} category={activeCategory} i18nData={i18nData} />
 			)}

@@ -22,7 +22,7 @@ const cspHeader = `
 const baseConfig: NextConfig = {
 	experimental: {
 		// Reduce client bundle by rewriting imports to per-file entrypoints
-		optimizePackageImports: ['@chakra-ui/react', '@chakra-ui/icons', 'react-icons'],
+		optimizePackageImports: ['@chakra-ui/icons', 'react-icons'],
 	},
 	productionBrowserSourceMaps: true,
 	cacheComponents: true,
