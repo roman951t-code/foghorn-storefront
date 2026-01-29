@@ -37,6 +37,19 @@ export async function getUserOrders(limit: number, offset = 0): Promise<{
 								imageUrl: true,
 							},
 						},
+						variant: {
+							select: {
+								id: true,
+								sku: true,
+								attributes: {
+									select: {
+										attribute: { select: { name: true, unit: true } },
+										value: true,
+									},
+									orderBy: { attribute: { name: 'asc' } },
+								},
+							},
+						},
 					},
 				},
 			},

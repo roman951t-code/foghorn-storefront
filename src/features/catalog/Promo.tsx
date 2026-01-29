@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { Flex, HStack, Text, useBreakpointValue } from '@chakra-ui/react';
 import { LoadingPromoSkeleton } from '@/components/ui/Skeleton';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper/modules';
+import { Autoplay, FreeMode, Mousewheel } from 'swiper/modules';
 import { Link } from '@/i18n/routing';
 import { PROMO_CARDS, type PromoCard } from '@/data/navigation/promoCards';
 import { promoBreakpoints } from '@/data/breakpoints';
@@ -34,12 +34,14 @@ function PromoSlider({ promos }: PromoProps) {
 		<Swiper
 			spaceBetween={6}
 			breakpoints={promoBreakpoints}
-			modules={[Autoplay]}
+			modules={[Autoplay, FreeMode, Mousewheel]}
 			autoplay={false}
 			loop
 			className='promoSlider'
 			grabCursor={true}
 			simulateTouch={true}
+			freeMode={{ enabled: true, sticky: false }}
+			mousewheel={{ forceToAxis: true }}
 			touchStartPreventDefault={false}
 			touchRatio={1}
 		>
@@ -54,7 +56,7 @@ function PromoSlider({ promos }: PromoProps) {
 						bgSize='cover'
 						position='center'
 						bgRepeat='no-repeat'
-						border='1px solid'
+						border='0.5px solid'
 						borderColor='border'
 						borderRadius='md'
 						height='472px'
@@ -63,10 +65,9 @@ function PromoSlider({ promos }: PromoProps) {
 						fontWeight='400'
 						fontSize='xl'
 						textAlign='center'
-						boxShadow='md'
+						boxShadow='none'
 						p={6}
 						transition='all 0.2s ease-in-out'
-						// _hover={{ bg: 'bgHover.promoCard' }}
 						title={promo.text}
 						role='group'
 					>

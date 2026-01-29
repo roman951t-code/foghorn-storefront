@@ -56,7 +56,11 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 								alt={product.name ?? ''}
 								width={120}
 								height={120}
-								style={{ objectFit: 'contain', borderRadius: '6px' }}
+								style={{
+									objectFit: 'contain',
+									borderRadius: '6px',
+									border: '0.5px solid var(--chakra-colors-border-light)',
+								}}
 							/>
 						</LocaleNavLink>
 						<Flex direction='column' gap={2} w='100%'>

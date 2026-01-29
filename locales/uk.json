@@ -300,7 +300,8 @@
       "searchQueryResults": "Результати за запитом: {searchQuery}",
       "advantages": "Переваги",
       "disAdvantages": "Недоліки",
-      "all": "Всі"
+      "all": "Всі",
+      "brand": "Бренд"
     },
 	"orders": {
 		"empty": "У вас ще немає замовлень",

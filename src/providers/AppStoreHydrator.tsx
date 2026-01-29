@@ -121,7 +121,7 @@ export function AppStoreHydrator({
 				if (!res.ok) return;
 				const data = await res.json();
 				if (data?.success && Array.isArray(data.items)) {
-					setCartInitial({ items: data.items }, data.items.map((item: any) => item.id));
+					setCartInitial({ items: data.items }, data.items.map((item: any) => item.productId));
 				}
 			} catch {
 				// noop

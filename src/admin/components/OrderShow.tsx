@@ -298,7 +298,7 @@ export default function OrderShow(props: ActionProps) {
 											{item.productName}
 										</a>
 										<Text color='grey60' style={{ fontSize: 13 }}>
-											{translateMessage('order-items-qty', { count: String(item.quantity) })}
+											{translateMessage('order-items-qty', { count: item.quantity })}
 										</Text>
 									</Box>
 								</Box>

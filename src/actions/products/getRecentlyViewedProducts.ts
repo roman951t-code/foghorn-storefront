@@ -33,6 +33,19 @@ function mapRecentlyViewedProducts(viewed: { product: any }[]): SubcategoryProdu
 				reviewCount: p.reviewCount ?? 0,
 				basePrice,
 				discountPrice: scheduledDiscountPrice,
+				defaultVariant: p.variants?.[0]
+					? {
+							id: p.variants[0].id,
+							sku: p.variants[0].sku,
+							price: p.variants[0].price?.toNumber?.() ?? Number(p.variants[0].price ?? 0),
+							stock: p.variants[0].stock,
+							label: (p.variants[0].attributes ?? [])
+								.map((a: any) =>
+									[a.attribute?.name, a.value, a.attribute?.unit].filter(Boolean).join(' ')
+								)
+								.join(' / '),
+						}
+					: undefined,
 			} as SubcategoryProduct;
 		})
 		.filter(Boolean) as SubcategoryProduct[];
@@ -74,6 +87,24 @@ export async function getRecentlyViewedProductsWithCount(
 						subcategoryName: true,
 						averageRating: true,
 						reviewCount: true,
+						variants: {
+							where: { stock: { gt: 0 } },
+							orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
+							take: 1,
+							select: {
+								id: true,
+								sku: true,
+								price: true,
+								stock: true,
+								attributes: {
+									select: {
+										attribute: { select: { name: true, unit: true } },
+										value: true,
+									},
+									orderBy: { attribute: { name: 'asc' } },
+								},
+							},
+						},
 					},
 				},
 			},

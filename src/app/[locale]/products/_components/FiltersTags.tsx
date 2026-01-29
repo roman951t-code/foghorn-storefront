@@ -3,8 +3,13 @@ import { HStack, Tag, Wrap } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FILTER_TAG_EXCLUDED_KEYS } from '@/constants/products';
+import type { Filter } from '@/types/product';
 
-export default function FiltersTags() {
+type Props = {
+	filters?: Filter[] | null;
+};
+
+export default function FiltersTags({ filters }: Props) {
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const t = useTranslations('products');
@@ -39,6 +44,16 @@ export default function FiltersTags() {
 		if (!FILTER_TAG_EXCLUDED_KEYS.includes(key)) {
 			dynamicFilters.push({ key, value });
 		}
+	});
+
+	const filterLabelByKey = new Map<string, string>();
+	const valueLabelByKey = new Map<string, Map<string, string>>();
+	(filters ?? []).forEach((filter) => {
+		const baseLabel = filter.key === 'brand' ? t('brand') : filter.name;
+		filterLabelByKey.set(filter.key, baseLabel);
+		const labels = new Map<string, string>();
+		filter.values.forEach((val) => labels.set(val.value, val.label));
+		valueLabelByKey.set(filter.key, labels);
 	});
 
 	const clearFilters = () => {
@@ -133,7 +148,7 @@ export default function FiltersTags() {
 						borderColor='border.light'
 					>
 						<Tag.Label>
-							{key}: {value}
+							{filterLabelByKey.get(key) ?? key}: {valueLabelByKey.get(key)?.get(value) ?? value}
 						</Tag.Label>
 						<Tag.EndElement onClick={() => clearParam(key, value)}>
 							<Tag.CloseTrigger

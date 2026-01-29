@@ -82,8 +82,12 @@ export default async function Subcategory({ params, searchParams }: Props) {
 
 	for (const [key, value] of Object.entries(searchData)) {
 		if (!excluded.includes(key) && value) {
-			if (!dynamicFilters[key]) dynamicFilters[key] = [];
-			dynamicFilters[key].push(value);
+			const values = Array.isArray(value) ? value : [value];
+			for (const item of values) {
+				if (!item) continue;
+				if (!dynamicFilters[key]) dynamicFilters[key] = [];
+				dynamicFilters[key].push(item);
+			}
 		}
 	}
 
@@ -153,7 +157,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 					btnText={navigationT('sidebar.filters')}
 				/>
 			</Flex>
-			<FiltersTags />
+			<FiltersTags filters={subcategoryFilters} />
 
 			<Group justifyContent='space-between' align='flex-start' gap='3'>
 				<Box

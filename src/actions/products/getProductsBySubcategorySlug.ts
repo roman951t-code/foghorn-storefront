@@ -55,19 +55,23 @@ export async function getProductsBySubcategorySlug(
 
 	const now = new Date();
 
-	const dynamicConditions = filters
-		? Object.entries(filters).map(([key, values]) => ({
-				attributes: {
-					some: {
-						attribute: { name: key },
-						value: { in: values.flat() },
-					},
-				},
-			}))
+	const brandFilters = (filters?.brand ?? []).flat().filter(Boolean);
+	const attributeFilters = filters
+		? Object.entries(filters).filter(([key]) => key !== 'brand')
 		: [];
+
+	const dynamicConditions = attributeFilters.map(([key, values]) => ({
+		attributes: {
+			some: {
+				attribute: { name: key },
+				value: { in: values.flat() },
+			},
+		},
+	}));
 
 	const whereClause: Prisma.ProductWhereInput = {
 		category: { slug },
+		...(brandFilters.length > 0 ? { brand: { slug: { in: brandFilters } } } : {}),
 		...(onlyInStock ? { inStock: true } : {}),
 		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
@@ -142,6 +146,24 @@ export async function getProductsBySubcategorySlug(
 			discountStartAt: true,
 			discountEndAt: true,
 			inStock: true,
+			variants: {
+				where: { stock: { gt: 0 } },
+				orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
+				take: 1,
+				select: {
+					id: true,
+					sku: true,
+					price: true,
+					stock: true,
+					attributes: {
+						select: {
+							attribute: { select: { name: true, unit: true } },
+							value: true,
+						},
+						orderBy: { attribute: { name: 'asc' } },
+					},
+				},
+			},
 			reviews: { select: { rating: true } },
 			tags: true,
 		},
@@ -160,6 +182,11 @@ export async function getProductsBySubcategorySlug(
 	}
 
 	const products: SubcategoryProduct[] = finalProducts.map((p) => {
+		const { variants, reviews, tags, ...rest } = p as typeof p & {
+			variants?: unknown;
+			reviews?: unknown;
+			tags?: unknown;
+		};
 		const ratings = p.reviews?.map((r) => r.rating) ?? [];
 		const averageRating = ratings.length ? ratings.reduce((s, v) => s + v, 0) / ratings.length : 0;
 
@@ -172,7 +199,7 @@ export async function getProductsBySubcategorySlug(
 		);
 
 		return {
-			...p,
+			...rest,
 			id: p.id ?? '',
 			name: p.name ?? '',
 			fullSlug: p.fullSlug ?? '',
@@ -183,8 +210,22 @@ export async function getProductsBySubcategorySlug(
 			inStock: !!p.inStock,
 			basePrice,
 			discountPrice: scheduledDiscountPrice,
+			defaultVariant: p.variants?.[0]
+				? {
+						id: p.variants[0].id,
+						sku: p.variants[0].sku,
+						price: p.variants[0].price.toNumber(),
+						stock: p.variants[0].stock,
+						label: p.variants[0].attributes
+							.map((a) =>
+								[a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' ')
+							)
+							.join(' / '),
+					}
+				: undefined,
 			averageRating,
 			reviewCount: p.reviews?.length ?? 0,
+			tags: p.tags ?? [],
 		} as SubcategoryProduct;
 	});
 

@@ -11,12 +11,12 @@ import { isProductPublished } from '@/utils/publishSchedule';
 const MAX_ITEM_QUANTITY = 99;
 
 interface UpdateCartItemQuantityParams {
-	productId: string;
+	cartItemId: string;
 	quantity: number;
 }
 
 export async function updateCartItemQuantity({
-	productId,
+	cartItemId,
 	quantity,
 }: UpdateCartItemQuantityParams) {
 	const validationT = await getTranslations('validation');
@@ -28,7 +28,7 @@ export async function updateCartItemQuantity({
 	}
 
 	const normalizedQty = Math.max(1, Math.floor(Number(quantity)));
-	if (!productId || !Number.isFinite(normalizedQty)) {
+	if (!cartItemId || !Number.isFinite(normalizedQty)) {
 		return { success: false, message: validationT('cartUpdateFailed') };
 	}
 
@@ -42,26 +42,34 @@ export async function updateCartItemQuantity({
 			return { success: false, message: validationT('cartNotFound') };
 		}
 
-		const existingItem = cart.items.find((item) => item.productId === productId);
+		const existingItem = cart.items.find((item) => item.id === cartItemId);
 		if (!existingItem) {
 			return { success: false, message: validationT('productNotFoundInCart') };
 		}
 
 		const product = await prisma.product.findUnique({
-			where: { id: productId },
+			where: { id: existingItem.productId },
 			select: { stock: true, inStock: true, status: true, publishStartAt: true, publishEndAt: true },
 		});
 
 		if (
 			!product ||
 			!product.inStock ||
-			!product.stock ||
 			!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
 		) {
 			return { success: false, message: validationT('cartUpdateFailed') };
 		}
 
-		const safeQty = Math.min(MAX_ITEM_QUANTITY, Math.min(product.stock, normalizedQty));
+		const availableStock = existingItem.variantId
+			? (
+					await prisma.productVariant.findUnique({
+						where: { id: existingItem.variantId },
+						select: { stock: true, productId: true },
+					})
+				)?.stock ?? 0
+			: product.stock ?? 0;
+
+		const safeQty = Math.min(MAX_ITEM_QUANTITY, Math.min(availableStock, normalizedQty));
 		if (safeQty < 1) {
 			return { success: false, message: validationT('cartUpdateFailed') };
 		}

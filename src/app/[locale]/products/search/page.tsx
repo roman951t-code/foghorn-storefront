@@ -111,8 +111,12 @@ export default async function SearchProducts({ searchParams }: Props) {
 	const dynamicFilters = Object.entries(searchData).reduce<Record<string, string[]>>(
 		(acc, [key, value]) => {
 			if (!value || excludedParams.has(key)) return acc;
-			acc[key] = acc[key] || [];
-			acc[key].push(value);
+			const values = Array.isArray(value) ? value : [value];
+			values.forEach((item) => {
+				if (!item) return;
+				acc[key] = acc[key] || [];
+				acc[key].push(item);
+			});
 			return acc;
 		},
 		{}
@@ -212,7 +216,7 @@ export default async function SearchProducts({ searchParams }: Props) {
 				/>
 			</Flex>
 
-			<FiltersTags />
+			<FiltersTags filters={filters} />
 
 			<Group justifyContent='space-between' align='flex-start' gap='3'>
 				<Box

@@ -15,7 +15,7 @@ import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
 
-type CreateOrderItemPayload = { productId: string; quantity: number };
+type CreateOrderItemPayload = { productId: string; variantId: string | null; quantity: number };
 
 export type CreateOrderPayload = {
 	items: CreateOrderItemPayload[];
@@ -32,6 +32,7 @@ const CreateOrderSchema = z.object({
 		.array(
 			z.object({
 				productId: z.string().min(1, 'productId_required'),
+				variantId: z.string().nullable(),
 				quantity: z.number().int().positive().max(99, 'quantity_too_high'),
 			})
 		)
@@ -59,6 +60,7 @@ export async function createOrderAction(
 
 	const items = parsed.data.items.map((item) => ({
 		productId: item.productId.trim(),
+		variantId: item.variantId ? item.variantId.trim() : null,
 		quantity: Math.max(1, Math.floor(item.quantity)),
 	}));
 
@@ -91,6 +93,38 @@ export async function createOrderAction(
 
 	const toCurrency = (value: number) => Math.round(value * 100) / 100;
 
+	const uniqueVariantIds = Array.from(
+		new Set(items.map((i) => i.variantId).filter((v): v is string => !!v))
+	);
+	const variants = uniqueVariantIds.length
+		? await prisma.productVariant.findMany({
+				where: { id: { in: uniqueVariantIds } },
+				select: {
+					id: true,
+					productId: true,
+					sku: true,
+					price: true,
+					stock: true,
+				},
+			})
+		: [];
+	const variantById = new Map(variants.map((v) => [v.id, v]));
+
+	const productsNeedingDefaultVariant = items
+		.filter((i) => !i.variantId)
+		.map((i) => i.productId);
+	const defaultVariants = productsNeedingDefaultVariant.length
+		? await prisma.productVariant.findMany({
+				where: { productId: { in: productsNeedingDefaultVariant }, stock: { gt: 0 } },
+				select: { id: true, productId: true, price: true, stock: true, sku: true },
+				orderBy: [{ productId: 'asc' }, { price: 'asc' }, { createdAt: 'asc' }],
+			})
+		: [];
+	const defaultVariantByProduct = new Map<string, (typeof defaultVariants)[number]>();
+	for (const v of defaultVariants) {
+		if (!defaultVariantByProduct.has(v.productId)) defaultVariantByProduct.set(v.productId, v);
+	}
+
 	const orderItems = items
 		.map((item) => {
 			const product = productMap.get(item.productId);
@@ -103,7 +137,15 @@ export async function createOrderAction(
 				return null;
 			}
 
-			const availableStock = product.stock ?? 0;
+			const variant =
+				(item.variantId ? variantById.get(item.variantId) ?? null : null) ??
+				(defaultVariantByProduct.get(item.productId) ?? null);
+			if (!variant || variant.productId !== item.productId) {
+				unavailable.push(item.productId);
+				return null;
+			}
+
+			const availableStock = Math.max(0, variant.stock ?? 0);
 			if (item.quantity > availableStock) {
 				unavailable.push(item.productId);
 				return null;
@@ -116,17 +158,31 @@ export async function createOrderAction(
 				product.discountStartAt ?? null,
 				product.discountEndAt ?? null
 			);
-			const unitPrice = toCurrency(Number(scheduledDiscountPrice ?? basePrice));
+			const discountAmount =
+				scheduledDiscountPrice != null ? Math.max(0, basePrice - scheduledDiscountPrice) : 0;
+
+			const variantBasePrice = variant.price?.toNumber?.() ?? 0;
+			const effectiveVariantPrice =
+				discountAmount > 0 ? Math.max(0, variantBasePrice - discountAmount) : variantBasePrice;
+
+			const unitPrice = toCurrency(Number(effectiveVariantPrice));
 			const quantity = Math.max(1, item.quantity);
 			const price = toCurrency(unitPrice * quantity);
 			return {
 				productId: item.productId,
+				variantId: variant.id,
 				quantity,
 				unitPrice,
 				price,
 			};
 		})
-		.filter(Boolean) as { productId: string; quantity: number; unitPrice: number; price: number }[];
+		.filter(Boolean) as {
+		productId: string;
+		variantId: string;
+		quantity: number;
+		unitPrice: number;
+		price: number;
+	}[];
 
 	if (unavailable.length || !orderItems.length) {
 		return { success: false, message: 'out-of-stock' };
@@ -153,17 +209,27 @@ export async function createOrderAction(
 	try {
 		const order = await prisma.$transaction(async (tx) => {
 			for (const item of orderItems) {
-				const updateResult = await tx.product.updateMany({
-					where: { id: item.productId, stock: { gte: item.quantity } },
-					data: {
-						stock: { decrement: item.quantity },
-						inStock: item.quantity < (productMap.get(item.productId)?.stock ?? 0),
-					},
+				const updateResult = await tx.productVariant.updateMany({
+					where: { id: item.variantId, productId: item.productId, stock: { gte: item.quantity } },
+					data: { stock: { decrement: item.quantity } },
 				});
 
 				if (updateResult.count === 0) {
 					throw new Error('stock-conflict');
 				}
+			}
+
+			// Keep Product.inStock roughly in sync with variant inventory.
+			for (const productId of uniqueIds) {
+				const remaining = await tx.productVariant.findMany({
+					where: { productId, stock: { gt: 0 } },
+					select: { stock: true },
+				});
+				const totalStock = remaining.reduce((sum, v) => sum + (v.stock ?? 0), 0);
+				await tx.product.update({
+					where: { id: productId },
+					data: { stock: totalStock, inStock: totalStock > 0 },
+				});
 			}
 
 			const newOrder = await tx.order.create({
@@ -181,6 +247,7 @@ export async function createOrderAction(
 					items: {
 						create: orderItems.map((item) => ({
 							productId: item.productId,
+							variantId: item.variantId,
 							quantity: item.quantity,
 							unitPrice: new Prisma.Decimal(item.unitPrice.toFixed(2)),
 							price: new Prisma.Decimal(item.price.toFixed(2)),
@@ -196,6 +263,19 @@ export async function createOrderAction(
 									name: true,
 									fullSlug: true,
 									imageUrl: true,
+								},
+							},
+							variant: {
+								select: {
+									id: true,
+									sku: true,
+									attributes: {
+										select: {
+											attribute: { select: { name: true, unit: true } },
+											value: true,
+										},
+										orderBy: { attribute: { name: 'asc' } },
+									},
 								},
 							},
 						},

@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import type { CartProduct } from '@/types/cart';
 import { isProductPublished } from '@/utils/publishSchedule';
+import { getCartItems } from './cart/getCartItems';
 
 const MAX_ITEM_QUANTITY = 99;
 
@@ -29,7 +30,7 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 	try {
 		const order = await prisma.order.findFirst({
 			where: { id: orderId, userId },
-			select: { id: true, items: { select: { productId: true, quantity: true } } },
+			select: { id: true, items: { select: { productId: true, variantId: true, quantity: true } } },
 		});
 
 		if (!order) {
@@ -45,7 +46,6 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 			where: { id: { in: productIds } },
 			select: {
 				id: true,
-				stock: true,
 				inStock: true,
 				status: true,
 				publishStartAt: true,
@@ -53,6 +53,32 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 			},
 		});
 		const productMap = new Map(products.map((p) => [p.id, p]));
+
+		const variantIds = Array.from(
+			new Set(order.items.map((i) => i.variantId).filter((v): v is string => !!v))
+		);
+		const variants = variantIds.length
+			? await prisma.productVariant.findMany({
+					where: { id: { in: variantIds } },
+					select: { id: true, productId: true, stock: true },
+				})
+			: [];
+		const variantById = new Map(variants.map((v) => [v.id, v]));
+
+		const needsDefaultVariant = order.items.filter((i) => !i.variantId).map((i) => i.productId);
+		const defaultVariants = needsDefaultVariant.length
+			? await prisma.productVariant.findMany({
+					where: { productId: { in: needsDefaultVariant }, stock: { gt: 0 } },
+					select: { id: true, productId: true, stock: true },
+					orderBy: [{ productId: 'asc' }, { price: 'asc' }, { createdAt: 'asc' }],
+				})
+			: [];
+		const defaultVariantByProduct = new Map<string, { id: string; stock: number }>();
+		for (const v of defaultVariants) {
+			if (!defaultVariantByProduct.has(v.productId)) {
+				defaultVariantByProduct.set(v.productId, { id: v.id, stock: v.stock });
+			}
+		}
 
 		const result = await prisma.$transaction(async (tx) => {
 			const cart = await tx.cart.upsert({
@@ -63,7 +89,10 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 			});
 
 			const existingByProduct = new Map(
-				cart.items.map((item) => [item.productId, { id: item.id, quantity: item.quantity }])
+				cart.items.map((ci) => [
+					`${ci.productId}:${ci.variantId ?? ''}`,
+					{ id: ci.id, quantity: ci.quantity },
+				])
 			);
 
 			let added = false;
@@ -73,17 +102,34 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 				if (
 					!product ||
 					!product.inStock ||
-					!product.stock ||
 					!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
 				)
 					continue;
 
+				const effectiveVariantId =
+					item.variantId ??
+					defaultVariantByProduct.get(item.productId)?.id ??
+					null;
+
+				const availableStock = (() => {
+					if (effectiveVariantId) {
+						const v = variantById.get(effectiveVariantId);
+						if (v && v.productId === item.productId) return v.stock;
+						const dv = defaultVariantByProduct.get(item.productId);
+						if (dv && dv.id === effectiveVariantId) return dv.stock;
+						return 0;
+					}
+					return 0;
+				})();
+
+				if (!availableStock) continue;
+
 				const desiredQty = Math.max(1, Math.min(MAX_ITEM_QUANTITY, item.quantity));
-				const existing = existingByProduct.get(item.productId);
+				const existing = existingByProduct.get(`${item.productId}:${effectiveVariantId ?? ''}`);
 
 				if (existing) {
 					const newQuantity = Math.min(
-						product.stock,
+						availableStock,
 						Math.min(MAX_ITEM_QUANTITY, existing.quantity + desiredQty)
 					);
 					if (newQuantity <= existing.quantity) continue;
@@ -92,58 +138,40 @@ export async function repeatOrderAction(orderId: string): Promise<RepeatOrderRes
 						where: { id: existing.id },
 						data: { quantity: newQuantity },
 					});
-					existingByProduct.set(item.productId, { ...existing, quantity: newQuantity });
+					existingByProduct.set(`${item.productId}:${effectiveVariantId ?? ''}`, {
+						...existing,
+						quantity: newQuantity,
+					});
 					added = true;
 				} else {
-					const quantityToInsert = Math.min(product.stock, desiredQty);
+					const quantityToInsert = Math.min(availableStock, desiredQty);
 					if (quantityToInsert < 1) continue;
 
 					const created = await tx.cartItem.create({
 						data: {
 							cartId: cart.id,
 							productId: item.productId,
+							variantId: effectiveVariantId,
 							quantity: quantityToInsert,
 						},
 					});
-					existingByProduct.set(item.productId, { id: created.id, quantity: quantityToInsert });
+					existingByProduct.set(`${item.productId}:${effectiveVariantId ?? ''}`, {
+						id: created.id,
+						quantity: quantityToInsert,
+					});
 					added = true;
 				}
 			}
 
-			const cartItems = await tx.cartItem.findMany({
-				where: { cartId: cart.id },
-				include: {
-					product: {
-						select: {
-							id: true,
-							name: true,
-							fullSlug: true,
-							imageUrl: true,
-							basePrice: true,
-							discountPrice: true,
-						},
-					},
-				},
-			});
-
-			const items = cartItems.map(({ product, quantity }) => ({
-				id: product.id,
-				name: product.name,
-				fullSlug: product.fullSlug,
-				imageUrl: product.imageUrl,
-				basePrice: product.basePrice?.toNumber?.() ?? 0,
-				discountPrice: product.discountPrice?.toNumber?.() ?? null,
-				quantity,
-			}));
-
-			return { items, added };
+			return { added };
 		});
 
 		if (!result.added) {
 			return { success: false, code: 'failed' };
 		}
 
-		return { success: true, items: result.items };
+		const fresh = await getCartItems(userId);
+		return fresh.success ? { success: true, items: fresh.items as CartProduct[] } : { success: false, code: 'failed' };
 	} catch (error) {
 		return { success: false, code: 'failed' };
 	}

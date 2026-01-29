@@ -28,6 +28,19 @@ export async function deleteOrderItemAction(orderItemId: string): Promise<Result
 					items: {
 						include: {
 							product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
+							variant: {
+								select: {
+									id: true,
+									sku: true,
+									attributes: {
+										select: {
+											attribute: { select: { name: true, unit: true } },
+											value: true,
+										},
+										orderBy: { attribute: { name: 'asc' } },
+									},
+								},
+							},
 						},
 					},
 				},
@@ -48,6 +61,19 @@ export async function deleteOrderItemAction(orderItemId: string): Promise<Result
 				items: {
 					include: {
 						product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
+						variant: {
+							select: {
+								id: true,
+								sku: true,
+								attributes: {
+									select: {
+										attribute: { select: { name: true, unit: true } },
+										value: true,
+									},
+									orderBy: { attribute: { name: 'asc' } },
+								},
+							},
+						},
 					},
 				},
 			},
@@ -76,6 +102,19 @@ export async function deleteOrderItemAction(orderItemId: string): Promise<Result
 				items: {
 					include: {
 						product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
+						variant: {
+							select: {
+								id: true,
+								sku: true,
+								attributes: {
+									select: {
+										attribute: { select: { name: true, unit: true } },
+										value: true,
+									},
+									orderBy: { attribute: { name: 'asc' } },
+								},
+							},
+						},
 					},
 				},
 			},

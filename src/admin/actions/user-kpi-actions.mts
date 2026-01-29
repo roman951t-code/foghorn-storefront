@@ -70,20 +70,22 @@ export const attachUserListKpis = async (response: ActionResponse): Promise<Acti
 		prisma.order.groupBy({
 			by: ['userId'],
 			where: { userId: { in: userIds }, status: { in: [...paidStatuses] } },
+			orderBy: { userId: 'asc' },
 			_sum: { total: true },
 		}),
 		prisma.order.groupBy({
 			by: ['userId'],
 			where: { userId: { in: userIds } },
+			orderBy: { userId: 'asc' },
 			_max: { createdAt: true },
 		}),
 	]);
 
 	const ltvMap = new Map(
-		ltvAgg.map((item) => [item.userId, roundCurrency(Number(item._sum.total ?? 0))])
+		ltvAgg.map((item) => [item.userId, roundCurrency(Number(item._sum?.total ?? 0))])
 	);
 	const lastOrderMap = new Map(
-		lastOrderAgg.map((item) => [item.userId, item._max.createdAt])
+		lastOrderAgg.map((item) => [item.userId, item._max?.createdAt ?? null])
 	);
 
 	response.records.forEach((record) => {

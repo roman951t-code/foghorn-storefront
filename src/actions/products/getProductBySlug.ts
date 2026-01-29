@@ -39,6 +39,21 @@ async function fetchProductBySlug(slug: string) {
 					value: true,
 				},
 			},
+			variants: {
+				select: {
+					id: true,
+					sku: true,
+					price: true,
+					stock: true,
+					attributes: {
+						select: {
+							attribute: { select: { id: true, name: true, unit: true } },
+							value: true,
+						},
+					},
+				},
+				orderBy: [{ stock: 'desc' }, { price: 'asc' }, { createdAt: 'asc' }],
+			},
 			reviews: {
 				select: {
 					id: true,
@@ -73,6 +88,16 @@ async function fetchProductBySlug(slug: string) {
 			name: a.attribute.name,
 			unit: a.attribute.unit,
 			value: a.value,
+		})),
+		variants: product.variants.map((v) => ({
+			...v,
+			price: v.price.toNumber(),
+			attributes: v.attributes.map((a) => ({
+				attributeId: a.attribute.id,
+				name: a.attribute.name,
+				unit: a.attribute.unit,
+				value: a.value,
+			})),
 		})),
 	};
 }

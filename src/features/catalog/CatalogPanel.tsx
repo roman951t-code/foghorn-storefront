@@ -18,6 +18,7 @@ interface Props {
 
 export default function CatalogPanel({ i18nData, promoCards }: Props) {
 	const { categories } = useCatalog();
+	const panelCategories = categories.slice(0, 8);
 
 	const [activeCategory, setActiveCategory] = useState<CatalogCategory | null>(null);
 	const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -53,7 +54,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 				mr='2'
 			>
 				<CatalogBtn fullText />
-				{categories.map((category, index) => (
+				{panelCategories.map((category, index) => (
 					<HStack
 						key={category.id}
 						justify='space-between'

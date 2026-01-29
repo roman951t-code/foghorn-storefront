@@ -84,7 +84,12 @@ export default function CategoryCard({
 				src={imageUrl}
 				alt={title}
 				loading='lazy'
-				style={{ maxHeight: '200px', objectFit: 'cover', marginTop: '28px' }}
+				style={{
+					maxHeight: '200px',
+					objectFit: 'cover',
+					marginTop: '28px',
+					border: '0.5px solid var(--chakra-colors-border-light)',
+				}}
 			/>
 		</Card.Root>
 	);

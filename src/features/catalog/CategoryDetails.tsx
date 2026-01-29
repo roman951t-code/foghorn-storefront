@@ -99,7 +99,16 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				>
 					{category.name}
 				</Heading>
-				<Box position='relative' w='full' aspectRatio='1' mt={4} overflow='hidden' rounded='sm'>
+				<Box
+					position='relative'
+					w='full'
+					aspectRatio='1'
+					mt={4}
+					overflow='hidden'
+					rounded='sm'
+					border='0.5px solid'
+					borderColor='border.light'
+				>
 					<Image
 						key={categoryBg}
 						src={categoryBg}

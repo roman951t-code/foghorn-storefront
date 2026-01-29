@@ -102,7 +102,11 @@ export function OrderAccordionContent({ order }: Props) {
 											height={110}
 											src={previewImage}
 											alt={item.product.name}
-											style={{ objectFit: 'contain', borderRadius: '6px' }}
+											style={{
+												objectFit: 'contain',
+												borderRadius: '6px',
+												border: '0.5px solid var(--chakra-colors-border-light)',
+											}}
 										/>
 									</LocaleNavLink>
 
@@ -122,6 +126,11 @@ export function OrderAccordionContent({ order }: Props) {
 												{item.product.name}
 											</LocaleNavLink>
 										</Card.Title>
+										{item.variantLabel && (
+											<Text color='main.disabled' fontSize='sm' mt='-2'>
+												{item.variantLabel}
+											</Text>
+										)}
 										<Text
 											color='main'
 											fontSize='md'

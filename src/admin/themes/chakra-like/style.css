@@ -72,6 +72,34 @@ body,
 	height: 16px;
 }
 
+/* Storefront-like link styling across AdminJS (including table links). */
+[data-css='app-content'] a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+		.adminjs_DropDownItem
+	) {
+	color: #0f172a;
+	font-weight: 500;
+	text-decoration-line: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 4px;
+	text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+	transition: color 0.15s ease-in-out, text-decoration-color 0.15s ease-in-out;
+}
+
+[data-css='app-content'] a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+		.adminjs_DropDownItem
+	):hover {
+	color: #3e3c78;
+	text-decoration-color: color-mix(in srgb, #3e3c78 55%, transparent);
+}
+
+[data-css='app-content'] a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+		.adminjs_DropDownItem
+	):focus-visible {
+	outline: 2px solid color-mix(in srgb, #3e3c78 35%, transparent);
+	outline-offset: 2px;
+	border-radius: 6px;
+}
+
 @supports selector(:has(*)) {
 	[data-css='app-content']
 		a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
@@ -79,27 +107,22 @@ body,
 		):not(:has(.adminjs_Button)):not(:has(.adminjs_ButtonGroupItem)):not(
 			:is(table.adminjs_Table *)
 		) {
-		color: #1f2937;
-		font-weight: 500;
-		text-decoration: none;
-		border-bottom: 1px solid rgba(15, 23, 42, 0.22);
-		padding-bottom: 1px;
-		transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+		/* Covered by the non-:has selector above (kept for older theme consistency). */
+		color: #0f172a;
 	}
 
 	[data-css='app-content']
 		a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
 			.adminjs_DropDownItem
 		):not(:has(.adminjs_Button)):not(:has(.adminjs_ButtonGroupItem)):hover {
-		color: #0f172a;
-		border-color: rgba(15, 23, 42, 0.8);
+		color: #3e3c78;
 	}
 
 	[data-css='app-content']
 		a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
 			.adminjs_DropDownItem
 		):not(:has(.adminjs_Button)):not(:has(.adminjs_ButtonGroupItem)):focus-visible {
-		outline: 2px solid rgba(15, 23, 42, 0.28);
+		outline: 2px solid color-mix(in srgb, #3e3c78 35%, transparent);
 		outline-offset: 2px;
 		border-radius: 6px;
 	}

@@ -28,6 +28,21 @@ export async function getCartItems(userId: string) {
 								discountEndAt: true,
 							},
 						},
+						variant: {
+							select: {
+								id: true,
+								sku: true,
+								price: true,
+								stock: true,
+								attributes: {
+									select: {
+										attribute: { select: { name: true, unit: true } },
+										value: true,
+									},
+									orderBy: { attribute: { name: 'asc' } },
+								},
+							},
+						},
 					},
 				},
 			},
@@ -35,20 +50,44 @@ export async function getCartItems(userId: string) {
 
 		const reshapedItems =
 			cart?.items.map((item) => {
-				const basePrice = item.product.basePrice?.toNumber?.() ?? 0;
-				const discountPriceRaw = item.product.discountPrice?.toNumber?.() ?? null;
-				const discountPrice = getEffectiveDiscountPrice(
-					basePrice,
-					discountPriceRaw,
+				const productBasePrice = item.product.basePrice?.toNumber?.() ?? 0;
+				const productDiscountPriceRaw = item.product.discountPrice?.toNumber?.() ?? null;
+				const effectiveProductDiscountPrice = getEffectiveDiscountPrice(
+					productBasePrice,
+					productDiscountPriceRaw,
 					item.product.discountStartAt ?? null,
 					item.product.discountEndAt ?? null
 				);
+				const discountAmount =
+					effectiveProductDiscountPrice != null
+						? Math.max(0, productBasePrice - effectiveProductDiscountPrice)
+						: 0;
+
+				const variantBasePrice = item.variant?.price?.toNumber?.() ?? productBasePrice;
+				const variantDiscountPrice =
+					discountAmount > 0 ? Math.max(0, variantBasePrice - discountAmount) : null;
+
+				const variantLabel =
+					item.variant?.attributes?.length
+						? item.variant.attributes
+								.map((a) =>
+									[a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' ')
+								)
+								.join(' / ')
+						: null;
 
 				return {
-					...item.product,
+					lineId: item.id,
+					productId: item.product.id,
+					variantId: item.variant?.id ?? item.variantId ?? null,
+					sku: item.variant?.sku ?? null,
+					variantLabel,
 					quantity: item.quantity,
-					basePrice,
-					discountPrice,
+					basePrice: variantBasePrice,
+					discountPrice: variantDiscountPrice,
+					name: item.product.name,
+					fullSlug: item.product.fullSlug,
+					imageUrl: item.product.imageUrl,
 				};
 			}) ?? [];
 

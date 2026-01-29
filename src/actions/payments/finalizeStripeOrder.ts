@@ -11,6 +11,7 @@ import { stripe } from '@/lib/stripe';
 import { env } from '@/config/env';
 import { normalizeOrder } from '../orderUtils';
 import { isProductPublished } from '@/utils/publishSchedule';
+import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
@@ -19,7 +20,7 @@ type Result =
 	| { success: true; order?: UserOrder }
 	| { success: false; message: string };
 
-type OrderItemPayload = { productId: string; quantity: number };
+type OrderItemPayload = { productId: string; variantId: string | null; quantity: number };
 const MAX_ITEM_QUANTITY = 99;
 
 export async function finalizeStripeOrder(sessionId?: string | null): Promise<Result> {
@@ -38,6 +39,19 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 			items: {
 				include: {
 					product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
+					variant: {
+						select: {
+							id: true,
+							sku: true,
+							attributes: {
+								select: {
+									attribute: { select: { name: true, unit: true } },
+									value: true,
+								},
+								orderBy: { attribute: { name: 'asc' } },
+							},
+						},
+					},
 				},
 			},
 		},
@@ -74,6 +88,7 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 			itemsPayload = parsed
 				.map((item) => ({
 					productId: String(item?.productId ?? '').trim(),
+					variantId: item?.variantId ? String(item?.variantId).trim() : null,
 					quantity: Math.max(1, Math.floor(item?.quantity ?? 1)),
 				}))
 				.filter((item) => item.productId);
@@ -96,6 +111,8 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 			imageUrl: true,
 			basePrice: true,
 			discountPrice: true,
+			discountStartAt: true,
+			discountEndAt: true,
 			stock: true,
 			inStock: true,
 			status: true,
@@ -105,6 +122,32 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 	});
 
 	const productMap = new Map(products.map((p) => [p.id, p]));
+
+	const uniqueVariantIds = Array.from(
+		new Set(itemsPayload.map((i) => i.variantId).filter((v): v is string => !!v))
+	);
+	const variants = uniqueVariantIds.length
+		? await prisma.productVariant.findMany({
+				where: { id: { in: uniqueVariantIds } },
+				select: { id: true, productId: true, sku: true, price: true, stock: true },
+			})
+		: [];
+	const variantById = new Map(variants.map((v) => [v.id, v]));
+
+	const productsNeedingDefaultVariant = itemsPayload
+		.filter((i) => !i.variantId)
+		.map((i) => i.productId);
+	const defaultVariants = productsNeedingDefaultVariant.length
+		? await prisma.productVariant.findMany({
+				where: { productId: { in: productsNeedingDefaultVariant }, stock: { gt: 0 } },
+				select: { id: true, productId: true, sku: true, price: true, stock: true },
+				orderBy: [{ productId: 'asc' }, { price: 'asc' }, { createdAt: 'asc' }],
+			})
+		: [];
+	const defaultVariantByProduct = new Map<string, (typeof defaultVariants)[number]>();
+	for (const v of defaultVariants) {
+		if (!defaultVariantByProduct.has(v.productId)) defaultVariantByProduct.set(v.productId, v);
+	}
 
 	const toCurrency = (value: number) => Math.round(value * 100) / 100;
 	const unavailable: string[] = [];
@@ -120,23 +163,52 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 				return null;
 			}
 
+			const variant =
+				(item.variantId ? variantById.get(item.variantId) ?? null : null) ??
+				(defaultVariantByProduct.get(item.productId) ?? null);
+			if (!variant || variant.productId !== item.productId) {
+				unavailable.push(item.productId);
+				return null;
+			}
+
 			const requestedQty = Math.max(1, Math.min(MAX_ITEM_QUANTITY, item.quantity));
-			const availableStock = Math.max(0, product.stock ?? 0);
+			const availableStock = Math.max(0, variant.stock ?? 0);
 			if (!availableStock || requestedQty > availableStock) {
 				unavailable.push(item.productId);
 				return null;
 			}
 
-			const unitPrice = toCurrency(Number(product.discountPrice ?? product.basePrice ?? 0));
+			const productBase = product.basePrice?.toNumber?.() ?? 0;
+			const effectiveProductDiscount = getEffectiveDiscountPrice(
+				productBase,
+				product.discountPrice?.toNumber?.() ?? null,
+				product.discountStartAt ?? null,
+				product.discountEndAt ?? null
+			);
+			const discountAmount =
+				effectiveProductDiscount != null ? Math.max(0, productBase - effectiveProductDiscount) : 0;
+
+			const variantBase = variant.price?.toNumber?.() ?? 0;
+			const effectiveVariantPrice =
+				discountAmount > 0 ? Math.max(0, variantBase - discountAmount) : variantBase;
+
+			const unitPrice = toCurrency(Number(effectiveVariantPrice));
 			const price = toCurrency(unitPrice * requestedQty);
 			return {
 				productId: item.productId,
+				variantId: variant.id,
 				quantity: requestedQty,
 				unitPrice,
 				price,
 			};
 		})
-		.filter(Boolean) as { productId: string; quantity: number; unitPrice: number; price: number }[];
+		.filter(Boolean) as {
+		productId: string;
+		variantId: string;
+		quantity: number;
+		unitPrice: number;
+		price: number;
+	}[];
 
 	if (!orderItems.length) {
 		return { success: false, message: 'invalid_items' };
@@ -176,20 +248,26 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 	try {
 		order = await prisma.$transaction(async (tx) => {
 			for (const item of orderItems) {
-				const product = productMap.get(item.productId);
-				if (!product) throw new Error('missing-product');
-
-				const updateResult = await tx.product.updateMany({
-					where: { id: item.productId, stock: { gte: item.quantity } },
-					data: {
-						stock: { decrement: item.quantity },
-						inStock: item.quantity < (product.stock ?? 0),
-					},
+				const updateResult = await tx.productVariant.updateMany({
+					where: { id: item.variantId, productId: item.productId, stock: { gte: item.quantity } },
+					data: { stock: { decrement: item.quantity } },
 				});
 
 				if (updateResult.count === 0) {
 					throw new Error('stock-conflict');
 				}
+			}
+
+			for (const productId of uniqueIds) {
+				const remaining = await tx.productVariant.findMany({
+					where: { productId, stock: { gt: 0 } },
+					select: { stock: true },
+				});
+				const totalStock = remaining.reduce((sum, v) => sum + (v.stock ?? 0), 0);
+				await tx.product.update({
+					where: { id: productId },
+					data: { stock: totalStock, inStock: totalStock > 0 },
+				});
 			}
 
 			const created = await tx.order.create({
@@ -208,6 +286,7 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 					items: {
 						create: orderItems.map((item) => ({
 							productId: item.productId,
+							variantId: item.variantId,
 							quantity: item.quantity,
 							unitPrice: new Prisma.Decimal(item.unitPrice.toFixed(2)),
 							price: new Prisma.Decimal(item.price.toFixed(2)),
@@ -218,6 +297,19 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 					items: {
 						include: {
 							product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
+							variant: {
+								select: {
+									id: true,
+									sku: true,
+									attributes: {
+										select: {
+											attribute: { select: { name: true, unit: true } },
+											value: true,
+										},
+										orderBy: { attribute: { name: 'asc' } },
+									},
+								},
+							},
 						},
 					},
 				},

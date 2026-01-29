@@ -36,7 +36,15 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 				const isFirst = i === 0;
 				return (
 					<SwiperSlide key={i}>
-						<Box as='div' _focus={{ outline: 'none' }}>
+						<Box
+							as='div'
+							_focus={{ outline: 'none' }}
+							border='0.5px solid'
+							borderColor='border.light'
+							borderRadius='6px'
+							overflow='hidden'
+							display='inline-block'
+						>
 							<Image
 								loading={isFirst ? undefined : 'lazy'}
 								src={src}
@@ -46,7 +54,6 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 								priority={isFirst}
 								fetchPriority={isFirst ? 'high' : undefined}
 								style={{
-									borderRadius: '6px',
 									width: '150px',
 									height: '150px',
 									objectFit: 'cover',

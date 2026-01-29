@@ -85,7 +85,7 @@ async function LayoutProviders({
 
 	const { success, ...restCartData } = cartResponse;
 	const cartProductIds = success
-		? { success: true, productIds: restCartData.items?.map((item) => item.id) ?? [] }
+		? { success: true, productIds: restCartData.items?.map((item) => item.productId) ?? [] }
 		: { success: false, productIds: [] };
 	const wishListIds = { success: true, productIds: wishListData?.products?.map((p) => p.id) ?? [] };
 

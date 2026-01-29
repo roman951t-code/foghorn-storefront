@@ -27,55 +27,59 @@ const fallbackCategoryImages = [
 ];
 
 const mainCategories = [
-	'Phones',
+	'Smartphones',
 	'Tablets',
-	'Laptops',
-	'Accessories',
-	'Smartwatches',
+	'Laptops & PCs',
+	'TVs',
+	'Cameras',
 	'Audio',
 	'Gaming',
-	'Monitors',
+	'Accessories',
 ];
 
 const subcategoriesMap: Record<string, string[]> = {
-	Phones: ['Smartphones', 'Feature Phones'],
+	Smartphones: ['Android Phones', 'iPhones'],
 	Tablets: ['Android Tablets', 'iPads'],
-	Laptops: ['Ultrabooks', 'Gaming Laptops'],
-	Accessories: ['Chargers', 'Cables'],
-	Smartwatches: ['Fitness Trackers', 'Wear OS Watches'],
-	Audio: ['Headphones', 'Speakers'],
-	Gaming: ['Consoles', 'Controllers'],
-	Monitors: ['4K Monitors', 'Gaming Monitors'],
+	'Laptops & PCs': ['Ultrabooks', 'Gaming Laptops', 'Desktops'],
+	TVs: ['4K TVs', 'Smart TVs'],
+	Cameras: ['Mirrorless Cameras', 'Action Cameras'],
+	Audio: ['Headphones', 'Speakers', 'Soundbars'],
+	Gaming: ['Consoles', 'Controllers', 'VR Headsets'],
+	Accessories: ['Chargers', 'Cables', 'Cases'],
 };
 
 const categoryImageKeywords: Record<string, string> = {
-	Phones: 'smartphone',
+	Smartphones: 'smartphone',
 	Tablets: 'tablet',
-	Laptops: 'laptop',
-	Accessories: 'tech-accessories',
-	Smartwatches: 'smartwatch',
+	'Laptops & PCs': 'laptop',
+	TVs: 'television',
+	Cameras: 'camera',
 	Audio: 'headphones',
 	Gaming: 'game-console',
-	Monitors: 'computer-monitor',
+	Accessories: 'tech-accessories',
 };
 
 const subcategoryImageKeywords: Record<string, string> = {
-	Smartphones: 'smartphone',
-	'Feature Phones': 'basic-phone',
+	'Android Phones': 'android-phone',
+	iPhones: 'iphone',
 	'Android Tablets': 'android-tablet',
 	iPads: 'ipad-tablet',
 	Ultrabooks: 'ultrabook',
 	'Gaming Laptops': 'gaming-laptop',
+	Desktops: 'desktop-computer',
+	'4K TVs': '4k-tv',
+	'Smart TVs': 'smart-tv',
+	'Mirrorless Cameras': 'mirrorless-camera',
+	'Action Cameras': 'action-camera',
 	Chargers: 'device-charger',
 	Cables: 'charging-cable',
-	'Fitness Trackers': 'fitness-tracker',
-	'Wear OS Watches': 'smartwatch',
 	Headphones: 'headphones',
 	Speakers: 'bluetooth-speaker',
+	Soundbars: 'soundbar',
 	Consoles: 'game-console',
 	Controllers: 'game-controller',
-	'4K Monitors': '4k-monitor',
-	'Gaming Monitors': 'gaming-monitor',
+	'VR Headsets': 'vr-headset',
+	Cases: 'phone-case',
 };
 
 function stablePick<T>(items: T[], seed: string) {
@@ -99,6 +103,90 @@ const getSubcategoryImage = (sub: string, seed: string) => {
 	return buildKeywordImage(keyword, 900, 900, seed) || stablePick(fallbackProductImages, seed);
 };
 
+const VARIANT_OPTIONS = {
+	colors: ['Black', 'White', 'Blue', 'Green', 'Silver'],
+	storage: ['128', '256', '512'],
+	ram: ['8', '16', '32'],
+	diagonal: ['27', '32', '55', '65'],
+	refresh: ['60', '120', '144'],
+};
+
+type VariantTemplate = {
+	attributes: Record<string, string>;
+	priceDelta: number;
+};
+
+const buildVariantTemplates = (category: string): VariantTemplate[] => {
+	const pick = (values: string[], count: number) =>
+		faker.helpers.arrayElements(values, Math.min(count, values.length));
+
+	const colors = pick(VARIANT_OPTIONS.colors, 2);
+	const storage = pick(VARIANT_OPTIONS.storage, 2);
+	const ram = pick(VARIANT_OPTIONS.ram, 2);
+	const diagonal = pick(VARIANT_OPTIONS.diagonal, 2);
+	const refresh = pick(VARIANT_OPTIONS.refresh, 2);
+
+	const combos: VariantTemplate[] = [];
+	const addCombo = (attributes: Record<string, string>) => {
+		combos.push({
+			attributes,
+			priceDelta: faker.number.int({ min: 0, max: 200 }),
+		});
+	};
+
+	switch (category) {
+		case 'Smartphones':
+		case 'Tablets':
+			for (const color of colors) {
+				for (const size of storage) {
+					addCombo({ Колір: color, "Памʼять": size });
+				}
+			}
+			break;
+		case 'Laptops & PCs':
+			for (const ramSize of ram) {
+				for (const size of storage) {
+					addCombo({ ОЗП: ramSize, "Памʼять": size });
+				}
+			}
+			break;
+		case 'TVs':
+			for (const size of diagonal) {
+				for (const hz of refresh) {
+					addCombo({ Діагональ: size, Частота: hz });
+				}
+			}
+			break;
+		case 'Cameras':
+			for (const color of colors) {
+				for (const size of storage) {
+					addCombo({ Колір: color, "Памʼять": size });
+				}
+			}
+			break;
+		case 'Audio':
+		case 'Accessories':
+			for (const color of colors) {
+				addCombo({ Колір: color });
+			}
+			break;
+		case 'Gaming':
+			for (const size of storage) {
+				addCombo({ "Памʼять": size });
+			}
+			break;
+		default:
+			for (const color of colors) {
+				addCombo({ Колір: color });
+			}
+	}
+
+	const minCount = 2;
+	const maxCount = Math.min(4, combos.length);
+	const takeCount = faker.number.int({ min: minCount, max: Math.max(minCount, maxCount) });
+	return faker.helpers.shuffle(combos).slice(0, takeCount);
+};
+
 function needsImageReplacement(url?: string | null) {
 	if (!url) return true;
 	try {
@@ -112,19 +200,31 @@ function needsImageReplacement(url?: string | null) {
 async function main() {
 	console.log('🌱 Seeding started...');
 
-	// Brand
-	const brand = await prisma.brand.upsert({
-		where: { slug: 'techbrand' },
-		update: {},
-		create: {
-			name: 'TechBrand',
-			slug: 'techbrand',
-			logoUrl: 'https://picsum.photos/seed/techbrand-logo/160/160',
-		},
-	});
+	// Brands
+	const brandNames = [
+		'TechBrand',
+		'NovaGear',
+		'Pulse',
+		'Auron',
+		'Skyline',
+		'Zenbit',
+		'Voltix',
+		'Axis',
+	];
+	const brands = await Promise.all(
+		brandNames.map(async (name) => {
+			const slug = createSlug(name);
+			const logoUrl = buildKeywordImage('brand-logo', 160, 160, slug);
+			return prisma.brand.upsert({
+				where: { slug },
+				update: { name, logoUrl },
+				create: { name, slug, logoUrl },
+			});
+		})
+	);
 
 	// Attributes
-	const attributeNames = [
+	const productAttributeNames = [
 		{ name: 'Вага', unit: 'г' },
 		{ name: 'Розмір', unit: 'мм' },
 		{ name: 'Модель', unit: '' },
@@ -132,15 +232,28 @@ async function main() {
 		{ name: 'Батарея', unit: 'мА·г' },
 	];
 
-	const attributes = await Promise.all(
-		attributeNames.map((attr) =>
-			prisma.productAttribute.upsert({
-				where: { name: attr.name },
-				update: {},
-				create: { name: attr.name, unit: attr.unit },
-			})
-		)
-	);
+	const variantAttributeNames = [
+		{ name: 'Колір', unit: '' },
+		{ name: 'Памʼять', unit: 'ГБ' },
+		{ name: 'ОЗП', unit: 'ГБ' },
+		{ name: 'Діагональ', unit: '"' },
+		{ name: 'Частота', unit: 'Гц' },
+	];
+
+	const attributeByName = new Map<string, { id: string; name: string; unit: string | null }>();
+	const allAttributeNames = [...productAttributeNames, ...variantAttributeNames];
+	for (const attr of allAttributeNames) {
+		const record = await prisma.productAttribute.upsert({
+			where: { name: attr.name },
+			update: { unit: attr.unit },
+			create: { name: attr.name, unit: attr.unit },
+		});
+		attributeByName.set(record.name, record);
+	}
+
+	const productAttributes = productAttributeNames
+		.map((attr) => attributeByName.get(attr.name))
+		.filter(Boolean) as { id: string; name: string; unit: string | null }[];
 
 	const TAGS = ['popular', 'new', 'discount', 'promotional', 'viewed'];
 	const allProducts: SeedProduct[] = [];
@@ -184,6 +297,7 @@ async function main() {
 				const fullSlug = `${parentSlug}/${subSlug}/${productSlug}`;
 				const imageUrl = getSubcategoryImage(sub, productSlug);
 
+				const pickedBrand = stablePick(brands, productSlug);
 				const product = await prisma.product.create({
 					data: {
 						name,
@@ -201,11 +315,11 @@ async function main() {
 						averageRating: 0,
 						reviewCount: 0,
 						productCode: faker.string.numeric(6),
-						brandId: brand.id,
+						brandId: pickedBrand.id,
 						categoryId: subcategory.id,
 						tags: [],
 						attributes: {
-							create: attributes.map((attr) => ({
+							create: productAttributes.map((attr) => ({
 								attributeId: attr.id,
 								value:
 									faker.commerce.productAdjective() +
@@ -215,6 +329,29 @@ async function main() {
 						},
 					},
 				});
+
+				const variantTemplates = buildVariantTemplates(main);
+				for (const [index, variant] of variantTemplates.entries()) {
+					const variantAttributes = Object.entries(variant.attributes)
+						.map(([name, value]) => {
+							const attr = attributeByName.get(name);
+							if (!attr) return null;
+							return { attributeId: attr.id, value: String(value) };
+						})
+						.filter(Boolean) as { attributeId: string; value: string }[];
+
+					if (variantAttributes.length === 0) continue;
+
+					await prisma.productVariant.create({
+						data: {
+							productId: product.id,
+							sku: `${product.productCode}-${index + 1}`,
+							price: price.add(new Decimal(variant.priceDelta)),
+							stock: faker.number.int({ min: 1, max: Math.max(2, Math.floor(stock / 2)) }),
+							attributes: { create: variantAttributes },
+						},
+					});
+				}
 
 				allProducts.push(product);
 			}

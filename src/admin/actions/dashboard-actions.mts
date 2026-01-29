@@ -54,6 +54,7 @@ export const dashboardMetrics: PageHandler = async () => {
 		prisma.order.groupBy({
 			by: ['status'],
 			where: { createdAt: { gte: last30DaysStart } },
+			orderBy: { status: 'asc' },
 			_count: { _all: true },
 		}),
 		prisma.orderItem.groupBy({
@@ -77,23 +78,23 @@ export const dashboardMetrics: PageHandler = async () => {
 	const productMap = new Map(products.map((product) => [product.id, product.name]));
 
 	const statusMap = new Map(
-		statusCounts.map((item) => [item.status, Number(item._count._all ?? 0)])
+		statusCounts.map((item) => [item.status, Number((item as any)?._count?._all ?? 0)])
 	);
 
 	return {
 		payload: {
 			sales: {
-				today: roundCurrency(Number(salesTodayAgg._sum.total ?? 0)),
-				last7Days: roundCurrency(Number(sales7DaysAgg._sum.total ?? 0)),
-				last30Days: roundCurrency(Number(sales30DaysAgg._sum.total ?? 0)),
+				today: roundCurrency(Number(salesTodayAgg._sum?.total ?? 0)),
+				last7Days: roundCurrency(Number(sales7DaysAgg._sum?.total ?? 0)),
+				last30Days: roundCurrency(Number(sales30DaysAgg._sum?.total ?? 0)),
 			},
 			newUsers: {
 				last7Days: Number(newUsers7Days ?? 0),
 			},
 			refunds: {
 				last30Days: {
-					count: Number(refunds30DaysAgg._count._all ?? 0),
-					amount: roundCurrency(Number(refunds30DaysAgg._sum.refundAmount ?? 0)),
+					count: Number(refunds30DaysAgg._count?._all ?? 0),
+					amount: roundCurrency(Number(refunds30DaysAgg._sum?.refundAmount ?? 0)),
 				},
 			},
 			orderStatusCounts: orderStatuses.map((status) => ({
@@ -103,8 +104,8 @@ export const dashboardMetrics: PageHandler = async () => {
 			topProducts: topProductsAgg.map((item) => ({
 				productId: item.productId,
 				name: productMap.get(item.productId) ?? 'Unknown product',
-				quantity: Number(item._sum.quantity ?? 0),
-				revenue: roundCurrency(Number(item._sum.price ?? 0)),
+				quantity: Number(item._sum?.quantity ?? 0),
+				revenue: roundCurrency(Number(item._sum?.price ?? 0)),
 			})),
 		},
 	};

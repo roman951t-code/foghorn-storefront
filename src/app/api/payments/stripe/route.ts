@@ -7,9 +7,10 @@ import { auth } from '@/lib/auth';
 import { isSameOriginRequest } from '@/lib/csrf';
 import { env } from '@/config/env';
 import { isProductPublished } from '@/utils/publishSchedule';
+import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import type Stripe from 'stripe';
 
-type LineItemPayload = { productId: string; quantity: number };
+type LineItemPayload = { productId: string; variantId: string | null; quantity: number };
 
 const currency = env.STRIPE_CURRENCY ?? 'usd';
 
@@ -38,6 +39,7 @@ export async function POST(req: NextRequest) {
 			.array(
 				z.object({
 					productId: z.string().min(1, 'productId_required'),
+					variantId: z.string().nullable(),
 					quantity: z.number().int().positive().max(99, 'quantity_too_high'),
 				})
 			)
@@ -80,6 +82,7 @@ export async function POST(req: NextRequest) {
 
 		const items: LineItemPayload[] = parsed.data.items.map((item) => ({
 			productId: item.productId.trim(),
+			variantId: item.variantId ? item.variantId.trim() : null,
 			quantity: Math.max(1, Math.floor(item.quantity)),
 		}));
 
@@ -91,6 +94,8 @@ export async function POST(req: NextRequest) {
 				name: true,
 				basePrice: true,
 				discountPrice: true,
+				discountStartAt: true,
+				discountEndAt: true,
 				stock: true,
 				inStock: true,
 				status: true,
@@ -99,6 +104,58 @@ export async function POST(req: NextRequest) {
 			},
 		});
 		const productMap = new Map(products.map((p) => [p.id, p]));
+
+		const uniqueVariantIds = Array.from(
+			new Set(items.map((i) => i.variantId).filter((v): v is string => !!v))
+		);
+		const variants = uniqueVariantIds.length
+			? await prisma.productVariant.findMany({
+					where: { id: { in: uniqueVariantIds } },
+					select: {
+						id: true,
+						productId: true,
+						sku: true,
+						price: true,
+						stock: true,
+						attributes: {
+							select: {
+								attribute: { select: { name: true, unit: true } },
+								value: true,
+							},
+							orderBy: { attribute: { name: 'asc' } },
+						},
+					},
+				})
+			: [];
+		const variantById = new Map(variants.map((v) => [v.id, v]));
+
+		const productsNeedingDefaultVariant = items
+			.filter((i) => !i.variantId)
+			.map((i) => i.productId);
+		const defaultVariants = productsNeedingDefaultVariant.length
+			? await prisma.productVariant.findMany({
+					where: { productId: { in: productsNeedingDefaultVariant }, stock: { gt: 0 } },
+					select: {
+						id: true,
+						productId: true,
+						sku: true,
+						price: true,
+						stock: true,
+						attributes: {
+							select: {
+								attribute: { select: { name: true, unit: true } },
+								value: true,
+							},
+							orderBy: { attribute: { name: 'asc' } },
+						},
+					},
+					orderBy: [{ productId: 'asc' }, { price: 'asc' }, { createdAt: 'asc' }],
+				})
+			: [];
+		const defaultVariantByProduct = new Map<string, (typeof defaultVariants)[number]>();
+		for (const v of defaultVariants) {
+			if (!defaultVariantByProduct.has(v.productId)) defaultVariantByProduct.set(v.productId, v);
+		}
 
 		const lineItems = items
 			.map((item) => {
@@ -109,17 +166,42 @@ export async function POST(req: NextRequest) {
 					!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
 				)
 					return null;
-				const availableStock = product.stock ?? 0;
+
+				const variant =
+					(item.variantId ? variantById.get(item.variantId) ?? null : null) ??
+					(defaultVariantByProduct.get(item.productId) ?? null);
+				if (!variant || variant.productId !== item.productId) return null;
+
+				const availableStock = variant.stock ?? 0;
 				if (item.quantity > availableStock) return null;
 				const quantity = Math.max(1, Math.floor(item.quantity ?? 1));
-				const unitPrice = Number(product.discountPrice ?? product.basePrice ?? 0);
-				const unitAmount = Math.max(1, Math.round(unitPrice * 100));
+
+				const productBase = product.basePrice?.toNumber?.() ?? 0;
+				const effectiveProductDiscount = getEffectiveDiscountPrice(
+					productBase,
+					product.discountPrice?.toNumber?.() ?? null,
+					product.discountStartAt ?? null,
+					product.discountEndAt ?? null
+				);
+				const discountAmount =
+					effectiveProductDiscount != null ? Math.max(0, productBase - effectiveProductDiscount) : 0;
+
+				const variantBase = variant.price?.toNumber?.() ?? 0;
+				const effectiveVariantPrice = discountAmount > 0 ? Math.max(0, variantBase - discountAmount) : variantBase;
+				const unitAmount = Math.max(1, Math.round(effectiveVariantPrice * 100));
+
+				const variantLabel =
+					variant.attributes?.length
+						? variant.attributes
+								.map((a) => [a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' '))
+								.join(' / ')
+						: null;
 
 				return {
 					quantity,
 					price_data: {
 						currency,
-						product_data: { name: product.name },
+						product_data: { name: variantLabel ? `${product.name} (${variantLabel})` : product.name },
 						unit_amount: unitAmount,
 					},
 				};

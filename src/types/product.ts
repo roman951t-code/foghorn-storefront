@@ -25,6 +25,13 @@ export type SubcategoryProduct = {
 	fullSlug: string;
 	averageRating: number;
 	reviewCount: number;
+	defaultVariant: {
+		id: string;
+		sku: string;
+		price: number;
+		stock: number;
+		label: string;
+	};
 }>;
 
 export type SearchProductItem = {
@@ -71,8 +78,14 @@ export type Review = {
 	user: { name: string; lastName: string | null; id: string };
 };
 
+export type FilterValue = {
+	value: string;
+	label: string;
+};
+
 export type Filter = {
 	id: string;
+	key: string;
 	name: string;
-	values: string[];
+	values: FilterValue[];
 };

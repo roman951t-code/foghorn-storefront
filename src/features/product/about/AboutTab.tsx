@@ -1,5 +1,6 @@
 import ProductThumbsSlider from '@/features/product/slider/ProductThumbsSlider';
 import { useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
 import {
 	Heading,
 	Box,
@@ -24,6 +25,7 @@ import AddToCartButton from './AddToCartButton';
 import { Product } from '@/types/product';
 import { buildProductImages } from '@/utils/productImages';
 import ProductDetails, { DetailOption } from './ProductDetails';
+import { VariantSelector } from './VariantSelector';
 
 const ShareProduct = dynamic(() => import('./ShareProduct'), { ssr: false });
 
@@ -68,7 +70,28 @@ export default function AboutTab({
 		cartUpdateFailed: cartT('cartUpdateFailed'),
 	};
 
-	const discount = product.discountPrice ? product.basePrice - product.discountPrice : 0;
+	const variants = product.variants ?? [];
+	const initialVariantId =
+		variants.find((v) => v.stock > 0)?.id ?? variants[0]?.id ?? null;
+	const [selectedVariantId, setSelectedVariantId] = useState<string | null>(initialVariantId);
+
+	const selectedVariant = useMemo(() => {
+		if (!variants.length) return null;
+		return (
+			(selectedVariantId ? variants.find((v) => v.id === selectedVariantId) : null) ??
+			variants.find((v) => v.stock > 0) ??
+			variants[0]
+		);
+	}, [selectedVariantId, variants]);
+
+	const selectedInStock = selectedVariant ? selectedVariant.stock > 0 : product.inStock;
+
+	const unitBasePrice = selectedVariant?.price ?? product.basePrice;
+	const discountAmount = product.discountPrice ? Math.max(0, product.basePrice - product.discountPrice) : 0;
+	const unitDiscountPrice = discountAmount > 0 ? Math.max(0, unitBasePrice - discountAmount) : null;
+	const unitEffectivePrice = unitDiscountPrice ?? unitBasePrice;
+	const discount = unitDiscountPrice != null ? unitBasePrice - unitDiscountPrice : 0;
+
 	const galleryImages =
 		product.images && product.images.length > 0
 			? product.images
@@ -117,8 +140,8 @@ export default function AboutTab({
 					>
 						<HStack>
 							<Status.Root size={'lg'} mr='4'>
-								<Status.Indicator colorPalette={product.inStock ? 'green' : 'red'} />
-								{product.inStock ? prodT('productIsPresent') : prodT('productIsOutOfStock')}
+								<Status.Indicator colorPalette={selectedInStock ? 'green' : 'red'} />
+								{selectedInStock ? prodT('productIsPresent') : prodT('productIsOutOfStock')}
 							</Status.Root>
 							<ShareProduct i18nData={shareI18nData} />
 							<AddToFavourite
@@ -142,9 +165,20 @@ export default function AboutTab({
 							</Tag.Label>
 						</Tag.Root>
 					</Flex>
+					{variants.length > 0 && (
+						<VariantSelector
+							variants={variants}
+							value={selectedVariant?.id ?? null}
+							onChange={(id) => setSelectedVariantId(id)}
+						/>
+					)}
 					<Flex flexWrap='wrap' alignItems='center' gap='4' my='3'>
-						{product.inStock ? (
-							<AddToCartButton i18nData={cartI18nData} product={product} />
+						{selectedInStock ? (
+							<AddToCartButton
+								i18nData={cartI18nData}
+								product={product}
+								variantId={selectedVariant?.id ?? null}
+							/>
 						) : (
 							<LocaleNavButton
 								href={`/products/${category}/${subcategory}?search=similar`}
@@ -158,11 +192,11 @@ export default function AboutTab({
 						)}
 
 						<Box as='span' fontSize='3xl' fontWeight='semibold'>
-							{product?.discountPrice ?? product.basePrice} ₴
+							{unitEffectivePrice} ₴
 							{discount > 0 && (
 								<Badge colorPalette='gray'>
 									<Box as='span' color='main' fontSize='sm' textDecoration='line-through'>
-										{parseInt(product.basePrice.toFixed(2))}₴
+										{parseInt(unitBasePrice.toFixed(2))}₴
 										<Badge
 											variant='solid'
 											fontWeight='semibold'

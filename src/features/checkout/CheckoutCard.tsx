@@ -36,7 +36,10 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 				<VStack mr='1'>
 					<LocaleNavLink href={productHref} display='inline-block' lineHeight='0'>
 						<Image
-							style={{ borderRadius: '6px' }}
+							style={{
+								borderRadius: '6px',
+								border: '0.5px solid var(--chakra-colors-border-light)',
+							}}
 							width={100}
 							height={100}
 							src={getImage(product.imageUrl)}
@@ -59,6 +62,11 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 							{product.name}
 						</LocaleNavLink>
 					</Card.Title>
+					{product.variantLabel && (
+						<Text color='main.disabled' fontSize='sm' mt='-2'>
+							{product.variantLabel}
+						</Text>
+					)}
 					<Text color='main' fontSize='xl'>
 						{price} ₴
 					</Text>
@@ -111,7 +119,12 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 								width={100}
 								height={100}
 								src={getImage(product.imageUrl)}
-								style={{ objectFit: 'contain', borderRadius: '6px', marginLeft: '4px' }}
+								style={{
+									objectFit: 'contain',
+									borderRadius: '6px',
+									marginLeft: '4px',
+									border: '0.5px solid var(--chakra-colors-border-light)',
+								}}
 								alt={product.name}
 							/>
 						</LocaleNavLink>
@@ -127,6 +140,11 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 									{product.name}
 								</LocaleNavLink>
 							</Card.Title>
+							{product.variantLabel && (
+								<Text color='main.disabled' fontSize='sm' mt='-2'>
+									{product.variantLabel}
+								</Text>
+							)}
 							<Text
 								color='main'
 								fontSize='xl'

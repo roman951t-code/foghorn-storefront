@@ -10,7 +10,9 @@ import { isProductPublished } from '@/utils/publishSchedule';
 
 const MAX_ITEM_QUANTITY = 99;
 
-export async function mergeCartData(localItems: { id: string; quantity: number }[]) {
+export async function mergeCartData(
+	localItems: { productId: string; variantId: string | null; quantity: number }[]
+) {
 	const cartT = await getTranslations('cart');
 
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -23,21 +25,33 @@ export async function mergeCartData(localItems: { id: string; quantity: number }
 	try {
 		const normalizedItems = localItems
 			.map((item) => ({
-				id: item.id?.trim?.(),
+				productId: item.productId?.trim?.(),
+				variantId: item.variantId ? String(item.variantId).trim() : null,
 				quantity: Math.max(1, Math.min(MAX_ITEM_QUANTITY, Math.floor(item.quantity || 1))),
 			}))
-			.filter((item): item is { id: string; quantity: number } => !!item.id);
+			.filter((item): item is { productId: string; variantId: string | null; quantity: number } => !!item.productId);
 
 		if (!normalizedItems.length) {
 			return { success: false, message: cartT('cartUpdateFailed') };
 		}
 
-		const productIds = Array.from(new Set(normalizedItems.map((item) => item.id)));
+		const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)));
 		const products = await prisma.product.findMany({
 			where: { id: { in: productIds } },
 			select: { id: true, stock: true, inStock: true, status: true, publishStartAt: true, publishEndAt: true },
 		});
 		const productMap = new Map(products.map((p) => [p.id, p]));
+
+		const variantIds = Array.from(
+			new Set(normalizedItems.map((i) => i.variantId).filter((v): v is string => !!v))
+		);
+		const variants = variantIds.length
+			? await prisma.productVariant.findMany({
+					where: { id: { in: variantIds } },
+					select: { id: true, productId: true, stock: true },
+				})
+			: [];
+		const variantById = new Map(variants.map((v) => [v.id, v]));
 
 		await prisma.$transaction(async (tx) => {
 			const cart = await tx.cart.upsert({
@@ -48,22 +62,34 @@ export async function mergeCartData(localItems: { id: string; quantity: number }
 			});
 
 			const existingByProduct = new Map(
-				cart.items.map((item) => [item.productId, { id: item.id, quantity: item.quantity }])
+				cart.items.map((ci) => [
+					`${ci.productId}:${ci.variantId ?? ''}`,
+					{ id: ci.id, quantity: ci.quantity },
+				])
 			);
 
 			for (const item of normalizedItems) {
-				const product = productMap.get(item.id);
+				const product = productMap.get(item.productId);
 				if (
 					!product ||
 					!product.inStock ||
-					!product.stock ||
 					!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
 				)
 					continue;
 
-				const existing = existingByProduct.get(item.id);
+				const availableStock = item.variantId
+					? (variantById.get(item.variantId)?.productId === item.productId
+							? variantById.get(item.variantId)?.stock ?? 0
+							: 0)
+					: product.stock ?? 0;
+				if (!availableStock) continue;
+
+				const existing = existingByProduct.get(`${item.productId}:${item.variantId ?? ''}`);
 				const currentQty = existing?.quantity ?? 0;
-				const nextQty = Math.min(MAX_ITEM_QUANTITY, Math.min(product.stock, currentQty + item.quantity));
+				const nextQty = Math.min(
+					MAX_ITEM_QUANTITY,
+					Math.min(availableStock, currentQty + item.quantity)
+				);
 				if (nextQty <= currentQty) continue;
 
 				if (existing) {
@@ -71,12 +97,18 @@ export async function mergeCartData(localItems: { id: string; quantity: number }
 						where: { id: existing.id },
 						data: { quantity: nextQty },
 					});
-					existingByProduct.set(item.id, { ...existing, quantity: nextQty });
+					existingByProduct.set(`${item.productId}:${item.variantId ?? ''}`, {
+						...existing,
+						quantity: nextQty,
+					});
 				} else {
 					const created = await tx.cartItem.create({
-						data: { cartId: cart.id, productId: item.id, quantity: nextQty },
+						data: { cartId: cart.id, productId: item.productId, variantId: item.variantId, quantity: nextQty },
 					});
-					existingByProduct.set(item.id, { id: created.id, quantity: nextQty });
+					existingByProduct.set(`${item.productId}:${item.variantId ?? ''}`, {
+						id: created.id,
+						quantity: nextQty,
+					});
 				}
 			}
 		});

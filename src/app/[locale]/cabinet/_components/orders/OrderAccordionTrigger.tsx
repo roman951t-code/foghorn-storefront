@@ -60,7 +60,11 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 								height={100}
 								src={previewImage}
 								alt={item.product.name}
-								style={{ objectFit: 'cover', borderRadius: '6px' }}
+								style={{
+									objectFit: 'cover',
+									borderRadius: '6px',
+									border: '0.5px solid var(--chakra-colors-border-light)',
+								}}
 							/>
 						);
 					})}

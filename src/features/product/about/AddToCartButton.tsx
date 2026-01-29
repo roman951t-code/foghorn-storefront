@@ -13,21 +13,24 @@ import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 interface AddToCartButtonProps {
 	i18nData: I18nData;
 	product: Product;
+	variantId?: string | null;
 }
 
-export default function AddToCartButton({ i18nData, product }: AddToCartButtonProps) {
+export default function AddToCartButton({ i18nData, product, variantId }: AddToCartButtonProps) {
 	const [isLoading, setIsLoading] = useState(false);
-	const { productIds, handleAddItem } = useCart();
+	const { cartData, handleAddItem } = useCart();
 
 	if (!product) return null;
 
-	const isInCart = productIds.includes(product?.id);
+	const isInCart = cartData.items.some(
+		(i) => i.productId === product.id && i.variantId === (variantId ?? null)
+	);
 
 	const handleAdd = async () => {
 		setIsLoading(true);
 
 		try {
-			const result = await handleAddItem(product);
+			const result = await handleAddItem(product, { variantId: variantId ?? null });
 
 			if (!result.success) {
 				showToaster('error', toasterMessages.cartUpdateFailed(i18nData.cartUpdateFailed));

@@ -17,7 +17,7 @@ interface Props {
 }
 
 export default function CartOrderCard({ product, i18nData, onNavigate }: Props) {
-	const { handleRemoveItem, handleUpdateQuantity } = useCart();
+	const { handleRemoveLine, handleUpdateQuantity } = useCart();
 
 	const discountAmount = product.discountPrice
 		? Number(product.basePrice) - Number(product.discountPrice)
@@ -30,7 +30,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 	};
 
 	const handleDelete = async () => {
-		const result = await handleRemoveItem(product.id);
+		const result = await handleRemoveLine(product.lineId);
 
 		if (!result.success) {
 			showToaster('error', toasterMessages.cartRemoveFailed(i18nData));
@@ -40,7 +40,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 	const handleQuantityChange = async (e: { value: number | string }) => {
 		const qty = Number(e.value);
 		if (Number.isFinite(qty) && qty >= 1) {
-			const res = await handleUpdateQuantity(product.id, qty);
+			const res = await handleUpdateQuantity(product.lineId, qty);
 			if (!res.success) {
 				showToaster('error', toasterMessages.cartUpdateFailed(i18nData.cartUpdateFailed));
 			}
@@ -82,13 +82,18 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 								alt={product.name}
 								width={100}
 								height={100}
-								style={{ objectFit: 'contain', borderRadius: '6px' }}
+								style={{
+									objectFit: 'contain',
+									borderRadius: '6px',
+									border: '0.5px solid var(--chakra-colors-border-light)',
+								}}
 							/>
 						</LocaleNavLink>
 						<Flex direction='column' gap={3} pt={{ base: 2, sm: 0 }}>
-							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
+							<Card.Title fontWeight='medium'>
 								<LocaleNavLink
 									href={productHref}
+									fontSize='lg'
 									textDecorationColor='main'
 									color='main'
 									variant='underline'
@@ -97,6 +102,11 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 									{product.name}
 								</LocaleNavLink>
 							</Card.Title>
+							{product.variantLabel && (
+								<Text color='main.disabled' fontSize='sm' mt='-2'>
+									{product.variantLabel}
+								</Text>
+							)}
 							<Text
 								color='main'
 								fontSize='xl'

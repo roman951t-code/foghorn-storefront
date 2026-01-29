@@ -81,7 +81,8 @@ export default function OrderInfo() {
 		if (disabledReason || !cartItems.length) return;
 
 		const orderItems = cartItems.map((item) => ({
-			productId: item.id,
+			productId: item.productId,
+			variantId: item.variantId,
 			quantity: Math.max(1, item.quantity ?? 1),
 		}));
 
@@ -109,7 +110,9 @@ export default function OrderInfo() {
 		});
 	};
 
-	const startStripeCheckout = async (orderItems: { productId: string; quantity: number }[]) => {
+	const startStripeCheckout = async (
+		orderItems: { productId: string; variantId: string | null; quantity: number }[]
+	) => {
 		try {
 			setIsStripeRedirecting(true);
 
@@ -160,7 +163,7 @@ export default function OrderInfo() {
 			<Box maxH='600px' overflowY='auto' hideBelow='lg'>
 				{cartItems.map((item, idx) => (
 					<SidebarCheckoutCard
-						key={item.id}
+						key={item.lineId}
 						product={item}
 						showSeparator={cartItems.length > 1 && idx < cartItems.length - 1}
 					/>
@@ -169,7 +172,7 @@ export default function OrderInfo() {
 			<Box maxH='600px' overflowY='auto' hideFrom='lg' shadow='sm'>
 				{cartItems.map((item, idx) => (
 					<FullCheckoutCard
-						key={item.id}
+						key={item.lineId}
 						product={item}
 						showSeparator={cartItems.length > 1 && idx < cartItems.length - 1}
 					/>
@@ -236,6 +239,8 @@ export default function OrderInfo() {
 					alignItems={{ base: 'flex-start', sm: 'flex-end' }}
 					order={{ base: 1, sm: 2 }}
 					gap='3'
+					textAlign='right'
+					minW='240px'
 				>
 					<Text>
 						<Highlight query={`${totalCount} ${unitsLabel}`} styles={{ fontWeight: 'semibold' }}>

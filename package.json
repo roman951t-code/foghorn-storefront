@@ -6,7 +6,7 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint",
+		"lint": "npx tsc --noEmit",
 		"test": "node tests/getProductsFilters.test.js",
 		"profile:search": "node --loader ts-node/esm scripts/profile-search.ts",
 		"admin:dev": "node --import tsx/esm src/admin/server.mts",

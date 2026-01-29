@@ -163,14 +163,14 @@ export default function Dashboard() {
 		let isActive = true;
 		setMetricsLoading(true);
 		setMetricsError(false);
-		api.getDashboard()
-			.then((response) => {
-				if (!isActive) return;
-				setMetrics((response.data?.payload ?? null) as DashboardMetricsPayload | null);
-			})
-			.catch(() => {
-				if (!isActive) return;
-				setMetrics(null);
+			api.getDashboard()
+				.then((response) => {
+					if (!isActive) return;
+					setMetrics(((response.data as any)?.payload ?? null) as DashboardMetricsPayload | null);
+				})
+				.catch(() => {
+					if (!isActive) return;
+					setMetrics(null);
 				setMetricsError(true);
 			})
 			.finally(() => {
@@ -320,16 +320,16 @@ export default function Dashboard() {
 						label: translateMessage('dashboard.kpis.newUsers7Days'),
 						value: metrics ? formatCount(metrics.newUsers.last7Days) : '-',
 					},
-					{
-						label: translateMessage('dashboard.kpis.refunds30Days'),
-						value: metrics ? formatMoney(metrics.refunds.last30Days.amount) : '-',
-						secondary: metrics
-							? translateMessage('dashboard.kpis.refundsCount', {
-									count: formatCount(metrics.refunds.last30Days.count),
-								})
-							: '-',
-					},
-				].map((item) => (
+						{
+							label: translateMessage('dashboard.kpis.refunds30Days'),
+							value: metrics ? formatMoney(metrics.refunds.last30Days.amount) : '-',
+							secondary: metrics
+								? translateMessage('dashboard.kpis.refundsCount', {
+										count: metrics.refunds.last30Days.count,
+									})
+								: '-',
+						},
+					].map((item) => (
 					<Box
 						key={item.label}
 						variant='white'
@@ -432,12 +432,12 @@ export default function Dashboard() {
 											<Text fontWeight='bold'>{formatMoney(item.revenue)}</Text>
 										</Box>
 										<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-											<Text color='grey60'>
-												{translateMessage('dashboard.charts.topProducts.units', {
-													count: formatCount(item.quantity),
-												})}
-											</Text>
-										</Box>
+												<Text color='grey60'>
+													{translateMessage('dashboard.charts.topProducts.units', {
+														count: item.quantity,
+													})}
+												</Text>
+											</Box>
 										<Box
 											style={{
 												height: 8,
@@ -474,11 +474,11 @@ export default function Dashboard() {
 					<Text fontSize='lg' fontWeight='bold' mb='xs'>
 						{translateMessage('dashboard.widgets.outOfStock.title')}
 					</Text>
-					<Text color='grey60' mb='lg'>
-						{translateMessage('dashboard.widgets.outOfStock.subtitle', {
-							count: formatCount(lowStockPayload?.counts.outOfStock ?? 0),
-						})}
-					</Text>
+						<Text color='grey60' mb='lg'>
+							{translateMessage('dashboard.widgets.outOfStock.subtitle', {
+								count: lowStockPayload?.counts.outOfStock ?? 0,
+							})}
+						</Text>
 					{lowStockLoading ? (
 						<Text color='grey60'>{translateMessage('dashboard.lowStock.loading')}</Text>
 					) : outOfStockItems.length === 0 ? (
@@ -533,7 +533,7 @@ export default function Dashboard() {
 									</Box>
 									<Text color='grey60' style={{ fontSize: 13 }}>
 										{translateMessage('dashboard.widgets.topProducts.units', {
-											count: formatCount(item.quantity),
+											count: item.quantity,
 										})}
 									</Text>
 								</Box>

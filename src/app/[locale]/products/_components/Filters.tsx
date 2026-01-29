@@ -9,6 +9,7 @@ import {
 import { Checkbox } from '@/components/ui/chakra/checkbox';
 import { Filter } from '@/types/product';
 import { VStack, CheckboxGroup, Fieldset } from '@chakra-ui/react';
+import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 
@@ -19,6 +20,7 @@ type Props = {
 export default function Filters({ filters }: Props) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const t = useTranslations('products');
 
 	const updateParams = useCallback(
 		(key: string, values: string[]) => {
@@ -42,30 +44,35 @@ export default function Filters({ filters }: Props) {
 			<AccordionRoot
 				collapsible
 				multiple
-				defaultValue={filters.length > 0 ? [filters[0].name] : []}
+				defaultValue={filters.length > 0 ? [filters[0].key] : []}
 			>
 				{filters.map((filter) => {
-					const selectedValues = searchParams.getAll(filter.name);
+					const selectedValues = searchParams.getAll(filter.key);
+					const filterLabel = filter.key === 'brand' ? t('brand') : filter.name;
 
 					return (
 						<AccordionItem
 							key={filter.id}
 							mb='3'
-							value={filter.name}
+							value={filter.key}
 							borderBottomColor='border.light'
 						>
-							<AccordionItemTrigger>{filter.name}</AccordionItemTrigger>
+							<AccordionItemTrigger>{filterLabel}</AccordionItemTrigger>
 							<AccordionItemContent>
 								<Fieldset.Root>
 									<CheckboxGroup
 										value={selectedValues}
-										onValueChange={(values) => updateParams(filter.name, values as string[])}
-										name={filter.name}
+										onValueChange={(values) => updateParams(filter.key, values as string[])}
+										name={filter.key}
 									>
 										<Fieldset.Content colorPalette='gray' w='100%'>
 											{filter.values.map((val) => (
-												<Checkbox key={val} value={val} _hover={{ cursor: 'pointer' }}>
-													{val}
+												<Checkbox
+													key={val.value}
+													value={val.value}
+													_hover={{ cursor: 'pointer' }}
+												>
+													{val.label}
 												</Checkbox>
 											))}
 										</Fieldset.Content>

@@ -9,6 +9,15 @@ export async function normalizeOrder(order: any): Promise<UserOrder> {
 		order?.items?.map((item: any) => ({
 			id: item.id,
 			productId: item.productId,
+			variantId: item.variant?.id ?? item.variantId ?? null,
+			sku: item.variant?.sku ?? null,
+			variantLabel: Array.isArray(item.variant?.attributes)
+				? item.variant.attributes
+						.map((a: any) =>
+							[a.attribute?.name, a.value, a.attribute?.unit].filter(Boolean).join(' ')
+						)
+						.join(' / ')
+				: null,
 			quantity: item.quantity,
 			unitPrice: Number(item.unitPrice ?? 0),
 			price: Number(item.price ?? 0),

@@ -10,6 +10,9 @@ export type OrderProduct = {
 export type OrderItem = {
 	id: string;
 	productId: string;
+	variantId: string | null;
+	sku: string | null;
+	variantLabel: string | null;
 	quantity: number;
 	unitPrice: number;
 	price: number;

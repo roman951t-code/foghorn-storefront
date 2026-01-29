@@ -58,7 +58,12 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 			</Flex>
 			<Stack direction='column' overflowY='auto' gap={4} mt={4} maxHeight='650px'>
 				{cartItems.map((item) => (
-					<CartOrderCard key={item?.id} product={item} i18nData={i18nData} onNavigate={() => setIsOpen(false)} />
+					<CartOrderCard
+						key={item?.lineId}
+						product={item}
+						i18nData={i18nData}
+						onNavigate={() => setIsOpen(false)}
+					/>
 				))}
 			</Stack>
 		</>

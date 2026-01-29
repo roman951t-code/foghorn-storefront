@@ -1,6 +1,6 @@
 import type { ActionHandler, BulkActionResponse } from 'adminjs';
 import { prisma } from '../prisma.mts';
-import { logInventoryAdjustment, resolveInventoryAdminEmail, resolveInventoryReason } from './inventory-adjustment-actions.mts';
+import { resolveInventoryAdminEmail, resolveInventoryReason } from './inventory-adjustment-actions.mts';
 
 type CategoryOption = { id: string; label: string };
 type BrandOption = { id: string; label: string };

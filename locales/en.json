@@ -300,7 +300,8 @@
       "searchQueryResults": "Results for: {searchQuery}",
       "advantages": "Advantages",
       "disAdvantages": "Disadvantages",
-      "all": "All"
+      "all": "All",
+      "brand": "Brand"
     },
 	"orders": {
 		"empty": "You have no orders yet",

@@ -149,15 +149,15 @@ export const lowStockAlerts: ActionHandler<ActionResponse> = async (req, _res, _
 					updatedAt: product.updatedAt.toISOString(),
 				})),
 			},
-			topProducts: {
-				rangeDays: salesWindowDays,
-				items: topProductsAgg.map((item) => ({
-					productId: item.productId,
-					name: topProductNameMap.get(item.productId) ?? 'Unknown product',
-					quantity: Number(item._sum.quantity ?? 0),
-					revenue: roundCurrency(Number(item._sum.price ?? 0)),
-				})),
+				topProducts: {
+					rangeDays: salesWindowDays,
+					items: topProductsAgg.map((item) => ({
+						productId: item.productId,
+						name: topProductNameMap.get(item.productId) ?? 'Unknown product',
+						quantity: Number(item._sum?.quantity ?? 0),
+						revenue: roundCurrency(Number(item._sum?.price ?? 0)),
+					})),
+				},
 			},
-		},
+		};
 	};
-};

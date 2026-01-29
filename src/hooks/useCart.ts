@@ -8,6 +8,7 @@ export function useCart() {
 	const productIds = useCartStore((state) => state.productIds);
 	const handleAddItem = useCartStore((state) => state.handleAddItem);
 	const handleRemoveItem = useCartStore((state) => state.handleRemoveItem);
+	const handleRemoveLine = useCartStore((state) => state.handleRemoveLine);
 	const handleClearCart = useCartStore((state) => state.handleClearCart);
 	const handleUpdateQuantity = useCartStore((state) => state.handleUpdateQuantity);
 
@@ -17,9 +18,18 @@ export function useCart() {
 			productIds,
 			handleAddItem,
 			handleRemoveItem,
+			handleRemoveLine,
 			handleClearCart,
 			handleUpdateQuantity,
 		}),
-		[cartData, productIds, handleAddItem, handleRemoveItem, handleClearCart, handleUpdateQuantity]
+		[
+			cartData,
+			productIds,
+			handleAddItem,
+			handleRemoveItem,
+			handleRemoveLine,
+			handleClearCart,
+			handleUpdateQuantity,
+		]
 	);
 }
