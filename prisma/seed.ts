@@ -5,7 +5,7 @@ import { customAlphabet } from 'nanoid';
 import { Decimal } from '@prisma/client/runtime/library';
 
 const prisma = new PrismaClient();
-type SeedProduct = { id: string; inStock: boolean; basePrice: Decimal };
+type SeedProduct = { id: string; inStock: boolean; basePrice: Decimal; discountPrice: Decimal | null };
 
 function createSlug(text: string) {
 	return slugify(text, { lower: true, strict: true });
@@ -40,7 +40,7 @@ const mainCategories = [
 const subcategoriesMap: Record<string, string[]> = {
 	Smartphones: ['Android Phones', 'iPhones'],
 	Tablets: ['Android Tablets', 'iPads'],
-	'Laptops & PCs': ['Ultrabooks', 'Gaming Laptops', 'Desktops'],
+	'Laptops & PCs': ['Laptops', 'Ultrabooks', 'Gaming Laptops', 'Desktops', 'Monitors'],
 	TVs: ['4K TVs', 'Smart TVs'],
 	Cameras: ['Mirrorless Cameras', 'Action Cameras'],
 	Audio: ['Headphones', 'Speakers', 'Soundbars'],
@@ -64,9 +64,11 @@ const subcategoryImageKeywords: Record<string, string> = {
 	iPhones: 'iphone',
 	'Android Tablets': 'android-tablet',
 	iPads: 'ipad-tablet',
+	Laptops: 'laptop',
 	Ultrabooks: 'ultrabook',
 	'Gaming Laptops': 'gaming-laptop',
 	Desktops: 'desktop-computer',
+	Monitors: 'computer-monitor',
 	'4K TVs': '4k-tv',
 	'Smart TVs': 'smart-tv',
 	'Mirrorless Cameras': 'mirrorless-camera',
@@ -109,6 +111,22 @@ const VARIANT_OPTIONS = {
 	ram: ['8', '16', '32'],
 	diagonal: ['27', '32', '55', '65'],
 	refresh: ['60', '120', '144'],
+};
+
+const PRODUCT_ATTRIBUTE_OPTIONS = {
+	models: [
+		'AX-100',
+		'AX-200',
+		'AX-300',
+		'ZN-100',
+		'ZN-200',
+		'ZN-300',
+		'VT-100',
+		'VT-200',
+	],
+	weightsKg: ['0.18', '0.22', '0.28', '0.45', '0.75', '1.20'], // kg
+	sizesMm: ['90', '120', '150', '210', '320', '420'], // mm
+	batteryMah: ['3500', '4500', '5000', '6000', '8000', '10000'], // mAh
 };
 
 type VariantTemplate = {
@@ -200,6 +218,27 @@ function needsImageReplacement(url?: string | null) {
 async function main() {
 	console.log('🌱 Seeding started...');
 
+	// Seed is meant to be repeatable during development. Since products are created with random slugs,
+	// rerunning the seed without cleanup will accumulate products/attributes and explode filter option counts.
+	console.log('🧹 Clearing existing catalog data...');
+	await prisma.$transaction([
+		prisma.cartItem.deleteMany({}),
+		prisma.cart.deleteMany({}),
+		prisma.wishlist.deleteMany({}),
+		prisma.review.deleteMany({}),
+		prisma.recentlyViewed.deleteMany({}),
+		prisma.orderItem.deleteMany({}),
+		prisma.orderDiscount.deleteMany({}),
+		prisma.orderAuditEntry.deleteMany({}),
+		prisma.order.deleteMany({}),
+		prisma.productAttributeValue.deleteMany({}),
+		prisma.product.deleteMany({}),
+	]);
+
+	if (mainCategories.length !== 8) {
+		throw new Error(`Seed expects exactly 8 main categories, got ${mainCategories.length}`);
+	}
+
 	// Brands
 	const brandNames = [
 		'TechBrand',
@@ -225,7 +264,7 @@ async function main() {
 
 	// Attributes
 	const productAttributeNames = [
-		{ name: 'Вага', unit: 'г' },
+		{ name: 'Вага', unit: 'кг' },
 		{ name: 'Розмір', unit: 'мм' },
 		{ name: 'Модель', unit: '' },
 		{ name: 'Колір', unit: '' },
@@ -251,12 +290,119 @@ async function main() {
 		attributeByName.set(record.name, record);
 	}
 
-	const productAttributes = productAttributeNames
-		.map((attr) => attributeByName.get(attr.name))
-		.filter(Boolean) as { id: string; name: string; unit: string | null }[];
-
 	const TAGS = ['popular', 'new', 'discount', 'promotional', 'viewed'];
 	const allProducts: SeedProduct[] = [];
+
+	const getAttributeId = (name: string) => {
+		const attr = attributeByName.get(name);
+		if (!attr) throw new Error(`Missing ProductAttribute "${name}" in seed`);
+		return attr.id;
+	};
+
+	const buildProductAttributeValueCreates = (category: string) => {
+		const create: { attributeId: string; value: string }[] = [];
+		const add = (name: string, value: string | number) => {
+			create.push({ attributeId: getAttributeId(name), value: String(value) });
+		};
+
+		// "Real world" baseline fields most products can have.
+		add('Модель', faker.helpers.arrayElement(PRODUCT_ATTRIBUTE_OPTIONS.models));
+		add('Колір', faker.helpers.arrayElement(VARIANT_OPTIONS.colors));
+		add('Вага', faker.helpers.arrayElement(PRODUCT_ATTRIBUTE_OPTIONS.weightsKg));
+		add('Розмір', faker.helpers.arrayElement(PRODUCT_ATTRIBUTE_OPTIONS.sizesMm));
+
+		// Category-specific fields (also used in filters).
+		if (category === 'Smartphones' || category === 'Tablets') {
+			add('Памʼять', faker.helpers.arrayElement(VARIANT_OPTIONS.storage));
+			add('Батарея', faker.helpers.arrayElement(PRODUCT_ATTRIBUTE_OPTIONS.batteryMah));
+		}
+
+		if (category === 'Laptops & PCs') {
+			add('ОЗП', faker.helpers.arrayElement(VARIANT_OPTIONS.ram));
+			add('Памʼять', faker.helpers.arrayElement(VARIANT_OPTIONS.storage));
+			add('Батарея', faker.helpers.arrayElement(PRODUCT_ATTRIBUTE_OPTIONS.batteryMah));
+		}
+
+		if (category === 'TVs') {
+			add('Діагональ', faker.helpers.arrayElement(VARIANT_OPTIONS.diagonal));
+			add('Частота', faker.helpers.arrayElement(VARIANT_OPTIONS.refresh));
+		}
+
+		if (category === 'Cameras') {
+			add('Памʼять', faker.helpers.arrayElement(VARIANT_OPTIONS.storage));
+		}
+
+		return create;
+	};
+
+	const attributeSetTemplateByMainCategory: Record<string, { name: string; attributes: string[] }> =
+		{
+			Smartphones: {
+				name: 'Smartphones — Specifications',
+				attributes: ['Модель', 'Колір', 'Памʼять', 'Батарея', 'Вага', 'Розмір'],
+			},
+			Tablets: {
+				name: 'Tablets — Specifications',
+				attributes: ['Модель', 'Колір', 'Памʼять', 'Батарея', 'Вага', 'Розмір'],
+			},
+			'Laptops & PCs': {
+				name: 'Laptops & PCs — Specifications',
+				attributes: ['Модель', 'ОЗП', 'Памʼять', 'Батарея', 'Вага', 'Розмір'],
+			},
+			TVs: {
+				name: 'TVs — Specifications',
+				attributes: ['Модель', 'Діагональ', 'Частота', 'Колір', 'Вага', 'Розмір'],
+			},
+			Cameras: {
+				name: 'Cameras — Specifications',
+				attributes: ['Модель', 'Колір', 'Памʼять', 'Вага', 'Розмір'],
+			},
+			Audio: {
+				name: 'Audio — Specifications',
+				attributes: ['Модель', 'Колір', 'Вага', 'Розмір'],
+			},
+			Gaming: {
+				name: 'Gaming — Specifications',
+				attributes: ['Модель', 'Колір', 'Памʼять', 'Вага', 'Розмір'],
+			},
+			Accessories: {
+				name: 'Accessories — Specifications',
+				attributes: ['Модель', 'Колір', 'Розмір', 'Вага'],
+			},
+		};
+
+	const ensureAttributeSetForCategory = async (
+		categoryId: string,
+		mainCategoryName: string
+	) => {
+		const template = attributeSetTemplateByMainCategory[mainCategoryName];
+		if (!template) return;
+
+		const attributeIds = template.attributes.map(getAttributeId);
+
+		const attributeSet = await prisma.productAttributeSet.upsert({
+			where: { categoryId },
+			update: { name: template.name },
+			create: { categoryId, name: template.name },
+		});
+
+		await prisma.productAttributeSetItem.deleteMany({
+			where: {
+				attributeSetId: attributeSet.id,
+				attributeId: { notIn: attributeIds },
+			},
+		});
+
+		await Promise.all(
+			attributeIds.map((attributeId, sortOrder) =>
+				prisma.productAttributeSetItem.upsert({
+					where: { attributeSetId_attributeId: { attributeSetId: attributeSet.id, attributeId } },
+					update: { sortOrder },
+					create: { attributeSetId: attributeSet.id, attributeId, sortOrder },
+				})
+			)
+		);
+	};
 
 	// Categories + Products
 	for (const main of mainCategories) {
@@ -264,18 +410,21 @@ async function main() {
 		const parentImage = getCategoryImage(main);
 		const parent = await prisma.productCategory.upsert({
 			where: { slug: parentSlug },
-			update: { imageUrl: parentImage },
-			create: { name: main, slug: parentSlug, imageUrl: parentImage },
+			update: { name: main, parentId: null, imageUrl: parentImage },
+			create: { name: main, slug: parentSlug, parentId: null, imageUrl: parentImage },
 		});
 
-		for (const sub of subcategoriesMap[main]) {
+		const subs = subcategoriesMap[main] ?? [];
+		for (const sub of subs) {
 			const subSlug = createSlug(sub);
 			const subImage = getSubcategoryImage(sub, subSlug);
 			const subcategory = await prisma.productCategory.upsert({
 				where: { slug: subSlug },
-				update: { parentId: parent.id, imageUrl: subImage },
+				update: { name: sub, parentId: parent.id, imageUrl: subImage },
 				create: { name: sub, slug: subSlug, parentId: parent.id, imageUrl: subImage },
 			});
+
+			await ensureAttributeSetForCategory(subcategory.id, main);
 
 			const count = faker.number.int({ min: 3, max: 5 });
 			for (let i = 0; i < count; i++) {
@@ -319,13 +468,7 @@ async function main() {
 						categoryId: subcategory.id,
 						tags: [],
 						attributes: {
-							create: productAttributes.map((attr) => ({
-								attributeId: attr.id,
-								value:
-									faker.commerce.productAdjective() +
-									' ' +
-									faker.number.int({ min: 100, max: 9999 }),
-							})),
+							create: buildProductAttributeValueCreates(main),
 						},
 					},
 				});
@@ -399,25 +542,32 @@ async function main() {
 	}
 
 	// Assign tags
-	for (const tag of TAGS) {
-		const inStockProducts = allProducts.filter((p) => p.inStock);
-
-		// Ensure at least 6 in stock
-		while (inStockProducts.length < 6) {
-			const randomProduct = faker.helpers.arrayElement(allProducts);
-			if (!randomProduct.inStock) {
-				await prisma.product.update({
-					where: { id: randomProduct.id },
-					data: {
-						inStock: true,
-						stock: faker.number.int({ min: 15, max: 50 }),
-					},
-				});
-				inStockProducts.push({ ...randomProduct, inStock: true });
+	const pickProductsForTag = (tag: string, count: number) => {
+		const inStock = allProducts.filter((p) => p.inStock);
+		switch (tag) {
+			case 'discount': {
+				const discounted = inStock.filter((p) => p.discountPrice != null);
+				return faker.helpers.shuffle(discounted.length ? discounted : inStock).slice(0, count);
 			}
+			case 'new': {
+				const latest = inStock.slice(-Math.max(count, 12));
+				return faker.helpers.shuffle(latest).slice(0, count);
+			}
+			default:
+				return faker.helpers.shuffle(inStock).slice(0, count);
 		}
+	};
 
-		const productsForTag = faker.helpers.shuffle(inStockProducts).slice(0, 6);
+	const tagCounts: Record<string, number> = {
+		popular: 10,
+		new: 10,
+		discount: 10,
+		promotional: 10,
+		viewed: 10,
+	};
+
+	for (const tag of TAGS) {
+		const productsForTag = pickProductsForTag(tag, tagCounts[tag] ?? 8);
 		for (const p of productsForTag) {
 			await prisma.product.update({
 				where: { id: p.id },
@@ -425,6 +575,55 @@ async function main() {
 			});
 		}
 	}
+
+	// Promo banners for homepage Promo slider (admin-controlled via Banner)
+	const seededPromoBanners = [
+		{
+			title: 'Laptop Deals Week',
+			subtitle: 'Save on ultrabooks, gaming rigs, and accessories.',
+			linkLabel: 'Shop laptops',
+			linkUrl: '/products/search/?tag=discount',
+			imageUrl: buildKeywordImage('laptop-deals', 1200, 700, 'promo-laptops'),
+			placement: 'promo',
+		},
+		{
+			title: 'New Arrivals',
+			subtitle: 'Fresh drops across all categories.',
+			linkLabel: 'Browse new',
+			linkUrl: '/products/search/?tag=new',
+			imageUrl: buildKeywordImage('new-tech', 1200, 700, 'promo-new'),
+			placement: 'promo',
+		},
+		{
+			title: 'Popular Right Now',
+			subtitle: 'Top picks customers love.',
+			linkLabel: 'View popular',
+			linkUrl: '/products/search/?tag=popular',
+			imageUrl: buildKeywordImage('popular-tech', 1200, 700, 'promo-popular'),
+			placement: 'promo',
+		},
+	] as const;
+
+	await prisma.banner.deleteMany({
+		where: {
+			placement: 'promo',
+			title: { in: seededPromoBanners.map((b) => b.title) },
+		},
+	});
+
+	await prisma.banner.createMany({
+		data: seededPromoBanners.map((b) => ({
+			title: b.title,
+			subtitle: b.subtitle,
+			linkLabel: b.linkLabel,
+			linkUrl: b.linkUrl,
+			imageUrl: b.imageUrl,
+			placement: b.placement,
+			isActive: true,
+			startsAt: null,
+			endsAt: null,
+		})),
+	});
 
 	const seedUserId = 'user-roman-951';
 

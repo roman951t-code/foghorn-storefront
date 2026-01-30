@@ -214,7 +214,8 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 					<Button
 						mt='4'
 						variant='outline'
-						border='1px solid'
+						borderWidth='0.5px'
+						borderStyle='solid'
 						borderColor='border'
 						onClick={resendVerificationCode}
 					>

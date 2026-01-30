@@ -44,7 +44,7 @@ export default function LocaleSwitcher() {
 			<Select.Label srOnly>{label}</Select.Label>
 			<Select.HiddenSelect />
 			<Select.Control>
-				<Select.Trigger borderColor='border.light' cursor='pointer' px='2' aria-label={label}>
+				<Select.Trigger borderColor='border' cursor='pointer' px='2' aria-label={label}>
 					<Select.ValueText fontSize='md' placeholder='-'>
 						{languages.items.find((item) => item.value === locale)?.flag}
 						<Box as='span' ml='2'>

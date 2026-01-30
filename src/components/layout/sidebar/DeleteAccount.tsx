@@ -75,7 +75,13 @@ export function DeleteAccount({ onCloseAction }: Props) {
 						</Dialog.Body>
 						<Dialog.Footer>
 							<Dialog.ActionTrigger asChild>
-								<Button color='main' variant='outline' border='1px solid ' borderColor='border'>
+								<Button
+									color='main'
+									variant='outline'
+									borderWidth='0.5px'
+									borderStyle='solid'
+									borderColor='border'
+								>
 									{authT('close')}
 								</Button>
 							</Dialog.ActionTrigger>
@@ -96,7 +102,8 @@ export function DeleteAccount({ onCloseAction }: Props) {
 							color='main'
 							_hover={{
 								bg: 'transparent',
-								border: '1px solid',
+								borderWidth: '0.5px',
+								borderStyle: 'solid',
 								borderColor: 'main',
 							}}
 						>

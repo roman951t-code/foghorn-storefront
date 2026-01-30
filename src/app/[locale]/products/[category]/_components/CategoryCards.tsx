@@ -12,14 +12,13 @@ import '@/styles/swiper.css';
 
 function CategoryCardsInner({ category }: { category?: CatalogCategory }) {
 	return (
-		<Wrap gap='4'>
+		<Wrap gapX='4' gapY='8'>
 			{category?.children.map((sub) => (
 				<CategoryCard
 					key={sub.id}
 					title={sub.name}
 					imageUrl={
-						sub.products[0]?.imageUrl ??
-						'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1770&q=80'
+						sub.imageUrl ?? sub.products[0]?.imageUrl ?? '/assets/images/temp/3Big.webp'
 					}
 					products={sub.products.map((product) => ({
 						name: product.name,

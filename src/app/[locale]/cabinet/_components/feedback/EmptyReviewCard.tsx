@@ -24,8 +24,9 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 		<Card.Root
 			minWidth='200px'
 			w='100%'
-			border='1px solid'
-			borderColor='border.dark'
+			borderWidth='0.5px'
+			borderStyle='solid'
+			borderColor='border'
 			bg='bg.tertiary'
 			p='4'
 			mb='4'

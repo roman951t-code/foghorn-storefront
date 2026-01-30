@@ -26,7 +26,7 @@ export function LogoutSection({ onClose }: LogoutProps) {
 	};
 
 	return (
-		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
+		<Card.Root size='sm' bg='bg.tertiary' borderColor='border'>
 			<Card.Body gap={3}>
 				<TertiaryButton onClick={handleLogogut}>{authT('logOut')}</TertiaryButton>
 			</Card.Body>
@@ -43,7 +43,7 @@ export function AuthorizeSection({ onAuthOpen }: Props) {
 	const authT = useTranslations('auth');
 
 	return (
-		<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
+		<Card.Root size='sm' bg='bg.tertiary' borderColor='border'>
 			<Card.Body gap={3}>
 				<TertiaryButton onClick={onAuthOpen}>{authT('authorize')}</TertiaryButton>
 

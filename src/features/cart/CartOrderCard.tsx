@@ -51,8 +51,9 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 		<Card.Root
 			minWidth='200px'
 			w='100%'
-			border='1px solid'
-			borderColor='border.dark'
+			borderWidth='0.5px'
+			borderStyle='solid'
+			borderColor='border'
 			bg='bg.tertiary'
 			transition='all 0.25s ease-in-out'
 		>
@@ -77,18 +78,18 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 							mx='4'
 							onClick={handleNavigate}
 						>
-							<Image
-								src={previewImage}
-								alt={product.name}
-								width={100}
-								height={100}
-								style={{
-									objectFit: 'contain',
-									borderRadius: '6px',
-									border: '0.5px solid var(--chakra-colors-border-light)',
-								}}
-							/>
-						</LocaleNavLink>
+								<Image
+									src={previewImage}
+									alt={product.name}
+									width={100}
+									height={100}
+									style={{
+										objectFit: 'contain',
+										borderRadius: '6px',
+										border: '0.5px solid var(--chakra-colors-border)',
+									}}
+								/>
+							</LocaleNavLink>
 						<Flex direction='column' gap={3} pt={{ base: 2, sm: 0 }}>
 							<Card.Title fontWeight='medium'>
 								<LocaleNavLink

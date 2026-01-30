@@ -8,10 +8,11 @@ import {
 } from '@/components/ui/chakra/accordion';
 import { Checkbox } from '@/components/ui/chakra/checkbox';
 import { Filter } from '@/types/product';
-import { VStack, CheckboxGroup, Fieldset } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
+import { Badge, Box, CheckboxGroup, Fieldset, HStack, Text } from '@chakra-ui/react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
+import { localizeUnit } from '@/utils/unitLocalization';
 
 type Props = {
 	filters: Filter[] | null;
@@ -21,6 +22,7 @@ export default function Filters({ filters }: Props) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const t = useTranslations('products');
+	const locale = useLocale();
 
 	const updateParams = useCallback(
 		(key: string, values: string[]) => {
@@ -40,39 +42,86 @@ export default function Filters({ filters }: Props) {
 	}
 
 	return (
-		<VStack mt='8' w='100%'>
+		<Box mt={6} w='100%' minW={0}>
 			<AccordionRoot
 				collapsible
 				multiple
 				defaultValue={filters.length > 0 ? [filters[0].key] : []}
+				w='100%'
 			>
 				{filters.map((filter) => {
 					const selectedValues = searchParams.getAll(filter.key);
 					const filterLabel = filter.key === 'brand' ? t('brand') : filter.name;
+					const localizedUnit =
+						filter.key === 'brand' ? null : localizeUnit(filter.unit, locale);
+					const filterLabelWithUnit =
+						localizedUnit ? `${filterLabel} (${localizedUnit})` : filterLabel;
+					const selectedCount = selectedValues.length;
 
-					return (
-						<AccordionItem
-							key={filter.id}
-							mb='3'
-							value={filter.key}
-							borderBottomColor='border.light'
+						return (
+							<AccordionItem
+								key={filter.id}
+								mb={3}
+								value={filter.key}
+								borderWidth='0.5px'
+								borderStyle='solid'
+								borderColor='border'
+								rounded='2xl'
+								overflow='hidden'
+								bg='bg.tertiary'
 						>
-							<AccordionItemTrigger>{filterLabel}</AccordionItemTrigger>
-							<AccordionItemContent>
+							<AccordionItemTrigger
+								px={4}
+								py={3}
+								bg='bg.tertiary'
+								fontWeight='semibold'
+								transition='all 0.15s ease-in-out'
+								_hover={{ bg: 'bgHover.promoCard' }}
+							>
+								<HStack justify='space-between' w='full' minW={0}>
+									<Text lineClamp={1}>{filterLabelWithUnit}</Text>
+									{selectedCount > 0 ? (
+										<Badge
+											variant='outline'
+											borderColor='border'
+											borderRadius='full'
+											px='2'
+											py='1'
+											bg='bg.tertiary'
+											fontSize='sm'
+										>
+											{selectedCount}
+										</Badge>
+									) : null}
+								</HStack>
+							</AccordionItemTrigger>
+							<AccordionItemContent px={4} pb={4}>
 								<Fieldset.Root>
 									<CheckboxGroup
 										value={selectedValues}
 										onValueChange={(values) => updateParams(filter.key, values as string[])}
 										name={filter.key}
 									>
-										<Fieldset.Content colorPalette='gray' w='100%'>
+										<Fieldset.Content colorPalette='gray' w='100%' gap={2}>
 											{filter.values.map((val) => (
 												<Checkbox
 													key={val.value}
 													value={val.value}
-													_hover={{ cursor: 'pointer' }}
+													w='100%'
+													minW={0}
+													px={3}
+													py={2}
+													rounded='xl'
+													borderWidth='0.5px'
+													borderStyle='solid'
+													borderColor='border'
+													transition='all 0.15s ease-in-out'
+													_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
+													_checked={{ bg: 'bgHover.promoCard', borderColor: 'main.secondary' }}
+													whiteSpace='normal'
+													wordBreak='break-word'
 												>
-													{val.label}
+													{localizedUnit ? `${val.label} ${localizedUnit}` : val.label}
 												</Checkbox>
 											))}
 										</Fieldset.Content>
@@ -83,6 +132,6 @@ export default function Filters({ filters }: Props) {
 					);
 				})}
 			</AccordionRoot>
-		</VStack>
+		</Box>
 	);
 }

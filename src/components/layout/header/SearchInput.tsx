@@ -119,7 +119,8 @@ export default function SearchInput({
 						fontSize='md'
 						roundedRight='0'
 						_focus={{
-							border: '1px solid',
+							borderWidth: '0.5px',
+							borderStyle: 'solid',
 							borderColor: { base: 'orange', _dark: 'yellow' },
 							outline: 'none',
 						}}
@@ -160,8 +161,9 @@ export default function SearchInput({
 									fontSize='lg'
 									fontWeight='medium'
 									my='2'
-									borderBottom='1px solid'
-									borderColor='border.light'
+									borderBottomWidth='0.5px'
+									borderBottomStyle='solid'
+									borderColor='border'
 								>
 									<Icon ml='1' mr='2.5'>
 										<IoPricetagsOutline />
@@ -183,8 +185,9 @@ export default function SearchInput({
 											fontSize='lg'
 											fontWeight='medium'
 											my='2'
-											borderBottom='1px solid'
-											borderColor='border.light'
+											borderBottomWidth='0.5px'
+											borderBottomStyle='solid'
+											borderColor='border'
 										>
 											<Icon ml='1' mr='2.5'>
 												<IoPricetagsOutline />

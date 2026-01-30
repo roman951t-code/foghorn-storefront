@@ -12,10 +12,10 @@ type ErrorProps = {
 export default function CategoryError({ error, reset }: ErrorProps) {
 	const t = useTranslations('errors');
 
-	return (
+		return (
 		<Box
-			borderWidth='1px'
-			borderColor='border.light'
+			borderWidth='0.5px'
+			borderColor='border'
 			borderRadius='lg'
 			bg='bg.tertiary'
 			p='6'

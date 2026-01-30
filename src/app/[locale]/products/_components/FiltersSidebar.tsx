@@ -11,6 +11,7 @@ import Filters from './Filters';
 import { IoFilter } from 'react-icons/io5';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { Filter } from '@/types/product';
+import { Box, Heading } from '@chakra-ui/react';
 
 interface Props {
 	maxProductPrice: number;
@@ -23,13 +24,38 @@ export default function FiltersSidebar({ btnText, maxProductPrice, filters }: Pr
 		<DrawerRoot placement='end'>
 			<DrawerBackdrop />
 			<DrawerTrigger asChild>
-				<SecondaryButton w='140px' alignSelf='flex-end' hideFrom='lg'>
+				<SecondaryButton w='160px' alignSelf='flex-end' hideFrom='lg' rounded='full'>
 					<IoFilter />
 					{btnText}
 				</SecondaryButton>
 			</DrawerTrigger>
-			<DrawerContent bg='bg.tertiary' w='280px' h='100%'>
-				<DrawerBody flexDirection='column' py='8' alignContent='center'>
+			<DrawerContent
+				bg='bg.tertiary'
+				w={{ base: '89.3vw', sm: '494px' }}
+				maxW='494px'
+				h='100%'
+				rounded='2xl'
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor='border'
+				boxShadow='2xl'
+			>
+				<DrawerBody
+					display='flex'
+					flexDirection='column'
+					gap={4}
+					px={{ base: 4, md: 5 }}
+					py={{ base: 5, md: 6 }}
+					overflowY='auto'
+					overflowX='hidden'
+					w='100%'
+					minW={0}
+				>
+					<Box pb={3} borderBottomWidth='0.5px' borderBottomStyle='solid' borderColor='border'>
+						<Heading fontWeight='semibold' textStyle='2xl' color='main'>
+							{btnText}
+						</Heading>
+					</Box>
 					<QuickFilters maxProductPrice={maxProductPrice} />
 					<Filters filters={filters} />
 				</DrawerBody>
@@ -37,7 +63,8 @@ export default function FiltersSidebar({ btnText, maxProductPrice, filters }: Pr
 					color='main'
 					_hover={{
 						bg: 'transparent',
-						border: '1px solid',
+						borderWidth: '0.5px',
+						borderStyle: 'solid',
 						borderColor: 'main',
 					}}
 				/>

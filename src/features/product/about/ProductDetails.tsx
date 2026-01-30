@@ -36,7 +36,7 @@ export default function ProductDetails({
 				borderWidth='0.5px'
 				boxShadow='none'
 				bg='bg.tertiary'
-				borderColor='border.light'
+				borderColor='border'
 				size='lg'
 				color='main'
 				py='1.5'
@@ -60,14 +60,14 @@ export default function ProductDetails({
 	return (
 		<Stack w='100%' gap='4' mt='6'>
 			<Wrap>
-				<Card.Root flex='1' minW='280px' size='sm' bg='bg.tertiary' borderColor='border.light'>
+				<Card.Root flex='1' minW='280px' size='sm' bg='bg.tertiary' borderColor='border'>
 					<Card.Header>
 						<Heading size='md'>{paymentTitle}</Heading>
 					</Card.Header>
 					<Card.Body gap='4'>{renderOptions(paymentOptions)}</Card.Body>
 				</Card.Root>
 
-				<Card.Root minW='280px' flex='1' size='sm' bg='bg.tertiary' borderColor='border.light'>
+				<Card.Root minW='280px' flex='1' size='sm' bg='bg.tertiary' borderColor='border'>
 					<Card.Header>
 						<Heading size='md'>{shipmentTitle}</Heading>
 					</Card.Header>
@@ -75,14 +75,14 @@ export default function ProductDetails({
 				</Card.Root>
 			</Wrap>
 
-			<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
+			<Card.Root size='sm' bg='bg.tertiary' borderColor='border'>
 				<Card.Header>
 					<Heading size='md'>{guaranteeTitle}</Heading>
 				</Card.Header>
 				<Card.Body>{guaranteeText}</Card.Body>
 			</Card.Root>
 
-			<Card.Root size='sm' bg='bg.tertiary' borderColor='border.light'>
+			<Card.Root size='sm' bg='bg.tertiary' borderColor='border'>
 				<Card.Header>
 					<Heading size='md'>{descriptionTitle}</Heading>
 				</Card.Header>

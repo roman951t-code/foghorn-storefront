@@ -1,7 +1,7 @@
 'use client';
 
 import { FiSearch } from 'react-icons/fi';
-import { Text, Input, Flex, IconButton } from '@chakra-ui/react';
+import { HStack, Text, Input, Flex, IconButton } from '@chakra-ui/react';
 import { Slider } from '@/components/ui/chakra/slider';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -47,13 +47,17 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 
 	return (
 		<>
-			<Text>{title} ₴</Text>
-			<Flex justifyContent='space-between' alignItems='center' gap='2'>
-				<Flex gap='1.5'>
+			<Text fontSize='md' fontWeight='semibold' color='main' mb={4}>
+				{title} ₴
+			</Text>
+			<Flex justifyContent='space-between' alignItems='center' gap={3} w='100%' minW={0}>
+				<HStack gap={2} flex='1' minW={0}>
 					<Input
 						fontSize='md'
-						h='38px'
-						minW='60px'
+						color='main'
+						h='40px'
+						flex='1'
+						minW={0}
 						type='number'
 						inputMode='numeric'
 						aria-label='Minimum price'
@@ -61,11 +65,16 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 						max={values[1]}
 						value={values[0]}
 						onChange={(e) => handleMinChange(e.target.value)}
+						rounded='lg'
+						bg='bg.tertiary'
+						borderColor='border'
 					/>
 					<Input
 						fontSize='md'
-						h='38px'
-						minW='60px'
+						color='main'
+						h='40px'
+						flex='1'
+						minW={0}
 						type='number'
 						inputMode='numeric'
 						aria-label='Maximum price'
@@ -73,12 +82,15 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 						max={maxPrice.current}
 						value={values[1]}
 						onChange={(e) => handleMaxChange(e.target.value)}
+						rounded='lg'
+						bg='bg.tertiary'
+						borderColor='border'
 					/>
-				</Flex>
+				</HStack>
 
 				<IconButton
 					aria-label='Search'
-					rounded='md'
+					rounded='lg'
 					size='md'
 					color='main.darkOnly'
 					h='40px'
@@ -94,6 +106,7 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 			<Slider
 				size='sm'
 				width='100%'
+				mt={4}
 				min={0}
 				max={Math.max(1, maxPrice.current)}
 				aria-label={[`${title} minimum`, `${title} maximum`]}

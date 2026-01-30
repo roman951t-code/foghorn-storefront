@@ -3,7 +3,7 @@ import { Flex } from '@chakra-ui/react';
 import '@/styles/swiper.css';
 
 type CharacteristicsTabProps = {
-	attributes: { name: string; value: string; unit?: string | null }[];
+	attributes: { name: string; value: string | null; unit?: string | null }[];
 };
 
 export default function CharacteristicsTab({ attributes }: CharacteristicsTabProps) {
@@ -12,12 +12,13 @@ export default function CharacteristicsTab({ attributes }: CharacteristicsTabPro
 			<DataList.Root
 				rounded='md'
 				orientation='horizontal'
-				divideY='1px'
-				divideColor='border.dark'
+				divideY='0.5px'
+				divideColor='border'
 				w='100%'
 				bg='bg.tertiary'
-				border='1px solid'
-				borderColor='border.dark'
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor='border'
 				p='4'
 			>
 				{attributes.map((attr) => (
@@ -26,8 +27,8 @@ export default function CharacteristicsTab({ attributes }: CharacteristicsTabPro
 							{attr.name}
 						</DataList.ItemLabel>
 						<DataList.ItemValue>
-							{attr.value}
-							{attr.unit ? ` ${attr.unit}` : ''}
+							{attr.value ?? '—'}
+							{attr.value && attr.unit ? ` ${attr.unit}` : ''}
 						</DataList.ItemValue>
 					</DataList.Item>
 				))}

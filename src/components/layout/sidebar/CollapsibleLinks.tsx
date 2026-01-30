@@ -36,7 +36,7 @@ export default function CollapsibleLinks({ onClose, userName, isAuthorized }: Pr
 		>
 			{SIDEBAR_SECTIONS.filter((section) => !section.requiresAuth || isAuthorized).map(
 				(section) => (
-					<AccordionItem key={section.value} value={section.value} borderBottomColor='border.light'>
+					<AccordionItem key={section.value} value={section.value} borderBottomColor='border'>
 						<AccordionItemTrigger fontSize='17px' mb='2'>
 							{navT(`sidebar.${section.value}`)}
 						</AccordionItemTrigger>

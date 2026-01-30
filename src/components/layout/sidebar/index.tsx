@@ -67,7 +67,8 @@ export default function SidePanel() {
 						bg='transparent'
 						_hover={{
 							bg: 'transparent',
-							border: '1px solid',
+							borderWidth: '0.5px',
+							borderStyle: 'solid',
 							borderColor: 'main.lightOnly',
 						}}
 					>
@@ -121,12 +122,13 @@ export default function SidePanel() {
 
 					<DrawerCloseTrigger
 						color='main.lightOnly'
-						_hover={{
-							bg: 'transparent',
-							border: '1px solid',
-							borderColor: 'main.lightOnly',
-						}}
-					/>
+					_hover={{
+						bg: 'transparent',
+						borderWidth: '0.5px',
+						borderStyle: 'solid',
+						borderColor: 'main.lightOnly',
+					}}
+				/>
 				</DrawerContent>
 			</DrawerRoot>
 			<Auth isOpen={authOpen} setIsOpen={setAuthOpen} />

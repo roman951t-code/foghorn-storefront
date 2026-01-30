@@ -22,7 +22,8 @@ export default function EditableInput({ defaultValue, onSubmit }: Props) {
 				bg='bg'
 				_placeholder={{ fontSize: 'md' }}
 				_focus={{
-					border: '1px solid',
+					borderWidth: '0.5px',
+					borderStyle: 'solid',
 					borderColor: 'main',
 					outline: 'none',
 				}}

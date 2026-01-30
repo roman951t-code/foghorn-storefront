@@ -28,7 +28,9 @@ const mapBannerToPromo = (banner: {
 }): PromoCard => ({
 	id: banner.id,
 	text: banner.title.trim(),
+	subtitle: banner.subtitle?.trim() || undefined,
 	href: banner.linkUrl?.trim() || undefined,
+	linkLabel: banner.linkLabel?.trim() || undefined,
 	imageUrl: banner.imageUrl?.trim() || undefined,
 });
 

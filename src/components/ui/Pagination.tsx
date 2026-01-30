@@ -114,7 +114,7 @@ export default function Pagination({
 								<IconButton
 									as='span'
 									variant={safePage === page.value ? 'outline' : 'ghost'}
-									borderColor={safePage === page.value ? 'border.dark' : 'transparent'}
+									borderColor={safePage === page.value ? 'border' : 'transparent'}
 									aria-label={`Page ${page.value}`}
 								>
 									{page.value}

@@ -21,6 +21,10 @@ async function fetchProductBySlug(slug: string) {
 			fullSlug: true,
 			slug: true,
 			description: true,
+			metaTitle: true,
+			metaDescription: true,
+			canonicalUrl: true,
+			openGraphImage: true,
 			imageUrl: true,
 			basePrice: true,
 			discountPrice: true,
@@ -32,10 +36,26 @@ async function fetchProductBySlug(slug: string) {
 			reviewCount: true,
 			categoryName: true,
 			subcategoryName: true,
+			category: {
+				select: {
+					attributeSet: {
+						select: {
+							items: {
+								select: {
+									attributeId: true,
+									sortOrder: true,
+									attribute: { select: { id: true, name: true, unit: true } },
+								},
+								orderBy: [{ sortOrder: 'asc' }, { attributeId: 'asc' }],
+							},
+						},
+					},
+				},
+			},
 			brand: { select: { name: true } },
 			attributes: {
 				select: {
-					attribute: { select: { name: true, unit: true } },
+					attribute: { select: { id: true, name: true, unit: true } },
 					value: true,
 				},
 			},
@@ -74,8 +94,53 @@ async function fetchProductBySlug(slug: string) {
 	if (!product) return null;
 	const images = buildProductImages(product.imageUrl ?? undefined, 4);
 	const basePrice = product.basePrice.toNumber();
+	const attributeSetItems = product.category?.attributeSet?.items ?? [];
+
+	const attributeValueById = new Map<
+		string,
+		{ id: string; name: string; unit: string | null; value: string }
+	>();
+	for (const a of product.attributes) {
+		attributeValueById.set(a.attribute.id, {
+			id: a.attribute.id,
+			name: a.attribute.name,
+			unit: a.attribute.unit,
+			value: a.value,
+		});
+	}
+
+	const attributeIdsInSet = new Set(attributeSetItems.map((i) => i.attributeId));
+
+	const setAttributes =
+		attributeSetItems.length > 0
+			? attributeSetItems.map((item) => {
+					const id = item.attribute.id;
+					const existing = attributeValueById.get(id);
+					return {
+						id,
+						name: item.attribute.name,
+						unit: item.attribute.unit,
+						value: existing?.value ?? null,
+					};
+			  })
+			: [];
+
+	const extraAttributes =
+		attributeSetItems.length > 0
+			? [...attributeValueById.values()]
+					.filter((a) => !attributeIdsInSet.has(a.id))
+					.sort((a, b) => a.name.localeCompare(b.name))
+					.map((a) => ({ ...a, value: a.value }))
+			: [...attributeValueById.values()].sort((a, b) => a.name.localeCompare(b.name));
+
+	const mergedAttributes =
+		attributeSetItems.length > 0
+			? [...setAttributes, ...extraAttributes]
+			: extraAttributes.map((a) => ({ ...a, value: a.value }));
+
+	const { category, ...productWithoutCategory } = product;
 	return {
-		...product,
+		...productWithoutCategory,
 		basePrice,
 		discountPrice: getEffectiveDiscountPrice(
 			basePrice,
@@ -84,9 +149,9 @@ async function fetchProductBySlug(slug: string) {
 			product.discountEndAt ?? null
 		),
 		images,
-		attributes: product.attributes.map((a) => ({
-			name: a.attribute.name,
-			unit: a.attribute.unit,
+		attributes: mergedAttributes.map((a) => ({
+			name: a.name,
+			unit: a.unit,
 			value: a.value,
 		})),
 		variants: product.variants.map((v) => ({

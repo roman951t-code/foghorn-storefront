@@ -43,7 +43,9 @@ export default async function OpenGraphImage({ params }: { params: { locale: str
 						display: 'flex',
 						flexDirection: 'column',
 						justifyContent: 'space-between',
-						border: '1px solid rgba(255,255,255,0.12)',
+						borderWidth: '0.5px',
+						borderStyle: 'solid',
+						borderColor: 'rgba(255,255,255,0.12)',
 						borderRadius: '32px',
 						padding: '48px',
 						background:

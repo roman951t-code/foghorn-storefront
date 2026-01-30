@@ -19,7 +19,7 @@ function CustomBreadcrumbLink({ href, children }: { href: string; children: Reac
 			px='1.5'
 			py='1'
 			boxShadow='none'
-			borderColor='border.light'
+			borderColor='border'
 		>
 			<LocaleNavLink
 				href={href}
@@ -83,7 +83,7 @@ export default function Breadcrumbs({
 						boxShadow='none'
 						px='1.5'
 						py='1'
-						borderColor='border.light'
+						borderColor='border'
 						aria-label='Open catalog'
 						height='32px'
 						minW='auto'

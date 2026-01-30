@@ -1,7 +1,7 @@
 'use client';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { VStack, List, Link, Accordion, Separator, Text } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
 type Props = {
@@ -17,42 +17,74 @@ type Props = {
 export default function SearchCategories({ data, allCategories }: Props) {
 	const [showAll, setShowAll] = useState(false);
 
-	const grouped = data.reduce(
-		(acc, item) => {
-			const key = item.categorySlug;
-			if (!acc[key]) {
-				acc[key] = {
-					categoryName: item.categoryName,
-					categorySlug: item.categorySlug,
-					subcategories: [],
-				};
-			}
-			acc[key].subcategories.push({
-				subcategoryName: item.subcategoryName,
-				subcategorySlug: item.subcategorySlug,
-			});
-			return acc;
-		},
-		{} as Record<
-			string,
-			{
-				categoryName: string;
-				categorySlug: string;
-				subcategories: { subcategoryName: string; subcategorySlug: string }[];
-			}
-		>
+	const categoryList = useMemo(() => {
+		const grouped = data.reduce(
+			(acc, item) => {
+				const key = item.categorySlug;
+				if (!acc[key]) {
+					acc[key] = {
+						categoryName: item.categoryName,
+						categorySlug: item.categorySlug,
+						subcategories: [],
+					};
+				}
+				acc[key].subcategories.push({
+					subcategoryName: item.subcategoryName,
+					subcategorySlug: item.subcategorySlug,
+				});
+				return acc;
+			},
+			{} as Record<
+				string,
+				{
+					categoryName: string;
+					categorySlug: string;
+					subcategories: { subcategoryName: string; subcategorySlug: string }[];
+				}
+			>
+		);
+
+		return Object.values(grouped);
+	}, [data]);
+
+	const visibleCategories = useMemo(
+		() => (showAll ? categoryList : categoryList.slice(0, 5)),
+		[showAll, categoryList]
+	);
+	const visibleCategorySlugs = useMemo(
+		() => new Set(visibleCategories.map((c) => c.categorySlug)),
+		[visibleCategories]
 	);
 
-	const categoryList = Object.values(grouped);
-	const visibleCategories = showAll ? categoryList : categoryList.slice(0, 5);
+	const [openCategories, setOpenCategories] = useState<string[]>(
+		() => visibleCategories.map((c) => c.categorySlug)
+	);
+
+	useEffect(() => {
+		setOpenCategories((prev) => {
+			const next = prev.filter((slug) => visibleCategorySlugs.has(slug));
+			if (next.length === prev.length && next.every((slug, index) => slug === prev[index])) {
+				return prev;
+			}
+			return next;
+		});
+	}, [visibleCategorySlugs]);
 
 	return (
 		<VStack align='flex-start' pb={4} w='full' gap='4'>
-			<Separator color='border.light' w='full' />
+			<Separator color='border' w='full' />
 
-			<Accordion.Root multiple lazyMount value={visibleCategories.map((c) => c.categorySlug)}>
+			<Accordion.Root
+				multiple
+				collapsible
+				lazyMount
+				value={openCategories}
+				onValueChange={(details) =>
+					setOpenCategories((details as { value?: string[] }).value ?? [])
+				}
+			>
 				{visibleCategories.map(({ categoryName, categorySlug, subcategories }) => (
-					<Accordion.Item key={categorySlug} value={categorySlug} borderBottomColor='border.light'>
+					<Accordion.Item key={categorySlug} value={categorySlug} borderBottomColor='border'>
 						<Accordion.ItemTrigger cursor='pointer'>
 							<Text fontSize='md' color='main'>
 								{categoryName}
@@ -106,7 +138,7 @@ export default function SearchCategories({ data, allCategories }: Props) {
 						{allCategories}
 						{showAll ? <IoIosArrowUp /> : <IoIosArrowDown />}
 					</Link>
-					<Separator color='border.light' w='full' />
+					<Separator color='border' w='full' />
 				</>
 			)}
 		</VStack>

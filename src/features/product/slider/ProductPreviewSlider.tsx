@@ -39,8 +39,9 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 						<Box
 							as='div'
 							_focus={{ outline: 'none' }}
-							border='0.5px solid'
-							borderColor='border.light'
+							borderWidth='0.5px'
+							borderStyle='solid'
+							borderColor='border'
 							borderRadius='6px'
 							overflow='hidden'
 							display='inline-block'

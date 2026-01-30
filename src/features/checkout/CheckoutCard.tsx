@@ -35,16 +35,16 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 			<Group p='0'>
 				<VStack mr='1'>
 					<LocaleNavLink href={productHref} display='inline-block' lineHeight='0'>
-						<Image
-							style={{
-								borderRadius: '6px',
-								border: '0.5px solid var(--chakra-colors-border-light)',
-							}}
-							width={100}
-							height={100}
-							src={getImage(product.imageUrl)}
-							alt={product.name}
-						/>
+							<Image
+								style={{
+									borderRadius: '6px',
+									border: '0.5px solid var(--chakra-colors-border)',
+								}}
+								width={100}
+								height={100}
+								src={getImage(product.imageUrl)}
+								alt={product.name}
+							/>
 					</LocaleNavLink>
 					<Text as='span' textStyle='md' minW='56px' fontWeight='semibold'>
 						{`x ${quantity}${t('units')}`}
@@ -87,7 +87,7 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 				</VStack>
 			</Group>
 
-			{showSeparator && <Separator mb='2' color='border.dark' />}
+			{showSeparator && <Separator mb='2' color='border' />}
 		</Card.Root>
 	);
 }
@@ -115,18 +115,18 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 				>
 					<Flex alignItems='center' direction='row' w='full' gapX='2'>
 						<LocaleNavLink href={productHref} display='inline-block' lineHeight='0' mx='3'>
-							<Image
-								width={100}
-								height={100}
-								src={getImage(product.imageUrl)}
-								style={{
-									objectFit: 'contain',
-									borderRadius: '6px',
-									marginLeft: '4px',
-									border: '0.5px solid var(--chakra-colors-border-light)',
-								}}
-								alt={product.name}
-							/>
+								<Image
+									width={100}
+									height={100}
+									src={getImage(product.imageUrl)}
+									style={{
+										objectFit: 'contain',
+										borderRadius: '6px',
+										marginLeft: '4px',
+										border: '0.5px solid var(--chakra-colors-border)',
+									}}
+									alt={product.name}
+								/>
 						</LocaleNavLink>
 						<Flex direction='column' gap={3} pt={{ base: 2, sm: 0 }}>
 							<Card.Title fontWeight='medium' lineHeight='24px'>
@@ -189,7 +189,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 				</Flex>
 			</Flex>
 
-			{showSeparator && <Separator mb='4' color='border.dark' />}
+			{showSeparator && <Separator mb='4' color='border' />}
 		</Card.Root>
 	);
 }

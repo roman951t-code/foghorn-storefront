@@ -19,7 +19,13 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 
 	return (
 		<Flex bg='bg.tertiary' overflowY='auto' rounded='sm' boxShadow='sm' w='100%' p={4}>
-			<Wrap gap={12} justify='flex-start' position='relative' w={{ base: '100%', lg: '75%' }}>
+			<Wrap
+				gap={12}
+				justify='flex-start'
+				position='relative'
+				maxH='440px'
+				w={{ base: '100%', lg: '75%' }}
+			>
 				{category.children?.map((subcategory) => (
 					<Box key={subcategory.id} maxW='32%'>
 						<Text ml='1' fontWeight='semibold' textStyle='lg' mb={4}>
@@ -93,7 +99,9 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					color='main'
 					size='2xl'
 					fontWeight='medium'
-					borderBottom='1px solid'
+					borderBottomWidth='0.5px'
+					borderBottomStyle='solid'
+					borderBottomColor='border'
 					pb='1'
 					zIndex={1}
 				>
@@ -106,8 +114,9 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					mt={4}
 					overflow='hidden'
 					rounded='sm'
-					border='0.5px solid'
-					borderColor='border.light'
+					borderWidth='0.5px'
+					borderStyle='solid'
+					borderColor='border'
 				>
 					<Image
 						key={categoryBg}

@@ -54,20 +54,20 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 						);
 
 						return (
-							<Image
-								key={item.id}
-								width={100}
-								height={100}
-								src={previewImage}
-								alt={item.product.name}
-								style={{
-									objectFit: 'cover',
-									borderRadius: '6px',
-									border: '0.5px solid var(--chakra-colors-border-light)',
-								}}
-							/>
-						);
-					})}
+								<Image
+									key={item.id}
+									width={100}
+									height={100}
+									src={previewImage}
+									alt={item.product.name}
+									style={{
+										objectFit: 'cover',
+										borderRadius: '6px',
+										border: '0.5px solid var(--chakra-colors-border)',
+									}}
+								/>
+							);
+						})}
 				</HStack>
 				<Tag.Root
 					py='1.5'
@@ -75,7 +75,7 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 					borderWidth='0.5px'
 					boxShadow='none'
 					bg='bg.tertiary'
-					borderColor='border.light'
+					borderColor='border'
 					size='lg'
 					color='main'
 					minW='154px'
@@ -100,7 +100,7 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 							borderWidth='0.5px'
 							boxShadow='none'
 							bg='bg.tertiary'
-							borderColor='border.light'
+							borderColor='border'
 							size='lg'
 							color='main'
 							py='1.5'

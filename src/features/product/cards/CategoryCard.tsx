@@ -26,8 +26,9 @@ export default function CategoryCard({
 			flex='1'
 			size='sm'
 			overflow='hidden'
-			border='1px solid'
-			borderColor='border.dark'
+			borderWidth='0.5px'
+			borderStyle='solid'
+			borderColor='border'
 			bg='bg.tertiary'
 			transition='all 0.25s ease-in-out'
 			_hover={{
@@ -50,7 +51,7 @@ export default function CategoryCard({
 							px='1.5'
 							py='1'
 							boxShadow='none'
-							borderColor='border.light'
+							borderColor='border'
 						>
 							<LocaleNavLink
 								href={product.href}
@@ -88,7 +89,7 @@ export default function CategoryCard({
 					maxHeight: '200px',
 					objectFit: 'cover',
 					marginTop: '28px',
-					border: '0.5px solid var(--chakra-colors-border-light)',
+					border: '0.5px solid var(--chakra-colors-border)',
 				}}
 			/>
 		</Card.Root>

@@ -1,13 +1,14 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Flex, HStack, Text, useBreakpointValue } from '@chakra-ui/react';
+import { Box, Flex, HStack, Text, VStack, useBreakpointValue } from '@chakra-ui/react';
 import { LoadingPromoSkeleton } from '@/components/ui/Skeleton';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, FreeMode, Mousewheel } from 'swiper/modules';
+import { Autoplay, Mousewheel } from 'swiper/modules';
 import { Link } from '@/i18n/routing';
 import { PROMO_CARDS, type PromoCard } from '@/data/navigation/promoCards';
 import { promoBreakpoints } from '@/data/breakpoints';
+import { useRef } from 'react';
 
 import 'swiper/css';
 
@@ -27,54 +28,164 @@ type PromoProps = {
 	promos?: PromoCard[];
 };
 
+function PromoCardSlide({
+	promo,
+	isDraggingRef,
+}: {
+	promo: PromoCard;
+	isDraggingRef: { current: boolean };
+}) {
+	const overlayContent = (
+		<Box
+			bg='rgba(24,24,24,0.5)'
+			backdropFilter='blur(10px)'
+			borderWidth='0.5px'
+			borderStyle='solid'
+			borderColor='rgba(255,255,255,0.14)'
+			borderRadius='md'
+			p={{ base: 3.5, md: 4 }}
+			maxW={{ base: '100%', md: '84%' }}
+			minW='300px'
+			transition='all 0.2s ease'
+			_hover={{ bg: 'rgba(24,24,24,0.62)', borderColor: 'rgba(255,255,255,0.20)' }}
+		>
+			<Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight='semibold' lineClamp={2}>
+				{promo.text}
+			</Text>
+
+			{promo.subtitle ? (
+				<Text mt='1.5' fontSize={{ base: 'sm', md: 'md' }} opacity={0.92} lineClamp={2}>
+					{promo.subtitle}
+				</Text>
+			) : null}
+
+			{promo.href ? (
+				<Box
+					display='inline-flex'
+					mt='3'
+					px='3'
+					py='2'
+					borderRadius='full'
+					bg='rgba(255,255,255,0.12)'
+					borderWidth='0.5px'
+					borderStyle='solid'
+					borderColor='rgba(255,255,255,0.18)'
+					fontSize='sm'
+					fontWeight='700'
+					transition='all 0.2s ease'
+					_groupHover={{ bg: 'rgba(255,255,255,0.18)', transform: 'translateY(-1px)' }}
+				>
+					{promo.linkLabel ?? 'Shop now'}
+				</Box>
+			) : null}
+		</Box>
+	);
+
+	const overlay = promo.href ? (
+		<Link
+			href={promo.href}
+			aria-label={promo.linkLabel ?? promo.text}
+			style={{ display: 'block' }}
+			onClick={(e) => {
+				if (isDraggingRef.current) {
+					e.preventDefault();
+				}
+			}}
+		>
+			{overlayContent}
+		</Link>
+	) : (
+		overlayContent
+	);
+
+	return (
+		<Flex
+			position='relative'
+			justify='flex-start'
+			align='stretch'
+			cursor='grab'
+			_active={{ cursor: 'grabbing' }}
+			bg='bg.tertiary'
+			borderWidth='0.5px'
+			borderStyle='solid'
+			borderColor={{ base: 'border', _dark: 'border' }}
+			borderRadius='md'
+			height='472px'
+			width='100%'
+			overflow='hidden'
+			boxShadow='none'
+			transition='box-shadow 0.2s ease-in-out'
+			_hover={{ boxShadow: 'md' }}
+			role='group'
+			title={promo.text}
+		>
+			<Box
+				position='absolute'
+				inset='0'
+				bgImage={promo.imageUrl ? `url(${promo.imageUrl})` : undefined}
+				bgSize='cover'
+				bgPos='center'
+				bgRepeat='no-repeat'
+				transform='scale(1.01)'
+				transition='transform 0.35s ease'
+				_groupHover={{ transform: 'scale(1.06)' }}
+			/>
+			<Box
+				position='absolute'
+				inset='0'
+				bgGradient='linear(to-t, rgba(0,0,0,0.78), rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.0))'
+			/>
+
+			<VStack
+				position='relative'
+				align='flex-start'
+				justify='flex-end'
+				gap='0'
+				p={{ base: 4, md: 6 }}
+				w='100%'
+				h='100%'
+				color='white'
+			>
+				<Box cursor={promo.href ? 'pointer' : 'default'}>{overlay}</Box>
+			</VStack>
+		</Flex>
+	);
+}
+
 function PromoSlider({ promos }: PromoProps) {
 	const cards = promos && promos.length > 0 ? promos : PROMO_CARDS;
+	const isDraggingRef = useRef(false);
 
 	return (
 		<Swiper
 			spaceBetween={6}
 			breakpoints={promoBreakpoints}
-			modules={[Autoplay, FreeMode, Mousewheel]}
+			slidesPerView={1}
+			modules={[Autoplay, Mousewheel]}
 			autoplay={false}
 			loop
 			className='promoSlider'
 			grabCursor={true}
 			simulateTouch={true}
-			freeMode={{ enabled: true, sticky: false }}
+			onTouchStart={() => {
+				isDraggingRef.current = false;
+			}}
+			onSliderMove={() => {
+				isDraggingRef.current = true;
+			}}
+			onTouchEnd={() => {
+				// Swiper can fire a click after touch ends; release the flag on the next tick.
+				setTimeout(() => {
+					isDraggingRef.current = false;
+				}, 0);
+			}}
 			mousewheel={{ forceToAxis: true }}
 			touchStartPreventDefault={false}
 			touchRatio={1}
 		>
 			{cards.map((promo) => (
 				<SwiperSlide key={promo.id}>
-					<Flex
-						justify='center'
-						align='center'
-						cursor='grab'
-						bg='bg.tertiary'
-						bgImage={promo.imageUrl ? `url(${promo.imageUrl})` : undefined}
-						bgSize='cover'
-						position='center'
-						bgRepeat='no-repeat'
-						border='0.5px solid'
-						borderColor='border'
-						borderRadius='md'
-						height='472px'
-						width='100%'
-						color='main'
-						fontWeight='400'
-						fontSize='xl'
-						textAlign='center'
-						boxShadow='none'
-						p={6}
-						transition='all 0.2s ease-in-out'
-						title={promo.text}
-						role='group'
-					>
-						<Text _groupHover={{ color: 'link' }} bg='bg' px='2' rounded='sm'>
-							{promo.href ? <Link href={promo.href}>{promo.text}</Link> : promo.text}
-						</Text>
-					</Flex>
+					<PromoCardSlide promo={promo} isDraggingRef={isDraggingRef} />
 				</SwiperSlide>
 			))}
 		</Swiper>

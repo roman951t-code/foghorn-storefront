@@ -116,10 +116,13 @@ export default function ProductCard({ product }: Props) {
 		<Card.Root
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			w='full'
+			maxW='95%'
+			mx='auto'
 			minW='250px'
 			h='full'
-			border='1px solid'
-			borderColor='border.dark'
+			borderWidth='0.5px'
+			borderStyle='solid'
+			borderColor='border'
 			bg={isInStock ? 'bg.tertiary' : 'gray.100/10'}
 			opacity={isInStock ? '1' : '.9'}
 			transition='all 0.25s ease-in-out'

@@ -31,7 +31,9 @@ const styles = {
 	card: {
 		width: 'min(520px, 100%)',
 		background: 'rgba(12, 19, 38, 0.92)',
-		border: '1px solid rgba(255, 255, 255, 0.08)',
+		borderWidth: '0.5px',
+		borderStyle: 'solid',
+		borderColor: 'rgba(255, 255, 255, 0.08)',
 		borderRadius: '16px',
 		padding: '24px',
 		boxShadow: '0 20px 60px rgba(0, 0, 0, 0.45)',

@@ -129,9 +129,11 @@ export default function SubscribeSection({ i18nData }: Props) {
 		<Flex
 			mt={24}
 			bg='bg.tertiary'
+			borderWidth='0.5px'
+			borderStyle='solid'
+			borderColor='border'
 			p={4}
 			rounded='md'
-			boxShadow='sm'
 			gapX='8'
 			gapY='4'
 			flexWrap='wrap'

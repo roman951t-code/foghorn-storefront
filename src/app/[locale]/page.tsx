@@ -45,8 +45,8 @@ export default async function Main() {
 			<CatalogPanel i18nData={i18nData} promoCards={promoCards} />
 			<ProductsSection title={prodT('popular')} tag='popular' />
 			<ProductsSection title={prodT('new')} tag='new' />
-			{/*<ProductsSection title={prodT('discount')} tag='discount' />
-			<ProductsSection title={prodT('promotional')} tag='promotional' /> */}
+			<ProductsSection title={prodT('discount')} tag='discount' />
+			<ProductsSection title={prodT('promotional')} tag='promotional' />
 			<ViewedProductsSection title={prodT('viewed')} tag='viewed' />
 
 			<SubscribeSection i18nData={subscribeI18nData} />

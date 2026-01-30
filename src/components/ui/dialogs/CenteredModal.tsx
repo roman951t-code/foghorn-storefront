@@ -79,7 +79,8 @@ export default function CenteredModal({
 						fontSize='xl'
 						w='100%'
 						fontWeight='medium'
-						borderBottom='1px solid'
+						borderBottomWidth='0.5px'
+						borderBottomStyle='solid'
 						borderColor='border'
 						pb={2}
 					>

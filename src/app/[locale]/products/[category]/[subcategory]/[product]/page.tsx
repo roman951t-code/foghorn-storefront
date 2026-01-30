@@ -31,12 +31,19 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const productData = await getProductBySlugCached(productSlug);
 	if (!productData) notFound();
 
+	const toAbsolute = (url?: string | null) => {
+		if (!url) return undefined;
+		return url.startsWith('http') ? url : absoluteUrl(url);
+	};
+
 	const pagesT = await getTranslations('pages');
-	const title = pagesT('metadata.product', { product: productData.name });
-	const description = pagesT('metadata.productDescription', {
+	const defaultTitle = pagesT('metadata.product', { product: productData.name });
+	const defaultDescription = pagesT('metadata.productDescription', {
 		product: productData.name,
 		description: productData.description ?? '',
 	});
+	const title = productData.metaTitle ?? defaultTitle;
+	const description = productData.metaDescription ?? defaultDescription;
 	const alternates = buildLanguageAlternates(
 		locale,
 		`/products/${category}/${subcategory}/${productSlug}`,
@@ -44,23 +51,23 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 			...(resolvedSearch?.tab ? { tab: resolvedSearch.tab } : {}),
 		}
 	);
+	const canonical = toAbsolute(productData.canonicalUrl) ?? alternates?.canonical;
 	const fallbackImage = absoluteUrl('/assets/images/logoBig.webp');
-	const image =
-		productData.imageUrl &&
-		(productData.imageUrl.startsWith('http')
-			? productData.imageUrl
-			: absoluteUrl(productData.imageUrl));
-	const ogImage = image ?? fallbackImage;
+	const image = toAbsolute(productData.imageUrl);
+	const ogImage = toAbsolute(productData.openGraphImage) ?? image ?? fallbackImage;
 
 	return {
 		title,
 		description,
-		alternates,
+		alternates: {
+			...alternates,
+			canonical,
+		},
 		openGraph: {
 			title,
 			description,
 			type: 'website',
-			url: alternates?.canonical,
+			url: canonical,
 			images: [ogImage],
 		},
 		twitter: {
@@ -93,17 +100,17 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 	}
 
 	const canonicalPath = localizePath(locale, `/products/${category}/${subcategory}/${product}`);
-	const canonicalUrl = absoluteUrl(canonicalPath);
-
-	const toAbsoluteImage = (url?: string | null) => {
+	const toAbsolute = (url?: string | null) => {
 		if (!url) return undefined;
 		return url.startsWith('http') ? url : absoluteUrl(url);
 	};
+	const canonicalUrl = toAbsolute(productData.canonicalUrl) ?? absoluteUrl(canonicalPath);
 
 	const images = (productData.images ?? [])
-		.map((src) => toAbsoluteImage(src))
+		.map((src) => toAbsolute(src))
 		.filter(Boolean) as string[];
-	const primaryImage = images[0] ?? toAbsoluteImage(productData.imageUrl);
+	const openGraphImage = toAbsolute(productData.openGraphImage);
+	const primaryImage = images[0] ?? openGraphImage ?? toAbsolute(productData.imageUrl);
 	const price = productData.discountPrice ?? productData.basePrice;
 	const availability = productData.inStock
 		? 'https://schema.org/InStock'
@@ -168,8 +175,13 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 		'@context': 'https://schema.org',
 		'@type': 'Product',
 		name: productData.name,
-		description: productData.description ?? productData.name,
-		image: images.length ? images : primaryImage ? [primaryImage] : [],
+		...(productData.metaTitle ? { alternateName: productData.metaTitle } : {}),
+		description: productData.metaDescription ?? productData.description ?? productData.name,
+		url: canonicalUrl,
+		image: [
+			...(openGraphImage ? [openGraphImage] : []),
+			...(images.length ? images : primaryImage ? [primaryImage] : []),
+		].filter((value, index, arr) => !!value && arr.indexOf(value) === index),
 		sku: productData.productCode,
 		brand: {
 			'@type': 'Brand',

@@ -125,18 +125,9 @@ const config = defineConfig({
 				},
 				border: {
 					DEFAULT: {
-						value: '{colors.bg.fg}',
-					},
-					light: {
 						value: {
-							base: '{colors.gray.200}',
+							_light: '{colors.gray.300}',
 							_dark: '{colors.gray.500}',
-						},
-					},
-					dark: {
-						value: {
-							base: '{colors.gray.300}',
-							_dark: '{colors.gray.700}',
 						},
 					},
 					disabled: { value: '{colors.fg.muted}' },
@@ -206,7 +197,7 @@ const config = defineConfig({
 			backgroundColor: 'bg.tertiary',
 			borderWidth: '0.5px',
 			borderRadius: '6px',
-			borderColor: 'var(--chakra-colors-border-light)',
+			borderColor: 'var(--chakra-colors-border)',
 			height: '88px !important',
 			width: '28px !important',
 		},

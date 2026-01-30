@@ -87,5 +87,6 @@ export type Filter = {
 	id: string;
 	key: string;
 	name: string;
+	unit?: string | null;
 	values: FilterValue[];
 };

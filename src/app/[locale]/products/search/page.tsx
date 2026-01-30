@@ -221,8 +221,8 @@ export default async function SearchProducts({ searchParams }: Props) {
 			<Group justifyContent='space-between' align='flex-start' gap='3'>
 				<Box
 					as='aside'
-					w='20%'
-					minW='232px'
+					w='304px'
+					flexShrink={0}
 					bg='bg.tertiary'
 					minH='800px'
 					rounded='sm'
@@ -246,7 +246,7 @@ export default async function SearchProducts({ searchParams }: Props) {
 					</VStack>
 				</Box>
 
-				<Box as='section' w={{ base: '100%', lg: '80%' }}>
+				<Box as='section' w='100%' flex='1' minW={0}>
 					<ProductsGrid
 						products={products}
 						notFound={productsT('productsNotFound')}

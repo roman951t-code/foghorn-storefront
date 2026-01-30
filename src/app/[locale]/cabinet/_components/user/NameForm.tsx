@@ -34,8 +34,9 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 				<Fieldset.Content
 					css={{ '--field-label-width': '120px' }}
 					gap='6'
-					border='1px solid'
-					borderColor='border.dark'
+					borderWidth='0.5px'
+					borderStyle='solid'
+					borderColor='border'
 					borderRadius='md'
 					p='4'
 					maxW='4xl'

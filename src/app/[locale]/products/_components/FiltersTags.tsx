@@ -1,9 +1,10 @@
 'use client';
 import { HStack, Tag, Wrap } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FILTER_TAG_EXCLUDED_KEYS } from '@/constants/products';
 import type { Filter } from '@/types/product';
+import { localizeUnit } from '@/utils/unitLocalization';
 
 type Props = {
 	filters?: Filter[] | null;
@@ -13,6 +14,7 @@ export default function FiltersTags({ filters }: Props) {
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const t = useTranslations('products');
+	const locale = useLocale();
 
 	const minPrice = searchParams.get('min');
 	const maxPrice = searchParams.get('max');
@@ -48,12 +50,17 @@ export default function FiltersTags({ filters }: Props) {
 
 	const filterLabelByKey = new Map<string, string>();
 	const valueLabelByKey = new Map<string, Map<string, string>>();
+	const unitByKey = new Map<string, string | null>();
 	(filters ?? []).forEach((filter) => {
 		const baseLabel = filter.key === 'brand' ? t('brand') : filter.name;
 		filterLabelByKey.set(filter.key, baseLabel);
 		const labels = new Map<string, string>();
 		filter.values.forEach((val) => labels.set(val.value, val.label));
 		valueLabelByKey.set(filter.key, labels);
+		unitByKey.set(
+			filter.key,
+			filter.key === 'brand' ? null : localizeUnit(filter.unit, locale)
+		);
 	});
 
 	const clearFilters = () => {
@@ -76,8 +83,9 @@ export default function FiltersTags({ filters }: Props) {
 						transition='all .15s ease-in-out'
 						px='4'
 						py='1.5'
-						border='1px solid'
-						borderColor='border.light'
+						borderWidth='0.5px'
+						borderStyle='solid'
+						borderColor='border'
 					>
 						<Tag.Label>
 							{minPrice} ₴ – {maxPrice} ₴
@@ -98,8 +106,9 @@ export default function FiltersTags({ filters }: Props) {
 						transition='all .15s ease-in-out'
 						px='4'
 						py='1.5'
-						border='1px solid'
-						borderColor='border.light'
+						borderWidth='0.5px'
+						borderStyle='solid'
+						borderColor='border'
 					>
 						<Tag.Label>
 							{inStockFilter === 'true' ? t('productIsPresent') : t('productIsOutOfStock')}
@@ -123,8 +132,9 @@ export default function FiltersTags({ filters }: Props) {
 						transition='all .15s ease-in-out'
 						px='4'
 						py='1.5'
-						border='1px solid'
-						borderColor='border.light'
+						borderWidth='0.5px'
+						borderStyle='solid'
+						borderColor='border'
 					>
 						<Tag.Label>{orderBy}</Tag.Label>
 						<Tag.EndElement onClick={() => clearParam('orderBy')}>
@@ -144,11 +154,14 @@ export default function FiltersTags({ filters }: Props) {
 						transition='all .15s ease-in-out'
 						px='4'
 						py='1.5'
-						border='1px solid'
-						borderColor='border.light'
+						borderWidth='0.5px'
+						borderStyle='solid'
+						borderColor='border'
 					>
 						<Tag.Label>
-							{filterLabelByKey.get(key) ?? key}: {valueLabelByKey.get(key)?.get(value) ?? value}
+							{filterLabelByKey.get(key) ?? key}:{' '}
+							{valueLabelByKey.get(key)?.get(value) ?? value}
+							{unitByKey.get(key) ? ` ${unitByKey.get(key)}` : ''}
 						</Tag.Label>
 						<Tag.EndElement onClick={() => clearParam(key, value)}>
 							<Tag.CloseTrigger

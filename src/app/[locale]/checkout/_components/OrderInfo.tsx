@@ -159,7 +159,7 @@ export default function OrderInfo() {
 			<Heading as='h3' mt='4' size='2xl' fontWeight='medium' textAlign='center'>
 				{t('yourOrder')}
 			</Heading>
-			<Separator my='2' color='border.dark' />
+			<Separator my='2' color='border' />
 			<Box maxH='600px' overflowY='auto' hideBelow='lg'>
 				{cartItems.map((item, idx) => (
 					<SidebarCheckoutCard
@@ -199,7 +199,7 @@ export default function OrderInfo() {
 						{`${t('discountSum')}: ${discountText}`}
 					</Highlight>
 				</Text>
-				<Separator w='full' mt='2' color='border.dark' />
+				<Separator w='full' mt='2' color='border' />
 				<Stat.Root mt='2'>
 					<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
 					<Stat.ValueText fontSize='3xl'>{`${discountedTotal.toFixed(2)} ₴`}</Stat.ValueText>

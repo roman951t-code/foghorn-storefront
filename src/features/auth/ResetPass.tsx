@@ -90,7 +90,8 @@ export default function ResetPass({ i18nData, backToLogin }: ResetPassProps) {
 					w='100%'
 					color='main'
 					variant='outline'
-					border='1px solid'
+					borderWidth='0.5px'
+					borderStyle='solid'
 					borderColor='border'
 					onClick={backToLogin}
 				>

@@ -86,7 +86,7 @@ export function OrderAccordionContent({ order }: Props) {
 						{productsT('repeatOrder')}
 					</PrimaryButton>
 				</Flex>
-				<Separator mt='4' mb='6' color='border.dark' />
+				<Separator mt='4' mb='6' color='border' />
 				<Stack maxH='510px' overflowY='auto'>
 					{order.items.map((item, idx) => {
 						const previewImage = toPreviewImage(
@@ -97,18 +97,18 @@ export function OrderAccordionContent({ order }: Props) {
 							<div key={item.id}>
 								<Flex alignItems='center' direction={{ base: 'column', sm: 'row' }} gap='3'>
 									<LocaleNavLink href={`/products/${item.product.fullSlug}`} mr='2'>
-										<Image
-											width={110}
-											height={110}
-											src={previewImage}
-											alt={item.product.name}
-											style={{
-												objectFit: 'contain',
-												borderRadius: '6px',
-												border: '0.5px solid var(--chakra-colors-border-light)',
-											}}
-										/>
-									</LocaleNavLink>
+											<Image
+												width={110}
+												height={110}
+												src={previewImage}
+												alt={item.product.name}
+												style={{
+													objectFit: 'contain',
+													borderRadius: '6px',
+													border: '0.5px solid var(--chakra-colors-border)',
+												}}
+											/>
+										</LocaleNavLink>
 
 									<Flex
 										direction='column'
@@ -152,7 +152,7 @@ export function OrderAccordionContent({ order }: Props) {
 									</Text>
 								</Flex>
 
-								{idx < order.items.length - 1 && <Separator my='4' color='border.dark' />}
+								{idx < order.items.length - 1 && <Separator my='4' color='border' />}
 							</div>
 						);
 					})}

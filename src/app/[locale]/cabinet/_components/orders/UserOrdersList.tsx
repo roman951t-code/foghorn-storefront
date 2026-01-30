@@ -69,8 +69,9 @@ export default function UserOrdersList({ orders, emptyText }: Props) {
 				return (
 					<Card.Root
 						minWidth='200px'
-						border='1px solid'
-						borderColor='border.dark'
+						borderWidth='0.5px'
+						borderStyle='solid'
+						borderColor='border'
 						bg='bg.tertiary'
 						p='4'
 						mb='6'

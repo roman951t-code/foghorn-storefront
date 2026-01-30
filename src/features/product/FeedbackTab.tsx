@@ -50,8 +50,9 @@ export default function FeedbackTab({
 				size='sm'
 				minWidth='200px'
 				w='100%'
-				border='1px solid'
-				borderColor='border.dark'
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor='border'
 				bg='bg.tertiary'
 			>
 				<Card.Header p='4'>
@@ -112,8 +113,9 @@ export default function FeedbackTab({
 					size='sm'
 					minWidth='200px'
 					w='full'
-					border='1px solid'
-					borderColor='border.dark'
+					borderWidth='0.5px'
+					borderStyle='solid'
+					borderColor='border'
 					bg='bg.tertiary'
 				>
 					<Card.Header>
@@ -132,7 +134,7 @@ export default function FeedbackTab({
 							<DateWithLocale date={review.createdAt} />
 						</Flex>
 					</Card.Header>
-					<Separator mt='4' color='border.dark' />
+					<Separator mt='4' color='border' />
 					<Card.Body color='main' flexDirection='row'>
 						<DataList.Root flex='1'>
 							{review.advantages && (

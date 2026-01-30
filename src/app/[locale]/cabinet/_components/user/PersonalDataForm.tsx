@@ -94,8 +94,9 @@ export default function PersonalDataForm({ i18nData }: Props) {
 			<Fieldset.Root size='lg' alignItems='center'>
 				<Fieldset.Content
 					gap='6'
-					border='1px solid'
-					borderColor='border.dark'
+					borderWidth='0.5px'
+					borderStyle='solid'
+					borderColor='border'
 					borderRadius='md'
 					p='4'
 					maxW='4xl'

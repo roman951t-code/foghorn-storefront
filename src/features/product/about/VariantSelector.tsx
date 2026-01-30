@@ -90,7 +90,7 @@ export function VariantSelector({
 										variant={selected ? 'solid' : 'outline'}
 										bg={selected ? 'main.secondary' : 'transparent'}
 										color={selected ? 'black' : 'main'}
-										borderColor={selected ? 'main.secondary' : 'border.light'}
+										borderColor={selected ? 'main.secondary' : 'border'}
 										_hover={
 											selected
 												? { bg: 'bgHover.button' }

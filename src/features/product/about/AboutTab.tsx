@@ -155,7 +155,7 @@ export default function AboutTab({
 							borderWidth='0.5px'
 							boxShadow='none'
 							bg='bg.tertiary'
-							borderColor='border.light'
+							borderColor='border'
 							size='lg'
 							color='main'
 							mr='1'

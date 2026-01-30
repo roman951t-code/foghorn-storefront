@@ -20,7 +20,7 @@ export default function DisabledCheckoutNotice({
 			color='main'
 			colorPalette='gray'
 			borderRadius='md'
-			borderWidth='1px'
+			borderWidth='0.5px'
 		>
 			<Alert.Indicator />
 			<Alert.Content>

@@ -41,7 +41,8 @@ export function TertiaryButton({ children, ...props }: Props) {
 			colorPalette='gray'
 			color='main'
 			variant='outline'
-			border='1px solid '
+			borderWidth='0.5px'
+			borderStyle='solid'
 			borderColor='border'
 			{...props}
 		>

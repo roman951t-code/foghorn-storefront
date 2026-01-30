@@ -26,7 +26,7 @@ export default function ProductCardsSkeletonGrid({
 
 	const slidesPerView =
 		breakpointsDesc.find((_, idx) => matches[idx])?.slides ??
-		productsBreakpoints?.[560]?.slidesPerView ??
+		productsBreakpoints?.[532]?.slidesPerView ??
 		1;
 
 	const skeletonCount = Math.max(1, limit ? Math.min(limit, slidesPerView) : slidesPerView);
@@ -50,4 +50,3 @@ export default function ProductCardsSkeletonGrid({
 		</SimpleGrid>
 	);
 }
-

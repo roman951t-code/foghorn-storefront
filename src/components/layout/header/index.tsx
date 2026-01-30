@@ -35,9 +35,9 @@ export default function Header() {
 					pt='4px'
 					pb='8px'
 					minH='52px'
-					borderBottom={{ smToMd: '1px solid' }}
-					borderColor={{ smToMd: 'border.light' }}
-					borderStyle={{ smToMd: 'dotted' }}
+					borderBottomWidth={{ smToMd: '0.5px' }}
+					borderBottomColor={{ smToMd: 'border' }}
+					borderBottomStyle={{ smToMd: 'dotted' }}
 				>
 					<Flex align='center' gap={4}>
 						<Sidebar />

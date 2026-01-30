@@ -57,8 +57,9 @@ export default function PreferredDeliveryForm({
 		<form onSubmit={form.handleSubmit(onSubmit)}>
 			<Fieldset.Root size='lg' alignItems='center'>
 				<Fieldset.Content
-					border='1px solid'
-					borderColor='border.dark'
+					borderWidth='0.5px'
+					borderStyle='solid'
+					borderColor='border'
 					borderRadius='md'
 					p='4'
 					maxW='4xl'
@@ -96,7 +97,7 @@ export default function PreferredDeliveryForm({
 											boxShadow='none'
 											_hover={{ cursor: 'pointer' }}
 											w='full'
-											borderColor={{ base: 'initial', _disabled: 'border.disabled' }}
+											borderColor={{ base: 'initial', _disabled: 'border' }}
 											bg={{ base: 'main', _disabled: 'bg.dark' }}
 											justifyContent={{ base: 'initial', sm: 'center' }}
 										>
