@@ -20,7 +20,7 @@ export default function Cabinet() {
 	};
 
 	return (
-		<VStack w='100%'>
+		<VStack w='100%' maxW='6xl' mx='auto'>
 			<Heading as='h2' size='2xl' fontWeight='normal'>
 				{authT('personalData')}
 			</Heading>

@@ -14,6 +14,7 @@ import { normalizeOrder } from './orderUtils';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
+import { getCouponDiscountPreview } from '@/lib/coupons';
 
 type CreateOrderItemPayload = { productId: string; variantId: string | null; quantity: number };
 
@@ -21,6 +22,7 @@ export type CreateOrderPayload = {
 	items: CreateOrderItemPayload[];
 	paymentMethod?: string;
 	shipmentMethod?: string;
+	couponCode?: string;
 };
 
 type CreateOrderResult =
@@ -39,6 +41,7 @@ const CreateOrderSchema = z.object({
 		.min(1, 'items_required'),
 	paymentMethod: z.string().optional(),
 	shipmentMethod: z.string().optional(),
+	couponCode: z.string().optional(),
 });
 
 export async function createOrderAction(
@@ -190,6 +193,15 @@ export async function createOrderAction(
 
 	const total = orderItems.reduce((acc, item) => acc + item.price, 0);
 	const roundedTotal = Math.round(total * 100) / 100;
+	const couponCode = parsed.data.couponCode?.trim() || null;
+	const couponDiscountRes =
+		couponCode ? await getCouponDiscountPreview(couponCode, roundedTotal) : null;
+	if (couponCode && couponDiscountRes && !couponDiscountRes.ok) {
+		return { success: false, message: couponDiscountRes.error };
+	}
+	const couponDiscountAmount =
+		couponDiscountRes && couponDiscountRes.ok ? couponDiscountRes.preview.amount : 0;
+	const finalTotal = Math.round(Math.max(0, roundedTotal - couponDiscountAmount) * 100) / 100;
 
 	const buildCustomerName = (first: string | null | undefined, last: string | null | undefined) => {
 		const firstTrimmed = (first ?? '').trim();
@@ -235,7 +247,7 @@ export async function createOrderAction(
 			const newOrder = await tx.order.create({
 				data: {
 					userId,
-					total: new Prisma.Decimal(roundedTotal.toFixed(2)),
+					total: new Prisma.Decimal(finalTotal.toFixed(2)),
 					paymentMethod: parsed.data.paymentMethod ?? null,
 					shipmentMethod: parsed.data.shipmentMethod ?? null,
 					customerName,
@@ -283,6 +295,31 @@ export async function createOrderAction(
 				},
 			});
 
+			if (couponDiscountRes && couponDiscountRes.ok) {
+				const maxRedemptions = couponDiscountRes.maxRedemptions;
+				const updated = await tx.coupon.updateMany({
+					where:
+						maxRedemptions != null
+							? { id: couponDiscountRes.preview.couponId, redemptionCount: { lt: maxRedemptions } }
+							: { id: couponDiscountRes.preview.couponId },
+					data: { redemptionCount: { increment: 1 } },
+				});
+				if (updated.count === 0) {
+					throw new Error('coupon-maxed');
+				}
+
+				await tx.orderDiscount.create({
+					data: {
+						orderId: newOrder.id,
+						couponId: couponDiscountRes.preview.couponId,
+						promotionId: couponDiscountRes.preview.promotionId,
+						label: couponDiscountRes.preview.label,
+						code: couponDiscountRes.preview.code,
+						amount: new Prisma.Decimal(couponDiscountRes.preview.amount.toFixed(2)),
+					},
+				});
+			}
+
 			return newOrder;
 		});
 
@@ -301,6 +338,10 @@ export async function createOrderAction(
 
 		return { success: true, order: normalized };
 	} catch (error) {
-		return { success: false, message: 'order-create-failed' };
+		const message =
+			error instanceof Error && error.message === 'coupon-maxed'
+				? 'coupon_maxed'
+				: 'order-create-failed';
+		return { success: false, message };
 	}
 }

@@ -60,7 +60,6 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 	const feedbackContent =
 		selectedTab === 'feedback' ? (
 			<FeedbackTab
-				averageRating={averageRating}
 				deleteReviewFail={validT('deleteReviewFail')}
 				productId={product.id}
 				reviews={product.reviews as Review[]}

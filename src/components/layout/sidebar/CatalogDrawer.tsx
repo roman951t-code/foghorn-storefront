@@ -189,7 +189,7 @@ export default function CatalogDrawer() {
 													bg='bg.tertiary'
 													overflow='hidden'
 													transition='all 0.18s ease-in-out'
-													_hover={{ transform: 'translateY(-1px)', boxShadow: 'md' }}
+													_hover={{ transform: 'translateY(-1px)', borderColor: 'main.secondary' }}
 												>
 													<Box
 														h={{ base: '120px', md: '160px' }}

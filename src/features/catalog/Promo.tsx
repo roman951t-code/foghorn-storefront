@@ -11,6 +11,7 @@ import { promoBreakpoints } from '@/data/breakpoints';
 import { useRef } from 'react';
 
 import 'swiper/css';
+import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 
 function PromoSkeletonFallback() {
 	const skeletonCount = useBreakpointValue({ base: 1, sm: 2, md: 1, lg: 2 }) ?? 4;
@@ -36,12 +37,14 @@ function PromoCardSlide({
 	isDraggingRef: { current: boolean };
 }) {
 	const overlayContent = (
-		<Box
+		<VStack
+			gapY='3'
 			bg='rgba(24,24,24,0.5)'
+			alignItems='flex-start'
 			backdropFilter='blur(10px)'
 			borderWidth='0.5px'
 			borderStyle='solid'
-			borderColor='rgba(255,255,255,0.14)'
+			borderColor='rgba(255,255,255,0.2)'
 			borderRadius='md'
 			p={{ base: 3.5, md: 4 }}
 			maxW={{ base: '100%', md: '84%' }}
@@ -54,31 +57,13 @@ function PromoCardSlide({
 			</Text>
 
 			{promo.subtitle ? (
-				<Text mt='1.5' fontSize={{ base: 'sm', md: 'md' }} opacity={0.92} lineClamp={2}>
+				<Text fontSize={{ base: 'sm', md: 'md' }} opacity={0.92} lineClamp={2}>
 					{promo.subtitle}
 				</Text>
 			) : null}
 
-			{promo.href ? (
-				<Box
-					display='inline-flex'
-					mt='3'
-					px='3'
-					py='2'
-					borderRadius='full'
-					bg='rgba(255,255,255,0.12)'
-					borderWidth='0.5px'
-					borderStyle='solid'
-					borderColor='rgba(255,255,255,0.18)'
-					fontSize='sm'
-					fontWeight='700'
-					transition='all 0.2s ease'
-					_groupHover={{ bg: 'rgba(255,255,255,0.18)', transform: 'translateY(-1px)' }}
-				>
-					{promo.linkLabel ?? 'Shop now'}
-				</Box>
-			) : null}
-		</Box>
+			{promo.href ? <SecondaryButton>{promo.linkLabel ?? 'Shop now'}</SecondaryButton> : null}
+		</VStack>
 	);
 
 	const overlay = promo.href ? (
@@ -114,8 +99,8 @@ function PromoCardSlide({
 			width='100%'
 			overflow='hidden'
 			boxShadow='none'
-			transition='box-shadow 0.2s ease-in-out'
-			_hover={{ boxShadow: 'md' }}
+			transition='border-color 0.2s ease-in-out'
+			_hover={{ borderColor: 'main.secondary' }}
 			role='group'
 			title={promo.text}
 		>

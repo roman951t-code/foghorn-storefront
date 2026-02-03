@@ -3,8 +3,6 @@ import { auth } from '@/lib/auth';
 import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedProducts';
 import { jsonNoStore } from '@/lib/response';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: Request) {
 	try {
 		const url = new URL(request.url);

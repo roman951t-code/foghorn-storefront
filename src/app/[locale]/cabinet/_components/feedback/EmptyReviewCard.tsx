@@ -1,6 +1,6 @@
 'use client';
 
-import { Accordion, Badge, Card, Flex, Stack, Text } from '@chakra-ui/react';
+import { Accordion, Card, Flex, Stack, Text } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { useMemo } from 'react';
@@ -32,18 +32,22 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 			mb='4'
 		>
 			<Accordion.Item value={product.id} borderBottom='none'>
-				<Flex alignItems='center' direction={{ base: 'column', sm: 'row' }} w='100%'>
-					<LocaleNavLink href={productHref} mr='4'>
+				<Flex alignItems='center' direction={{ base: 'column', sm: 'row' }} gap='3' w='100%'>
+					<LocaleNavLink href={productHref} mr='2'>
 						<Image
 							src={previewImage}
 							alt={product.name ?? ''}
-							width={130}
-							height={130}
-							style={{ objectFit: 'contain', borderRadius: '6px' }}
+							width={110}
+							height={110}
+							style={{
+								objectFit: 'contain',
+								borderRadius: '6px',
+								border: '0.5px solid var(--chakra-colors-border)',
+							}}
 						/>
 					</LocaleNavLink>
-					<Stack direction='column' gap={2} w='100%'>
-						<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
+					<Stack direction='column' gap={2} w='full' textAlign={{ base: 'center', sm: 'left' }}>
+						<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' as='div'>
 							<LocaleNavLink
 								href={`/products/${product.fullSlug}`}
 								textDecoration='underline'
@@ -53,34 +57,28 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 								{product.name}
 							</LocaleNavLink>
 						</Card.Title>
-						<Stack direction={{ base: 'column', sm: 'row' }} justifyContent='space-between'>
-							<Text color='main' fontSize='xl' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
-								{price.current} ₴
-								{price.previous && (
-									<Text
-										as='span'
-										color='main.disabled'
-										fontSize='sm'
-										textDecoration='line-through'
-										marginLeft='8px'
-									>
-										{price.previous} ₴
-									</Text>
-								)}
-								{price.savings && (
-									<Badge
-										variant='solid'
-										color='main.lightOnly'
-										bg='main.tertiary'
-										marginLeft='12px'
-									>
-										- {price.savings} ₴
-									</Badge>
-								)}
+						{(product.subcategoryName || product.categoryName) && (
+							<Text color='main.disabled' fontSize='sm' mt='-2'>
+								{[product.categoryName, product.subcategoryName].filter(Boolean).join(' / ')}
 							</Text>
-						</Stack>
+						)}
+
+						<Text color='main' fontSize='md' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
+							{price.current} ₴
+							{price.previous && (
+								<Text
+									as='span'
+									color='main.disabled'
+									fontSize='sm'
+									textDecoration='line-through'
+									marginLeft='8px'
+								>
+									{price.previous} ₴
+								</Text>
+							)}
+						</Text>
 					</Stack>
-					<Flex flex={1} alignSelf='flex-end' hideBelow='md'>
+					<Flex flexShrink={0} alignSelf='flex-end' hideBelow='md'>
 						<FeedbackModal productId={product.id} onSuccessAction={onAddAction} />
 					</Flex>
 				</Flex>

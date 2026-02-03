@@ -23,12 +23,17 @@ import { createOrderAction } from '@/actions/createOrderAction';
 import { useState, useTransition } from 'react';
 import { showToaster } from '@/utils/toast';
 import { useRouter } from 'next/navigation';
+import CouponField from '@/components/ui/inputs/CouponField';
+import CheckoutConsents from './CheckoutConsents';
+import type { StorefrontFormPublic } from '@/actions/storefront/getEnabledStorefrontForms';
 
-export default function OrderInfo() {
+export default function OrderInfo({ storefrontForms = [] }: { storefrontForms?: StorefrontFormPublic[] }) {
 	const { session } = useSession();
 	const checkoutT = useTranslations('checkout');
 	const paymentMethod = useCheckoutStore((state) => state.paymentMethod);
 	const shipmentMethod = useCheckoutStore((state) => state.shipmentMethod);
+	const appliedCoupon = useCheckoutStore((state) => state.appliedCoupon);
+	const consents = useCheckoutStore((state) => state.consents);
 	const [isSubmitting, startTransition] = useTransition();
 	const [isStripeRedirecting, setIsStripeRedirecting] = useState(false);
 	const router = useRouter();
@@ -48,7 +53,12 @@ export default function OrderInfo() {
 	const discountText = `${
 		discountTotal > 0 ? `-${discountTotal.toFixed(2)}` : discountTotal.toFixed(2)
 	} ₴`;
-	const totalAmountText = `${discountedTotal.toFixed(2)} ₴`;
+	const couponDiscount = appliedCoupon?.amount ?? 0;
+	const couponText = `${
+		couponDiscount > 0 ? `-${couponDiscount.toFixed(2)}` : couponDiscount.toFixed(2)
+	} ₴`;
+	const finalTotal = Math.max(0, discountedTotal - couponDiscount);
+	const totalAmountText = `${finalTotal.toFixed(2)} ₴`;
 	const hasContactData = Boolean(
 		user?.name?.trim() &&
 			user?.lastName?.trim() &&
@@ -56,12 +66,17 @@ export default function OrderInfo() {
 			(user?.phoneNumber?.trim() || user?.email?.trim())
 	);
 
-	const disabledReason: 'auth' | 'contacts' | 'empty' | null = !isAuthorized
+	const requiredForms = storefrontForms.filter((f) => f.enabled && f.required);
+	const missingRequiredConsents = requiredForms.filter((f) => !consents[f.key]);
+
+	const disabledReason: 'auth' | 'contacts' | 'empty' | 'consents' | null = !isAuthorized
 		? 'auth'
 		: !hasContactData
 		? 'contacts'
 		: cartItems.length === 0
 		? 'empty'
+		: missingRequiredConsents.length > 0
+		? 'consents'
 		: null;
 
 	const noticeTitle =
@@ -69,15 +84,24 @@ export default function OrderInfo() {
 			? checkoutT('signinRequiredTitle')
 			: disabledReason === 'contacts'
 			? checkoutT('contactRequiredTitle')
+			: disabledReason === 'consents'
+			? checkoutT('consentsRequiredTitle')
 			: null;
 	const noticeDescription =
 		disabledReason === 'auth'
 			? checkoutT('signinRequiredDesc')
 			: disabledReason === 'contacts'
 			? checkoutT('contactRequiredDesc')
+			: disabledReason === 'consents'
+			? checkoutT('consentsRequiredDesc')
 			: null;
 
 	const handleAcceptOrder = () => {
+		if (missingRequiredConsents.length > 0) {
+			showToaster('error', checkoutT('consentsRequiredTitle'));
+			return;
+		}
+
 		if (disabledReason || !cartItems.length) return;
 
 		const orderItems = cartItems.map((item) => ({
@@ -97,11 +121,14 @@ export default function OrderInfo() {
 					items: orderItems,
 					paymentMethod,
 					shipmentMethod,
+					couponCode: appliedCoupon?.code ?? undefined,
 				});
 
 				if (result?.success) {
 					showToaster('success', checkoutT('orderCreated'));
 					await handleClearCart();
+					useCheckoutStore.getState().clearCoupon();
+					useCheckoutStore.getState().resetConsents();
 					router.push('/cabinet/orders');
 				} else {
 					showToaster('error', checkoutT('orderCreateFail'));
@@ -126,6 +153,7 @@ export default function OrderInfo() {
 					items: orderItems,
 					successUrl: `${origin}/cabinet/orders?payment=success&session_id={CHECKOUT_SESSION_ID}`,
 					cancelUrl: `${origin}/checkout?cancelled=1`,
+					couponCode: appliedCoupon?.code ?? undefined,
 				}),
 			});
 
@@ -160,6 +188,11 @@ export default function OrderInfo() {
 				{t('yourOrder')}
 			</Heading>
 			<Separator my='2' color='border' />
+			<Box w='full' maxW='400px'>
+				<CouponField subtotal={discountedTotal} layout='column' />
+			</Box>
+
+			<Separator my='2' color='border' />
 			<Box maxH='600px' overflowY='auto' hideBelow='lg'>
 				{cartItems.map((item, idx) => (
 					<SidebarCheckoutCard
@@ -169,7 +202,16 @@ export default function OrderInfo() {
 					/>
 				))}
 			</Box>
-			<Box maxH='600px' overflowY='auto' hideFrom='lg' shadow='sm'>
+			<Box
+				maxH='600px'
+				overflowY='auto'
+				hideFrom='lg'
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor='border'
+				rounded='sm'
+				bg='bg.tertiary'
+			>
 				{cartItems.map((item, idx) => (
 					<FullCheckoutCard
 						key={item.lineId}
@@ -199,11 +241,22 @@ export default function OrderInfo() {
 						{`${t('discountSum')}: ${discountText}`}
 					</Highlight>
 				</Text>
+				{couponDiscount > 0 ? (
+					<Text>
+						<Highlight
+							query={couponText}
+							styles={{ fontWeight: 'semibold', color: 'main.secondary' }}
+						>
+							{`${checkoutT('couponLine')}: ${couponText}`}
+						</Highlight>
+					</Text>
+				) : null}
 				<Separator w='full' mt='2' color='border' />
 				<Stat.Root mt='2'>
 					<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
-					<Stat.ValueText fontSize='3xl'>{`${discountedTotal.toFixed(2)} ₴`}</Stat.ValueText>
+					<Stat.ValueText fontSize='3xl'>{totalAmountText}</Stat.ValueText>
 				</Stat.Root>
+				<CheckoutConsents forms={storefrontForms} />
 				<AcceptOrderBtn
 					text={t('acceptOrder')}
 					w='100%'
@@ -227,6 +280,8 @@ export default function OrderInfo() {
 						<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
 						<Stat.ValueText fontSize='3xl'>{totalAmountText}</Stat.ValueText>
 					</Stat.Root>
+
+					<CheckoutConsents forms={storefrontForms} />
 					<AcceptOrderBtn
 						text={t('acceptOrder')}
 						disabledReason={disabledReason}
@@ -261,6 +316,16 @@ export default function OrderInfo() {
 							{`${t('discountSum')}: ${discountText}`}
 						</Highlight>
 					</Text>
+					{couponDiscount > 0 ? (
+						<Text>
+							<Highlight
+								query={couponText}
+								styles={{ fontWeight: 'semibold', color: 'main.secondary' }}
+							>
+								{`${checkoutT('couponLine')}: ${couponText}`}
+							</Highlight>
+						</Text>
+					) : null}
 				</VStack>
 			</Stack>
 		</Flex>

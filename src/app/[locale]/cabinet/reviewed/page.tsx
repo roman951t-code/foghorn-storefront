@@ -7,7 +7,7 @@ import { auth } from '@/lib/auth';
 import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedProducts';
 import ClearViewedButton from '../_components/viewed/ClearViewedButton';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
-import CabinetSectionHeading from '../../../../components/ui/CabinetSectionHeading';
+import CabinetSectionHeading from '@/components/ui/CabinetSectionHeading';
 
 const VIEWED_LIMIT = 32;
 

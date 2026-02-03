@@ -1,9 +1,9 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
 import { Tabs } from '@chakra-ui/react';
 import { CABINET_TAB_ROUTE_SUFFIXES, type CabinetTabValue } from '@/constants/cabinetTabs';
+import { usePathname, useRouter } from '@/i18n/routing';
 
 const isCabinetTabValue = (value: string): value is CabinetTabValue =>
 	value in CABINET_TAB_ROUTE_SUFFIXES;
@@ -13,8 +13,7 @@ export default function TabsProvider({ children }: { children: ReactNode }) {
 	const pathname = usePathname();
 	const segments = pathname.split('/').filter(Boolean);
 	const lastSegment = segments[segments.length - 1];
-	const locale = segments[0];
-	const baseCabinetPath = `/${[locale, 'cabinet'].filter(Boolean).join('/')}`;
+	const baseCabinetPath = '/cabinet';
 
 	const currentValue: CabinetTabValue = isCabinetTabValue(lastSegment) ? lastSegment : 'cabinet';
 

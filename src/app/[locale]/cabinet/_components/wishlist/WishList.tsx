@@ -8,6 +8,7 @@ import { LoadingSkeleton } from '@/components/ui/Skeleton';
 import { FiHeart } from 'react-icons/fi';
 import WishlistActions from './WishlistActions';
 import WishListCount from './WishlistCount';
+import { CABINET_PRODUCTS_GRID_CSS } from '@/constants/grids';
 
 type Props = {
 	emptyText: string;
@@ -121,7 +122,7 @@ export default function WishList({
 				mt='8'
 				mb='4'
 				className='productsSlider'
-				columns={{ base: 1, sm: 2, md: 2, lg: 3, xl: 4, '2xl': 5 }}
+				css={CABINET_PRODUCTS_GRID_CSS}
 				gapX='2'
 				gapY='4'
 				w='100%'

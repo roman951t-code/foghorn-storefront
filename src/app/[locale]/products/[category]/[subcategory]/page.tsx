@@ -173,7 +173,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 				>
 					<CatalogBtn fullText />
 					<VStack p='4' justifyContent='flex-start'>
-						<Text w='full'>
+						<Text w='full' fontSize='sm'>
 							<Highlight
 								query={subcategoryData?.totalCount?.toString()}
 								styles={{ fontWeight: 'semibold' }}
@@ -193,12 +193,14 @@ export default async function Subcategory({ params, searchParams }: Props) {
 						notFound={productsT('productsNotFound')}
 						limit={pageSize}
 					/>
-					<Pagination
-						currentPage={page}
-						totalItems={subcategoryData?.totalCount || 0}
-						pageSize={pageSize}
-						baseRoute={`/products/${category}/${subcategory}`}
-					/>
+					{(subcategoryData?.totalCount ?? 0) > 0 && (
+						<Pagination
+							currentPage={page}
+							totalItems={subcategoryData?.totalCount || 0}
+							pageSize={pageSize}
+							baseRoute={`/products/${category}/${subcategory}`}
+						/>
+					)}
 				</Box>
 			</Group>
 

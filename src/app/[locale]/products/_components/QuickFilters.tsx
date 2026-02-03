@@ -48,7 +48,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 				borderStyle='solid'
 				borderColor='border'
 			>
-				<Text fontSize='md' fontWeight='semibold' color='main' mb={3}>
+				<Text fontSize='sm' fontWeight='semibold' color='main' mb={3}>
 					{t('sortBy')}
 				</Text>
 				<RadioGroup
@@ -67,7 +67,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 								wordBreak='break-word'
 								textAlign='start'
 								color='main'
-								fontSize='md'
+								fontSize='sm'
 								value='new'
 								px={3}
 								py={2.5}
@@ -88,7 +88,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 								wordBreak='break-word'
 								textAlign='start'
 								color='main'
-								fontSize='md'
+								fontSize='sm'
 								value='expensive'
 								px={3}
 								py={2.5}
@@ -109,7 +109,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 								wordBreak='break-word'
 								textAlign='start'
 								color='main'
-								fontSize='md'
+								fontSize='sm'
 								value='cheap'
 								px={3}
 								py={2.5}
@@ -137,7 +137,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 				borderStyle='solid'
 				borderColor='border'
 			>
-				<Text fontSize='md' fontWeight='semibold' color='main' mb={3}>
+				<Text fontSize='sm' fontWeight='semibold' color='main' mb={3}>
 					{t('availability')}
 				</Text>
 				<RadioGroup
@@ -162,7 +162,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 							wordBreak='break-word'
 							textAlign='start'
 							color='main'
-							fontSize='md'
+							fontSize='sm'
 							value='all'
 							px={3}
 							py={2.5}
@@ -183,7 +183,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 							wordBreak='break-word'
 							textAlign='start'
 							color='main'
-							fontSize='md'
+							fontSize='sm'
 							value='inStock'
 							px={3}
 							py={2.5}
@@ -204,7 +204,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 							wordBreak='break-word'
 							textAlign='start'
 							color='main'
-							fontSize='md'
+							fontSize='sm'
 							value='outOfStock'
 							px={3}
 							py={2.5}

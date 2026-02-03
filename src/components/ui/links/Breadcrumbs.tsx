@@ -1,39 +1,37 @@
 import { BreadcrumbLink, BreadcrumbRoot } from '@/components/ui/chakra/breadcrumb';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import { LocaleNavLink } from './LocaleNavLink';
-import { Badge, Button } from '@chakra-ui/react';
-
-interface Props {
-	category?: string;
-	subcategory?: string;
-	product?: string;
-}
+import { Button } from '@chakra-ui/react';
 
 function CustomBreadcrumbLink({ href, children }: { href: string; children: React.ReactNode }) {
 	return (
-		<Badge
-			variant='outline'
-			size='md'
-			borderWidth='0.5px'
-			bg='bg.tertiary'
-			px='1.5'
+		<LocaleNavLink
+			href={href}
+			wordBreak='break-word'
+			fontSize='sm'
+			color='main.breadcrumb'
+			textDecoration='none'
+			display='inline-flex'
+			alignItems='center'
+			h='30px'
+			px='3'
 			py='1'
-			boxShadow='none'
+			rounded='full'
+			borderWidth='0.5px'
+			borderStyle='solid'
 			borderColor='border'
+			bg='bg.tertiary'
+			transition='all .15s ease-in-out'
+			_hover={{
+				color: 'link',
+				cursor: 'pointer',
+				bg: 'bgHover.promoCard',
+				borderColor: 'main.secondary',
+			}}
+			_focus={{ outline: 'none' }}
 		>
-			<LocaleNavLink
-				href={href}
-				wordBreak='break-word'
-				fontSize='15px'
-				transition='all .15s ease-in-out'
-				textDecorationColor='main.breadcrumb'
-				color='main.breadcrumb'
-				_hover={{ color: 'link', cursor: 'pointer' }}
-				_focus={{ outline: 'none' }}
-			>
-				{children}
-			</LocaleNavLink>
-		</Badge>
+			{children}
+		</LocaleNavLink>
 	);
 }
 
@@ -41,7 +39,6 @@ function BreadcrumbCurrentLink({ children }: { children: React.ReactNode }) {
 	return (
 		<BreadcrumbLink
 			wordBreak='break-word'
-			color='main.breadcrumb'
 			cursor='default'
 			fontWeight='medium'
 			fontSize='15px'
@@ -71,7 +68,12 @@ export default function Breadcrumbs({
 	productName,
 }: Props) {
 	return (
-		<BreadcrumbRoot variant='underline' size='lg'>
+		<BreadcrumbRoot
+			variant='underline'
+			size='lg'
+			separator={<span style={{ color: 'var(--chakra-colors-main-disabled)' }}>›</span>}
+			separatorGap={2}
+		>
 			<CatalogBtn
 				fullText={false}
 				trigger={
@@ -81,29 +83,23 @@ export default function Breadcrumbs({
 						borderWidth='0.5px'
 						bg='bg.tertiary'
 						boxShadow='none'
-						px='1.5'
-						py='1'
+						px='3'
 						borderColor='border'
 						aria-label='Open catalog'
-						height='32px'
+						height='30px'
 						minW='auto'
+						rounded='full'
+						fontSize='sm'
+						fontWeight='medium'
+						color='main.breadcrumb'
+						_hover={{
+							color: 'link',
+							bg: 'bgHover.promoCard',
+							borderColor: 'main.secondary',
+						}}
+						_focus={{ outline: 'none' }}
 					>
-						<BreadcrumbLink
-							wordBreak='break-word'
-							fontSize='15px'
-							transition='all .15s ease-in-out'
-							textDecoration='none'
-							color='main.breadcrumb'
-							_hover={{
-								color: 'link',
-								cursor: 'pointer',
-								textDecoration: 'underline',
-								textDecorationColor: 'main.breadcrumb',
-							}}
-							_focus={{ outline: 'none' }}
-						>
-							Каталог
-						</BreadcrumbLink>
+						Каталог
 					</Button>
 				}
 			/>

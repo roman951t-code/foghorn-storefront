@@ -53,6 +53,8 @@ export const SIDEBAR_SECTIONS: SidebarSection[] = [
 			{ href: '/guarantee', labelKey: 'sidebar.guarantee', icon: FiShield },
 			{ href: '/return-refund', labelKey: 'sidebar.returnRefund', icon: FiRefreshCcw },
 			{ href: '/terms', labelKey: 'sidebar.terms', icon: MdGavel },
+			{ href: '/privacy-policy', labelKey: 'sidebar.privacyPolicy', icon: FiFileText },
+			{ href: '/cookie-policy', labelKey: 'sidebar.cookiePolicy', icon: FiFileText },
 		],
 	},
 ];

@@ -35,16 +35,16 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 			<Group p='0'>
 				<VStack mr='1'>
 					<LocaleNavLink href={productHref} display='inline-block' lineHeight='0'>
-							<Image
-								style={{
-									borderRadius: '6px',
-									border: '0.5px solid var(--chakra-colors-border)',
-								}}
-								width={100}
-								height={100}
-								src={getImage(product.imageUrl)}
-								alt={product.name}
-							/>
+						<Image
+							style={{
+								borderRadius: '6px',
+								border: '0.5px solid var(--chakra-colors-border)',
+							}}
+							width={100}
+							height={100}
+							src={getImage(product.imageUrl)}
+							alt={product.name}
+						/>
 					</LocaleNavLink>
 					<Text as='span' textStyle='md' minW='56px' fontWeight='semibold'>
 						{`x ${quantity}${t('units')}`}
@@ -103,45 +103,65 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 			<Flex
 				align='center'
 				justifyContent='space-between'
-				direction={{ base: 'column', sm: 'row' }}
+				direction={{ base: 'column', xs: 'row' } as any}
 				p={3}
-				pl={0}
+				pl={{ base: '4', xs: 0 } as any}
 			>
 				<Flex
 					align='center'
 					justifyContent='space-between'
-					direction={{ base: 'column', sm: 'row' }}
+					direction={{ base: 'column', xs: 'row' } as any}
 					w='full'
 				>
-					<Flex alignItems='center' direction='row' w='full' gapX='2'>
-						<LocaleNavLink href={productHref} display='inline-block' lineHeight='0' mx='3'>
-								<Image
-									width={100}
-									height={100}
-									src={getImage(product.imageUrl)}
-									style={{
-										objectFit: 'contain',
-										borderRadius: '6px',
-										marginLeft: '4px',
-										border: '0.5px solid var(--chakra-colors-border)',
-									}}
-									alt={product.name}
-								/>
+					<Flex
+						alignItems={{ base: 'center', xs: 'center' } as any}
+						direction={{ base: 'column', xs: 'row' } as any}
+						w='full'
+						gap={{ base: 2, xs: 2 } as any}
+					>
+						<LocaleNavLink
+							href={productHref}
+							display='inline-block'
+							lineHeight='0'
+							mx={{ base: 0, xs: 3 } as any}
+						>
+							<Image
+								width={112}
+								height={112}
+								src={getImage(product.imageUrl)}
+								style={{
+									objectFit: 'contain',
+									borderRadius: '6px',
+									marginLeft: '4px',
+									border: '0.5px solid var(--chakra-colors-border)',
+								}}
+								alt={product.name}
+							/>
 						</LocaleNavLink>
-						<Flex direction='column' gap={3} pt={{ base: 2, sm: 0 }}>
-							<Card.Title fontWeight='medium' lineHeight='24px'>
+						<Flex direction='column' gap={3} pt={{ base: 2, xs: 0 } as any} w='full' minW={0}>
+							<Card.Title
+								fontWeight='medium'
+								lineHeight='24px'
+								textAlign={{ base: 'center', xs: 'left' } as any}
+							>
 								<LocaleNavLink
 									href={productHref}
 									textDecorationColor='main'
 									color='main'
-									fontSize='17px'
+									fontSize={{ base: 'lg', xs: '17px' } as any}
 									variant='underline'
 								>
 									{product.name}
 								</LocaleNavLink>
 							</Card.Title>
 							{product.variantLabel && (
-								<Text color='main.disabled' fontSize='sm' mt='-2'>
+								<Text
+									textAlign={{ base: 'center', xs: 'left' } as any}
+									color='main.disabled'
+									borderColor='border'
+									fontSize='sm'
+									mt='-1'
+								>
 									{product.variantLabel}
 								</Text>
 							)}
@@ -149,8 +169,9 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 								color='main'
 								fontSize='xl'
 								fontWeight='medium'
-								mb={{ base: 4, sm: 0 }}
-								mr={{ base: 0, sm: 2 }}
+								textAlign={{ base: 'center', xs: 'left' } as any}
+								mb={{ base: 4, xs: 0 } as any}
+								mr={{ base: 0, xs: 2 } as any}
 							>
 								{price} ₴
 								{hasDiscount && (
@@ -179,7 +200,10 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 						</Flex>
 					</Flex>
 
-					<Flex alignSelf='flex-end'>
+					<Flex
+						alignSelf={{ base: 'center', xs: 'flex-end' } as any}
+						mt={{ base: 2, xs: 0 } as any}
+					>
 						<Stat.Root color='main'>
 							<Stat.ValueText textStyle='md' minW='42px'>
 								{`x ${quantity}${t('units')}`}

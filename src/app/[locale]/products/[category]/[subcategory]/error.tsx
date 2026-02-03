@@ -20,7 +20,6 @@ export default function SubcategoryError({ error, reset }: ErrorProps) {
 			bg='bg.tertiary'
 			p='6'
 			maxW='520px'
-			boxShadow='sm'
 		>
 			<VStack align='flex-start' gap='3'>
 				<Heading as='h2' size='md' fontWeight='semibold'>

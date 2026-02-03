@@ -789,6 +789,19 @@ export const resources = [
 			updatedAt: readOnly,
 		},
 	}),
+	maybeResource(modelMap.StorefrontForm, {
+		navigation: 'Content',
+		listProperties: ['key', 'placement', 'enabled', 'required', 'sortOrder', 'updatedAt'],
+		filterProperties: ['key', 'placement', 'enabled', 'required'],
+		properties: {
+			id: hidden,
+			description: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			body: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			checkboxLabel: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			createdAt: readOnly,
+			updatedAt: readOnly,
+		},
+	}),
 	maybeResource(modelMap.Coupon, {
 		navigation: 'Marketing',
 		listProperties: [

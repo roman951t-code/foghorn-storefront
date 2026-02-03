@@ -15,6 +15,7 @@ import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
+import { getCouponDiscountPreview } from '@/lib/coupons';
 
 type Result =
 	| { success: true; order?: UserOrder }
@@ -219,13 +220,28 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 	}
 
 	const calculatedTotal = toCurrency(orderItems.reduce((acc, item) => acc + item.price, 0));
+	const amountSubtotal = checkoutSession.amount_subtotal ? checkoutSession.amount_subtotal / 100 : null;
+	const amountDiscount = checkoutSession.total_details?.amount_discount
+		? checkoutSession.total_details.amount_discount / 100
+		: 0;
 	const amountTotal = checkoutSession.amount_total ? checkoutSession.amount_total / 100 : null;
 
-	if (amountTotal === null || Math.abs(calculatedTotal - amountTotal) > 0.01) {
+	if (amountSubtotal === null || Math.abs(calculatedTotal - amountSubtotal) > 0.01) {
+		return { success: false, message: 'invalid_subtotal' };
+	}
+
+	const expectedTotal = toCurrency(Math.max(0, calculatedTotal - amountDiscount));
+	if (amountTotal === null || Math.abs(expectedTotal - amountTotal) > 0.01) {
 		return { success: false, message: 'invalid_total' };
 	}
 
-	const decimalTotal = new Prisma.Decimal(calculatedTotal.toFixed(2));
+	const decimalTotal = new Prisma.Decimal(amountTotal.toFixed(2));
+
+	const couponCode = typeof checkoutSession.metadata?.couponCode === 'string'
+		? checkoutSession.metadata.couponCode.trim()
+		: '';
+	const couponPreview =
+		couponCode && amountDiscount > 0 ? await getCouponDiscountPreview(couponCode, calculatedTotal).catch(() => null) : null;
 
 	const buildCustomerName = (first: string | null | undefined, last: string | null | undefined) => {
 		const firstTrimmed = (first ?? '').trim();
@@ -317,6 +333,50 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 
 			// Clear cart for the user after successful paid order
 			await tx.cartItem.deleteMany({ where: { cart: { userId } } });
+
+			if (couponCode && amountDiscount > 0) {
+				let couponId: string | null = null;
+				let promotionId: string | null = null;
+				let label: string | null = null;
+				let code: string | null = couponCode;
+
+				if (couponPreview && couponPreview.ok) {
+					couponId = couponPreview.preview.couponId;
+					promotionId = couponPreview.preview.promotionId;
+					label = couponPreview.preview.label;
+					code = couponPreview.preview.code;
+					await tx.coupon.update({
+						where: { id: couponId },
+						data: { redemptionCount: { increment: 1 } },
+					});
+				} else {
+					const existingCoupon = await tx.coupon.findFirst({
+						where: { code: { equals: couponCode, mode: 'insensitive' } },
+						select: { id: true, code: true, promotion: { select: { id: true, name: true } } },
+					});
+					if (existingCoupon) {
+						couponId = existingCoupon.id;
+						promotionId = existingCoupon.promotion?.id ?? null;
+						label = existingCoupon.promotion?.name ?? null;
+						code = existingCoupon.code;
+						await tx.coupon.update({
+							where: { id: couponId },
+							data: { redemptionCount: { increment: 1 } },
+						});
+					}
+				}
+
+				await tx.orderDiscount.create({
+					data: {
+						orderId: created.id,
+						couponId,
+						promotionId,
+						label,
+						code,
+						amount: new Prisma.Decimal(amountDiscount.toFixed(2)),
+					},
+				});
+			}
 
 			return created;
 		});

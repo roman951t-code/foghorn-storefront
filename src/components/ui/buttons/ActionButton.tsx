@@ -24,6 +24,7 @@ export function SecondaryButton({ children, ...props }: Props) {
 			color='main'
 			bgColor={{ base: 'main' }}
 			_hover={{
+				color: { base: 'black', _dark: 'white' },
 				bgColor: { base: 'bgHover', _dark: 'bg.subtle' },
 			}}
 			borderColor={{ base: 'main.accent', _dark: 'main.secondary' }}
@@ -43,7 +44,7 @@ export function TertiaryButton({ children, ...props }: Props) {
 			variant='outline'
 			borderWidth='0.5px'
 			borderStyle='solid'
-			borderColor='border'
+			borderColor='border.button'
 			{...props}
 		>
 			{children}

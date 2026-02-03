@@ -27,6 +27,9 @@ import { EMPTY_CART_DATA } from '@/constants/cart';
 import type { AppLocale } from '@/constants/locales';
 import type { Metadata } from 'next';
 import { APP_URL } from '@/utils/seo';
+import CookieConsentBanner from '@/components/layout/CookieConsentBanner';
+import { getEnabledStorefrontForms } from '@/actions/storefront/getEnabledStorefrontForms';
+import { StorefrontFormPlacement } from '@prisma/client';
 
 export const metadata: Metadata = {
 	metadataBase: new URL(APP_URL),
@@ -69,11 +72,13 @@ async function LayoutProviders({
 
 	const sessionPromise = auth.api.getSession({ headers: headersList });
 	const catalogPromise = getCatalog();
+	const cookieBannerPromise = getEnabledStorefrontForms(StorefrontFormPlacement.COOKIE_BANNER);
 
-	const [messages, session, catalogResponse] = await Promise.all([
+	const [messages, session, catalogResponse, cookieBanners] = await Promise.all([
 		messagesPromise,
 		sessionPromise,
 		catalogPromise,
+		cookieBannerPromise,
 	]);
 
 	const userId = session?.user?.id ?? null;
@@ -117,6 +122,7 @@ async function LayoutProviders({
 						{children}
 						<ToTop />
 					</Box>
+					<CookieConsentBanner form={cookieBanners?.[0] ?? null} />
 				</AppStoreHydrator>
 			</NextIntlClientProvider>
 			<Footer />

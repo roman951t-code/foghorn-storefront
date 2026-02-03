@@ -130,6 +130,12 @@ const config = defineConfig({
 							_dark: '{colors.gray.500}',
 						},
 					},
+					button: {
+						value: {
+							_light: '{colors.gray.600}',
+							_dark: '{colors.gray.300}',
+						},
+					},
 					disabled: { value: '{colors.fg.muted}' },
 				},
 				link: {

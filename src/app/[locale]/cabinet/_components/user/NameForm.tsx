@@ -30,16 +30,17 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 
 	return (
 		<form onSubmit={onSubmitAction}>
-			<Fieldset.Root size='lg' alignItems='center'>
+			<Fieldset.Root size='lg' alignItems='stretch' w='full'>
 				<Fieldset.Content
 					css={{ '--field-label-width': '120px' }}
+					bg='bg.tertiary'
 					gap='6'
 					borderWidth='0.5px'
 					borderStyle='solid'
 					borderColor='border'
-					borderRadius='md'
-					p='4'
-					maxW='4xl'
+					borderRadius='2xl'
+					p={{ base: 4, md: 6 }}
+					w='full'
 				>
 					<Field.Root
 						orientation={FIELD_ORIENTATION_SM}
@@ -72,7 +73,12 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 						</Field.Label>
 
 						<VStack w='full' maxW='3xl'>
-							<Input id={lastNameId} {...nameForm.register('lastName')} variant='outline' size='md' />
+							<Input
+								id={lastNameId}
+								{...nameForm.register('lastName')}
+								variant='outline'
+								size='md'
+							/>
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.lastName?.message?.toString()}
 							</Field.ErrorText>
@@ -92,7 +98,12 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 						</Field.Label>
 
 						<VStack w='full' maxW='3xl'>
-							<Input id={middleNameId} {...nameForm.register('middleName')} variant='outline' size='md' />
+							<Input
+								id={middleNameId}
+								{...nameForm.register('middleName')}
+								variant='outline'
+								size='md'
+							/>
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.middleName?.message?.toString()}
 							</Field.ErrorText>

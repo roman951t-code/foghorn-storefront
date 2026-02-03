@@ -18,7 +18,16 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 	const categoryBg = category.imageUrl ?? '/assets/images/temp/1Big.webp';
 
 	return (
-		<Flex bg='bg.tertiary' overflowY='auto' rounded='sm' boxShadow='sm' w='100%' p={4}>
+		<Flex
+			bg='bg.tertiary'
+			overflowY='auto'
+			rounded='sm'
+			w='100%'
+			p={4}
+			borderWidth='0.5px'
+			borderStyle='solid'
+			borderColor='border'
+		>
 			<Wrap
 				gap={12}
 				justify='flex-start'
@@ -87,9 +96,11 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				maxW='380px'
 				minW={{ base: '240px', xl: '280px' }}
 				position='absolute'
-				boxShadow='sm'
 				right={0}
-				border='none'
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor='border'
+				borderRadius='sm'
 				top={0}
 				zIndex={10}
 				p={4}

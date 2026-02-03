@@ -2,6 +2,7 @@
 
 import { Accordion, Card, EmptyState } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
+import { FiTruck } from 'react-icons/fi';
 import { IoBagCheckOutline } from 'react-icons/io5';
 import type { OrderDetailTag, UserOrder } from '@/types/order';
 import { OrderAccordionTrigger } from './OrderAccordionTrigger';
@@ -64,6 +65,16 @@ export default function UserOrdersList({ orders, emptyText }: Props) {
 						value: formatMethodLabel(order.shipmentMethod),
 						icon: getShipmentIcon(order.shipmentMethod),
 					},
+					...(order.trackingNumber
+						? [
+								{
+									key: 'tracking' as const,
+									label: ordersT('tracking'),
+									value: order.trackingNumber,
+									icon: FiTruck,
+								},
+							]
+						: []),
 				];
 
 				return (

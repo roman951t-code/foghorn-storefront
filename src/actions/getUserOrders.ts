@@ -26,9 +26,23 @@ export async function getUserOrders(limit: number, offset = 0): Promise<{
 			orderBy: { createdAt: 'desc' },
 			skip: offset,
 			take: limit,
-			include: {
+			select: {
+				id: true,
+				total: true,
+				status: true,
+				createdAt: true,
+				paymentMethod: true,
+				shipmentMethod: true,
+				carrier: true,
+				trackingNumber: true,
 				items: {
-					include: {
+					select: {
+						id: true,
+						productId: true,
+						variantId: true,
+						quantity: true,
+						unitPrice: true,
+						price: true,
 						product: {
 							select: {
 								id: true,

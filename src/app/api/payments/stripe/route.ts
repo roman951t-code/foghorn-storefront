@@ -9,6 +9,7 @@ import { env } from '@/config/env';
 import { isProductPublished } from '@/utils/publishSchedule';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import type Stripe from 'stripe';
+import { getCouponDiscountPreview } from '@/lib/coupons';
 
 type LineItemPayload = { productId: string; variantId: string | null; quantity: number };
 
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
 				})
 			)
 			.min(1, 'items_required'),
+		couponCode: z.string().optional(),
 		successUrl: z.string().url().optional(),
 		cancelUrl: z.string().url().optional(),
 	});
@@ -212,6 +214,44 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'invalid_items' }, { status: 400 });
 		}
 
+		const rawCouponCode = parsed.data.couponCode?.trim() ?? '';
+		let resolvedCouponCode: string | null = null;
+		let resolvedCouponAmount: number | null = null;
+		let stripeCouponId: string | null = null;
+		if (rawCouponCode) {
+			const subtotal = lineItems.reduce((sum, li) => {
+				const unit = li.price_data?.unit_amount ?? 0;
+				const qty = li.quantity ?? 1;
+				return sum + unit * qty;
+			}, 0);
+			const subtotalCurrency = subtotal / 100;
+			const previewRes = await getCouponDiscountPreview(rawCouponCode, subtotalCurrency);
+			if (!previewRes.ok) {
+				return NextResponse.json({ error: previewRes.error }, { status: 400 });
+			}
+
+			const discountCents = Math.max(0, Math.round(previewRes.preview.amount * 100));
+			if (discountCents >= subtotal) {
+				return NextResponse.json({ error: 'discount_too_large' }, { status: 400 });
+			}
+
+			const stripeCoupon = await stripe.coupons.create({
+				duration: 'once',
+				amount_off: discountCents,
+				currency,
+				name: (previewRes.preview.label || previewRes.preview.code).slice(0, 40),
+				metadata: {
+					appCouponCode: previewRes.preview.code,
+					appCouponId: previewRes.preview.couponId,
+					appPromotionId: previewRes.preview.promotionId,
+				},
+			});
+
+			resolvedCouponCode = previewRes.preview.code;
+			resolvedCouponAmount = previewRes.preview.amount;
+			stripeCouponId = stripeCoupon.id;
+		}
+
 		const successUrl = resolveSafeRedirectUrl(parsed.data.successUrl, {
 			origin: appOrigin,
 			fallbackPath: '/cabinet/orders?payment=success&session_id={CHECKOUT_SESSION_ID}',
@@ -221,18 +261,23 @@ export async function POST(req: NextRequest) {
 			fallbackPath: '/checkout?cancelled=1',
 		});
 
+		const metadata: Record<string, string> = {
+			userId: session.user.id,
+			items: JSON.stringify(items),
+		};
+		if (resolvedCouponCode) metadata.couponCode = resolvedCouponCode;
+		if (resolvedCouponAmount != null) metadata.couponAmount = resolvedCouponAmount.toFixed(2);
+
 		const checkoutSession = await stripe.checkout.sessions.create({
 			mode: 'payment',
 			payment_method_types: ['card'],
 			locale: 'auto',
 			line_items: lineItems,
+			discounts: stripeCouponId ? [{ coupon: stripeCouponId }] : undefined,
 			success_url: successUrl,
 			cancel_url: cancelUrl,
 			customer_email: session.user?.email ?? undefined,
-			metadata: {
-				userId: session.user.id,
-				items: JSON.stringify(items),
-			},
+			metadata,
 		});
 
 		return NextResponse.json({ sessionId: checkoutSession.id, url: checkoutSession.url });

@@ -52,18 +52,18 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 				<Accordion.ItemTrigger w='100%' p='0' cursor='pointer'>
 					<Flex alignItems='center' direction={{ base: 'column', sm: 'row' }} w='100%'>
 						<LocaleNavLink href={productHref} mr='4'>
-								<Image
-									src={previewImage}
-									alt={product.name ?? ''}
-									width={120}
-									height={120}
-									style={{
-										objectFit: 'contain',
-										borderRadius: '6px',
-										border: '0.5px solid var(--chakra-colors-border)',
-									}}
-								/>
-							</LocaleNavLink>
+							<Image
+								src={previewImage}
+								alt={product.name ?? ''}
+								width={120}
+								height={120}
+								style={{
+									objectFit: 'contain',
+									borderRadius: '6px',
+									border: '0.5px solid var(--chakra-colors-border)',
+								}}
+							/>
+						</LocaleNavLink>
 						<Flex direction='column' gap={2} w='100%'>
 							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
 								<LocaleNavLink
@@ -91,8 +91,9 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 								{price.savings && (
 									<Badge
 										variant='solid'
-										color='main.lightOnly'
-										bg='main.tertiary'
+										color='black'
+										bg='main.secondary'
+										fontWeight='semibold'
 										marginLeft='12px'
 									>
 										- {price.savings} ₴

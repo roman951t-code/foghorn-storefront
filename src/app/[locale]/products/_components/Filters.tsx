@@ -75,11 +75,14 @@ export default function Filters({ filters }: Props) {
 								py={3}
 								bg='bg.tertiary'
 								fontWeight='semibold'
+								fontSize='sm'
 								transition='all 0.15s ease-in-out'
 								_hover={{ bg: 'bgHover.promoCard' }}
 							>
 								<HStack justify='space-between' w='full' minW={0}>
-									<Text lineClamp={1}>{filterLabelWithUnit}</Text>
+									<Text lineClamp={1} fontSize='sm'>
+										{filterLabelWithUnit}
+									</Text>
 									{selectedCount > 0 ? (
 										<Badge
 											variant='outline'
@@ -88,7 +91,7 @@ export default function Filters({ filters }: Props) {
 											px='2'
 											py='1'
 											bg='bg.tertiary'
-											fontSize='sm'
+											fontSize='xs'
 										>
 											{selectedCount}
 										</Badge>
@@ -118,6 +121,7 @@ export default function Filters({ filters }: Props) {
 													transition='all 0.15s ease-in-out'
 													_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
 													_checked={{ bg: 'bgHover.promoCard', borderColor: 'main.secondary' }}
+													fontSize='sm'
 													whiteSpace='normal'
 													wordBreak='break-word'
 												>

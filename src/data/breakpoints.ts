@@ -1,8 +1,8 @@
 export const productsBreakpoints = {
-	532: { slidesPerView: 2 },
-	770: { slidesPerView: 3 },
-	1022: { slidesPerView: 4 },
-	1258: { slidesPerView: 5 },
+	582: { slidesPerView: 2 },
+	816: { slidesPerView: 3 },
+	1064: { slidesPerView: 4 },
+	1316: { slidesPerView: 5 },
 };
 
 export const promoBreakpoints = {

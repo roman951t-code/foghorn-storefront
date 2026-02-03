@@ -116,9 +116,9 @@ export default function ProductCard({ product }: Props) {
 		<Card.Root
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			w='full'
-			maxW='95%'
-			mx='auto'
+			maxW='300px'
 			minW='250px'
+			mx='auto'
 			h='full'
 			borderWidth='0.5px'
 			borderStyle='solid'
@@ -195,7 +195,7 @@ export default function ProductCard({ product }: Props) {
 					<Text
 						color='main'
 						fontSize='xl'
-						mt='2'
+						mt='1'
 						textWrap='wrap'
 						textAlign={{ base: 'center', sm: 'left' }}
 					>

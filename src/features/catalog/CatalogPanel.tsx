@@ -118,7 +118,6 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 								borderWidth='0.5px'
 								borderStyle='solid'
 								borderColor={isHighlighted ? 'border' : 'transparent'}
-								boxShadow={isHighlighted ? 'sm' : 'none'}
 								transition='all 0.15s ease-in-out'
 								_hover={{
 									cursor: 'pointer',

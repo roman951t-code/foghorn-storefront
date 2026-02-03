@@ -1,5 +1,15 @@
 'use client';
-import { Card, Flex, Stack, Heading, Separator, DataList, IconButton } from '@chakra-ui/react';
+import {
+	Card,
+	DataList,
+	Flex,
+	HStack,
+	IconButton,
+	Separator,
+	Stack,
+	Tag,
+	Text,
+} from '@chakra-ui/react';
 import { Rating } from '@/components/ui/chakra/rating';
 import { Tooltip } from '@/components/ui/tooltip';
 import DateWithLocale from '@/components/ui/DateWithLocale';
@@ -13,24 +23,23 @@ import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 
 type Props = {
-	averageRating: number;
 	deleteReviewFail: string;
 	productId: string;
 	reviews: Review[];
 };
 
-export default function FeedbackTab({
-	averageRating,
-	deleteReviewFail,
-	productId,
-	reviews,
-}: Props) {
+export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Props) {
 	useInitReviews(productId, reviews);
 	const { reviews: storeReviews, handleRemoveAction } = useReviews();
 	const { session } = useSession();
 	const prodT = useTranslations('products');
 
 	const userId = session?.user?.id;
+	const userReview = userId ? storeReviews.find((r) => r.user.id === userId) : undefined;
+
+	const reviewCount = storeReviews.length;
+	const effectiveAverageRating =
+		reviewCount > 0 ? storeReviews.reduce((acc, r) => acc + (r.rating ?? 0), 0) / reviewCount : 0;
 
 	const onRemoveFeedback = async () => {
 		try {
@@ -45,7 +54,7 @@ export default function FeedbackTab({
 	};
 
 	return (
-		<Stack gap='4' colorPalette='gray'>
+		<Stack gap='6' colorPalette='gray'>
 			<Card.Root
 				size='sm'
 				minWidth='200px'
@@ -54,57 +63,67 @@ export default function FeedbackTab({
 				borderStyle='solid'
 				borderColor='border'
 				bg='bg.tertiary'
+				overflow='hidden'
 			>
-				<Card.Header p='4'>
-					<Flex justifyContent='space-between' alignItems='center'>
-						<Stack>
-							<DataList.Root orientation='horizontal'>
-								<DataList.Item>
-									<DataList.ItemLabel fontSize='md' fontWeight='medium' color='main'>
-										{storeReviews.length > 0
-											? `${prodT('feedbackTotal')}:`
-											: prodT('feedbackAbsent')}
-									</DataList.ItemLabel>
-									{storeReviews.length > 0 && (
-										<DataList.ItemValue>
-											<Heading size='md'>{storeReviews.length}</Heading>
-										</DataList.ItemValue>
-									)}
-								</DataList.Item>
-								{storeReviews.length > 0 && (
-									<DataList.Item>
-										<DataList.ItemLabel fontSize='md' fontWeight='medium' color='main'>
-											{`${prodT('averageFeedback')}:`}
-										</DataList.ItemLabel>
+				<Card.Body p={{ base: '4', sm: '5' }}>
+					<Flex justifyContent='space-between' alignItems='flex-start' gap='4' flexWrap='wrap'>
+						<Stack gap='3' minW={{ base: '100%', sm: '320px' }}>
+							<HStack gap='2' flexWrap='wrap'>
+								<Text fontWeight='semibold' color='main'>
+									{prodT('feedback')}
+								</Text>
+								<Tag.Root
+									variant='surface'
+									borderWidth='0.5px'
+									boxShadow='none'
+									bg='bg.tertiary'
+									borderColor='border'
+									size='lg'
+									color='main'
+									py='1'
+								>
+									<Tag.Label fontSize='sm' fontWeight='semibold'>
+										{reviewCount}
+									</Tag.Label>
+								</Tag.Root>
+							</HStack>
 
-										<Tooltip
-											content={`${averageRating}`}
-											contentProps={{
-												color: 'black',
-												bg: 'bg.accent',
-											}}
-											positioning={{ placement: 'right-end' }}
-											openDelay={100}
-											closeDelay={100}
-										>
-									<DataList.ItemValue gapX='4' cursor='pointer'>
-										<Rating
-											size='xs'
-											colorPalette={{ base: 'orange', _dark: 'yellow' }}
-											readOnly
-											allowHalf
-											value={averageRating}
-										/>
-									</DataList.ItemValue>
-								</Tooltip>
-									</DataList.Item>
-								)}
-							</DataList.Root>
+							{reviewCount > 0 ? (
+								<HStack gap='3' alignItems='center' flexWrap='wrap'>
+									<Tooltip
+										content={`${effectiveAverageRating.toFixed(2)}`}
+										contentProps={{ color: 'black', bg: 'bg.accent' }}
+										positioning={{ placement: 'right-end' }}
+										openDelay={100}
+										closeDelay={100}
+									>
+										<HStack gap='3' cursor='pointer'>
+											<Text fontSize='3xl' fontWeight='bold' color='main'>
+												{effectiveAverageRating.toFixed(1)}
+											</Text>
+											<Rating
+												size='sm'
+												colorPalette={{ base: 'orange', _dark: 'yellow' }}
+												readOnly
+												allowHalf
+												value={effectiveAverageRating}
+											/>
+										</HStack>
+									</Tooltip>
+									<Text fontSize='sm' color='fg.muted'>
+										{prodT('feedbackTotal')}: {reviewCount}
+									</Text>
+								</HStack>
+							) : (
+								<Text fontSize='sm' color='fg.muted'>
+									{prodT('feedbackAbsent')}
+								</Text>
+							)}
 						</Stack>
 
-						<FeedbackModal />
+						<FeedbackModal productId={productId} initialReviews={userReview ? [userReview] : []} />
 					</Flex>
-				</Card.Header>
+				</Card.Body>
 			</Card.Root>
 
 			{storeReviews.map((review) => (
@@ -120,13 +139,15 @@ export default function FeedbackTab({
 				>
 					<Card.Header>
 						<Flex justifyContent='space-between'>
-							<Stack>
-								<Heading size='md'>{`${review.user.name} ${review.user.lastName ?? ''}`}</Heading>
+							<Stack gap='1.5'>
+								<Text fontWeight='semibold' fontSize='md' color='main'>
+									{`${review.user.name} ${review.user.lastName ?? ''}`}
+								</Text>
 								<Rating
 									colorPalette={{ base: 'orange', _dark: 'yellow' }}
 									readOnly
 									allowHalf
-									size='xs'
+									size='sm'
 									defaultValue={review.rating}
 								/>
 							</Stack>

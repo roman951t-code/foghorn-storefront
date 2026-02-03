@@ -1,8 +1,9 @@
 'use client';
 
 import { useTransition } from 'react';
-import { Accordion, Card, Flex, Separator, Stack, Text } from '@chakra-ui/react';
+import { Accordion, Card, Flex, HStack, Icon, Separator, Stack, Tag, Text } from '@chakra-ui/react';
 import { BsArrowRepeat } from 'react-icons/bs';
+import { FiTruck } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { PrimaryButton, TertiaryButton } from '@/components/ui/buttons/ActionButton';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
@@ -29,6 +30,7 @@ export function OrderAccordionContent({ order }: Props) {
 	const router = useRouter();
 	const isPendingStatus = (order.status ?? '').toLowerCase() === 'pending';
 	const deleteLabel = isPendingStatus ? ordersT('cancelOrder') : ordersT('deleteOrder');
+	const hasFulfillmentDetails = Boolean(order.carrier || order.trackingNumber);
 
 	const handleRepeatOrder = () => {
 		startRepeatTransition(async () => {
@@ -86,6 +88,73 @@ export function OrderAccordionContent({ order }: Props) {
 						{productsT('repeatOrder')}
 					</PrimaryButton>
 				</Flex>
+
+				{hasFulfillmentDetails ? (
+					<Card.Root
+						borderWidth='0.5px'
+						borderStyle='solid'
+						borderColor='border'
+						overflow='hidden'
+						p='4'
+						bg='bg.tertiary'
+					>
+						<Flex justifyContent='space-between' alignItems='center' gap='3' flexWrap='wrap'>
+							<HStack gap='2'>
+								<Icon as={FiTruck} size='md' color='fg.muted' />
+								<Text fontWeight='semibold' color='main'>
+									{ordersT('tracking')}
+								</Text>
+							</HStack>
+
+							<HStack gap='2' flexWrap='wrap'>
+								{order.carrier ? (
+									<Tag.Root
+										variant='surface'
+										borderWidth='0.5px'
+										boxShadow='none'
+										bg='bg.tertiary'
+										borderColor='border'
+										size='lg'
+										color='main'
+										py='1.5'
+									>
+										<Tag.Label fontSize='sm'>
+											<Text as='span' color='fg.muted'>
+												{ordersT('carrier')}:
+											</Text>{' '}
+											<Text as='span' fontWeight='semibold'>
+												{order.carrier}
+											</Text>
+										</Tag.Label>
+									</Tag.Root>
+								) : null}
+
+								{order.trackingNumber ? (
+									<Tag.Root
+										variant='surface'
+										borderWidth='0.5px'
+										boxShadow='none'
+										bg='bg.tertiary'
+										borderColor='border'
+										size='lg'
+										color='main'
+										py='1.5'
+									>
+										<Tag.Label fontSize='sm'>
+											<Text as='span' color='fg.muted'>
+												{ordersT('trackingNumber')}:
+											</Text>{' '}
+											<Text as='span' fontWeight='semibold' fontFamily='mono'>
+												{order.trackingNumber}
+											</Text>
+										</Tag.Label>
+									</Tag.Root>
+								) : null}
+							</HStack>
+						</Flex>
+					</Card.Root>
+				) : null}
+
 				<Separator mt='4' mb='6' color='border' />
 				<Stack maxH='510px' overflowY='auto'>
 					{order.items.map((item, idx) => {
@@ -97,18 +166,18 @@ export function OrderAccordionContent({ order }: Props) {
 							<div key={item.id}>
 								<Flex alignItems='center' direction={{ base: 'column', sm: 'row' }} gap='3'>
 									<LocaleNavLink href={`/products/${item.product.fullSlug}`} mr='2'>
-											<Image
-												width={110}
-												height={110}
-												src={previewImage}
-												alt={item.product.name}
-												style={{
-													objectFit: 'contain',
-													borderRadius: '6px',
-													border: '0.5px solid var(--chakra-colors-border)',
-												}}
-											/>
-										</LocaleNavLink>
+										<Image
+											width={110}
+											height={110}
+											src={previewImage}
+											alt={item.product.name}
+											style={{
+												objectFit: 'contain',
+												borderRadius: '6px',
+												border: '0.5px solid var(--chakra-colors-border)',
+											}}
+										/>
+									</LocaleNavLink>
 
 									<Flex
 										direction='column'

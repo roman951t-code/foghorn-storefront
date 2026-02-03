@@ -2,9 +2,10 @@
 
 import { ReactNode, Suspense, useMemo } from 'react';
 import { Tabs, SimpleGrid, Box } from '@chakra-ui/react';
-import { usePathname } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { CABINET_TABS, TAB_ANIMATION_PROPS, type CabinetTabValue } from '@/constants/cabinetTabs';
 import { LoadingSkeleton } from '@/components/ui/Skeleton';
+import { usePathname } from '@/i18n/routing';
 
 function CabinetTabSkeleton() {
 	return (
@@ -27,6 +28,11 @@ function CabinetTabSkeleton() {
 
 export default function TabsContentRenderer({ children }: { children: ReactNode }) {
 	const pathname = usePathname();
+	const searchParams = useSearchParams();
+	const suspenseKey = useMemo(() => {
+		const query = searchParams.toString();
+		return query ? `${pathname}?${query}` : pathname;
+	}, [pathname, searchParams]);
 	const currentTab = useMemo<CabinetTabValue>(() => {
 		const segments = pathname?.split('/').filter(Boolean) ?? [];
 		const lastSegment = segments[segments.length - 1] as CabinetTabValue | undefined;
@@ -47,7 +53,7 @@ export default function TabsContentRenderer({ children }: { children: ReactNode 
 					{...TAB_ANIMATION_PROPS}
 				>
 					{tab.value === currentTab ? (
-						<Suspense key={currentTab} fallback={<CabinetTabSkeleton />}>
+						<Suspense key={suspenseKey} fallback={<CabinetTabSkeleton />}>
 							{children}
 						</Suspense>
 					) : null}

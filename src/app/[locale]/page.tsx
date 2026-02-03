@@ -1,7 +1,6 @@
 import { Flex, Box } from '@chakra-ui/react';
 import CatalogPanel from '@/features/catalog/CatalogPanel';
 import ProductsSection from '@/features/catalog/ProductsSection';
-import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
 import SubscribeSection from '@/components/ui/sections/SubscribeSection';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import { extractI18nData, getLocalizedMetadata } from '@/utils/i18nUtils';
@@ -44,10 +43,10 @@ export default async function Main() {
 			</Box>
 			<CatalogPanel i18nData={i18nData} promoCards={promoCards} />
 			<ProductsSection title={prodT('popular')} tag='popular' />
-			<ProductsSection title={prodT('new')} tag='new' />
+			{/* <ProductsSection title={prodT('new')} tag='new' />
 			<ProductsSection title={prodT('discount')} tag='discount' />
-			<ProductsSection title={prodT('promotional')} tag='promotional' />
-			<ViewedProductsSection title={prodT('viewed')} tag='viewed' />
+			<ProductsSection title={prodT('promotional')} tag='promotional' /> */}
+			{/* <ViewedProductsSection title={prodT('viewed')} tag='viewed' /> */}
 
 			<SubscribeSection i18nData={subscribeI18nData} />
 		</Flex>

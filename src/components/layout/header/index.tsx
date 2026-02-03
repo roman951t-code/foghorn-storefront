@@ -23,7 +23,9 @@ export default function Header() {
 			zIndex='1000'
 			px={2}
 			py={2}
-			shadow='sm'
+			borderBottomWidth='0.5px'
+			borderBottomStyle='solid'
+			borderBottomColor='border'
 		>
 			<Stack>
 				<Flex

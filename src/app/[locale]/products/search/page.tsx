@@ -252,12 +252,14 @@ export default async function SearchProducts({ searchParams }: Props) {
 						notFound={productsT('productsNotFound')}
 						limit={pageSize}
 					/>
-					<Pagination
-						currentPage={page}
-						totalItems={totalCount}
-						pageSize={pageSize}
-						baseRoute='/products/search/'
-					/>
+					{(totalCount ?? 0) > 0 && (
+						<Pagination
+							currentPage={page}
+							totalItems={totalCount}
+							pageSize={pageSize}
+							baseRoute='/products/search/'
+						/>
+					)}
 				</Box>
 			</Group>
 

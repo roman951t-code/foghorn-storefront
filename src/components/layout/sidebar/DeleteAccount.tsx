@@ -36,10 +36,7 @@ export function DeleteAccount({ onCloseAction }: Props) {
 
 				onCloseAction();
 			} else {
-				showToaster(
-					'error',
-					toasterMessages.deleteAccountFailed(result?.message, validT)
-				);
+				showToaster('error', toasterMessages.deleteAccountFailed(result?.message, validT));
 			}
 		} catch {
 			showToaster('error', toasterMessages.deleteAccountFailed(null, validT));
@@ -57,7 +54,7 @@ export function DeleteAccount({ onCloseAction }: Props) {
 			ids={DELETE_ACCOUNT_DIALOG_IDS}
 		>
 			<Dialog.Trigger asChild>
-				<AlertButton mt='8' w='full'>
+				<AlertButton mt='8' w='full' color='main' variant='outline'>
 					{authT('deleteAccount')}
 				</AlertButton>
 			</Dialog.Trigger>

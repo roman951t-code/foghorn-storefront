@@ -8,6 +8,8 @@
 		"start": "next start",
 		"lint": "npx tsc --noEmit",
 		"test": "node tests/getProductsFilters.test.js",
+		"db:push": "npx prisma db push --schema prisma/schema.prisma",
+		"db:seed": "npm run db:push && npx prisma db seed",
 		"profile:search": "node --loader ts-node/esm scripts/profile-search.ts",
 		"admin:dev": "node --import tsx/esm src/admin/server.mts",
 		"seed:content": "node scripts/seed-content-pages.cjs"

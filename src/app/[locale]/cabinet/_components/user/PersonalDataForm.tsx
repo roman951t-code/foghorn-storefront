@@ -1,5 +1,5 @@
 'use client';
-import { Fieldset, Wrap } from '@chakra-ui/react';
+import { Fieldset, SimpleGrid } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
@@ -85,21 +85,28 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	};
 
 	return (
-		<Wrap gapX='4' gapY='8' mt='4' colorPalette='gray'>
+		<SimpleGrid
+			columns={{ base: 1, '2xl': 2 }}
+			gap={{ base: 6, md: 8 }}
+			mt='4'
+			w='full'
+			colorPalette='gray'
+		>
 			<NameForm
 				i18nData={i18nData}
 				nameForm={nameForm}
 				onSubmitAction={nameForm.handleSubmit(handleNameSubmit)}
 			/>
-			<Fieldset.Root size='lg' alignItems='center'>
+			<Fieldset.Root size='lg' alignItems='stretch' w='full'>
 				<Fieldset.Content
 					gap='6'
 					borderWidth='0.5px'
 					borderStyle='solid'
 					borderColor='border'
-					borderRadius='md'
-					p='4'
-					maxW='4xl'
+					borderRadius='2xl'
+					p={{ base: 4, md: 6 }}
+					bg='bg.tertiary'
+					w='full'
 					css={{ '--field-label-width': '150px' }}
 				>
 					<EmailForm
@@ -117,6 +124,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					/>
 				</Fieldset.Content>
 			</Fieldset.Root>
-		</Wrap>
+		</SimpleGrid>
 	);
 }

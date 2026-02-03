@@ -1,19 +1,10 @@
 'use client';
-import {
-	Box,
-	Center,
-	Input,
-	Heading,
-	Fieldset,
-	Field,
-	RatingGroup,
-	Textarea,
-} from '@chakra-ui/react';
+import { Box, Input, Fieldset, Field, Textarea, Card, Flex, Stack, Text } from '@chakra-ui/react';
 import { VscFeedback } from 'react-icons/vsc';
 import CenteredModal from '@/components/ui/dialogs/CenteredModal';
 import { Controller, useForm } from 'react-hook-form';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/buttons/ActionButton';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import Auth from '@/features/auth/Auth';
 import { useSession } from '@/providers/SessionProvider';
 import { createFeedbackSchema, FeedbackSchema } from 'validationSchemas/feedbackSchema';
@@ -24,6 +15,7 @@ import { useReviews } from '@/hooks/useReviews';
 import { useTranslations } from 'next-intl';
 import { useReviewStore } from '@/stores/reviewStore';
 import type { Review } from '@/types/product';
+import { Rating } from '@/components/ui/chakra/rating';
 
 type Props = {
 	productId?: string;
@@ -39,6 +31,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 
 	const { session } = useSession();
 	const [isOpen, setIsOpen] = useState(false);
+	const didSetActiveProductRef = useRef(false);
 
 	const { handleReviewAction } = useReviews();
 	const setActiveProduct = useReviewStore((state) => state.setActiveProduct);
@@ -70,6 +63,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 		handleSubmit,
 		control,
 		reset,
+		watch,
 		formState: { errors, isSubmitting },
 	} = useForm<FeedbackSchema>({
 		mode: 'all',
@@ -84,17 +78,29 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 		},
 	});
 
+	const ratingValue = watch('rating') ?? 0;
+
 	const handleModalChange = (nextOpen: boolean) => {
 		setIsOpen(nextOpen);
-		if (!nextOpen && productId) {
+		if (!nextOpen && productId && didSetActiveProductRef.current) {
 			clearActiveProduct(productId);
+			didSetActiveProductRef.current = false;
 		}
 	};
 
 	const handleOpen = () => {
 		if (productId) {
-			setActiveProduct(productId);
-			setReviews(productId, initialReviews ?? []);
+			const state = useReviewStore.getState();
+			if (state.activeProductId !== productId) {
+				setActiveProduct(productId);
+				didSetActiveProductRef.current = true;
+			}
+
+			// Avoid overwriting an already-initialized reviews list (e.g. on product page),
+			// otherwise the UI can "lose" reviews until a full reload.
+			if (!state.reviewsByProduct[productId]) {
+				setReviews(productId, initialReviews ?? []);
+			}
 		}
 		setIsOpen(true);
 	};
@@ -145,39 +151,44 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 		>
 			<Box px={4} pt='0' borderRadius='md'>
 				<form onSubmit={handleSubmit(onSubmit)}>
-					<Center flexDirection='column' gap='4' mb='4'>
-						<Heading size='3xl' fontWeight='normal'>
-							{i18nData.rate}
-						</Heading>
-						<Controller
-							control={control}
-							name='rating'
-							render={({ field }) => (
-								<RatingGroup.Root
-									cursor='pointer'
-									defaultValue={5}
-									name={field.name}
-									value={field.value}
-									onValueChange={({ value }) => field.onChange(value)}
-								>
-									<RatingGroup.Root
-										size='lg'
-										colorPalette={{ base: 'orange', _dark: 'yellow' }}
-										allowHalf
-										count={5}
-										name={field.name}
-										value={field.value}
-										onValueChange={({ value }) => field.onChange(value)}
-									>
-										<RatingGroup.HiddenInput />
-										<RatingGroup.Control />
-									</RatingGroup.Root>
-								</RatingGroup.Root>
-							)}
-						/>
-					</Center>
+					<Card.Root
+						borderWidth='0.5px'
+						borderStyle='solid'
+						borderColor='border'
+						bg='bg.tertiary'
+						boxShadow='none'
+					>
+						<Card.Body p='4'>
+							<Flex justifyContent='space-between' alignItems='center' gap='4' flexWrap='wrap'>
+								<Stack fontSize='md' gapY='2.5'>
+									<Text fontWeight='semibold' color='main'>
+										{prodT('rate')}
+									</Text>
+									<Text color='fg.muted'>
+										{Number.isFinite(ratingValue) ? ratingValue : '0.0'} / 5
+									</Text>
+								</Stack>
+								<Controller
+									control={control}
+									name='rating'
+									render={({ field }) => (
+										<Rating
+											cursor='pointer'
+											size='lg'
+											allowHalf
+											count={5}
+											name={field.name}
+											value={field.value}
+											onValueChange={({ value }) => field.onChange(value)}
+											colorPalette={{ base: 'orange', _dark: 'yellow' }}
+										/>
+									)}
+								/>
+							</Flex>
+						</Card.Body>
+					</Card.Root>
 
-					<Fieldset.Root size='lg' maxW='md'>
+					<Fieldset.Root size='lg' maxW='md' mt='6'>
 						<Fieldset.Content gap='6' maxH='580px' overflowY='auto'>
 							<Field.Root invalid={!!errors.name} gap='2' justifyContent='center' required>
 								<Field.Label maxH='20px'>

@@ -77,7 +77,7 @@ export default function CartModal({ i18nData, triggerType, isInCart }: Props) {
 			setIsOpen={setIsOpen}
 		>
 			{isCartEmpty ? (
-				<Stack direction='column' alignItems='center'>
+				<Stack direction='column' alignItems='center' py='2' gap='4'>
 					<Image
 						src={ASSET_IMAGES.emptyCart}
 						width={240}
@@ -90,9 +90,10 @@ export default function CartModal({ i18nData, triggerType, isInCart }: Props) {
 							marginLeft: '-54px',
 						}}
 					/>
-					<EmptyState.Root paddingBlock='0' my={2}>
+
+					<EmptyState.Root paddingBlock='0'>
 						<EmptyState.Content>
-							<VStack textAlign='center'>
+							<VStack textAlign='center' gap='2'>
 								<EmptyState.Title fontSize='xl'>{i18nData.emptyCart}</EmptyState.Title>
 								<EmptyState.Description fontSize='md'>
 									{i18nData.emptyCartDescr}

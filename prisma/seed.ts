@@ -1,4 +1,4 @@
-import { PrismaClient, OrderStatus } from '@prisma/client';
+import { PrismaClient, OrderStatus, StorefrontFormPlacement } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import slugify from 'slugify';
 import { customAlphabet } from 'nanoid';
@@ -217,6 +217,23 @@ function needsImageReplacement(url?: string | null) {
 
 async function main() {
 	console.log('🌱 Seeding started...');
+
+	// Seed expects the database schema to be up-to-date. In this repo we typically use `prisma db push`
+	// (no migrations folder). If the schema wasn't applied, seeding will fail with cryptic "table does not exist".
+	try {
+		await prisma.storefrontForm.count();
+	} catch (e) {
+		const maybePrismaError = e as { code?: string; message?: string } | null;
+		if (maybePrismaError?.code === 'P2021') {
+			throw new Error(
+				[
+					'Database schema is not up to date (missing table for StorefrontForm).',
+					'Run `npx prisma db push --schema prisma/schema.prisma` and then rerun the seed.',
+				].join(' ')
+			);
+		}
+		throw e;
+	}
 
 	// Seed is meant to be repeatable during development. Since products are created with random slugs,
 	// rerunning the seed without cleanup will accumulate products/attributes and explode filter option counts.
@@ -703,6 +720,115 @@ async function main() {
 			},
 		},
 	});
+
+	// Content pages (editable via AdminJS)
+	const now = new Date();
+	await prisma.page.upsert({
+		where: { slug: 'privacy-policy' },
+		update: {
+			title: 'Privacy Policy',
+			status: 'PUBLISHED',
+			type: 'PAGE',
+			excerpt: 'How we collect, use, and protect personal data.',
+			content:
+				'This is a starter Privacy Policy template. Replace it with your real policy and legal advice.\n\nWe process your personal data to fulfill orders, provide customer support, prevent fraud, and comply with legal obligations.\n\nContact: support@example.com',
+			publishedAt: now,
+		},
+		create: {
+			title: 'Privacy Policy',
+			slug: 'privacy-policy',
+			status: 'PUBLISHED',
+			type: 'PAGE',
+			excerpt: 'How we collect, use, and protect personal data.',
+			content:
+				'This is a starter Privacy Policy template. Replace it with your real policy and legal advice.\n\nWe process your personal data to fulfill orders, provide customer support, prevent fraud, and comply with legal obligations.\n\nContact: support@example.com',
+			publishedAt: now,
+		},
+	});
+
+	await prisma.page.upsert({
+		where: { slug: 'cookie-policy' },
+		update: {
+			title: 'Cookie Policy',
+			status: 'PUBLISHED',
+			type: 'PAGE',
+			excerpt: 'What cookies we use and why.',
+			content:
+				'This is a starter Cookie Policy template. Replace it with your real policy.\n\nWe use essential cookies to keep the site working (e.g. login and cart). Optional cookies (analytics/marketing) should only be enabled after consent where required by law.',
+			publishedAt: now,
+		},
+		create: {
+			title: 'Cookie Policy',
+			slug: 'cookie-policy',
+			status: 'PUBLISHED',
+			type: 'PAGE',
+			excerpt: 'What cookies we use and why.',
+			content:
+				'This is a starter Cookie Policy template. Replace it with your real policy.\n\nWe use essential cookies to keep the site working (e.g. login and cart). Optional cookies (analytics/marketing) should only be enabled after consent where required by law.',
+			publishedAt: now,
+		},
+	});
+
+	// Storefront forms (editable via AdminJS)
+	const storefrontForms = [
+		{
+			key: 'checkout-terms',
+			placement: StorefrontFormPlacement.CHECKOUT,
+			title: 'Terms acceptance',
+			description: 'Required for checkout',
+			enabled: true,
+			required: true,
+			checkboxLabel: 'I agree to the Terms of Service',
+			linkLabel: 'Read terms',
+			linkHref: '/terms',
+			sortOrder: 10,
+		},
+		{
+			key: 'checkout-privacy',
+			placement: StorefrontFormPlacement.CHECKOUT,
+			title: 'Privacy policy acknowledgement',
+			description: 'Required for checkout',
+			enabled: true,
+			required: true,
+			checkboxLabel: 'I have read the Privacy Policy',
+			linkLabel: 'Read privacy policy',
+			linkHref: '/privacy-policy',
+			sortOrder: 20,
+		},
+		{
+			key: 'checkout-marketing',
+			placement: StorefrontFormPlacement.CHECKOUT,
+			title: 'Marketing emails',
+			description: 'Optional',
+			enabled: false,
+			required: false,
+			checkboxLabel: 'I want to receive marketing emails and special offers',
+			sortOrder: 30,
+		},
+		{
+			key: 'cookie-consent-banner',
+			placement: StorefrontFormPlacement.COOKIE_BANNER,
+			title: 'Cookies',
+			description: 'Cookie preferences',
+			body:
+				'We use cookies to make the site work. Optional cookies (analytics/marketing) are only used with consent where required.\n\nYou can change your choice later by clearing cookies in your browser.',
+			enabled: false,
+			required: false,
+			acceptLabel: 'Accept all',
+			declineLabel: 'Essential only',
+			linkLabel: 'Cookie Policy',
+			linkHref: '/cookie-policy',
+			sortOrder: 10,
+		},
+	] as const;
+
+	for (const form of storefrontForms) {
+		await prisma.storefrontForm.upsert({
+			where: { key: form.key },
+			update: form,
+			create: form,
+		});
+	}
 
 	console.log('✅ Seeding completed.');
 }
