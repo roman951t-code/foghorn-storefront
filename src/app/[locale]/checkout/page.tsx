@@ -25,16 +25,15 @@ export default async function Checkout() {
 			<Heading as='h1' size='4xl' fontWeight='normal'>
 				{productsT('orderProcessing')}
 			</Heading>
-			<Group justifyContent='space-between' align='flex-start' gapX='6'>
-				<Box as='section' w={{ base: '100%', lg: '73%' }}>
+			<Group justifyContent='space-between' align='flex-start' gapX='4'>
+				<Box as='section' flex='1'>
 					<CheckoutSteps />
 					<Box hideFrom='lg'>{<OrderInfo storefrontForms={checkoutForms} />}</Box>
 				</Box>
 				<Box
 					as='aside'
-					w='27%'
-					minW='324px'
-					rounded='sm'
+					w='360px'
+					rounded='lg'
 					bg='bg.tertiary'
 					borderWidth='0.5px'
 					borderStyle='solid'

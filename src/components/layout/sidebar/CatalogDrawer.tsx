@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import {
 	AccordionItem,
 	AccordionItemContent,
@@ -18,27 +18,19 @@ import {
 	SimpleGrid,
 	Skeleton,
 	Icon,
-	Button,
 } from '@chakra-ui/react';
 import { DrawerActionTrigger } from '@/components/ui/chakra/drawer';
 import { LocaleNavLink, LocaleNavSecButton } from '@/components/ui/links/LocaleNavLink';
 import { useCatalog } from '@/providers/CatalogProvider';
 import { BsChevronRight } from 'react-icons/bs';
+import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
+import CountPill from '@/components/ui/CountPill';
 
 export default function CatalogDrawer() {
 	const t = useTranslations('common');
 	const { categories } = useCatalog();
 
 	const [openValues, setOpenValues] = useState<string[]>([]);
-	const hasInitializedOpen = useRef(false);
-
-	useEffect(() => {
-		if (hasInitializedOpen.current) return;
-		if (!categories || categories.length === 0) return;
-		if (!categories[0]?.slug) return;
-		setOpenValues([categories[0].slug]);
-		hasInitializedOpen.current = true;
-	}, [categories]);
 
 	if (!categories || categories.length === 0) {
 		return (
@@ -47,16 +39,16 @@ export default function CatalogDrawer() {
 				borderWidth='0.5px'
 				borderStyle='solid'
 				borderColor='border'
-				rounded='2xl'
+				rounded='lg'
 				overflow='hidden'
 				bg='bg.tertiary'
 			>
 				<Box p={4} borderBottomWidth='0.5px' borderBottomStyle='solid' borderColor='border'>
-					<Skeleton height='28px' width='220px' borderRadius='md' />
+					<Skeleton height='28px' width='220px' borderRadius='lg' />
 				</Box>
 				<VStack align='stretch' gap={2} p={4}>
 					{Array.from({ length: 6 }).map((_, i) => (
-						<Skeleton key={i} height='52px' borderRadius='xl' />
+						<Skeleton key={i} height='52px' borderRadius='lg' />
 					))}
 				</VStack>
 			</Box>
@@ -69,7 +61,7 @@ export default function CatalogDrawer() {
 			borderWidth='0.5px'
 			borderStyle='solid'
 			borderColor='border'
-			rounded='2xl'
+			rounded='lg'
 			overflow='hidden'
 			bg='bg.tertiary'
 		>
@@ -84,17 +76,13 @@ export default function CatalogDrawer() {
 					<Heading fontWeight='semibold' textStyle='2xl' color='main'>
 						{t('catalogFull')}
 					</Heading>
-					<Button
-						size='sm'
-						variant='outline'
-						borderColor='border'
+					<SecondaryButton
 						onClick={() => {
-							hasInitializedOpen.current = true;
 							setOpenValues([]);
 						}}
 					>
 						{t('collapseAll')}
-					</Button>
+					</SecondaryButton>
 				</HStack>
 			</Box>
 
@@ -134,156 +122,146 @@ export default function CatalogDrawer() {
 								bg='bg.tertiary'
 								transition='all 0.18s ease-in-out'
 								_hover={{ bg: 'bgHover.promoCard' }}
-								>
-									<HStack gap={4} w='full' minW={0}>
-										<Box
-											boxSize='88px'
-											rounded='xl'
-											bgImage={`url(${categoryImage})`}
-											bgSize='cover'
-											bgPos='center'
-											borderWidth='0.5px'
-											borderStyle='solid'
-											borderColor='border'
-											flexShrink={0}
-										/>
+							>
+								<HStack gap={4} w='full' minW={0}>
+									<Box
+										boxSize='88px'
+										rounded='lg'
+										bgImage={`url(${categoryImage})`}
+										bgSize='cover'
+										bgPos='center'
+										borderWidth='0.5px'
+										borderStyle='solid'
+										borderColor='border'
+										flexShrink={0}
+									/>
 
-										<Box flex='1' minW={0}>
-											<Text fontSize='xl' fontWeight='semibold' lineClamp={1}>
-												{category.name}
-											</Text>
-											<Text fontSize='md' opacity={0.75} lineClamp={1} title={subPreview}>
-												{subPreview}
-											</Text>
-										</Box>
+									<Box flex='1' minW={0}>
+										<Text fontSize='xl' fontWeight='semibold' lineClamp={1}>
+											{category.name}
+										</Text>
+										<Text fontSize='md' opacity={0.75} lineClamp={1} title={subPreview}>
+											{subPreview}
+										</Text>
+									</Box>
 
-										<Badge
-											variant='outline'
-											borderColor='border'
-											px='2'
-											py='1'
-											borderRadius='full'
-											bg='bg.tertiary'
-											fontSize='md'
-										>
-											{subCount}
-										</Badge>
-									</HStack>
-								</AccordionItemTrigger>
+									<CountPill value={subCount} px='2' py='1' labelProps={{ fontSize: 'md' }} />
+								</HStack>
+							</AccordionItemTrigger>
 
-								<AccordionItemContent
-									px={{ base: 3, md: 4 }}
-									pb={{ base: 6, md: 8 }}
-									pt={{ base: 3, md: 4 }}
-								>
-									<SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap={5} w='full'>
-										{category.children?.map((subcategory) => {
-											const subImage = subcategory.imageUrl ?? '/assets/images/temp/3Big.webp';
-											return (
+							<AccordionItemContent
+								px={{ base: 3, md: 4 }}
+								pb={{ base: 6, md: 8 }}
+								pt={{ base: 3, md: 4 }}
+							>
+								<SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap={5} w='full'>
+									{category.children?.map((subcategory) => {
+										const subImage = subcategory.imageUrl ?? '/assets/images/temp/3Big.webp';
+										return (
+											<Box
+												key={subcategory.id}
+												rounded='lg'
+												borderWidth='0.5px'
+												borderStyle='solid'
+												borderColor='border'
+												bg='bg.tertiary'
+												overflow='hidden'
+												transition='all 0.18s ease-in-out'
+												_hover={{ transform: 'translateY(-1px)', borderColor: 'main.secondary' }}
+											>
 												<Box
-													key={subcategory.id}
-													rounded='2xl'
-													borderWidth='0.5px'
-													borderStyle='solid'
-													borderColor='border'
-													bg='bg.tertiary'
-													overflow='hidden'
-													transition='all 0.18s ease-in-out'
-													_hover={{ transform: 'translateY(-1px)', borderColor: 'main.secondary' }}
+													h={{ base: '120px', md: '160px' }}
+													bgImage={`url(${subImage})`}
+													bgSize='cover'
+													bgPos='center'
+													position='relative'
 												>
 													<Box
-														h={{ base: '120px', md: '160px' }}
-														bgImage={`url(${subImage})`}
-														bgSize='cover'
-														bgPos='center'
-														position='relative'
-													>
-														<Box
-															position='absolute'
-															inset='0'
-															bgGradient='linear(to-t, rgba(0,0,0,0.62), rgba(0,0,0,0.0))'
-														/>
-													</Box>
+														position='absolute'
+														inset='0'
+														bgGradient='linear(to-t, rgba(0,0,0,0.62), rgba(0,0,0,0.0))'
+													/>
+												</Box>
 
-													<Box p={4}>
+												<Box p={4}>
+													<DrawerActionTrigger asChild>
+														<LocaleNavLink
+															href={`/products/${category.slug}/${subcategory.slug}`}
+															fontSize='lg'
+															fontWeight='semibold'
+															variant='plain'
+															color='main'
+															textDecoration='none'
+															textWrap='wrap'
+															wordBreak='break-word'
+															_hover={{ color: 'link' }}
+															display='inline-flex'
+															alignItems='center'
+															gap={2}
+														>
+															<Text as='span' lineClamp={2}>
+																{subcategory.name}
+															</Text>
+															<Icon as='span' fontSize='16px' color='gray.500'>
+																<BsChevronRight />
+															</Icon>
+														</LocaleNavLink>
+													</DrawerActionTrigger>
+
+													<Wrap mt={3} gap={3} align='center'>
+														{subcategory.products.map((product) => (
+															<Badge
+																key={product.id}
+																variant='outline'
+																size='md'
+																borderWidth='0.5px'
+																bg='bg.tertiary'
+																px='2'
+																py='1'
+																borderRadius='lg'
+																boxShadow='none'
+																borderColor='border'
+															>
+																<DrawerActionTrigger asChild>
+																	<LocaleNavLink
+																		href={`/products/${product.fullSlug}`}
+																		fontSize='14px'
+																		variant='plain'
+																		textWrap='wrap'
+																		wordBreak='break-word'
+																	>
+																		{product.name}
+																	</LocaleNavLink>
+																</DrawerActionTrigger>
+															</Badge>
+														))}
+
 														<DrawerActionTrigger asChild>
 															<LocaleNavLink
 																href={`/products/${category.slug}/${subcategory.slug}`}
-																fontSize='lg'
-																fontWeight='semibold'
+																fontSize='sm'
 																variant='plain'
-																color='main'
-																textDecoration='none'
-																textWrap='wrap'
-																wordBreak='break-word'
-																_hover={{ color: 'link' }}
-																display='inline-flex'
-																alignItems='center'
-																gap={2}
+																color='link'
+																textDecoration='underline'
+																textUnderlineOffset='4px'
 															>
-																<Text as='span' lineClamp={2}>
-																	{subcategory.name}
-																</Text>
-																<Icon as='span' fontSize='16px' color='gray.500'>
-																	<BsChevronRight />
-																</Icon>
+																{t('seeAll')}
 															</LocaleNavLink>
 														</DrawerActionTrigger>
-
-														<Wrap mt={3} gap={3} align='center'>
-															{subcategory.products.map((product) => (
-																<Badge
-																	key={product.id}
-																	variant='outline'
-																	size='md'
-																	borderWidth='0.5px'
-																	bg='bg.tertiary'
-																	px='2'
-																	py='1'
-																	borderRadius='full'
-																	boxShadow='none'
-																	borderColor='border'
-																>
-																	<DrawerActionTrigger asChild>
-																		<LocaleNavLink
-																			href={`/products/${product.fullSlug}`}
-																			fontSize='14px'
-																			variant='plain'
-																			textWrap='wrap'
-																			wordBreak='break-word'
-																		>
-																			{product.name}
-																		</LocaleNavLink>
-																	</DrawerActionTrigger>
-																</Badge>
-															))}
-
-															<DrawerActionTrigger asChild>
-																<LocaleNavLink
-																	href={`/products/${category.slug}/${subcategory.slug}`}
-																	fontSize='sm'
-																	variant='plain'
-																	color='link'
-																	textDecoration='underline'
-																	textUnderlineOffset='4px'
-																>
-																	{t('seeAll')}
-																</LocaleNavLink>
-															</DrawerActionTrigger>
-														</Wrap>
-													</Box>
+													</Wrap>
 												</Box>
-											);
-										})}
-									</SimpleGrid>
+											</Box>
+										);
+									})}
+								</SimpleGrid>
 
-									<HStack justify='flex-end' mt={{ base: 4, md: 5 }}>
-										<DrawerActionTrigger asChild>
-											<LocaleNavSecButton href={`/products/${category.slug}`} size='sm'>
-												{t('seeCategory')} <BsChevronRight />
-											</LocaleNavSecButton>
-										</DrawerActionTrigger>
-									</HStack>
+								<HStack justify='flex-end' mt={{ base: 4, md: 5 }}>
+									<DrawerActionTrigger asChild>
+										<LocaleNavSecButton href={`/products/${category.slug}`} size='sm'>
+											{t('seeCategory')} <BsChevronRight />
+										</LocaleNavSecButton>
+									</DrawerActionTrigger>
+								</HStack>
 							</AccordionItemContent>
 						</AccordionItem>
 					);

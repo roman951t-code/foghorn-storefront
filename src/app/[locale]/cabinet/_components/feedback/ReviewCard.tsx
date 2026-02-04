@@ -59,7 +59,7 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 								height={120}
 								style={{
 									objectFit: 'contain',
-									borderRadius: '6px',
+									borderRadius: 'var(--chakra-radii-md)',
 									border: '0.5px solid var(--chakra-colors-border)',
 								}}
 							/>
@@ -126,7 +126,7 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 								onClick={onRemoveAction}
 								aria-label='Delete feedback'
 								variant='ghost'
-								rounded='full'
+								rounded='md'
 								color='main.disabled'
 								disabled={pending}
 								loading={pending}

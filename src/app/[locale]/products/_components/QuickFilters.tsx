@@ -39,7 +39,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 	return (
 		<Flex flexDirection='column' gap={4} w='100%' minW={0}>
 			<Box
-				rounded='2xl'
+				rounded='lg'
 				bg='bg.tertiary'
 				p={4}
 				w='100%'
@@ -61,66 +61,63 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 				>
 					<VStack gap={2} alignItems='stretch'>
 						<Radio
-								w='100%'
-								minW={0}
-								whiteSpace='normal'
-								wordBreak='break-word'
-								textAlign='start'
-								color='main'
-								fontSize='sm'
-								value='new'
-								px={3}
-								py={2.5}
-								rounded='xl'
-								borderWidth='0.5px'
-								borderStyle='solid'
-								borderColor='border'
-								transition='all 0.15s ease-in-out'
-								_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-								_checked={{ bg: 'bgHover.promoCard', borderColor: 'main.secondary' }}
-							>
+							w='100%'
+							minW={0}
+							whiteSpace='normal'
+							wordBreak='break-word'
+							textAlign='start'
+							color='main'
+							fontSize='sm'
+							value='new'
+							px={3}
+							py={2.5}
+							rounded='lg'
+							borderWidth='0.5px'
+							borderStyle='solid'
+							borderColor='border'
+							transition='all 0.15s ease-in-out'
+							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
+						>
 							{t('new')}
 						</Radio>
 						<Radio
-								w='100%'
-								minW={0}
-								whiteSpace='normal'
-								wordBreak='break-word'
-								textAlign='start'
-								color='main'
-								fontSize='sm'
-								value='expensive'
-								px={3}
-								py={2.5}
-								rounded='xl'
-								borderWidth='0.5px'
-								borderStyle='solid'
-								borderColor='border'
-								transition='all 0.15s ease-in-out'
-								_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-								_checked={{ bg: 'bgHover.promoCard', borderColor: 'main.secondary' }}
-							>
+							w='100%'
+							minW={0}
+							whiteSpace='normal'
+							wordBreak='break-word'
+							textAlign='start'
+							color='main'
+							fontSize='sm'
+							value='expensive'
+							px={3}
+							py={2.5}
+							rounded='lg'
+							borderWidth='0.5px'
+							borderStyle='solid'
+							borderColor='border'
+							transition='all 0.15s ease-in-out'
+							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
+						>
 							{t('expensiveToCheap')}
 						</Radio>
 						<Radio
-								w='100%'
-								minW={0}
-								whiteSpace='normal'
-								wordBreak='break-word'
-								textAlign='start'
-								color='main'
-								fontSize='sm'
-								value='cheap'
-								px={3}
-								py={2.5}
-								rounded='xl'
-								borderWidth='0.5px'
-								borderStyle='solid'
-								borderColor='border'
-								transition='all 0.15s ease-in-out'
-								_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-								_checked={{ bg: 'bgHover.promoCard', borderColor: 'main.secondary' }}
-							>
+							w='100%'
+							minW={0}
+							whiteSpace='normal'
+							wordBreak='break-word'
+							textAlign='start'
+							color='main'
+							fontSize='sm'
+							value='cheap'
+							px={3}
+							py={2.5}
+							rounded='lg'
+							borderWidth='0.5px'
+							borderStyle='solid'
+							borderColor='border'
+							transition='all 0.15s ease-in-out'
+							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
+						>
 							{t('cheapToExpensive')}
 						</Radio>
 					</VStack>
@@ -128,7 +125,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 			</Box>
 
 			<Box
-				rounded='2xl'
+				rounded='lg'
 				bg='bg.tertiary'
 				p={4}
 				w='100%'
@@ -145,8 +142,8 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 						searchParams.get('inStock') === 'true'
 							? 'inStock'
 							: searchParams.get('inStock') === 'false'
-								? 'outOfStock'
-								: 'all'
+							? 'outOfStock'
+							: 'all'
 					}
 					onValueChange={handleStockChange}
 					spaceX='4'
@@ -166,13 +163,12 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 							value='all'
 							px={3}
 							py={2.5}
-							rounded='xl'
+							rounded='lg'
 							borderWidth='0.5px'
 							borderStyle='solid'
 							borderColor='border'
 							transition='all 0.15s ease-in-out'
 							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-							_checked={{ bg: 'bgHover.promoCard', borderColor: 'main.secondary' }}
 						>
 							{t('all')}
 						</Radio>
@@ -187,13 +183,12 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 							value='inStock'
 							px={3}
 							py={2.5}
-							rounded='xl'
+							rounded='lg'
 							borderWidth='0.5px'
 							borderStyle='solid'
 							borderColor='border'
 							transition='all 0.15s ease-in-out'
 							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-							_checked={{ bg: 'bgHover.promoCard', borderColor: 'main.secondary' }}
 						>
 							{t('productIsPresent')}
 						</Radio>
@@ -208,13 +203,12 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 							value='outOfStock'
 							px={3}
 							py={2.5}
-							rounded='xl'
+							rounded='lg'
 							borderWidth='0.5px'
 							borderStyle='solid'
 							borderColor='border'
 							transition='all 0.15s ease-in-out'
 							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-							_checked={{ bg: 'bgHover.promoCard', borderColor: 'main.secondary' }}
 						>
 							{t('productIsOutOfStock')}
 						</Radio>
@@ -223,7 +217,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 			</Box>
 
 			<Box
-				rounded='2xl'
+				rounded='lg'
 				bg='bg.tertiary'
 				p={4}
 				w='100%'

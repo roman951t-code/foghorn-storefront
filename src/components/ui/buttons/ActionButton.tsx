@@ -10,6 +10,7 @@ export function PrimaryButton({ children, ...props }: Props) {
 			colorPalette='gray'
 			bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 			variant='solid'
+			rounded='md'
 			{...props}
 		>
 			{children}
@@ -23,6 +24,7 @@ export function SecondaryButton({ children, ...props }: Props) {
 			colorPalette='gray'
 			color='main'
 			bgColor={{ base: 'main' }}
+			rounded='md'
 			_hover={{
 				color: { base: 'black', _dark: 'white' },
 				bgColor: { base: 'bgHover', _dark: 'bg.subtle' },
@@ -42,6 +44,7 @@ export function TertiaryButton({ children, ...props }: Props) {
 			colorPalette='gray'
 			color='main'
 			variant='outline'
+			rounded='md'
 			borderWidth='0.5px'
 			borderStyle='solid'
 			borderColor='border.button'
@@ -60,7 +63,7 @@ export function AlertButton({ children, ...props }: Props) {
 				base: 'subtle',
 				_dark: 'solid',
 			}}
-			rounded='sm'
+			rounded='md'
 			{...props}
 		>
 			{children}

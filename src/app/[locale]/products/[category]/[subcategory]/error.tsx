@@ -12,7 +12,7 @@ type ErrorProps = {
 export default function SubcategoryError({ error, reset }: ErrorProps) {
 	const t = useTranslations('errors');
 
-		return (
+	return (
 		<Box
 			borderWidth='0.5px'
 			borderColor='border'
@@ -34,10 +34,10 @@ export default function SubcategoryError({ error, reset }: ErrorProps) {
 					</Text>
 				) : null}
 				<HStack gap='3' pt='2'>
-					<Button colorPalette='blue' onClick={reset}>
+					<Button colorPalette='blue' rounded='md' onClick={reset}>
 						{t('actions.tryAgain')}
 					</Button>
-					<Button asChild variant='outline' colorPalette='gray'>
+					<Button asChild variant='outline' colorPalette='gray' rounded='md'>
 						<LocaleNavLink href='/'>{t('actions.goHome')}</LocaleNavLink>
 					</Button>
 				</HStack>

@@ -149,7 +149,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 			}
 			size='md'
 		>
-			<Box px={4} pt='0' borderRadius='md'>
+			<Box px={4} pt='0' borderRadius='lg'>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<Card.Root
 						borderWidth='0.5px'
@@ -195,7 +195,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 									{i18nData.name} <Field.RequiredIndicator />
 								</Field.Label>
 
-								<Input {...register('name')} variant='outline' size='md' />
+								<Input {...register('name')} size='md' />
 								<Field.ErrorText alignSelf='flex-start'>
 									{errors.name?.message?.toString()}
 								</Field.ErrorText>
@@ -206,7 +206,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 									{i18nData.lastName} <Field.RequiredIndicator />
 								</Field.Label>
 
-								<Input {...register('lastName')} variant='outline' size='md' />
+								<Input {...register('lastName')} size='md' />
 								<Field.ErrorText alignSelf='flex-start'>
 									{errors.lastName?.message?.toString()}
 								</Field.ErrorText>

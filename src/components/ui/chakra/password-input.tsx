@@ -78,6 +78,7 @@ const VisibilityTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
 				aspectRatio='square'
 				size='sm'
 				variant='ghost'
+				rounded='md'
 				height='calc(100% - {spacing.2})'
 				aria-label='Toggle password visibility'
 				{...props}
@@ -108,7 +109,7 @@ export const PasswordStrengthMeter = React.forwardRef<
 						key={index}
 						height='1'
 						flex='1'
-						rounded='sm'
+						rounded='lg'
 						data-selected={index < value ? '' : undefined}
 						layerStyle='fill.subtle'
 						colorPalette='gray'

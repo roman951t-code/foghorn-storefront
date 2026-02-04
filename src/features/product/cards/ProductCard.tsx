@@ -138,7 +138,7 @@ export default function ProductCard({ product }: Props) {
 						aria-label='Cart add and remove'
 						variant='ghost'
 						disabled={!isInStock}
-						rounded='full'
+						rounded='md'
 						colorPalette='green'
 						color={{ base: 'colorPalette.600', _dark: 'colorPalette.500' }}
 						transition='all 0.2s ease-in-out'
@@ -156,7 +156,7 @@ export default function ProductCard({ product }: Props) {
 						onClick={isInWishlist ? removeFromWishList : addToWishList}
 						aria-label='Favourite'
 						variant='ghost'
-						rounded='full'
+						rounded='md'
 						colorPalette='red'
 						color='colorPalette.400'
 						transition='all 0.2s ease-in-out'

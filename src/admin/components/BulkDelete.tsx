@@ -20,6 +20,7 @@ import {
 	useNotice,
 	useTranslation,
 } from 'adminjs';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const appendForceRefresh = (url: string, search?: string) => {
 	const searchParamsIdx = url.lastIndexOf('?');
@@ -36,6 +37,7 @@ export default function BulkDelete(props: ActionProps) {
 	const navigate = useNavigate();
 	const addNotice = useNotice();
 	const [loading, setLoading] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 	const { translateMessage, translateButton } = useTranslation();
 	const contentRef = useRef<HTMLElement | null>(null);
 	const footerRef = useRef<HTMLElement | null>(null);
@@ -133,7 +135,7 @@ export default function BulkDelete(props: ActionProps) {
 				</Table>
 			</DrawerContent>
 			<DrawerFooter ref={footerRef as any}>
-				<Button variant='contained' size='lg' onClick={handleClick} disabled={loading}>
+				<Button variant='contained' size='lg' onClick={handleClick} disabled={isReadOnly || loading}>
 					{loading ? <Icon icon='Loader' spin /> : null}
 					{translateButton(
 						records.length > 1 ? 'confirmRemovalMany_plural' : 'confirmRemovalMany',

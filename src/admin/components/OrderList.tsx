@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ApiClient, type ActionProps, OriginalList, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -52,6 +53,7 @@ export default function OrderList(props: ActionProps) {
 	const { translateMessage } = useTranslation();
 	const addNotice = useNotice();
 	const [exporting, setExporting] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	const filters = useMemo(() => resolveFilters(), []);
 
@@ -92,16 +94,16 @@ export default function OrderList(props: ActionProps) {
 				style={{ border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}
 			>
 				<Text fontWeight='bold'>{translateMessage('order-views-title')}</Text>
-				<Button
-					variant='contained'
-					color='primary'
-					style={actionButtonStyle}
-					onClick={handleExport}
-					disabled={exporting}
-				>
-					{exporting ? translateMessage('order-csv-exporting') : translateMessage('order-csv-export')}
-				</Button>
-			</Box>
+					<Button
+						variant='contained'
+						color='primary'
+						style={actionButtonStyle}
+						onClick={handleExport}
+						disabled={isReadOnly || exporting}
+					>
+						{exporting ? translateMessage('order-csv-exporting') : translateMessage('order-csv-export')}
+					</Button>
+				</Box>
 
 			<OriginalList {...props} />
 		</Box>

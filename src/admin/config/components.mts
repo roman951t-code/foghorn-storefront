@@ -122,6 +122,7 @@ const dashboardComponent = componentLoader.add(
 componentLoader.override('Login', path.join(adminDir, 'components', 'Login'));
 componentLoader.override('LoggedIn', path.join(adminDir, 'components', 'LoggedIn'));
 componentLoader.override('TopBar', path.join(adminDir, 'components', 'TopBar'));
+componentLoader.override('ActionButton', path.join(adminDir, 'components', 'ActionButton'));
 componentLoader.override('FilterDrawer', path.join(adminDir, 'components', 'FilterDrawer'));
 componentLoader.override('DefaultBulkDeleteAction', path.join(adminDir, 'components', 'BulkDelete'));
 componentLoader.override('PropertyDescription', path.join(adminDir, 'components', 'PropertyDescription'));

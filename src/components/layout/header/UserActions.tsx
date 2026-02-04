@@ -13,7 +13,7 @@ const AuthBtn = () => (
 		size='md'
 		variant='ghost'
 		color='main.lightOnly'
-		rounded='full'
+		rounded='md'
 		colorPalette='blue'
 		bg={{ _hover: 'colorPalette.400' }}
 		_focusVisible={{ boxShadow: '0 0 0 2px var(--chakra-colors-blue-400)' }}

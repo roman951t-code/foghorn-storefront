@@ -34,7 +34,7 @@ export function LoadingSkeleton() {
 export function ProductPreviewSkeleton() {
 	return (
 		<HStack overflowX='hidden' overflowY='hidden' alignSelf='center'>
-			<Skeleton width='116px' height='116px' borderRadius='sm' />
+			<Skeleton width='116px' height='116px' borderRadius='lg' />
 		</HStack>
 	);
 }

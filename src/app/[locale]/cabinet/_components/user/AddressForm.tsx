@@ -42,7 +42,7 @@ export default function AddressForm({
 
 				<Stack w='full' direction={{ base: 'column', sm: 'row' } as const} gap='4'>
 					<VStack w='full' alignItems='flex-start'>
-						<Input {...addressForm.register('shipmentAddress')} variant='outline' size='md' />
+						<Input {...addressForm.register('shipmentAddress')} size='md' />
 						<Field.ErrorText>
 							{addressForm.formState.errors.shipmentAddress?.message?.toString() || error?.message}
 						</Field.ErrorText>

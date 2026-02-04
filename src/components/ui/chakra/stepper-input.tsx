@@ -13,15 +13,7 @@ export const StepperInput = React.forwardRef<HTMLDivElement, StepperInputProps>(
 		return (
 			<NumberInput.Root aria-label={resolvedLabel} {...rest} unstyled ref={ref}>
 				{label && <NumberInput.Label>{label}</NumberInput.Label>}
-				<HStack
-					gap='1'
-					px='1'
-					py='1'
-					rounded='full'
-					borderWidth='1px'
-					borderColor='border'
-					bg={{ base: 'gray.100', _dark: '#161620' }}
-				>
+				<HStack gap='1' px='0.5' py='0.5' rounded='lg' borderWidth='0.5px' borderColor='border'>
 					<DecrementTrigger />
 					<NumberInput.ValueText textAlign='center' fontSize='sm' fontWeight='bold' minW='3ch' />
 					<IncrementTrigger />
@@ -38,7 +30,7 @@ const DecrementTrigger = React.forwardRef<HTMLButtonElement, NumberInput.Decreme
 				<IconButton
 					variant='ghost'
 					size='xs'
-					rounded='full'
+					rounded='md'
 					aria-label='Decrease value'
 					_hover={{ bg: 'bgHover.promoCard' }}
 				>
@@ -56,7 +48,7 @@ const IncrementTrigger = React.forwardRef<HTMLButtonElement, NumberInput.Increme
 				<IconButton
 					variant='ghost'
 					size='xs'
-					rounded='full'
+					rounded='md'
 					aria-label='Increase value'
 					_hover={{ bg: 'bgHover.promoCard' }}
 				>

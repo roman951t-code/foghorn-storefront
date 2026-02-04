@@ -60,7 +60,7 @@ export default function PreferredDeliveryForm({
 					borderWidth='0.5px'
 					borderStyle='solid'
 					borderColor='border'
-					borderRadius='md'
+					borderRadius='lg'
 					p='4'
 					maxW='4xl'
 				>

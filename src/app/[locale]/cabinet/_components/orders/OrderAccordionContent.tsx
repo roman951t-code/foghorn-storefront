@@ -5,7 +5,7 @@ import { Accordion, Card, Flex, HStack, Icon, Separator, Stack, Tag, Text } from
 import { BsArrowRepeat } from 'react-icons/bs';
 import { FiTruck } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
-import { PrimaryButton, TertiaryButton } from '@/components/ui/buttons/ActionButton';
+import { PrimaryButton, SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { buildProductImages, toPreviewImage } from '@/utils/productImages';
 import { repeatOrderAction } from '@/actions/repeatOrderAction';
@@ -80,9 +80,9 @@ export function OrderAccordionContent({ order }: Props) {
 					flexWrap='wrap'
 					mb='4'
 				>
-					<TertiaryButton onClick={handleDeleteOrder} loading={isDeleting} disabled={isDeleting}>
+					<SecondaryButton onClick={handleDeleteOrder} loading={isDeleting} disabled={isDeleting}>
 						{deleteLabel}
-					</TertiaryButton>
+					</SecondaryButton>
 					<PrimaryButton onClick={handleRepeatOrder} loading={isRepeating}>
 						<BsArrowRepeat />
 						{productsT('repeatOrder')}
@@ -173,7 +173,7 @@ export function OrderAccordionContent({ order }: Props) {
 											alt={item.product.name}
 											style={{
 												objectFit: 'contain',
-												borderRadius: '6px',
+												borderRadius: 'var(--chakra-radii-md)',
 												border: '0.5px solid var(--chakra-colors-border)',
 											}}
 										/>

@@ -133,7 +133,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 			borderStyle='solid'
 			borderColor='border'
 			p={4}
-			rounded='md'
+			rounded='lg'
 			gapX='8'
 			gapY='4'
 			flexWrap='wrap'
@@ -155,22 +155,21 @@ export default function SubscribeSection({ i18nData }: Props) {
 					>
 						<Fieldset.Root invalid w={{ base: 'full', md: 'auto' }} maxW='340px'>
 							<Field.Root required invalid={!!errors?.email || !!verifyError}>
-								<Input
-									{...register('email')}
-									maxLength={MAX_CHARACTERS}
-									rounded='md'
-									type='email'
-									placeholder={i18nData.email}
-									size='md'
-									minH='44px'
-									fontSize='md'
-									variant='outline'
-									minWidth='280px'
-									maxWidth='340px'
-									flex='1 1 0'
-									disabled={session?.user?.isGoogleUser}
-									readOnly={session?.user?.isGoogleUser}
-								/>
+									<Input
+										{...register('email')}
+										maxLength={MAX_CHARACTERS}
+										rounded='lg'
+										type='email'
+										placeholder={i18nData.email}
+										size='md'
+										minH='44px'
+										fontSize='md'
+										minWidth='280px'
+										maxWidth='340px'
+										flex='1 1 0'
+										disabled={session?.user?.isGoogleUser}
+										readOnly={session?.user?.isGoogleUser}
+									/>
 
 								<Field.ErrorText minH='22px'>
 									{errors.email?.message || verifyError || i18nData.emailNotVerifiedError}

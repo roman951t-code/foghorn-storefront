@@ -46,14 +46,14 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 					m='auto'
 					maxHeight='96%'
 					bg='bg.tertiary'
-					rounded='md'
+					rounded='lg'
 				>
-					<DrawerBody maxW='1444px' margin='auto' w='full' py='4'>
+					<DrawerBody maxW='1444px' margin='auto' w='full' pt={{ base: '6', md: '7' }} pb='4'>
 						<CatalogDrawer />
 					</DrawerBody>
 					<DrawerFooter>
 						<DrawerActionTrigger asChild>
-							<Button borderColor='border' variant='outline'>
+							<Button borderColor='border' variant='outline' rounded='md'>
 								{authT('close')}
 							</Button>
 						</DrawerActionTrigger>

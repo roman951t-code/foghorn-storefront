@@ -20,13 +20,15 @@ type ProductPreviewSliderProps = {
 function ProductPreviewSkeleton() {
 	return (
 		<HStack overflowX='hidden' overflowY='hidden' alignSelf='center'>
-			<Skeleton width='116px' height='116px' borderRadius='sm' />
+			<Skeleton width='116px' height='116px' borderRadius='lg' />
 		</HStack>
 	);
 }
 
 function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps) {
-	const baseImages = images.length ? images : [ASSET_IMAGES.tempProduct1, ASSET_IMAGES.tempProduct2];
+	const baseImages = images.length
+		? images
+		: [ASSET_IMAGES.tempProduct1, ASSET_IMAGES.tempProduct2];
 	const previewImages = baseImages.map(toPreviewImage);
 	const altText = productName ? `${productName} photo` : 'Product photo';
 
@@ -42,7 +44,7 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 							borderWidth='0.5px'
 							borderStyle='solid'
 							borderColor='border'
-							borderRadius='6px'
+							borderRadius='lg'
 							overflow='hidden'
 							display='inline-block'
 						>

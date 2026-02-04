@@ -13,6 +13,7 @@ import {
 	TableRow,
 	Text,
 } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 type Attribute = { id: string; name: string; unit?: string | null };
 type AttributeValue = { attributeId: string; value: string };
@@ -107,6 +108,7 @@ export default function ProductVariantMatrix(props: ActionProps) {
 	const { action, record, resource } = props;
 	const { translateAction, translateMessage } = useTranslation();
 	const addNotice = useNotice();
+	const isReadOnly = useIsReadOnlyAdmin();
 	const addNoticeRef = useRef(addNotice);
 	const recordId =
 		record?.id ?? (record?.params?.id != null ? String(record.params.id) : undefined);
@@ -339,6 +341,7 @@ export default function ProductVariantMatrix(props: ActionProps) {
 										<input
 											type='checkbox'
 											checked={attr.enabled}
+											disabled={isReadOnly}
 											onChange={() => handleToggleAttribute(attr.id)}
 										/>
 										<span>
@@ -351,7 +354,7 @@ export default function ProductVariantMatrix(props: ActionProps) {
 										<Input
 											placeholder={translateMessage('product-variant-values-placeholder')}
 											value={attr.valueText}
-											disabled={!attr.enabled}
+											disabled={isReadOnly || !attr.enabled}
 											onChange={(event: ChangeEvent<HTMLInputElement>) =>
 												handleAttributeValuesChange(attr.id, event.target.value)
 											}
@@ -361,14 +364,14 @@ export default function ProductVariantMatrix(props: ActionProps) {
 							))}
 						</Box>
 						<Box mt='lg' style={{ display: 'flex', gap: 20 }}>
-							<Button variant='outlined' onClick={handleGenerate}>
+							<Button variant='outlined' onClick={handleGenerate} disabled={isReadOnly}>
 								{translateMessage('product-variant-generate')}
 							</Button>
 							<Button
 								variant='contained'
 								color='primary'
 								onClick={handleSave}
-								disabled={saving}
+								disabled={isReadOnly || saving}
 								style={actionButtonStyle}
 							>
 								{saving ? translateMessage('product-variant-saving') : translateMessage('product-variant-save')}
@@ -408,6 +411,7 @@ export default function ProductVariantMatrix(props: ActionProps) {
 											<TableCell>
 												<Input
 													value={variant.sku}
+													disabled={isReadOnly}
 													onChange={(event: ChangeEvent<HTMLInputElement>) =>
 														handleVariantChange(index, 'sku', event.target.value)
 													}
@@ -417,6 +421,7 @@ export default function ProductVariantMatrix(props: ActionProps) {
 												<Input
 													type='number'
 													value={variant.price}
+													disabled={isReadOnly}
 													onChange={(event: ChangeEvent<HTMLInputElement>) =>
 														handleVariantChange(index, 'price', event.target.value)
 													}
@@ -426,6 +431,7 @@ export default function ProductVariantMatrix(props: ActionProps) {
 												<Input
 													type='number'
 													value={variant.stock}
+													disabled={isReadOnly}
 													onChange={(event: ChangeEvent<HTMLInputElement>) =>
 														handleVariantChange(index, 'stock', event.target.value)
 													}

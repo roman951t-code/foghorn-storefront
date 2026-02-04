@@ -16,7 +16,7 @@ export default function MediaContacts({ hideBelow }: Props) {
 					size='md'
 					variant='ghost'
 					color='main.lightOnly'
-					rounded='full'
+					rounded='md'
 					colorPalette='blue'
 					bg={{ _hover: 'colorPalette.500' }}
 				>
@@ -29,7 +29,7 @@ export default function MediaContacts({ hideBelow }: Props) {
 					size='md'
 					variant='ghost'
 					color='main.lightOnly'
-					rounded='full'
+					rounded='md'
 					colorPalette='pink'
 					bg={{ _hover: 'colorPalette.400' }}
 				>
@@ -42,7 +42,7 @@ export default function MediaContacts({ hideBelow }: Props) {
 					size='md'
 					variant='ghost'
 					color='main.lightOnly'
-					rounded='full'
+					rounded='md'
 					colorPalette='purple'
 					bg={{ _hover: 'colorPalette.400' }}
 				>
@@ -55,7 +55,7 @@ export default function MediaContacts({ hideBelow }: Props) {
 					size='md'
 					variant='ghost'
 					color='main.lightOnly'
-					rounded='full'
+					rounded='md'
 					colorPalette='blue'
 					bg={{ _hover: 'colorPalette.400' }}
 				>
@@ -68,7 +68,7 @@ export default function MediaContacts({ hideBelow }: Props) {
 					size='md'
 					variant='ghost'
 					color='main.lightOnly'
-					rounded='full'
+					rounded='md'
 					colorPalette='accent'
 					bg={{ _hover: 'colorPalette.500' }}
 				>

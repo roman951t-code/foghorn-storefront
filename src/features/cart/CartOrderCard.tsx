@@ -60,7 +60,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 			borderWidth='1px'
 			borderColor='border'
 			bg='bg.tertiary'
-			rounded='2xl'
+			rounded='lg'
 			transition='all 0.2s ease-in-out'
 		>
 			<Flex
@@ -81,7 +81,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 						position='relative'
 						w={{ base: '128px', sm: '112px' }}
 						h={{ base: '128px', sm: '112px' }}
-						borderRadius='6px'
+						borderRadius='lg'
 						borderWidth='0.5px'
 						borderStyle='solid'
 						borderColor='border'
@@ -146,7 +146,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 						<IconButton
 							aria-label='Remove item from cart'
 							variant='subtle'
-							rounded='full'
+							rounded='md'
 							onClick={handleDelete}
 							display={{ base: 'none', sm: 'inline-flex' }}
 						>
@@ -179,7 +179,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 												bg='bg.accent'
 												color='black'
 												fontWeight='bold'
-												rounded='full'
+												rounded='lg'
 												px='2'
 												ml='4'
 											>
@@ -206,7 +206,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 							<IconButton
 								aria-label='Remove item from cart'
 								variant='subtle'
-								rounded='full'
+								rounded='md'
 								onClick={handleDelete}
 								display={{ base: 'inline-flex', sm: 'none' }}
 							>

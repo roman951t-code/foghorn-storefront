@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, FormGroup, Label, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -57,6 +58,7 @@ export default function ProductScheduleDiscountAction({ action, record, resource
 	const [discountStartAt, setDiscountStartAt] = useState(initialStart);
 	const [discountEndAt, setDiscountEndAt] = useState(initialEnd);
 	const [saving, setSaving] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	const title = translateAction(action.name, resource.id);
 
@@ -158,6 +160,7 @@ export default function ProductScheduleDiscountAction({ action, record, resource
 						type='number'
 						step='0.01'
 						value={discountPrice}
+						disabled={isReadOnly}
 						onChange={(e) => setDiscountPrice(e.target.value)}
 						placeholder='0.00'
 						style={{
@@ -176,6 +179,7 @@ export default function ProductScheduleDiscountAction({ action, record, resource
 						id='discountStartAt'
 						type='datetime-local'
 						value={discountStartAt}
+						disabled={isReadOnly}
 						onChange={(e) => setDiscountStartAt(e.target.value)}
 						style={{
 							width: '100%',
@@ -194,6 +198,7 @@ export default function ProductScheduleDiscountAction({ action, record, resource
 						id='discountEndAt'
 						type='datetime-local'
 						value={discountEndAt}
+						disabled={isReadOnly}
 						onChange={(e) => setDiscountEndAt(e.target.value)}
 						style={{
 							width: '100%',
@@ -219,7 +224,7 @@ export default function ProductScheduleDiscountAction({ action, record, resource
 					variant='contained'
 					color='primary'
 					onClick={handleSave}
-					disabled={saving}
+					disabled={isReadOnly || saving}
 				>
 					{saving ? translateMessage('discount-saving') : translateMessage('discount-save')}
 				</Button>

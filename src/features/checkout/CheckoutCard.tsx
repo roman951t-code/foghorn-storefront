@@ -37,7 +37,7 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 					<LocaleNavLink href={productHref} display='inline-block' lineHeight='0'>
 						<Image
 							style={{
-								borderRadius: '6px',
+								borderRadius: 'var(--chakra-radii-md)',
 								border: '0.5px solid var(--chakra-colors-border)',
 							}}
 							width={100}
@@ -131,7 +131,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 								src={getImage(product.imageUrl)}
 								style={{
 									objectFit: 'contain',
-									borderRadius: '6px',
+									borderRadius: 'var(--chakra-radii-md)',
 									marginLeft: '4px',
 									border: '0.5px solid var(--chakra-colors-border)',
 								}}
@@ -205,7 +205,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 						mt={{ base: 2, xs: 0 } as any}
 					>
 						<Stat.Root color='main'>
-							<Stat.ValueText textStyle='md' minW='42px'>
+							<Stat.ValueText textStyle='md' minW='46px'>
 								{`x ${quantity}${t('units')}`}
 							</Stat.ValueText>
 						</Stat.Root>
@@ -213,7 +213,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 				</Flex>
 			</Flex>
 
-			{showSeparator && <Separator mb='4' color='border' />}
+			{showSeparator && <Separator color='border' />}
 		</Card.Root>
 	);
 }

@@ -145,7 +145,7 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 									<PinInput.HiddenInput />
 									<PinInput.Control w='100%' justifyContent='center'>
 										{Array.from({ length: 6 }).map((_, i) => (
-											<PinInput.Input key={i} _focus={{ outline: 'none' }} index={i} />
+											<PinInput.Input key={i} index={i} />
 										))}
 									</PinInput.Control>
 								</PinInput.Root>
@@ -178,6 +178,7 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 							disabled={isSubmitting}
 							borderColor='border'
 							variant='outline'
+							rounded='md'
 							onClick={backToLogin}
 						>
 							{i18nData.close}
@@ -194,6 +195,7 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'
 					variant='solid'
+					rounded='md'
 					loading={isSubmitting}
 					disabled={isSubmitting}
 				>
@@ -214,6 +216,7 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 					<Button
 						mt='4'
 						variant='outline'
+						rounded='md'
 						borderWidth='0.5px'
 						borderStyle='solid'
 						borderColor='border'

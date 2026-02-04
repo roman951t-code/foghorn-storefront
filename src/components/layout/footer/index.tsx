@@ -6,7 +6,15 @@ export default function Footer() {
 	const t = useTranslations('common');
 
 	return (
-		<Box as='footer' bg='bg.secondary' mt='12' px={4}>
+		<Box
+			as='footer'
+			bg='bg.secondary'
+			mt='12'
+			px={4}
+			borderTopWidth='0.5px'
+			borderTopStyle='solid'
+			borderTopColor={{ base: 'gray.100', _dark: 'gray.600' }}
+		>
 			<Flex
 				hideFrom='md'
 				pt='8px'

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, Label, Text } from '@adminjs/design-system';
 import { isProductPublished } from '../../utils/publishSchedule';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -46,6 +47,7 @@ export default function ProductSchedulePublishAction({ action, record, resource 
 	const [publishStartAt, setPublishStartAt] = useState(initialStart);
 	const [publishEndAt, setPublishEndAt] = useState(initialEnd);
 	const [saving, setSaving] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	const title = translateAction(action.name, resource.id);
 
@@ -144,6 +146,7 @@ export default function ProductSchedulePublishAction({ action, record, resource 
 						id='publishStartAt'
 						type='datetime-local'
 						value={publishStartAt}
+						disabled={isReadOnly}
 						onChange={(e) => setPublishStartAt(e.target.value)}
 						style={{
 							width: '100%',
@@ -162,6 +165,7 @@ export default function ProductSchedulePublishAction({ action, record, resource 
 						id='publishEndAt'
 						type='datetime-local'
 						value={publishEndAt}
+						disabled={isReadOnly}
 						onChange={(e) => setPublishEndAt(e.target.value)}
 						style={{
 							width: '100%',
@@ -187,7 +191,7 @@ export default function ProductSchedulePublishAction({ action, record, resource 
 					variant='contained'
 					color='primary'
 					onClick={handleSave}
-					disabled={saving}
+					disabled={isReadOnly || saving}
 				>
 					{saving ? translateMessage('publish-schedule-saving') : translateMessage('publish-schedule-save')}
 				</Button>

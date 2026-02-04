@@ -1,4 +1,22 @@
-import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react';
+import {
+	createSystem,
+	defaultConfig,
+	defineConfig,
+	defineRecipe,
+	defineSlotRecipe,
+} from '@chakra-ui/react';
+
+const storefrontInputFocusStyles = {
+	borderWidth: '0.5px',
+	borderStyle: 'solid',
+	borderColor: { base: 'orange.400', _dark: 'yellow.400' },
+	outline: 'none',
+	boxShadow: 'none',
+} as const;
+
+const chakraDefaultTheme = defaultConfig.theme!;
+const chakraDefaultRecipes = chakraDefaultTheme.recipes!;
+const chakraDefaultSlotRecipes = chakraDefaultTheme.slotRecipes!;
 
 const config = defineConfig({
 	strictTokens: false,
@@ -148,6 +166,223 @@ const config = defineConfig({
 				},
 			},
 		},
+		recipes: {
+			input: defineRecipe({
+				...chakraDefaultRecipes.input,
+				defaultVariants: {
+					...chakraDefaultRecipes.input.defaultVariants,
+					variant: 'subtle',
+				},
+				variants: {
+					...chakraDefaultRecipes.input.variants,
+					variant: {
+						...chakraDefaultRecipes.input.variants!.variant,
+						subtle: {
+							...chakraDefaultRecipes.input.variants!.variant.subtle,
+							bg: { base: 'transparent', _dark: 'bg.muted' },
+							borderWidth: '0.5px',
+							borderStyle: 'solid',
+							borderColor: 'border.button',
+							focusVisibleRing: 'none',
+							_focus: storefrontInputFocusStyles,
+							_focusVisible: storefrontInputFocusStyles,
+						},
+					},
+				},
+			}),
+			textarea: defineRecipe({
+				...chakraDefaultRecipes.textarea,
+				defaultVariants: {
+					...chakraDefaultRecipes.textarea.defaultVariants,
+					variant: 'subtle',
+				},
+				variants: {
+					...chakraDefaultRecipes.textarea.variants,
+					variant: {
+						...chakraDefaultRecipes.textarea.variants!.variant,
+						subtle: {
+							...chakraDefaultRecipes.textarea.variants!.variant.subtle,
+							bg: { base: 'transparent', _dark: 'bg.muted' },
+							borderWidth: '0.5px',
+							borderStyle: 'solid',
+							borderColor: 'border.button',
+							focusVisibleRing: 'none',
+							_focus: storefrontInputFocusStyles,
+							_focusVisible: storefrontInputFocusStyles,
+						},
+					},
+				},
+			}),
+		},
+			slotRecipes: {
+				checkbox: defineSlotRecipe({
+					...chakraDefaultSlotRecipes.checkbox,
+					base: {
+						...chakraDefaultSlotRecipes.checkbox.base,
+						control: {
+							...chakraDefaultSlotRecipes.checkbox.base?.control,
+							'&[data-state="unchecked"]': {
+								borderColor: 'fg',
+							},
+							'&:is([data-state="checked"], [data-state="indeterminate"])': {
+								bg: { base: 'black', _dark: 'white' },
+								color: { base: 'white', _dark: 'black' },
+								borderColor: { base: 'black', _dark: 'white' },
+							},
+						},
+					},
+				}),
+				checkboxCard: defineSlotRecipe({
+					...chakraDefaultSlotRecipes.checkboxCard,
+					base: {
+						...chakraDefaultSlotRecipes.checkboxCard.base,
+						indicator: {
+							...chakraDefaultSlotRecipes.checkboxCard.base?.indicator,
+							'&[data-state="unchecked"]': {
+								borderColor: 'fg',
+							},
+							'&:is([data-state="checked"], [data-state="indeterminate"])': {
+								bg: { base: 'black', _dark: 'white' },
+								color: { base: 'white', _dark: 'black' },
+								borderColor: { base: 'black', _dark: 'white' },
+							},
+						},
+					},
+				}),
+				radioGroup: defineSlotRecipe({
+					...chakraDefaultSlotRecipes.radioGroup,
+					base: {
+						...chakraDefaultSlotRecipes.radioGroup.base,
+						itemControl: {
+							...chakraDefaultSlotRecipes.radioGroup.base?.itemControl,
+							'&[data-state="unchecked"]': {
+								borderColor: 'fg',
+							},
+							'&[data-state="checked"]': {
+								bg: { base: 'black', _dark: 'white' },
+								color: { base: 'white', _dark: 'black' },
+								borderColor: { base: 'black', _dark: 'white' },
+							},
+						},
+					},
+				}),
+				radioCard: defineSlotRecipe({
+					...chakraDefaultSlotRecipes.radioCard,
+					base: {
+						...chakraDefaultSlotRecipes.radioCard.base,
+						itemIndicator: {
+							...chakraDefaultSlotRecipes.radioCard.base?.itemIndicator,
+							'&[data-state="unchecked"]': {
+								borderColor: 'fg',
+							},
+							'&[data-state="checked"]': {
+								bg: { base: 'black', _dark: 'white' },
+								color: { base: 'white', _dark: 'black' },
+								borderColor: { base: 'black', _dark: 'white' },
+							},
+						},
+					},
+				}),
+			combobox: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.combobox,
+				variants: {
+					...chakraDefaultSlotRecipes.combobox.variants,
+					variant: {
+						...chakraDefaultSlotRecipes.combobox.variants!.variant,
+						subtle: {
+							...chakraDefaultSlotRecipes.combobox.variants!.variant.subtle,
+							input: {
+								...chakraDefaultSlotRecipes.combobox.variants!.variant.subtle.input,
+								bg: { base: 'transparent', _dark: 'bg.muted' },
+								borderWidth: '0.5px',
+								borderStyle: 'solid',
+								borderColor: 'border.button',
+								focusVisibleRing: 'none',
+								_focus: storefrontInputFocusStyles,
+								_focusVisible: storefrontInputFocusStyles,
+							},
+						},
+					},
+				},
+			}),
+			numberInput: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.numberInput,
+				defaultVariants: {
+					...chakraDefaultSlotRecipes.numberInput.defaultVariants,
+					variant: 'subtle',
+				},
+				variants: {
+					...chakraDefaultSlotRecipes.numberInput.variants,
+					variant: {
+						...chakraDefaultSlotRecipes.numberInput.variants!.variant,
+						subtle: {
+							...chakraDefaultSlotRecipes.numberInput.variants!.variant.subtle,
+							input: {
+								...chakraDefaultSlotRecipes.numberInput.variants!.variant.subtle.input,
+								borderWidth: '0.5px',
+								borderStyle: 'solid',
+								borderColor: 'border.button',
+								focusVisibleRing: 'none',
+								_focus: storefrontInputFocusStyles,
+								_focusVisible: storefrontInputFocusStyles,
+							},
+						},
+					},
+				},
+			}),
+			pinInput: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.pinInput,
+				defaultVariants: {
+					...chakraDefaultSlotRecipes.pinInput.defaultVariants,
+					variant: 'subtle',
+				},
+				variants: {
+					...chakraDefaultSlotRecipes.pinInput.variants,
+					variant: {
+						...chakraDefaultSlotRecipes.pinInput.variants!.variant,
+						subtle: {
+							...chakraDefaultSlotRecipes.pinInput.variants!.variant.subtle,
+							input: {
+								...chakraDefaultSlotRecipes.pinInput.variants!.variant.subtle.input,
+								bg: { base: 'transparent', _dark: 'bg.muted' },
+								borderWidth: '0.5px',
+								borderStyle: 'solid',
+								borderColor: 'border.button',
+								focusVisibleRing: 'none',
+								_focus: storefrontInputFocusStyles,
+								_focusVisible: storefrontInputFocusStyles,
+							},
+						},
+					},
+				},
+			}),
+			select: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.select,
+				defaultVariants: {
+					...chakraDefaultSlotRecipes.select.defaultVariants,
+					variant: 'subtle',
+				},
+				variants: {
+					...chakraDefaultSlotRecipes.select.variants,
+					variant: {
+						...chakraDefaultSlotRecipes.select.variants!.variant,
+						subtle: {
+							...chakraDefaultSlotRecipes.select.variants!.variant.subtle,
+							trigger: {
+								...chakraDefaultSlotRecipes.select.variants!.variant.subtle.trigger,
+								bg: { base: 'transparent', _dark: 'bg.muted' },
+								borderWidth: '0.5px',
+								borderStyle: 'solid',
+								borderColor: 'border.button',
+								focusVisibleRing: 'none',
+								_focus: storefrontInputFocusStyles,
+								_focusVisible: storefrontInputFocusStyles,
+							},
+						},
+					},
+				},
+			}),
+		},
 	},
 	globalCss: {
 		'html, body': {
@@ -202,7 +437,7 @@ const config = defineConfig({
 		'.thumbsSlider .swiper-button-prev, .thumbsSlider .swiper-button-next': {
 			backgroundColor: 'bg.tertiary',
 			borderWidth: '0.5px',
-			borderRadius: '6px',
+			borderRadius: 'sm',
 			borderColor: 'var(--chakra-colors-border)',
 			height: '88px !important',
 			width: '28px !important',
@@ -228,13 +463,13 @@ const config = defineConfig({
 		'.ReactModal__Content': {
 			backgroundColor: 'var(--chakra-colors-bg-tertiary) !important',
 		},
-		'.chakra-radio-group__item > span:first-of-type:not(.chakra-radio-group__itemText)[data-state="unchecked"]':
-			{
-				color: 'var(--chakra-colors-fg) !important',
-			},
-		'.chakra-checkbox__control[data-state="unchecked"]': {
-			color: 'var(--chakra-colors-fg) !important',
-		},
+		// '.chakra-radio-group__item > span:first-of-type:not(.chakra-radio-group__itemText)[data-state="unchecked"]':
+		// 	{
+		// 		color: 'var(--chakra-colors-fg) !important',
+		// 	},
+		// '.chakra-checkbox__control[data-state="unchecked"]': {
+		// 	color: 'var(--chakra-colors-fg) !important',
+		// },
 		'.thumbsSlider .swiper-pagination-bullet, .thumbsSlider-pagination .swiper-pagination-bullet': {
 			width: '20px !important',
 			height: '20px !important',

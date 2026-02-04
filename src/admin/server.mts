@@ -4,9 +4,14 @@ import admin from './admin.mts';
 
 const adminEmail = process.env.ADMINJS_EMAIL;
 const adminPassword = process.env.ADMINJS_PASSWORD;
+const nodeEnv = process.env.NODE_ENV ?? 'development';
+const readonlyEmail =
+	process.env.ADMINJS_READONLY_EMAIL ??
+	(nodeEnv !== 'production' ? 'readonly@mail.com' : undefined);
+const readonlyPassword =
+	process.env.ADMINJS_READONLY_PASSWORD ?? (nodeEnv !== 'production' ? 'test' : undefined);
 const sessionSecret = process.env.ADMINJS_SESSION_SECRET;
 const cookiePassword = process.env.ADMINJS_COOKIE_PASSWORD ?? sessionSecret;
-const nodeEnv = process.env.NODE_ENV ?? 'development';
 
 if (!adminEmail || !adminPassword || !sessionSecret || !cookiePassword) {
 	throw new Error(
@@ -16,7 +21,10 @@ if (!adminEmail || !adminPassword || !sessionSecret || !cookiePassword) {
 
 const authenticate = async (email: string, password: string) => {
 	if (email === adminEmail && password === adminPassword) {
-		return { email };
+		return { email, role: 'admin' };
+	}
+	if (readonlyEmail && readonlyPassword && email === readonlyEmail && password === readonlyPassword) {
+		return { email, role: 'readonly' };
 	}
 	return null;
 };
@@ -172,7 +180,36 @@ const start = async () => {
 		}
 	});
 
-	app.use(admin.options.rootPath, router);
+	const gatedRouter = express.Router();
+	gatedRouter.use((req, res, next) => {
+		const currentAdmin = (req.session as any)?.adminUser as { role?: string } | undefined;
+		const isReadonly = currentAdmin?.role === 'readonly';
+		const path = typeof req.path === 'string' ? req.path : '';
+		if (isReadonly && req.method === 'POST' && path.startsWith('/api/')) {
+			const safePostActions = new Set(['lowStockAlerts']);
+			const matchResourceAction = path.match(/^\/api\/resources\/[^/]+\/actions\/([^/]+)$/);
+			const matchRecordAction = path.match(/^\/api\/resources\/[^/]+\/records\/[^/]+\/([^/]+)$/);
+			const matchBulkAction = path.match(/^\/api\/resources\/[^/]+\/bulk\/([^/]+)$/);
+			const actionName = matchResourceAction?.[1] ?? matchRecordAction?.[1] ?? matchBulkAction?.[1] ?? null;
+
+			if (actionName && safePostActions.has(actionName)) {
+				next();
+				return;
+			}
+
+			res.status(403).json({
+				notice: {
+					message: 'Read-only account: changes are disabled.',
+					type: 'error',
+				},
+			});
+			return;
+		}
+		next();
+	});
+	gatedRouter.use(router);
+
+	app.use(admin.options.rootPath, gatedRouter);
 
 	const port = Number(process.env.ADMINJS_PORT ?? 3001);
 	app.listen(port, () => {

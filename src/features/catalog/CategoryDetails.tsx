@@ -21,7 +21,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 		<Flex
 			bg='bg.tertiary'
 			overflowY='auto'
-			rounded='sm'
+			rounded='lg'
 			w='100%'
 			p={4}
 			borderWidth='0.5px'
@@ -100,7 +100,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 				borderWidth='0.5px'
 				borderStyle='solid'
 				borderColor='border'
-				borderRadius='sm'
+				borderRadius='lg'
 				top={0}
 				zIndex={10}
 				p={4}
@@ -124,7 +124,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					aspectRatio='1'
 					mt={4}
 					overflow='hidden'
-					rounded='sm'
+					rounded='lg'
 					borderWidth='0.5px'
 					borderStyle='solid'
 					borderColor='border'

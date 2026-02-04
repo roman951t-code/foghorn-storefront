@@ -4,7 +4,7 @@ import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { type ButtonProps } from '@chakra-ui/react';
 import { clearRecentlyViewedProducts } from '@/actions/products/clearRecentlyViewedProducts';
-import { TertiaryButton } from '@/components/ui/buttons/ActionButton';
+import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 
 type Props = ButtonProps & {
 	text: string;
@@ -25,13 +25,13 @@ export default function ClearViewedButton({ text, ...buttonProps }: Props) {
 	};
 
 	return (
-		<TertiaryButton
+		<SecondaryButton
 			{...restProps}
 			onClick={handleClear}
 			loading={isPending}
 			disabled={isPending || disabled}
 		>
 			{text}
-		</TertiaryButton>
+		</SecondaryButton>
 	);
 }

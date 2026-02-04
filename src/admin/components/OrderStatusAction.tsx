@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Badge, Box, Button, FormGroup, Select, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'RETURNED';
 type StatusOption = { value: OrderStatus; label: string };
@@ -15,6 +16,7 @@ export default function OrderStatusAction({ action, record, resource }: ActionPr
 		(record?.params.status as OrderStatus) ?? 'PENDING'
 	);
 	const [loading, setLoading] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 	const addNotice = useNotice();
 	const { translateAction, translateLabel, translateMessage } = useTranslation();
 
@@ -148,7 +150,7 @@ export default function OrderStatusAction({ action, record, resource }: ActionPr
 						variant='contained'
 						color='primary'
 						onClick={handleClick}
-						disabled={!selectedStatus || loading}
+						disabled={isReadOnly || !selectedStatus || loading}
 					>
 						{buttonLabel}
 					</Button>

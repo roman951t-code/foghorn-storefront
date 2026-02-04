@@ -73,7 +73,6 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 										required: i18nData.phoneRequired,
 									})}
 									type='text'
-									variant='outline'
 									size='md'
 									maxLength={17}
 								/>

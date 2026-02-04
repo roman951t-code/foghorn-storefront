@@ -47,7 +47,7 @@ export default function ShareProduct({ i18nData }: Props) {
 				<IconButton
 					aria-label='Share'
 					variant='ghost'
-					rounded='full'
+					rounded='md'
 					colorPalette='gray'
 					color='main'
 					transition='all 0.2s ease-in-out'
@@ -86,7 +86,7 @@ export default function ShareProduct({ i18nData }: Props) {
 										size='md'
 										variant='ghost'
 										color='main'
-										rounded='full'
+										rounded='md'
 									>
 										<FaTelegramPlane />
 									</IconButton>
@@ -97,7 +97,7 @@ export default function ShareProduct({ i18nData }: Props) {
 										size='md'
 										variant='ghost'
 										color='main'
-										rounded='full'
+										rounded='md'
 									>
 										<FaWhatsapp />
 									</IconButton>
@@ -108,7 +108,7 @@ export default function ShareProduct({ i18nData }: Props) {
 										size='md'
 										variant='ghost'
 										color='main'
-										rounded='full'
+										rounded='md'
 									>
 										<FaXTwitter />
 									</IconButton>
@@ -119,7 +119,7 @@ export default function ShareProduct({ i18nData }: Props) {
 										size='md'
 										variant='ghost'
 										color='main'
-										rounded='full'
+										rounded='md'
 									>
 										<FaFacebookSquare />
 									</IconButton>
@@ -130,7 +130,7 @@ export default function ShareProduct({ i18nData }: Props) {
 										size='md'
 										variant='ghost'
 										color='main'
-										rounded='full'
+										rounded='md'
 									>
 										<FaViber />
 									</IconButton>

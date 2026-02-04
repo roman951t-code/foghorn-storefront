@@ -34,7 +34,13 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 			{isEmailAuth && <EmailSignIn i18nData={i18nData} />}
 
 			<Stack gap={4} mt={12}>
-				<Button gap='12px' variant='outline' borderColor='main' onClick={handleGoogleLogin}>
+				<Button
+					gap='12px'
+					variant='outline'
+					borderColor='main'
+					rounded='md'
+					onClick={handleGoogleLogin}
+				>
 					<FcGoogle />
 					{i18nData.continueWith} Google
 				</Button>
@@ -43,6 +49,7 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 						gap='12px'
 						variant='outline'
 						borderColor='main'
+						rounded='md'
 						onClick={() => setAuthMethod('email')}
 					>
 						<IoMailOutline />
@@ -54,6 +61,7 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 						gap='12px'
 						variant='outline'
 						borderColor='main'
+						rounded='md'
 						onClick={() => setAuthMethod('phone')}
 					>
 						<IoMdPhonePortrait />
@@ -62,7 +70,14 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 				)}
 			</Stack>
 
-			<Button w='100%' mt={12} variant='outline' borderColor='main' onClick={moveToSignup}>
+			<Button
+				w='100%'
+				mt={12}
+				variant='outline'
+				borderColor='main'
+				rounded='md'
+				onClick={moveToSignup}
+			>
 				{i18nData.signUp}
 			</Button>
 		</>

@@ -45,7 +45,7 @@ function PromoCardSlide({
 			borderWidth='0.5px'
 			borderStyle='solid'
 			borderColor='rgba(255,255,255,0.2)'
-			borderRadius='md'
+			borderRadius='lg'
 			p={{ base: 3.5, md: 4 }}
 			maxW={{ base: '100%', md: '84%' }}
 			minW='300px'
@@ -94,7 +94,7 @@ function PromoCardSlide({
 			borderWidth='0.5px'
 			borderStyle='solid'
 			borderColor={{ base: 'border', _dark: 'border' }}
-			borderRadius='md'
+			borderRadius='lg'
 			height='472px'
 			width='100%'
 			overflow='hidden'

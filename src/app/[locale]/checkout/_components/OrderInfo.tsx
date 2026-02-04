@@ -17,7 +17,6 @@ import AcceptOrderBtn from './AcceptOrderBtn';
 import { useCart } from '@/hooks/useCart';
 import { calculateCartTotals } from '@/utils/cartTotals';
 import { useSession } from '@/providers/SessionProvider';
-import DisabledCheckoutNotice from './DisabledCheckoutNotice';
 import { useCheckoutStore } from '@/stores/checkoutStore';
 import { createOrderAction } from '@/actions/createOrderAction';
 import { useState, useTransition } from 'react';
@@ -26,8 +25,13 @@ import { useRouter } from 'next/navigation';
 import CouponField from '@/components/ui/inputs/CouponField';
 import CheckoutConsents from './CheckoutConsents';
 import type { StorefrontFormPublic } from '@/actions/storefront/getEnabledStorefrontForms';
+import { isBlockingCheckoutConsent } from './checkoutConsentUtils';
 
-export default function OrderInfo({ storefrontForms = [] }: { storefrontForms?: StorefrontFormPublic[] }) {
+export default function OrderInfo({
+	storefrontForms = [],
+}: {
+	storefrontForms?: StorefrontFormPublic[];
+}) {
 	const { session } = useSession();
 	const checkoutT = useTranslations('checkout');
 	const paymentMethod = useCheckoutStore((state) => state.paymentMethod);
@@ -66,8 +70,8 @@ export default function OrderInfo({ storefrontForms = [] }: { storefrontForms?: 
 			(user?.phoneNumber?.trim() || user?.email?.trim())
 	);
 
-	const requiredForms = storefrontForms.filter((f) => f.enabled && f.required);
-	const missingRequiredConsents = requiredForms.filter((f) => !consents[f.key]);
+	const requiredForms = storefrontForms.filter(isBlockingCheckoutConsent);
+	const missingRequiredConsents = requiredForms.filter((f) => consents[f.key] !== true);
 
 	const disabledReason: 'auth' | 'contacts' | 'empty' | 'consents' | null = !isAuthorized
 		? 'auth'
@@ -79,29 +83,7 @@ export default function OrderInfo({ storefrontForms = [] }: { storefrontForms?: 
 		? 'consents'
 		: null;
 
-	const noticeTitle =
-		disabledReason === 'auth'
-			? checkoutT('signinRequiredTitle')
-			: disabledReason === 'contacts'
-			? checkoutT('contactRequiredTitle')
-			: disabledReason === 'consents'
-			? checkoutT('consentsRequiredTitle')
-			: null;
-	const noticeDescription =
-		disabledReason === 'auth'
-			? checkoutT('signinRequiredDesc')
-			: disabledReason === 'contacts'
-			? checkoutT('contactRequiredDesc')
-			: disabledReason === 'consents'
-			? checkoutT('consentsRequiredDesc')
-			: null;
-
 	const handleAcceptOrder = () => {
-		if (missingRequiredConsents.length > 0) {
-			showToaster('error', checkoutT('consentsRequiredTitle'));
-			return;
-		}
-
 		if (disabledReason || !cartItems.length) return;
 
 		const orderItems = cartItems.map((item) => ({
@@ -209,7 +191,7 @@ export default function OrderInfo({ storefrontForms = [] }: { storefrontForms?: 
 				borderWidth='0.5px'
 				borderStyle='solid'
 				borderColor='border'
-				rounded='sm'
+				rounded='lg'
 				bg='bg.tertiary'
 			>
 				{cartItems.map((item, idx) => (
@@ -256,7 +238,10 @@ export default function OrderInfo({ storefrontForms = [] }: { storefrontForms?: 
 					<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
 					<Stat.ValueText fontSize='3xl'>{totalAmountText}</Stat.ValueText>
 				</Stat.Root>
-				<CheckoutConsents forms={storefrontForms} />
+				<Box mt='4'>
+					<CheckoutConsents forms={storefrontForms} />
+				</Box>
+
 				<AcceptOrderBtn
 					text={t('acceptOrder')}
 					w='100%'
@@ -265,8 +250,10 @@ export default function OrderInfo({ storefrontForms = [] }: { storefrontForms?: 
 					loading={isLoading}
 					onAccept={handleAcceptOrder}
 				/>
-				<DisabledCheckoutNotice title={noticeTitle} description={noticeDescription} />
 			</VStack>
+			<Box my='4' hideFrom='lg'>
+				<CheckoutConsents forms={storefrontForms} />
+			</Box>
 
 			<Stack
 				hideFrom='lg'
@@ -281,14 +268,12 @@ export default function OrderInfo({ storefrontForms = [] }: { storefrontForms?: 
 						<Stat.ValueText fontSize='3xl'>{totalAmountText}</Stat.ValueText>
 					</Stat.Root>
 
-					<CheckoutConsents forms={storefrontForms} />
 					<AcceptOrderBtn
 						text={t('acceptOrder')}
 						disabledReason={disabledReason}
 						loading={isLoading}
 						onAccept={handleAcceptOrder}
 					/>
-					<DisabledCheckoutNotice title={noticeTitle} description={noticeDescription} />
 				</VStack>
 				<VStack
 					alignItems={{ base: 'flex-start', sm: 'flex-end' }}

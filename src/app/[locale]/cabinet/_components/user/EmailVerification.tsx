@@ -125,7 +125,7 @@ export default function EmailVerification({ email, i18nData, onCloseAction }: Pr
 									<PinInput.HiddenInput />
 									<PinInput.Control w='100%' justifyContent='center'>
 										{Array.from({ length: 6 }).map((_, i) => (
-											<PinInput.Input key={i} _focus={{ outline: 'none' }} index={i} />
+											<PinInput.Input key={i} index={i} />
 										))}
 									</PinInput.Control>
 								</PinInput.Root>
@@ -144,6 +144,7 @@ export default function EmailVerification({ email, i18nData, onCloseAction }: Pr
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'
 					variant='solid'
+					rounded='md'
 					loading={isSubmitting}
 					disabled={isSubmitting || isResending}
 				>
@@ -164,6 +165,7 @@ export default function EmailVerification({ email, i18nData, onCloseAction }: Pr
 					<Button
 						mt='4'
 						variant='outline'
+						rounded='md'
 						borderWidth='0.5px'
 						borderStyle='solid'
 						borderColor='border'

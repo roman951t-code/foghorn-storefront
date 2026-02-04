@@ -1,6 +1,7 @@
 import { useMemo, useState, type ChangeEvent } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, FormGroup, Input, Label, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -42,6 +43,7 @@ export default function OrderReturnAction({ action, record, resource }: ActionPr
 	const [loading, setLoading] = useState(false);
 	const [refundAmount, setRefundAmount] = useState('');
 	const [refundReason, setRefundReason] = useState('');
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	if (!record) {
 		return (
@@ -100,6 +102,7 @@ export default function OrderReturnAction({ action, record, resource }: ActionPr
 						step='0.01'
 						placeholder={translateMessage('return-refund-placeholder')}
 						value={refundAmount}
+						disabled={isReadOnly}
 						onChange={(event: ChangeEvent<HTMLInputElement>) => setRefundAmount(event.target.value)}
 					/>
 				</FormGroup>
@@ -109,12 +112,19 @@ export default function OrderReturnAction({ action, record, resource }: ActionPr
 						type='text'
 						placeholder={translateMessage('return-reason-placeholder')}
 						value={refundReason}
+						disabled={isReadOnly}
 						onChange={(event: ChangeEvent<HTMLInputElement>) => setRefundReason(event.target.value)}
 					/>
 				</FormGroup>
 			</Box>
 
-			<Button variant='contained' color='primary' style={actionButtonStyle} onClick={handleSubmit} disabled={loading}>
+			<Button
+				variant='contained'
+				color='primary'
+				style={actionButtonStyle}
+				onClick={handleSubmit}
+				disabled={isReadOnly || loading}
+			>
 				{loading ? translateMessage('return-processing') : translateMessage('return-process')}
 			</Button>
 		</Box>

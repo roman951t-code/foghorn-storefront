@@ -1,6 +1,5 @@
 import { FiTrash2, FiShoppingCart } from 'react-icons/fi';
 import {
-	Badge,
 	Card,
 	Flex,
 	Icon,
@@ -19,6 +18,7 @@ import { useCart } from '@/hooks/useCart';
 import { calculateCartTotals } from '@/utils/cartTotals';
 import CouponField from '@/components/ui/inputs/CouponField';
 import { useCheckoutStore } from '@/stores/checkoutStore';
+import CountPill from '@/components/ui/CountPill';
 
 interface Props {
 	i18nData: I18nData;
@@ -36,7 +36,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 
 	return (
 		<Stack gap='4' pt='2'>
-			<Card.Root p='4' borderWidth='1px' borderColor='border' bg='bg.tertiary' rounded='2xl'>
+			<Card.Root p='4' borderWidth='1px' borderColor='border' bg='bg.tertiary' rounded='lg'>
 				<Flex justifyContent='space-between' alignItems='flex-start' gap='4'>
 					<VStack alignItems='flex-start' gap='3' flex='1'>
 						<Stat.Root>
@@ -53,20 +53,11 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 							</Text>
 						) : null}
 
-						<Flex align='center' gap='3'>
+						<Flex align='center' gap='3' mt='2'>
 							<Text fontSize='sm' color='main.disabled'>
 								{i18nData.numOfProducts}
 							</Text>
-							<Badge
-								variant='solid'
-								bg='bg.accent'
-								color='black'
-								rounded='full'
-								px='2'
-								fontWeight='bold'
-							>
-								{totalCount}
-							</Badge>
+							<CountPill value={totalCount} px='2' labelProps={{ fontWeight: 'bold' }} />
 						</Flex>
 					</VStack>
 
@@ -74,7 +65,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 						onClick={handleClearCart}
 						aria-label='Clear cart'
 						variant='subtle'
-						rounded='full'
+						rounded='md'
 					>
 						<Icon size='lg'>
 							<FiTrash2 />
@@ -83,7 +74,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 				</Flex>
 
 				<Stack mt='4' gap='3'>
-					<CouponField subtotal={discountedTotal} />
+					<CouponField subtotal={discountedTotal} layout='responsive' />
 				</Stack>
 
 				<Separator my='4' color='border' />

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Badge, Box, Button, Icon, Label, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -36,6 +37,7 @@ export default function ProductActivityTimeline(props: Props) {
 	const [note, setNote] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 	const addNotice = useNotice();
 	const { translateAction, translateMessage, translateProperty } = useTranslation();
 	const addNoticeRef = useRef(addNotice);
@@ -156,6 +158,7 @@ export default function ProductActivityTimeline(props: Props) {
 						id='product-activity-note'
 						name='productActivityNote'
 						value={note}
+						disabled={isReadOnly}
 						onChange={(event) => setNote(event.target.value)}
 						placeholder={translateMessage('product-activity-note-placeholder')}
 						rows={3}
@@ -176,7 +179,7 @@ export default function ProductActivityTimeline(props: Props) {
 						variant='contained'
 						color='primary'
 						onClick={handleSubmit}
-						disabled={saving}
+						disabled={isReadOnly || saving}
 					>
 						{saving ? translateMessage('product-activity-note-saving') : translateMessage('product-activity-note-submit')}
 					</Button>

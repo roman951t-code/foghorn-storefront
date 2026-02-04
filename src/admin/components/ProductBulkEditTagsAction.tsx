@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, FormGroup, Label, Select, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -29,6 +30,7 @@ export default function ProductBulkEditTagsAction({ action, resource, records }:
 	const [mode, setMode] = useState<'add' | 'remove' | 'replace'>('add');
 	const [tags, setTags] = useState('');
 	const [saving, setSaving] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	const title = translateAction(action.name, resource.id);
 	const canSave = recordIds.length > 0 && tags.trim().length > 0;
@@ -66,7 +68,11 @@ export default function ProductBulkEditTagsAction({ action, resource, records }:
 
 			<FormGroup>
 				<Label>{translateMessage('product-bulk-tags-mode')}</Label>
-				<Select value={mode} onChange={(e: any) => setMode(String(e?.target?.value ?? 'add') as any)}>
+				<Select
+					value={mode}
+					disabled={isReadOnly}
+					onChange={(e: any) => setMode(String(e?.target?.value ?? 'add') as any)}
+				>
 					<option value='add'>{translateMessage('product-bulk-tags-add')}</option>
 					<option value='remove'>{translateMessage('product-bulk-tags-remove')}</option>
 					<option value='replace'>{translateMessage('product-bulk-tags-replace')}</option>
@@ -77,6 +83,7 @@ export default function ProductBulkEditTagsAction({ action, resource, records }:
 				<Label>{translateMessage('product-bulk-tags')}</Label>
 				<input
 					value={tags}
+					disabled={isReadOnly}
 					onChange={(e) => setTags(e.target.value)}
 					placeholder='popular,new'
 					style={{
@@ -93,7 +100,13 @@ export default function ProductBulkEditTagsAction({ action, resource, records }:
 			</FormGroup>
 
 			<Box mt='xl'>
-				<Button variant='contained' color='primary' style={actionButtonStyle} disabled={!canSave || saving} onClick={handleSave}>
+				<Button
+					variant='contained'
+					color='primary'
+					style={actionButtonStyle}
+					disabled={isReadOnly || !canSave || saving}
+					onClick={handleSave}
+				>
 					{saving ? translateMessage('product-bulk-saving') : translateMessage('product-bulk-apply')}
 				</Button>
 			</Box>

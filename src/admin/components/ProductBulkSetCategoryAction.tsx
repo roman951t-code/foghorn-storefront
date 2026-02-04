@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, FormGroup, Label, Select, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -32,6 +33,7 @@ export default function ProductBulkSetCategoryAction({ action, resource, records
 	const [categoryId, setCategoryId] = useState('');
 	const [saving, setSaving] = useState(false);
 	const [loading, setLoading] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	useEffect(() => {
 		if (!recordIds.length) return;
@@ -84,7 +86,11 @@ export default function ProductBulkSetCategoryAction({ action, resource, records
 			) : hasOptions ? (
 				<FormGroup>
 					<Label>{translateMessage('product-bulk-category')}</Label>
-					<Select value={categoryId} onChange={(e: any) => setCategoryId(String(e?.target?.value ?? ''))}>
+					<Select
+						value={categoryId}
+						disabled={isReadOnly}
+						onChange={(e: any) => setCategoryId(String(e?.target?.value ?? ''))}
+					>
 						<option value=''>{translateMessage('select-placeholder')}</option>
 						{options.map((o) => (
 							<option key={o.id} value={o.id}>
@@ -105,7 +111,7 @@ export default function ProductBulkSetCategoryAction({ action, resource, records
 						variant='contained'
 						color='primary'
 						style={actionButtonStyle}
-						disabled={!canSave || saving}
+						disabled={isReadOnly || !canSave || saving}
 						onClick={handleSave}
 					>
 						{saving ? translateMessage('product-bulk-saving') : translateMessage('product-bulk-apply')}

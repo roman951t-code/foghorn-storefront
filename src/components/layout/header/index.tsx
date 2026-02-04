@@ -25,7 +25,7 @@ export default function Header() {
 			py={2}
 			borderBottomWidth='0.5px'
 			borderBottomStyle='solid'
-			borderBottomColor='border'
+			borderBottomColor={{ base: 'gray.100', _dark: 'gray.600' }}
 		>
 			<Stack>
 				<Flex

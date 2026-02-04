@@ -10,7 +10,7 @@ export default function CharacteristicsTab({ attributes }: CharacteristicsTabPro
 	return (
 		<Flex justifyContent='space-between' gap='4'>
 			<DataList.Root
-				rounded='md'
+				rounded='lg'
 				orientation='horizontal'
 				divideY='0.5px'
 				divideColor='border'

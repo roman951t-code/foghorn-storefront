@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Badge, Box, Button, Icon, Label, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -27,6 +28,7 @@ export default function OrderAuditTimelineAction({ action, record, resource }: A
 	const [note, setNote] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 	const addNotice = useNotice();
 	const { translateAction, translateLabel, translateMessage } = useTranslation();
 	const recordId = record?.id;
@@ -133,6 +135,7 @@ export default function OrderAuditTimelineAction({ action, record, resource }: A
 						id='audit-note'
 						name='auditNote'
 						value={note}
+						disabled={isReadOnly}
 						onChange={(event) => setNote(event.target.value)}
 						placeholder={translateMessage('audit-note-placeholder')}
 						rows={4}
@@ -157,7 +160,7 @@ export default function OrderAuditTimelineAction({ action, record, resource }: A
 						variant='contained'
 						color='primary'
 						onClick={handleSubmit}
-						disabled={saving}
+						disabled={isReadOnly || saving}
 					>
 						{saving ? translateMessage('audit-note-saving') : translateMessage('audit-note-submit')}
 					</Button>

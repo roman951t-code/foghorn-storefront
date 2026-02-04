@@ -129,7 +129,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 								height={{ base: '400px', md: '700px' }}
 								cursor='pointer'
 								overflow='hidden'
-								rounded='sm'
+								rounded='lg'
 							>
 								<Image
 									src={src}

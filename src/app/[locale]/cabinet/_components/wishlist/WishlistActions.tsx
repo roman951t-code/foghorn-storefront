@@ -39,7 +39,7 @@ export default function WishlistActions({ i18nData, shareCopiedText, countSlot }
 						size='md'
 						aria-label='Share wishlist'
 						variant='ghost'
-						rounded='full'
+						rounded='md'
 						colorPalette='orange'
 						color='colorPalette.500'
 						transition='all 0.2s ease-in-out'

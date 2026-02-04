@@ -28,8 +28,6 @@
 		"contactRequiredDesc": "Заповніть ім’я, прізвище, по батькові, email та телефон, а також оберіть спосіб доставки й оплати, щоб оформити замовлення.",
 		"agreementsTitle": "Угоди",
 		"learnMore": "Детальніше",
-		"consentsRequiredTitle": "Підтвердіть обовʼязкові умови",
-		"consentsRequiredDesc": "Підтвердіть обовʼязкові умови нижче, щоб оформити замовлення.",
 		"orderCreated": "Замовлення успішно створено",
 		"orderCreateFail": "Не вдалося створити замовлення. Спробуйте ще раз.",
 		"couponTitle": "Промокод",
@@ -316,20 +314,20 @@
 		"pressToCopy": "Натисніть на посилання щоб скопіювати",
 		"product": "товару",
 		"shareSocial": "Або поширте через соціальні мережі",
-      "orderProcessing": "Оформлення замовлення",
-      "seeProducts": "Дивитись товари",
-      "productsNotFound": "Товарів не знайдено",
-      "products": "Товари",
-      "categories": "Категорії",
-      "allCategories": "Всі категорії",
-      "hideAllCategories": "Всі категорії",
-      "clearFilters": "Очистити фільтри",
-      "searchQueryResults": "Результати за запитом: {searchQuery}",
-      "advantages": "Переваги",
-      "disAdvantages": "Недоліки",
-      "all": "Всі",
-      "brand": "Бренд"
-    },
+		"orderProcessing": "Оформлення замовлення",
+		"seeProducts": "Дивитись товари",
+		"productsNotFound": "Товарів не знайдено",
+		"products": "Товари",
+		"categories": "Категорії",
+		"allCategories": "Всі категорії",
+		"hideAllCategories": "Всі категорії",
+		"clearFilters": "Очистити фільтри",
+		"searchQueryResults": "Результати за запитом: {searchQuery}",
+		"advantages": "Переваги",
+		"disAdvantages": "Недоліки",
+		"all": "Всі",
+		"brand": "Бренд"
+	},
 	"orders": {
 		"empty": "У вас ще немає замовлень",
 		"orderNumber": "Замовлення №",
@@ -446,14 +444,14 @@
 				"goHome": "На головну"
 			},
 			"checkoutUnavailableTitle": "Оформлення зараз недоступне",
-  "checkoutUnavailableDesc": "Сталася помилка під час завантаження сторінки оформлення. Спробуйте ще раз.",
-  "categoryUnavailableTitle": "Категорія недоступна",
-  "categoryUnavailableDesc": "Сталася помилка під час завантаження категорії. Спробуйте ще раз або поверніться назад.",
-  "subcategoryUnavailableTitle": "Товари недоступні",
-  "subcategoryUnavailableDesc": "Сталася помилка під час завантаження цієї підкатегорії. Спробуйте ще раз або поверніться назад.",
-  "orderCreateFailed": "Не вдалося оформити замовлення. Спробуйте ще раз.",
-  "orderOutOfStock": "Деякі товари закінчилися або недоступні. Оновіть кошик і спробуйте знову.",
-  "paymentSessionFailed": "Не вдалося створити платіжну сесію. Спробуйте ще раз."
-}
+			"checkoutUnavailableDesc": "Сталася помилка під час завантаження сторінки оформлення. Спробуйте ще раз.",
+			"categoryUnavailableTitle": "Категорія недоступна",
+			"categoryUnavailableDesc": "Сталася помилка під час завантаження категорії. Спробуйте ще раз або поверніться назад.",
+			"subcategoryUnavailableTitle": "Товари недоступні",
+			"subcategoryUnavailableDesc": "Сталася помилка під час завантаження цієї підкатегорії. Спробуйте ще раз або поверніться назад.",
+			"orderCreateFailed": "Не вдалося оформити замовлення. Спробуйте ще раз.",
+			"orderOutOfStock": "Деякі товари закінчилися або недоступні. Оновіть кошик і спробуйте знову.",
+			"paymentSessionFailed": "Не вдалося створити платіжну сесію. Спробуйте ще раз."
+		}
 	}
 }

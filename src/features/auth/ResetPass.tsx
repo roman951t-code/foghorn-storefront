@@ -82,6 +82,7 @@ export default function ResetPass({ i18nData, backToLogin }: ResetPassProps) {
 					bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
 					color='black'
 					variant='solid'
+					rounded='md'
 				>
 					{i18nData.sendOtp}
 				</Button>
@@ -90,6 +91,7 @@ export default function ResetPass({ i18nData, backToLogin }: ResetPassProps) {
 					w='100%'
 					color='main'
 					variant='outline'
+					rounded='md'
 					borderWidth='0.5px'
 					borderStyle='solid'
 					borderColor='border'

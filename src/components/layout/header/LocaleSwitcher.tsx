@@ -21,7 +21,7 @@ export default function LocaleSwitcher() {
 
 	const changeLocale = (details: { value: string[] }) => {
 		const newLocale = details.value?.[0]?.toLowerCase();
-		if (newLocale === 'uk' || newLocale === 'en') {
+		if ((newLocale === 'uk' || newLocale === 'en') && newLocale !== locale) {
 			const search = searchParams.toString();
 			const destination = search ? `${pathname}?${search}` : pathname;
 			router.replace(destination, { locale: newLocale });
@@ -33,12 +33,12 @@ export default function LocaleSwitcher() {
 			position='relative'
 			aria-label={label}
 			bg={{ base: 'gray.100', _dark: 'gray.800' }}
-			rounded='sm'
+			rounded='lg'
 			collection={languages}
 			size='sm'
 			w='110px'
 			mx='2.5'
-			defaultValue={[locale]}
+			value={[locale]}
 			onValueChange={changeLocale}
 		>
 			<Select.Label srOnly>{label}</Select.Label>

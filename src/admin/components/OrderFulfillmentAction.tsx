@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, FormGroup, Input, Label, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -26,6 +27,7 @@ export default function OrderFulfillmentAction({ action, record, resource }: Act
 	const [trackingNumber, setTrackingNumber] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 	const addNotice = useNotice();
 	const addNoticeRef = useRef(addNotice);
 	const { translateAction, translateMessage } = useTranslation();
@@ -125,6 +127,7 @@ export default function OrderFulfillmentAction({ action, record, resource }: Act
 						<Label>{translateMessage('fulfillment-carrier')}</Label>
 						<Input
 							value={carrier}
+							disabled={isReadOnly}
 							onChange={(e: ChangeEvent<HTMLInputElement>) => setCarrier(e.target.value)}
 						/>
 					</FormGroup>
@@ -132,6 +135,7 @@ export default function OrderFulfillmentAction({ action, record, resource }: Act
 						<Label>{translateMessage('fulfillment-tracking-number')}</Label>
 						<Input
 							value={trackingNumber}
+							disabled={isReadOnly}
 							onChange={(e: ChangeEvent<HTMLInputElement>) => setTrackingNumber(e.target.value)}
 						/>
 					</FormGroup>
@@ -141,7 +145,7 @@ export default function OrderFulfillmentAction({ action, record, resource }: Act
 							variant='contained'
 							color='primary'
 							onClick={handleSave}
-							disabled={saving}
+							disabled={isReadOnly || saving}
 						>
 							{saving ? translateMessage('fulfillment-save-progress') : translateMessage('confirm')}
 						</Button>

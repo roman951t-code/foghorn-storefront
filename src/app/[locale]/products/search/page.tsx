@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Flex, Heading, Box, Group, VStack, Highlight, Text } from '@chakra-ui/react';
+import { Flex, Heading, Box, Group, VStack, Text, HStack } from '@chakra-ui/react';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import QuickFilters from '../_components/QuickFilters';
 import Filters from '../_components/Filters';
@@ -19,6 +19,7 @@ import { getRecentlyViewedProductsWithCount } from '@/actions/products/getRecent
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { absoluteUrl, buildLanguageAlternates } from '@/utils/seo';
 import { LocaleParams, ProductFiltersSearchParams } from '@/types/routing';
+import CountPill from '@/components/ui/CountPill';
 
 type Props = LocaleParams & {
 	searchParams: ProductFiltersSearchParams;
@@ -50,14 +51,20 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const description = pagesT('metadata.searchDescription', {
 		query: tag ? productsT(tag) : searchQuery || '',
 	});
-	const alternates = buildLanguageAlternates(locale, '/products/search', resolvedSearch ?? undefined);
+	const alternates = buildLanguageAlternates(
+		locale,
+		'/products/search',
+		resolvedSearch ?? undefined
+	);
 	const tagImageMap: Record<string, string> = {
 		popular: '/assets/images/carousel1.webp',
 		new: '/assets/images/carousel2.webp',
 		discount: '/assets/images/carousel3.webp',
 		viewed: '/assets/images/logoSmall.webp',
 	};
-	const ogImagePath = tag ? tagImageMap[tag] ?? '/assets/images/logoBig.webp' : '/assets/images/logoBig.webp';
+	const ogImagePath = tag
+		? tagImageMap[tag] ?? '/assets/images/logoBig.webp'
+		: '/assets/images/logoBig.webp';
 	const ogImage = absoluteUrl(ogImagePath);
 
 	return {
@@ -225,7 +232,7 @@ export default async function SearchProducts({ searchParams }: Props) {
 					flexShrink={0}
 					bg='bg.tertiary'
 					minH='800px'
-					rounded='sm'
+					rounded='lg'
 					hideBelow='lg'
 					position='sticky'
 					top='74px'
@@ -233,11 +240,12 @@ export default async function SearchProducts({ searchParams }: Props) {
 					<CatalogBtn fullText />
 
 					<VStack p='4' justifyContent='flex-start'>
-						<Text w='full' mb='1.5'>
-							<Highlight query={totalCount?.toString()} styles={{ fontWeight: 'semibold' }}>
-								{`${productsT('totalProducts')}: ${totalCount}`}
-							</Highlight>
-						</Text>
+						<HStack w='full' justify='flex-start' align='center' mb='1.5'>
+							<Text fontSize='sm' color='fg.muted'>
+								{productsT('totalProducts')}
+							</Text>
+							<CountPill value={totalCount ?? 0} labelProps={{ fontSize: 'sm' }} />
+						</HStack>
 
 						<SearchCategories data={subcategories} allCategories={productsT('allCategories')} />
 

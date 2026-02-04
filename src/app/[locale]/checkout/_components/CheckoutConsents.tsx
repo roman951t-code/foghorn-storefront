@@ -7,6 +7,7 @@ import { useCheckoutStore } from '@/stores/checkoutStore';
 import type { StorefrontFormPublic } from '@/actions/storefront/getEnabledStorefrontForms';
 import { useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import { isBlockingCheckoutConsent } from './checkoutConsentUtils';
 
 export default function CheckoutConsents({ forms }: { forms: StorefrontFormPublic[] }) {
 	const checkoutT = useTranslations('checkout');
@@ -46,11 +47,11 @@ export default function CheckoutConsents({ forms }: { forms: StorefrontFormPubli
 			borderWidth='0.5px'
 			borderStyle='solid'
 			borderColor='border'
-			rounded='md'
+			rounded='lg'
 			bg='bg.tertiary'
 			p={4}
 		>
-			<Heading as='h4' size='sm' fontWeight='semibold'>
+			<Heading as='h4' size='md' fontWeight='semibold'>
 				{checkoutT('agreementsTitle')}
 			</Heading>
 
@@ -58,6 +59,7 @@ export default function CheckoutConsents({ forms }: { forms: StorefrontFormPubli
 				{enabledForms.map((form) => {
 					const checked = !!consents[form.key];
 					const label = (form.checkboxLabel?.trim() || form.title).trim();
+					const isRequired = isBlockingCheckoutConsent(form);
 					return (
 						<Checkbox
 							key={form.key}
@@ -66,12 +68,12 @@ export default function CheckoutConsents({ forms }: { forms: StorefrontFormPubli
 							alignItems='flex-start'
 							gap={3}
 							py={1}
-							inputProps={{ required: form.required }}
+							inputProps={{ required: isRequired }}
 						>
 							<VStack alignItems='flex-start' gap={1}>
-								<Text fontSize='15px' lineHeight='1.35'>
+								<Text fontSize='sm' lineHeight='1.35'>
 									{label}
-									{form.required ? (
+									{isRequired ? (
 										<Text as='span' color='main.tertiary'>
 											{' '}
 											*
@@ -80,7 +82,7 @@ export default function CheckoutConsents({ forms }: { forms: StorefrontFormPubli
 								</Text>
 
 								{form.description ? (
-									<Text fontSize='13px' color='gray.600'>
+									<Text fontSize='sm' color='main.disabled'>
 										{form.description}
 									</Text>
 								) : null}
@@ -89,7 +91,7 @@ export default function CheckoutConsents({ forms }: { forms: StorefrontFormPubli
 									<HStack gap={2}>
 										<LocaleNavLink
 											href={form.linkHref}
-											fontSize='13px'
+											fontSize='sm'
 											color='link'
 											textDecoration='underline'
 											textUnderlineOffset='2px'

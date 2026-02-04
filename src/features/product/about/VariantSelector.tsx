@@ -29,7 +29,7 @@ export function VariantSelector({
 	if (!variants?.length) return null;
 
 	const current =
-		( value ? variants.find((v) => v.id === value) : null ) ??
+		(value ? variants.find((v) => v.id === value) : null) ??
 		variants.find((v) => v.stock > 0) ??
 		variants[0];
 
@@ -65,9 +65,7 @@ export function VariantSelector({
 					)
 				).sort((a, b) => a.localeCompare(b));
 
-				const unit = variants
-					.flatMap((v) => v.attributes)
-					.find((a) => a.name === attrName)?.unit;
+				const unit = variants.flatMap((v) => v.attributes).find((a) => a.name === attrName)?.unit;
 
 				return (
 					<VStack key={attrName} alignItems='flex-start' gap='2' w='full'>
@@ -87,6 +85,7 @@ export function VariantSelector({
 										key={val}
 										type='button'
 										size='sm'
+										rounded='md'
 										variant={selected ? 'solid' : 'outline'}
 										bg={selected ? 'main.secondary' : 'transparent'}
 										color={selected ? 'black' : 'main'}

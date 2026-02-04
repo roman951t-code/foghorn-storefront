@@ -71,8 +71,7 @@ export default function AboutTab({
 	};
 
 	const variants = product.variants ?? [];
-	const initialVariantId =
-		variants.find((v) => v.stock > 0)?.id ?? variants[0]?.id ?? null;
+	const initialVariantId = variants.find((v) => v.stock > 0)?.id ?? variants[0]?.id ?? null;
 	const [selectedVariantId, setSelectedVariantId] = useState<string | null>(initialVariantId);
 
 	const selectedVariant = useMemo(() => {
@@ -87,7 +86,9 @@ export default function AboutTab({
 	const selectedInStock = selectedVariant ? selectedVariant.stock > 0 : product.inStock;
 
 	const unitBasePrice = selectedVariant?.price ?? product.basePrice;
-	const discountAmount = product.discountPrice ? Math.max(0, product.basePrice - product.discountPrice) : 0;
+	const discountAmount = product.discountPrice
+		? Math.max(0, product.basePrice - product.discountPrice)
+		: 0;
 	const unitDiscountPrice = discountAmount > 0 ? Math.max(0, unitBasePrice - discountAmount) : null;
 	const unitEffectivePrice = unitDiscountPrice ?? unitBasePrice;
 	const discount = unitDiscountPrice != null ? unitBasePrice - unitDiscountPrice : 0;
@@ -122,7 +123,7 @@ export default function AboutTab({
 					w='full'
 					bg='bg.tertiary'
 					mb='4'
-					rounded='md'
+					rounded='lg'
 				>
 					<ProductThumbsSlider images={galleryImages} productName={product.name} />
 				</Box>

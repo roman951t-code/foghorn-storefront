@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, FormGroup, Label, Select, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -33,6 +34,7 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 	const [syncInStock, setSyncInStock] = useState(true);
 	const [reason, setReason] = useState('');
 	const [saving, setSaving] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	const title = translateAction(action.name, resource.id);
 	const parsedValue = value.trim() === '' ? NaN : Number(value);
@@ -99,7 +101,11 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 
 			<FormGroup>
 				<Label>{translateWithFallback('product-bulk-stock-adjust-mode', 'Mode')}</Label>
-				<Select value={mode} onChange={(e: any) => setMode(String(e?.target?.value ?? 'set') as Mode)}>
+				<Select
+					value={mode}
+					disabled={isReadOnly}
+					onChange={(e: any) => setMode(String(e?.target?.value ?? 'set') as Mode)}
+				>
 					<option value='set'>{translateWithFallback('product-bulk-stock-adjust-set', 'Set stock (reconcile)')}</option>
 					<option value='increase'>
 						{translateWithFallback('product-bulk-stock-adjust-increase', 'Increase stock')}
@@ -117,6 +123,7 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 					step='1'
 					min='0'
 					value={value}
+					disabled={isReadOnly}
 					onChange={(e) => setValue(e.target.value)}
 					style={{
 						width: '100%',
@@ -133,6 +140,7 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 				<textarea
 					rows={3}
 					value={reason}
+					disabled={isReadOnly}
 					onChange={(e) => setReason(e.target.value)}
 					placeholder={translateWithFallback(
 						'product-bulk-stock-adjust-reason-placeholder',
@@ -151,7 +159,12 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 
 			<Box mt='lg'>
 				<label style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-					<input type='checkbox' checked={syncInStock} onChange={(e) => setSyncInStock(e.target.checked)} />
+					<input
+						type='checkbox'
+						checked={syncInStock}
+						disabled={isReadOnly}
+						onChange={(e) => setSyncInStock(e.target.checked)}
+					/>
 					<Text>
 						{translateWithFallback('product-bulk-stock-adjust-sync', 'Also update inStock based on resulting stock')}
 					</Text>
@@ -159,7 +172,13 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 			</Box>
 
 			<Box mt='xl'>
-				<Button variant='contained' color='primary' style={actionButtonStyle} disabled={!canSave || saving} onClick={handleSave}>
+				<Button
+					variant='contained'
+					color='primary'
+					style={actionButtonStyle}
+					disabled={isReadOnly || !canSave || saving}
+					onClick={handleSave}
+				>
 					{saving ? translateMessage('product-bulk-saving') : translateMessage('product-bulk-apply')}
 				</Button>
 			</Box>

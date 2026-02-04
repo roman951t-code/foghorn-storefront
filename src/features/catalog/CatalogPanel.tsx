@@ -51,7 +51,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 	return (
 		<Flex
 			position='relative'
-			rounded='2xl'
+			rounded='lg'
 			gap={3}
 			onMouseLeave={handleMouseLeave}
 			minH='472px'
@@ -64,7 +64,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 				h='472px'
 				align='stretch'
 				gap={1}
-				rounded='xl'
+				rounded='lg'
 				hideBelow='md'
 				overflow='hidden'
 				borderWidth='0.5px'
@@ -90,7 +90,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 									rounded='lg'
 									bg={index % 2 === 0 ? 'catalog.bgEven' : 'catalog.bgOdd'}
 								>
-									<Skeleton height='18px' width='70%' borderRadius='md' />
+									<Skeleton height='18px' width='70%' borderRadius='lg' />
 									<Skeleton height='18px' width='18px' borderRadius='full' />
 								</HStack>
 							);
@@ -130,7 +130,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 									<Box
 										w='3px'
 										h='20px'
-										rounded='full'
+										rounded='lg'
 										bg={isHighlighted ? 'main.secondary' : 'transparent'}
 										transition='background 0.18s ease-in-out'
 									/>

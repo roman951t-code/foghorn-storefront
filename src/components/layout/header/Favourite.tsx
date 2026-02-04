@@ -24,7 +24,7 @@ export default function Favourite() {
 				size='md'
 				variant='ghost'
 				color='main.lightOnly'
-				rounded='full'
+				rounded='md'
 				colorPalette='red'
 				bg={{ _hover: 'colorPalette.400' }}
 			>

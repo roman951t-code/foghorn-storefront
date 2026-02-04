@@ -12,6 +12,9 @@ const rootPath = process.env.ADMINJS_ROOT_PATH ?? '/admin';
 const admin = new AdminJS({
 	rootPath,
 	componentLoader,
+	assets: {
+		scripts: ['/adminjs-readonly.js'],
+	},
 	availableThemes: [chakraTheme],
 	defaultTheme: chakraTheme.id,
 	dashboard: {

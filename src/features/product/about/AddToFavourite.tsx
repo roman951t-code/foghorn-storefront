@@ -52,7 +52,7 @@ export default function AddToFavourite({ wishlistUpdateFailed, product }: Props)
 			onClick={isInWishlist ? removeFromWishList : addToWishList}
 			aria-label='Favourite'
 			variant='ghost'
-			rounded='full'
+			rounded='md'
 			colorPalette='red'
 			color='colorPalette.400'
 			transition='all 0.2s ease-in-out'

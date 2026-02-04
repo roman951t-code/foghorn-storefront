@@ -25,7 +25,7 @@ const CartBtn = ({ setIsOpen, cartSize }: CartBtnProps) => (
 		variant='ghost'
 		position='relative'
 		color='main.lightOnly'
-		rounded='full'
+		rounded='md'
 		colorPalette='green'
 		bg={{ _hover: 'colorPalette.600' }}
 		_focusVisible={{ boxShadow: '0 0 0 2px var(--chakra-colors-green-400)' }}

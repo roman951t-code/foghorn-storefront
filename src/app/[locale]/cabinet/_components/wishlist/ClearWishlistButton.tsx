@@ -23,7 +23,7 @@ export default function ClearWishlistButton() {
 			size='md'
 			aria-label='Clear wishlist'
 			variant='ghost'
-			rounded='full'
+			rounded='md'
 			colorPalette='gray'
 			color='main.disabled'
 			transition='all 0.2s ease-in-out'

@@ -28,8 +28,6 @@
 		"contactRequiredDesc": "Please fill in your name, email, and phone number, then choose shipment and payment options to place the order.",
 		"agreementsTitle": "Agreements",
 		"learnMore": "Learn more",
-		"consentsRequiredTitle": "Confirm required agreements",
-		"consentsRequiredDesc": "Please confirm the required agreements below to place the order.",
 		"orderCreated": "Order placed successfully",
 		"orderCreateFail": "Failed to place the order. Please try again.",
 		"couponTitle": "Promo code",
@@ -319,17 +317,17 @@
 		"orderProcessing": "Checkout",
 		"seeProducts": "View products",
 		"productsNotFound": "No products found",
-      "products": "Products",
-      "categories": "Categories",
-      "allCategories": "All categories",
-      "hideAllCategories": "Hide all categories",
-      "clearFilters": "Clear filters",
-      "searchQueryResults": "Results for: {searchQuery}",
-      "advantages": "Advantages",
-      "disAdvantages": "Disadvantages",
-      "all": "All",
-      "brand": "Brand"
-    },
+		"products": "Products",
+		"categories": "Categories",
+		"allCategories": "All categories",
+		"hideAllCategories": "Hide all categories",
+		"clearFilters": "Clear filters",
+		"searchQueryResults": "Results for: {searchQuery}",
+		"advantages": "Advantages",
+		"disAdvantages": "Disadvantages",
+		"all": "All",
+		"brand": "Brand"
+	},
 	"orders": {
 		"empty": "You have no orders yet",
 		"orderNumber": "Order №",
@@ -446,14 +444,14 @@
 				"goHome": "Go home"
 			},
 			"checkoutUnavailableTitle": "Checkout is unavailable",
-  "checkoutUnavailableDesc": "Something went wrong while loading checkout. Please try again.",
-  "categoryUnavailableTitle": "Category is unavailable",
-  "categoryUnavailableDesc": "Something went wrong loading this category. Please retry or go back.",
-  "subcategoryUnavailableTitle": "Products are unavailable",
-  "subcategoryUnavailableDesc": "Something went wrong loading this subcategory. Please retry or go back.",
-  "orderCreateFailed": "We couldn’t create your order. Please try again.",
-  "orderOutOfStock": "Some items are out of stock or unavailable. Update your cart and retry.",
-  "paymentSessionFailed": "Payment session could not be created. Please try again."
-}
+			"checkoutUnavailableDesc": "Something went wrong while loading checkout. Please try again.",
+			"categoryUnavailableTitle": "Category is unavailable",
+			"categoryUnavailableDesc": "Something went wrong loading this category. Please retry or go back.",
+			"subcategoryUnavailableTitle": "Products are unavailable",
+			"subcategoryUnavailableDesc": "Something went wrong loading this subcategory. Please retry or go back.",
+			"orderCreateFailed": "We couldn’t create your order. Please try again.",
+			"orderOutOfStock": "Some items are out of stock or unavailable. Update your cart and retry.",
+			"paymentSessionFailed": "Payment session could not be created. Please try again."
+		}
 	}
 }

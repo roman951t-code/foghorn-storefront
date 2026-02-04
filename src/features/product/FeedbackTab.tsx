@@ -1,15 +1,5 @@
 'use client';
-import {
-	Card,
-	DataList,
-	Flex,
-	HStack,
-	IconButton,
-	Separator,
-	Stack,
-	Tag,
-	Text,
-} from '@chakra-ui/react';
+import { Card, DataList, Flex, HStack, IconButton, Separator, Stack, Text } from '@chakra-ui/react';
 import { Rating } from '@/components/ui/chakra/rating';
 import { Tooltip } from '@/components/ui/tooltip';
 import DateWithLocale from '@/components/ui/DateWithLocale';
@@ -21,6 +11,7 @@ import { FiTrash2 } from 'react-icons/fi';
 import { useSession } from '@/providers/SessionProvider';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
+import CountPill from '@/components/ui/CountPill';
 
 type Props = {
 	deleteReviewFail: string;
@@ -72,20 +63,7 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 								<Text fontWeight='semibold' color='main'>
 									{prodT('feedback')}
 								</Text>
-								<Tag.Root
-									variant='surface'
-									borderWidth='0.5px'
-									boxShadow='none'
-									bg='bg.tertiary'
-									borderColor='border'
-									size='lg'
-									color='main'
-									py='1'
-								>
-									<Tag.Label fontSize='sm' fontWeight='semibold'>
-										{reviewCount}
-									</Tag.Label>
-								</Tag.Root>
+								<CountPill value={reviewCount} />
 							</HStack>
 
 							{reviewCount > 0 ? (
@@ -195,7 +173,7 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 								justifySelf='flex-end'
 								aria-label='Delete review'
 								variant='ghost'
-								rounded='full'
+								rounded='md'
 								color='main.disabled'
 								transition='all 0.2s ease-in-out'
 								_hover={{

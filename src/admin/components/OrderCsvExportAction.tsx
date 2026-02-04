@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -54,6 +55,7 @@ export default function OrderCsvExportAction(props: ActionProps) {
 	const { translateAction, translateMessage } = useTranslation();
 	const addNotice = useNotice();
 	const [loading, setLoading] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	const filters = useMemo(() => resolveFilters(), []);
 
@@ -102,7 +104,7 @@ export default function OrderCsvExportAction(props: ActionProps) {
 				color='primary'
 				style={actionButtonStyle}
 				onClick={handleExport}
-				disabled={loading}
+				disabled={isReadOnly || loading}
 			>
 				{loading ? translateMessage('order-csv-exporting') : translateMessage('order-csv-export')}
 			</Button>

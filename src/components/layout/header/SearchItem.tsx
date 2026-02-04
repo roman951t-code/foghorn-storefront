@@ -1,8 +1,21 @@
 'use client';
-import { Combobox, Highlight, Icon, Tag, useComboboxContext } from '@chakra-ui/react';
+import { Box, Combobox, Highlight, Icon, Tag, Text, useComboboxContext } from '@chakra-ui/react';
 import { LocaleNavLink, LocaleSearchLink } from '@/components/ui/links/LocaleNavLink';
 import { FiSearch } from 'react-icons/fi';
 import { SearchProductItem, SearchSubcategoryItem } from '@/types/product';
+
+const formatSearchMeta = (value: string) => {
+	const text = value.replace(/[-_]+/g, ' ').trim();
+	return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
+};
+
+const highlightStyles = {
+	bg: { base: 'rgba(255, 214, 102, 0.55)', _dark: 'rgba(255, 214, 102, 0.75)' },
+	color: { base: 'black', _dark: 'black' },
+	fontWeight: 'semibold',
+	px: '1',
+	rounded: 'sm',
+} as const;
 
 export function ProductSearchItem({ item }: { item: SearchProductItem }) {
 	const combobox = useComboboxContext();
@@ -12,23 +25,39 @@ export function ProductSearchItem({ item }: { item: SearchProductItem }) {
 		<Combobox.Item item={item} key={item.name} fontSize='sm' minW='90px' w='full' py='0'>
 			<Combobox.ItemText
 				fontWeight='medium'
-				as='p'
+				as='div'
 				css={{
 					'& a': {
 						width: '100%',
-						display: 'inline-block',
-						lineHeight: '38px',
+						display: 'block',
 					},
 				}}
 			>
 				<LocaleSearchLink asChild href={href} textDecoration='none' fontSize='15px'>
-					<Highlight
-						ignoreCase
-						query={combobox.inputValue}
-						styles={{ bg: 'bg.search', color: 'black', fontWeight: 'semibold' }}
-					>
-						{item.name}
-					</Highlight>
+					<Box py='1' minH='38px' display='flex' flexWrap='wrap' alignItems='center' columnGap='3'>
+						<Text
+							fontSize='15px'
+							lineHeight='1.25'
+							flex='1 1 auto'
+							minW='0'
+							whiteSpace='nowrap'
+							overflow='hidden'
+							textOverflow='ellipsis'
+						>
+							<Highlight ignoreCase query={combobox.inputValue} styles={highlightStyles}>
+								{item.name}
+							</Highlight>
+						</Text>
+						<Text
+							fontSize='15px'
+							color='fg.muted'
+							lineHeight='1.25'
+							flex='0 0 auto'
+							whiteSpace='nowrap'
+						>
+							{formatSearchMeta(item.category)} / {formatSearchMeta(item.subcategory)}
+						</Text>
+					</Box>
 				</LocaleSearchLink>
 			</Combobox.ItemText>
 		</Combobox.Item>
@@ -60,7 +89,7 @@ export function CategorySearchItem({ item }: { item: SearchSubcategoryItem }) {
 						<Highlight
 							ignoreCase
 							query={combobox.inputValue}
-							styles={{ bg: 'bg.search', color: 'black', fontWeight: 'semibold' }}
+							styles={highlightStyles}
 						>
 							{item.name}
 						</Highlight>

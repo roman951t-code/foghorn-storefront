@@ -75,6 +75,7 @@ export function DeleteAccount({ onCloseAction }: Props) {
 								<Button
 									color='main'
 									variant='outline'
+									rounded='md'
 									borderWidth='0.5px'
 									borderStyle='solid'
 									borderColor='border'
@@ -86,6 +87,7 @@ export function DeleteAccount({ onCloseAction }: Props) {
 								onClick={handleDeleteUser}
 								loading={pending}
 								colorPalette='red'
+								rounded='md'
 								variant={{
 									base: 'surface',
 									_dark: 'solid',

@@ -24,17 +24,14 @@ export default function FiltersSidebar({ btnText, maxProductPrice, filters }: Pr
 		<DrawerRoot placement='end'>
 			<DrawerBackdrop />
 			<DrawerTrigger asChild>
-				<SecondaryButton w='160px' alignSelf='flex-end' hideFrom='lg' rounded='sm'>
+				<SecondaryButton w='160px' alignSelf='flex-end' hideFrom='lg' rounded='md'>
 					<IoFilter />
 					{btnText}
 				</SecondaryButton>
 			</DrawerTrigger>
 			<DrawerContent
 				bg='bg.tertiary'
-				w={{ base: '89.3vw', sm: '494px' }}
-				maxW='494px'
 				h='100%'
-				rounded='2xl'
 				borderWidth='0.5px'
 				borderStyle='solid'
 				borderColor='border'

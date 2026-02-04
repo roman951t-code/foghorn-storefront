@@ -103,7 +103,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					borderWidth='0.5px'
 					borderStyle='solid'
 					borderColor='border'
-					borderRadius='2xl'
+					borderRadius='lg'
 					p={{ base: 4, md: 6 }}
 					bg='bg.tertiary'
 					w='full'

@@ -8,7 +8,8 @@ import {
 } from '@/components/ui/chakra/accordion';
 import { Checkbox } from '@/components/ui/chakra/checkbox';
 import { Filter } from '@/types/product';
-import { Badge, Box, CheckboxGroup, Fieldset, HStack, Text } from '@chakra-ui/react';
+import CountPill from '@/components/ui/CountPill';
+import { Box, CheckboxGroup, Fieldset, HStack, Text } from '@chakra-ui/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
@@ -52,23 +53,23 @@ export default function Filters({ filters }: Props) {
 				{filters.map((filter) => {
 					const selectedValues = searchParams.getAll(filter.key);
 					const filterLabel = filter.key === 'brand' ? t('brand') : filter.name;
-					const localizedUnit =
-						filter.key === 'brand' ? null : localizeUnit(filter.unit, locale);
-					const filterLabelWithUnit =
-						localizedUnit ? `${filterLabel} (${localizedUnit})` : filterLabel;
+					const localizedUnit = filter.key === 'brand' ? null : localizeUnit(filter.unit, locale);
+					const filterLabelWithUnit = localizedUnit
+						? `${filterLabel} (${localizedUnit})`
+						: filterLabel;
 					const selectedCount = selectedValues.length;
 
-						return (
-							<AccordionItem
-								key={filter.id}
-								mb={3}
-								value={filter.key}
-								borderWidth='0.5px'
-								borderStyle='solid'
-								borderColor='border'
-								rounded='2xl'
-								overflow='hidden'
-								bg='bg.tertiary'
+					return (
+						<AccordionItem
+							key={filter.id}
+							mb={3}
+							value={filter.key}
+							borderWidth='0.5px'
+							borderStyle='solid'
+							borderColor='border'
+							rounded='lg'
+							overflow='hidden'
+							bg='bg.tertiary'
 						>
 							<AccordionItemTrigger
 								px={4}
@@ -84,17 +85,7 @@ export default function Filters({ filters }: Props) {
 										{filterLabelWithUnit}
 									</Text>
 									{selectedCount > 0 ? (
-										<Badge
-											variant='outline'
-											borderColor='border'
-											borderRadius='full'
-											px='2'
-											py='1'
-											bg='bg.tertiary'
-											fontSize='xs'
-										>
-											{selectedCount}
-										</Badge>
+										<CountPill value={selectedCount} labelProps={{ fontSize: 'xs' }} />
 									) : null}
 								</HStack>
 							</AccordionItemTrigger>
@@ -114,13 +105,12 @@ export default function Filters({ filters }: Props) {
 													minW={0}
 													px={3}
 													py={2}
-													rounded='xl'
+													rounded='lg'
 													borderWidth='0.5px'
 													borderStyle='solid'
 													borderColor='border'
 													transition='all 0.15s ease-in-out'
 													_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-													_checked={{ bg: 'bgHover.promoCard', borderColor: 'main.secondary' }}
 													fontSize='sm'
 													whiteSpace='normal'
 													wordBreak='break-word'

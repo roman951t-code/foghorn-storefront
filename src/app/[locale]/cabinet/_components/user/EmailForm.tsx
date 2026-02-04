@@ -68,7 +68,6 @@ export default function EmailForm({
 						<Input
 							id={emailId}
 							{...emailForm.register('email')}
-							variant='outline'
 							size='md'
 							disabled={isGoogleUser}
 							readOnly={isGoogleUser}

@@ -64,6 +64,7 @@ export default function SidePanel() {
 						color='main.lightOnly'
 						variant='ghost'
 						size='md'
+						rounded='md'
 						bg='transparent'
 						_hover={{
 							bg: 'transparent',
@@ -109,7 +110,7 @@ export default function SidePanel() {
 							/>
 
 							{session?.session && (
-								<Box mt='auto' pt='4'>
+								<Box mt='auto'>
 									<DeleteAccount onCloseAction={onClose} />
 								</Box>
 							)}
@@ -122,13 +123,13 @@ export default function SidePanel() {
 
 					<DrawerCloseTrigger
 						color='main.lightOnly'
-					_hover={{
-						bg: 'transparent',
-						borderWidth: '0.5px',
-						borderStyle: 'solid',
-						borderColor: 'main.lightOnly',
-					}}
-				/>
+						_hover={{
+							bg: 'transparent',
+							borderWidth: '0.5px',
+							borderStyle: 'solid',
+							borderColor: 'main.lightOnly',
+						}}
+					/>
 				</DrawerContent>
 			</DrawerRoot>
 			<Auth isOpen={authOpen} setIsOpen={setAuthOpen} />

@@ -1,32 +1,35 @@
 import { Editable, IconButton } from '@chakra-ui/react';
 import { LuCheck, LuPencilLine, LuX } from 'react-icons/lu';
 
+const storefrontInputFocusStyles = {
+	borderWidth: '0.5px',
+	borderStyle: 'solid',
+	borderColor: { base: 'orange', _dark: 'yellow' },
+	outline: 'none',
+	boxShadow: 'none',
+} as const;
+
 interface Props {
 	defaultValue: string;
 	onSubmit: (value: string) => void;
 }
 export default function EditableInput({ defaultValue, onSubmit }: Props) {
 	return (
-		<Editable.Root
-			defaultValue={defaultValue}
-			onValueCommit={(details) => onSubmit(details.value)}
-		>
+		<Editable.Root defaultValue={defaultValue} onValueCommit={(details) => onSubmit(details.value)}>
 			<Editable.Preview textStyle='md' minW='110px' />
 			<Editable.Input
 				textAlign='left'
 				aria-label='Editable field input'
 				flex='1'
-				rounded='md'
-				fontSize='md'
-				color='text'
-				bg='bg'
-				_placeholder={{ fontSize: 'md' }}
-				_focus={{
-					borderWidth: '0.5px',
-					borderStyle: 'solid',
-					borderColor: 'main',
-					outline: 'none',
-				}}
+					rounded='lg'
+					fontSize='md'
+					color='text'
+					borderWidth='0.5px'
+					borderColor='border'
+					_placeholder={{ fontSize: 'md' }}
+					focusVisibleRing='none'
+				_focus={storefrontInputFocusStyles}
+				_focusVisible={storefrontInputFocusStyles}
 			/>
 			<Editable.Control>
 				<Editable.EditTrigger asChild>
@@ -35,7 +38,7 @@ export default function EditableInput({ defaultValue, onSubmit }: Props) {
 						size='xs'
 						color='main'
 						bg='bg'
-						rounded='full'
+						rounded='md'
 						ml='2'
 						aria-label='Edit value'
 					>
@@ -48,7 +51,7 @@ export default function EditableInput({ defaultValue, onSubmit }: Props) {
 						size='xs'
 						color='main'
 						bg='bg'
-						rounded='full'
+						rounded='md'
 						aria-label='Cancel editing'
 					>
 						<LuX />
@@ -60,7 +63,7 @@ export default function EditableInput({ defaultValue, onSubmit }: Props) {
 						size='xs'
 						color='main'
 						bg='bg'
-						rounded='full'
+						rounded='md'
 						aria-label='Save value'
 					>
 						<LuCheck />

@@ -41,7 +41,7 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 							height={110}
 							style={{
 								objectFit: 'contain',
-								borderRadius: '6px',
+								borderRadius: 'var(--chakra-radii-md)',
 								border: '0.5px solid var(--chakra-colors-border)',
 							}}
 						/>

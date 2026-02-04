@@ -38,7 +38,7 @@ export default function ToTop() {
 			right='24px'
 			aria-label='Back to Top'
 			size='md'
-			rounded='full'
+			rounded='md'
 			border='2px solid'
 			bg='bg.primary'
 			transition='all 0.3s ease-in-out'

@@ -53,7 +53,7 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 			<Flex justifyContent='space-between' alignItems='center' gap={3} w='100%' minW={0}>
 				<HStack gap={2} flex='1' minW={0}>
 					<Input
-						fontSize='sm'
+						fontSize='15px'
 						color='main'
 						h='40px'
 						flex='1'
@@ -70,7 +70,7 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 						borderColor='border'
 					/>
 					<Input
-						fontSize='sm'
+						fontSize='15px'
 						color='main'
 						h='40px'
 						flex='1'
@@ -90,7 +90,7 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 
 				<IconButton
 					aria-label='Search'
-					rounded='lg'
+					rounded='md'
 					size='md'
 					color='main.darkOnly'
 					h='40px'

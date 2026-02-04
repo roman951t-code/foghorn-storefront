@@ -12,6 +12,7 @@ import {
 	TableRow,
 	Text,
 } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 type CsvResult = {
 	row: number;
@@ -48,6 +49,7 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 	const [reason, setReason] = useState('');
 	const [results, setResults] = useState<CsvResult[]>([]);
 	const [loading, setLoading] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	const summary = useMemo(() => {
 		const created = results.filter((r) => r.status === 'created').length;
@@ -136,12 +138,14 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 				<Input
 					type='file'
 					accept='.csv,text/csv'
+					disabled={isReadOnly}
 					onChange={(event: ChangeEvent<HTMLInputElement>) => handleFile(event.target.files?.[0] ?? null)}
 				/>
 				<Box style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 					<input
 						type='checkbox'
 						checked={dryRun}
+						disabled={isReadOnly}
 						onChange={(event: ChangeEvent<HTMLInputElement>) => setDryRun(event.target.checked)}
 					/>
 					<Text>{translateMessage('product-csv-dry-run')}</Text>
@@ -150,6 +154,7 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 					<Label>{translateMessage('product-csv-reason-label')}</Label>
 					<Input
 						value={reason}
+						disabled={isReadOnly}
 						onChange={(event: ChangeEvent<HTMLInputElement>) => setReason(event.target.value)}
 						placeholder={translateMessage('product-csv-reason-placeholder')}
 					/>
@@ -158,7 +163,13 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 					<Button variant='outlined' onClick={handleExport} disabled={loading}>
 						{translateMessage('product-csv-export')}
 					</Button>
-					<Button variant='contained' color='primary' style={actionButtonStyle} onClick={handleImport} disabled={loading}>
+					<Button
+						variant='contained'
+						color='primary'
+						style={actionButtonStyle}
+						onClick={handleImport}
+						disabled={isReadOnly || loading}
+					>
 						{loading ? translateMessage('product-csv-importing') : translateMessage('product-csv-import')}
 					</Button>
 				</Box>

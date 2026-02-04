@@ -62,7 +62,7 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 									alt={item.product.name}
 									style={{
 										objectFit: 'cover',
-										borderRadius: '6px',
+										borderRadius: 'var(--chakra-radii-md)',
 										border: '0.5px solid var(--chakra-colors-border)',
 									}}
 								/>

@@ -38,7 +38,7 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 					borderWidth='0.5px'
 					borderStyle='solid'
 					borderColor='border'
-					borderRadius='2xl'
+					borderRadius='lg'
 					p={{ base: 4, md: 6 }}
 					w='full'
 				>
@@ -54,7 +54,7 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 						</Field.Label>
 
 						<VStack w='full' maxW='3xl'>
-							<Input id={nameId} {...nameForm.register('name')} variant='outline' size='md' />
+							<Input id={nameId} {...nameForm.register('name')} size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.name?.message?.toString()}
 							</Field.ErrorText>
@@ -73,12 +73,7 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 						</Field.Label>
 
 						<VStack w='full' maxW='3xl'>
-							<Input
-								id={lastNameId}
-								{...nameForm.register('lastName')}
-								variant='outline'
-								size='md'
-							/>
+							<Input id={lastNameId} {...nameForm.register('lastName')} size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.lastName?.message?.toString()}
 							</Field.ErrorText>
@@ -98,12 +93,7 @@ export default function NameForm({ nameForm, i18nData, onSubmitAction }: Props) 
 						</Field.Label>
 
 						<VStack w='full' maxW='3xl'>
-							<Input
-								id={middleNameId}
-								{...nameForm.register('middleName')}
-								variant='outline'
-								size='md'
-							/>
+							<Input id={middleNameId} {...nameForm.register('middleName')} size='md' />
 							<Field.ErrorText alignSelf='flex-start'>
 								{nameForm.formState.errors.middleName?.message?.toString()}
 							</Field.ErrorText>

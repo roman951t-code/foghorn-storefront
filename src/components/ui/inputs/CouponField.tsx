@@ -11,7 +11,7 @@ import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 
 type Props = {
 	subtotal: number;
-	layout?: 'row' | 'column';
+	layout?: 'row' | 'column' | 'responsive';
 };
 
 const errorKey = (code: string) => {
@@ -47,6 +47,7 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 
 	const [isApplying, setIsApplying] = useState(false);
 	const isColumn = layout === 'column';
+	const isResponsive = layout === 'responsive';
 
 	const handleApply = async () => {
 		const code = draft.trim();
@@ -113,7 +114,7 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 								aria-label={t('couponRemove')}
 								variant='ghost'
 								size='xs'
-								rounded='full'
+								rounded='md'
 								onClick={handleClear}
 							>
 								<FiX />
@@ -122,7 +123,12 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 					) : null}
 				</Flex>
 
-				<Stack direction={isColumn ? 'column' : 'row'} gap='2' alignItems='stretch' w='full'>
+				<Stack
+					direction={isResponsive ? { base: 'column', sm: 'row' } : isColumn ? 'column' : 'row'}
+					gap='2'
+					alignItems='stretch'
+					w='full'
+				>
 					<Input
 						value={draft}
 						onChange={(e) => setCouponDraft(e.target.value)}
@@ -132,8 +138,8 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 					<SecondaryButton
 						onClick={handleApply}
 						loading={isApplying}
-						disabled={isApplying}
-						w={isColumn ? 'full' : undefined}
+						disabled={isApplying || draft.trim().length === 0}
+						w={isResponsive ? { base: 'full', sm: 'auto' } : isColumn ? 'full' : undefined}
 					>
 						{t('couponApply')}
 					</SecondaryButton>

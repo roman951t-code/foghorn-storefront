@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -8,6 +9,7 @@ export default function CancelOrderAction({ action, record, resource }: ActionPr
 	const [localRecord, setLocalRecord] = useState(record);
 	const [refundPayment, setRefundPayment] = useState(false);
 	const [loading, setLoading] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 	const addNotice = useNotice();
 	const { translateAction, translateMessage } = useTranslation();
 
@@ -74,7 +76,7 @@ export default function CancelOrderAction({ action, record, resource }: ActionPr
 					<input
 						type='checkbox'
 						checked={refundPayment}
-						disabled={!canRefund}
+						disabled={isReadOnly || !canRefund}
 						onChange={(event) => setRefundPayment(event.target.checked)}
 						style={{ width: 16, height: 16 }}
 					/>
@@ -95,7 +97,7 @@ export default function CancelOrderAction({ action, record, resource }: ActionPr
 						variant='contained'
 						color='primary'
 						onClick={handleCancel}
-						disabled={loading}
+						disabled={isReadOnly || loading}
 					>
 						{buttonLabel}
 					</Button>

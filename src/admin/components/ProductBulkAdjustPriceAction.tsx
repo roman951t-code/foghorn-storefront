@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, FormGroup, Label, Select, Text } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -31,6 +32,7 @@ export default function ProductBulkAdjustPriceAction({ action, resource, records
 	const [value, setValue] = useState('10');
 	const [applyToDiscount, setApplyToDiscount] = useState(false);
 	const [saving, setSaving] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	const title = translateAction(action.name, resource.id);
 	const parsedValue = Number(value);
@@ -72,14 +74,24 @@ export default function ProductBulkAdjustPriceAction({ action, resource, records
 			<Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
 				<FormGroup>
 					<Label>{translateMessage('product-bulk-price-direction')}</Label>
-					<Select value={direction} onChange={(e: any) => setDirection(String(e?.target?.value ?? 'increase') as any)}>
+					<Select
+						value={direction}
+						disabled={isReadOnly}
+						onChange={(e: any) =>
+							setDirection(String(e?.target?.value ?? 'increase') as any)
+						}
+					>
 						<option value='increase'>{translateMessage('product-bulk-price-increase')}</option>
 						<option value='decrease'>{translateMessage('product-bulk-price-decrease')}</option>
 					</Select>
 				</FormGroup>
 				<FormGroup>
 					<Label>{translateMessage('product-bulk-price-kind')}</Label>
-					<Select value={kind} onChange={(e: any) => setKind(String(e?.target?.value ?? 'percent') as any)}>
+					<Select
+						value={kind}
+						disabled={isReadOnly}
+						onChange={(e: any) => setKind(String(e?.target?.value ?? 'percent') as any)}
+					>
 						<option value='percent'>{translateMessage('product-bulk-price-percent')}</option>
 						<option value='fixed'>{translateMessage('product-bulk-price-fixed')}</option>
 					</Select>
@@ -90,6 +102,7 @@ export default function ProductBulkAdjustPriceAction({ action, resource, records
 						type='number'
 						step='0.01'
 						value={value}
+						disabled={isReadOnly}
 						onChange={(e) => setValue(e.target.value)}
 						style={{
 							width: '100%',
@@ -104,13 +117,24 @@ export default function ProductBulkAdjustPriceAction({ action, resource, records
 
 			<Box mt='lg'>
 				<label style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-					<input type='checkbox' checked={applyToDiscount} onChange={(e) => setApplyToDiscount(e.target.checked)} />
+					<input
+						type='checkbox'
+						checked={applyToDiscount}
+						disabled={isReadOnly}
+						onChange={(e) => setApplyToDiscount(e.target.checked)}
+					/>
 					<Text>{translateMessage('product-bulk-price-apply-discount')}</Text>
 				</label>
 			</Box>
 
 			<Box mt='xl'>
-				<Button variant='contained' color='primary' style={actionButtonStyle} disabled={!canSave || saving} onClick={handleSave}>
+				<Button
+					variant='contained'
+					color='primary'
+					style={actionButtonStyle}
+					disabled={isReadOnly || !canSave || saving}
+					onClick={handleSave}
+				>
 					{saving ? translateMessage('product-bulk-saving') : translateMessage('product-bulk-apply')}
 				</Button>
 			</Box>

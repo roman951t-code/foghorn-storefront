@@ -76,7 +76,7 @@ export default function CenteredModal({
 			<DialogContent bg='bg.tertiary' minWidth='350px'>
 				<DialogHeader>
 					<DialogTitle
-						fontSize='xl'
+						fontSize='2xl'
 						w='100%'
 						fontWeight='medium'
 						borderBottomWidth='0.5px'

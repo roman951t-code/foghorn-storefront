@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import Breadcrumbs from '@/components/ui/links/Breadcrumbs';
 import ProductsGrid from '../../_components/ProductsGrid';
-import { Flex, Heading, Box, Group, VStack, Text, Highlight, Separator } from '@chakra-ui/react';
+import { Flex, Heading, Box, Group, VStack, Text, Separator, HStack } from '@chakra-ui/react';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import QuickFilters from '../../_components/QuickFilters';
 import Filters from '../../_components/Filters';
@@ -21,6 +21,7 @@ import Script from 'next/script';
 import { ProductFiltersSearchParams, SubcategoryParams } from '@/types/routing';
 import { ensureParams } from '@/utils/validateParams';
 import { subcategoryParamsSchema } from 'validationSchemas/productParamsSchemas';
+import CountPill from '@/components/ui/CountPill';
 
 type Props = SubcategoryParams & {
 	searchParams: ProductFiltersSearchParams;
@@ -166,21 +167,27 @@ export default async function Subcategory({ params, searchParams }: Props) {
 					flexShrink={0}
 					bg='bg.tertiary'
 					minH='800px'
-					rounded='sm'
+					rounded='lg'
 					hideBelow='lg'
 					position='sticky'
 					top='74px'
 				>
 					<CatalogBtn fullText />
 					<VStack p='4' justifyContent='flex-start'>
-						<Text w='full' fontSize='sm'>
-							<Highlight
-								query={subcategoryData?.totalCount?.toString()}
-								styles={{ fontWeight: 'semibold' }}
-							>
-								{`${productsT('totalProducts')}: ${subcategoryData?.totalCount}`}
-							</Highlight>
-						</Text>
+						<HStack w='full' justify='space-between' align='center'>
+							<Text fontSize='sm' color='fg.muted'>
+								{productsT('totalProducts')}
+							</Text>
+							<CountPill
+								value={subcategoryData?.totalCount ?? 0}
+								size='sm'
+								borderRadius='full'
+								borderColor='border.button'
+								px='2.5'
+								py='0.5'
+								labelProps={{ fontSize: 'xs' }}
+							/>
+						</HStack>
 						<Separator color='border' w='full' my='2' />
 						<QuickFilters maxProductPrice={subcategoryData.maxProductPrice} />
 						<Filters filters={subcategoryFilters} />

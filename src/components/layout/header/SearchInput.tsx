@@ -114,16 +114,13 @@ export default function SearchInput({
 			>
 				<Combobox.Control roundedLeft='md' fontSize='md' minW='284px'>
 					<Combobox.Input
+						borderColor='border'
+						_focus={{ borderColor: 'main.secondary' }}
 						placeholder={placeholder}
 						aria-label={placeholder}
 						fontSize='md'
+						bg='bg.muted'
 						roundedRight='0'
-						_focus={{
-							borderWidth: '0.5px',
-							borderStyle: 'solid',
-							borderColor: { base: 'orange', _dark: 'yellow' },
-							outline: 'none',
-						}}
 					/>
 					<Combobox.IndicatorGroup pr='2'>
 						<Combobox.ClearTrigger
@@ -210,7 +207,7 @@ export default function SearchInput({
 			<IconButton
 				aria-label='Search'
 				roundedLeft='0'
-				roundedRight='md'
+				roundedRight='sm'
 				size='md'
 				color='main.darkOnly'
 				width='44px'

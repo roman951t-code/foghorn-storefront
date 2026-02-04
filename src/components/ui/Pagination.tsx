@@ -92,12 +92,12 @@ export default function Pagination({
 			>
 				<ButtonGroup variant='ghost' size='md'>
 					{safePage === 1 ? (
-						<IconButton aria-label='Previous' disabled opacity={0.5}>
+						<IconButton aria-label='Previous' rounded='md' disabled opacity={0.5}>
 							<LuChevronLeft />
 						</IconButton>
 					) : (
 						<Link href={prevHref} prefetch scroll={false}>
-							<IconButton as='span' aria-label='Previous'>
+							<IconButton as='span' aria-label='Previous' rounded='md'>
 								<LuChevronLeft />
 							</IconButton>
 						</Link>
@@ -116,6 +116,7 @@ export default function Pagination({
 									variant={safePage === page.value ? 'outline' : 'ghost'}
 									borderColor={safePage === page.value ? 'border' : 'transparent'}
 									aria-label={`Page ${page.value}`}
+									rounded='md'
 								>
 									{page.value}
 								</IconButton>
@@ -124,12 +125,12 @@ export default function Pagination({
 					/>
 
 					{safePage === totalPages ? (
-						<IconButton aria-label='Next' disabled opacity={0.5}>
+						<IconButton aria-label='Next' rounded='md' disabled opacity={0.5}>
 							<LuChevronRight />
 						</IconButton>
 					) : (
 						<Link href={nextHref} prefetch scroll={false}>
-							<IconButton as='span' aria-label='Next'>
+							<IconButton as='span' aria-label='Next' rounded='md'>
 								<LuChevronRight />
 							</IconButton>
 						</Link>
@@ -159,7 +160,12 @@ export default function Pagination({
 					>
 						<NumberInput.Label srOnly>{t('perPage')}</NumberInput.Label>
 						<NumberInput.Control />
-						<NumberInput.Input fontSize='15px' inputMode='numeric' aria-label={t('perPage')} />
+						<NumberInput.Input
+							bg='none'
+							fontSize='15px'
+							inputMode='numeric'
+							aria-label={t('perPage')}
+						/>
 					</NumberInput.Root>
 				</HStack>
 			</HStack>

@@ -14,6 +14,7 @@ import {
 	TableRow,
 	Text,
 } from '@adminjs/design-system';
+import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
 
@@ -98,6 +99,7 @@ export default function UserShow(props: ActionProps) {
 	const [adminStatus, setAdminStatus] = useState<UserAdminStatus>('ACTIVE');
 	const [adminNotes, setAdminNotes] = useState('');
 	const [savingMeta, setSavingMeta] = useState(false);
+	const isReadOnly = useIsReadOnlyAdmin();
 
 	useEffect(() => {
 		setLocalRecord(record);
@@ -305,6 +307,7 @@ export default function UserShow(props: ActionProps) {
 									isClearable={false}
 									options={statusOptions}
 									value={selectedStatusOption}
+									isDisabled={isReadOnly}
 									onChange={(option: StatusOption | null) => {
 										const value = option?.value ?? 'ACTIVE';
 										setAdminStatus(value);
@@ -319,6 +322,7 @@ export default function UserShow(props: ActionProps) {
 						<textarea
 							id='admin-notes'
 							value={adminNotes}
+							disabled={isReadOnly}
 							onChange={(event) => setAdminNotes(event.target.value)}
 							placeholder={translateMessage('customer-internal-notes-placeholder')}
 							rows={5}
@@ -341,7 +345,7 @@ export default function UserShow(props: ActionProps) {
 						variant='contained'
 						color='primary'
 						onClick={handleSaveMeta}
-						disabled={!isDirty || savingMeta}
+						disabled={isReadOnly || !isDirty || savingMeta}
 					>
 						{savingMeta ? translateMessage('customer-flags-saving') : translateMessage('customer-flags-save')}
 					</Button>
@@ -400,7 +404,7 @@ export default function UserShow(props: ActionProps) {
 											variant='outlined'
 											size='sm'
 											onClick={() => handleRevokeSession(session.id)}
-											disabled={revokingSessionId === session.id}
+											disabled={isReadOnly || revokingSessionId === session.id}
 											style={{ borderColor: '#E53E3E', color: '#E53E3E' }}
 										>
 											{revokingSessionId === session.id
