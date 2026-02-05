@@ -27,6 +27,10 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 	const productsT = useTranslations('products');
 	const commonT = useTranslations('common');
 
+	const totalDiscountText = `${
+		order.totalDiscount > 0 ? `-${order.totalDiscount.toFixed(2)}` : order.totalDiscount.toFixed(2)
+	} ₴`;
+
 	return (
 		<Accordion.ItemTrigger w='full' p='0' cursor='pointer' flexDirection='column'>
 			<Flex
@@ -46,6 +50,16 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 							'numOfProducts'
 						)}: ${totalItems}`}</Highlight>
 					</Text>
+					{order.totalDiscount > 0 ? (
+						<Text textStyle='sm' fontWeight='normal'>
+							<Highlight
+								query={totalDiscountText}
+								styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+							>
+								{`${productsT('totalDiscount')}: ${totalDiscountText}`}
+							</Highlight>
+						</Text>
+					) : null}
 				</VStack>
 				<HStack gap='2' display={{ base: 'none', md: 'flex' }} overflowX='auto'>
 					{thumbItems.map((item) => {

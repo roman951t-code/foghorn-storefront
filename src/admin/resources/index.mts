@@ -1063,8 +1063,15 @@ export const resources = [
 		resource: { model: modelMap.NewsletterSubscription, client: prisma },
 		options: {
 			navigation: 'Customers',
+			sort: {
+				sortBy: 'createdAt',
+				direction: 'desc',
+			},
+			listProperties: ['email', 'createdAt'],
+			filterProperties: ['email', 'createdAt'],
 			properties: {
 				id: hidden,
+				email: { isTitle: true },
 				createdAt: readOnly,
 			},
 		},

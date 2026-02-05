@@ -282,6 +282,27 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json({ sessionId: checkoutSession.id, url: checkoutSession.url });
 	} catch (error) {
-		return NextResponse.json({ error: 'stripe_session_failed' }, { status: 500 });
+		console.error('Stripe session failed', error);
+
+		const status =
+			typeof (error as any)?.statusCode === 'number'
+				? (error as any).statusCode
+				: 500;
+		const errorCode =
+			typeof (error as any)?.code === 'string'
+				? (error as any).code
+				: 'stripe_session_failed';
+
+		const message =
+			typeof (error as any)?.message === 'string'
+				? (error as any).message
+				: undefined;
+
+		return NextResponse.json(
+			env.NODE_ENV === 'development'
+				? { error: errorCode, message }
+				: { error: errorCode },
+			{ status: status >= 400 && status < 600 ? status : 500 }
+		);
 	}
 }

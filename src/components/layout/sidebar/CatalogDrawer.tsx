@@ -91,8 +91,6 @@ export default function CatalogDrawer() {
 				w='full'
 				value={openValues}
 				onValueChange={(details) => {
-					// Chakra's Accordion passes the next value in `details.value`.
-					// Keep it controlled so we can "collapse all".
 					setOpenValues((details as { value?: string[] }).value ?? []);
 				}}
 				borderBottom='none'

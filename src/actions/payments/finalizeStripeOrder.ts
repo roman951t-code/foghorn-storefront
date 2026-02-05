@@ -37,6 +37,7 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 	const existing = await prisma.order.findUnique({
 		where: { stripeSessionId: sessionId },
 		include: {
+			discounts: true,
 			items: {
 				include: {
 					product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
@@ -193,12 +194,14 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 			const effectiveVariantPrice =
 				discountAmount > 0 ? Math.max(0, variantBase - discountAmount) : variantBase;
 
+			const baseUnitPrice = toCurrency(Number(variantBase));
 			const unitPrice = toCurrency(Number(effectiveVariantPrice));
 			const price = toCurrency(unitPrice * requestedQty);
 			return {
 				productId: item.productId,
 				variantId: variant.id,
 				quantity: requestedQty,
+				baseUnitPrice,
 				unitPrice,
 				price,
 			};
@@ -207,6 +210,7 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 		productId: string;
 		variantId: string;
 		quantity: number;
+		baseUnitPrice: number;
 		unitPrice: number;
 		price: number;
 	}[];
@@ -304,6 +308,7 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 							productId: item.productId,
 							variantId: item.variantId,
 							quantity: item.quantity,
+							baseUnitPrice: new Prisma.Decimal(item.baseUnitPrice.toFixed(2)),
 							unitPrice: new Prisma.Decimal(item.unitPrice.toFixed(2)),
 							price: new Prisma.Decimal(item.price.toFixed(2)),
 						})),

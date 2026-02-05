@@ -79,8 +79,8 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 				>
 					<Box
 						position='relative'
-						w={{ base: '128px', sm: '112px' }}
-						h={{ base: '128px', sm: '112px' }}
+						w={{ base: '128px', sm: '106px' }}
+						h={{ base: '128px', sm: '106px' }}
 						borderRadius='lg'
 						borderWidth='0.5px'
 						borderStyle='solid'
@@ -91,7 +91,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 							src={previewImage}
 							alt={product.name}
 							fill
-							sizes='(max-width: 479px) 128px, 112px'
+							sizes='(max-width: 479px) 128px, 106px'
 							style={{
 								objectFit: 'contain',
 								paddingTop: '4px',
@@ -108,7 +108,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 						w='full'
 					>
 						<VStack alignItems={{ base: 'center', sm: 'flex-start' }} gap='2' minW='0'>
-							<Card.Title fontWeight='semibold' lineHeight='1.2'>
+							<Card.Title fontWeight='semibold' lineHeight='1.1'>
 								<Text
 									textAlign={{ base: 'center', sm: 'start' }}
 									style={{
@@ -135,7 +135,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 								<Text
 									color='main.disabled'
 									borderColor='border'
-									fontSize={{ base: 'md', sm: '15px' }}
+									fontSize={{ base: '15px', sm: 'sm' }}
 									textAlign={{ base: 'center', sm: 'start' }}
 								>
 									{product.variantLabel}
@@ -145,7 +145,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 
 						<IconButton
 							aria-label='Remove item from cart'
-							variant='subtle'
+							variant='outline'
 							rounded='md'
 							onClick={handleDelete}
 							display={{ base: 'none', sm: 'inline-flex' }}
@@ -161,7 +161,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 						gap='3'
 						w='full'
 					>
-						<VStack alignItems={{ base: 'center', sm: 'flex-start' }} gap='1' flex='1'>
+						<VStack alignItems={{ base: 'center', sm: 'flex-start' }} gap='0.5' flex='1'>
 							<Text color='main' fontSize={{ base: 'md', sm: 'lg' }} fontWeight='semibold'>
 								{unitPrice} ₴
 								{hasDiscount && (
@@ -190,12 +190,12 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 								)}
 							</Text>
 
-							<Text fontSize='md' color='main.disabled'>
+							<Text fontSize='15px' color='main.disabled' hideBelow='sm'>
 								{totalLabel}: {lineTotal.toFixed(2)} ₴
 							</Text>
 						</VStack>
 
-						<HStack gap='2' alignSelf={{ base: 'center', sm: 'auto' }}>
+						<HStack gap={{ base: '8', sm: '2' }} alignSelf={{ base: 'center', sm: 'auto' }}>
 							<StepperInput
 								defaultValue={quantity.toString()}
 								min={1}

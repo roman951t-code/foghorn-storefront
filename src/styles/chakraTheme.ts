@@ -214,75 +214,75 @@ const config = defineConfig({
 				},
 			}),
 		},
-			slotRecipes: {
-				checkbox: defineSlotRecipe({
-					...chakraDefaultSlotRecipes.checkbox,
-					base: {
-						...chakraDefaultSlotRecipes.checkbox.base,
-						control: {
-							...chakraDefaultSlotRecipes.checkbox.base?.control,
-							'&[data-state="unchecked"]': {
-								borderColor: 'fg',
-							},
-							'&:is([data-state="checked"], [data-state="indeterminate"])': {
-								bg: { base: 'black', _dark: 'white' },
-								color: { base: 'white', _dark: 'black' },
-								borderColor: { base: 'black', _dark: 'white' },
-							},
+		slotRecipes: {
+			checkbox: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.checkbox,
+				base: {
+					...chakraDefaultSlotRecipes.checkbox.base,
+					control: {
+						...chakraDefaultSlotRecipes.checkbox.base?.control,
+						'&[data-state="unchecked"]': {
+							borderColor: 'fg',
+						},
+						'&:is([data-state="checked"], [data-state="indeterminate"])': {
+							bg: { base: 'black', _dark: 'white' },
+							color: { base: 'white', _dark: 'black' },
+							borderColor: { base: 'black', _dark: 'white' },
 						},
 					},
-				}),
-				checkboxCard: defineSlotRecipe({
-					...chakraDefaultSlotRecipes.checkboxCard,
-					base: {
-						...chakraDefaultSlotRecipes.checkboxCard.base,
-						indicator: {
-							...chakraDefaultSlotRecipes.checkboxCard.base?.indicator,
-							'&[data-state="unchecked"]': {
-								borderColor: 'fg',
-							},
-							'&:is([data-state="checked"], [data-state="indeterminate"])': {
-								bg: { base: 'black', _dark: 'white' },
-								color: { base: 'white', _dark: 'black' },
-								borderColor: { base: 'black', _dark: 'white' },
-							},
+				},
+			}),
+			checkboxCard: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.checkboxCard,
+				base: {
+					...chakraDefaultSlotRecipes.checkboxCard.base,
+					indicator: {
+						...chakraDefaultSlotRecipes.checkboxCard.base?.indicator,
+						'&[data-state="unchecked"]': {
+							borderColor: 'fg',
+						},
+						'&:is([data-state="checked"], [data-state="indeterminate"])': {
+							bg: { base: 'black', _dark: 'white' },
+							color: { base: 'white', _dark: 'black' },
+							borderColor: { base: 'black', _dark: 'white' },
 						},
 					},
-				}),
-				radioGroup: defineSlotRecipe({
-					...chakraDefaultSlotRecipes.radioGroup,
-					base: {
-						...chakraDefaultSlotRecipes.radioGroup.base,
-						itemControl: {
-							...chakraDefaultSlotRecipes.radioGroup.base?.itemControl,
-							'&[data-state="unchecked"]': {
-								borderColor: 'fg',
-							},
-							'&[data-state="checked"]': {
-								bg: { base: 'black', _dark: 'white' },
-								color: { base: 'white', _dark: 'black' },
-								borderColor: { base: 'black', _dark: 'white' },
-							},
+				},
+			}),
+			radioGroup: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.radioGroup,
+				base: {
+					...chakraDefaultSlotRecipes.radioGroup.base,
+					itemControl: {
+						...chakraDefaultSlotRecipes.radioGroup.base?.itemControl,
+						'&[data-state="unchecked"]': {
+							borderColor: 'fg',
+						},
+						'&[data-state="checked"]': {
+							bg: { base: 'black', _dark: 'white' },
+							color: { base: 'white', _dark: 'black' },
+							borderColor: { base: 'black', _dark: 'white' },
 						},
 					},
-				}),
-				radioCard: defineSlotRecipe({
-					...chakraDefaultSlotRecipes.radioCard,
-					base: {
-						...chakraDefaultSlotRecipes.radioCard.base,
-						itemIndicator: {
-							...chakraDefaultSlotRecipes.radioCard.base?.itemIndicator,
-							'&[data-state="unchecked"]': {
-								borderColor: 'fg',
-							},
-							'&[data-state="checked"]': {
-								bg: { base: 'black', _dark: 'white' },
-								color: { base: 'white', _dark: 'black' },
-								borderColor: { base: 'black', _dark: 'white' },
-							},
+				},
+			}),
+			radioCard: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.radioCard,
+				base: {
+					...chakraDefaultSlotRecipes.radioCard.base,
+					itemIndicator: {
+						...chakraDefaultSlotRecipes.radioCard.base?.itemIndicator,
+						'&[data-state="unchecked"]': {
+							borderColor: 'fg',
+						},
+						'&[data-state="checked"]': {
+							bg: { base: 'black', _dark: 'white' },
+							color: { base: 'white', _dark: 'black' },
+							borderColor: { base: 'black', _dark: 'white' },
 						},
 					},
-				}),
+				},
+			}),
 			combobox: defineSlotRecipe({
 				...chakraDefaultSlotRecipes.combobox,
 				variants: {

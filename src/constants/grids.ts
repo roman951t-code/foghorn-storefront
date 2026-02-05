@@ -38,3 +38,11 @@ export const CABINET_PRODUCTS_GRID_CSS = {
 		gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
 	},
 } as const;
+
+export const CATEGORY_DETAILS_GRID_CSS = {
+	gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+
+	'@media (min-width: 928px)': {
+		gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 260px))',
+	},
+} as const;

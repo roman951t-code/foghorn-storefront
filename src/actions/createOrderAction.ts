@@ -168,6 +168,7 @@ export async function createOrderAction(
 			const effectiveVariantPrice =
 				discountAmount > 0 ? Math.max(0, variantBasePrice - discountAmount) : variantBasePrice;
 
+			const baseUnitPrice = toCurrency(Number(variantBasePrice));
 			const unitPrice = toCurrency(Number(effectiveVariantPrice));
 			const quantity = Math.max(1, item.quantity);
 			const price = toCurrency(unitPrice * quantity);
@@ -175,6 +176,7 @@ export async function createOrderAction(
 				productId: item.productId,
 				variantId: variant.id,
 				quantity,
+				baseUnitPrice,
 				unitPrice,
 				price,
 			};
@@ -183,6 +185,7 @@ export async function createOrderAction(
 		productId: string;
 		variantId: string;
 		quantity: number;
+		baseUnitPrice: number;
 		unitPrice: number;
 		price: number;
 	}[];
@@ -261,6 +264,7 @@ export async function createOrderAction(
 							productId: item.productId,
 							variantId: item.variantId,
 							quantity: item.quantity,
+							baseUnitPrice: new Prisma.Decimal(item.baseUnitPrice.toFixed(2)),
 							unitPrice: new Prisma.Decimal(item.unitPrice.toFixed(2)),
 							price: new Prisma.Decimal(item.price.toFixed(2)),
 						})),

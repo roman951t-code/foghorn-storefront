@@ -1,4 +1,5 @@
 import type { PageHandler } from 'adminjs';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma.mts';
 
 const paidStatuses = ['PAID', 'SHIPPED', 'DELIVERED'] as const;
@@ -21,36 +22,68 @@ const startOfDaysAgo = (start: Date, days: number) => {
 export const dashboardMetrics: PageHandler = async () => {
 	const now = new Date();
 	const todayStart = startOfToday(now);
+	const trendDays = 14;
+	const trendStart = startOfDaysAgo(todayStart, trendDays);
 	const last7DaysStart = startOfDaysAgo(todayStart, 7);
 	const last30DaysStart = startOfDaysAgo(todayStart, 30);
 
-	const [
-		salesTodayAgg,
-		sales7DaysAgg,
-		sales30DaysAgg,
-		newUsers7Days,
-		refunds30DaysAgg,
-		statusCounts,
-		topProductsAgg,
-	] = await prisma.$transaction([
+		const [
+			salesTodayAgg,
+			salesTrendAgg,
+			ordersTrendAgg,
+			sales7DaysAgg,
+			sales30DaysAgg,
+			newUsers7Days,
+			newSubscribers7Days,
+			totalSubscribers,
+			refunds30DaysAgg,
+			statusCounts,
+			topProductsAgg,
+		] = await prisma.$transaction([
 		prisma.order.aggregate({
 			where: { status: { in: [...paidStatuses] }, createdAt: { gte: todayStart } },
 			_sum: { total: true },
 		}),
+		prisma.$queryRaw<{ day: string; total: number }[]>(
+			Prisma.sql`
+				select
+					to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') as day,
+					coalesce(sum(total), 0)::float as total
+				from "Order"
+				where status in (${Prisma.join([...paidStatuses])})
+					and "createdAt" >= ${trendStart}
+				group by 1
+				order by 1 asc
+			`
+		),
+		prisma.$queryRaw<{ day: string; count: number }[]>(
+			Prisma.sql`
+				select
+					to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') as day,
+					count(*)::int as count
+				from "Order"
+				where status in (${Prisma.join([...paidStatuses])})
+					and "createdAt" >= ${trendStart}
+				group by 1
+				order by 1 asc
+			`
+		),
 		prisma.order.aggregate({
 			where: { status: { in: [...paidStatuses] }, createdAt: { gte: last7DaysStart } },
 			_sum: { total: true },
 		}),
-		prisma.order.aggregate({
-			where: { status: { in: [...paidStatuses] }, createdAt: { gte: last30DaysStart } },
-			_sum: { total: true },
-		}),
-		prisma.user.count({ where: { createdAt: { gte: last7DaysStart } } }),
-		prisma.order.aggregate({
-			where: { refundedAt: { not: null, gte: last30DaysStart } },
-			_sum: { refundAmount: true },
-			_count: { _all: true },
-		}),
+			prisma.order.aggregate({
+				where: { status: { in: [...paidStatuses] }, createdAt: { gte: last30DaysStart } },
+				_sum: { total: true },
+			}),
+			prisma.user.count({ where: { createdAt: { gte: last7DaysStart } } }),
+			prisma.newsletterSubscription.count({ where: { createdAt: { gte: last7DaysStart } } }),
+			prisma.newsletterSubscription.count(),
+			prisma.order.aggregate({
+				where: { refundedAt: { not: null, gte: last30DaysStart } },
+				_sum: { refundAmount: true },
+				_count: { _all: true },
+			}),
 		prisma.order.groupBy({
 			by: ['status'],
 			where: { createdAt: { gte: last30DaysStart } },
@@ -81,6 +114,19 @@ export const dashboardMetrics: PageHandler = async () => {
 		statusCounts.map((item) => [item.status, Number((item as any)?._count?._all ?? 0)])
 	);
 
+	const trendTotalsByDay = new Map(salesTrendAgg.map((p) => [p.day, roundCurrency(Number(p.total ?? 0))]));
+	const trendOrdersByDay = new Map(ordersTrendAgg.map((p) => [p.day, Number(p.count ?? 0)]));
+	const trendPoints = Array.from({ length: trendDays }, (_, idx) => {
+		const day = new Date(trendStart);
+		day.setDate(day.getDate() + idx);
+		const key = day.toISOString().slice(0, 10);
+		return {
+			day: key,
+			total: trendTotalsByDay.get(key) ?? 0,
+			orders: trendOrdersByDay.get(key) ?? 0,
+		};
+	});
+
 	return {
 		payload: {
 			sales: {
@@ -88,8 +134,20 @@ export const dashboardMetrics: PageHandler = async () => {
 				last7Days: roundCurrency(Number(sales7DaysAgg._sum?.total ?? 0)),
 				last30Days: roundCurrency(Number(sales30DaysAgg._sum?.total ?? 0)),
 			},
+			salesTrend: {
+				days: trendDays,
+				points: trendPoints,
+			},
+			ordersTrend: {
+				days: trendDays,
+				points: trendPoints,
+			},
 			newUsers: {
 				last7Days: Number(newUsers7Days ?? 0),
+			},
+			newSubscribers: {
+				last7Days: Number(newSubscribers7Days ?? 0),
+				total: Number(totalSubscribers ?? 0),
 			},
 			refunds: {
 				last30Days: {

@@ -14,6 +14,7 @@ export type OrderItem = {
 	sku: string | null;
 	variantLabel: string | null;
 	quantity: number;
+	baseUnitPrice?: number | null;
 	unitPrice: number;
 	price: number;
 	product: OrderProduct;
@@ -22,6 +23,9 @@ export type OrderItem = {
 export type UserOrder = {
 	id: string;
 	total: number;
+	itemsDiscount: number;
+	promoDiscount: number;
+	totalDiscount: number;
 	status: string;
 	createdAt: Date;
 	paymentMethod: string | null;

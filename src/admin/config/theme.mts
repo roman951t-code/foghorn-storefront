@@ -50,8 +50,8 @@ export const chakraTheme: ThemeConfig = {
 			infoLight: '#BEE3F8',
 		},
 		fontSizes: {
-			xs: '14px',
-			sm: '14px',
+			xs: '15px',
+			sm: '15px',
 			default: '16px',
 			md: '16px',
 			lg: '18px',

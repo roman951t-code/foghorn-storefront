@@ -4,7 +4,6 @@ import {
 	type ActionResponse,
 	type ActionJSON,
 	buildActionTestId,
-	getActionElementCss,
 	useAction,
 	useCurrentAdmin,
 } from 'adminjs';
@@ -62,7 +61,7 @@ export default function ActionButton(props: Props) {
 		throw new Error('ActionButton has to have one child');
 	}
 
-	const contentTag = getActionElementCss(resourceId, action.name, 'button');
+	const contentTag = [resourceId, action.name, 'button'].join('-');
 	const baseChild = firstChild as ReactElement<any>;
 	const baseStyle = baseChild.props?.style ?? {};
 
@@ -86,4 +85,3 @@ export default function ActionButton(props: Props) {
 			: baseStyle,
 	});
 }
-

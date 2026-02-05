@@ -49,8 +49,20 @@ type DashboardMetricsPayload = {
 		last7Days: number;
 		last30Days: number;
 	};
+	salesTrend: {
+		days: number;
+		points: { day: string; total: number; orders?: number }[];
+	};
+	ordersTrend: {
+		days: number;
+		points: { day: string; orders: number; total?: number }[];
+	};
 	newUsers: {
 		last7Days: number;
+	};
+	newSubscribers: {
+		last7Days: number;
+		total: number;
 	};
 	refunds: {
 		last30Days: {
@@ -234,6 +246,28 @@ export default function Dashboard() {
 	const topProductsRangeDays =
 		lowStockPayload?.topProducts?.rangeDays ?? lowStockPayload?.config.topProductsRangeDays ?? 30;
 
+	const salesTrendPoints = metrics?.salesTrend?.points ?? [];
+	const salesTrendMax = useMemo(() => {
+		if (!salesTrendPoints.length) return 0;
+		return Math.max(...salesTrendPoints.map((p) => p.total));
+	}, [salesTrendPoints]);
+
+	const ordersTrendPoints = metrics?.ordersTrend?.points ?? [];
+	const ordersTrendMax = useMemo(() => {
+		if (!ordersTrendPoints.length) return 0;
+		return Math.max(...ordersTrendPoints.map((p) => p.orders));
+	}, [ordersTrendPoints]);
+
+	const formatShortDay = (isoDate: string) => {
+		const d = new Date(`${isoDate}T00:00:00.000Z`);
+		if (Number.isNaN(d.getTime())) return isoDate;
+		try {
+			return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(d);
+		} catch {
+			return isoDate.slice(5);
+		}
+	};
+
 	return (
 		<Box variant='grey' p='xxl'>
 			<Box mt='xxl'>
@@ -319,6 +353,14 @@ export default function Dashboard() {
 					{
 						label: translateMessage('dashboard.kpis.newUsers7Days'),
 						value: metrics ? formatCount(metrics.newUsers.last7Days) : '-',
+					},
+					{
+						label: translateMessage('dashboard.kpis.newSubscribers7Days'),
+						value: metrics ? formatCount(metrics.newSubscribers.last7Days) : '-',
+					},
+					{
+						label: translateMessage('dashboard.kpis.totalSubscribers'),
+						value: metrics ? formatCount(metrics.newSubscribers.total) : '-',
 					},
 						{
 							label: translateMessage('dashboard.kpis.refunds30Days'),
@@ -457,6 +499,143 @@ export default function Dashboard() {
 									</Box>
 								);
 							})}
+						</Box>
+					)}
+				</Box>
+			</Box>
+
+			<Box
+				mt='lg'
+				style={{
+					display: 'grid',
+					gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+					gap: 16,
+				}}
+			>
+				<Box variant='white' p='xl' borderRadius='xl' boxShadow='sm' style={{ border: '1px solid #E2E8F0' }}>
+					<Text fontSize='lg' fontWeight='bold' mb='xs'>
+						{translateMessage('dashboard.charts.salesTrend.title')}
+					</Text>
+					<Text color='grey60' mb='lg'>
+						{translateMessage('dashboard.charts.salesTrend.subtitle', {
+							days: formatCount(metrics?.salesTrend?.days ?? 14),
+						})}
+					</Text>
+					{metricsLoading ? (
+						<Text color='grey60'>{translateMessage('dashboard.metrics.loading')}</Text>
+					) : salesTrendPoints.length === 0 ? (
+						<Text color='grey60'>{translateMessage('dashboard.charts.salesTrend.empty')}</Text>
+					) : (
+						<Box style={{ display: 'grid', gap: 10 }}>
+							<Box
+								style={{
+									display: 'grid',
+									gridTemplateColumns: `repeat(${salesTrendPoints.length}, 1fr)`,
+									gap: 6,
+									alignItems: 'end',
+									height: 120,
+								}}
+							>
+								{salesTrendPoints.map((p) => {
+									const height = salesTrendMax > 0 ? Math.round((p.total / salesTrendMax) * 100) : 0;
+									return (
+										<Box
+											key={p.day}
+											title={`${p.day}: ${formatMoney(p.total)}`}
+											style={{
+												height: `${Math.max(3, height)}%`,
+												borderRadius: 8,
+												background: '#FACC15',
+											}}
+										/>
+									);
+								})}
+							</Box>
+							<Box
+								style={{
+									display: 'grid',
+									gridTemplateColumns: `repeat(${salesTrendPoints.length}, 1fr)`,
+									gap: 6,
+								}}
+							>
+								{salesTrendPoints.map((p, idx) => (
+									<Text
+										key={p.day}
+										color='grey60'
+										style={{
+											fontSize: 12,
+											textAlign: 'center',
+											opacity: idx % 2 === 0 ? 1 : 0,
+										}}
+									>
+										{formatShortDay(p.day)}
+									</Text>
+								))}
+							</Box>
+						</Box>
+					)}
+				</Box>
+
+				<Box variant='white' p='xl' borderRadius='xl' boxShadow='sm' style={{ border: '1px solid #E2E8F0' }}>
+					<Text fontSize='lg' fontWeight='bold' mb='xs'>
+						{translateMessage('dashboard.charts.ordersTrend.title')}
+					</Text>
+					<Text color='grey60' mb='lg'>
+						{translateMessage('dashboard.charts.ordersTrend.subtitle', {
+							days: formatCount(metrics?.ordersTrend?.days ?? 14),
+						})}
+					</Text>
+					{metricsLoading ? (
+						<Text color='grey60'>{translateMessage('dashboard.metrics.loading')}</Text>
+					) : ordersTrendPoints.length === 0 ? (
+						<Text color='grey60'>{translateMessage('dashboard.charts.ordersTrend.empty')}</Text>
+					) : (
+						<Box style={{ display: 'grid', gap: 10 }}>
+							<Box
+								style={{
+									display: 'grid',
+									gridTemplateColumns: `repeat(${ordersTrendPoints.length}, 1fr)`,
+									gap: 6,
+									alignItems: 'end',
+									height: 120,
+								}}
+							>
+								{ordersTrendPoints.map((p) => {
+									const height = ordersTrendMax > 0 ? Math.round((p.orders / ordersTrendMax) * 100) : 0;
+									return (
+										<Box
+											key={p.day}
+											title={`${p.day}: ${formatCount(p.orders)}`}
+											style={{
+												height: `${Math.max(3, height)}%`,
+												borderRadius: 8,
+												background: '#0EA5E9',
+											}}
+										/>
+									);
+								})}
+							</Box>
+							<Box
+								style={{
+									display: 'grid',
+									gridTemplateColumns: `repeat(${ordersTrendPoints.length}, 1fr)`,
+									gap: 6,
+								}}
+							>
+								{ordersTrendPoints.map((p, idx) => (
+									<Text
+										key={p.day}
+										color='grey60'
+										style={{
+											fontSize: 12,
+											textAlign: 'center',
+											opacity: idx % 2 === 0 ? 1 : 0,
+										}}
+									>
+										{formatShortDay(p.day)}
+									</Text>
+								))}
+							</Box>
 						</Box>
 					)}
 				</Box>
@@ -686,13 +865,13 @@ export default function Dashboard() {
 											</Box>
 											<Box style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
 												<Box>
-													<Text color='grey60' style={{ fontSize: 12 }}>
+													<Text color='grey60' style={{ fontSize: 13 }}>
 														{translateMessage('dashboard.lowStock.headers.stock')}
 													</Text>
 													<Text fontWeight='bold'>{item.stock}</Text>
 												</Box>
 												<Box>
-													<Text color='grey60' style={{ fontSize: 12 }}>
+													<Text color='grey60' style={{ fontSize: 13 }}>
 														{translateMessage('dashboard.lowStock.headers.inStock')}
 													</Text>
 													<Text fontWeight='bold'>{resolveInStockLabel(item.inStock)}</Text>

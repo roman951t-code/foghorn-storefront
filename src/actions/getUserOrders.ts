@@ -35,12 +35,20 @@ export async function getUserOrders(limit: number, offset = 0): Promise<{
 				shipmentMethod: true,
 				carrier: true,
 				trackingNumber: true,
+				discounts: {
+					select: {
+						amount: true,
+						code: true,
+						label: true,
+					},
+				},
 				items: {
 					select: {
 						id: true,
 						productId: true,
 						variantId: true,
 						quantity: true,
+						baseUnitPrice: true,
 						unitPrice: true,
 						price: true,
 						product: {

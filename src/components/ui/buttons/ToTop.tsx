@@ -38,13 +38,13 @@ export default function ToTop() {
 			right='24px'
 			aria-label='Back to Top'
 			size='md'
-			rounded='md'
+			rounded='full'
 			border='2px solid'
-			bg='bg.primary'
+			bg='bg.tertiary'
 			transition='all 0.3s ease-in-out'
 			color='main'
 			variant='outline'
-			borderColor='border'
+			borderColor='border.button'
 		>
 			<FiArrowUp />
 		</IconButton>

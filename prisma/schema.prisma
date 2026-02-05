@@ -400,6 +400,7 @@ model OrderItem {
   variantId String?
   quantity  Int
   price     Decimal         @db.Decimal(10, 2)
+  baseUnitPrice Decimal?    @db.Decimal(10, 2)
   unitPrice Decimal         @db.Decimal(10, 2)
   order     Order           @relation(fields: [orderId], references: [id])
   product   Product         @relation(fields: [productId], references: [id])

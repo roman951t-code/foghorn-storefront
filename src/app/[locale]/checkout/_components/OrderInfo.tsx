@@ -61,6 +61,10 @@ export default function OrderInfo({
 	const couponText = `${
 		couponDiscount > 0 ? `-${couponDiscount.toFixed(2)}` : couponDiscount.toFixed(2)
 	} ₴`;
+	const totalDiscount = discountTotal + couponDiscount;
+	const totalDiscountText = `${
+		totalDiscount > 0 ? `-${totalDiscount.toFixed(2)}` : totalDiscount.toFixed(2)
+	} ₴`;
 	const finalTotal = Math.max(0, discountedTotal - couponDiscount);
 	const totalAmountText = `${finalTotal.toFixed(2)} ₴`;
 	const hasContactData = Boolean(
@@ -92,8 +96,11 @@ export default function OrderInfo({
 			quantity: Math.max(1, item.quantity ?? 1),
 		}));
 
+		const rawCouponCode = useCheckoutStore.getState().appliedCoupon?.code ?? '';
+		const couponCode = rawCouponCode.trim() ? rawCouponCode.trim() : undefined;
+
 		if (paymentMethod === 'card') {
-			startStripeCheckout(orderItems);
+			startStripeCheckout(orderItems, couponCode);
 			return;
 		}
 
@@ -103,7 +110,7 @@ export default function OrderInfo({
 					items: orderItems,
 					paymentMethod,
 					shipmentMethod,
-					couponCode: appliedCoupon?.code ?? undefined,
+					couponCode,
 				});
 
 				if (result?.success) {
@@ -120,7 +127,8 @@ export default function OrderInfo({
 	};
 
 	const startStripeCheckout = async (
-		orderItems: { productId: string; variantId: string | null; quantity: number }[]
+		orderItems: { productId: string; variantId: string | null; quantity: number }[],
+		couponCode?: string
 	) => {
 		try {
 			setIsStripeRedirecting(true);
@@ -135,7 +143,7 @@ export default function OrderInfo({
 					items: orderItems,
 					successUrl: `${origin}/cabinet/orders?payment=success&session_id={CHECKOUT_SESSION_ID}`,
 					cancelUrl: `${origin}/checkout?cancelled=1`,
-					couponCode: appliedCoupon?.code ?? undefined,
+					couponCode,
 				}),
 			});
 
@@ -185,7 +193,7 @@ export default function OrderInfo({
 				))}
 			</Box>
 			<Box
-				maxH='600px'
+				maxH='608px'
 				overflowY='auto'
 				hideFrom='lg'
 				borderWidth='0.5px'
@@ -227,9 +235,19 @@ export default function OrderInfo({
 					<Text>
 						<Highlight
 							query={couponText}
-							styles={{ fontWeight: 'semibold', color: 'main.secondary' }}
+							styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
 						>
 							{`${checkoutT('couponLine')}: ${couponText}`}
+						</Highlight>
+					</Text>
+				) : null}
+				{couponDiscount > 0 ? (
+					<Text>
+						<Highlight
+							query={totalDiscountText}
+							styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+						>
+							{`${t('totalDiscount')}: ${totalDiscountText}`}
 						</Highlight>
 					</Text>
 				) : null}
@@ -305,9 +323,19 @@ export default function OrderInfo({
 						<Text>
 							<Highlight
 								query={couponText}
-								styles={{ fontWeight: 'semibold', color: 'main.secondary' }}
+								styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
 							>
 								{`${checkoutT('couponLine')}: ${couponText}`}
+							</Highlight>
+						</Text>
+					) : null}
+					{couponDiscount > 0 ? (
+						<Text>
+							<Highlight
+								query={totalDiscountText}
+								styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+							>
+								{`${t('totalDiscount')}: ${totalDiscountText}`}
 							</Highlight>
 						</Text>
 					) : null}

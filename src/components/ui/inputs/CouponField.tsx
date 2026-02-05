@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Flex, IconButton, Input, Stack, Tag, Text } from '@chakra-ui/react';
+import { Card, Flex, Highlight, IconButton, Input, Stack, Tag, Text } from '@chakra-ui/react';
 import { FiX } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -27,11 +27,15 @@ const errorKey = (code: string) => {
 		case 'coupon_maxed':
 			return 'couponErrorMaxed';
 		case 'promotion_inactive':
+			return 'couponErrorPromotionInactive';
 		case 'promotion_not_started':
+			return 'couponErrorPromotionNotStarted';
 		case 'promotion_expired':
-			return 'couponErrorInvalid';
+			return 'couponErrorPromotionExpired';
 		case 'min_order_total':
 			return 'couponErrorMinTotal';
+		case 'discount_zero':
+			return 'couponErrorNoDiscount';
 		default:
 			return 'couponErrorInvalid';
 	}
@@ -53,6 +57,10 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 		const code = draft.trim();
 		if (!code) {
 			showToaster('error', t('couponErrorEmpty'));
+			return;
+		}
+		if (subtotal <= 0) {
+			showToaster('error', t('couponErrorEmptyCart'));
 			return;
 		}
 		setIsApplying(true);
@@ -125,7 +133,7 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 
 				<Stack
 					direction={isResponsive ? { base: 'column', sm: 'row' } : isColumn ? 'column' : 'row'}
-					gap='2'
+					gapX='4'
 					alignItems='stretch'
 					w='full'
 				>
@@ -145,11 +153,16 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 					</SecondaryButton>
 				</Stack>
 
-				{appliedCoupon ? (
-					<Text fontSize='sm' color='fg.muted'>
-						{t('couponSavings')}: -{appliedCoupon.amount.toFixed(2)} ₴
-					</Text>
-				) : (
+					{appliedCoupon ? (
+						<Text>
+							<Highlight
+								query={appliedCoupon.amount.toFixed(2)}
+								styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+							>
+								{`${t('couponSavings')}: -${appliedCoupon.amount.toFixed(2)} ₴`}
+							</Highlight>
+						</Text>
+					) : (
 					<Text fontSize='sm' color='fg.muted'>
 						{t('couponHint')}
 					</Text>

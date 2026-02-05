@@ -18,7 +18,7 @@ interface Props {
 
 export default function CatalogPanel({ i18nData, promoCards }: Props) {
 	const { categories } = useCatalog();
-	const TARGET_CATEGORIES = 8;
+	const TARGET_CATEGORIES = 9;
 	const panelCategories = categories.slice(0, TARGET_CATEGORIES);
 	const uiCategories = Array.from(
 		{ length: TARGET_CATEGORIES },
@@ -61,7 +61,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 			<VStack
 				minW='280px'
 				w='280px'
-				h='472px'
+				h='516px'
 				align='stretch'
 				gap={1}
 				rounded='lg'

@@ -25,6 +25,7 @@ export async function deleteOrderItemAction(orderItemId: string): Promise<Result
 		include: {
 			order: {
 				include: {
+					discounts: true,
 					items: {
 						include: {
 							product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
@@ -58,6 +59,7 @@ export async function deleteOrderItemAction(orderItemId: string): Promise<Result
 		const order = await tx.order.findUnique({
 			where: { id: orderId },
 			include: {
+				discounts: true,
 				items: {
 					include: {
 						product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
@@ -99,6 +101,7 @@ export async function deleteOrderItemAction(orderItemId: string): Promise<Result
 			where: { id: orderId },
 			data: { total: new Prisma.Decimal(newTotal.toFixed(2)) },
 			include: {
+				discounts: true,
 				items: {
 					include: {
 						product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },

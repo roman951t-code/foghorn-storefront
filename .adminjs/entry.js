@@ -73,6 +73,8 @@ import LoggedIn from '../src/admin/components/LoggedIn'
 AdminJS.UserComponents.LoggedIn = LoggedIn
 import TopBar from '../src/admin/components/TopBar'
 AdminJS.UserComponents.TopBar = TopBar
+import ActionButton from '../src/admin/components/ActionButton'
+AdminJS.UserComponents.ActionButton = ActionButton
 import FilterDrawer from '../src/admin/components/FilterDrawer'
 AdminJS.UserComponents.FilterDrawer = FilterDrawer
 import DefaultBulkDeleteAction from '../src/admin/components/BulkDelete'

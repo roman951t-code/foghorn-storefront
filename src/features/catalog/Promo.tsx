@@ -95,7 +95,7 @@ function PromoCardSlide({
 			borderStyle='solid'
 			borderColor={{ base: 'border', _dark: 'border' }}
 			borderRadius='lg'
-			height='472px'
+			height='516px'
 			width='100%'
 			overflow='hidden'
 			boxShadow='none'

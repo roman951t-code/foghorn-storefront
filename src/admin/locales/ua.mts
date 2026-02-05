@@ -11,6 +11,12 @@ export const uaAdminLocale = {
 				name: "Ім'я",
 			},
 		},
+		NewsletterSubscription: {
+			properties: {
+				email: 'Email',
+				createdAt: 'Створено',
+			},
+		},
 	},
 	labels: {
 		Product: 'Товар',
@@ -35,6 +41,7 @@ export const uaAdminLocale = {
 		Customers: 'Клієнти',
 		Review: 'Відгук',
 		NewsletterSubscription: 'Підписка на розсилку',
+		StorefrontForm: 'Форма на сайті',
 		confirm: 'Підтвердити',
 		type: {
 			PAGE: 'Сторінка',
@@ -721,10 +728,22 @@ export const uaAdminLocale = {
 				sales7Days: 'Продажі за 7 днів',
 				sales30Days: 'Продажі за 30 днів',
 				newUsers7Days: 'Нові користувачі (7д)',
+				newSubscribers7Days: 'Нові підписники (7д)',
+				totalSubscribers: 'Всього підписників',
 				refunds30Days: 'Повернення (30д)',
 				refundsCount: '{{count}} повернень',
 			},
 			charts: {
+				salesTrend: {
+					title: 'Динаміка продажів',
+					subtitle: 'Дохід за днями (останні {{days}} днів).',
+					empty: 'Немає оплачених замовлень за цей період.',
+				},
+				ordersTrend: {
+					title: 'Динаміка замовлень',
+					subtitle: 'Оплачені замовлення за днями (останні {{days}} днів).',
+					empty: 'Немає оплачених замовлень за цей період.',
+				},
 				orderStatus: {
 					title: 'Розподіл статусів замовлень (30д)',
 					subtitle: 'Кількість за статусами для нещодавніх замовлень.',

@@ -6,6 +6,12 @@ export const enAdminLocale = {
 				publishEndAt: 'Publish end at',
 			},
 		},
+		NewsletterSubscription: {
+			properties: {
+				email: 'Email',
+				createdAt: 'Created at',
+			},
+		},
 	},
 	labels: {
 		Product: 'Product',
@@ -30,6 +36,7 @@ export const enAdminLocale = {
 		Customers: 'Customers',
 		Review: 'Review',
 		NewsletterSubscription: 'Newsletter Subscription',
+		StorefrontForm: 'Storefront Form',
 		confirm: 'Confirm',
 		type: {
 			PAGE: 'Page',
@@ -712,10 +719,22 @@ export const enAdminLocale = {
 				sales7Days: 'Sales last 7 days',
 				sales30Days: 'Sales last 30 days',
 				newUsers7Days: 'New users (7d)',
+				newSubscribers7Days: 'New subscribers (7d)',
+				totalSubscribers: 'Total subscribers',
 				refunds30Days: 'Refunds (30d)',
 				refundsCount: '{{count}} refunds',
 			},
 			charts: {
+				salesTrend: {
+					title: 'Sales trend',
+					subtitle: 'Revenue by day (last {{days}} days).',
+					empty: 'No paid orders in this period.',
+				},
+				ordersTrend: {
+					title: 'Orders trend',
+					subtitle: 'Paid orders by day (last {{days}} days).',
+					empty: 'No paid orders in this period.',
+				},
 				orderStatus: {
 					title: 'Order status mix (30d)',
 					subtitle: 'Counts by status for recent orders.',

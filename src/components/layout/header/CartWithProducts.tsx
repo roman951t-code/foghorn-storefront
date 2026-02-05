@@ -1,15 +1,5 @@
 import { FiTrash2, FiShoppingCart } from 'react-icons/fi';
-import {
-	Card,
-	Flex,
-	Icon,
-	IconButton,
-	Separator,
-	Stack,
-	Stat,
-	Text,
-	VStack,
-} from '@chakra-ui/react';
+import { Badge, Card, Flex, Icon, IconButton, Stack, Stat, Text, VStack } from '@chakra-ui/react';
 import CartOrderCard from '@/features/cart/CartOrderCard';
 import { LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
 import { I18nData } from '@/types/i18n';
@@ -35,9 +25,9 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 	const finalTotal = Math.max(0, discountedTotal - couponDiscount);
 
 	return (
-		<Stack gap='4' pt='2'>
+		<Stack gap='4'>
 			<Card.Root p='4' borderWidth='1px' borderColor='border' bg='bg.tertiary' rounded='lg'>
-				<Flex justifyContent='space-between' alignItems='flex-start' gap='4'>
+				<Flex justifyContent='space-between' alignItems='stretch' gap='4'>
 					<VStack alignItems='flex-start' gap='3' flex='1'>
 						<Stat.Root>
 							<Stat.Label fontSize='sm' color='main.disabled'>
@@ -48,48 +38,68 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 							</Stat.ValueText>
 						</Stat.Root>
 						{couponDiscount > 0 ? (
-							<Text fontSize='sm' color='main.secondary' fontWeight='semibold'>
-								{`-${couponDiscount.toFixed(2)} ₴ ${appliedCoupon?.code ?? ''}`}
-							</Text>
+							<Badge
+								variant='solid'
+								color='black'
+								bg='main.secondary'
+								fontWeight='semibold'
+								mt='1'
+							>{`-${couponDiscount.toFixed(2)} ₴ ${appliedCoupon?.code ?? ''}`}</Badge>
 						) : null}
 
-						<Flex align='center' gap='3' mt='2'>
-							<Text fontSize='sm' color='main.disabled'>
+						<Flex align='center' gapX='4' mt='1'>
+							<Text fontSize='15px' color='main'>
 								{i18nData.numOfProducts}
 							</Text>
 							<CountPill value={totalCount} px='2' labelProps={{ fontWeight: 'bold' }} />
 						</Flex>
+
+						<LocaleNavButton
+							display={{ base: 'inline-flex', sm: 'none' }}
+							mt='2'
+							href='/checkout'
+							onClick={() => setIsOpen(false)}
+							size='md'
+						>
+							<FiShoppingCart />
+							{i18nData.order}
+						</LocaleNavButton>
 					</VStack>
 
-					<IconButton
-						onClick={handleClearCart}
-						aria-label='Clear cart'
-						variant='subtle'
-						rounded='md'
-					>
-						<Icon size='lg'>
-							<FiTrash2 />
-						</Icon>
-					</IconButton>
+					<Flex direction='column' alignItems='flex-end' justifyContent='space-between'>
+						<IconButton
+							onClick={handleClearCart}
+							aria-label='Clear cart'
+							variant='outline'
+							rounded='md'
+						>
+							<Icon size='md'>
+								<FiTrash2 />
+							</Icon>
+						</IconButton>
+
+						<LocaleNavButton
+							display={{ base: 'none', sm: 'inline-flex' }}
+							href='/checkout'
+							onClick={() => setIsOpen(false)}
+							size='md'
+						>
+							<FiShoppingCart />
+							{i18nData.order}
+						</LocaleNavButton>
+					</Flex>
 				</Flex>
 
-				<Stack mt='4' gap='3'>
+				<Stack mt='6' gap='4'>
 					<CouponField subtotal={discountedTotal} layout='responsive' />
 				</Stack>
-
-				<Separator my='4' color='border' />
-
-				<LocaleNavButton href='/checkout' onClick={() => setIsOpen(false)} size='md'>
-					<FiShoppingCart />
-					{i18nData.order}
-				</LocaleNavButton>
 			</Card.Root>
 
 			<Stack
 				direction='column'
 				overflowY='auto'
 				gap={3}
-				maxHeight={{ base: '52vh', md: '60vh' }}
+				maxHeight={{ base: '42vh', sm: '584px' }}
 				pr='1'
 			>
 				{cartItems.map((item) => (
