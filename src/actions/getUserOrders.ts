@@ -33,6 +33,7 @@ export async function getUserOrders(limit: number, offset = 0): Promise<{
 				createdAt: true,
 				paymentMethod: true,
 				shipmentMethod: true,
+				shippingAddress: true,
 				carrier: true,
 				trackingNumber: true,
 				discounts: {

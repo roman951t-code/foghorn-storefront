@@ -73,7 +73,8 @@ body,
 }
 
 /* Storefront-like link styling across AdminJS (including table links). */
-[data-css='app-content'] a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+[data-css='app-content']
+	a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
 		.adminjs_DropDownItem
 	) {
 	color: #0f172a;
@@ -85,14 +86,16 @@ body,
 	transition: color 0.15s ease-in-out, text-decoration-color 0.15s ease-in-out;
 }
 
-[data-css='app-content'] a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+[data-css='app-content']
+	a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
 		.adminjs_DropDownItem
 	):hover {
 	color: #3e3c78;
 	text-decoration-color: color-mix(in srgb, #3e3c78 55%, transparent);
 }
 
-[data-css='app-content'] a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+[data-css='app-content']
+	a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
 		.adminjs_DropDownItem
 	):focus-visible {
 	outline: 2px solid color-mix(in srgb, #3e3c78 35%, transparent);
@@ -127,10 +130,9 @@ body,
 		border-radius: 6px;
 	}
 }
-/*
 table.adminjs_Table {
-	margin-top: 30px;
-} */
+	margin-top: 38px;
+}
 
 [data-css$='table-caption'] {
 	display: block;

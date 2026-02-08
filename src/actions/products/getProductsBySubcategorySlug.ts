@@ -139,6 +139,11 @@ export async function getProductsBySubcategorySlug(
 			name: true,
 			fullSlug: true,
 			imageUrl: true,
+			productImages: {
+				select: { url: true, sortOrder: true, createdAt: true },
+				orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+				take: 6,
+			},
 			basePrice: true,
 			categoryName: true,
 			subcategoryName: true,
@@ -182,10 +187,11 @@ export async function getProductsBySubcategorySlug(
 	}
 
 	const products: SubcategoryProduct[] = finalProducts.map((p) => {
-		const { variants, reviews, tags, ...rest } = p as typeof p & {
+		const { variants, reviews, tags, productImages, ...rest } = p as typeof p & {
 			variants?: unknown;
 			reviews?: unknown;
 			tags?: unknown;
+			productImages?: unknown;
 		};
 		const ratings = p.reviews?.map((r) => r.rating) ?? [];
 		const averageRating = ratings.length ? ratings.reduce((s, v) => s + v, 0) / ratings.length : 0;
@@ -204,7 +210,9 @@ export async function getProductsBySubcategorySlug(
 			name: p.name ?? '',
 			fullSlug: p.fullSlug ?? '',
 			imageUrl: p.imageUrl ?? null,
-			images: buildProductImages(p.imageUrl ?? undefined, 4),
+			images: p.productImages.length
+				? p.productImages.map((image) => image.url)
+				: buildProductImages(p.imageUrl ?? undefined, 4),
 			categoryName: p.categoryName ?? '',
 			subcategoryName: p.subcategoryName ?? '',
 			inStock: !!p.inStock,

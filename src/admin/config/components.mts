@@ -80,6 +80,10 @@ const productCsvImportExportActionComponent = componentLoader.add(
 	'ProductCsvImportExportAction',
 	path.join(adminDir, 'components', 'ProductCsvImportExportAction')
 );
+const productGalleryEditComponent = componentLoader.add(
+	'ProductGalleryEdit',
+	path.join(adminDir, 'components', 'ProductGalleryEdit')
+);
 const productTagsEditComponent = componentLoader.add(
 	'ProductTagsEdit',
 	path.join(adminDir, 'components', 'ProductTagsEdit')
@@ -113,6 +117,10 @@ const productBulkAdjustStockActionComponent = componentLoader.add(
 const productBulkToggleInStockActionComponent = componentLoader.add(
 	'ProductBulkToggleInStockAction',
 	path.join(adminDir, 'components', 'ProductBulkToggleInStockAction')
+);
+const productBulkSeoTemplateActionComponent = componentLoader.add(
+	'ProductBulkSeoTemplateAction',
+	path.join(adminDir, 'components', 'ProductBulkSeoTemplateAction')
 );
 const reviewShowComponent = componentLoader.add('ReviewShow', path.join(adminDir, 'components', 'ReviewShow'));
 const dashboardComponent = componentLoader.add(
@@ -151,6 +159,7 @@ export {
 	productShowComponent,
 	productVariantMatrixComponent,
 	productCsvImportExportActionComponent,
+	productGalleryEditComponent,
 	productTagsEditComponent,
 	productNewComponent,
 	productEditComponent,
@@ -161,6 +170,7 @@ export {
 	productBulkAdjustPriceActionComponent,
 	productBulkAdjustStockActionComponent,
 	productBulkToggleInStockActionComponent,
+	productBulkSeoTemplateActionComponent,
 	reviewShowComponent,
 	dashboardComponent,
 };

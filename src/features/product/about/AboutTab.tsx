@@ -53,6 +53,7 @@ export default function AboutTab({
 	const checkoutT = useTranslations('checkout');
 
 	const shareI18nData = {
+		productTitle: product.name,
 		pressToCopy: prodT('pressToCopy'),
 		shareProductText: prodT('shareProductText'),
 		shareSocial: prodT('shareSocial'),
@@ -193,11 +194,11 @@ export default function AboutTab({
 						)}
 
 						<Box as='span' fontSize='3xl' fontWeight='semibold'>
-							{unitEffectivePrice} ₴
+							{`$${unitEffectivePrice}`}
 							{discount > 0 && (
 								<Badge colorPalette='gray'>
 									<Box as='span' color='main' fontSize='sm' textDecoration='line-through'>
-										{parseInt(unitBasePrice.toFixed(2))}₴
+										{`$${parseInt(unitBasePrice.toFixed(2))}`}
 										<Badge
 											variant='solid'
 											fontWeight='semibold'
@@ -205,7 +206,7 @@ export default function AboutTab({
 											bg='main.secondary'
 											marginLeft='12px'
 										>
-											- {parseInt(discount.toFixed(2))}₴
+											-{`$${parseInt(discount.toFixed(2))}`}
 										</Badge>
 									</Box>
 								</Badge>

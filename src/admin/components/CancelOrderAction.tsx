@@ -35,7 +35,7 @@ export default function CancelOrderAction({ action, record, resource }: ActionPr
 			const response = await api.recordAction({
 				resourceId: resource.id,
 				recordId: localRecord.id,
-				actionName: action.name,
+				actionName: 'cancelOrder',
 				method: 'post',
 				data: formData,
 			});

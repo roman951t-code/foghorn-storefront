@@ -1,4 +1,4 @@
-import { Card, Badge, VStack, Flex } from '@chakra-ui/react';
+import { Card, Badge, VStack, Flex, Box } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavButton, LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { useTranslations } from 'next-intl';
@@ -51,15 +51,18 @@ export default function CategoryCard({
 							px='1.5'
 							py='1'
 							boxShadow='none'
-							borderColor='border'
+							border='none'
 						>
 							<LocaleNavLink
 								href={product.href}
+								fontSize='md'
+								fontWeight='normal'
+								textWrap='wrap'
 								wordBreak='break-word'
-								transition='all .15s ease-in-out'
 								textDecorationColor='main'
 								color='main'
-								_hover={{ color: 'link', cursor: 'pointer' }}
+								variant='underline'
+								_hover={{ color: 'link' }}
 								_focus={{ outline: 'none' }}
 							>
 								{product.name}
@@ -79,19 +82,25 @@ export default function CategoryCard({
 				</LocaleNavButton>
 			</Flex>
 
-			<Image
-				height={186}
-				width={316}
-				src={imageUrl}
-				alt={title}
-				loading='lazy'
-				style={{
-					maxHeight: '200px',
-					objectFit: 'cover',
-					marginTop: '28px',
-					border: '0.5px solid var(--chakra-colors-border)',
-				}}
-			/>
+			<Box
+				position='relative'
+				w='full'
+				aspectRatio={316 / 186}
+				mt='28px'
+				overflow='hidden'
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor='border'
+			>
+				<Image
+					src={imageUrl}
+					alt={title}
+					fill
+					sizes='(min-width: 30em) 316px, 100vw'
+					loading='lazy'
+					style={{ objectFit: 'cover' }}
+				/>
+			</Box>
 		</Card.Root>
 	);
 }

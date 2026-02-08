@@ -13,7 +13,7 @@ import {
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import DateWithLocale from '@/components/ui/DateWithLocale';
-import { buildProductImages, toPreviewImage } from '@/utils/productImages';
+import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
 import type { OrderDetailTag, UserOrder } from '@/types/order';
 
 type Props = {
@@ -27,9 +27,10 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 	const productsT = useTranslations('products');
 	const commonT = useTranslations('common');
 
-	const totalDiscountText = `${
-		order.totalDiscount > 0 ? `-${order.totalDiscount.toFixed(2)}` : order.totalDiscount.toFixed(2)
-	} ₴`;
+	const totalDiscountText =
+		order.totalDiscount > 0
+			? `-$${order.totalDiscount.toFixed(2)}`
+			: `$${order.totalDiscount.toFixed(2)}`;
 
 	return (
 		<Accordion.ItemTrigger w='full' p='0' cursor='pointer' flexDirection='column'>
@@ -43,7 +44,7 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 				<VStack gap='3' alignItems='flex-start' minW='160px'>
 					<Stat.Root>
 						<Stat.Label fontSize='sm'>{productsT('totalAmount')}</Stat.Label>
-						<Stat.ValueText fontSize='3xl'>{order.total.toFixed(2)} ₴</Stat.ValueText>
+						<Stat.ValueText fontSize='3xl'>{`$${order.total.toFixed(2)}`}</Stat.ValueText>
 					</Stat.Root>
 					<Text textStyle='sm' fontWeight='normal'>
 						<Highlight query={`${totalItems}`} styles={{ fontWeight: 'bold' }}>{`${productsT(
@@ -64,7 +65,7 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 				<HStack gap='2' display={{ base: 'none', md: 'flex' }} overflowX='auto'>
 					{thumbItems.map((item) => {
 						const previewImage = toPreviewImage(
-							buildProductImages(item.product.imageUrl, 1)[0] || '/assets/images/temp/1.webp'
+							buildProductImages(item.product.imageUrl, 1)[0] || PRODUCT_PLACEHOLDER_IMAGE
 						);
 
 						return (

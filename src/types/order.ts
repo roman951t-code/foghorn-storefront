@@ -30,6 +30,7 @@ export type UserOrder = {
 	createdAt: Date;
 	paymentMethod: string | null;
 	shipmentMethod: string | null;
+	shippingAddress: string | null;
 	carrier: string | null;
 	trackingNumber: string | null;
 	items: OrderItem[];

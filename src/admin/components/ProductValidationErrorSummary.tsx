@@ -20,7 +20,6 @@ const hintKeyByProperty: Record<string, string> = {
 	currency: 'product-hint-currency',
 	stock: 'product-hint-stock',
 	inStock: 'product-hint-inStock',
-	imageUrl: 'product-hint-imageUrl',
 	brand: 'product-hint-brand',
 	category: 'product-hint-category',
 	tags: 'product-hint-tags',

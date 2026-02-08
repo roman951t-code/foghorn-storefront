@@ -19,6 +19,7 @@ import {
 	bulkSetCategory,
 	bulkToggleInStock,
 } from '../actions/product-bulk-actions.mts';
+import { bulkSeoTemplate as bulkSeoTemplateHandler } from '../actions/product-seo-template-actions.mts';
 import {
 	bulkMarkDelivered,
 	bulkMarkShipped,
@@ -49,7 +50,11 @@ import { userSegments } from '../actions/user-segmentation-actions.mts';
 import { userRelatedData } from '../actions/user-related-actions.mts';
 import { reviewProductSummary } from '../actions/review-actions.mts';
 import { duplicateBanner } from '../actions/banner-actions.mts';
-import { validateProductNewEdit } from '../validation/product-admin-validation.mts';
+import {
+	PRODUCT_GALLERY_PRIMARY_URL_CONTEXT_KEY,
+	PRODUCT_GALLERY_URLS_CONTEXT_KEY,
+	validateProductNewEdit,
+} from '../validation/product-admin-validation.mts';
 import {
 	cancelOrderActionComponent,
 	orderAuditTimelineActionComponent,
@@ -70,6 +75,7 @@ import {
 	productShowComponent,
 	productVariantMatrixComponent,
 	productCsvImportExportActionComponent,
+	productGalleryEditComponent,
 	productTagsEditComponent,
 	productNewComponent,
 	productEditComponent,
@@ -80,6 +86,7 @@ import {
 	productBulkAdjustPriceActionComponent,
 	productBulkAdjustStockActionComponent,
 	productBulkToggleInStockActionComponent,
+	productBulkSeoTemplateActionComponent,
 	userShowComponent,
 	userSegmentsComponent,
 	orderStatusActionComponent,
@@ -141,6 +148,151 @@ const mapOrderDiscountPayload = async (request: any) => {
 	return { ...request, payload: next };
 };
 
+const mapProductImagePayload = async (request: any) => {
+	const payload = request?.payload ?? {};
+	if (!payload || typeof payload !== 'object') return request;
+	const next = { ...payload } as Record<string, any>;
+	const mapIdToReference = (idKey: string, relationKey: string) => {
+		const idValue = next[idKey];
+		if (typeof idValue === 'string' && idValue.trim()) {
+			if (!next[relationKey]) {
+				next[relationKey] = idValue;
+			}
+			delete next[idKey];
+		}
+	};
+	mapIdToReference('productId', 'product');
+	if (typeof next.sortOrder === 'string') {
+		const parsed = Number(next.sortOrder);
+		next.sortOrder = Number.isFinite(parsed) ? parsed : 0;
+	}
+	return { ...request, payload: next };
+};
+
+const withProductGallerySyncErrorNotice = (response: any) => ({
+	...response,
+	notice: { message: 'product-gallery-sync-failed', type: 'error' },
+});
+
+const normalizeGalleryUrl = (value: unknown): string | null => {
+	if (typeof value !== 'string') return null;
+	const normalized = value.trim();
+	return normalized || null;
+};
+
+const normalizeGalleryUrls = (value: unknown): string[] | null => {
+	if (!Array.isArray(value)) return null;
+	const normalized = value
+		.map((item) => normalizeGalleryUrl(item))
+		.filter((item): item is string => Boolean(item));
+	return Array.from(new Set(normalized));
+};
+
+const resolveProductIdForGallerySync = (response: any, context: any): string | null => {
+	const fromResponse = response?.record?.params?.id;
+	if (typeof fromResponse === 'string' && fromResponse.trim()) return fromResponse;
+	const fromContext = context?.record?.param?.('id');
+	if (typeof fromContext === 'string' && fromContext.trim()) return fromContext;
+	return null;
+};
+
+const hydrateProductGalleryField = async (response: any, request: any, context: any) => {
+	const method = String(request?.method ?? 'get').toLowerCase();
+	if (method !== 'get') return response;
+
+	const recordId = context?.record?.param?.('id');
+	if (typeof recordId !== 'string' || !recordId.trim()) return response;
+
+	try {
+		const images = await prisma.productImage.findMany({
+			where: { productId: recordId },
+			select: { url: true, sortOrder: true, createdAt: true },
+			orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+		});
+		const galleryUrlList = images.map((image) => image.url).filter(Boolean);
+		const galleryUrls = galleryUrlList.join('\n');
+		const persistedPrimaryImageUrl = normalizeGalleryUrl(response?.record?.params?.imageUrl);
+		const primaryGalleryUrl =
+			persistedPrimaryImageUrl && galleryUrlList.includes(persistedPrimaryImageUrl)
+				? persistedPrimaryImageUrl
+				: galleryUrlList[0] ?? null;
+		if (response?.record && typeof response.record === 'object') {
+			response.record.params = {
+				...(response.record.params ?? {}),
+				galleryUrls,
+				primaryGalleryUrl: primaryGalleryUrl ?? '',
+			};
+		}
+	} catch {
+		// never block form rendering on gallery read errors
+	}
+
+	return response;
+};
+
+const syncProductGalleryAfterHook = async (response: any, request: any, context: any) => {
+	const method = String(request?.method ?? 'get').toLowerCase();
+	if (method !== 'post') return response;
+	if (response?.notice?.type === 'error') return response;
+
+	const galleryUrlsFromContext = normalizeGalleryUrls(context?.[PRODUCT_GALLERY_URLS_CONTEXT_KEY]);
+	const hasGalleryUrlsUpdate = galleryUrlsFromContext !== null;
+	const rawPrimaryGalleryUrl = context?.[PRODUCT_GALLERY_PRIMARY_URL_CONTEXT_KEY];
+	const hasPrimaryGalleryUrlUpdate = rawPrimaryGalleryUrl !== undefined;
+	if (!hasGalleryUrlsUpdate && !hasPrimaryGalleryUrlUpdate) return response;
+
+	const productId = resolveProductIdForGallerySync(response, context);
+	if (!productId) return response;
+
+	try {
+		const baseGalleryUrls = hasGalleryUrlsUpdate
+			? (galleryUrlsFromContext ?? [])
+			: (
+					await prisma.productImage.findMany({
+						where: { productId },
+						select: { url: true, sortOrder: true, createdAt: true },
+						orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+					})
+				)
+					.map((image) => image.url)
+					.filter((url) => Boolean(url));
+		const nextPrimaryCandidate = normalizeGalleryUrl(rawPrimaryGalleryUrl);
+		const primaryImageUrl =
+			nextPrimaryCandidate && baseGalleryUrls.includes(nextPrimaryCandidate)
+				? nextPrimaryCandidate
+				: baseGalleryUrls[0] ?? null;
+		const orderedGalleryUrls = primaryImageUrl
+			? [primaryImageUrl, ...baseGalleryUrls.filter((url) => url !== primaryImageUrl)]
+			: baseGalleryUrls;
+
+		await prisma.$transaction(async (tx) => {
+			await tx.productImage.deleteMany({ where: { productId } });
+			if (orderedGalleryUrls.length > 0) {
+				await tx.productImage.createMany({
+					data: orderedGalleryUrls.map((url, index) => ({
+						productId,
+						url,
+						sortOrder: index,
+					})),
+				});
+			}
+			await tx.product.update({
+				where: { id: productId },
+				data: { imageUrl: primaryImageUrl },
+			});
+		});
+		return response;
+	} catch {
+		return withProductGallerySyncErrorNotice(response);
+	}
+};
+
+const productEditAfterHook = async (response: any, request: any, context: any) => {
+	const withAudit = await productAuditAfterHook(response, request, context);
+	const withHydratedGalleryField = await hydrateProductGalleryField(withAudit, request, context);
+	return syncProductGalleryAfterHook(withHydratedGalleryField, request, context);
+};
+
 type AdminResource = {
 	resource: { model: unknown; client: PrismaClient };
 	options: ResourceOptions;
@@ -156,11 +308,6 @@ const maybeResource = (model: unknown, options: ResourceOptions): AdminResource 
 
 const isOrderStatus = (record: { param: (key: string) => unknown } | undefined, status: string) =>
 	String(record?.param('status') ?? '') === status;
-
-const isOrderStatusBlocked = (
-	record: { param: (key: string) => unknown } | undefined,
-	blocked: string[]
-) => blocked.includes(String(record?.param('status') ?? ''));
 
 export const resources = [
 	{
@@ -200,13 +347,13 @@ export const resources = [
 				'publishStartAt',
 				'publishEndAt',
 				'tags',
-				'imageUrl',
 				'updatedAt',
 			],
 			properties: {
 				id: hidden,
 				name: {
 					components: { list: productNameListComponent },
+					isTitle: true,
 				},
 				metaTitle: { isVisible: { list: false, filter: false, show: true, edit: true } },
 				metaDescription: { isVisible: { list: false, filter: false, show: true, edit: true } },
@@ -216,17 +363,19 @@ export const resources = [
 				discountPrice: { type: 'currency' },
 				currency: {
 					isRequired: true,
-					availableValues: [
-						{ value: 'UAH', label: 'UAH' },
-						{ value: 'USD', label: 'USD' },
-						{ value: 'EUR', label: 'EUR' },
-					],
+					availableValues: [{ value: 'USD', label: 'USD' }],
 				},
 				discountStartAt: { isVisible: { list: true, filter: true, show: true, edit: false } },
 				discountEndAt: { isVisible: { list: true, filter: true, show: true, edit: false } },
 				publishStartAt: { isVisible: { list: true, filter: true, show: true, edit: false } },
 				publishEndAt: { isVisible: { list: true, filter: true, show: true, edit: false } },
-				imageUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
+				imageUrl: { isVisible: { list: false, filter: false, show: true, edit: false } },
+				primaryGalleryUrl: { isVisible: { list: false, filter: false, show: false, edit: false } },
+				galleryUrls: {
+					components: { edit: productGalleryEditComponent },
+					isVisible: { list: false, filter: false, show: false, edit: true },
+					description: 'product-hint-galleryUrls',
+				},
 				averageRating: { isVisible: { edit: false } },
 				reviewCount: { isVisible: { edit: false } },
 				fullSlug: { isVisible: { edit: false } },
@@ -294,13 +443,23 @@ export const resources = [
 					component: productBulkToggleInStockActionComponent,
 					handler: bulkToggleInStock,
 				},
-				new: { before: validateProductNewEdit, component: productNewComponent },
+				bulkSeoTemplate: {
+					actionType: 'bulk',
+					icon: 'Search',
+					component: productBulkSeoTemplateActionComponent,
+					handler: bulkSeoTemplateHandler,
+				},
+				new: {
+					before: validateProductNewEdit,
+					after: syncProductGalleryAfterHook,
+					component: productNewComponent,
+				},
 				edit: {
 					before: async (request: any, context: any) => {
 						await captureProductAuditBeforeHook(request, context);
 						return validateProductNewEdit(request, context);
 					},
-					after: productAuditAfterHook,
+					after: productEditAfterHook,
 					component: productEditComponent,
 				},
 				show: {
@@ -416,6 +575,23 @@ export const resources = [
 			},
 		},
 	},
+	maybeResource(modelMap.ProductImage, {
+		navigation: null,
+		sort: { sortBy: 'sortOrder', direction: 'asc' },
+		listProperties: ['product', 'sortOrder', 'url', 'altText', 'createdAt'],
+		filterProperties: ['product', 'url', 'sortOrder', 'createdAt'],
+		properties: {
+			id: hidden,
+			product: { isVisible: { list: true, filter: true, show: true, edit: true } },
+			productId: { isVisible: { list: false, filter: false, show: true, edit: false } },
+			createdAt: readOnly,
+			updatedAt: readOnly,
+		},
+		actions: {
+			new: { before: mapProductImagePayload },
+			edit: { before: mapProductImagePayload },
+		},
+	}),
 	{
 		resource: { model: modelMap.Brand, client: prisma },
 		options: {
@@ -489,6 +665,7 @@ export const resources = [
 				'total',
 				'paymentMethod',
 				'shipmentMethod',
+				'shippingAddress',
 				'contactEmail',
 				'contactPhone',
 				'customerName',
@@ -537,6 +714,9 @@ export const resources = [
 						{ value: 'meest', label: 'meest' },
 					],
 					components: { filter: selectFilterWithPlaceholderComponent },
+				},
+				shippingAddress: {
+					isVisible: { list: false, filter: true, show: true, edit: false },
 				},
 				status: {
 					components: { filter: selectFilterWithPlaceholderComponent },
@@ -618,8 +798,7 @@ export const resources = [
 					actionType: 'record',
 					icon: 'XCircle',
 					guard: 'cancel-order',
-					isVisible: ({ record }: { record?: { param: (key: string) => unknown } }) =>
-						!isOrderStatusBlocked(record, ['CANCELLED', 'DELIVERED', 'RETURNED']),
+					isVisible: true,
 					component: cancelOrderActionComponent,
 					handler: cancelOrder,
 				},
@@ -916,12 +1095,12 @@ export const resources = [
 				price: {
 					...disabled,
 					type: 'currency',
-					props: { intlConfig: { locale: 'uk-UA', currency: 'UAH' } },
+					props: { intlConfig: { locale: 'uk-UA', currency: 'USD' } },
 				},
 				unitPrice: {
 					...disabled,
 					type: 'currency',
-					props: { intlConfig: { locale: 'uk-UA', currency: 'UAH' } },
+					props: { intlConfig: { locale: 'uk-UA', currency: 'USD' } },
 				},
 			},
 			actions: readOnlyActions,
@@ -971,7 +1150,7 @@ export const resources = [
 				},
 				lifetimeValue: {
 					type: 'currency',
-					props: { intlConfig: { locale: 'uk-UA', currency: 'UAH' } },
+					props: { intlConfig: { locale: 'uk-UA', currency: 'USD' } },
 					isVisible: { list: true, filter: false, show: false, edit: false },
 				},
 				lastOrderDate: {

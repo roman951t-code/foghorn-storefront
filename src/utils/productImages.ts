@@ -1,5 +1,6 @@
 const SQUARE_FULL = 900;
 const SQUARE_PREVIEW = 160;
+export const PRODUCT_PLACEHOLDER_IMAGE = '/assets/images/product-placeholder.svg';
 
 const updatePicsumPath = (url: URL, size: number, suffix?: string) => {
 	const segments = url.pathname.split('/').filter(Boolean);

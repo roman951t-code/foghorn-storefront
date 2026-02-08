@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { CartProduct } from '@/types/cart';
-import { buildProductImages } from '@/utils/productImages';
+import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE } from '@/utils/productImages';
 
 type CheckoutCardProps = {
 	product: CartProduct;
@@ -11,7 +11,7 @@ type CheckoutCardProps = {
 };
 
 const getImage = (src?: string | null) =>
-	buildProductImages(src)?.[0] || src || '/assets/images/temp/1.webp';
+	buildProductImages(src)?.[0] || src || PRODUCT_PLACEHOLDER_IMAGE;
 
 const usePriceParts = (product: CartProduct) => {
 	const price = product.discountPrice ?? product.basePrice;
@@ -68,11 +68,11 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 						</Text>
 					)}
 					<Text color='main' fontSize='xl'>
-						{price} ₴
+						{`$${price}`}
 					</Text>
 					{hasDiscount && (
 						<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
-							{product.basePrice} ₴
+							{`$${product.basePrice}`}
 							<Badge
 								variant='solid'
 								color='black'
@@ -80,7 +80,7 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 								fontWeight='semibold'
 								marginLeft='10px'
 							>
-								- {discountAmount}₴
+								-{`$${discountAmount}`}
 							</Badge>
 						</Text>
 					)}
@@ -173,7 +173,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 								mb={{ base: 4, xs: 0 } as any}
 								mr={{ base: 0, xs: 2 } as any}
 							>
-								{price} ₴
+								{`$${price}`}
 								{hasDiscount && (
 									<Text
 										as='span'
@@ -182,7 +182,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 										textDecoration='line-through'
 										marginLeft='2'
 									>
-										{product.basePrice} ₴
+										{`$${product.basePrice}`}
 									</Text>
 								)}
 								{hasDiscount && (
@@ -193,7 +193,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 										fontWeight='semibold'
 										ml='8px'
 									>
-										-{discountAmount} ₴
+										-{`$${discountAmount}`}
 									</Badge>
 								)}
 							</Text>

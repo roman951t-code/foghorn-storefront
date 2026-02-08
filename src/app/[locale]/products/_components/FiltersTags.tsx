@@ -88,7 +88,7 @@ export default function FiltersTags({ filters }: Props) {
 						borderColor='border'
 					>
 						<Tag.Label>
-							{minPrice} ₴ – {maxPrice} ₴
+							{`$${minPrice} – $${maxPrice}`}
 						</Tag.Label>
 						<Tag.EndElement onClick={clearFilters}>
 							<Tag.CloseTrigger cursor='pointer' aria-label={t('clearFilters')} />

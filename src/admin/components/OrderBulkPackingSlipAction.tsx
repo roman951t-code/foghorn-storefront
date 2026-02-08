@@ -49,7 +49,7 @@ const resolveRecordIds = (records: ActionProps['records']) => {
 		.filter(Boolean);
 };
 
-const formatMoney = (value: number, currency = 'UAH') => {
+const formatMoney = (value: number, currency = 'USD') => {
 	const safeValue = Number.isFinite(value) ? value : 0;
 	try {
 		return new Intl.NumberFormat(undefined, {

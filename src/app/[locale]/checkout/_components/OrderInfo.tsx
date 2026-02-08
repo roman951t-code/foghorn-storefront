@@ -29,14 +29,17 @@ import { isBlockingCheckoutConsent } from './checkoutConsentUtils';
 
 export default function OrderInfo({
 	storefrontForms = [],
+	currencyCode,
 }: {
 	storefrontForms?: StorefrontFormPublic[];
+	currencyCode: string;
 }) {
 	const { session } = useSession();
 	const checkoutT = useTranslations('checkout');
 	const paymentMethod = useCheckoutStore((state) => state.paymentMethod);
 	const shipmentMethod = useCheckoutStore((state) => state.shipmentMethod);
 	const appliedCoupon = useCheckoutStore((state) => state.appliedCoupon);
+	const shippingAddress = useCheckoutStore((state) => state.shippingAddress);
 	const consents = useCheckoutStore((state) => state.consents);
 	const [isSubmitting, startTransition] = useTransition();
 	const [isStripeRedirecting, setIsStripeRedirecting] = useState(false);
@@ -51,22 +54,24 @@ export default function OrderInfo({
 	const { cartData, handleClearCart } = useCart();
 	const cartItems = cartData.items;
 	const { totalCount, baseTotal, discountedTotal, discountTotal } = calculateCartTotals(cartItems);
+	const formatMoney = (value: number) =>
+		new Intl.NumberFormat(undefined, {
+			style: 'currency',
+			currency: currencyCode,
+			currencyDisplay: 'narrowSymbol',
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		}).format(value);
 	const unitsLabel = commonT('units');
 	const productsLabel = `${t('productsInCart')}: ${totalCount} ${unitsLabel}`;
-	const orderSumText = `${baseTotal.toFixed(2)} ₴`;
-	const discountText = `${
-		discountTotal > 0 ? `-${discountTotal.toFixed(2)}` : discountTotal.toFixed(2)
-	} ₴`;
+	const orderSumText = formatMoney(baseTotal);
+	const discountText = formatMoney(discountTotal > 0 ? -discountTotal : discountTotal);
 	const couponDiscount = appliedCoupon?.amount ?? 0;
-	const couponText = `${
-		couponDiscount > 0 ? `-${couponDiscount.toFixed(2)}` : couponDiscount.toFixed(2)
-	} ₴`;
+	const couponText = formatMoney(couponDiscount > 0 ? -couponDiscount : couponDiscount);
 	const totalDiscount = discountTotal + couponDiscount;
-	const totalDiscountText = `${
-		totalDiscount > 0 ? `-${totalDiscount.toFixed(2)}` : totalDiscount.toFixed(2)
-	} ₴`;
+	const totalDiscountText = formatMoney(totalDiscount > 0 ? -totalDiscount : totalDiscount);
 	const finalTotal = Math.max(0, discountedTotal - couponDiscount);
-	const totalAmountText = `${finalTotal.toFixed(2)} ₴`;
+	const totalAmountText = formatMoney(finalTotal);
 	const hasContactData = Boolean(
 		user?.name?.trim() &&
 			user?.lastName?.trim() &&
@@ -110,6 +115,7 @@ export default function OrderInfo({
 					items: orderItems,
 					paymentMethod,
 					shipmentMethod,
+					shippingAddress,
 					couponCode,
 				});
 
@@ -144,6 +150,8 @@ export default function OrderInfo({
 					successUrl: `${origin}/cabinet/orders?payment=success&session_id={CHECKOUT_SESSION_ID}`,
 					cancelUrl: `${origin}/checkout?cancelled=1`,
 					couponCode,
+					shipmentMethod,
+					shippingAddress,
 				}),
 			});
 

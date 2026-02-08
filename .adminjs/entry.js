@@ -43,6 +43,8 @@ import ProductVariantMatrix from '../src/admin/components/ProductVariantMatrix'
 AdminJS.UserComponents.ProductVariantMatrix = ProductVariantMatrix
 import ProductCsvImportExportAction from '../src/admin/components/ProductCsvImportExportAction'
 AdminJS.UserComponents.ProductCsvImportExportAction = ProductCsvImportExportAction
+import ProductGalleryEdit from '../src/admin/components/ProductGalleryEdit'
+AdminJS.UserComponents.ProductGalleryEdit = ProductGalleryEdit
 import ProductTagsEdit from '../src/admin/components/ProductTagsEdit'
 AdminJS.UserComponents.ProductTagsEdit = ProductTagsEdit
 import ProductNew from '../src/admin/components/ProductNew'
@@ -63,6 +65,8 @@ import ProductBulkAdjustStockAction from '../src/admin/components/ProductBulkAdj
 AdminJS.UserComponents.ProductBulkAdjustStockAction = ProductBulkAdjustStockAction
 import ProductBulkToggleInStockAction from '../src/admin/components/ProductBulkToggleInStockAction'
 AdminJS.UserComponents.ProductBulkToggleInStockAction = ProductBulkToggleInStockAction
+import ProductBulkSeoTemplateAction from '../src/admin/components/ProductBulkSeoTemplateAction'
+AdminJS.UserComponents.ProductBulkSeoTemplateAction = ProductBulkSeoTemplateAction
 import ReviewShow from '../src/admin/components/ReviewShow'
 AdminJS.UserComponents.ReviewShow = ReviewShow
 import Dashboard from '../src/admin/components/Dashboard'

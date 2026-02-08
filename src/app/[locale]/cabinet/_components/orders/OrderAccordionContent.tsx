@@ -7,7 +7,7 @@ import { FiTruck } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
-import { buildProductImages, toPreviewImage } from '@/utils/productImages';
+import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
 import { repeatOrderAction } from '@/actions/repeatOrderAction';
 import { useCartStore } from '@/stores/cartStore';
 import { showToaster } from '@/utils/toast';
@@ -60,7 +60,10 @@ export function OrderAccordionContent({ order }: Props) {
 			const result = await deleteOrderAction(order.id);
 
 			if (result.success) {
-				showToaster('success', ordersT('orderDeleteSuccess'));
+				showToaster(
+					'success',
+					ordersT(result.action === 'cancelled' ? 'orderCancelSuccess' : 'orderDeleteSuccess')
+				);
 				router.refresh();
 			} else {
 				const key =
@@ -159,7 +162,7 @@ export function OrderAccordionContent({ order }: Props) {
 				<Stack maxH='510px' overflowY='auto'>
 					{order.items.map((item, idx) => {
 						const previewImage = toPreviewImage(
-							buildProductImages(item.product.imageUrl, 1)[0] || '/assets/images/temp/1.webp'
+							buildProductImages(item.product.imageUrl, 1)[0] || PRODUCT_PLACEHOLDER_IMAGE
 						);
 
 						return (
@@ -206,7 +209,7 @@ export function OrderAccordionContent({ order }: Props) {
 											mb={{ base: 4, sm: 0 }}
 											mr={{ base: 0, sm: 2 }}
 										>
-											{ordersT('unit')}: {item.unitPrice.toFixed(2)} ₴
+											{ordersT('unit')}: {`$${item.unitPrice.toFixed(2)}`}
 										</Text>
 									</Flex>
 									<Text

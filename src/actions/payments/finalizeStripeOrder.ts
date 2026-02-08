@@ -8,7 +8,7 @@ import { auth } from '@/lib/auth';
 import { revalidateTag, updateTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
-import { env } from '@/config/env';
+import { STORE_CURRENCY_CODE_LOWER } from '@/config/currency';
 import { normalizeOrder } from '../orderUtils';
 import { isProductPublished } from '@/utils/publishSchedule';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
@@ -24,42 +24,95 @@ type Result =
 type OrderItemPayload = { productId: string; variantId: string | null; quantity: number };
 const MAX_ITEM_QUANTITY = 99;
 
-export async function finalizeStripeOrder(sessionId?: string | null): Promise<Result> {
-	if (!sessionId) return { success: false, message: 'missing_session' };
-	if (!stripe) return { success: false, message: 'stripe_not_configured' };
+type FinalizeMode = 'user' | 'system';
 
-	const requestHeaders = await headers();
-	const session = await auth.api.getSession({ headers: requestHeaders });
-	const userId = session?.user?.id;
+type UserSnapshot = {
+	id: string;
+	email: string | null;
+	name: string | null;
+	lastName: string | null;
+	middleName: string | null;
+	phoneNumber: string | null;
+};
 
-	if (!userId) return { success: false, message: 'unauthorized' };
-
-	const existing = await prisma.order.findUnique({
-		where: { stripeSessionId: sessionId },
+const stripeOrderInclude = {
+	discounts: true,
+	items: {
 		include: {
-			discounts: true,
-			items: {
-				include: {
-					product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
-					variant: {
+			product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
+			variant: {
+				select: {
+					id: true,
+					sku: true,
+					attributes: {
 						select: {
-							id: true,
-							sku: true,
-							attributes: {
-								select: {
-									attribute: { select: { name: true, unit: true } },
-									value: true,
-								},
-								orderBy: { attribute: { name: 'asc' } },
-							},
+							attribute: { select: { name: true, unit: true } },
+							value: true,
 						},
+						orderBy: { attribute: { name: 'asc' } },
 					},
 				},
 			},
 		},
+	},
+} satisfies Prisma.OrderInclude;
+
+const normalizeMetadataString = (value: unknown, maxLen: number) => {
+	if (typeof value !== 'string') return null;
+	const trimmed = value.trim();
+	if (!trimmed) return null;
+	if (trimmed.length > maxLen) return trimmed.slice(0, maxLen);
+	return trimmed;
+};
+
+async function finalizeStripeOrderInternal(
+	sessionId: string,
+	{
+		mode,
+		requestUserId,
+		requestHeaders,
+		userSnapshotOverride,
+	}: {
+		mode: FinalizeMode;
+		requestUserId?: string | null;
+		requestHeaders?: Headers;
+		userSnapshotOverride?: UserSnapshot | null;
+	}
+): Promise<Result> {
+	if (!stripe) return { success: false, message: 'stripe_not_configured' };
+
+	const existing = await prisma.order.findUnique({
+		where: { stripeSessionId: sessionId },
+		include: stripeOrderInclude,
 	});
 
 	if (existing) {
+		if (existing.status === 'PENDING') {
+			const existingSession = await stripe.checkout.sessions.retrieve(sessionId);
+			if (existingSession.payment_status === 'paid') {
+				const updated = await prisma.$transaction(async (tx) => {
+					const order = await tx.order.update({
+						where: { id: existing.id },
+						data: { status: 'PAID' },
+						include: stripeOrderInclude,
+					});
+					await tx.orderAuditEntry.create({
+						data: {
+							orderId: existing.id,
+							type: 'STATUS_CHANGE',
+							fromStatus: 'PENDING',
+							toStatus: 'PAID',
+							note: 'Auto-marked paid from Stripe session',
+							adminEmail: null,
+						},
+					});
+					return order;
+				});
+				const normalized = await normalizeOrder(updated);
+				return { success: true, order: normalized };
+			}
+		}
+
 		const normalized = await normalizeOrder(existing);
 		return { success: true, order: normalized };
 	}
@@ -73,15 +126,40 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 	}
 
 	const sessionCurrency = checkoutSession.currency?.toLowerCase() ?? null;
-	const expectedCurrency = (env.STRIPE_CURRENCY ?? 'usd').toLowerCase();
+	const expectedCurrency = STORE_CURRENCY_CODE_LOWER;
 	if (sessionCurrency && sessionCurrency !== expectedCurrency) {
 		return { success: false, message: 'currency_mismatch' };
 	}
 
-	const sessionUserId = checkoutSession.metadata?.userId;
-	if (sessionUserId && sessionUserId !== userId) {
-		return { success: false, message: 'forbidden' };
+	const metadataUserId = normalizeMetadataString(checkoutSession.metadata?.userId, 128);
+	if (mode === 'user') {
+		if (!requestUserId) return { success: false, message: 'unauthorized' };
+		if (metadataUserId && metadataUserId !== requestUserId) return { success: false, message: 'forbidden' };
+	} else {
+		if (!metadataUserId) return { success: false, message: 'missing_userId' };
 	}
+
+	const userId = mode === 'user' ? (requestUserId ?? null) : metadataUserId;
+	if (!userId) return { success: false, message: 'unauthorized' };
+
+	const userSnapshot: UserSnapshot | null =
+		userSnapshotOverride ??
+		(await prisma.user.findUnique({
+			where: { id: userId },
+			select: {
+				id: true,
+				email: true,
+				name: true,
+				lastName: true,
+				middleName: true,
+				phoneNumber: true,
+			},
+		}));
+
+	if (!userSnapshot?.id) return { success: false, message: 'user_not_found' };
+
+	const shipmentMethod = normalizeMetadataString(checkoutSession.metadata?.shipmentMethod, 64);
+	const shippingAddress = normalizeMetadataString(checkoutSession.metadata?.shippingAddress, 500);
 
 	let itemsPayload: OrderItemPayload[] = [];
 	try {
@@ -258,8 +336,8 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 		}
 		return `${firstTrimmed} ${lastTrimmed}`;
 	};
-	const contactName = session.user?.name ?? null;
-	const contactLastName = session.user?.lastName ?? null;
+	const contactName = userSnapshot.name ?? null;
+	const contactLastName = userSnapshot.lastName ?? null;
 	const customerName = buildCustomerName(contactName, contactLastName);
 
 	let order:
@@ -292,17 +370,19 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 
 			const created = await tx.order.create({
 				data: {
-					userId,
+					userId: userSnapshot.id,
 					total: decimalTotal,
 					paymentMethod: 'card',
-					shipmentMethod: null,
+					shipmentMethod,
+					shippingAddress,
+					status: 'PAID',
 					stripeSessionId: sessionId,
 					customerName,
 					contactName,
 					contactLastName,
-					contactMiddleName: session.user?.middleName ?? null,
-					contactEmail: session.user?.email ?? null,
-					contactPhone: session.user?.phoneNumber ?? null,
+					contactMiddleName: userSnapshot.middleName ?? null,
+					contactEmail: userSnapshot.email ?? null,
+					contactPhone: userSnapshot.phoneNumber ?? null,
 					items: {
 						create: orderItems.map((item) => ({
 							productId: item.productId,
@@ -315,29 +395,13 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 					},
 				},
 				include: {
-					items: {
-						include: {
-							product: { select: { id: true, name: true, fullSlug: true, imageUrl: true } },
-							variant: {
-								select: {
-									id: true,
-									sku: true,
-									attributes: {
-										select: {
-											attribute: { select: { name: true, unit: true } },
-											value: true,
-										},
-										orderBy: { attribute: { name: 'asc' } },
-									},
-								},
-							},
-						},
-					},
+					items: stripeOrderInclude.items,
+					discounts: true,
 				},
 			});
 
 			// Clear cart for the user after successful paid order
-			await tx.cartItem.deleteMany({ where: { cart: { userId } } });
+			await tx.cartItem.deleteMany({ where: { cart: { userId: userSnapshot.id } } });
 
 			if (couponCode && amountDiscount > 0) {
 				let couponId: string | null = null;
@@ -397,12 +461,42 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 	const productTags = uniqueIds.map((id) => productCacheTagById(id));
 	await Promise.all(productTags.map((tag) => updateTag(tag)));
 	await revalidateTag(PRODUCT_LIST_CACHE_TAG, 'default');
+
 	await sendOrderConfirmationEmail({
 		order: normalized,
-		email: session.user?.email ?? null,
-		name: session.user?.name ?? null,
+		email: userSnapshot.email ?? null,
+		name: userSnapshot.name ?? null,
 		headersList: requestHeaders,
 	});
 
 	return { success: true, order: normalized };
+}
+
+export async function finalizeStripeOrder(sessionId?: string | null): Promise<Result> {
+	if (!sessionId) return { success: false, message: 'missing_session' };
+
+	const requestHeaders = await headers();
+	const session = await auth.api.getSession({ headers: requestHeaders });
+	const userId = session?.user?.id;
+
+	if (!userId) return { success: false, message: 'unauthorized' };
+
+	return finalizeStripeOrderInternal(sessionId, {
+		mode: 'user',
+		requestUserId: userId,
+		requestHeaders,
+		userSnapshotOverride: {
+			id: userId,
+			email: session.user?.email ?? null,
+			name: session.user?.name ?? null,
+			lastName: (session.user as any)?.lastName ?? null,
+			middleName: (session.user as any)?.middleName ?? null,
+			phoneNumber: (session.user as any)?.phoneNumber ?? null,
+		},
+	});
+}
+
+export async function finalizeStripeOrderAsSystem(sessionId: string): Promise<Result> {
+	if (!sessionId) return { success: false, message: 'missing_session' };
+	return finalizeStripeOrderInternal(sessionId, { mode: 'system' });
 }

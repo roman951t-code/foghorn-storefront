@@ -48,7 +48,7 @@ const formatMoney = (value: number | null) => {
 	try {
 		return new Intl.NumberFormat(undefined, {
 			style: 'currency',
-			currency: 'UAH',
+			currency: 'USD',
 			minimumFractionDigits: 2,
 			maximumFractionDigits: 2,
 		}).format(safeValue);

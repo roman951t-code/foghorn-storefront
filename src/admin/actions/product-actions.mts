@@ -1,5 +1,6 @@
 import type { ActionHandler, RecordActionResponse } from 'adminjs';
 import { prisma } from '../prisma.mts';
+import { archiveProductAndZeroStock } from './product-unavailable-utils.mts';
 
 type ProductStatus = 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
 
@@ -37,18 +38,30 @@ export const publishProduct: ActionHandler<RecordActionResponse> = async (_req, 
 	}
 	const product = await prisma.product.findUnique({
 		where: { id: productId },
-		select: { id: true, imageUrl: true },
+		select: {
+			id: true,
+			imageUrl: true,
+			productImages: {
+				select: { url: true, sortOrder: true, createdAt: true },
+				orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+				take: 1,
+			},
+		},
 	});
 	if (!product) {
 		return { record: record.toJSON(currentAdmin), notice: { message: 'product-not-found', type: 'error' } };
 	}
-	if (!product.imageUrl) {
+	const primaryImageUrl = product.productImages[0]?.url ?? product.imageUrl ?? null;
+	if (!primaryImageUrl) {
 		return {
 			record: record.toJSON(currentAdmin),
 			notice: { message: 'product-publish-image-required', type: 'error' },
 		};
 	}
-	await prisma.product.update({ where: { id: productId }, data: { status: 'ACTIVE' } });
+	await prisma.product.update({
+		where: { id: productId },
+		data: { status: 'ACTIVE', imageUrl: primaryImageUrl },
+	});
 	const updated = await resource.findOne(productId);
 	return {
 		record: updated ? updated.toJSON(currentAdmin) : record.toJSON(currentAdmin),
@@ -63,17 +76,14 @@ export const archiveProduct: ActionHandler<RecordActionResponse> = async (_req, 
 	}
 	const productId = record.param('id') as string;
 	const currentStatus = record.param('status') as ProductStatus | undefined;
-	if (currentStatus === 'ARCHIVED') {
-		return {
-			record: record.toJSON(currentAdmin),
-			notice: { message: 'product-already-archived', type: 'info' },
-		};
-	}
-	await prisma.product.update({ where: { id: productId }, data: { status: 'ARCHIVED' } });
+	await archiveProductAndZeroStock(productId);
 	const updated = await resource.findOne(productId);
 	return {
 		record: updated ? updated.toJSON(currentAdmin) : record.toJSON(currentAdmin),
-		notice: { message: 'product-archived', type: 'success' },
+		notice: {
+			message: currentStatus === 'ARCHIVED' ? 'product-already-archived' : 'product-archived',
+			type: currentStatus === 'ARCHIVED' ? 'info' : 'success',
+		},
 	};
 };
 

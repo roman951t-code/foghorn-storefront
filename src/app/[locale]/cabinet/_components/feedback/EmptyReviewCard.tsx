@@ -6,7 +6,7 @@ import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { useMemo } from 'react';
 import FeedbackModal from '@/features/product/FeedbackModal';
 import type { Review, SubcategoryProduct } from '@/types/product';
-import { buildProductImages, toPreviewImage } from '@/utils/productImages';
+import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
 
 type Props = {
 	product: SubcategoryProduct & { fullSlug: string };
@@ -17,7 +17,7 @@ type Props = {
 export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 	const productHref = useMemo(() => `/products/${product.fullSlug}`, [product.fullSlug]);
 	const previewImage = toPreviewImage(
-		buildProductImages(product.imageUrl, 1)[0] || '/assets/images/temp/1.webp'
+		buildProductImages(product.imageUrl, 1)[0] || PRODUCT_PLACEHOLDER_IMAGE
 	);
 
 	return (
@@ -64,7 +64,7 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 						)}
 
 						<Text color='main' fontSize='md' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
-							{price.current} ₴
+							{`$${price.current}`}
 							{price.previous && (
 								<Text
 									as='span'
@@ -73,7 +73,7 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 									textDecoration='line-through'
 									marginLeft='8px'
 								>
-									{price.previous} ₴
+									{`$${price.previous}`}
 								</Text>
 							)}
 						</Text>

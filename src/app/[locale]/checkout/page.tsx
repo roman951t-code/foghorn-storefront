@@ -7,6 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import { LocaleParams } from '@/types/routing';
 import { getEnabledStorefrontForms } from '@/actions/storefront/getEnabledStorefrontForms';
 import { StorefrontFormPlacement } from '@prisma/client';
+import { STORE_CURRENCY_CODE } from '@/config/currency';
 
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
@@ -28,7 +29,7 @@ export default async function Checkout() {
 			<Group justifyContent='space-between' align='flex-start' gapX='4'>
 				<Box as='section' flex='1'>
 					<CheckoutSteps />
-					<Box hideFrom='lg'>{<OrderInfo storefrontForms={checkoutForms} />}</Box>
+					<Box hideFrom='lg'>{<OrderInfo storefrontForms={checkoutForms} currencyCode={STORE_CURRENCY_CODE} />}</Box>
 				</Box>
 				<Box
 					as='aside'
@@ -42,7 +43,7 @@ export default async function Checkout() {
 					position='sticky'
 					top='76px'
 				>
-					<OrderInfo storefrontForms={checkoutForms} />
+					<OrderInfo storefrontForms={checkoutForms} currencyCode={STORE_CURRENCY_CODE} />
 				</Box>
 			</Group>
 		</Flex>

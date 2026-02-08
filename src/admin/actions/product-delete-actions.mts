@@ -1,5 +1,6 @@
 import type { ActionHandler, RecordActionResponse } from 'adminjs';
 import { prisma } from '../prisma.mts';
+import { archiveProductAndZeroStock } from './product-unavailable-utils.mts';
 
 export const deleteProduct: ActionHandler<RecordActionResponse> = async (_req, _res, context) => {
 	const { record, resource, currentAdmin, h } = context;
@@ -24,9 +25,21 @@ export const deleteProduct: ActionHandler<RecordActionResponse> = async (_req, _
 		orderItemsCount + wishlistCount + reviewsCount + cartItemsCount + recentlyViewedCount + attributesCount;
 
 	if (totalRelations > 0) {
+		try {
+			await archiveProductAndZeroStock(productId);
+		} catch {
+			return {
+				record: record.toJSON(currentAdmin),
+				notice: { message: 'product-delete-failed', type: 'error' },
+			};
+		}
+
+		const updated = await resource.findOne(productId);
+		const redirectUrl = h.recordActionUrl({ resourceId, recordId: productId, actionName: 'show' });
 		return {
-			record: record.toJSON(currentAdmin),
-			notice: { message: 'product-delete-blocked', type: 'error' },
+			record: updated ? updated.toJSON(currentAdmin) : record.toJSON(currentAdmin),
+			notice: { message: 'product-archived-instead-of-delete', type: 'success' },
+			redirectUrl,
 		};
 	}
 
@@ -44,4 +57,3 @@ export const deleteProduct: ActionHandler<RecordActionResponse> = async (_req, _
 		};
 	}
 };
-

@@ -70,6 +70,46 @@ type DashboardMetricsPayload = {
 			amount: number;
 		};
 	};
+	periodComparison: {
+		sales7Days: { current: number; previous: number; delta: number; changePercent: number | null };
+		sales30Days: { current: number; previous: number; delta: number; changePercent: number | null };
+		paidOrders7Days: { current: number; previous: number; delta: number; changePercent: number | null };
+		paidOrders30Days: { current: number; previous: number; delta: number; changePercent: number | null };
+		newUsers7Days: { current: number; previous: number; delta: number; changePercent: number | null };
+		newSubscribers7Days: { current: number; previous: number; delta: number; changePercent: number | null };
+	};
+	netRevenue: {
+		sales: number;
+		discounts: number;
+		refunds: number;
+		net: number;
+	};
+	funnel: {
+		created: number;
+		pending: number;
+		paid: number;
+		shipped: number;
+		delivered: number;
+		paidRate: number | null;
+		shippedFromPaidRate: number | null;
+		deliveredFromShippedRate: number | null;
+		deliveredRate: number | null;
+	};
+	orderHealth: {
+		cancelRate: number | null;
+		returnRate: number | null;
+		refundRate: number | null;
+		avgFulfillmentHours: number | null;
+		fulfillmentSampleSize: number;
+	};
+	promotionEffectiveness: {
+		discountedOrders: number;
+		discountedOrdersShare: number | null;
+		couponOrders: number;
+		couponOrdersShare: number | null;
+		discountAmount: number;
+		averageDiscountAmount: number;
+	};
 	orderStatusCounts: { status: string; count: number }[];
 	topProducts: { productId: string; name: string; quantity: number; revenue: number }[];
 };
@@ -87,7 +127,7 @@ const actionButtonStyle = {
 	color: 'black',
 };
 
-const formatMoney = (value: number, currency = 'UAH') => {
+const formatMoney = (value: number, currency = 'USD') => {
 	const safeValue = Number.isFinite(value) ? value : 0;
 	try {
 		return new Intl.NumberFormat(undefined, {
@@ -108,6 +148,23 @@ const formatCount = (value: number) => {
 	} catch {
 		return String(Math.trunc(safeValue));
 	}
+};
+
+const formatPercent = (value: number | null, digits = 1) => {
+	if (value === null || value === undefined || !Number.isFinite(value)) return '—';
+	return `${value.toFixed(digits)}%`;
+};
+
+const formatSignedPercent = (value: number | null, digits = 1) => {
+	if (value === null || value === undefined || !Number.isFinite(value)) return '—';
+	const sign = value > 0 ? '+' : '';
+	return `${sign}${value.toFixed(digits)}%`;
+};
+
+const formatSigned = (value: number, formatter: (next: number) => string) => {
+	const safeValue = Number.isFinite(value) ? value : 0;
+	const sign = safeValue > 0 ? '+' : safeValue < 0 ? '-' : '';
+	return `${sign}${formatter(Math.abs(safeValue))}`;
 };
 
 const resolvePath = (path: string) => {
@@ -258,6 +315,95 @@ export default function Dashboard() {
 		return Math.max(...ordersTrendPoints.map((p) => p.orders));
 	}, [ordersTrendPoints]);
 
+	const comparisonCards = useMemo(() => {
+		if (!metrics) return [];
+		const period = metrics.periodComparison;
+		return [
+			{
+				key: 'sales7Days',
+				label: translateMessage('dashboard.compare.cards.sales7Days'),
+				current: formatMoney(period.sales7Days.current),
+				previous: formatMoney(period.sales7Days.previous),
+				change: formatSignedPercent(period.sales7Days.changePercent),
+				delta: formatSigned(period.sales7Days.delta, formatMoney),
+			},
+			{
+				key: 'sales30Days',
+				label: translateMessage('dashboard.compare.cards.sales30Days'),
+				current: formatMoney(period.sales30Days.current),
+				previous: formatMoney(period.sales30Days.previous),
+				change: formatSignedPercent(period.sales30Days.changePercent),
+				delta: formatSigned(period.sales30Days.delta, formatMoney),
+			},
+			{
+				key: 'paidOrders7Days',
+				label: translateMessage('dashboard.compare.cards.paidOrders7Days'),
+				current: formatCount(period.paidOrders7Days.current),
+				previous: formatCount(period.paidOrders7Days.previous),
+				change: formatSignedPercent(period.paidOrders7Days.changePercent),
+				delta: formatSigned(period.paidOrders7Days.delta, formatCount),
+			},
+			{
+				key: 'paidOrders30Days',
+				label: translateMessage('dashboard.compare.cards.paidOrders30Days'),
+				current: formatCount(period.paidOrders30Days.current),
+				previous: formatCount(period.paidOrders30Days.previous),
+				change: formatSignedPercent(period.paidOrders30Days.changePercent),
+				delta: formatSigned(period.paidOrders30Days.delta, formatCount),
+			},
+			{
+				key: 'newUsers7Days',
+				label: translateMessage('dashboard.compare.cards.newUsers7Days'),
+				current: formatCount(period.newUsers7Days.current),
+				previous: formatCount(period.newUsers7Days.previous),
+				change: formatSignedPercent(period.newUsers7Days.changePercent),
+				delta: formatSigned(period.newUsers7Days.delta, formatCount),
+			},
+			{
+				key: 'newSubscribers7Days',
+				label: translateMessage('dashboard.compare.cards.newSubscribers7Days'),
+				current: formatCount(period.newSubscribers7Days.current),
+				previous: formatCount(period.newSubscribers7Days.previous),
+				change: formatSignedPercent(period.newSubscribers7Days.changePercent),
+				delta: formatSigned(period.newSubscribers7Days.delta, formatCount),
+			},
+		];
+	}, [metrics, translateMessage]);
+
+	const funnelItems = useMemo(() => {
+		if (!metrics) return [];
+		const created = Math.max(1, metrics.funnel.created);
+		return [
+			{
+				key: 'created',
+				label: translateMessage('dashboard.funnel.created'),
+				value: metrics.funnel.created,
+				width: Math.round((metrics.funnel.created / created) * 100),
+			},
+			{
+				key: 'paid',
+				label: translateMessage('dashboard.funnel.paid'),
+				value: metrics.funnel.paid,
+				width: Math.round((metrics.funnel.paid / created) * 100),
+				rate: metrics.funnel.paidRate,
+			},
+			{
+				key: 'shipped',
+				label: translateMessage('dashboard.funnel.shipped'),
+				value: metrics.funnel.shipped,
+				width: Math.round((metrics.funnel.shipped / created) * 100),
+				rate: metrics.funnel.shippedFromPaidRate,
+			},
+			{
+				key: 'delivered',
+				label: translateMessage('dashboard.funnel.delivered'),
+				value: metrics.funnel.delivered,
+				width: Math.round((metrics.funnel.delivered / created) * 100),
+				rate: metrics.funnel.deliveredFromShippedRate,
+			},
+		];
+	}, [metrics, translateMessage]);
+
 	const formatShortDay = (isoDate: string) => {
 		const d = new Date(`${isoDate}T00:00:00.000Z`);
 		if (Number.isNaN(d.getTime())) return isoDate;
@@ -336,8 +482,8 @@ export default function Dashboard() {
 					gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
 					gap: 16,
 				}}
-			>
-				{[
+				>
+					{[
 					{
 						label: translateMessage('dashboard.kpis.salesToday'),
 						value: metrics ? formatMoney(metrics.sales.today) : '-',
@@ -392,11 +538,239 @@ export default function Dashboard() {
 							</Text>
 						) : null}
 					</Box>
-				))}
-			</Box>
+					))}
+				</Box>
 
-			<Box
-				mt='lg'
+				<Box mt='xxl'>
+					<Text fontSize='lg' fontWeight='bold' mb='xs'>
+						{translateMessage('dashboard.compare.title')}
+					</Text>
+					<Text color='grey60' mb='lg'>
+						{translateMessage('dashboard.compare.subtitle')}
+					</Text>
+					{metricsLoading ? (
+						<Text color='grey60'>{translateMessage('dashboard.metrics.loading')}</Text>
+					) : !metrics ? (
+						<Text color='grey60'>{translateMessage('dashboard.metrics.error')}</Text>
+					) : (
+						<Box
+							style={{
+								display: 'grid',
+								gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+								gap: 12,
+							}}
+						>
+							{comparisonCards.map((card) => (
+								<Box
+									key={card.key}
+									variant='white'
+									p='lg'
+									borderRadius='xl'
+									boxShadow='sm'
+									style={{ border: '1px solid #E2E8F0' }}
+								>
+									<Text color='grey60' fontSize='sm' mb='xs'>
+										{card.label}
+									</Text>
+									<Text fontSize='xl' fontWeight='bold'>
+										{card.current}
+									</Text>
+									<Text color='grey60' fontSize='sm'>
+										{translateMessage('dashboard.compare.previous')}: {card.previous}
+									</Text>
+									<Text color='grey60' fontSize='sm'>
+										{translateMessage('dashboard.compare.change')}: {card.change}{' '}
+										{card.change !== '—' ? `(${card.delta})` : ''}
+									</Text>
+								</Box>
+							))}
+						</Box>
+					)}
+				</Box>
+
+				<Box
+					mt='lg'
+					style={{
+						display: 'grid',
+						gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+						gap: 16,
+					}}
+				>
+					<Box variant='white' p='xl' borderRadius='xl' boxShadow='sm' style={{ border: '1px solid #E2E8F0' }}>
+						<Text fontSize='lg' fontWeight='bold' mb='xs'>
+							{translateMessage('dashboard.netRevenue.title')}
+						</Text>
+						<Text color='grey60' mb='lg'>
+							{translateMessage('dashboard.netRevenue.subtitle')}
+						</Text>
+						{metricsLoading ? (
+							<Text color='grey60'>{translateMessage('dashboard.metrics.loading')}</Text>
+						) : !metrics ? (
+							<Text color='grey60'>{translateMessage('dashboard.metrics.error')}</Text>
+						) : (
+							<Box style={{ display: 'grid', gap: 10 }}>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.netRevenue.sales')}</Text>
+									<Text fontWeight='bold'>{formatMoney(metrics.netRevenue.sales)}</Text>
+								</Box>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.netRevenue.discounts')}</Text>
+									<Text fontWeight='bold'>-{formatMoney(metrics.netRevenue.discounts)}</Text>
+								</Box>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.netRevenue.refunds')}</Text>
+									<Text fontWeight='bold'>-{formatMoney(metrics.netRevenue.refunds)}</Text>
+								</Box>
+								<Box style={{ borderTop: '1px solid #E2E8F0', paddingTop: 8, display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text fontWeight='bold'>{translateMessage('dashboard.netRevenue.net')}</Text>
+									<Text fontWeight='bold'>{formatMoney(metrics.netRevenue.net)}</Text>
+								</Box>
+							</Box>
+						)}
+					</Box>
+
+					<Box variant='white' p='xl' borderRadius='xl' boxShadow='sm' style={{ border: '1px solid #E2E8F0' }}>
+						<Text fontSize='lg' fontWeight='bold' mb='xs'>
+							{translateMessage('dashboard.promo.title')}
+						</Text>
+						<Text color='grey60' mb='lg'>
+							{translateMessage('dashboard.promo.subtitle')}
+						</Text>
+						{metricsLoading ? (
+							<Text color='grey60'>{translateMessage('dashboard.metrics.loading')}</Text>
+						) : !metrics ? (
+							<Text color='grey60'>{translateMessage('dashboard.metrics.error')}</Text>
+						) : (
+							<Box style={{ display: 'grid', gap: 10 }}>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.promo.discountedOrders')}</Text>
+									<Text fontWeight='bold'>
+										{formatCount(metrics.promotionEffectiveness.discountedOrders)} (
+										{formatPercent(metrics.promotionEffectiveness.discountedOrdersShare)})
+									</Text>
+								</Box>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.promo.couponOrders')}</Text>
+									<Text fontWeight='bold'>
+										{formatCount(metrics.promotionEffectiveness.couponOrders)} (
+										{formatPercent(metrics.promotionEffectiveness.couponOrdersShare)})
+									</Text>
+								</Box>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.promo.discountAmount')}</Text>
+									<Text fontWeight='bold'>{formatMoney(metrics.promotionEffectiveness.discountAmount)}</Text>
+								</Box>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.promo.averageDiscount')}</Text>
+									<Text fontWeight='bold'>
+										{formatMoney(metrics.promotionEffectiveness.averageDiscountAmount)}
+									</Text>
+								</Box>
+							</Box>
+						)}
+					</Box>
+				</Box>
+
+				<Box
+					mt='lg'
+					style={{
+						display: 'grid',
+						gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+						gap: 16,
+					}}
+				>
+					<Box variant='white' p='xl' borderRadius='xl' boxShadow='sm' style={{ border: '1px solid #E2E8F0' }}>
+						<Text fontSize='lg' fontWeight='bold' mb='xs'>
+							{translateMessage('dashboard.funnel.title')}
+						</Text>
+						<Text color='grey60' mb='lg'>
+							{translateMessage('dashboard.funnel.subtitle')}
+						</Text>
+						{metricsLoading ? (
+							<Text color='grey60'>{translateMessage('dashboard.metrics.loading')}</Text>
+						) : !metrics ? (
+							<Text color='grey60'>{translateMessage('dashboard.metrics.error')}</Text>
+						) : (
+							<Box style={{ display: 'grid', gap: 10 }}>
+								{funnelItems.map((item) => (
+									<Box key={item.key} style={{ display: 'grid', gap: 6 }}>
+										<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+											<Text>{item.label}</Text>
+											<Text fontWeight='bold'>
+												{formatCount(item.value)}
+												{item.rate !== undefined ? ` (${formatPercent(item.rate)})` : ''}
+											</Text>
+										</Box>
+										<Box
+											style={{
+												height: 8,
+												borderRadius: 999,
+												background: '#E2E8F0',
+												overflow: 'hidden',
+											}}
+										>
+											<Box
+												style={{
+													height: '100%',
+													width: `${Math.max(3, item.width)}%`,
+													background: '#22C55E',
+												}}
+											/>
+										</Box>
+									</Box>
+								))}
+								<Text color='grey60' fontSize='sm'>
+									{translateMessage('dashboard.funnel.pending')}: {formatCount(metrics.funnel.pending)}
+								</Text>
+							</Box>
+						)}
+					</Box>
+
+					<Box variant='white' p='xl' borderRadius='xl' boxShadow='sm' style={{ border: '1px solid #E2E8F0' }}>
+						<Text fontSize='lg' fontWeight='bold' mb='xs'>
+							{translateMessage('dashboard.health.title')}
+						</Text>
+						<Text color='grey60' mb='lg'>
+							{translateMessage('dashboard.health.subtitle')}
+						</Text>
+						{metricsLoading ? (
+							<Text color='grey60'>{translateMessage('dashboard.metrics.loading')}</Text>
+						) : !metrics ? (
+							<Text color='grey60'>{translateMessage('dashboard.metrics.error')}</Text>
+						) : (
+							<Box style={{ display: 'grid', gap: 10 }}>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.health.cancelRate')}</Text>
+									<Text fontWeight='bold'>{formatPercent(metrics.orderHealth.cancelRate)}</Text>
+								</Box>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.health.returnRate')}</Text>
+									<Text fontWeight='bold'>{formatPercent(metrics.orderHealth.returnRate)}</Text>
+								</Box>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.health.refundRate')}</Text>
+									<Text fontWeight='bold'>{formatPercent(metrics.orderHealth.refundRate)}</Text>
+								</Box>
+								<Box style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+									<Text>{translateMessage('dashboard.health.avgFulfillmentHours')}</Text>
+									<Text fontWeight='bold'>
+										{metrics.orderHealth.avgFulfillmentHours === null
+											? '—'
+											: `${metrics.orderHealth.avgFulfillmentHours.toFixed(1)}h`}
+									</Text>
+								</Box>
+								<Text color='grey60' fontSize='sm'>
+									{translateMessage('dashboard.health.sampleSize', {
+										count: metrics.orderHealth.fulfillmentSampleSize,
+									})}
+								</Text>
+							</Box>
+						)}
+					</Box>
+				</Box>
+
+				<Box
+					mt='lg'
 				style={{
 					display: 'grid',
 					gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',

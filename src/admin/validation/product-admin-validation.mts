@@ -64,7 +64,30 @@ const toSlugPart = (value: unknown): string => {
 		.replace(/^-+|-+$/g, '');
 };
 
-const currencyValues = ['UAH', 'USD', 'EUR'] as const;
+const currencyValues = ['USD'] as const;
+export const PRODUCT_GALLERY_URLS_CONTEXT_KEY = '__productGalleryUrls';
+export const PRODUCT_GALLERY_PRIMARY_URL_CONTEXT_KEY = '__productGalleryPrimaryUrl';
+
+const parseGalleryUrls = (value: unknown): string[] | undefined => {
+	if (value === undefined) return undefined;
+
+	const rawValues = Array.isArray(value)
+		? value.map((item) => String(item))
+		: typeof value === 'string'
+			? value.split(/\r?\n/g)
+			: [];
+
+	const normalized = rawValues.map((item) => item.trim()).filter(Boolean);
+	return Array.from(new Set(normalized));
+};
+
+const parseGalleryPrimaryUrl = (value: unknown): string | null | undefined => {
+	if (value === undefined) return undefined;
+	if (value == null) return null;
+	if (typeof value !== 'string') return null;
+	const normalized = value.trim();
+	return normalized || null;
+};
 
 const ProductSchema = z
 	.object({
@@ -167,13 +190,6 @@ const ProductSchema = z
 			},
 			z.boolean()
 		),
-		imageUrl: z.preprocess(
-			emptyToNull,
-			z
-				.string()
-				.max(2048, 'product-validation-imageUrl-max')
-				.nullable()
-		),
 		brand: z.preprocess(coerceUuidString, z.string().uuid('product-validation-brand')),
 		category: z.preprocess(coerceUuidString, z.string().uuid('product-validation-category')),
 		discountStartAt: toNullableDate.optional(),
@@ -257,6 +273,44 @@ export const validateProductNewEdit = async (request: ActionRequest, context: Ac
 
 	const finalPayload = requestWithPayload.payload ?? payload;
 
+	const normalizeNumericLike = (value: unknown): unknown => {
+		if (value == null) return value;
+		if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
+		if (typeof value === 'string') {
+			const trimmed = value.trim();
+			if (!trimmed) return undefined;
+			const parsed = Number(trimmed);
+			return Number.isFinite(parsed) ? parsed : undefined;
+		}
+		return value;
+	};
+
+	// Defensive normalization for AdminJS payload oddities (e.g. NaN/empty string).
+	if (!Object.prototype.hasOwnProperty.call(finalPayload, 'basePrice') || finalPayload.basePrice == null || finalPayload.basePrice === '') {
+		if (baseParams.basePrice != null) {
+			finalPayload.basePrice = baseParams.basePrice;
+		}
+	} else {
+		finalPayload.basePrice = normalizeNumericLike(finalPayload.basePrice);
+	}
+
+	if (Object.prototype.hasOwnProperty.call(finalPayload, 'discountPrice')) {
+		const normalizedDiscount = normalizeNumericLike(finalPayload.discountPrice);
+		finalPayload.discountPrice = normalizedDiscount == null ? null : normalizedDiscount;
+	}
+
+	const galleryUrls = parseGalleryUrls(finalPayload.galleryUrls);
+	if (galleryUrls !== undefined) {
+		(context as Record<string, unknown>)[PRODUCT_GALLERY_URLS_CONTEXT_KEY] = galleryUrls;
+		delete (finalPayload as Record<string, unknown>).galleryUrls;
+	}
+
+	const primaryGalleryUrl = parseGalleryPrimaryUrl(finalPayload.primaryGalleryUrl);
+	if (primaryGalleryUrl !== undefined) {
+		(context as Record<string, unknown>)[PRODUCT_GALLERY_PRIMARY_URL_CONTEXT_KEY] = primaryGalleryUrl;
+		delete (finalPayload as Record<string, unknown>).primaryGalleryUrl;
+	}
+
 	if (typeof finalPayload.slug === 'string') {
 		finalPayload.slug = finalPayload.slug.trim().toLowerCase();
 	}
@@ -313,11 +367,6 @@ export const validateProductNewEdit = async (request: ActionRequest, context: Ac
 		if (existing) {
 			propertyErrors.slug = { message: 'product-validation-slug-unique', type: 'validation' };
 		}
-	}
-
-	const status = String((merged as any).status ?? baseParams.status ?? 'DRAFT').toUpperCase();
-	if (status === 'ACTIVE' && !parsed.data.imageUrl) {
-		propertyErrors.imageUrl = { message: 'product-validation-image-required-active', type: 'validation' };
 	}
 
 	if (Object.keys(propertyErrors).length > 0) {

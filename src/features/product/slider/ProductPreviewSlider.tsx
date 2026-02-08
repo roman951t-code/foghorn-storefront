@@ -9,8 +9,7 @@ import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-import { toPreviewImage } from '@/utils/productImages';
-import { ASSET_IMAGES } from '@/constants/assets';
+import { PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
 
 type ProductPreviewSliderProps = {
 	images: string[];
@@ -28,7 +27,7 @@ function ProductPreviewSkeleton() {
 function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps) {
 	const baseImages = images.length
 		? images
-		: [ASSET_IMAGES.tempProduct1, ASSET_IMAGES.tempProduct2];
+		: [PRODUCT_PLACEHOLDER_IMAGE, PRODUCT_PLACEHOLDER_IMAGE];
 	const previewImages = baseImages.map(toPreviewImage);
 	const altText = productName ? `${productName} photo` : 'Product photo';
 
@@ -44,7 +43,7 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 							borderWidth='0.5px'
 							borderStyle='solid'
 							borderColor='border'
-							borderRadius='lg'
+							borderRadius='sm'
 							overflow='hidden'
 							display='inline-block'
 						>

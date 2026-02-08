@@ -71,7 +71,9 @@ export default function Breadcrumbs({
 		<BreadcrumbRoot
 			variant='underline'
 			size='lg'
-			separator={<span style={{ color: 'var(--chakra-colors-main-disabled)' }}>›</span>}
+			separator={
+				<span style={{ fontSize: '1.4em', color: 'var(--chakra-colors-main-disabled)' }}>›</span>
+			}
 			separatorGap={2}
 		>
 			<CatalogBtn

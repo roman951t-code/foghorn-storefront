@@ -72,6 +72,7 @@ export async function normalizeOrder(order: any): Promise<UserOrder> {
 		createdAt: order.createdAt,
 		paymentMethod: order.paymentMethod ?? null,
 		shipmentMethod: order.shipmentMethod ?? null,
+		shippingAddress: order.shippingAddress ?? null,
 		carrier: order.carrier ?? null,
 		trackingNumber: order.trackingNumber ?? null,
 		items,

@@ -8,7 +8,7 @@ import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { I18nData } from '@/types/i18n';
 import { CartProduct } from '@/types/cart';
-import { buildProductImages } from '@/utils/productImages';
+import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE } from '@/utils/productImages';
 
 interface Props {
 	product: CartProduct;
@@ -30,7 +30,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 	const totalLabel = i18nData.totalAmount || 'Total';
 
 	const previewImage =
-		buildProductImages(product.imageUrl)?.[0] || product.imageUrl || '/assets/images/temp/1.webp';
+		buildProductImages(product.imageUrl)?.[0] || product.imageUrl || PRODUCT_PLACEHOLDER_IMAGE;
 	const productHref = `/products/${product.fullSlug}`;
 	const handleNavigate = () => {
 		if (typeof onNavigate === 'function') onNavigate();
@@ -163,7 +163,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 					>
 						<VStack alignItems={{ base: 'center', sm: 'flex-start' }} gap='0.5' flex='1'>
 							<Text color='main' fontSize={{ base: 'md', sm: 'lg' }} fontWeight='semibold'>
-								{unitPrice} ₴
+								{`$${unitPrice}`}
 								{hasDiscount && (
 									<Text
 										as='span'
@@ -172,7 +172,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 										textDecoration='line-through'
 										marginLeft='2'
 									>
-										{product.basePrice} ₴
+										{`$${product.basePrice}`}
 										{discountAmount > 0 && (
 											<Badge
 												variant='solid'
@@ -183,7 +183,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 												px='2'
 												ml='4'
 											>
-												-{discountAmount} ₴
+												-{`$${discountAmount}`}
 											</Badge>
 										)}
 									</Text>
@@ -191,7 +191,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 							</Text>
 
 							<Text fontSize='15px' color='main.disabled' hideBelow='sm'>
-								{totalLabel}: {lineTotal.toFixed(2)} ₴
+								{totalLabel}: {`$${lineTotal.toFixed(2)}`}
 							</Text>
 						</VStack>
 

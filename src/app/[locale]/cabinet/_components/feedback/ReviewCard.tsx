@@ -20,7 +20,7 @@ import DateWithLocale from '@/components/ui/DateWithLocale';
 import { FiTrash2 } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import type { Review, SubcategoryProduct } from '@/types/product';
-import { buildProductImages, toPreviewImage } from '@/utils/productImages';
+import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
 
 type Props = {
 	product: SubcategoryProduct & { fullSlug: string };
@@ -34,7 +34,7 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 	const prodT = useTranslations('products');
 	const productHref = useMemo(() => `/products/${product.fullSlug}`, [product.fullSlug]);
 	const previewImage = toPreviewImage(
-		buildProductImages(product.imageUrl, 1)[0] || '/assets/images/temp/1.webp'
+		buildProductImages(product.imageUrl, 1)[0] || PRODUCT_PLACEHOLDER_IMAGE
 	);
 
 	return (
@@ -76,7 +76,7 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 								</LocaleNavLink>
 							</Card.Title>
 							<Text color='main' fontSize='xl' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
-								{price.current} ₴
+								{`$${price.current}`}
 								{price.previous && (
 									<Text
 										as='span'
@@ -85,7 +85,7 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 										textDecoration='line-through'
 										marginLeft='8px'
 									>
-										{price.previous} ₴
+										{`$${price.previous}`}
 									</Text>
 								)}
 								{price.savings && (
@@ -96,7 +96,7 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 										fontWeight='semibold'
 										marginLeft='12px'
 									>
-										- {price.savings} ₴
+										-{`$${price.savings}`}
 									</Badge>
 								)}
 							</Text>

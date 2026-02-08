@@ -199,10 +199,10 @@ export default function ProductCard({ product }: Props) {
 						textWrap='wrap'
 						textAlign={{ base: 'center', sm: 'left' }}
 					>
-						{discountPrice ?? basePrice} ₴
+						{`$${discountPrice ?? basePrice}`}
 						{discount > 0 && (
 							<Text as='span' pl='2' color='main' fontSize='sm' textDecoration='line-through'>
-								{parseInt(basePrice.toFixed(2))}₴
+								{`$${parseInt(basePrice.toFixed(2))}`}
 								<Badge
 									variant='solid'
 									color='black'
@@ -210,7 +210,7 @@ export default function ProductCard({ product }: Props) {
 									fontWeight='semibold'
 									ml='8px'
 								>
-									- {parseInt(discount.toFixed(2))}₴
+									-{`$${parseInt(discount.toFixed(2))}`}
 								</Badge>
 							</Text>
 						)}

@@ -3,11 +3,11 @@ import 'server-only';
 import { headers as getHeaders } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 import type { UserOrder } from '@/types/order';
-import { APP_URL, env } from '@/config/env';
+import { APP_URL } from '@/config/env';
+import { STORE_CURRENCY_CODE } from '@/config/currency';
 import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
 
 const FALLBACK_LOCALE = 'en';
-const currencyCode = (env.STRIPE_CURRENCY ?? 'USD').toUpperCase();
 
 type HeaderLike = { get(name: string): string | null };
 type HeaderSource = HeaderLike | Promise<HeaderLike>;
@@ -29,7 +29,7 @@ const getLocale = async (headersList?: HeaderSource) => {
 const formatCurrency = (value: number, locale: string) =>
 	new Intl.NumberFormat(locale, {
 		style: 'currency',
-		currency: currencyCode,
+		currency: STORE_CURRENCY_CODE,
 		maximumFractionDigits: 2,
 	}).format(value);
 

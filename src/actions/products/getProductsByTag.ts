@@ -126,6 +126,11 @@ export async function getProductsByTag<T extends boolean>(
 			name: true,
 			fullSlug: true,
 			imageUrl: true,
+			productImages: {
+				select: { url: true, sortOrder: true, createdAt: true },
+				orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+				take: 6,
+			},
 			basePrice: true,
 			discountPrice: true,
 			discountStartAt: true,
@@ -172,9 +177,10 @@ export async function getProductsByTag<T extends boolean>(
 	});
 
 	const products: SubcategoryProduct[] = productsWithPrice.map((product) => {
-		const { variants, reviews, ...rest } = product as typeof product & {
+		const { variants, reviews, productImages, ...rest } = product as typeof product & {
 			variants?: unknown;
 			reviews?: unknown;
+			productImages?: unknown;
 		};
 		const ratings = product.reviews?.map((r) => r.rating) ?? [];
 		const averageRating = ratings.length
@@ -187,7 +193,9 @@ export async function getProductsByTag<T extends boolean>(
 			name: product.name ?? '',
 			fullSlug: product.fullSlug ?? '',
 			imageUrl: product.imageUrl ?? null,
-			images: buildProductImages(product.imageUrl ?? undefined, 4),
+			images: product.productImages.length
+				? product.productImages.map((image) => image.url)
+				: buildProductImages(product.imageUrl ?? undefined, 4),
 			inStock: !!product.inStock,
 			basePrice: Number(product.basePrice ?? 0),
 			discountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,

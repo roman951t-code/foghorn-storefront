@@ -61,7 +61,9 @@
 			"novaPoshta": "Нова Пошта",
 			"ukrposhta": "Укрпошта",
 			"meest": "Meest"
-		}
+		},
+		"shippingAddress": "Адреса доставки",
+		"shippingAddressPlaceholder": "Вулиця, будинок, квартира, місто"
 	},
 	"navigation": {
 		"header": {
@@ -356,6 +358,7 @@
 		"repeatUnauthorized": "Увійдіть, щоб повторити замовлення",
 		"cancelOrder": "Скасувати замовлення",
 		"deleteOrder": "Видалити замовлення",
+		"orderCancelSuccess": "Замовлення скасовано",
 		"orderDeleteSuccess": "Замовлення видалено",
 		"orderDeleteFailed": "Не вдалося видалити це замовлення",
 		"orderDeleteUnauthorized": "Увійдіть, щоб змінювати замовлення"

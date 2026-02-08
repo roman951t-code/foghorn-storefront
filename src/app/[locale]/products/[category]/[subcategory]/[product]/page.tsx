@@ -16,6 +16,7 @@ import {
 	productSearchParamsSchema,
 } from 'validationSchemas/productParamsSchemas';
 import ProductTabs from '@/features/product/ProductTabs';
+import { STORE_CURRENCY_CODE } from '@/config/currency';
 
 type Props = ProductParams & { searchParams: { tab?: string } };
 
@@ -191,7 +192,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 			'@type': 'Offer',
 			url: canonicalUrl,
 			price: price ?? undefined,
-			priceCurrency: 'UAH',
+			priceCurrency: STORE_CURRENCY_CODE,
 			availability,
 			itemCondition: 'https://schema.org/NewCondition',
 		},

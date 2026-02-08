@@ -6,6 +6,7 @@ import { stripe } from '@/lib/stripe';
 import { auth } from '@/lib/auth';
 import { isSameOriginRequest } from '@/lib/csrf';
 import { env } from '@/config/env';
+import { STORE_CURRENCY_CODE_LOWER } from '@/config/currency';
 import { isProductPublished } from '@/utils/publishSchedule';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import type Stripe from 'stripe';
@@ -13,7 +14,7 @@ import { getCouponDiscountPreview } from '@/lib/coupons';
 
 type LineItemPayload = { productId: string; variantId: string | null; quantity: number };
 
-const currency = env.STRIPE_CURRENCY ?? 'usd';
+const currency = STORE_CURRENCY_CODE_LOWER;
 
 function resolveSafeRedirectUrl(
 	value: unknown,
@@ -46,6 +47,8 @@ export async function POST(req: NextRequest) {
 			)
 			.min(1, 'items_required'),
 		couponCode: z.string().optional(),
+		shipmentMethod: z.string().max(64).optional(),
+		shippingAddress: z.string().max(500).optional(),
 		successUrl: z.string().url().optional(),
 		cancelUrl: z.string().url().optional(),
 	});
@@ -215,6 +218,8 @@ export async function POST(req: NextRequest) {
 		}
 
 		const rawCouponCode = parsed.data.couponCode?.trim() ?? '';
+		const shipmentMethod = parsed.data.shipmentMethod?.trim() || null;
+		const shippingAddress = parsed.data.shippingAddress?.trim() || null;
 		let resolvedCouponCode: string | null = null;
 		let resolvedCouponAmount: number | null = null;
 		let stripeCouponId: string | null = null;
@@ -267,6 +272,8 @@ export async function POST(req: NextRequest) {
 		};
 		if (resolvedCouponCode) metadata.couponCode = resolvedCouponCode;
 		if (resolvedCouponAmount != null) metadata.couponAmount = resolvedCouponAmount.toFixed(2);
+		if (shipmentMethod) metadata.shipmentMethod = shipmentMethod;
+		if (shippingAddress) metadata.shippingAddress = shippingAddress;
 
 		const checkoutSession = await stripe.checkout.sessions.create({
 			mode: 'payment',

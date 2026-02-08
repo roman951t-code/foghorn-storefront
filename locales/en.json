@@ -61,7 +61,9 @@
 			"novaPoshta": "Nova Poshta",
 			"ukrposhta": "Ukrposhta",
 			"meest": "Meest"
-		}
+		},
+		"shippingAddress": "Shipping address",
+		"shippingAddressPlaceholder": "Street, house, apartment, city"
 	},
 	"navigation": {
 		"header": {
@@ -356,6 +358,7 @@
 		"repeatUnauthorized": "Sign in to repeat this order",
 		"cancelOrder": "Cancel order",
 		"deleteOrder": "Delete order",
+		"orderCancelSuccess": "Order cancelled",
 		"orderDeleteSuccess": "Order removed",
 		"orderDeleteFailed": "Could not remove this order",
 		"orderDeleteUnauthorized": "Sign in to update your orders"

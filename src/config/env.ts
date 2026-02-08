@@ -5,6 +5,10 @@ const envSchema = z.object({
 	DATABASE_URL: z.string().url({ message: 'DATABASE_URL must be a valid url' }),
 	RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
 	STRIPE_SECRET_KEY: z.string().optional().transform((val) => (val && val.length > 0 ? val : undefined)),
+	STRIPE_WEBHOOK_SECRET: z
+		.string()
+		.optional()
+		.transform((val) => (val && val.length > 0 ? val : undefined)),
 	STRIPE_CURRENCY: z.string().min(1).default('usd'),
 	GOOGLE_CLIENT_ID: z.string().optional(),
 	GOOGLE_CLIENT_SECRET: z.string().optional(),

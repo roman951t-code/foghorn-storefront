@@ -159,7 +159,7 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 								query={appliedCoupon.amount.toFixed(2)}
 								styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
 							>
-								{`${t('couponSavings')}: -${appliedCoupon.amount.toFixed(2)} ₴`}
+								{`${t('couponSavings')}: -$${appliedCoupon.amount.toFixed(2)}`}
 							</Highlight>
 						</Text>
 					) : (

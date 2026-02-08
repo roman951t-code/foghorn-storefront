@@ -34,7 +34,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 								{i18nData.totalAmount}
 							</Stat.Label>
 							<Stat.ValueText fontSize={{ base: '3xl', sm: '4xl' }}>
-								{`${finalTotal.toFixed(2)} ₴`}
+								{`$${finalTotal.toFixed(2)}`}
 							</Stat.ValueText>
 						</Stat.Root>
 						{couponDiscount > 0 ? (
@@ -44,7 +44,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 								bg='main.secondary'
 								fontWeight='semibold'
 								mt='1'
-							>{`-${couponDiscount.toFixed(2)} ₴ ${appliedCoupon?.code ?? ''}`}</Badge>
+							>{`-$${couponDiscount.toFixed(2)} ${appliedCoupon?.code ?? ''}`}</Badge>
 						) : null}
 
 						<Flex align='center' gapX='4' mt='1'>

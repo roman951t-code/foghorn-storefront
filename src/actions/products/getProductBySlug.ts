@@ -26,6 +26,10 @@ async function fetchProductBySlug(slug: string) {
 			canonicalUrl: true,
 			openGraphImage: true,
 			imageUrl: true,
+			productImages: {
+				select: { url: true, sortOrder: true, createdAt: true },
+				orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+			},
 			basePrice: true,
 			discountPrice: true,
 			discountStartAt: true,
@@ -92,7 +96,10 @@ async function fetchProductBySlug(slug: string) {
 	});
 
 	if (!product) return null;
-	const images = buildProductImages(product.imageUrl ?? undefined, 4);
+	const persistedImages = product.productImages.map((image) => image.url).filter(Boolean);
+	const images = persistedImages.length
+		? persistedImages
+		: buildProductImages(product.imageUrl ?? undefined, 4);
 	const basePrice = product.basePrice.toNumber();
 	const attributeSetItems = product.category?.attributeSet?.items ?? [];
 
@@ -138,7 +145,7 @@ async function fetchProductBySlug(slug: string) {
 			? [...setAttributes, ...extraAttributes]
 			: extraAttributes.map((a) => ({ ...a, value: a.value }));
 
-	const { category, ...productWithoutCategory } = product;
+	const { category, productImages, ...productWithoutCategory } = product;
 	return {
 		...productWithoutCategory,
 		basePrice,

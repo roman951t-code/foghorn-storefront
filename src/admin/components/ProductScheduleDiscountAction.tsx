@@ -14,7 +14,7 @@ const toLocalInputValue = (value: string | null | undefined) => {
 	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-const formatMoney = (value: number, currency = 'UAH') => {
+const formatMoney = (value: number, currency = 'USD') => {
 	const safeValue = Number.isFinite(value) ? value : 0;
 	try {
 		return new Intl.NumberFormat(undefined, {

@@ -15,6 +15,7 @@ import { FiSearch } from 'react-icons/fi';
 import { SearchProductItem, SearchSubcategoryItem } from '@/types/product';
 import { IoPricetagsOutline } from 'react-icons/io5';
 import { CategorySearchItem, ProductSearchItem, SeeAllLink } from './SearchItem';
+import { useRouter } from '@/i18n/routing';
 
 interface SearchResponse {
 	products: SearchProductItem[];
@@ -38,10 +39,32 @@ export default function SearchInput({
 	products,
 	categories,
 }: Props) {
+	const router = useRouter();
 	const [inputValue, setInputValue] = useState('');
 	const [hasSearched, setHasSearched] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
 	const [subcategories, setSubcategories] = useState<SearchSubcategoryItem[]>([]);
+	const inputRef = useRef<HTMLInputElement | null>(null);
+	const searchQuery = inputValue.trim();
+	const searchResultsLink = `/products/search/?searchQuery=${encodeURIComponent(searchQuery)}`;
+	const clearSearch = () => {
+		setInputValue('');
+		set([]);
+		setSubcategories([]);
+		setHasSearched(false);
+		setIsLoading(false);
+		setIsOpen(false);
+	};
+	const redirectToSearch = () => {
+		const query = (inputRef.current?.value ?? inputValue).trim();
+
+		if (!query) {
+			return;
+		}
+
+		router.push(`/products/search/?searchQuery=${encodeURIComponent(query)}`);
+	};
 
 	const { collection, set } = useListCollection<SearchProductItem>({
 		initialItems: [],
@@ -108,12 +131,19 @@ export default function SearchInput({
 				variant='subtle'
 				collection={collection}
 				size='md'
-				openOnChange={(e) => e.inputValue.length > 0}
-				onInputValueChange={(e) => setInputValue(e.inputValue)}
+				selectionBehavior='preserve'
+				inputValue={inputValue}
+				open={isOpen}
+				onOpenChange={(details) => setIsOpen(details.open)}
+				onInputValueChange={(e) => {
+					setInputValue(e.inputValue);
+					setIsOpen(e.inputValue.trim().length > 0);
+				}}
 				positioning={{ flip: false, gutter: 2 }}
 			>
 				<Combobox.Control roundedLeft='md' fontSize='md' minW='284px'>
 					<Combobox.Input
+						ref={inputRef}
 						borderColor='border'
 						_focus={{ borderColor: 'main.secondary' }}
 						placeholder={placeholder}
@@ -121,12 +151,19 @@ export default function SearchInput({
 						fontSize='md'
 						bg='bg.muted'
 						roundedRight='0'
+						onPaste={(event) => {
+							if (event.clipboardData.getData('text').trim().length > 0) {
+								setIsOpen(true);
+							}
+						}}
 					/>
 					<Combobox.IndicatorGroup pr='2'>
 						<Combobox.ClearTrigger
 							aria-label='Clear search input'
 							_hover={{ cursor: 'pointer' }}
 							mt='-1'
+							hidden={searchQuery.length === 0}
+							onClick={clearSearch}
 						/>
 						<Combobox.Trigger />
 					</Combobox.IndicatorGroup>
@@ -172,7 +209,7 @@ export default function SearchInput({
 								))}
 
 								<SeeAllLink
-									linkTo={`/products/search/?searchQuery=${encodeURIComponent(inputValue.trim())}`}
+									linkTo={searchResultsLink}
 									seeAll={seeAll}
 								/>
 
@@ -212,6 +249,9 @@ export default function SearchInput({
 				color='main.darkOnly'
 				width='44px'
 				bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
+				type='button'
+				onMouseDown={(event) => event.preventDefault()}
+				onClick={redirectToSearch}
 			>
 				<FiSearch />
 			</IconButton>

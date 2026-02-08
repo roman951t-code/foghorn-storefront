@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode, Navigation, Thumbs, Pagination, A11y, Keyboard } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
+import { PRODUCT_PLACEHOLDER_IMAGE } from '@/utils/productImages';
 import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
@@ -59,12 +60,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 
 	const galleryImages = images.length
 		? images
-		: [
-				'/assets/images/temp/1Big.webp',
-				'/assets/images/temp/2Big.webp',
-				'/assets/images/temp/3Big.webp',
-				'/assets/images/temp/4Big.webp',
-		  ];
+		: Array.from({ length: 4 }, () => PRODUCT_PLACEHOLDER_IMAGE);
 
 	const pagination = isSmallScreen
 		? {

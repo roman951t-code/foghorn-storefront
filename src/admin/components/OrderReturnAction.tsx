@@ -23,7 +23,7 @@ const toNumber = (value: unknown): number => {
 	return Number.isFinite(numeric) ? numeric : 0;
 };
 
-const formatMoney = (value: number, currency = 'UAH') => {
+const formatMoney = (value: number, currency = 'USD') => {
 	const safeValue = Number.isFinite(value) ? value : 0;
 	try {
 		return new Intl.NumberFormat(undefined, {

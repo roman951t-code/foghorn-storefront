@@ -1,11 +1,15 @@
-import { PrismaClient, OrderStatus, StorefrontFormPlacement } from '@prisma/client';
+import { Prisma, PrismaClient, OrderStatus, StorefrontFormPlacement } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import slugify from 'slugify';
 import { customAlphabet } from 'nanoid';
-import { Decimal } from '@prisma/client/runtime/library';
 
 const prisma = new PrismaClient();
-type SeedProduct = { id: string; inStock: boolean; basePrice: Decimal; discountPrice: Decimal | null };
+type SeedProduct = {
+	id: string;
+	inStock: boolean;
+	basePrice: Prisma.Decimal;
+	discountPrice: Prisma.Decimal | null;
+};
 
 function createSlug(text: string) {
 	return slugify(text, { lower: true, strict: true });
@@ -446,13 +450,15 @@ async function main() {
 			const count = faker.number.int({ min: 3, max: 5 });
 			for (let i = 0; i < count; i++) {
 				const name = faker.commerce.productName();
-				const price = new Decimal(faker.number.float({ min: 100, max: 1500, fractionDigits: 2 }));
+				const price = new Prisma.Decimal(
+					faker.number.float({ min: 100, max: 1500, fractionDigits: 2 })
+				);
 				const stock = faker.number.int({ min: 5, max: 50 });
 
 				// Discount validation
-				let discountPrice: Decimal | null = null;
+				let discountPrice: Prisma.Decimal | null = null;
 				if (faker.datatype.boolean()) {
-					const discountValue = new Decimal(faker.number.int({ min: 10, max: 100 }));
+					const discountValue = new Prisma.Decimal(faker.number.int({ min: 10, max: 100 }));
 					if (price.gt(discountValue)) {
 						discountPrice = price.sub(discountValue);
 					}
@@ -506,7 +512,7 @@ async function main() {
 						data: {
 							productId: product.id,
 							sku: `${product.productCode}-${index + 1}`,
-							price: price.add(new Decimal(variant.priceDelta)),
+							price: price.add(new Prisma.Decimal(variant.priceDelta)),
 							stock: faker.number.int({ min: 1, max: Math.max(2, Math.floor(stock / 2)) }),
 							attributes: { create: variantAttributes },
 						},
@@ -703,7 +709,10 @@ async function main() {
 
 	// Orders
 	const orderedProducts = faker.helpers.arrayElements(allProducts, 2);
-	const total = orderedProducts.reduce<Decimal>((sum, p) => sum.add(p.basePrice), new Decimal(0));
+	const total = orderedProducts.reduce<Prisma.Decimal>(
+		(sum, p) => sum.add(p.basePrice),
+		new Prisma.Decimal(0)
+	);
 
 	await prisma.order.create({
 		data: {

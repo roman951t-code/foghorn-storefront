@@ -22,6 +22,7 @@ export type CreateOrderPayload = {
 	items: CreateOrderItemPayload[];
 	paymentMethod?: string;
 	shipmentMethod?: string;
+	shippingAddress?: string;
 	couponCode?: string;
 };
 
@@ -41,6 +42,7 @@ const CreateOrderSchema = z.object({
 		.min(1, 'items_required'),
 	paymentMethod: z.string().optional(),
 	shipmentMethod: z.string().optional(),
+	shippingAddress: z.string().max(500).optional(),
 	couponCode: z.string().optional(),
 });
 
@@ -197,6 +199,7 @@ export async function createOrderAction(
 	const total = orderItems.reduce((acc, item) => acc + item.price, 0);
 	const roundedTotal = Math.round(total * 100) / 100;
 	const couponCode = parsed.data.couponCode?.trim() || null;
+	const shippingAddress = parsed.data.shippingAddress?.trim() || null;
 	const couponDiscountRes =
 		couponCode ? await getCouponDiscountPreview(couponCode, roundedTotal) : null;
 	if (couponCode && couponDiscountRes && !couponDiscountRes.ok) {
@@ -253,6 +256,7 @@ export async function createOrderAction(
 					total: new Prisma.Decimal(finalTotal.toFixed(2)),
 					paymentMethod: parsed.data.paymentMethod ?? null,
 					shipmentMethod: parsed.data.shipmentMethod ?? null,
+					shippingAddress,
 					customerName,
 					contactName,
 					contactLastName,

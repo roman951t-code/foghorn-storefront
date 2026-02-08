@@ -1,5 +1,5 @@
 import type { ActionHandler, BulkActionResponse, RecordActionResponse } from 'adminjs';
-import type { OrderStatus } from '@prisma/client';
+import type { OrderStatus, Prisma } from '@prisma/client';
 import Stripe from 'stripe';
 import { prisma } from '../prisma.mts';
 
@@ -7,7 +7,9 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe =
 	stripeSecretKey && stripeSecretKey !== ''
 		? new Stripe(stripeSecretKey, { apiVersion: '2025-12-15.clover' })
-		: null;
+	: null;
+
+const INVENTORY_RESTOCKED_NOTE = 'Inventory restocked';
 
 const resolveAdminEmail = (currentAdmin: unknown): string | null => {
 	if (!currentAdmin || typeof currentAdmin !== 'object') {
@@ -18,6 +20,34 @@ const resolveAdminEmail = (currentAdmin: unknown): string | null => {
 		return null;
 	}
 	return email;
+};
+
+const restockOrderInventory = async (tx: Prisma.TransactionClient, orderId: string) => {
+	const items = await tx.orderItem.findMany({
+		where: { orderId },
+		select: { productId: true, variantId: true, quantity: true },
+	});
+
+	for (const item of items) {
+		if (!item.variantId) continue;
+		await tx.productVariant.updateMany({
+			where: { id: item.variantId, productId: item.productId },
+			data: { stock: { increment: item.quantity } },
+		});
+	}
+
+	const productIds = Array.from(new Set(items.map((item) => item.productId)));
+	for (const productId of productIds) {
+		const remaining = await tx.productVariant.findMany({
+			where: { productId, stock: { gt: 0 } },
+			select: { stock: true },
+		});
+		const totalStock = remaining.reduce((sum, v) => sum + (v.stock ?? 0), 0);
+		await tx.product.update({
+			where: { id: productId },
+			data: { stock: totalStock, inStock: totalStock > 0 },
+		});
+	}
 };
 
 const updateOrderStatusWithAudit = async (
@@ -198,6 +228,50 @@ export const setStatus: ActionHandler<RecordActionResponse> = async (req, _res, 
 			notice: { message: 'invalid-status', type: 'error' },
 		};
 	}
+
+	if (requested === 'CANCELLED') {
+		const orderId = record.param('id') as string;
+		const adminEmail = resolveAdminEmail(currentAdmin);
+		await prisma.$transaction(async (tx) => {
+			const order = await tx.order.findUnique({
+				where: { id: orderId },
+				select: { status: true },
+			});
+			if (!order || order.status === 'CANCELLED' || order.status === 'DELIVERED' || order.status === 'RETURNED') {
+				return;
+			}
+
+			await restockOrderInventory(tx, orderId);
+			await tx.order.update({
+				where: { id: orderId },
+				data: { status: 'CANCELLED' },
+			});
+			await tx.orderAuditEntry.create({
+				data: {
+					orderId,
+					type: 'STATUS_CHANGE',
+					fromStatus: order.status ?? null,
+					toStatus: 'CANCELLED',
+					adminEmail,
+					note: 'Cancelled',
+				},
+			});
+			await tx.orderAuditEntry.create({
+				data: {
+					orderId,
+					type: 'NOTE',
+					note: INVENTORY_RESTOCKED_NOTE,
+					adminEmail,
+				},
+			});
+		});
+		const updated = await resource.findOne(orderId);
+		return {
+			record: updated ? updated.toJSON(currentAdmin) : record.toJSON(currentAdmin),
+			notice: { message: 'status-updated', type: 'success', options: { status: requested } },
+		};
+	}
+
 	return makeStatusAction(requested)(req, _res, context);
 };
 
@@ -210,6 +284,7 @@ export const bulkMarkDelivered = makeBulkStatusAction('DELIVERED');
 
 export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
 	const { record, resource, currentAdmin } = context;
+	const method = ((req as { method?: string }).method ?? 'get').toLowerCase();
 	const payload = (req as { payload?: Record<string, unknown> }).payload ?? {};
 	const refundRequested = String(payload.refund ?? 'false') === 'true';
 
@@ -217,26 +292,47 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 		throw new Error('Missing record context');
 	}
 
-	const orderId = record.param('id') as string;
-	const stripeSessionId = record.param('stripeSessionId') as string | null;
-	const currentStatus = record.param('status') as OrderStatus | undefined;
-
-	if (currentStatus === 'CANCELLED' || currentStatus === 'DELIVERED' || currentStatus === 'RETURNED') {
+	if (method === 'get') {
 		return {
 			record: record.toJSON(currentAdmin),
-			notice: { message: 'order-not-cancellable', type: 'error' },
+		};
+	}
+
+	const orderId = record.param('id') as string;
+	const orderSnapshot = await prisma.order.findUnique({
+		where: { id: orderId },
+		select: { status: true, stripeSessionId: true },
+	});
+	if (!orderSnapshot) {
+		return {
+			record: record.toJSON(currentAdmin),
+			notice: { message: 'order-not-found', type: 'error' },
+		};
+	}
+	if (
+		orderSnapshot.status === 'CANCELLED' ||
+		orderSnapshot.status === 'DELIVERED' ||
+		orderSnapshot.status === 'RETURNED'
+	) {
+		return {
+			record: record.toJSON(currentAdmin),
+			notice: {
+				message: 'order-not-cancellable-status',
+				type: 'error',
+				options: { status: orderSnapshot.status },
+			},
 		};
 	}
 
 	if (refundRequested) {
-		if (!stripeSessionId) {
+		if (!orderSnapshot.stripeSessionId) {
 			return {
 				record: record.toJSON(currentAdmin),
 				notice: { message: 'refund-unavailable', type: 'error' },
 			};
 		}
 		try {
-			await refundStripeSession(stripeSessionId);
+			await refundStripeSession(orderSnapshot.stripeSessionId);
 		} catch (error) {
 			const message =
 				error instanceof Error && error.message === 'refund-unavailable'
@@ -250,7 +346,63 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 	}
 
 	const adminEmail = resolveAdminEmail(currentAdmin);
-	await updateOrderStatusWithAudit(orderId, 'CANCELLED', currentStatus, adminEmail);
+	const result = await prisma.$transaction(async (tx) => {
+		const order = await tx.order.findUnique({
+			where: { id: orderId },
+			select: { status: true },
+		});
+		if (!order) {
+			return { success: false as const, reason: 'not-found' as const };
+		}
+		if (order.status === 'CANCELLED' || order.status === 'DELIVERED' || order.status === 'RETURNED') {
+			return { success: false as const, reason: 'blocked' as const, status: order.status };
+		}
+
+		await restockOrderInventory(tx, orderId);
+		await tx.order.update({
+			where: { id: orderId },
+			data: { status: 'CANCELLED' },
+		});
+		await tx.orderAuditEntry.create({
+			data: {
+				orderId,
+				type: 'STATUS_CHANGE',
+				fromStatus: order.status ?? null,
+				toStatus: 'CANCELLED',
+				adminEmail,
+				note: refundRequested ? 'Cancelled and refunded' : 'Cancelled',
+			},
+		});
+
+		await tx.orderAuditEntry.create({
+			data: {
+				orderId,
+				type: 'NOTE',
+				note: INVENTORY_RESTOCKED_NOTE,
+				adminEmail,
+			},
+		});
+
+		return { success: true as const };
+	});
+
+	if (!result.success) {
+		if (result.reason === 'not-found') {
+			return {
+				record: record.toJSON(currentAdmin),
+				notice: { message: 'order-not-found', type: 'error' },
+			};
+		}
+		return {
+			record: record.toJSON(currentAdmin),
+			notice: {
+				message: 'order-not-cancellable-status',
+				type: 'error',
+				options: { status: result.status },
+			},
+		};
+	}
+
 	const updated = await resource.findOne(orderId);
 	return {
 		record: updated ? updated.toJSON(currentAdmin) : record.toJSON(currentAdmin),
@@ -262,16 +414,36 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 };
 
 export const deleteOrder: ActionHandler<RecordActionResponse> = async (_req, _res, context) => {
-	const { record, currentAdmin } = context;
-	if (!record) {
+	const { record, resource, currentAdmin, h } = context;
+	if (!record || !resource) {
 		throw new Error('Missing record context');
 	}
 	const orderId = record.param('id') as string;
-	await prisma.orderItem.deleteMany({ where: { orderId } });
-	await prisma.order.delete({ where: { id: orderId } });
+	const resourceId = typeof (resource as any).id === 'function' ? (resource as any).id() : (resource as any).id;
+	await prisma.$transaction(async (tx) => {
+		const order = await tx.order.findUnique({
+			where: { id: orderId },
+			select: { status: true },
+		});
+		if (order && (order.status === 'PENDING' || order.status === 'PAID')) {
+			await restockOrderInventory(tx, orderId);
+		}
+		if (order && order.status === 'CANCELLED') {
+			const restocked = await tx.orderAuditEntry.findFirst({
+				where: { orderId, type: 'NOTE', note: INVENTORY_RESTOCKED_NOTE },
+				select: { id: true },
+			});
+			if (!restocked) {
+				await restockOrderInventory(tx, orderId);
+			}
+		}
+		await tx.orderItem.deleteMany({ where: { orderId } });
+		await tx.order.delete({ where: { id: orderId } });
+	});
 	return {
 		record: record.toJSON(currentAdmin),
 		notice: { message: 'order-deleted', type: 'success' },
+		redirectUrl: h.resourceUrl({ resourceId }),
 	};
 };
 

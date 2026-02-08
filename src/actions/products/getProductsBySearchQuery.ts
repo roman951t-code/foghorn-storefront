@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
 import { PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
+import { buildProductImages } from '@/utils/productImages';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
@@ -166,6 +167,11 @@ export async function getProductsBySearchQuery(
 			name: true,
 			fullSlug: true,
 			imageUrl: true,
+			productImages: {
+				select: { url: true, sortOrder: true, createdAt: true },
+				orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+				take: 6,
+			},
 			basePrice: true,
 			categoryName: true,
 			subcategoryName: true,
@@ -196,9 +202,10 @@ export async function getProductsBySearchQuery(
 	});
 
 	const productItems: SubcategoryProduct[] = products.map((product) => {
-		const { variants, reviews, ...rest } = product as typeof product & {
+		const { variants, reviews, productImages, ...rest } = product as typeof product & {
 			variants?: unknown;
 			reviews?: unknown;
+			productImages?: unknown;
 		};
 		const ratings = product.reviews?.map((r) => r.rating) ?? [];
 		const averageRating =
@@ -218,6 +225,9 @@ export async function getProductsBySearchQuery(
 			name: product.name ?? '',
 			fullSlug: product.fullSlug ?? '',
 			imageUrl: product.imageUrl ?? null,
+			images: product.productImages.length
+				? product.productImages.map((image) => image.url)
+				: buildProductImages(product.imageUrl ?? undefined, 4),
 			categoryName: product.categoryName ?? '',
 			subcategoryName: product.subcategoryName ?? '',
 			inStock: !!product.inStock,

@@ -48,7 +48,7 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 	return (
 		<>
 			<Text fontSize='sm' fontWeight='semibold' color='main' mb={4}>
-				{title} ₴
+				{title} ($)
 			</Text>
 			<Flex justifyContent='space-between' alignItems='center' gap={3} w='100%' minW={0}>
 				<HStack gap={2} flex='1' minW={0}>
