@@ -79,52 +79,56 @@ export async function getProductsBySearchQuery(
 				],
 			}
 		: undefined;
-
-	const whereClause: Prisma.ProductWhereInput = {
-		...(searchCondition ?? {}),
-		...(brandFilters.length > 0 ? { brand: { slug: { in: brandFilters } } } : {}),
-		...(inStock !== undefined ? { inStock } : {}),
+	const combinedConditions: Prisma.ProductWhereInput[] = [
+		getPublishedProductWhere(now),
+		...(searchCondition ? [searchCondition] : []),
+		...(brandFilters.length > 0 ? [{ brand: { slug: { in: brandFilters } } }] : []),
+		...(inStock !== undefined ? [{ inStock }] : []),
+		...(dynamicConditions.length > 0 ? dynamicConditions : []),
 		...(priceFilter
-			? {
-					OR: [
-						{
-							AND: [
-								{ discountPrice: { not: null } },
-								{
-									OR: [
-										{ discountStartAt: null, discountEndAt: null },
-										{ discountStartAt: { lte: now }, discountEndAt: { gt: now } },
-									],
-								},
-								{ discountPrice: priceFilter },
-							],
-						},
-						{
-							AND: [
-								{
-									OR: [
-										{ discountPrice: null },
-										{
-											AND: [
-												{ discountPrice: { not: null } },
-												{
-													OR: [
-														{ discountStartAt: { gt: now } },
-														{ discountEndAt: { lte: now } },
-													],
-												},
-											],
-										},
-									],
-								},
-								{ basePrice: priceFilter },
-							],
-						},
-					],
-				}
-			: {}),
-		AND: [getPublishedProductWhere(now), ...(dynamicConditions.length > 0 ? dynamicConditions : [])],
-	};
+			? [
+					{
+						OR: [
+							{
+								AND: [
+									{ discountPrice: { not: null } },
+									{
+										OR: [
+											{ discountStartAt: null, discountEndAt: null },
+											{ discountStartAt: { lte: now }, discountEndAt: { gt: now } },
+										],
+									},
+									{ discountPrice: priceFilter },
+								],
+							},
+							{
+								AND: [
+									{
+										OR: [
+											{ discountPrice: null },
+											{
+												AND: [
+													{ discountPrice: { not: null } },
+													{
+														OR: [
+															{ discountStartAt: { gt: now } },
+															{ discountEndAt: { lte: now } },
+														],
+													},
+												],
+											},
+										],
+									},
+									{ basePrice: priceFilter },
+								],
+							},
+						],
+					},
+				]
+			: []),
+	];
+
+	const whereClause: Prisma.ProductWhereInput = { AND: combinedConditions };
 
 	const allMatchingProducts = await prisma.product.findMany({
 		where: whereClause,

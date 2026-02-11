@@ -1,5 +1,5 @@
 'use client';
-import { Fieldset, SimpleGrid } from '@chakra-ui/react';
+import { Fieldset, VStack } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
@@ -15,8 +15,10 @@ import { editNameAction } from '@/actions/auth/editAccountAction';
 import NameForm from './NameForm';
 import EmailForm from './EmailForm';
 import PhoneForm from './PhoneForm';
+import AddressForm from './AddressForm';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
+import { toShippingAddressFormValue } from '@/utils/shippingAddress';
 
 interface Props {
 	i18nData: I18nData;
@@ -27,7 +29,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 
 	const userEmail = session?.user?.email;
 	const userPhone = session?.user?.phoneNumber;
-	const isGoogleUser = session?.user?.isGoogleUser;
 
 	const schemaShape = useMemo(() => createAccountSchema(i18nData), [i18nData]);
 	const nameSchema = useMemo(
@@ -39,8 +40,19 @@ export default function PersonalDataForm({ i18nData }: Props) {
 			}),
 		[schemaShape]
 	);
-	const emailSchema = useMemo(() => z.object({ email: schemaShape.email }), [schemaShape]);
 	const phoneSchema = useMemo(() => z.object({ phone: schemaShape.phone }), [schemaShape]);
+	const shippingAddressDefault = useMemo(
+		() =>
+			toShippingAddressFormValue({
+				country: (session?.user as any)?.shippingCountry ?? null,
+				region: (session?.user as any)?.shippingRegion ?? null,
+				city: (session?.user as any)?.shippingCity ?? null,
+				postalCode: (session?.user as any)?.shippingPostalCode ?? null,
+				addressLine1: (session?.user as any)?.shippingAddressLine1 ?? null,
+				addressLine2: (session?.user as any)?.shippingAddressLine2 ?? null,
+			}),
+		[session?.user]
+	);
 
 	const nameForm = useForm({
 		defaultValues: {
@@ -49,11 +61,6 @@ export default function PersonalDataForm({ i18nData }: Props) {
 			middleName: session?.user?.middleName,
 		},
 		resolver: zodResolver(nameSchema),
-	});
-
-	const emailForm = useForm({
-		defaultValues: { email: session?.user?.email },
-		resolver: zodResolver(emailSchema),
 	});
 
 	const refreshSession = async () => {
@@ -85,13 +92,7 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	};
 
 	return (
-		<SimpleGrid
-			columns={{ base: 1, '2xl': 2 }}
-			gap={{ base: 6, md: 8 }}
-			mt='4'
-			w='full'
-			colorPalette='gray'
-		>
+		<VStack mt='4' w='full' colorPalette='gray' alignItems='stretch' gap='6'>
 			<NameForm
 				i18nData={i18nData}
 				nameForm={nameForm}
@@ -110,11 +111,8 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					css={{ '--field-label-width': '150px' }}
 				>
 					<EmailForm
-						isEmailVerified={session?.user?.emailVerified}
 						i18nData={i18nData}
-						emailForm={emailForm}
 						userEmail={userEmail}
-						isGoogleUser={isGoogleUser}
 					/>
 					<PhoneForm
 						i18nData={i18nData}
@@ -124,6 +122,11 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					/>
 				</Fieldset.Content>
 			</Fieldset.Root>
-		</SimpleGrid>
+			<AddressForm
+				i18nData={i18nData}
+				initialAddress={shippingAddressDefault}
+				refreshSession={refreshSession}
+			/>
+		</VStack>
 	);
 }

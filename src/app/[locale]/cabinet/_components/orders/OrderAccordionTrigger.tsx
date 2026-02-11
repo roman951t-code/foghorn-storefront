@@ -1,7 +1,7 @@
 import {
 	Accordion,
+	Badge,
 	Flex,
-	Highlight,
 	HStack,
 	Icon,
 	Stat,
@@ -47,18 +47,19 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 						<Stat.ValueText fontSize='3xl'>{`$${order.total.toFixed(2)}`}</Stat.ValueText>
 					</Stat.Root>
 					<Text textStyle='sm' fontWeight='normal'>
-						<Highlight query={`${totalItems}`} styles={{ fontWeight: 'bold' }}>{`${productsT(
-							'numOfProducts'
-						)}: ${totalItems}`}</Highlight>
+						<Text as='span' fontWeight='bold'>{`${productsT('numOfProducts')}: ${totalItems}`}</Text>
 					</Text>
 					{order.totalDiscount > 0 ? (
 						<Text textStyle='sm' fontWeight='normal'>
-							<Highlight
-								query={totalDiscountText}
-								styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+							{`${productsT('totalDiscount')}: `}
+							<Badge
+								variant='solid'
+								color='black'
+								bg='main.secondary'
+								fontWeight='semibold'
 							>
-								{`${productsT('totalDiscount')}: ${totalDiscountText}`}
-							</Highlight>
+								{totalDiscountText}
+							</Badge>
 						</Text>
 					) : null}
 				</VStack>

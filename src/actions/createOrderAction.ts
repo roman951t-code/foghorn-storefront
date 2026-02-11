@@ -17,6 +17,12 @@ import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
 import { getCouponDiscountPreview } from '@/lib/coupons';
+import {
+	getMissingRequiredShippingAddressFields,
+	normalizeShippingAddress,
+	SHIPPING_ADDRESS_FIELD_LIMITS,
+	type ShippingAddressInput,
+} from '@/utils/shippingAddress';
 
 type CreateOrderItemPayload = { productId: string; variantId: string | null; quantity: number };
 
@@ -24,7 +30,7 @@ export type CreateOrderPayload = {
 	items: CreateOrderItemPayload[];
 	paymentMethod?: string;
 	shipmentMethod?: string;
-	shippingAddress?: string;
+	shippingAddress?: ShippingAddressInput | string;
 	couponCode?: string;
 	locale?: string;
 };
@@ -45,7 +51,19 @@ const CreateOrderSchema = z.object({
 		.min(1, 'items_required'),
 	paymentMethod: z.string().optional(),
 	shipmentMethod: z.string().optional(),
-	shippingAddress: z.string().max(500).optional(),
+	shippingAddress: z
+		.union([
+			z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.fullAddress),
+			z.object({
+				country: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.country).optional().nullable(),
+				region: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.region).optional().nullable(),
+				city: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.city).optional().nullable(),
+				postalCode: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.postalCode).optional().nullable(),
+				addressLine1: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine1).optional().nullable(),
+				addressLine2: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine2).optional().nullable(),
+			}),
+		])
+		.optional(),
 	couponCode: z.string().optional(),
 	locale: z.string().trim().toLowerCase().max(16).optional(),
 });
@@ -256,7 +274,7 @@ export async function createOrderAction(
 	const total = orderItems.reduce((acc, item) => acc + item.price, 0);
 	const roundedTotal = Math.round(total * 100) / 100;
 	const couponCode = parsed.data.couponCode?.trim() || null;
-	const shippingAddress = parsed.data.shippingAddress?.trim() || null;
+	const shippingAddress = normalizeShippingAddress(parsed.data.shippingAddress);
 	const couponDiscountRes =
 		couponCode ? await getCouponDiscountPreview(couponCode, roundedTotal) : null;
 	if (couponCode && couponDiscountRes && !couponDiscountRes.ok) {
@@ -265,6 +283,10 @@ export async function createOrderAction(
 	const couponDiscountAmount =
 		couponDiscountRes && couponDiscountRes.ok ? couponDiscountRes.preview.amount : 0;
 	const finalTotal = Math.round(Math.max(0, roundedTotal - couponDiscountAmount) * 100) / 100;
+	const missingShippingFields = getMissingRequiredShippingAddressFields(parsed.data.shippingAddress);
+	if (missingShippingFields.length > 0) {
+		return { success: false, message: 'shipping-address-required' };
+	}
 
 	const buildCustomerName = (first: string | null | undefined, last: string | null | undefined) => {
 		const firstTrimmed = (first ?? '').trim();
@@ -313,7 +335,13 @@ export async function createOrderAction(
 					total: new Prisma.Decimal(finalTotal.toFixed(2)),
 					paymentMethod: parsed.data.paymentMethod ?? null,
 					shipmentMethod: parsed.data.shipmentMethod ?? null,
-					shippingAddress,
+					shippingAddress: shippingAddress.fullAddress,
+					shippingCountry: shippingAddress.country,
+					shippingRegion: shippingAddress.region,
+					shippingCity: shippingAddress.city,
+					shippingPostalCode: shippingAddress.postalCode,
+					shippingAddressLine1: shippingAddress.addressLine1,
+					shippingAddressLine2: shippingAddress.addressLine2,
 					customerName,
 					contactName,
 					contactLastName,
@@ -364,6 +392,18 @@ export async function createOrderAction(
 				},
 			});
 
+			await tx.user.update({
+				where: { id: userId },
+				data: {
+					shippingCountry: shippingAddress.country,
+					shippingRegion: shippingAddress.region,
+					shippingCity: shippingAddress.city,
+					shippingPostalCode: shippingAddress.postalCode,
+					shippingAddressLine1: shippingAddress.addressLine1,
+					shippingAddressLine2: shippingAddress.addressLine2,
+				},
+			});
+
 			if (couponDiscountRes && couponDiscountRes.ok) {
 				const maxRedemptions = couponDiscountRes.maxRedemptions;
 				const updated = await tx.coupon.updateMany({
@@ -388,6 +428,11 @@ export async function createOrderAction(
 					},
 				});
 			}
+
+			// Clear cart after successful order creation.
+			await tx.cartItem.deleteMany({
+				where: { cart: { userId } },
+			});
 
 			return newOrder;
 		});

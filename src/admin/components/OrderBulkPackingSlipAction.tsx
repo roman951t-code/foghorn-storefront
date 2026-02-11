@@ -21,6 +21,13 @@ type PackingSlipPayload = {
 	contactPhone: string | null;
 	paymentMethod: string | null;
 	shipmentMethod: string | null;
+	shippingAddress: string | null;
+	shippingCountry: string | null;
+	shippingRegion: string | null;
+	shippingCity: string | null;
+	shippingPostalCode: string | null;
+	shippingAddressLine1: string | null;
+	shippingAddressLine2: string | null;
 	carrier: string | null;
 	trackingNumber: string | null;
 	total: number;
@@ -76,6 +83,21 @@ const normalizeFullName = (first: string | null, last: string | null) => {
 		return firstTrimmed;
 	}
 	return `${firstTrimmed} ${lastTrimmed}`;
+};
+
+const buildShippingAddressLines = (order: PackingSlipPayload): string[] => {
+	const lines = [
+		order.shippingAddressLine1,
+		order.shippingAddressLine2,
+		[order.shippingCity, order.shippingRegion, order.shippingPostalCode].filter(Boolean).join(', '),
+		order.shippingCountry,
+	]
+		.map((line) => (line ?? '').trim())
+		.filter(Boolean);
+
+	if (lines.length) return lines;
+	if (order.shippingAddress?.trim()) return [order.shippingAddress.trim()];
+	return [];
 };
 
 export default function OrderBulkPackingSlipAction({ action, resource, records }: ActionProps) {
@@ -152,6 +174,7 @@ export default function OrderBulkPackingSlipAction({ action, resource, records }
 				<Box style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 					{payload.orders.map((order, index) => {
 						const customer = normalizeFullName(order.contactName, order.contactLastName);
+						const shippingAddressLines = buildShippingAddressLines(order);
 						const isLast = index === payload.orders.length - 1;
 						return (
 							<Box
@@ -181,6 +204,22 @@ export default function OrderBulkPackingSlipAction({ action, resource, records }
 										<Text color='grey60' fontSize='sm'>
 											{order.contactPhone ?? order.contactEmail ?? '-'}
 										</Text>
+									</Box>
+									<Box style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
+										<Text color='grey60' fontSize='sm'>
+											{translateMessage('packing-slip-shipping-address')}
+										</Text>
+										{shippingAddressLines.length ? (
+											<Box style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+												{shippingAddressLines.map((line, lineIndex) => (
+													<Text key={`${order.orderId}-${line}-${lineIndex}`} fontWeight={lineIndex === 0 ? 'bold' : 'normal'}>
+														{line}
+													</Text>
+												))}
+											</Box>
+										) : (
+											<Text fontWeight='bold'>-</Text>
+										)}
 									</Box>
 									<Box style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
 										<Text color='grey60' fontSize='sm'>

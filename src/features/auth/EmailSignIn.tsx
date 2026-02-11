@@ -75,8 +75,8 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 	}
 
 	const errorMap: Record<string, string> = {
-		'Invalid password': i18nData.invalidFormData,
-		'User not found': i18nData.userNotFound,
+		'Invalid password': i18nData.userLoginFail,
+		'User not found': i18nData.userLoginFail,
 		'Email not verified': i18nData.emailNotVerified,
 		'Too many attempts': i18nData.tooManyAttempts,
 	};

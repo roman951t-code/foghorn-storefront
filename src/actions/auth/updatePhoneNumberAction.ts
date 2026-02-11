@@ -8,6 +8,11 @@ import { getAccountSchemas } from 'validationSchemas/accountSchema';
 import { prisma } from '@/lib/prisma';
 import { autoVerifyPhoneNumber } from './phoneVerificationHelper';
 import { auth } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rateLimit';
+
+const UPDATE_PHONE_LIMIT_PER_USER = 5;
+const UPDATE_PHONE_LIMIT_PER_PHONE = 4;
+const UPDATE_PHONE_WINDOW_MS = 10 * 60 * 1000;
 
 export async function updatePhoneNumberAction(
 	_: unknown,
@@ -29,6 +34,23 @@ export async function updatePhoneNumberAction(
 
 	if (!currentUserId) {
 		return { success: false, message: validationT('userNotFound') };
+	}
+
+	const [userRate, phoneRate] = await Promise.all([
+		checkRateLimit({
+			key: `auth:phone-update:user:${currentUserId}`,
+			limit: UPDATE_PHONE_LIMIT_PER_USER,
+			windowMs: UPDATE_PHONE_WINDOW_MS,
+		}),
+		checkRateLimit({
+			key: `auth:phone-update:phone:${rawPhone}`,
+			limit: UPDATE_PHONE_LIMIT_PER_PHONE,
+			windowMs: UPDATE_PHONE_WINDOW_MS,
+		}),
+	]);
+
+	if (!userRate.allowed || !phoneRate.allowed) {
+		return { success: false, message: validationT('tooManyRequests') };
 	}
 
 	const existingUserWithPhone = await prisma.user.findUnique({

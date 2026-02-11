@@ -39,15 +39,42 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const description = pagesT('metadata.categoryDescription', {
 		category: subcategoryData.subcategoryName,
 	});
+	const hasFilteringParams = Object.entries(resolvedSearch ?? {}).some(([key, value]) => {
+		if (key === 'page' || key === 'perPage') return false;
+		if (Array.isArray(value)) return value.some(Boolean);
+		return Boolean(value);
+	});
+	const parsedPage = Number.parseInt(
+		Array.isArray(resolvedSearch?.page) ? resolvedSearch.page[0] : resolvedSearch?.page ?? '1',
+		10
+	);
+	const canonicalSearchParams =
+		Number.isFinite(parsedPage) && parsedPage > 1 ? { page: `${parsedPage}` } : undefined;
+	const alternates = buildLanguageAlternates(
+		locale,
+		`/products/${category}/${subcategory}`,
+		canonicalSearchParams
+	);
+	const ogImage = absoluteUrl('/assets/images/logoBig.webp');
 
 	return {
 		title,
 		description,
-		alternates: buildLanguageAlternates(
-			locale,
-			`/products/${category}/${subcategory}`,
-			resolvedSearch ?? undefined
-		),
+		alternates,
+		robots: hasFilteringParams ? { index: false, follow: true } : { index: true, follow: true },
+		openGraph: {
+			title,
+			description,
+			type: 'website',
+			url: alternates.canonical,
+			images: [ogImage],
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title,
+			description,
+			images: [ogImage],
+		},
 	};
 }
 

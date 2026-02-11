@@ -43,7 +43,7 @@ export default function Footer() {
 				<MediaContacts hideBelow='md' />
 				<Group>
 					<Text color='main.lightOnly'>{t('design')}</Text>
-					<Link href='#' variant='underline' color='main.secondary' _focus={{ outline: 'none' }}>
+					<Link href='#' variant='underline' color='main.secondary' _focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}>
 						Foghorn
 					</Link>
 				</Group>

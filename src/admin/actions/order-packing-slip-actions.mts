@@ -18,6 +18,13 @@ type PackingSlipPayload = {
 	contactPhone: string | null;
 	paymentMethod: string | null;
 	shipmentMethod: string | null;
+	shippingAddress: string | null;
+	shippingCountry: string | null;
+	shippingRegion: string | null;
+	shippingCity: string | null;
+	shippingPostalCode: string | null;
+	shippingAddressLine1: string | null;
+	shippingAddressLine2: string | null;
 	carrier: string | null;
 	trackingNumber: string | null;
 	total: number;
@@ -38,6 +45,13 @@ const buildPackingPayload = (order: {
 	contactPhone: string | null;
 	paymentMethod: string | null;
 	shipmentMethod: string | null;
+	shippingAddress: string | null;
+	shippingCountry: string | null;
+	shippingRegion: string | null;
+	shippingCity: string | null;
+	shippingPostalCode: string | null;
+	shippingAddressLine1: string | null;
+	shippingAddressLine2: string | null;
 	carrier: string | null;
 	trackingNumber: string | null;
 	total: unknown;
@@ -66,6 +80,13 @@ const buildPackingPayload = (order: {
 		contactPhone: order.contactPhone ?? null,
 		paymentMethod: order.paymentMethod ?? null,
 		shipmentMethod: order.shipmentMethod ?? null,
+		shippingAddress: order.shippingAddress ?? null,
+		shippingCountry: order.shippingCountry ?? null,
+		shippingRegion: order.shippingRegion ?? null,
+		shippingCity: order.shippingCity ?? null,
+		shippingPostalCode: order.shippingPostalCode ?? null,
+		shippingAddressLine1: order.shippingAddressLine1 ?? null,
+		shippingAddressLine2: order.shippingAddressLine2 ?? null,
 		carrier: order.carrier ?? null,
 		trackingNumber: order.trackingNumber ?? null,
 		total: Number(order.total ?? 0),

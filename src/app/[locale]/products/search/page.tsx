@@ -51,11 +51,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const description = pagesT('metadata.searchDescription', {
 		query: tag ? productsT(tag) : searchQuery || '',
 	});
-	const alternates = buildLanguageAlternates(
-		locale,
-		'/products/search',
-		resolvedSearch ?? undefined
-	);
+	const alternates = buildLanguageAlternates(locale, '/products/search');
 	const tagImageMap: Record<string, string> = {
 		popular: '/assets/images/carousel1.webp',
 		new: '/assets/images/carousel2.webp',
@@ -71,6 +67,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 		title,
 		description,
 		alternates,
+		robots: { index: false, follow: true },
 		openGraph: {
 			title,
 			description,

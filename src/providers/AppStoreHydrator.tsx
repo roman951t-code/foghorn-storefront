@@ -6,7 +6,7 @@ import type { CartData } from '@/types/cart';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishListStore } from '@/stores/wishListStore';
-import { useSession } from './SessionProvider';
+import { useOptionalSession } from '@/providers/SessionProvider';
 
 type Props = {
 	categories: CatalogCategory[];
@@ -40,7 +40,8 @@ export function AppStoreHydrator({
 	const mergeGuestWish = useWishListStore((state) => state.mergeGuestWishlistIntoServer);
 
 	const prevLoggedInRef = useRef<boolean | null>(null);
-	const { session } = useSession();
+	const sessionContext = useOptionalSession();
+	const session = sessionContext?.session;
 	const currentUserId = session?.user?.id ?? null;
 	const prevUserIdRef = useRef<string | null>(currentUserId);
 

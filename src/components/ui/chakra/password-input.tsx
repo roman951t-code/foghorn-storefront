@@ -54,6 +54,9 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
 							if (rest.disabled) return;
 							if (e.button !== 0) return;
 							e.preventDefault();
+						}}
+						onClick={() => {
+							if (rest.disabled) return;
 							setVisible(!visible);
 						}}
 					>
@@ -72,7 +75,6 @@ const VisibilityTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
 	function VisibilityTrigger(props, ref) {
 		return (
 			<IconButton
-				tabIndex={-1}
 				ref={ref}
 				me='-2'
 				aspectRatio='square'

@@ -5,6 +5,12 @@ import 'server-only';
 import { getTranslations } from 'next-intl/server';
 import { getResetPassSchema } from 'validationSchemas/resetPassSchema';
 import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+
+const RESET_PASSWORD_LIMIT_PER_EMAIL = 3;
+const RESET_PASSWORD_LIMIT_PER_IP = 20;
+const RESET_PASSWORD_WINDOW_MS = 10 * 60 * 1000;
 
 export async function resetPasswordAction(
 	_: unknown,
@@ -19,12 +25,31 @@ export async function resetPasswordAction(
 		return { success: false, message: validationT('invalidFormData') };
 	}
 
-	const { email } = validatedFormData.data;
+	const normalizedEmail = validatedFormData.data.email.trim().toLowerCase();
+	const requestHeaders = await headers();
+	const ip = getClientIp(requestHeaders);
+
+	const [emailRate, ipRate] = await Promise.all([
+		checkRateLimit({
+			key: `auth:password-reset:email:${normalizedEmail}`,
+			limit: RESET_PASSWORD_LIMIT_PER_EMAIL,
+			windowMs: RESET_PASSWORD_WINDOW_MS,
+		}),
+		checkRateLimit({
+			key: `auth:password-reset:ip:${ip}`,
+			limit: RESET_PASSWORD_LIMIT_PER_IP,
+			windowMs: RESET_PASSWORD_WINDOW_MS,
+		}),
+	]);
+
+	if (!emailRate.allowed || !ipRate.allowed) {
+		return { success: false, message: validationT('tooManyRequests') };
+	}
 
 	try {
 		await auth.api.forgetPasswordEmailOTP({
 			body: {
-				email,
+				email: normalizedEmail,
 			},
 		});
 

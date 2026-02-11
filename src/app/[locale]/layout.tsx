@@ -1,5 +1,5 @@
 import { ReactNode, Suspense } from 'react';
-import { Box } from '@chakra-ui/react';
+import { Box, Link } from '@chakra-ui/react';
 import { hasLocale } from 'next-intl';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
@@ -33,6 +33,17 @@ import { StorefrontFormPlacement } from '@prisma/client';
 
 export const metadata: Metadata = {
 	metadataBase: new URL(APP_URL),
+	title: {
+		default: 'Online Store',
+		template: '%s | Online Store',
+	},
+	description: 'Online Store catalog with secure checkout, fast delivery, and trusted product guarantees.',
+	openGraph: {
+		siteName: 'Online Store',
+	},
+	twitter: {
+		card: 'summary_large_image',
+	},
 };
 
 export function generateStaticParams() {
@@ -45,7 +56,7 @@ interface Props {
 }
 
 function LayoutFallback() {
-	return <Box display='flex' flexDirection='column' minHeight='100vh' bg='bg.primary' />;
+	return <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }} />;
 }
 
 async function LayoutProviders({
@@ -55,6 +66,8 @@ async function LayoutProviders({
 	children: ReactNode;
 	locale: AppLocale;
 }) {
+	const skipToMainLabel =
+		locale === 'uk' ? 'Перейти до основного вмісту' : 'Skip to main content';
 	const headersList = await headers();
 
 	const messagesPromise = loadClientMessages([
@@ -119,8 +132,31 @@ async function LayoutProviders({
 					<Script id='org-schema' type='application/ld+json'>
 						{JSON.stringify(orgJsonLd)}
 					</Script>
+					<Link
+						href='#main-content'
+						position='fixed'
+						top='2'
+						left='2'
+						zIndex='skipNav'
+						bg='bg.secondary'
+						color='fg'
+						px='4'
+						py='2'
+						rounded='md'
+						borderWidth='1px'
+						borderColor='border'
+						transform='translateY(-160%)'
+						_focusVisible={{
+							transform: 'translateY(0)',
+							outline: '2px solid',
+							outlineColor: 'main.secondary',
+							outlineOffset: '2px',
+						}}
+					>
+						{skipToMainLabel}
+					</Link>
 					<Header />
-					<Box as='main' w='full' maxW='1444px' flex='1' mx='auto'>
+					<Box as='main' id='main-content' w='full' maxW='1444px' flex='1' mx='auto'>
 						{children}
 						<ToTop />
 					</Box>

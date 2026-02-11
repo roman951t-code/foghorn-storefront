@@ -89,13 +89,31 @@ export const auth = betterAuth({
 		}),
 		emailOTP({
 			overrideDefaultEmailVerification: true,
-			async sendVerificationOTP({ email, otp, type }) {
+			async sendVerificationOTP({ email, otp, type }, ctx) {
 				const [authT, emailsT] = await Promise.all([
 					getTranslations('auth'),
 					getTranslations('emails'),
 				]);
 
 				if (type === 'sign-in') {
+					return;
+				}
+
+				// In custom signup flow, email was already OTP-verified before signUpEmail is called.
+				// Suppress Better Auth's automatic verification OTP for /sign-up/email to avoid duplicate emails.
+				const requestPath = (() => {
+					const rawPath = ctx?.path;
+					if (typeof rawPath === 'string' && rawPath.length > 0) return rawPath;
+					const requestUrl = ctx?.request?.url;
+					if (!requestUrl) return '';
+					try {
+						return new URL(requestUrl).pathname;
+					} catch {
+						return '';
+					}
+				})();
+
+				if (type === 'email-verification' && requestPath.startsWith('/sign-up/email')) {
 					return;
 				}
 
@@ -136,6 +154,12 @@ export const auth = betterAuth({
 					middleName: true,
 					notificationMethod: true,
 					subscribed: true,
+					shippingCountry: true,
+					shippingRegion: true,
+					shippingCity: true,
+					shippingPostalCode: true,
+					shippingAddressLine1: true,
+					shippingAddressLine2: true,
 				},
 			});
 

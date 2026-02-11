@@ -25,7 +25,7 @@ export function LocaleSearchLink({ href, children, ...props }: LocaleLinkProps) 
 				transition='all .15s ease-in-out'
 				textDecorationColor='main'
 				_hover={{ color: 'link' }}
-				_focus={{ outline: 'none' }}
+				_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 				{...props}
 			>
 				{children}
@@ -43,7 +43,7 @@ export function LocaleNavLink({ href, children, ...props }: LocaleLinkProps) {
 				transition='all .15s ease-in-out'
 				textDecorationColor='main'
 				_hover={{ color: 'link' }}
-				_focus={{ outline: 'none' }}
+				_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 				{...props}
 			>
 				{children}

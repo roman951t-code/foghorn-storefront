@@ -1,115 +1,24 @@
-import { Input, Field, VStack, Stack } from '@chakra-ui/react';
+import { Input, Field, VStack } from '@chakra-ui/react';
 import type { I18nData } from '@/types/i18n';
-import { UseFormReturn } from 'react-hook-form';
-import CenteredModal from '@/components/ui/dialogs/CenteredModal';
-import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
-import { useId, useState } from 'react';
-import EmailVerification from './EmailVerification';
-import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
-import { EmailSchema } from 'validationSchemas/emailSubscribeSchema';
+import { useId } from 'react';
 import { FIELD_ORIENTATION_MD } from '@/constants/forms';
 
 interface Props {
-	isEmailVerified: boolean;
-	userEmail: string;
-	isGoogleUser?: boolean;
-	emailForm: UseFormReturn<
-		{
-			email: string;
-		},
-		unknown,
-		{
-			email: string;
-		}
-	>;
+	userEmail?: string;
 	i18nData: I18nData;
 }
 
-export default function EmailForm({
-	i18nData,
-	userEmail,
-	emailForm,
-	isEmailVerified,
-	isGoogleUser,
-}: Props) {
+export default function EmailForm({ i18nData, userEmail }: Props) {
 	const emailId = useId();
 
-	const [verifyEmailOpen, setVerifyEmailOpen] = useState(false);
-	const [error, setError] = useState('');
-	const [newEmail, setNewEmail] = useState<string | null>(null);
-
-	const onSubmit = async (formData: EmailSchema) => {
-		try {
-			const result = await sendVerifyEmailAction(null, formData);
-
-			if (!result?.success) {
-				setError(i18nData.editEmailFail);
-			} else {
-				setNewEmail(formData.email);
-				setVerifyEmailOpen(true);
-			}
-		} catch {
-			setError(i18nData.editEmailFail);
-		}
-	};
-
-	const isInvalid =
-		!!emailForm.formState.errors.email || !!error || (!isEmailVerified && !!userEmail);
-
 	return (
-		<form onSubmit={emailForm.handleSubmit(onSubmit)}>
-			<Field.Root orientation={FIELD_ORIENTATION_MD} invalid={isInvalid} justifyContent='center'>
-				<Field.Label maxH='20px' htmlFor={emailId}>
-					{i18nData.email}
-				</Field.Label>
-
-				<Stack w='full' direction={{ base: 'column', sm: 'row' } as const} gap='4'>
-					<VStack w='full' alignItems='flex-start'>
-						<Input
-							id={emailId}
-							{...emailForm.register('email')}
-							size='md'
-							disabled={isGoogleUser}
-							readOnly={isGoogleUser}
-						/>
-
-						<Field.ErrorText>
-							{emailForm.formState.errors.email?.message?.toString()}
-						</Field.ErrorText>
-						{!isEmailVerified && !!userEmail && (
-							<>
-								<Field.ErrorText>{error || i18nData.emailNotVerifiedError}</Field.ErrorText>
-							</>
-						)}
-					</VStack>
-					<VStack alignItems='stretch'>
-						<CenteredModal
-							dialogId='email-form-verify-modal'
-							closeOnInteractOutside={false}
-							title={i18nData.editEmail}
-							trigger={
-								<SecondaryButton
-									type='submit'
-									loading={emailForm.formState.isSubmitting}
-									disabled={emailForm.formState.isSubmitting || isGoogleUser}
-									mt={{ base: '2', sm: '0' }}
-								>
-									{i18nData.save}
-								</SecondaryButton>
-							}
-							size='md'
-							open={verifyEmailOpen && !!newEmail && !error}
-							setIsOpen={setVerifyEmailOpen}
-						>
-							<EmailVerification
-								email={newEmail!}
-								i18nData={i18nData}
-								onCloseAction={() => setVerifyEmailOpen(false)}
-							/>
-						</CenteredModal>
-					</VStack>
-				</Stack>
-			</Field.Root>
-		</form>
+		<Field.Root orientation={FIELD_ORIENTATION_MD} justifyContent='center'>
+			<Field.Label maxH='20px' htmlFor={emailId}>
+				{i18nData.email}
+			</Field.Label>
+			<VStack w='full' alignItems='flex-start'>
+				<Input id={emailId} value={userEmail ?? ''} size='md' disabled readOnly />
+			</VStack>
+		</Field.Root>
 	);
 }

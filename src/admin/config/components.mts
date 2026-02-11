@@ -36,6 +36,14 @@ const orderBulkPackingSlipActionComponent = componentLoader.add(
 	'OrderBulkPackingSlipAction',
 	path.join(adminDir, 'components', 'OrderBulkPackingSlipAction')
 );
+const orderShippingLabelActionComponent = componentLoader.add(
+	'OrderShippingLabelAction',
+	path.join(adminDir, 'components', 'OrderShippingLabelAction')
+);
+const orderBulkShippingLabelActionComponent = componentLoader.add(
+	'OrderBulkShippingLabelAction',
+	path.join(adminDir, 'components', 'OrderBulkShippingLabelAction')
+);
 const orderCsvExportActionComponent = componentLoader.add(
 	'OrderCsvExportAction',
 	path.join(adminDir, 'components', 'OrderCsvExportAction')
@@ -150,6 +158,8 @@ export {
 	orderReturnActionComponent,
 	orderCsvExportActionComponent,
 	orderBulkPackingSlipActionComponent,
+	orderShippingLabelActionComponent,
+	orderBulkShippingLabelActionComponent,
 	orderTotalListComponent,
 	orderTotalRangeFilterComponent,
 	selectFilterWithPlaceholderComponent,

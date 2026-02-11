@@ -9,7 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createPhoneVerifySchema, PhoneVerifySchema } from 'validationSchemas/phoneVerifySchema';
 import { verifyEmailRegisterOtpAction } from '@/actions/auth/verifyEmailRegisterOtpAction';
 import { EmailSignUpSchema } from 'validationSchemas/emailSignUpSchema';
-import { sendVerifyEmailAction } from '@/actions/auth/sendVerifyEmailAction';
+import { sendRegisterEmailAction } from '@/actions/auth/sendRegisterEmailAction';
 
 interface Props {
 	i18nData: I18nData;
@@ -50,7 +50,7 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 	const resendVerificationCode = async () => {
 		setTimer(120);
 		try {
-			const result = await sendVerifyEmailAction(null, resendData);
+			const result = await sendRegisterEmailAction(null, resendData);
 
 			if (!result?.success) {
 				setVerifyError(result?.message!);

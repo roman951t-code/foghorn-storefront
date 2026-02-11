@@ -63,6 +63,15 @@ export async function normalizeOrder(order: any): Promise<UserOrder> {
 	);
 
 	const totalDiscount = roundCurrency(itemDiscountTotal + promoDiscountTotal);
+	const shippingAddressDetails = {
+		country: order?.shippingCountry ?? null,
+		region: order?.shippingRegion ?? null,
+		city: order?.shippingCity ?? null,
+		postalCode: order?.shippingPostalCode ?? null,
+		addressLine1: order?.shippingAddressLine1 ?? null,
+		addressLine2: order?.shippingAddressLine2 ?? null,
+	};
+	const hasShippingAddressDetails = Object.values(shippingAddressDetails).some((value) => Boolean(value));
 
 	return {
 		id: order.id,
@@ -75,6 +84,7 @@ export async function normalizeOrder(order: any): Promise<UserOrder> {
 		paymentMethod: order.paymentMethod ?? null,
 		shipmentMethod: order.shipmentMethod ?? null,
 		shippingAddress: order.shippingAddress ?? null,
+		shippingAddressDetails: hasShippingAddressDetails ? shippingAddressDetails : null,
 		carrier: order.carrier ?? null,
 		trackingNumber: order.trackingNumber ?? null,
 		items,

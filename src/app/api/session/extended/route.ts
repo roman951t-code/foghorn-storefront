@@ -35,6 +35,12 @@ export async function GET() {
 				notificationMethod: user.notificationMethod,
 				emailVerified: user.emailVerified,
 				subscribed: user.subscribed,
+				shippingCountry: (user as any).shippingCountry ?? null,
+				shippingRegion: (user as any).shippingRegion ?? null,
+				shippingCity: (user as any).shippingCity ?? null,
+				shippingPostalCode: (user as any).shippingPostalCode ?? null,
+				shippingAddressLine1: (user as any).shippingAddressLine1 ?? null,
+				shippingAddressLine2: (user as any).shippingAddressLine2 ?? null,
 				isGoogleUser: !!socialAccount,
 			},
 		});

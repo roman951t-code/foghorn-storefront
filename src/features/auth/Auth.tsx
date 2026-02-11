@@ -81,7 +81,7 @@ export default function Auth({ trigger, isOpen, setIsOpen }: Props) {
 	};
 
 	const title = session?.session
-		? `${i18nData.returnCongrats}, ${session?.user?.name}!`
+		? `${i18nData.returnCongrats},\n${session?.user?.name ?? ''}!`
 		: showSignup
 		? i18nData.register
 		: i18nData.authorize;

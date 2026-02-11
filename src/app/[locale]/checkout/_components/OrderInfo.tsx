@@ -6,10 +6,10 @@ import {
 	VStack,
 	Flex,
 	Stack,
-	Highlight,
 	Separator,
 	Stat,
 	Box,
+	Badge,
 } from '@chakra-ui/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { SidebarCheckoutCard, FullCheckoutCard } from '@/features/checkout/CheckoutCard';
@@ -18,6 +18,7 @@ import { useCart } from '@/hooks/useCart';
 import { calculateCartTotals } from '@/utils/cartTotals';
 import { useSession } from '@/providers/SessionProvider';
 import { useCheckoutStore } from '@/stores/checkoutStore';
+import { useCartStore } from '@/stores/cartStore';
 import { createOrderAction } from '@/actions/createOrderAction';
 import { useState, useTransition } from 'react';
 import { showToaster } from '@/utils/toast';
@@ -26,6 +27,7 @@ import CouponField from '@/components/ui/inputs/CouponField';
 import CheckoutConsents from './CheckoutConsents';
 import type { StorefrontFormPublic } from '@/actions/storefront/getEnabledStorefrontForms';
 import { isBlockingCheckoutConsent } from './checkoutConsentUtils';
+import { hasRequiredShippingAddressFields } from '@/utils/shippingAddress';
 
 export default function OrderInfo({
 	storefrontForms = [],
@@ -34,7 +36,7 @@ export default function OrderInfo({
 	storefrontForms?: StorefrontFormPublic[];
 	currencyCode: string;
 }) {
-	const { session } = useSession();
+	const { session, refresh } = useSession();
 	const locale = useLocale();
 	const checkoutT = useTranslations('checkout');
 	const paymentMethod = useCheckoutStore((state) => state.paymentMethod);
@@ -52,11 +54,11 @@ export default function OrderInfo({
 
 	const t = useTranslations('products');
 	const commonT = useTranslations('common');
-	const { cartData, handleClearCart } = useCart();
+	const { cartData } = useCart();
 	const cartItems = cartData.items;
 	const { totalCount, baseTotal, discountedTotal, discountTotal } = calculateCartTotals(cartItems);
 	const formatMoney = (value: number) =>
-		new Intl.NumberFormat(undefined, {
+		new Intl.NumberFormat(locale, {
 			style: 'currency',
 			currency: currencyCode,
 			currencyDisplay: 'narrowSymbol',
@@ -79,14 +81,17 @@ export default function OrderInfo({
 			user?.middleName?.trim() &&
 			(user?.phoneNumber?.trim() || user?.email?.trim())
 	);
+	const hasRequiredShippingAddress = hasRequiredShippingAddressFields(shippingAddress);
 
 	const requiredForms = storefrontForms.filter(isBlockingCheckoutConsent);
 	const missingRequiredConsents = requiredForms.filter((f) => consents[f.key] !== true);
 
-	const disabledReason: 'auth' | 'contacts' | 'empty' | 'consents' | null = !isAuthorized
+	const disabledReason: 'auth' | 'contacts' | 'address' | 'empty' | 'consents' | null = !isAuthorized
 		? 'auth'
 		: !hasContactData
 		? 'contacts'
+		: !hasRequiredShippingAddress
+		? 'address'
 		: cartItems.length === 0
 		? 'empty'
 		: missingRequiredConsents.length > 0
@@ -123,11 +128,16 @@ export default function OrderInfo({
 
 				if (result?.success) {
 					showToaster('success', checkoutT('orderCreated'));
-					await handleClearCart();
+					useCartStore.getState().setCartItems([]);
+					await refresh();
 					useCheckoutStore.getState().clearCoupon();
 					useCheckoutStore.getState().resetConsents();
 					router.push('/cabinet/orders');
 				} else {
+					if (result?.message === 'shipping-address-required') {
+						showToaster('error', checkoutT('shippingAddressRequired'));
+						return;
+					}
 					showToaster('error', checkoutT('orderCreateFail'));
 				}
 			})();
@@ -161,6 +171,10 @@ export default function OrderInfo({
 			const data = await response.json();
 			if (!response.ok) {
 				const message = data?.error ?? 'stripe_session_failed';
+				if (message === 'shipping-address-required') {
+					showToaster('error', checkoutT('shippingAddressRequired'));
+					return;
+				}
 				throw new Error(message);
 			}
 
@@ -223,43 +237,44 @@ export default function OrderInfo({
 			</Box>
 
 			<VStack mt='4' alignItems='flex-start' hideBelow='lg'>
-				<Text>
-					<Highlight query={`${totalCount} ${unitsLabel}`} styles={{ fontWeight: 'semibold' }}>
-						{productsLabel}
-					</Highlight>
-				</Text>
-				<Text>
-					<Highlight query={orderSumText} styles={{ fontWeight: 'semibold' }}>
-						{`${t('orderSum')}: ${orderSumText}`}
-					</Highlight>
-				</Text>
+				<Text fontWeight='semibold'>{productsLabel}</Text>
+				<Text fontWeight='semibold'>{`${t('orderSum')}: ${orderSumText}`}</Text>
 
 				<Text>
-					<Highlight
-						query={discountText}
-						styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+					{`${t('discountSum')}: `}
+					<Badge
+						variant='solid'
+						color='black'
+						bg='main.secondary'
+						fontWeight='semibold'
 					>
-						{`${t('discountSum')}: ${discountText}`}
-					</Highlight>
+						{discountText}
+					</Badge>
 				</Text>
 				{couponDiscount > 0 ? (
 					<Text>
-						<Highlight
-							query={couponText}
-							styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+						{`${checkoutT('couponLine')}: `}
+						<Badge
+							variant='solid'
+							color='black'
+							bg='main.secondary'
+							fontWeight='semibold'
 						>
-							{`${checkoutT('couponLine')}: ${couponText}`}
-						</Highlight>
+							{couponText}
+						</Badge>
 					</Text>
 				) : null}
 				{couponDiscount > 0 ? (
 					<Text>
-						<Highlight
-							query={totalDiscountText}
-							styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+						{`${t('totalDiscount')}: `}
+						<Badge
+							variant='solid'
+							color='black'
+							bg='main.secondary'
+							fontWeight='semibold'
 						>
-							{`${t('totalDiscount')}: ${totalDiscountText}`}
-						</Highlight>
+							{totalDiscountText}
+						</Badge>
 					</Text>
 				) : null}
 				<Separator w='full' mt='2' color='border' />
@@ -267,9 +282,14 @@ export default function OrderInfo({
 					<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
 					<Stat.ValueText fontSize='3xl'>{totalAmountText}</Stat.ValueText>
 				</Stat.Root>
-				<Box mt='4'>
+				<Box mt='4' w='full'>
 					<CheckoutConsents forms={storefrontForms} />
 				</Box>
+				{disabledReason === 'address' ? (
+					<Text fontSize='sm' color='fg.muted'>
+						{checkoutT('shippingAddressRequired')}
+					</Text>
+				) : null}
 
 				<AcceptOrderBtn
 					text={t('acceptOrder')}
@@ -303,6 +323,11 @@ export default function OrderInfo({
 						loading={isLoading}
 						onAccept={handleAcceptOrder}
 					/>
+					{disabledReason === 'address' ? (
+						<Text fontSize='sm' color='fg.muted'>
+							{checkoutT('shippingAddressRequired')}
+						</Text>
+					) : null}
 				</VStack>
 				<VStack
 					alignItems={{ base: 'flex-start', sm: 'flex-end' }}
@@ -311,43 +336,44 @@ export default function OrderInfo({
 					textAlign='right'
 					minW='240px'
 				>
-					<Text>
-						<Highlight query={`${totalCount} ${unitsLabel}`} styles={{ fontWeight: 'semibold' }}>
-							{productsLabel}
-						</Highlight>
-					</Text>
-					<Text>
-						<Highlight query={orderSumText} styles={{ fontWeight: 'semibold' }}>
-							{`${t('orderSum')}: ${orderSumText}`}
-						</Highlight>
-					</Text>
+					<Text fontWeight='semibold'>{productsLabel}</Text>
+					<Text fontWeight='semibold'>{`${t('orderSum')}: ${orderSumText}`}</Text>
 
 					<Text>
-						<Highlight
-							query={discountText}
-							styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+						{`${t('discountSum')}: `}
+						<Badge
+							variant='solid'
+							color='black'
+							bg='main.secondary'
+							fontWeight='semibold'
 						>
-							{`${t('discountSum')}: ${discountText}`}
-						</Highlight>
+							{discountText}
+						</Badge>
 					</Text>
 					{couponDiscount > 0 ? (
 						<Text>
-							<Highlight
-								query={couponText}
-								styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+							{`${checkoutT('couponLine')}: `}
+							<Badge
+								variant='solid'
+								color='black'
+								bg='main.secondary'
+								fontWeight='semibold'
 							>
-								{`${checkoutT('couponLine')}: ${couponText}`}
-							</Highlight>
+								{couponText}
+							</Badge>
 						</Text>
 					) : null}
 					{couponDiscount > 0 ? (
 						<Text>
-							<Highlight
-								query={totalDiscountText}
-								styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
+							{`${t('totalDiscount')}: `}
+							<Badge
+								variant='solid'
+								color='black'
+								bg='main.secondary'
+								fontWeight='semibold'
 							>
-								{`${t('totalDiscount')}: ${totalDiscountText}`}
-							</Highlight>
+								{totalDiscountText}
+							</Badge>
 						</Text>
 					) : null}
 				</VStack>

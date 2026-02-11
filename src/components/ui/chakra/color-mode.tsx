@@ -1,7 +1,7 @@
 'use client';
 
 import type { IconButtonProps } from '@chakra-ui/react';
-import { ClientOnly, IconButton, Skeleton } from '@chakra-ui/react';
+import { IconButton } from '@chakra-ui/react';
 import { ThemeProvider, useTheme } from 'next-themes';
 import type { ThemeProviderProps } from 'next-themes';
 import * as React from 'react';
@@ -40,30 +40,46 @@ interface ColorModeButtonProps extends Omit<IconButtonProps, 'aria-label'> {}
 export const ColorModeButton = React.forwardRef<HTMLButtonElement, ColorModeButtonProps>(
 	function ColorModeButton(props, ref) {
 		const { toggleColorMode } = useColorMode();
+		const [mounted, setMounted] = React.useState(false);
+
+		React.useEffect(() => {
+			setMounted(true);
+		}, []);
+
+		if (!mounted) {
+			return (
+				<span
+					aria-hidden='true'
+					style={{
+						display: 'inline-block',
+						width: '32px',
+						height: '32px',
+					}}
+				/>
+			);
+		}
 
 		return (
-			<ClientOnly fallback={<Skeleton boxSize='8' />}>
-				<IconButton
-					onClick={toggleColorMode}
-					variant='ghost'
-					aria-label='Toggle color mode'
-					size='md'
-					rounded='md'
-					color='main.lightOnly'
-					bg='transparent'
-					_hover={{ bg: 'orange.400' }}
-					ref={ref}
-					{...props}
-					css={{
-						_icon: {
-							width: '5',
-							height: '5',
-						},
-					}}
-				>
-					<ColorModeIcon />
-				</IconButton>
-			</ClientOnly>
+			<IconButton
+				onClick={toggleColorMode}
+				variant='ghost'
+				aria-label='Toggle color mode'
+				size='md'
+				rounded='md'
+				color='main.lightOnly'
+				bg='transparent'
+				_hover={{ bg: 'orange.400' }}
+				ref={ref}
+				{...props}
+				css={{
+					_icon: {
+						width: '5',
+						height: '5',
+					},
+				}}
+			>
+				<ColorModeIcon />
+			</IconButton>
 		);
 	}
 );

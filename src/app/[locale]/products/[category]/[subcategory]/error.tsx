@@ -1,8 +1,7 @@
 'use client';
 
-import { Box, Button, HStack, Heading, Text, VStack } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
+import { Link } from '@/i18n/routing';
 
 type ErrorProps = {
 	error: Error & { digest?: string };
@@ -13,35 +12,57 @@ export default function SubcategoryError({ error, reset }: ErrorProps) {
 	const t = useTranslations('errors');
 
 	return (
-		<Box
-			borderWidth='0.5px'
-			borderColor='border'
-			borderRadius='lg'
-			bg='bg.tertiary'
-			p='6'
-			maxW='520px'
+		<section
+			aria-labelledby='subcategory-error-title'
+			style={{
+				border: '0.5px solid rgba(148, 163, 184, 0.45)',
+				borderRadius: '12px',
+				background: 'rgba(148, 163, 184, 0.08)',
+				padding: '24px',
+				maxWidth: '520px',
+			}}
 		>
-			<VStack align='flex-start' gap='3'>
-				<Heading as='h2' size='md' fontWeight='semibold'>
-					{t('subcategoryUnavailableTitle')}
-				</Heading>
-				<Text color='main' fontSize='md'>
-					{t('subcategoryUnavailableDesc')}
-				</Text>
-				{error?.digest ? (
-					<Text color='muted' fontSize='sm'>
-						{t('ref', { value: error.digest })}
-					</Text>
-				) : null}
-				<HStack gap='3' pt='2'>
-					<Button colorPalette='blue' rounded='md' onClick={reset}>
-						{t('actions.tryAgain')}
-					</Button>
-					<Button asChild variant='outline' colorPalette='gray' rounded='md'>
-						<LocaleNavLink href='/'>{t('actions.goHome')}</LocaleNavLink>
-					</Button>
-				</HStack>
-			</VStack>
-		</Box>
+			<h2 id='subcategory-error-title' style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>
+				{t('subcategoryUnavailableTitle')}
+			</h2>
+			<p style={{ marginTop: '12px', marginBottom: 0, lineHeight: 1.55 }}>
+				{t('subcategoryUnavailableDesc')}
+			</p>
+			{error?.digest ? (
+				<p style={{ marginTop: '10px', marginBottom: 0, opacity: 0.75, fontSize: '14px' }}>
+					{t('ref', { value: error.digest })}
+				</p>
+			) : null}
+			<div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center' }}>
+				<button
+					type='button'
+					onClick={reset}
+					style={{
+						border: 'none',
+						borderRadius: '10px',
+						padding: '10px 14px',
+						fontWeight: 600,
+						cursor: 'pointer',
+						background: '#3182ce',
+						color: '#fff',
+					}}
+				>
+					{t('actions.tryAgain')}
+				</button>
+				<Link
+					href='/'
+					style={{
+						display: 'inline-block',
+						border: '1px solid rgba(148, 163, 184, 0.55)',
+						borderRadius: '10px',
+						padding: '9px 13px',
+						fontWeight: 600,
+						textDecoration: 'none',
+					}}
+				>
+					{t('actions.goHome')}
+				</Link>
+			</div>
+		</section>
 	);
 }

@@ -108,29 +108,33 @@ export default function Login() {
 						/>
 					) : null}
 					<FormGroup>
-						<Label required style={labelStyle}>
+						<Label required style={labelStyle} htmlFor='admin-login-email'>
 							{translateComponent('Login.properties.email')}
 						</Label>
 						<Input
+							id='admin-login-email'
 							name='email'
 							type='email'
-							autoComplete='off'
+							autoComplete='email'
 							placeholder={translateComponent('Login.properties.email')}
 							value={email}
 							onChange={handleEmailChange}
+							required
 						/>
 					</FormGroup>
 					<FormGroup>
-						<Label required style={labelStyle}>
+						<Label required style={labelStyle} htmlFor='admin-login-password'>
 							{translateComponent('Login.properties.password')}
 						</Label>
 						<Input
+							id='admin-login-password'
 							type='password'
 							name='password'
-							autoComplete='new-password'
+							autoComplete='current-password'
 							placeholder={translateComponent('Login.properties.password')}
 							value={password}
 							onChange={handlePasswordChange}
+							required
 						/>
 					</FormGroup>
 					<Box>

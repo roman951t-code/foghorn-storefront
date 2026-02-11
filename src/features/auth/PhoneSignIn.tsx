@@ -68,7 +68,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 									required: i18nData.phoneRequired,
 								})}
 								type='text'
-								_focus={{ outline: 'none' }}
+								_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 								fontSize='md'
 								maxLength={17}
 							/>

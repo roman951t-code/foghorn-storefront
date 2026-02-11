@@ -70,10 +70,6 @@ export default function SubscribeSection({ i18nData }: Props) {
 	const isUserSubscribed = session?.user?.subscribed;
 
 	const onSubmit = async (formData: EmailSchema) => {
-		// if (userEmail === data.email) {
-		// 	return;
-		// }
-
 		try {
 			const result = await sendVerifyEmailAction(null, formData);
 

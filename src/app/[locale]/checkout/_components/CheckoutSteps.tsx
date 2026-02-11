@@ -34,6 +34,15 @@ const PaymentStep = dynamic(() => import('./PaymentStep'), {
 export default function CheckoutSteps() {
 	const t = useTranslations('products');
 	const authT = useTranslations('auth');
+	const sectionStyles = {
+		mt: '4',
+		borderWidth: '0.5px',
+		borderStyle: 'solid',
+		borderColor: 'border',
+		borderRadius: 'lg',
+		p: { base: 4, md: 6 },
+		bg: 'bg.tertiary',
+	};
 
 	return (
 		<VStack mt='4' w='100%'>
@@ -59,7 +68,11 @@ export default function CheckoutSteps() {
 							{t('shipment')}
 						</Heading>
 					</AccordionItemTrigger>
-					<AccordionItemContent>{<ShipmentStep />}</AccordionItemContent>
+					<AccordionItemContent>
+						<Box {...sectionStyles}>
+							<ShipmentStep />
+						</Box>
+					</AccordionItemContent>
 				</AccordionItem>
 				<AccordionItem mb='6' value='payment' borderBottomColor='border'>
 					<AccordionItemTrigger>
@@ -68,7 +81,9 @@ export default function CheckoutSteps() {
 						</Heading>
 					</AccordionItemTrigger>
 					<AccordionItemContent>
-						<PaymentStep />
+						<Box {...sectionStyles}>
+							<PaymentStep />
+						</Box>
 					</AccordionItemContent>
 				</AccordionItem>
 			</AccordionRoot>

@@ -44,6 +44,7 @@ import {
 } from '../actions/product-activity-actions.mts';
 import { setFulfillment } from '../actions/order-fulfillment-actions.mts';
 import { bulkPackingSlips, packingSlip } from '../actions/order-packing-slip-actions.mts';
+import { bulkShippingLabels, shippingLabel } from '../actions/order-shipping-label-actions.mts';
 import { attachUserListKpis, userKpis } from '../actions/user-kpi-actions.mts';
 import { updateUserAdminMeta } from '../actions/user-admin-actions.mts';
 import { revokeSession, userSessions } from '../actions/user-session-actions.mts';
@@ -63,6 +64,8 @@ import {
 	orderPackingSlipActionComponent,
 	orderReturnActionComponent,
 	orderBulkPackingSlipActionComponent,
+	orderShippingLabelActionComponent,
+	orderBulkShippingLabelActionComponent,
 	orderCsvExportActionComponent,
 	orderShowComponent,
 	orderTotalListComponent,
@@ -1198,6 +1201,12 @@ export const resources = [
 				'paymentMethod',
 				'shipmentMethod',
 				'shippingAddress',
+				'shippingAddressLine1',
+				'shippingAddressLine2',
+				'shippingCity',
+				'shippingRegion',
+				'shippingPostalCode',
+				'shippingCountry',
 				'contactEmail',
 				'contactPhone',
 				'customerName',
@@ -1248,6 +1257,24 @@ export const resources = [
 					components: { filter: selectFilterWithPlaceholderComponent },
 				},
 				shippingAddress: {
+					isVisible: { list: false, filter: true, show: true, edit: false },
+				},
+				shippingAddressLine1: {
+					isVisible: { list: false, filter: true, show: true, edit: false },
+				},
+				shippingAddressLine2: {
+					isVisible: { list: false, filter: true, show: true, edit: false },
+				},
+				shippingCity: {
+					isVisible: { list: false, filter: true, show: true, edit: false },
+				},
+				shippingRegion: {
+					isVisible: { list: false, filter: true, show: true, edit: false },
+				},
+				shippingPostalCode: {
+					isVisible: { list: false, filter: true, show: true, edit: false },
+				},
+				shippingCountry: {
 					isVisible: { list: false, filter: true, show: true, edit: false },
 				},
 				status: {
@@ -1375,6 +1402,19 @@ export const resources = [
 					guard: 'bulk-packing-slips',
 					component: orderBulkPackingSlipActionComponent,
 					handler: bulkPackingSlips,
+				},
+				shippingLabel: {
+					actionType: 'record',
+					icon: 'Truck',
+					component: orderShippingLabelActionComponent,
+					handler: shippingLabel,
+				},
+				bulkShippingLabels: {
+					actionType: 'bulk',
+					icon: 'Truck',
+					guard: 'bulk-shipping-labels',
+					component: orderBulkShippingLabelActionComponent,
+					handler: bulkShippingLabels,
 				},
 				exportOrdersCsv: {
 					actionType: 'resource',

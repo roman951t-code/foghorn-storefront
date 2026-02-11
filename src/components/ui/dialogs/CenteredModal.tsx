@@ -79,6 +79,7 @@ export default function CenteredModal({
 						fontSize='2xl'
 						w='100%'
 						fontWeight='medium'
+						whiteSpace='pre-line'
 						borderBottomWidth='0.5px'
 						borderBottomStyle='solid'
 						borderColor='border'
@@ -88,7 +89,7 @@ export default function CenteredModal({
 					</DialogTitle>
 				</DialogHeader>
 				<DialogBody>{children}</DialogBody>
-				<DialogCloseTrigger _focus={{ outline: 'none' }} borderColor={{ _hover: 'border' }} />
+				<DialogCloseTrigger _focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }} borderColor={{ _hover: 'border' }} />
 			</DialogContent>
 		</DialogRoot>
 	);

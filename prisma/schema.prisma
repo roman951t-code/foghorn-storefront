@@ -85,6 +85,12 @@ model User {
   phoneNumber         String?
   phoneNumberVerified Boolean?
   subscribed          Boolean  @default(false)
+  shippingCountry     String?
+  shippingRegion      String?
+  shippingCity        String?
+  shippingPostalCode  String?
+  shippingAddressLine1 String?
+  shippingAddressLine2 String?
 
   @@unique([phoneNumber])
   @@map("user")
@@ -414,6 +420,12 @@ model Order {
   paymentMethod     String?
   shipmentMethod    String?
   shippingAddress   String?           @db.Text
+  shippingCountry   String?
+  shippingRegion    String?
+  shippingCity      String?
+  shippingPostalCode String?
+  shippingAddressLine1 String?
+  shippingAddressLine2 String?
   customerName      String?
   carrier           String?
   trackingNumber    String?

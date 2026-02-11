@@ -7,10 +7,13 @@ import { getTranslations } from 'next-intl/server';
 import { getEmailSignUpSchema } from 'validationSchemas/emailSignUpSchema';
 import { encryptPassword } from '@/lib/crypto';
 import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
+import { headers } from 'next/headers';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { generateOtpCode, hashOtpCode, normalizeEmailForOtp } from '@/lib/otp';
 
-function generateOtp() {
-	return Math.floor(100000 + Math.random() * 900000).toString();
-}
+const OTP_SEND_LIMIT_PER_EMAIL = 3;
+const OTP_SEND_LIMIT_PER_IP = 20;
+const OTP_SEND_WINDOW_MS = 10 * 60 * 1000;
 
 export async function sendRegisterEmailAction(
 	_: unknown,
@@ -28,26 +31,51 @@ export async function sendRegisterEmailAction(
 		return { success: false, message: validationT('invalidFormData') };
 	}
 
-	const { email, password, name } = validated.data;
+	const { password, name } = validated.data;
+	const normalizedEmail = normalizeEmailForOtp(validated.data.email);
 
 	try {
-		const existingUser = await prisma.user.findUnique({ where: { email } });
+		const requestHeaders = await headers();
+		const ip = getClientIp(requestHeaders);
+		const [emailRate, ipRate] = await Promise.all([
+			checkRateLimit({
+				key: `auth:email-register:send:email:${normalizedEmail}`,
+				limit: OTP_SEND_LIMIT_PER_EMAIL,
+				windowMs: OTP_SEND_WINDOW_MS,
+			}),
+			checkRateLimit({
+				key: `auth:email-register:send:ip:${ip}`,
+				limit: OTP_SEND_LIMIT_PER_IP,
+				windowMs: OTP_SEND_WINDOW_MS,
+			}),
+		]);
 
-		if (existingUser) {
-			return { success: false, message: validationT('userExists') };
+		if (!emailRate.allowed || !ipRate.allowed) {
+			return { success: false, message: validationT('tooManyRequests') };
 		}
 
-		await prisma.emailRegistrationCode.deleteMany({ where: { email } });
+		const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+
+		if (existingUser) {
+			return { success: false, message: validationT('userRegisterFail') };
+		}
+
+		await prisma.emailRegistrationCode.deleteMany({ where: { email: normalizedEmail } });
 
 		const encryptedPassword = encryptPassword(password);
-		const otp = generateOtp();
+		const otp = generateOtpCode();
+		const otpHash = hashOtpCode({
+			otp,
+			scope: 'email-registration',
+			identifier: normalizedEmail,
+		});
 
 		await prisma.emailRegistrationCode.create({
 			data: {
-				email,
+				email: normalizedEmail,
 				name,
 				password: encryptedPassword,
-				code: otp,
+				code: otpHash,
 				expiresAt: new Date(Date.now() + 10 * 60 * 1000),
 			},
 		});
@@ -66,7 +94,7 @@ export async function sendRegisterEmailAction(
 
 		await resendClient.emails.send({
 			from: DEFAULT_FROM,
-			to: [email],
+			to: [normalizedEmail],
 			subject: emailContent.subject,
 			html: emailContent.html,
 			text: emailContent.text,

@@ -63,7 +63,7 @@ export default function CategoryCard({
 								color='main'
 								variant='underline'
 								_hover={{ color: 'link' }}
-								_focus={{ outline: 'none' }}
+								_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 							>
 								{product.name}
 							</LocaleNavLink>

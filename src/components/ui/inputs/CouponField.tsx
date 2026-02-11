@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Flex, Highlight, IconButton, Input, Stack, Tag, Text } from '@chakra-ui/react';
+import { Badge, Card, Flex, IconButton, Input, Stack, Tag, Text } from '@chakra-ui/react';
 import { FiX } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -153,16 +153,19 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 					</SecondaryButton>
 				</Stack>
 
-					{appliedCoupon ? (
-						<Text>
-							<Highlight
-								query={appliedCoupon.amount.toFixed(2)}
-								styles={{ fontWeight: 'semibold', color: 'main.tertiary' }}
-							>
-								{`${t('couponSavings')}: -$${appliedCoupon.amount.toFixed(2)}`}
-							</Highlight>
-						</Text>
-					) : (
+				{appliedCoupon ? (
+					<Text>
+						{`${t('couponSavings')}: `}
+						<Badge
+							variant='solid'
+							color='black'
+							bg='main.secondary'
+							fontWeight='semibold'
+						>
+							{`-$${appliedCoupon.amount.toFixed(2)}`}
+						</Badge>
+					</Text>
+				) : (
 					<Text fontSize='sm' color='fg.muted'>
 						{t('couponHint')}
 					</Text>

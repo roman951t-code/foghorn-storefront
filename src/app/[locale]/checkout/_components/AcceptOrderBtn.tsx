@@ -6,7 +6,7 @@ import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 
 interface Props extends ButtonProps {
 	text: string;
-	disabledReason?: 'auth' | 'contacts' | 'empty' | 'consents' | null;
+	disabledReason?: 'auth' | 'contacts' | 'address' | 'empty' | 'consents' | null;
 	onAccept?: () => void;
 }
 

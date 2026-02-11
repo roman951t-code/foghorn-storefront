@@ -109,15 +109,17 @@ export default function TopBar({ toggleSidebar }: TopBarProps) {
 			}}
 		>
 			<Box display='flex' alignItems='center' style={{ gap: 12 }}>
-				<Box
+				<Button
+					type='button'
+					variant='text'
 					py='lg'
 					px={['default', 'lg']}
 					onClick={toggleSidebar}
+					aria-label='Toggle sidebar'
 					display={['block', 'block', 'block', 'block', 'none']}
-					style={{ cursor: 'pointer' }}
 				>
 					<Icon icon='Menu' size={24} />
-				</Box>
+				</Button>
 				<a href={rootPath} className='admin-home-link'>
 					<Icon icon='Home' />
 					{homeLabel}

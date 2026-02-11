@@ -182,6 +182,27 @@ const buildOrderWhere = (filters: Record<string, FilterValue>): Prisma.OrderWher
 	const customerName = parseStringCondition(filters.customerName);
 	if (customerName) and.push({ customerName });
 
+	const shippingAddress = parseStringCondition(filters.shippingAddress);
+	if (shippingAddress) and.push({ shippingAddress });
+
+	const shippingAddressLine1 = parseStringCondition(filters.shippingAddressLine1);
+	if (shippingAddressLine1) and.push({ shippingAddressLine1 });
+
+	const shippingAddressLine2 = parseStringCondition(filters.shippingAddressLine2);
+	if (shippingAddressLine2) and.push({ shippingAddressLine2 });
+
+	const shippingCity = parseStringCondition(filters.shippingCity);
+	if (shippingCity) and.push({ shippingCity });
+
+	const shippingRegion = parseStringCondition(filters.shippingRegion);
+	if (shippingRegion) and.push({ shippingRegion });
+
+	const shippingPostalCode = parseStringCondition(filters.shippingPostalCode);
+	if (shippingPostalCode) and.push({ shippingPostalCode });
+
+	const shippingCountry = parseStringCondition(filters.shippingCountry);
+	if (shippingCountry) and.push({ shippingCountry });
+
 	const contactEmail = parseStringCondition(filters.contactEmail);
 	if (contactEmail) and.push({ contactEmail });
 
@@ -207,6 +228,13 @@ const ORDER_HEADERS = [
 	'total',
 	'paymentMethod',
 	'shipmentMethod',
+	'shippingAddress',
+	'shippingAddressLine1',
+	'shippingAddressLine2',
+	'shippingCity',
+	'shippingRegion',
+	'shippingPostalCode',
+	'shippingCountry',
 	'customerName',
 	'contactEmail',
 	'contactPhone',
@@ -228,6 +256,13 @@ export const exportOrdersCsv: ActionHandler<ActionResponse> = async (req) => {
 			total: true,
 			paymentMethod: true,
 			shipmentMethod: true,
+			shippingAddress: true,
+			shippingAddressLine1: true,
+			shippingAddressLine2: true,
+			shippingCity: true,
+			shippingRegion: true,
+			shippingPostalCode: true,
+			shippingCountry: true,
 			customerName: true,
 			contactEmail: true,
 			contactPhone: true,
@@ -263,6 +298,13 @@ export const exportOrdersCsv: ActionHandler<ActionResponse> = async (req) => {
 			order.total?.toNumber?.() != null ? String(order.total.toNumber()) : '',
 			order.paymentMethod ?? '',
 			order.shipmentMethod ?? '',
+			order.shippingAddress ?? '',
+			order.shippingAddressLine1 ?? '',
+			order.shippingAddressLine2 ?? '',
+			order.shippingCity ?? '',
+			order.shippingRegion ?? '',
+			order.shippingPostalCode ?? '',
+			order.shippingCountry ?? '',
 			order.customerName ?? '',
 			order.contactEmail ?? '',
 			order.contactPhone ?? '',

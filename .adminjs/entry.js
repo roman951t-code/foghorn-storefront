@@ -15,6 +15,10 @@ import OrderReturnAction from '../src/admin/components/OrderReturnAction'
 AdminJS.UserComponents.OrderReturnAction = OrderReturnAction
 import OrderBulkPackingSlipAction from '../src/admin/components/OrderBulkPackingSlipAction'
 AdminJS.UserComponents.OrderBulkPackingSlipAction = OrderBulkPackingSlipAction
+import OrderShippingLabelAction from '../src/admin/components/OrderShippingLabelAction'
+AdminJS.UserComponents.OrderShippingLabelAction = OrderShippingLabelAction
+import OrderBulkShippingLabelAction from '../src/admin/components/OrderBulkShippingLabelAction'
+AdminJS.UserComponents.OrderBulkShippingLabelAction = OrderBulkShippingLabelAction
 import OrderCsvExportAction from '../src/admin/components/OrderCsvExportAction'
 AdminJS.UserComponents.OrderCsvExportAction = OrderCsvExportAction
 import OrderTotalList from '../src/admin/components/OrderTotalList'

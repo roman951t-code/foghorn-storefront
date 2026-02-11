@@ -32,4 +32,7 @@ export const toasterMessages = {
 	emailUpdated: (i18nData: I18nData) => i18nData.emailUpdated,
 	passwordUpdated: (i18nData: I18nData) => i18nData.passUpdated,
 	phoneUpdated: (i18nData: I18nData) => i18nData.phoneUpdated,
+	addressUpdated: (i18nData: I18nData) => i18nData.addressUpdated,
+	addressUpdateFailed: (message: string | null | undefined, i18nData: I18nData) =>
+		message || i18nData.editAddressFail || i18nData.invalidFormData,
 };

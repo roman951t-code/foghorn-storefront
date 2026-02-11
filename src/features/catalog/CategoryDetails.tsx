@@ -123,7 +123,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 														color='main'
 														variant='underline'
 														_hover={{ color: 'link' }}
-														_focus={{ outline: 'none' }}
+														_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 													>
 														{product.name}
 													</LocaleNavLink>
@@ -138,7 +138,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 												mt='1'
 												textDecoration='underline'
 												textUnderlineOffset='4px'
-												_focus={{ outline: 'none' }}
+												_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 											>
 												{i18nData.seeAll}
 											</LocaleNavLink>

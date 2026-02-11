@@ -18,6 +18,11 @@ import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
 import { getCouponDiscountPreview } from '@/lib/coupons';
+import {
+	getMissingRequiredShippingAddressFields,
+	normalizeShippingAddress,
+	SHIPPING_ADDRESS_FIELD_LIMITS,
+} from '@/utils/shippingAddress';
 
 type Result =
 	| { success: true; order?: UserOrder }
@@ -178,7 +183,42 @@ async function finalizeStripeOrderInternal(
 	if (!userSnapshot?.id) return { success: false, message: 'user_not_found' };
 
 	const shipmentMethod = normalizeMetadataString(checkoutSession.metadata?.shipmentMethod, 64);
-	const shippingAddress = normalizeMetadataString(checkoutSession.metadata?.shippingAddress, 500);
+	const legacyShippingAddress = normalizeMetadataString(
+		checkoutSession.metadata?.shippingAddress,
+		SHIPPING_ADDRESS_FIELD_LIMITS.fullAddress
+	);
+	let shippingAddress = normalizeShippingAddress({
+		country: normalizeMetadataString(
+			checkoutSession.metadata?.shippingCountry,
+			SHIPPING_ADDRESS_FIELD_LIMITS.country
+		),
+		region: normalizeMetadataString(
+			checkoutSession.metadata?.shippingRegion,
+			SHIPPING_ADDRESS_FIELD_LIMITS.region
+		),
+		city: normalizeMetadataString(
+			checkoutSession.metadata?.shippingCity,
+			SHIPPING_ADDRESS_FIELD_LIMITS.city
+		),
+		postalCode: normalizeMetadataString(
+			checkoutSession.metadata?.shippingPostalCode,
+			SHIPPING_ADDRESS_FIELD_LIMITS.postalCode
+		),
+		addressLine1: normalizeMetadataString(
+			checkoutSession.metadata?.shippingAddressLine1,
+			SHIPPING_ADDRESS_FIELD_LIMITS.addressLine1
+		),
+		addressLine2: normalizeMetadataString(
+			checkoutSession.metadata?.shippingAddressLine2,
+			SHIPPING_ADDRESS_FIELD_LIMITS.addressLine2
+		),
+	});
+	if (!shippingAddress.fullAddress && legacyShippingAddress) {
+		shippingAddress = normalizeShippingAddress(legacyShippingAddress);
+	}
+	if (getMissingRequiredShippingAddressFields(shippingAddress).length > 0) {
+		return { success: false, message: 'shipping-address-required' };
+	}
 	const checkoutLocale =
 		normalizeMetadataString(checkoutSession.metadata?.locale, 16)?.toLowerCase() || DEFAULT_LOCALE;
 	const localeFallbacks = getLocaleFallbacks(checkoutLocale);
@@ -436,7 +476,13 @@ async function finalizeStripeOrderInternal(
 					total: decimalTotal,
 					paymentMethod: 'card',
 					shipmentMethod,
-					shippingAddress,
+					shippingAddress: shippingAddress.fullAddress,
+					shippingCountry: shippingAddress.country,
+					shippingRegion: shippingAddress.region,
+					shippingCity: shippingAddress.city,
+					shippingPostalCode: shippingAddress.postalCode,
+					shippingAddressLine1: shippingAddress.addressLine1,
+					shippingAddressLine2: shippingAddress.addressLine2,
 					status: 'PAID',
 					stripeSessionId: sessionId,
 					customerName,
@@ -463,6 +509,18 @@ async function finalizeStripeOrderInternal(
 				include: {
 					items: stripeOrderInclude.items,
 					discounts: true,
+				},
+			});
+
+			await tx.user.update({
+				where: { id: userSnapshot.id },
+				data: {
+					shippingCountry: shippingAddress.country,
+					shippingRegion: shippingAddress.region,
+					shippingCity: shippingAddress.city,
+					shippingPostalCode: shippingAddress.postalCode,
+					shippingAddressLine1: shippingAddress.addressLine1,
+					shippingAddressLine2: shippingAddress.addressLine2,
 				},
 			});
 

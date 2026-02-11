@@ -13,6 +13,11 @@ import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import type Stripe from 'stripe';
 import { getCouponDiscountPreview } from '@/lib/coupons';
+import {
+	getMissingRequiredShippingAddressFields,
+	normalizeShippingAddress,
+	SHIPPING_ADDRESS_FIELD_LIMITS,
+} from '@/utils/shippingAddress';
 
 type LineItemPayload = { productId: string; variantId: string | null; quantity: number };
 
@@ -50,7 +55,19 @@ export async function POST(req: NextRequest) {
 			.min(1, 'items_required'),
 		couponCode: z.string().optional(),
 		shipmentMethod: z.string().max(64).optional(),
-		shippingAddress: z.string().max(500).optional(),
+		shippingAddress: z
+			.union([
+				z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.fullAddress),
+				z.object({
+					country: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.country).optional().nullable(),
+					region: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.region).optional().nullable(),
+					city: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.city).optional().nullable(),
+					postalCode: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.postalCode).optional().nullable(),
+					addressLine1: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine1).optional().nullable(),
+					addressLine2: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine2).optional().nullable(),
+				}),
+			])
+			.optional(),
 		locale: z.string().trim().toLowerCase().max(16).optional(),
 		successUrl: z.string().url().optional(),
 		cancelUrl: z.string().url().optional(),
@@ -233,7 +250,11 @@ export async function POST(req: NextRequest) {
 
 		const rawCouponCode = parsed.data.couponCode?.trim() ?? '';
 		const shipmentMethod = parsed.data.shipmentMethod?.trim() || null;
-		const shippingAddress = parsed.data.shippingAddress?.trim() || null;
+		const shippingAddress = normalizeShippingAddress(parsed.data.shippingAddress);
+		const missingShippingFields = getMissingRequiredShippingAddressFields(parsed.data.shippingAddress);
+		if (missingShippingFields.length > 0) {
+			return NextResponse.json({ error: 'shipping-address-required' }, { status: 400 });
+		}
 		let resolvedCouponCode: string | null = null;
 		let resolvedCouponAmount: number | null = null;
 		let stripeCouponId: string | null = null;
@@ -288,7 +309,13 @@ export async function POST(req: NextRequest) {
 		if (resolvedCouponCode) metadata.couponCode = resolvedCouponCode;
 		if (resolvedCouponAmount != null) metadata.couponAmount = resolvedCouponAmount.toFixed(2);
 		if (shipmentMethod) metadata.shipmentMethod = shipmentMethod;
-		if (shippingAddress) metadata.shippingAddress = shippingAddress;
+		if (shippingAddress.fullAddress) metadata.shippingAddress = shippingAddress.fullAddress;
+		if (shippingAddress.country) metadata.shippingCountry = shippingAddress.country;
+		if (shippingAddress.region) metadata.shippingRegion = shippingAddress.region;
+		if (shippingAddress.city) metadata.shippingCity = shippingAddress.city;
+		if (shippingAddress.postalCode) metadata.shippingPostalCode = shippingAddress.postalCode;
+		if (shippingAddress.addressLine1) metadata.shippingAddressLine1 = shippingAddress.addressLine1;
+		if (shippingAddress.addressLine2) metadata.shippingAddressLine2 = shippingAddress.addressLine2;
 
 		const checkoutSession = await stripe.checkout.sessions.create({
 			mode: 'payment',

@@ -39,7 +39,7 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 					<SwiperSlide key={i}>
 						<Box
 							as='div'
-							_focus={{ outline: 'none' }}
+							_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 							borderWidth='0.5px'
 							borderStyle='solid'
 							borderColor='border'

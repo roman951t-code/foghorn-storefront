@@ -6,6 +6,12 @@ import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
 import { getPhoneSignUpSchema } from 'validationSchemas/phoneSignUpSchema';
 import { autoVerifyPhoneNumber } from './phoneVerificationHelper';
+import { headers } from 'next/headers';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+
+const PHONE_SIGN_UP_LIMIT_PER_PHONE = 6;
+const PHONE_SIGN_UP_LIMIT_PER_IP = 20;
+const PHONE_SIGN_UP_WINDOW_MS = 10 * 60 * 1000;
 
 export async function phoneSignUpAction(
 	_: unknown,
@@ -21,6 +27,25 @@ export async function phoneSignUpAction(
 
 	const { phone, name } = validated.data;
 	const rawPhone = phone.replace(/\D/g, '');
+	const requestHeaders = await headers();
+	const ip = getClientIp(requestHeaders);
+
+	const [phoneRate, ipRate] = await Promise.all([
+		checkRateLimit({
+			key: `auth:phone-signup:phone:${rawPhone}`,
+			limit: PHONE_SIGN_UP_LIMIT_PER_PHONE,
+			windowMs: PHONE_SIGN_UP_WINDOW_MS,
+		}),
+		checkRateLimit({
+			key: `auth:phone-signup:ip:${ip}`,
+			limit: PHONE_SIGN_UP_LIMIT_PER_IP,
+			windowMs: PHONE_SIGN_UP_WINDOW_MS,
+		}),
+	]);
+
+	if (!phoneRate.allowed || !ipRate.allowed) {
+		return { success: false, message: validationT('tooManyRequests') };
+	}
 
 	try {
 		const verificationResult = await autoVerifyPhoneNumber({
@@ -45,7 +70,7 @@ export async function phoneSignUpAction(
 	} catch (error: any) {
 		const messageKey = error?.body?.message ?? error?.message ?? '';
 		const errorMap: Record<string, string> = {
-			'Phone number already exists': validationT('userExists'),
+			'Phone number already exists': validationT('userRegisterFail'),
 			'Too many requests': validationT('tooManyRequests'),
 			'OTP not found': validationT('userRegisterFail'),
 		};

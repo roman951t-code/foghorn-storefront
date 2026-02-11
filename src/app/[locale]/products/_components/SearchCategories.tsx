@@ -105,7 +105,7 @@ export default function SearchCategories({ data, allCategories }: Props) {
 												wordBreak='break-word'
 												color='main'
 												variant='plain'
-												_focus={{ outline: 'none' }}
+												_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 											>
 												{subcategoryName}
 											</LocaleNavLink>
@@ -132,7 +132,7 @@ export default function SearchCategories({ data, allCategories }: Props) {
 						variant='underline'
 						textDecorationColor='main'
 						_hover={{ color: 'link' }}
-						_focus={{ outline: 'none' }}
+						_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 						onClick={() => setShowAll((prev) => !prev)}
 					>
 						{allCategories}

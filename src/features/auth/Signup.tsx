@@ -52,7 +52,7 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 								transition='all .15s ease-in-out'
 								textDecorationColor='main'
 								_hover={{ color: 'link' }}
-								_focus={{ outline: 'none' }}
+								_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 							>
 								{i18nData.acceptTerms}
 							</ChakraLink>

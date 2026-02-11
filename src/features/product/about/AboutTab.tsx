@@ -229,7 +229,7 @@ export default function AboutTab({
 							variant='underline'
 							fontSize='sm'
 							color='main'
-							_focus={{ outline: 'none' }}
+							_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 							onClick={(e) => {
 								if (onTabChange) {
 									e.preventDefault();

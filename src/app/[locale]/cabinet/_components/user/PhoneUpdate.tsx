@@ -104,7 +104,7 @@ export default function PhoneUpdate({
 			<Fieldset.Root size='lg' invalid>
 				<Fieldset.Legend fontSize='17px'>{i18nData.phoneConfirmation}</Fieldset.Legend>
 				<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mt='4'>
-					На номер
+					{i18nData.toPost}
 					<Highlight query={phone} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
 						{phone}
 					</Highlight>

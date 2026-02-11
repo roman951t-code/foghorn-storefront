@@ -55,7 +55,19 @@
 		"payment": {
 			"paypal": "PayPal",
 			"cod": "Cash on delivery",
-			"card": "Card"
+			"card": "Card",
+			"cardForm": {
+				"title": "Card details",
+				"description": "Enter your card information to continue with card payment.",
+				"cardholder": "Cardholder name",
+				"cardholderPlaceholder": "Name as shown on card",
+				"number": "Card number",
+				"numberPlaceholder": "1234 5678 9012 3456",
+				"expiry": "Expiry date",
+				"expiryPlaceholder": "MM/YY",
+				"cvv": "Security code (CVV)",
+				"cvvPlaceholder": "123"
+			}
 		},
 		"shipment": {
 			"novaPoshta": "Nova Poshta",
@@ -63,7 +75,19 @@
 			"meest": "Meest"
 		},
 		"shippingAddress": "Shipping address",
-		"shippingAddressPlaceholder": "Street, house, apartment, city"
+		"shippingCountry": "Country",
+		"shippingCountryPlaceholder": "Country",
+		"shippingRegion": "Region / State",
+		"shippingRegionPlaceholder": "Region or state",
+		"shippingCity": "City",
+		"shippingCityPlaceholder": "City",
+		"shippingPostalCode": "Postal code",
+		"shippingPostalCodePlaceholder": "Postal code",
+		"shippingAddressLine1": "Address line 1",
+		"shippingAddressLine1Placeholder": "Street, house number",
+		"shippingAddressLine2": "Address line 2",
+		"shippingAddressLine2Placeholder": "Apartment, suite, floor (optional)",
+		"shippingAddressRequired": "Please fill in all required shipping address fields."
 	},
 	"navigation": {
 		"header": {
@@ -112,7 +136,7 @@
 		"deliveryAddress": "Delivery address",
 		"personalData": "Personal data",
 		"phone": "Mobile phone",
-		"rememberPass": "I remember the password",
+		"rememberPass": "I remember my password",
 		"notSecure": "Weak",
 		"secure": "Strong",
 		"middleSecure": "Medium",
@@ -122,7 +146,7 @@
 		"phoneNumber": "Phone number",
 		"backToLogin": "Back to sign in",
 		"register": "Register",
-		"continueWithEmail": "Continue with Email",
+		"continueWithEmail": "Continue with email",
 		"continueWithPhone": "Continue with phone number",
 		"phoneConfirmation": "Phone confirmation",
 		"emailConfirmation": "Email confirmation",
@@ -130,17 +154,15 @@
 		"confirmEmail": "Confirm email",
 		"resendAfter": "Resend after",
 		"resendCode": "Resend code",
-		"activationCodeSent": "An SMS with the activation code has been sent. To finish signing in, enter it below.",
-		"updateCodeSent": "An SMS with the activation code has been sent. To update your phone number, enter it below.",
-		"signUpCodeSent": "An activation code has been sent. To confirm your email, enter it below.",
-		"editEmailCodeSent": "An activation code has been sent. To complete changing your email address, enter it below.",
-		"resetPassCodeSent": "An activation code has been sent. To confirm password reset, enter it below.",
+		"updateCodeSent": "Enter it below to confirm your new phone number.",
+		"signUpCodeSent": "Enter it below to verify your email.",
+		"editEmailCodeSent": "Enter it below to complete your email change.",
+		"resetPassCodeSent": "Enter it below to confirm password reset.",
 		"continuePurchases": "Continue shopping",
 		"returnCongrats": "Welcome back",
-		"toPost": "To post",
-		"toNewPost": "To your Nova Poshta",
+		"toPost": "Verification code sent to",
+		"toNewPost": "Verification code sent to",
 		"sendOtp": "Send verification code",
-		"pin": "Verification code",
 		"emailOtpText": "Your verification code: ",
 		"verifyEmail": "Verify your email address",
 		"verifyChangeEmail": "Confirm email change",
@@ -153,7 +175,6 @@
 		"resetPassAction": "Reset password",
 		"resetPassConfirm": "Confirm password reset",
 		"preferredNotificationWay": "Preferred notification method",
-		"renewPass": "Password recovery",
 		"saveNewPass": "Save new password",
 		"shipmentAddress": "Shipping address",
 		"save": "Save",
@@ -161,11 +182,11 @@
 		"nameUpdated": "Name updated successfully",
 		"emailUpdated": "Email updated successfully",
 		"phoneUpdated": "Phone number updated successfully",
+		"addressUpdated": "Shipping address updated successfully",
 		"notifUpdated": "Notification method updated successfully",
 		"close": "Close",
 		"deleteAccount": "Delete account",
 		"areYouSure": "Are you sure?",
-		"sendVerifEmail": "Verify email",
 		"confirmDeleteAcc": "This action cannot be undone. It will permanently delete your account and remove your data from our systems."
 	},
 	"emails": {
@@ -230,22 +251,25 @@
 		"nameRequired": "First name is required",
 		"lastNameRequired": "Last name is required",
 		"middleNameRequired": "Middle name is required",
+		"fieldRequired": "This field is required",
 		"invalidPhone": "Invalid phone number format. Example: +380501234567",
 		"pinRequired": "Verification code is required",
 		"pinLength": "Verification code must contain 6 characters",
 		"userNotFound": "User not found",
 		"alreadyVerified": "User already has a verified email",
 		"verificationFailed": "Failed to verify email. Try again",
-		"preferedNotifFailed": "Failed to save value. Try again",
+		"preferedNotifFailed": "Failed to save notification preference. Please try again.",
 		"invalidOtp": "Invalid verification code",
 		"otpExpired": "Verification code has expired",
 		"tooManyAttempts": "Too many attempts, try again later",
 		"passwordTooWeak": "Password is too weak.",
 		"passwordTooShort": "Password is too short.",
 		"tooManyRequests": "Too many attempts. Try again later.",
+		"editAddressFail": "Failed to update shipping address",
+		"shippingAddressRequired": "Please fill in all required shipping address fields.",
 		"deleteFailed": "Failed to delete account",
-		"refreshTokenError": "The activation code for restoring the password is outdated, try to get a new one",
-		"emailNotVerifiedError": "Email is not verified. You cannot shop using this email",
+		"refreshTokenError": "Password reset code has expired. Request a new one.",
+		"emailNotVerifiedError": "Email is not verified. You can't shop with this email.",
 		"feedbackRequired": "Feedback is required",
 		"addReviewFail": "Failed to add review",
 		"deleteReviewFail": "Failed to delete review",
@@ -269,12 +293,12 @@
 		"buy": "Buy",
 		"cart": "Cart",
 		"emptyCart": "Your cart is empty",
-		"emptyCartDescr": "Browse our catalog and add an order"
+		"emptyCartDescr": "Browse our catalog and add items to your cart."
 	},
 	"wishlist": {
 		"wishlistUpdateFailed": "Failed to update wishlist",
 		"wishListEmpty": "Wishlist is empty",
-		"shareCopied": "Link to your wishlist copied. You can share it with friends."
+		"shareCopied": "Link to your wishlist has been copied. You can share it with friends."
 	},
 	"products": {
 		"popular": "Popular products",
@@ -288,7 +312,7 @@
 		"cheapToExpensive": "From cheap to expensive",
 		"sortBy": "Sort by",
 		"price": "Price",
-		"about": "About product",
+		"about": "About the product",
 		"characteristics": "Specifications",
 		"similar": "Similar products",
 		"payment": "Payment",
@@ -378,9 +402,9 @@
 		"checkoutUnavailableTitle": "Checkout is unavailable",
 		"checkoutUnavailableDesc": "Something went wrong while loading checkout. Please try again.",
 		"categoryUnavailableTitle": "Category is unavailable",
-		"categoryUnavailableDesc": "Something went wrong loading this category. Please retry or go back.",
+		"categoryUnavailableDesc": "Something went wrong while loading this category. Please retry or go back.",
 		"subcategoryUnavailableTitle": "Products are unavailable",
-		"subcategoryUnavailableDesc": "Something went wrong loading this subcategory. Please retry or go back."
+		"subcategoryUnavailableDesc": "Something went wrong while loading this subcategory. Please retry or go back."
 	},
 	"pages": {
 		"main": {
@@ -388,7 +412,7 @@
 		},
 		"notFound": {
 			"title": "Page not found",
-			"hint": "Go to home"
+			"hint": "Go home"
 		},
 		"metadata": {
 			"main": {
@@ -429,11 +453,11 @@
 			},
 			"catalog": {
 				"title": "Catalog",
-				"description": "View your orders, reviews, favorite products and personal information."
+				"description": "Browse products by category, apply filters, and find what you need."
 			},
 			"terms": {
 				"title": "Terms and conditions",
-				"description": "View your orders, reviews, favorite products and personal information."
+				"description": "Read the terms and conditions for using our website and services."
 			},
 			"privacyPolicy": {
 				"title": "Privacy policy",
@@ -458,9 +482,9 @@
 			"checkoutUnavailableTitle": "Checkout is unavailable",
 			"checkoutUnavailableDesc": "Something went wrong while loading checkout. Please try again.",
 			"categoryUnavailableTitle": "Category is unavailable",
-			"categoryUnavailableDesc": "Something went wrong loading this category. Please retry or go back.",
+			"categoryUnavailableDesc": "Something went wrong while loading this category. Please retry or go back.",
 			"subcategoryUnavailableTitle": "Products are unavailable",
-			"subcategoryUnavailableDesc": "Something went wrong loading this subcategory. Please retry or go back.",
+			"subcategoryUnavailableDesc": "Something went wrong while loading this subcategory. Please retry or go back.",
 			"orderCreateFailed": "We couldn’t create your order. Please try again.",
 			"orderOutOfStock": "Some items are out of stock or unavailable. Update your cart and retry.",
 			"paymentSessionFailed": "Payment session could not be created. Please try again."

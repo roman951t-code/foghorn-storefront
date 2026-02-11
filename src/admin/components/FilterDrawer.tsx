@@ -63,11 +63,10 @@ export default function FilterDrawer(props: FilterProps) {
 	return (
 		<>
 			{isVisible ? (
-				<div
+				<button
+					type='button'
 					className='admin-filter-overlay'
 					onClick={toggleFilter}
-					role='button'
-					tabIndex={-1}
 					aria-label='Close filters'
 				/>
 			) : null}

@@ -20,6 +20,15 @@ export type OrderItem = {
 	product: OrderProduct;
 };
 
+export type OrderShippingAddress = {
+	country: string | null;
+	region: string | null;
+	city: string | null;
+	postalCode: string | null;
+	addressLine1: string | null;
+	addressLine2: string | null;
+};
+
 export type UserOrder = {
 	id: string;
 	total: number;
@@ -31,6 +40,7 @@ export type UserOrder = {
 	paymentMethod: string | null;
 	shipmentMethod: string | null;
 	shippingAddress: string | null;
+	shippingAddressDetails: OrderShippingAddress | null;
 	carrier: string | null;
 	trackingNumber: string | null;
 	items: OrderItem[];

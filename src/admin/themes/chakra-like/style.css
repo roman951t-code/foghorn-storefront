@@ -27,6 +27,9 @@ body,
 	inset: 0;
 	z-index: 99;
 	background: rgba(15, 23, 42, 0.35);
+	border: 0;
+	padding: 0;
+	cursor: pointer;
 }
 
 .adminjs_Badge {
