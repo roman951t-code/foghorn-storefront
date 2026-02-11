@@ -245,8 +245,8 @@ export default function AboutTab({
 						shipmentTitle={prodT('shipment')}
 						guaranteeTitle={prodT('guarantee')}
 						descriptionTitle={prodT('description')}
-						guaranteeText={prodT('guaranteeText')}
-						descriptionText={prodT('descriptionText')}
+						guaranteeText={product.guarantee?.trim() || prodT('guaranteeText')}
+						descriptionText={product.description?.trim() || prodT('descriptionText')}
 						paymentOptions={paymentOptions}
 						shipmentOptions={shipmentOptions}
 					/>

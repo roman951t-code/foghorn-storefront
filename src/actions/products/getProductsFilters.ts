@@ -3,9 +3,12 @@
 import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
+import { Prisma } from '@prisma/client';
+import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
 import { PRODUCT_FILTERS_CACHE_TAG, PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 import type { Filter } from '@/types/product';
+import { getLocaleFallbacks } from '@/utils/localeFallback';
 import { sortByAttributeSet } from '@/utils/attributeSetOrder';
 
 const isNumericString = (value: string) => /^-?\d+(\.\d+)?$/.test(value.trim());
@@ -166,17 +169,37 @@ export async function getTagFilters(tag: string) {
 	return [brandFilter, ...attributeFilters].filter(Boolean) as Filter[];
 }
 
-export async function getSearchFilters(searchQuery: string) {
+export async function getSearchFilters(
+	searchQuery: string,
+	locale: string = DEFAULT_LOCALE
+) {
 	'use cache';
 	cacheLife('hours');
 	cacheTag(PRODUCT_FILTERS_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
 
+	const localeFallbacks = getLocaleFallbacks(locale);
+	const normalizedSearchQuery = searchQuery.trim();
+	const searchCondition: Prisma.ProductWhereInput =
+		normalizedSearchQuery.length > 0
+			? {
+					OR: [
+						{ name: { contains: normalizedSearchQuery, mode: 'insensitive' } },
+						{
+							translations: {
+								some: {
+									locale: { in: localeFallbacks },
+									name: { contains: normalizedSearchQuery, mode: 'insensitive' },
+								},
+							},
+						},
+						],
+				  }
+			: {};
+
 	const brands = await prisma.brand.findMany({
 		where: {
 			products: {
-				some: {
-					name: { contains: searchQuery, mode: 'insensitive' },
-				},
+				some: searchCondition,
 			},
 		},
 		select: { id: true, name: true, slug: true },
@@ -188,14 +211,12 @@ export async function getSearchFilters(searchQuery: string) {
 			id: true,
 			name: true,
 			unit: true,
-			products: {
-				where: {
-					product: {
-						name: { contains: searchQuery, mode: 'insensitive' },
+				products: {
+					where: {
+						product: searchCondition,
 					},
+					select: { value: true },
 				},
-				select: { value: true },
-			},
 		},
 	});
 

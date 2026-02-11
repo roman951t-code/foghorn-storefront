@@ -8,17 +8,19 @@ import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedP
 import ClearViewedButton from '../_components/viewed/ClearViewedButton';
 import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import CabinetSectionHeading from '@/components/ui/CabinetSectionHeading';
+import { LocaleParams } from '@/types/routing';
 
 const VIEWED_LIMIT = 32;
 
-type Props = {
+type Props = LocaleParams & {
 	searchParams?: Promise<{
 		page?: string;
 		perPage?: string;
 	}>;
 };
 
-export default async function Reviewed({ searchParams }: Props) {
+export default async function Reviewed({ params, searchParams }: Props) {
+	const { locale } = await params;
 	const [navT, genT, productsT] = await Promise.all([
 		getTranslations('navigation'),
 		getTranslations('common'),
@@ -27,13 +29,15 @@ export default async function Reviewed({ searchParams }: Props) {
 
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
-	const viewedProducts = userId ? await getRecentlyViewedProducts(userId, VIEWED_LIMIT) : [];
+	const viewedProducts = userId
+		? await getRecentlyViewedProducts(userId, VIEWED_LIMIT, 0, locale)
+		: [];
 
 	const totalProductsCount = viewedProducts.length;
 	const hasViewedProducts = totalProductsCount > 0;
-	const params = await searchParams;
-	const pageParam = Number.parseInt(params?.page ?? '1', 10);
-	const requestedPerPage = Number.parseInt(params?.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
+	const search = await searchParams;
+	const pageParam = Number.parseInt(search?.page ?? '1', 10);
+	const requestedPerPage = Number.parseInt(search?.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
 	const pageSize =
 		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
 	const totalPages = Math.max(1, Math.ceil(totalProductsCount / pageSize));

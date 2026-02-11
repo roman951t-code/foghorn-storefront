@@ -11,22 +11,34 @@ import Script from 'next/script';
 import { CategoryParams } from '@/types/routing';
 import { ensureParams } from '@/utils/validateParams';
 import { categoryParamsSchema } from 'validationSchemas/productParamsSchemas';
+import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 
 export async function generateMetadata({ params }: CategoryParams): Promise<Metadata> {
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
+	const localeFallbacks = getLocaleFallbacks(locale);
 
 	const category = await prisma.productCategory.findUnique({
 		where: { slug: categorySlug },
-		select: { name: true, imageUrl: true },
+		select: {
+			name: true,
+			imageUrl: true,
+			translations: {
+				where: { locale: { in: localeFallbacks } },
+				select: { locale: true, name: true },
+				orderBy: { updatedAt: 'desc' },
+			},
+		},
 	});
 
 	if (!category) {
 		notFound();
 	}
+	const categoryTranslation = pickLocalizedTranslation(category.translations, locale);
+	const categoryName = categoryTranslation?.name ?? category.name;
 
 	const pagesT = await getTranslations('pages');
-	const title = pagesT('metadata.category', { category: category.name });
-	const description = pagesT('metadata.categoryDescription', { category: category.name });
+	const title = pagesT('metadata.category', { category: categoryName });
+	const description = pagesT('metadata.categoryDescription', { category: categoryName });
 	const imageUrl = category.imageUrl
 		? absoluteUrl(category.imageUrl.startsWith('http') ? category.imageUrl : category.imageUrl)
 		: absoluteUrl('/assets/images/logoBig.webp');
@@ -53,7 +65,7 @@ export async function generateMetadata({ params }: CategoryParams): Promise<Meta
 
 export default async function CategoryPage({ params }: CategoryParams) {
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
-	const categoryDataResponse = await getCategoryData();
+	const categoryDataResponse = await getCategoryData(locale);
 
 	const category = categoryDataResponse.categoryData.find((cat) => cat.slug === categorySlug);
 

@@ -4,6 +4,10 @@ import slugify from 'slugify';
 import { customAlphabet } from 'nanoid';
 
 const prisma = new PrismaClient();
+const DEFAULT_LOCALE = 'uk';
+const SECONDARY_LOCALE = 'en';
+const TRANSLATION_LOCALES = [DEFAULT_LOCALE, SECONDARY_LOCALE] as const;
+type SupportedLocale = (typeof TRANSLATION_LOCALES)[number];
 type SeedProduct = {
 	id: string;
 	inStock: boolean;
@@ -39,6 +43,7 @@ const mainCategories = [
 	'Audio',
 	'Gaming',
 	'Accessories',
+	'Wearables',
 ];
 
 const subcategoriesMap: Record<string, string[]> = {
@@ -50,7 +55,107 @@ const subcategoriesMap: Record<string, string[]> = {
 	Audio: ['Headphones', 'Speakers', 'Soundbars'],
 	Gaming: ['Consoles', 'Controllers', 'VR Headsets'],
 	Accessories: ['Chargers', 'Cables', 'Cases'],
+	Wearables: ['Smartwatches', 'Fitness Bands'],
 };
+
+const mainCategoryUkMap: Record<string, string> = {
+	Smartphones: 'Смартфони',
+	Tablets: 'Планшети',
+	'Laptops & PCs': "Ноутбуки та ПК",
+	TVs: 'Телевізори',
+	Cameras: 'Камери',
+	Audio: 'Аудіо',
+	Gaming: 'Геймінг',
+	Accessories: 'Аксесуари',
+	Wearables: 'Носимі пристрої',
+};
+
+const subcategoryUkMap: Record<string, string> = {
+	'Android Phones': 'Смартфони Android',
+	iPhones: 'iPhone',
+	'Android Tablets': 'Планшети Android',
+	iPads: 'iPad',
+	Laptops: 'Ноутбуки',
+	Ultrabooks: 'Ультрабуки',
+	'Gaming Laptops': 'Ігрові ноутбуки',
+	Desktops: "Настільні ПК",
+	Monitors: 'Монітори',
+	'4K TVs': 'Телевізори 4K',
+	'Smart TVs': 'Смарт-телевізори',
+	'Mirrorless Cameras': 'Бездзеркальні камери',
+	'Action Cameras': 'Екшн-камери',
+	Headphones: 'Навушники',
+	Speakers: 'Колонки',
+	Soundbars: 'Саундбари',
+	Consoles: 'Консолі',
+	Controllers: 'Контролери',
+	'VR Headsets': 'VR-гарнітури',
+	Chargers: 'Зарядні пристрої',
+	Cables: 'Кабелі',
+	Cases: 'Чохли',
+	Smartwatches: 'Смарт-годинники',
+	'Fitness Bands': 'Фітнес-браслети',
+};
+
+const fallbackProductModels = [
+	'Horizon Pro',
+	'Nova Air',
+	'Pulse Max',
+	'Vertex Go',
+	'Summit Plus',
+	'Orbit Ultra',
+];
+
+const productModelsBySubcategory: Record<string, string[]> = {
+	'Android Phones': ['Nova Edge', 'Pulse Lite', 'Horizon Pro', 'Vertex Max'],
+	iPhones: ['Apex One', 'Apex Plus', 'Apex Pro', 'Apex Max'],
+	'Android Tablets': ['Tab Vision', 'Tab Air', 'Tab Studio', 'Tab Plus'],
+	iPads: ['Pad One', 'Pad Air', 'Pad Pro', 'Pad Studio'],
+	Laptops: ['Notebook Core', 'Notebook Pro', 'Notebook Air', 'Notebook Studio'],
+	Ultrabooks: ['Feather Air', 'Feather Pro', 'Feather Max', 'Feather Studio'],
+	'Gaming Laptops': ['Predator X', 'Legion Core', 'Nitro Pulse', 'Vortex Pro'],
+	Desktops: ['Tower Core', 'Tower Studio', 'Tower Pro', 'Tower Max'],
+	Monitors: ['Vision Display', 'Clarity View', 'Focus Panel', 'Spectrum Screen'],
+	'4K TVs': ['Vision Cinema', 'Ultra Theater', 'Crystal View', 'Cinema Max'],
+	'Smart TVs': ['Smart HomeView', 'Smart Stream', 'Smart Horizon', 'Smart Vision'],
+	'Mirrorless Cameras': ['Lumina Mirrorless', 'Focus Mirrorless', 'Optic Pro', 'Frame X'],
+	'Action Cameras': ['Adventure Cam', 'Trail Cam', 'Motion Cam', 'Summit Cam'],
+	Headphones: ['Sound Wave', 'Quiet Studio', 'Bass Flow', 'Audio Pro'],
+	Speakers: ['Pulse Speaker', 'Home Speaker', 'Arena Speaker', 'Echo Speaker'],
+	Soundbars: ['Cinema Bar', 'Sound Bar Pro', 'Theater Bar', 'Studio Bar'],
+	Consoles: ['Game Box', 'Play Hub', 'Arena Core', 'Next Play'],
+	Controllers: ['Grip Controller', 'Pro Controller', 'Dual Controller', 'Arcade Controller'],
+	'VR Headsets': ['VR Vision', 'VR Arena', 'VR Motion', 'VR Studio'],
+	Chargers: ['Fast Charge', 'Power Adapter', 'Quick Charge', 'Travel Charger'],
+	Cables: ['Charge Cable', 'Data Cable', 'Sync Cable', 'Flex Cable'],
+	Cases: ['Slim Case', 'Protect Case', 'Armor Case', 'Clear Case'],
+	Smartwatches: ['Watch Active', 'Watch Pro', 'Watch Sport', 'Watch Classic'],
+	'Fitness Bands': ['Band Active', 'Band Pulse', 'Band Move', 'Band Fit'],
+};
+
+const productHighlightsEn = [
+	'balanced performance and battery life',
+	'a sharp display and dependable connectivity',
+	'stable everyday speed for work and entertainment',
+];
+
+const productHighlightsUk = [
+	'збалансовану продуктивність і автономність',
+	'чіткий екран та стабільне підключення',
+	'комфортну швидкодію для роботи й розваг',
+];
+
+const productUseCasesEn = [
+	'great for remote work, streaming, and daily communication',
+	'suited for study, office tasks, and media consumption',
+	'designed for everyday tasks with smooth multitasking',
+];
+
+const productUseCasesUk = [
+	'підходить для віддаленої роботи, стримінгу та щоденного спілкування',
+	'добре працює для навчання, офісних задач і медіаконтенту',
+	'створений для щоденних сценаріїв із плавною багатозадачністю',
+];
 
 const categoryImageKeywords: Record<string, string> = {
 	Smartphones: 'smartphone',
@@ -61,6 +166,7 @@ const categoryImageKeywords: Record<string, string> = {
 	Audio: 'headphones',
 	Gaming: 'game-console',
 	Accessories: 'tech-accessories',
+	Wearables: 'smart-watch',
 };
 
 const subcategoryImageKeywords: Record<string, string> = {
@@ -86,6 +192,8 @@ const subcategoryImageKeywords: Record<string, string> = {
 	Controllers: 'game-controller',
 	'VR Headsets': 'vr-headset',
 	Cases: 'phone-case',
+	Smartwatches: 'smart-watch',
+	'Fitness Bands': 'fitness-band',
 };
 
 function stablePick<T>(items: T[], seed: string) {
@@ -107,6 +215,16 @@ const getCategoryImage = (name: string) => {
 const getSubcategoryImage = (sub: string, seed: string) => {
 	const keyword = subcategoryImageKeywords[sub] ?? categoryImageKeywords[sub] ?? 'tech-gadgets';
 	return buildKeywordImage(keyword, 900, 900, seed) || stablePick(fallbackProductImages, seed);
+};
+
+const buildSemanticProductName = (
+	brandName: string,
+	subcategoryName: string,
+	seed: string
+) => {
+	const models = productModelsBySubcategory[subcategoryName] ?? fallbackProductModels;
+	const model = stablePick(models, seed);
+	return `${brandName} ${model}`;
 };
 
 const VARIANT_OPTIONS = {
@@ -188,6 +306,7 @@ const buildVariantTemplates = (category: string): VariantTemplate[] => {
 			break;
 		case 'Audio':
 		case 'Accessories':
+		case 'Wearables':
 			for (const color of colors) {
 				addCombo({ Колір: color });
 			}
@@ -217,6 +336,505 @@ function needsImageReplacement(url?: string | null) {
 	} catch {
 		return true;
 	}
+}
+
+function getLocalizedCategoryName(name: string, locale: SupportedLocale) {
+	if (locale === 'en') return name;
+	return mainCategoryUkMap[name] ?? subcategoryUkMap[name] ?? name;
+}
+
+type LocalizedProductCopy = {
+	name: string;
+	description: string;
+	metaTitle: string;
+	metaDescription: string;
+	categoryName: string;
+	subcategoryName: string;
+};
+
+function buildLocalizedProductCopy(
+	product: {
+		id: string;
+		name: string;
+		slug: string;
+		fullSlug: string;
+		categoryName: string;
+		subcategoryName: string;
+		brand: {
+			name: string;
+		};
+	},
+	locale: SupportedLocale
+): LocalizedProductCopy {
+	const isUkrainian = locale === 'uk';
+	const categoryName = getLocalizedCategoryName(product.categoryName, locale);
+	const subcategoryName = getLocalizedCategoryName(product.subcategoryName, locale);
+	const highlight = stablePick(
+		isUkrainian ? productHighlightsUk : productHighlightsEn,
+		product.fullSlug
+	);
+	const useCase = stablePick(isUkrainian ? productUseCasesUk : productUseCasesEn, product.id);
+	const name = product.name.trim();
+	const description = isUkrainian
+		? `${name} — ${subcategoryName.toLowerCase()} від ${product.brand.name}, що пропонує ${highlight}. Модель ${useCase}.`
+		: `${name} is a ${product.subcategoryName.toLowerCase()} by ${product.brand.name} that delivers ${highlight}. It is ${useCase}.`;
+	const metaTitle = `${name} | ${categoryName} | Online Store`;
+	const metaDescription = isUkrainian
+		? `${name} від ${product.brand.name}: ${highlight}. Швидка доставка по Україні.`
+		: `${name} by ${product.brand.name}: ${highlight}. Fast shipping across Ukraine.`;
+
+	return {
+		name,
+		description,
+		metaTitle,
+		metaDescription,
+		categoryName,
+		subcategoryName,
+	};
+}
+
+type LocalizedPageCopy = {
+	title: string;
+	excerpt: string | null;
+	content: string | null;
+	metaTitle: string | null;
+	metaDescription: string | null;
+};
+
+const pageLocalizationBySlug: Record<string, Record<SupportedLocale, LocalizedPageCopy>> = {
+	'privacy-policy': {
+		en: {
+			title: 'Privacy Policy',
+			excerpt: 'How we collect, use, and protect personal data.',
+			content:
+				'This is a starter Privacy Policy template. Replace it with your real policy and legal advice.\n\nWe process personal data to fulfill orders, provide customer support, prevent fraud, and comply with legal obligations.\n\nContact: support@example.com',
+			metaTitle: 'Privacy Policy | Online Store',
+			metaDescription:
+				'Learn how Online Store collects, uses, and protects personal data during shopping and support interactions.',
+		},
+		uk: {
+			title: 'Політика конфіденційності',
+			excerpt: 'Як ми збираємо, використовуємо та захищаємо персональні дані.',
+			content:
+				'Це стартовий шаблон Політики конфіденційності. Замініть його на вашу фактичну політику та юридично перевірений текст.\n\nМи обробляємо персональні дані для виконання замовлень, підтримки клієнтів, запобігання шахрайству та виконання вимог законодавства.\n\nКонтакт: support@example.com',
+			metaTitle: 'Політика конфіденційності | Online Store',
+			metaDescription:
+				'Дізнайтеся, як Online Store збирає, використовує та захищає персональні дані під час покупок і звернень у підтримку.',
+		},
+	},
+	'cookie-policy': {
+		en: {
+			title: 'Cookie Policy',
+			excerpt: 'What cookies we use and why.',
+			content:
+				'This is a starter Cookie Policy template. Replace it with your real policy.\n\nWe use essential cookies to keep the site working (for example: login, cart, and security). Optional cookies (analytics/marketing) should be enabled only after consent where required by law.',
+			metaTitle: 'Cookie Policy | Online Store',
+			metaDescription:
+				'Read which cookies Online Store uses, what they do, and how consent affects optional analytics and marketing cookies.',
+		},
+		uk: {
+			title: 'Політика використання cookie',
+			excerpt: 'Які cookie ми використовуємо та з якою метою.',
+			content:
+				'Це стартовий шаблон Політики cookie. Замініть його на вашу фактичну політику.\n\nМи використовуємо обовʼязкові cookie для роботи сайту (наприклад: вхід, кошик і безпека). Необовʼязкові cookie (аналітика/маркетинг) вмикаються лише після згоди, якщо це вимагає закон.',
+			metaTitle: 'Політика cookie | Online Store',
+			metaDescription:
+				'Перегляньте, які cookie використовує Online Store, для чого вони потрібні та як згода впливає на необовʼязкові cookie.',
+		},
+	},
+	'about-us': {
+		en: {
+			title: 'About Us',
+			excerpt: 'Who we are and what service standards we follow.',
+			content:
+				'We are an online electronics store focused on reliable service and practical product selection.\n\nOur team works every day to deliver orders on time and provide fast, clear support before and after purchase.',
+			metaTitle: 'About Us | Online Store',
+			metaDescription:
+				'Learn about Online Store values, customer service approach, and how we build a reliable shopping experience.',
+		},
+		uk: {
+			title: 'Про нас',
+			excerpt: 'Хто ми та яких стандартів сервісу дотримуємося.',
+			content:
+				'Ми — інтернет-магазин електроніки, що фокусується на надійному сервісі та практичному підборі товарів.\n\nНаша команда щодня працює, щоб ви отримували замовлення вчасно й мали швидку та зрозумілу підтримку до і після покупки.',
+			metaTitle: 'Про нас | Online Store',
+			metaDescription:
+				'Дізнайтеся про цінності Online Store, підхід до сервісу клієнтів і принципи нашої роботи.',
+		},
+	},
+	faq: {
+		en: {
+			title: 'FAQ',
+			excerpt: 'Answers to the most common customer questions.',
+			content: JSON.stringify(
+				[
+					{
+						question: 'How long can I return a product after purchase?',
+						answer: 'You can return eligible products within 30 days after purchase.',
+					},
+					{
+						question: 'Do you provide international shipping?',
+						answer: 'Yes, we ship internationally to most countries.',
+					},
+				],
+				null,
+				2
+			),
+			metaTitle: 'FAQ | Online Store',
+			metaDescription:
+				'Find quick answers about delivery, returns, payments, and other common Online Store questions.',
+		},
+		uk: {
+			title: 'Часті питання',
+			excerpt: 'Відповіді на найпоширеніші запитання клієнтів.',
+			content: JSON.stringify(
+				[
+					{
+						question: 'Що таке повернення товару?',
+						answer: 'Ми приймаємо повернення протягом 30 днів після покупки.',
+					},
+					{
+						question: 'Чи доступна міжнародна доставка?',
+						answer: 'Так, ми доставляємо товари у більшість країн світу.',
+					},
+				],
+				null,
+				2
+			),
+			metaTitle: 'Часті питання | Online Store',
+			metaDescription:
+				'Перегляньте відповіді щодо доставки, повернення, оплати та інших поширених питань Online Store.',
+		},
+	},
+	guarantee: {
+		en: {
+			title: 'Warranty',
+			excerpt: 'Warranty terms and defect handling process.',
+			content:
+				'We provide warranty coverage for all products under applicable Ukrainian law.\n\nIf you detect a manufacturing defect, contact us with proof of purchase and issue details. We will help with repair or replacement as quickly as possible.',
+			metaTitle: 'Warranty | Online Store',
+			metaDescription:
+				'Read Online Store warranty terms and what to do when a product has a manufacturing defect.',
+		},
+		uk: {
+			title: 'Гарантії',
+			excerpt: 'Умови гарантії та порядок дій у разі дефекту товару.',
+			content:
+				'Ми надаємо гарантію на всі товари відповідно до законодавства України.\n\nУ разі виявлення виробничого браку зверніться до нас із підтвердженням покупки та описом проблеми. Ми допоможемо з ремонтом або заміною у найкоротші строки.',
+			metaTitle: 'Гарантії | Online Store',
+			metaDescription:
+				'Ознайомтеся з гарантійними умовами Online Store та алгоритмом дій при виявленні браку.',
+		},
+	},
+	'public-offer': {
+		en: {
+			title: 'Public Offer',
+			excerpt: 'Terms of purchase for orders placed in our online store.',
+			content:
+				'This document is a public offer that defines purchase conditions in our online store.\n\nBy placing an order, the customer accepts the offer terms. We reserve the right to update the offer text without prior notice.',
+			metaTitle: 'Public Offer | Online Store',
+			metaDescription:
+				'Review the public offer terms that apply to purchases made at Online Store.',
+		},
+		uk: {
+			title: 'Публічна оферта',
+			excerpt: 'Умови купівлі товарів в інтернет-магазині.',
+			content:
+				'Цей документ є публічною офертою, що визначає умови покупки товарів через наш інтернет-магазин.\n\nОформлюючи замовлення, покупець погоджується з умовами оферти. Ми залишаємо за собою право змінювати текст оферти без попереднього повідомлення.',
+			metaTitle: 'Публічна оферта | Online Store',
+			metaDescription:
+				'Ознайомтеся з умовами публічної оферти, що діють для покупок в Online Store.',
+		},
+	},
+	'return-refund': {
+		en: {
+			title: 'Returns and Refunds',
+			excerpt: 'How exchange and return requests are processed.',
+			content:
+				'You can exchange or return a product within 14 days after purchase if it has not been used and keeps its original condition.\n\nContact our support team to start the process, and we will guide you through each step.',
+			metaTitle: 'Returns and Refunds | Online Store',
+			metaDescription:
+				'Learn Online Store return timelines, eligibility requirements, and refund workflow.',
+		},
+		uk: {
+			title: 'Обмін/повернення',
+			excerpt: 'Як відбувається обмін і повернення товару.',
+			content:
+				'Ви можете обміняти або повернути товар протягом 14 днів з моменту покупки за умови, що він не був у використанні та збережений товарний вигляд.\n\nЩоб розпочати процедуру, зверніться до служби підтримки, і ми допоможемо пройти всі етапи.',
+			metaTitle: 'Обмін та повернення | Online Store',
+			metaDescription:
+				'Дізнайтеся про строки, умови та порядок повернення коштів в Online Store.',
+		},
+	},
+	'shipping-terms': {
+		en: {
+			title: 'Shipping Terms',
+			excerpt: 'Delivery options, timelines, and shipping costs.',
+			content:
+				'We deliver across Ukraine through popular carriers such as Nova Poshta and Ukrposhta.\n\nShipping cost and delivery time depend on your region and selected method. Typical delivery window is 1-3 business days.',
+			metaTitle: 'Shipping Terms | Online Store',
+			metaDescription:
+				'Check delivery methods, costs, and estimated shipping timelines for Online Store orders.',
+		},
+		uk: {
+			title: 'Умови доставки',
+			excerpt: 'Способи доставки, строки та вартість відправлень.',
+			content:
+				'Ми доставляємо по всій території України через популярні служби доставки, зокрема Нова Пошта та Укрпошта.\n\nВартість і строки залежать від регіону та обраного способу доставки. Зазвичай доставка триває 1-3 робочі дні.',
+			metaTitle: 'Умови доставки | Online Store',
+			metaDescription:
+				'Перегляньте способи, строки та вартість доставки замовлень Online Store.',
+		},
+	},
+	terms: {
+		en: {
+			title: 'Terms and Conditions',
+			excerpt: 'General terms for using the website and placing orders.',
+			content:
+				'These Terms and Conditions define the rules for using our website and placing orders.\n\nBy using the website, you agree to these terms, payment and delivery policies, and other publicly available store documents.',
+			metaTitle: 'Terms and Conditions | Online Store',
+			metaDescription:
+				'Read the terms governing website usage, orders, and customer responsibilities at Online Store.',
+		},
+		uk: {
+			title: 'Умови та положення',
+			excerpt: 'Загальні правила користування сайтом і оформлення замовлень.',
+			content:
+				'Ці Умови та положення визначають правила користування сайтом і оформлення замовлень.\n\nКористуючись сайтом, ви погоджуєтеся з цими умовами, правилами оплати та доставки, а також іншими публічними документами магазину.',
+			metaTitle: 'Умови та положення | Online Store',
+			metaDescription:
+				'Ознайомтеся з правилами використання сайту, оформлення замовлень і відповідальністю сторін в Online Store.',
+		},
+	},
+};
+
+function buildLocalizedPageCopy(
+	page: {
+		title: string;
+		excerpt: string | null;
+		content: string | null;
+		metaTitle: string | null;
+		metaDescription: string | null;
+		slug: string;
+	},
+	locale: SupportedLocale
+): LocalizedPageCopy {
+	const localizedOverride = pageLocalizationBySlug[page.slug]?.[locale];
+	if (localizedOverride) return localizedOverride;
+
+	return {
+		title: page.title,
+		excerpt: page.excerpt,
+		content: page.content,
+		metaTitle: page.metaTitle,
+		metaDescription: page.metaDescription,
+	};
+}
+
+async function syncProductTranslations(locales: readonly SupportedLocale[]) {
+	const products = await prisma.product.findMany({
+		select: {
+			id: true,
+			name: true,
+			categoryName: true,
+			subcategoryName: true,
+			slug: true,
+			fullSlug: true,
+			brand: {
+				select: {
+					name: true,
+				},
+			},
+		},
+	});
+
+	await Promise.all(
+		products.flatMap((product) =>
+			locales.map((locale) => {
+				const localized = buildLocalizedProductCopy(product, locale);
+				return prisma.productTranslation.upsert({
+					where: {
+						productId_locale: {
+							productId: product.id,
+							locale,
+						},
+					},
+					update: {
+						name: localized.name,
+						description: localized.description,
+						metaTitle: localized.metaTitle,
+						metaDescription: localized.metaDescription,
+						categoryName: localized.categoryName,
+						subcategoryName: localized.subcategoryName,
+						slug: product.slug,
+						fullSlug: product.fullSlug,
+					},
+					create: {
+						productId: product.id,
+						locale,
+						name: localized.name,
+						description: localized.description,
+						metaTitle: localized.metaTitle,
+						metaDescription: localized.metaDescription,
+						categoryName: localized.categoryName,
+						subcategoryName: localized.subcategoryName,
+						slug: product.slug,
+						fullSlug: product.fullSlug,
+					},
+				});
+			})
+		)
+	);
+
+	return products.length * locales.length;
+}
+
+async function syncCategoryTranslations(locales: readonly SupportedLocale[]) {
+	const categories = await prisma.productCategory.findMany({
+		select: {
+			id: true,
+			name: true,
+			slug: true,
+		},
+	});
+
+	await Promise.all(
+		categories.flatMap((category) =>
+			locales.map((locale) =>
+				prisma.productCategoryTranslation.upsert({
+					where: {
+						categoryId_locale: {
+							categoryId: category.id,
+							locale,
+						},
+					},
+					update: {
+						name: getLocalizedCategoryName(category.name, locale),
+						slug: category.slug,
+					},
+					create: {
+						categoryId: category.id,
+						locale,
+						name: getLocalizedCategoryName(category.name, locale),
+						slug: category.slug,
+					},
+				})
+			)
+		)
+	);
+
+	return categories.length * locales.length;
+}
+
+async function syncPageTranslations(locales: readonly SupportedLocale[]) {
+	const pages = await prisma.page.findMany({
+		select: {
+			id: true,
+			title: true,
+			slug: true,
+			excerpt: true,
+			content: true,
+			metaTitle: true,
+			metaDescription: true,
+		},
+	});
+
+	await Promise.all(
+		pages.flatMap((page) =>
+			locales.map((locale) => {
+				const localized = buildLocalizedPageCopy(page, locale);
+				return prisma.pageTranslation.upsert({
+					where: {
+						pageId_locale: {
+							pageId: page.id,
+							locale,
+						},
+					},
+					update: {
+						title: localized.title,
+						slug: page.slug,
+						excerpt: localized.excerpt,
+						content: localized.content,
+						metaTitle: localized.metaTitle,
+						metaDescription: localized.metaDescription,
+					},
+					create: {
+						pageId: page.id,
+						locale,
+						title: localized.title,
+						slug: page.slug,
+						excerpt: localized.excerpt,
+						content: localized.content,
+						metaTitle: localized.metaTitle,
+						metaDescription: localized.metaDescription,
+					},
+				});
+			})
+		)
+	);
+
+	return pages.length * locales.length;
+}
+
+async function syncBannerTranslations(locales: readonly SupportedLocale[]) {
+	const banners = await prisma.banner.findMany({
+		select: {
+			id: true,
+			title: true,
+			subtitle: true,
+			linkLabel: true,
+		},
+	});
+	if (!banners.length) return 0;
+
+	const existingRows = await prisma.bannerTranslation.findMany({
+		where: {
+			bannerId: { in: banners.map((banner) => banner.id) },
+			locale: { in: [...locales] },
+		},
+		select: {
+			bannerId: true,
+			locale: true,
+		},
+	});
+	const existingKeys = new Set(existingRows.map((row) => `${row.bannerId}:${row.locale}`));
+	const rowsToCreate = banners.flatMap((banner) =>
+		locales
+			.filter((locale) => !existingKeys.has(`${banner.id}:${locale}`))
+			.map((locale) => ({
+				bannerId: banner.id,
+				locale,
+				title: banner.title,
+				subtitle: banner.subtitle,
+				linkLabel: banner.linkLabel,
+			}))
+	);
+	if (!rowsToCreate.length) return 0;
+
+	const result = await prisma.bannerTranslation.createMany({
+		data: rowsToCreate,
+		skipDuplicates: true,
+	});
+	return result.count;
+}
+
+async function syncLocalizedSeedTranslations(locales: readonly SupportedLocale[]) {
+	const [productRows, categoryRows, pageRows, bannerRows] = await Promise.all([
+		syncProductTranslations(locales),
+		syncCategoryTranslations(locales),
+		syncPageTranslations(locales),
+		syncBannerTranslations(locales),
+	]);
+
+	console.log(
+		[
+			`Localized rows synced for locales: ${locales.join(', ')}.`,
+			`ProductTranslation rows synced: ${productRows}`,
+			`ProductCategoryTranslation rows synced: ${categoryRows}`,
+			`PageTranslation rows synced: ${pageRows}`,
+			`BannerTranslation rows synced: ${bannerRows}`,
+		].join('\n')
+	);
 }
 
 async function main() {
@@ -256,8 +874,17 @@ async function main() {
 		prisma.product.deleteMany({}),
 	]);
 
-	if (mainCategories.length !== 8) {
-		throw new Error(`Seed expects exactly 8 main categories, got ${mainCategories.length}`);
+	if (mainCategories.length !== 9) {
+		throw new Error(`Seed expects exactly 9 main categories, got ${mainCategories.length}`);
+	}
+
+	const categoriesWithoutSubcategories = mainCategories.filter(
+		(category) => (subcategoriesMap[category] ?? []).length === 0
+	);
+	if (categoriesWithoutSubcategories.length > 0) {
+		throw new Error(
+			`Each main category must have at least one subcategory. Missing: ${categoriesWithoutSubcategories.join(', ')}`
+		);
 	}
 
 	// Brands
@@ -353,6 +980,11 @@ async function main() {
 			add('Памʼять', faker.helpers.arrayElement(VARIANT_OPTIONS.storage));
 		}
 
+		if (category === 'Wearables') {
+			add('Памʼять', faker.helpers.arrayElement(VARIANT_OPTIONS.storage));
+			add('Батарея', faker.helpers.arrayElement(PRODUCT_ATTRIBUTE_OPTIONS.batteryMah));
+		}
+
 		return create;
 	};
 
@@ -389,6 +1021,10 @@ async function main() {
 			Accessories: {
 				name: 'Accessories — Specifications',
 				attributes: ['Модель', 'Колір', 'Розмір', 'Вага'],
+			},
+			Wearables: {
+				name: 'Wearables — Specifications',
+				attributes: ['Модель', 'Колір', 'Памʼять', 'Батарея', 'Вага', 'Розмір'],
 			},
 		};
 
@@ -449,7 +1085,9 @@ async function main() {
 
 			const count = faker.number.int({ min: 3, max: 5 });
 			for (let i = 0; i < count; i++) {
-				const name = faker.commerce.productName();
+				const productSeed = `${main}-${sub}-${i}-${nanoid()}`;
+				const pickedBrand = stablePick(brands, productSeed);
+				const name = buildSemanticProductName(pickedBrand.name, sub, productSeed);
 				const price = new Prisma.Decimal(
 					faker.number.float({ min: 100, max: 1500, fractionDigits: 2 })
 				);
@@ -468,8 +1106,10 @@ async function main() {
 				const productSlug = createSlug(`${name}-${nanoid()}`);
 				const fullSlug = `${parentSlug}/${subSlug}/${productSlug}`;
 				const imageUrl = getSubcategoryImage(sub, productSlug);
-
-				const pickedBrand = stablePick(brands, productSlug);
+				const description = `${name} delivers ${stablePick(
+					productHighlightsEn,
+					productSlug
+				)}. This model is ${stablePick(productUseCasesEn, productSeed)}.`;
 				const product = await prisma.product.create({
 					data: {
 						name,
@@ -478,7 +1118,7 @@ async function main() {
 						status: 'ACTIVE',
 						categoryName: main,
 						subcategoryName: sub,
-						description: faker.commerce.productDescription(),
+						description,
 						imageUrl,
 						basePrice: price,
 						discountPrice,
@@ -522,6 +1162,57 @@ async function main() {
 				allProducts.push(product);
 			}
 		}
+	}
+
+	const seededMainCategoryRows = await prisma.productCategory.findMany({
+		where: { parentId: null, name: { in: mainCategories } },
+		select: {
+			name: true,
+			_count: {
+				select: {
+					children: true,
+				},
+			},
+		},
+	});
+	if (seededMainCategoryRows.length !== mainCategories.length) {
+		throw new Error(
+			`Expected ${mainCategories.length} main categories, created ${seededMainCategoryRows.length}`
+		);
+	}
+	const mainWithoutSubcategories = seededMainCategoryRows
+		.filter((category) => category._count.children < 1)
+		.map((category) => category.name);
+	if (mainWithoutSubcategories.length > 0) {
+		throw new Error(
+			`Each main category must have at least one subcategory. Missing subcategories for: ${mainWithoutSubcategories.join(', ')}`
+		);
+	}
+
+	const expectedSubcategoryNames = Array.from(new Set(Object.values(subcategoriesMap).flat()));
+	const seededSubcategoryRows = await prisma.productCategory.findMany({
+		where: { parentId: { not: null }, name: { in: expectedSubcategoryNames } },
+		select: {
+			name: true,
+			_count: {
+				select: {
+					products: true,
+				},
+			},
+		},
+	});
+	if (seededSubcategoryRows.length !== expectedSubcategoryNames.length) {
+		throw new Error(
+			`Expected ${expectedSubcategoryNames.length} seeded subcategories, created ${seededSubcategoryRows.length}`
+		);
+	}
+	const subcategoriesWithoutProducts = seededSubcategoryRows
+		.filter((subcategory) => subcategory._count.products < 1)
+		.map((subcategory) => subcategory.name);
+	if (subcategoriesWithoutProducts.length > 0) {
+		throw new Error(
+			`Each subcategory must have at least one product. Missing products for: ${subcategoriesWithoutProducts.join(', ')}`
+		);
 	}
 
 	// Backfill any existing categories/products with missing or unsupported images
@@ -602,51 +1293,126 @@ async function main() {
 	// Promo banners for homepage Promo slider (admin-controlled via Banner)
 	const seededPromoBanners = [
 		{
-			title: 'Laptop Deals Week',
-			subtitle: 'Save on ultrabooks, gaming rigs, and accessories.',
-			linkLabel: 'Shop laptops',
+			legacyTitle: 'Laptop Deals Week',
 			linkUrl: '/products/search/?tag=discount',
 			imageUrl: buildKeywordImage('laptop-deals', 1200, 700, 'promo-laptops'),
 			placement: 'promo',
+			locales: {
+				uk: {
+					title: 'Тиждень знижок на ноутбуки',
+					subtitle: 'Економте на ультрабуках, ігрових моделях і аксесуарах.',
+					linkLabel: 'До ноутбуків',
+				},
+				en: {
+					title: 'Laptop Deals Week',
+					subtitle: 'Save on ultrabooks, gaming rigs, and accessories.',
+					linkLabel: 'Shop laptops',
+				},
+			},
 		},
 		{
-			title: 'New Arrivals',
-			subtitle: 'Fresh drops across all categories.',
-			linkLabel: 'Browse new',
+			legacyTitle: 'New Arrivals',
 			linkUrl: '/products/search/?tag=new',
 			imageUrl: buildKeywordImage('new-tech', 1200, 700, 'promo-new'),
 			placement: 'promo',
+			locales: {
+				uk: {
+					title: 'Нові надходження',
+					subtitle: 'Свіжі новинки у всіх категоріях.',
+					linkLabel: 'Дивитися новинки',
+				},
+				en: {
+					title: 'New Arrivals',
+					subtitle: 'Fresh drops across all categories.',
+					linkLabel: 'Browse new',
+				},
+			},
 		},
 		{
-			title: 'Popular Right Now',
-			subtitle: 'Top picks customers love.',
-			linkLabel: 'View popular',
+			legacyTitle: 'Popular Right Now',
 			linkUrl: '/products/search/?tag=popular',
 			imageUrl: buildKeywordImage('popular-tech', 1200, 700, 'promo-popular'),
 			placement: 'promo',
+			locales: {
+				uk: {
+					title: 'Популярне зараз',
+					subtitle: 'Топові товари, які обирають клієнти.',
+					linkLabel: 'Дивитися популярне',
+				},
+				en: {
+					title: 'Popular Right Now',
+					subtitle: 'Top picks customers love.',
+					linkLabel: 'View popular',
+				},
+			},
 		},
 	] as const;
+	const promoTitlesToReplace = Array.from(
+		new Set(
+			seededPromoBanners.flatMap((banner) => [
+				banner.legacyTitle,
+				banner.locales.uk.title,
+				banner.locales.en.title,
+			])
+		)
+	);
 
 	await prisma.banner.deleteMany({
 		where: {
 			placement: 'promo',
-			title: { in: seededPromoBanners.map((b) => b.title) },
+			OR: [
+				{ title: { in: promoTitlesToReplace } },
+				{ linkUrl: { in: seededPromoBanners.map((b) => b.linkUrl) } },
+			],
 		},
 	});
 
-	await prisma.banner.createMany({
-		data: seededPromoBanners.map((b) => ({
-			title: b.title,
-			subtitle: b.subtitle,
-			linkLabel: b.linkLabel,
-			linkUrl: b.linkUrl,
-			imageUrl: b.imageUrl,
-			placement: b.placement,
-			isActive: true,
-			startsAt: null,
-			endsAt: null,
-		})),
-	});
+	const createdPromoBanners = await Promise.all(
+		seededPromoBanners.map((banner) => {
+			const defaultLocaleCopy = banner.locales[DEFAULT_LOCALE];
+			return prisma.banner.create({
+				data: {
+					title: defaultLocaleCopy.title,
+					subtitle: defaultLocaleCopy.subtitle,
+					linkLabel: defaultLocaleCopy.linkLabel,
+					linkUrl: banner.linkUrl,
+					imageUrl: banner.imageUrl,
+					placement: banner.placement,
+					isActive: true,
+					startsAt: null,
+					endsAt: null,
+				},
+			});
+		})
+	);
+
+	await Promise.all(
+		createdPromoBanners.flatMap((banner, index) => {
+			const source = seededPromoBanners[index];
+			return TRANSLATION_LOCALES.map((locale) =>
+				prisma.bannerTranslation.upsert({
+					where: {
+						bannerId_locale: {
+							bannerId: banner.id,
+							locale,
+						},
+					},
+					update: {
+						title: source.locales[locale].title,
+						subtitle: source.locales[locale].subtitle,
+						linkLabel: source.locales[locale].linkLabel,
+					},
+					create: {
+						bannerId: banner.id,
+						locale,
+						title: source.locales[locale].title,
+						subtitle: source.locales[locale].subtitle,
+						linkLabel: source.locales[locale].linkLabel,
+					},
+				})
+			);
+		})
+	);
 
 	const seedUserId = 'user-roman-951';
 
@@ -838,6 +1604,8 @@ async function main() {
 			create: form,
 		});
 	}
+
+	await syncLocalizedSeedTranslations(TRANSLATION_LOCALES);
 
 	console.log('✅ Seeding completed.');
 }

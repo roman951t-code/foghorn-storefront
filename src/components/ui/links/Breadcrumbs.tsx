@@ -26,7 +26,7 @@ function CustomBreadcrumbLink({ href, children }: { href: string; children: Reac
 				color: 'link',
 				cursor: 'pointer',
 				bg: 'bgHover.promoCard',
-				borderColor: 'main.secondary',
+				borderColor: 'border.button',
 			}}
 			_focus={{ outline: 'none' }}
 		>
@@ -97,7 +97,7 @@ export default function Breadcrumbs({
 						_hover={{
 							color: 'link',
 							bg: 'bgHover.promoCard',
-							borderColor: 'main.secondary',
+							borderColor: 'border.button',
 						}}
 						_focus={{ outline: 'none' }}
 					>

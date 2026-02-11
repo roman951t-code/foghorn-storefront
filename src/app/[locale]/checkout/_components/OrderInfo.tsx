@@ -11,7 +11,7 @@ import {
 	Stat,
 	Box,
 } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { SidebarCheckoutCard, FullCheckoutCard } from '@/features/checkout/CheckoutCard';
 import AcceptOrderBtn from './AcceptOrderBtn';
 import { useCart } from '@/hooks/useCart';
@@ -35,6 +35,7 @@ export default function OrderInfo({
 	currencyCode: string;
 }) {
 	const { session } = useSession();
+	const locale = useLocale();
 	const checkoutT = useTranslations('checkout');
 	const paymentMethod = useCheckoutStore((state) => state.paymentMethod);
 	const shipmentMethod = useCheckoutStore((state) => state.shipmentMethod);
@@ -117,6 +118,7 @@ export default function OrderInfo({
 					shipmentMethod,
 					shippingAddress,
 					couponCode,
+					locale,
 				});
 
 				if (result?.success) {
@@ -152,6 +154,7 @@ export default function OrderInfo({
 					couponCode,
 					shipmentMethod,
 					shippingAddress,
+					locale,
 				}),
 			});
 

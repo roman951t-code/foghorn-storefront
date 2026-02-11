@@ -6,9 +6,11 @@ import { Prisma } from '@prisma/client';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 import { revalidateTag, updateTag } from 'next/cache';
+import { DEFAULT_LOCALE } from '@/constants/locales';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { isProductPublished } from '@/utils/publishSchedule';
 import { normalizeOrder } from './orderUtils';
 import type { UserOrder } from '@/types/order';
@@ -24,6 +26,7 @@ export type CreateOrderPayload = {
 	shipmentMethod?: string;
 	shippingAddress?: string;
 	couponCode?: string;
+	locale?: string;
 };
 
 type CreateOrderResult =
@@ -44,7 +47,25 @@ const CreateOrderSchema = z.object({
 	shipmentMethod: z.string().optional(),
 	shippingAddress: z.string().max(500).optional(),
 	couponCode: z.string().optional(),
+	locale: z.string().trim().toLowerCase().max(16).optional(),
 });
+
+const buildVariantLabel = (
+	attributes:
+		| {
+				attribute: { name: string; unit: string | null };
+				value: string;
+		  }[]
+		| undefined
+		| null
+) => {
+	if (!attributes?.length) return null;
+	const label = attributes
+		.map((a) => [a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' '))
+		.join(' / ')
+		.trim();
+	return label || null;
+};
 
 export async function createOrderAction(
 	_: unknown,
@@ -62,6 +83,8 @@ export async function createOrderAction(
 	if (!userId) {
 		return { success: false, message: 'unauthorized' };
 	}
+	const locale = parsed.data.locale || DEFAULT_LOCALE;
+	const localeFallbacks = getLocaleFallbacks(locale);
 
 	const items = parsed.data.items.map((item) => ({
 		productId: item.productId.trim(),
@@ -86,6 +109,11 @@ export async function createOrderAction(
 			status: true,
 			publishStartAt: true,
 			publishEndAt: true,
+			translations: {
+				where: { locale: { in: localeFallbacks } },
+				select: { locale: true, name: true },
+				orderBy: { updatedAt: 'desc' },
+			},
 		},
 	});
 
@@ -110,6 +138,13 @@ export async function createOrderAction(
 					sku: true,
 					price: true,
 					stock: true,
+					attributes: {
+						select: {
+							attribute: { select: { name: true, unit: true } },
+							value: true,
+						},
+						orderBy: { attribute: { name: 'asc' } },
+					},
 				},
 			})
 		: [];
@@ -121,7 +156,20 @@ export async function createOrderAction(
 	const defaultVariants = productsNeedingDefaultVariant.length
 		? await prisma.productVariant.findMany({
 				where: { productId: { in: productsNeedingDefaultVariant }, stock: { gt: 0 } },
-				select: { id: true, productId: true, price: true, stock: true, sku: true },
+				select: {
+					id: true,
+					productId: true,
+					price: true,
+					stock: true,
+					sku: true,
+					attributes: {
+						select: {
+							attribute: { select: { name: true, unit: true } },
+							value: true,
+						},
+						orderBy: { attribute: { name: 'asc' } },
+					},
+				},
 				orderBy: [{ productId: 'asc' }, { price: 'asc' }, { createdAt: 'asc' }],
 			})
 		: [];
@@ -174,6 +222,7 @@ export async function createOrderAction(
 			const unitPrice = toCurrency(Number(effectiveVariantPrice));
 			const quantity = Math.max(1, item.quantity);
 			const price = toCurrency(unitPrice * quantity);
+			const translation = pickLocalizedTranslation(product.translations, locale);
 			return {
 				productId: item.productId,
 				variantId: variant.id,
@@ -181,6 +230,10 @@ export async function createOrderAction(
 				baseUnitPrice,
 				unitPrice,
 				price,
+				snapshotLocale: locale,
+				snapshotProductName: translation?.name ?? product.name,
+				snapshotVariantLabel: buildVariantLabel(variant.attributes),
+				snapshotVariantSku: variant.sku ?? null,
 			};
 		})
 		.filter(Boolean) as {
@@ -190,6 +243,10 @@ export async function createOrderAction(
 		baseUnitPrice: number;
 		unitPrice: number;
 		price: number;
+		snapshotLocale: string;
+		snapshotProductName: string;
+		snapshotVariantLabel: string | null;
+		snapshotVariantSku: string | null;
 	}[];
 
 	if (unavailable.length || !orderItems.length) {
@@ -271,6 +328,10 @@ export async function createOrderAction(
 							baseUnitPrice: new Prisma.Decimal(item.baseUnitPrice.toFixed(2)),
 							unitPrice: new Prisma.Decimal(item.unitPrice.toFixed(2)),
 							price: new Prisma.Decimal(item.price.toFixed(2)),
+							snapshotLocale: item.snapshotLocale,
+							snapshotProductName: item.snapshotProductName,
+							snapshotVariantLabel: item.snapshotVariantLabel,
+							snapshotVariantSku: item.snapshotVariantSku,
 						})),
 					},
 				},

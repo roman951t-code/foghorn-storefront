@@ -2,6 +2,7 @@
 import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
+import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import {
@@ -13,6 +14,7 @@ import {
 import { buildProductImages } from '@/utils/productImages';
 import { PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 export async function getProductsByTag<T extends boolean>(
@@ -24,12 +26,14 @@ export async function getProductsByTag<T extends boolean>(
 	maxPrice?: number,
 	inStock?: boolean,
 	orderBy?: 'new' | 'expensive' | 'cheap',
-	filters?: Record<string, string[]>
+	filters?: Record<string, string[]>,
+	locale: string = DEFAULT_LOCALE
 ): Promise<T extends true ? ProductsWithMeta : ProductsOnly> {
 	'use cache';
 	cacheLife('hours');
 	cacheTag(PRODUCT_LIST_CACHE_TAG);
 
+	const localeFallbacks = getLocaleFallbacks(locale);
 	const safeLimit = Math.min(50, Math.max(1, Math.floor(limit || 1)));
 	const safeOffset = Math.max(0, Math.floor(offset || 0));
 	const now = new Date();
@@ -136,6 +140,11 @@ export async function getProductsByTag<T extends boolean>(
 			discountStartAt: true,
 			discountEndAt: true,
 			inStock: true,
+			translations: {
+				where: { locale: { in: localeFallbacks } },
+				select: { locale: true, name: true },
+				orderBy: { updatedAt: 'desc' },
+			},
 			variants: {
 				where: { stock: { gt: 0 } },
 				orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
@@ -177,10 +186,12 @@ export async function getProductsByTag<T extends boolean>(
 	});
 
 	const products: SubcategoryProduct[] = productsWithPrice.map((product) => {
-		const { variants, reviews, productImages, ...rest } = product as typeof product & {
+		const translation = pickLocalizedTranslation(product.translations, locale);
+		const { variants, reviews, productImages, translations, ...rest } = product as typeof product & {
 			variants?: unknown;
 			reviews?: unknown;
 			productImages?: unknown;
+			translations?: unknown;
 		};
 		const ratings = product.reviews?.map((r) => r.rating) ?? [];
 		const averageRating = ratings.length
@@ -190,7 +201,7 @@ export async function getProductsByTag<T extends boolean>(
 		return {
 			...rest,
 			id: product.id ?? '',
-			name: product.name ?? '',
+			name: translation?.name ?? product.name ?? '',
 			fullSlug: product.fullSlug ?? '',
 			imageUrl: product.imageUrl ?? null,
 			images: product.productImages.length
@@ -236,7 +247,22 @@ export async function getProductsByTag<T extends boolean>(
 					select: {
 						slug: true,
 						name: true,
-						parent: { select: { slug: true, name: true } },
+						translations: {
+							where: { locale: { in: localeFallbacks } },
+							select: { locale: true, name: true },
+							orderBy: { updatedAt: 'desc' },
+						},
+						parent: {
+							select: {
+								slug: true,
+								name: true,
+								translations: {
+									where: { locale: { in: localeFallbacks } },
+									select: { locale: true, name: true },
+									orderBy: { updatedAt: 'desc' },
+								},
+							},
+						},
 					},
 				},
 			},
@@ -247,12 +273,14 @@ export async function getProductsByTag<T extends boolean>(
 	for (const p of distinctCategories) {
 		const category = p.category;
 		if (!category?.slug) continue;
+		const categoryTranslation = pickLocalizedTranslation(category.translations, locale);
+		const parentTranslation = pickLocalizedTranslation(category.parent?.translations, locale);
 		const subcategorySlug = category.slug;
 		if (!subcategoriesMap.has(subcategorySlug)) {
 			subcategoriesMap.set(subcategorySlug, {
-				categoryName: category.parent?.name || '',
+				categoryName: parentTranslation?.name ?? category.parent?.name ?? '',
 				categorySlug: category.parent?.slug || '',
-				subcategoryName: category.name || '',
+				subcategoryName: categoryTranslation?.name ?? category.name ?? '',
 				subcategorySlug,
 			});
 		}

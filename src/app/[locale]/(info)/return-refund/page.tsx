@@ -10,13 +10,14 @@ import { mergePageMetadata } from '@/utils/contentPage';
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
 	const base = await getLocalizedMetadata(locale, 'returnRefund', { pathname: '/return-refund' });
-	const page = await getPageBySlug('return-refund');
+	const page = await getPageBySlug('return-refund', locale);
 	return mergePageMetadata(base, page);
 }
 
-export default async function ReturnRefund() {
+export default async function ReturnRefund({ params }: LocaleParams) {
+	const { locale } = await params;
 	const navigationT = await getTranslations('navigation');
-	const page = await getPageBySlug('return-refund');
+	const page = await getPageBySlug('return-refund', locale);
 	const pageTitle = page?.title?.trim() || navigationT('sidebar.returnRefund');
 	const content = page?.content ?? returnRefundData.content;
 

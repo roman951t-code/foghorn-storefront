@@ -50,8 +50,10 @@ function LayoutFallback() {
 
 async function LayoutProviders({
 	children,
+	locale,
 }: {
 	children: ReactNode;
+	locale: AppLocale;
 }) {
 	const headersList = await headers();
 
@@ -71,7 +73,7 @@ async function LayoutProviders({
 	]);
 
 	const sessionPromise = auth.api.getSession({ headers: headersList });
-	const catalogPromise = getCatalog();
+	const catalogPromise = getCatalog(locale);
 	const cookieBannerPromise = getEnabledStorefrontForms(StorefrontFormPlacement.COOKIE_BANNER);
 
 	const [messages, session, catalogResponse, cookieBanners] = await Promise.all([
@@ -145,7 +147,7 @@ export default async function Layout({ children, params }: Props) {
 					<ChakraUIProvider>
 						<Box display='flex' flexDirection='column' minHeight='100vh' gap='6' bg='bg.primary'>
 							<Suspense fallback={<LayoutFallback />}>
-								<LayoutProviders>{children}</LayoutProviders>
+								<LayoutProviders locale={locale}>{children}</LayoutProviders>
 							</Suspense>
 						</Box>
 					</ChakraUIProvider>

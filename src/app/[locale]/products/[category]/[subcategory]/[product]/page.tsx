@@ -29,7 +29,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	} = ensureParams(productParamsSchema, await params);
 	const resolvedSearch = ensureParams(productSearchParamsSchema, await searchParams);
 
-	const productData = await getProductBySlugCached(productSlug);
+	const productData = await getProductBySlugCached(productSlug, locale);
 	if (!productData) notFound();
 
 	const toAbsolute = (url?: string | null) => {
@@ -89,7 +89,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 
 	const headersList = await headers();
 	const [productData, session] = await Promise.all([
-		getProductBySlugCached(product),
+		getProductBySlugCached(product, locale),
 		auth.api.getSession({ headers: headersList }),
 	]);
 	const userId = session?.user?.id;

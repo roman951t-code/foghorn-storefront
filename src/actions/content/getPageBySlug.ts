@@ -2,15 +2,19 @@
 import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
+import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
+import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 
-export async function getPageBySlug(slug: string) {
+export async function getPageBySlug(slug: string, locale: string = DEFAULT_LOCALE) {
 	'use cache';
 	cacheLife('minutes');
 	cacheTag(`page:${slug}`);
 
 	const now = new Date();
-	return prisma.page.findFirst({
+	const localeFallbacks = getLocaleFallbacks(locale);
+
+	const page = await prisma.page.findFirst({
 		where: {
 			slug,
 			status: 'PUBLISHED',
@@ -27,6 +31,36 @@ export async function getPageBySlug(slug: string) {
 			metaDescription: true,
 			canonicalUrl: true,
 			publishedAt: true,
+			translations: {
+				where: {
+					locale: {
+						in: localeFallbacks,
+					},
+				},
+				select: {
+					locale: true,
+					title: true,
+					excerpt: true,
+					content: true,
+					metaTitle: true,
+					metaDescription: true,
+				},
+				orderBy: { updatedAt: 'desc' },
+			},
 		},
 	});
+
+	if (!page) return null;
+
+	const translation = pickLocalizedTranslation(page.translations, locale);
+	const { translations, ...basePage } = page;
+
+	return {
+		...basePage,
+		title: translation?.title ?? page.title,
+		excerpt: translation?.excerpt ?? page.excerpt,
+		content: translation?.content ?? page.content,
+		metaTitle: translation?.metaTitle ?? page.metaTitle,
+		metaDescription: translation?.metaDescription ?? page.metaDescription,
+	};
 }

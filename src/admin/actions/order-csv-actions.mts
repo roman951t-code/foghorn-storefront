@@ -237,6 +237,7 @@ export const exportOrdersCsv: ActionHandler<ActionResponse> = async (req) => {
 				select: {
 					quantity: true,
 					productId: true,
+					snapshotProductName: true,
 					product: { select: { name: true, productCode: true } },
 				},
 			},
@@ -248,6 +249,7 @@ export const exportOrdersCsv: ActionHandler<ActionResponse> = async (req) => {
 		const items = order.items
 			.map((item) => {
 				const label =
+					item.snapshotProductName?.trim() ||
 					item.product?.name?.trim() ||
 					item.product?.productCode?.trim() ||
 					item.productId;

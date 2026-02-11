@@ -3,28 +3,26 @@
 import { ReactNode } from 'react';
 import { Tabs } from '@chakra-ui/react';
 import { CABINET_TAB_ROUTE_SUFFIXES, type CabinetTabValue } from '@/constants/cabinetTabs';
-import { usePathname, useRouter } from '@/i18n/routing';
+import { useRouter } from '@/i18n/routing';
+import { useSelectedLayoutSegment } from 'next/navigation';
 
 const isCabinetTabValue = (value: string): value is CabinetTabValue =>
 	value in CABINET_TAB_ROUTE_SUFFIXES;
 
 export default function TabsProvider({ children }: { children: ReactNode }) {
 	const router = useRouter();
-	const pathname = usePathname();
-	const segments = pathname.split('/').filter(Boolean);
-	const lastSegment = segments[segments.length - 1];
+	const selectedSegment = useSelectedLayoutSegment();
 	const baseCabinetPath = '/cabinet';
+	const segmentValue = selectedSegment ?? 'cabinet';
 
-	const currentValue: CabinetTabValue = isCabinetTabValue(lastSegment) ? lastSegment : 'cabinet';
+	const currentValue: CabinetTabValue = isCabinetTabValue(segmentValue) ? segmentValue : 'cabinet';
 
 	const handleValueChange = (nextValue: string | null) => {
 		if (!nextValue || !isCabinetTabValue(nextValue)) return;
+		if (nextValue === currentValue) return;
 
 		const suffix = CABINET_TAB_ROUTE_SUFFIXES[nextValue];
-		const nextRoute = `${baseCabinetPath}${suffix}`;
-		if (nextRoute !== pathname) {
-			router.replace(nextRoute);
-		}
+		router.replace(`${baseCabinetPath}${suffix}`);
 	};
 
 	return (
@@ -34,7 +32,6 @@ export default function TabsProvider({ children }: { children: ReactNode }) {
 			onValueChange={(e) => handleValueChange(e.value)}
 			orientation='horizontal'
 			width='full'
-			lazyMount
 			fitted
 		>
 			{children}

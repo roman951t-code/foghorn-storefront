@@ -3,11 +3,13 @@
 import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
+import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
 import { buildProductImages } from '@/utils/productImages';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import { PRODUCT_CATEGORY_CACHE_TAG, PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 
@@ -20,17 +22,33 @@ export async function getProductsBySubcategorySlug(
 	minPrice?: number,
 	maxPrice?: number,
 	orderBy?: 'new' | 'expensive' | 'cheap',
-	filters?: Record<string, string[]>
+	filters?: Record<string, string[]>,
+	locale: string = DEFAULT_LOCALE
 ) {
 	'use cache';
 	cacheLife('hours');
 	cacheTag(PRODUCT_LIST_CACHE_TAG, PRODUCT_CATEGORY_CACHE_TAG);
 
+	const localeFallbacks = getLocaleFallbacks(locale);
 	const subcategory = await prisma.productCategory.findUnique({
 		where: { slug },
 		select: {
 			name: true,
-			parent: { select: { name: true } },
+			translations: {
+				where: { locale: { in: localeFallbacks } },
+				select: { locale: true, name: true },
+				orderBy: { updatedAt: 'desc' },
+			},
+			parent: {
+				select: {
+					name: true,
+					translations: {
+						where: { locale: { in: localeFallbacks } },
+						select: { locale: true, name: true },
+						orderBy: { updatedAt: 'desc' },
+					},
+				},
+			},
 		},
 	});
 
@@ -147,6 +165,16 @@ export async function getProductsBySubcategorySlug(
 			basePrice: true,
 			categoryName: true,
 			subcategoryName: true,
+			translations: {
+				where: { locale: { in: localeFallbacks } },
+				select: {
+					locale: true,
+					name: true,
+					categoryName: true,
+					subcategoryName: true,
+				},
+				orderBy: { updatedAt: 'desc' },
+			},
 			discountPrice: true,
 			discountStartAt: true,
 			discountEndAt: true,
@@ -187,11 +215,13 @@ export async function getProductsBySubcategorySlug(
 	}
 
 	const products: SubcategoryProduct[] = finalProducts.map((p) => {
-		const { variants, reviews, tags, productImages, ...rest } = p as typeof p & {
+		const translation = pickLocalizedTranslation(p.translations, locale);
+		const { variants, reviews, tags, productImages, translations, ...rest } = p as typeof p & {
 			variants?: unknown;
 			reviews?: unknown;
 			tags?: unknown;
 			productImages?: unknown;
+			translations?: unknown;
 		};
 		const ratings = p.reviews?.map((r) => r.rating) ?? [];
 		const averageRating = ratings.length ? ratings.reduce((s, v) => s + v, 0) / ratings.length : 0;
@@ -207,14 +237,14 @@ export async function getProductsBySubcategorySlug(
 		return {
 			...rest,
 			id: p.id ?? '',
-			name: p.name ?? '',
+			name: translation?.name ?? p.name ?? '',
 			fullSlug: p.fullSlug ?? '',
 			imageUrl: p.imageUrl ?? null,
 			images: p.productImages.length
 				? p.productImages.map((image) => image.url)
 				: buildProductImages(p.imageUrl ?? undefined, 4),
-			categoryName: p.categoryName ?? '',
-			subcategoryName: p.subcategoryName ?? '',
+			categoryName: translation?.categoryName ?? p.categoryName ?? '',
+			subcategoryName: translation?.subcategoryName ?? p.subcategoryName ?? '',
 			inStock: !!p.inStock,
 			basePrice,
 			discountPrice: scheduledDiscountPrice,
@@ -249,9 +279,12 @@ export async function getProductsBySubcategorySlug(
 		return Math.max(max, Number(price));
 	}, 0);
 
+	const subcategoryTranslation = pickLocalizedTranslation(subcategory.translations, locale);
+	const parentTranslation = pickLocalizedTranslation(subcategory.parent?.translations, locale);
+
 	return {
-		categoryName: subcategory.parent?.name || '',
-		subcategoryName: subcategory.name,
+		categoryName: parentTranslation?.name ?? subcategory.parent?.name ?? '',
+		subcategoryName: subcategoryTranslation?.name ?? subcategory.name,
 		products,
 		totalCount,
 		maxProductPrice,

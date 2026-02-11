@@ -2,7 +2,7 @@
 
 import { Accordion, EmptyState } from '@chakra-ui/react';
 import { VscFeedback } from 'react-icons/vsc';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { removeFeedback } from '@/actions/feedback/removeFeedback';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
@@ -40,6 +40,10 @@ export default function UserFeedbackList({ items, emptyText, deleteFailText }: P
 		items.map((item) => ({ ...item, review: item.review ?? null }))
 	);
 	const [pendingId, setPendingId] = useState<string | null>(null);
+
+	useEffect(() => {
+		setData(items.map((item) => ({ ...item, review: item.review ?? null })));
+	}, [items]);
 
 	const handleRemove = async (productId: string) => {
 		const snapshot = data.map((item) => ({ ...item }));

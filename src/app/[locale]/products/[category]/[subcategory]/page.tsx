@@ -31,7 +31,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const { category, subcategory, locale } = ensureParams(subcategoryParamsSchema, await params);
 	const resolvedSearch = await searchParams;
 
-	const subcategoryData = await getSubcategoryNameBySlug(subcategory);
+	const subcategoryData = await getSubcategoryNameBySlug(subcategory, locale);
 	if (!subcategoryData) notFound();
 
 	const pagesT = await getTranslations('pages');
@@ -102,7 +102,8 @@ export default async function Subcategory({ params, searchParams }: Props) {
 		minPrice,
 		maxPrice,
 		orderBy,
-		dynamicFilters
+		dynamicFilters,
+		locale
 	);
 
 	const [subcategoryFilters, subcategoryData] = await Promise.all([
@@ -211,7 +212,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 				</Box>
 			</Group>
 
-			<ViewedProductsSection title={productsT('viewed')} tag='viewed' />
+			<ViewedProductsSection title={productsT('viewed')} tag='viewed' locale={locale} />
 		</Flex>
 	);
 }

@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type KeyboardEvent } from 'react';
+import {
+	useEffect,
+	useMemo,
+	useState,
+	type ChangeEvent,
+	type KeyboardEvent,
+	type MouseEvent,
+} from 'react';
 import { flat, type EditPropertyProps, useTranslation } from 'adminjs';
 import { Box, Button, FormGroup, Input, Label, Text } from '@adminjs/design-system';
 
@@ -144,7 +151,15 @@ export default function ProductGalleryEdit(props: EditPropertyProps) {
 								/>
 								<Text>{translateMessage('product-gallery-primary')}</Text>
 							</label>
-							<Button size='sm' onClick={() => handleRemove(index)}>
+							<Button
+								type='button'
+								size='sm'
+								onClick={(event: MouseEvent<HTMLButtonElement>) => {
+									event.preventDefault();
+									event.stopPropagation();
+									handleRemove(index);
+								}}
+							>
 								{translateMessage('product-gallery-remove')}
 							</Button>
 						</Box>
@@ -164,10 +179,15 @@ export default function ProductGalleryEdit(props: EditPropertyProps) {
 					}}
 				/>
 				<Button
+					type='button'
 					variant='contained'
 					color='primary'
 					size='sm'
-					onClick={handleAdd}
+					onClick={(event: MouseEvent<HTMLButtonElement>) => {
+						event.preventDefault();
+						event.stopPropagation();
+						handleAdd();
+					}}
 					disabled={nextUrl.trim().length === 0}
 				>
 					{translateMessage('product-gallery-add')}

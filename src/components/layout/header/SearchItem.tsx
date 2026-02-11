@@ -20,6 +20,8 @@ const highlightStyles = {
 export function ProductSearchItem({ item }: { item: SearchProductItem }) {
 	const combobox = useComboboxContext();
 	const href = `/products/${item.category}/${item.subcategory}/${item.product}`;
+	const categoryLabel = item.categoryName?.trim() || formatSearchMeta(item.category);
+	const subcategoryLabel = item.subcategoryName?.trim() || formatSearchMeta(item.subcategory);
 
 	return (
 		<Combobox.Item item={item} key={item.name} fontSize='sm' minW='90px' w='full' py='0'>
@@ -55,7 +57,7 @@ export function ProductSearchItem({ item }: { item: SearchProductItem }) {
 							flex='0 0 auto'
 							whiteSpace='nowrap'
 						>
-							{formatSearchMeta(item.category)} / {formatSearchMeta(item.subcategory)}
+							{categoryLabel} / {subcategoryLabel}
 						</Text>
 					</Box>
 				</LocaleSearchLink>

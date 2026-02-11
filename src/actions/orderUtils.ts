@@ -15,6 +15,14 @@ const toNumber = (value: unknown): number => {
 };
 
 const roundCurrency = (value: number) => Math.round(value * 100) / 100;
+const buildVariantLabel = (attributes: any[] | undefined | null): string | null => {
+	if (!Array.isArray(attributes) || attributes.length === 0) return null;
+	const label = attributes
+		.map((a) => [a.attribute?.name, a.value, a.attribute?.unit].filter(Boolean).join(' '))
+		.join(' / ')
+		.trim();
+	return label || null;
+};
 
 export async function normalizeOrder(order: any): Promise<UserOrder> {
 	const items: OrderItem[] =
@@ -22,21 +30,15 @@ export async function normalizeOrder(order: any): Promise<UserOrder> {
 			id: item.id,
 			productId: item.productId,
 			variantId: item.variant?.id ?? item.variantId ?? null,
-			sku: item.variant?.sku ?? null,
-			variantLabel: Array.isArray(item.variant?.attributes)
-				? item.variant.attributes
-						.map((a: any) =>
-							[a.attribute?.name, a.value, a.attribute?.unit].filter(Boolean).join(' ')
-						)
-						.join(' / ')
-				: null,
+			sku: item.snapshotVariantSku ?? item.variant?.sku ?? null,
+			variantLabel: item.snapshotVariantLabel ?? buildVariantLabel(item.variant?.attributes),
 			quantity: item.quantity,
 			baseUnitPrice: item.baseUnitPrice != null ? toNumber(item.baseUnitPrice) : null,
 			unitPrice: Number(item.unitPrice ?? 0),
 			price: Number(item.price ?? 0),
 			product: {
 				id: item.product?.id ?? item.productId,
-				name: item.product?.name ?? '',
+				name: item.snapshotProductName ?? item.product?.name ?? '',
 				fullSlug: item.product?.fullSlug ?? '',
 				imageUrl: item.product?.imageUrl ?? null,
 			},

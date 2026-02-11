@@ -79,14 +79,18 @@ export default function ProductDetails({
 				<Card.Header>
 					<Heading size='md'>{guaranteeTitle}</Heading>
 				</Card.Header>
-				<Card.Body>{guaranteeText}</Card.Body>
+				<Card.Body>
+					<Text whiteSpace='pre-line'>{guaranteeText}</Text>
+				</Card.Body>
 			</Card.Root>
 
 			<Card.Root size='sm' bg='bg.tertiary' borderColor='border'>
 				<Card.Header>
 					<Heading size='md'>{descriptionTitle}</Heading>
 				</Card.Header>
-				<Card.Body>{descriptionText}</Card.Body>
+				<Card.Body>
+					<Text whiteSpace='pre-line'>{descriptionText}</Text>
+				</Card.Body>
 			</Card.Root>
 		</Stack>
 	);

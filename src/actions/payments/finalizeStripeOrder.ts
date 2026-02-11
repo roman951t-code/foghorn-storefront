@@ -6,12 +6,14 @@ import { Prisma } from '@prisma/client';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { revalidateTag, updateTag } from 'next/cache';
+import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
 import { STORE_CURRENCY_CODE_LOWER } from '@/config/currency';
 import { normalizeOrder } from '../orderUtils';
 import { isProductPublished } from '@/utils/publishSchedule';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
@@ -63,6 +65,23 @@ const normalizeMetadataString = (value: unknown, maxLen: number) => {
 	if (!trimmed) return null;
 	if (trimmed.length > maxLen) return trimmed.slice(0, maxLen);
 	return trimmed;
+};
+
+const buildVariantLabel = (
+	attributes:
+		| {
+				attribute: { name: string; unit: string | null };
+				value: string;
+		  }[]
+		| undefined
+		| null
+) => {
+	if (!attributes?.length) return null;
+	const label = attributes
+		.map((a) => [a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' '))
+		.join(' / ')
+		.trim();
+	return label || null;
 };
 
 async function finalizeStripeOrderInternal(
@@ -160,6 +179,9 @@ async function finalizeStripeOrderInternal(
 
 	const shipmentMethod = normalizeMetadataString(checkoutSession.metadata?.shipmentMethod, 64);
 	const shippingAddress = normalizeMetadataString(checkoutSession.metadata?.shippingAddress, 500);
+	const checkoutLocale =
+		normalizeMetadataString(checkoutSession.metadata?.locale, 16)?.toLowerCase() || DEFAULT_LOCALE;
+	const localeFallbacks = getLocaleFallbacks(checkoutLocale);
 
 	let itemsPayload: OrderItemPayload[] = [];
 	try {
@@ -198,6 +220,11 @@ async function finalizeStripeOrderInternal(
 			status: true,
 			publishStartAt: true,
 			publishEndAt: true,
+			translations: {
+				where: { locale: { in: localeFallbacks } },
+				select: { locale: true, name: true },
+				orderBy: { updatedAt: 'desc' },
+			},
 		},
 	});
 
@@ -209,7 +236,20 @@ async function finalizeStripeOrderInternal(
 	const variants = uniqueVariantIds.length
 		? await prisma.productVariant.findMany({
 				where: { id: { in: uniqueVariantIds } },
-				select: { id: true, productId: true, sku: true, price: true, stock: true },
+				select: {
+					id: true,
+					productId: true,
+					sku: true,
+					price: true,
+					stock: true,
+					attributes: {
+						select: {
+							attribute: { select: { name: true, unit: true } },
+							value: true,
+						},
+						orderBy: { attribute: { name: 'asc' } },
+					},
+				},
 			})
 		: [];
 	const variantById = new Map(variants.map((v) => [v.id, v]));
@@ -220,7 +260,20 @@ async function finalizeStripeOrderInternal(
 	const defaultVariants = productsNeedingDefaultVariant.length
 		? await prisma.productVariant.findMany({
 				where: { productId: { in: productsNeedingDefaultVariant }, stock: { gt: 0 } },
-				select: { id: true, productId: true, sku: true, price: true, stock: true },
+				select: {
+					id: true,
+					productId: true,
+					sku: true,
+					price: true,
+					stock: true,
+					attributes: {
+						select: {
+							attribute: { select: { name: true, unit: true } },
+							value: true,
+						},
+						orderBy: { attribute: { name: 'asc' } },
+					},
+				},
 				orderBy: [{ productId: 'asc' }, { price: 'asc' }, { createdAt: 'asc' }],
 			})
 		: [];
@@ -275,6 +328,7 @@ async function finalizeStripeOrderInternal(
 			const baseUnitPrice = toCurrency(Number(variantBase));
 			const unitPrice = toCurrency(Number(effectiveVariantPrice));
 			const price = toCurrency(unitPrice * requestedQty);
+			const translation = pickLocalizedTranslation(product.translations, checkoutLocale);
 			return {
 				productId: item.productId,
 				variantId: variant.id,
@@ -282,6 +336,10 @@ async function finalizeStripeOrderInternal(
 				baseUnitPrice,
 				unitPrice,
 				price,
+				snapshotLocale: checkoutLocale,
+				snapshotProductName: translation?.name ?? product.name,
+				snapshotVariantLabel: buildVariantLabel(variant.attributes),
+				snapshotVariantSku: variant.sku ?? null,
 			};
 		})
 		.filter(Boolean) as {
@@ -291,6 +349,10 @@ async function finalizeStripeOrderInternal(
 		baseUnitPrice: number;
 		unitPrice: number;
 		price: number;
+		snapshotLocale: string;
+		snapshotProductName: string;
+		snapshotVariantLabel: string | null;
+		snapshotVariantSku: string | null;
 	}[];
 
 	if (!orderItems.length) {
@@ -391,6 +453,10 @@ async function finalizeStripeOrderInternal(
 							baseUnitPrice: new Prisma.Decimal(item.baseUnitPrice.toFixed(2)),
 							unitPrice: new Prisma.Decimal(item.unitPrice.toFixed(2)),
 							price: new Prisma.Decimal(item.price.toFixed(2)),
+							snapshotLocale: item.snapshotLocale,
+							snapshotProductName: item.snapshotProductName,
+							snapshotVariantLabel: item.snapshotVariantLabel,
+							snapshotVariantSku: item.snapshotVariantSku,
 						})),
 					},
 				},

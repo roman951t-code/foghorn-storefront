@@ -251,6 +251,9 @@
 		"deleteReviewFail": "Failed to delete review",
 		"subscribeFail": "Failed to subscribe, try again later",
 		"unsubscribeFail": "Failed to unsubscribe, try again later",
+		"cartNotFound": "Cart not found",
+		"productNotFoundInCart": "Item not found in the cart",
+		"cartUpdateFailed": "Failed to update cart",
 		"feedbackMaxLength": "Maximum 200 characters",
 		"feedbackMinLength": "Minimum 5 characters"
 	},

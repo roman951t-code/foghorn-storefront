@@ -23,6 +23,14 @@ export const duplicateBanner: ActionHandler<RecordActionResponse> = async (_req,
 			isActive: true,
 			startsAt: true,
 			endsAt: true,
+			translations: {
+				select: {
+					locale: true,
+					title: true,
+					subtitle: true,
+					linkLabel: true,
+				},
+			},
 		},
 	});
 
@@ -44,6 +52,19 @@ export const duplicateBanner: ActionHandler<RecordActionResponse> = async (_req,
 				endsAt: banner.endsAt,
 			},
 		});
+		if (banner.translations.length > 0) {
+			await prisma.bannerTranslation.createMany({
+				data: banner.translations.map((translation) => ({
+					bannerId: created.id,
+					locale: translation.locale,
+					title:
+						translation.locale === 'uk' ? `${translation.title} (Copy)` : translation.title,
+					subtitle: translation.subtitle,
+					linkLabel: translation.linkLabel,
+				})),
+				skipDuplicates: true,
+			});
+		}
 
 		const createdRecord = await resource.findOne(created.id);
 		const redirectUrl = h.recordActionUrl({ resourceId, recordId: created.id, actionName: 'show' });

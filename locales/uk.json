@@ -251,6 +251,9 @@
 		"deleteReviewFail": "Не вдалося видалити відгук",
 		"subscribeFail": "Не вдалося оформити підписку, спробуйте пізніше",
 		"unsubscribeFail": "Не вдалося скасувати підписку, спробуйте пізніше",
+		"cartNotFound": "Кошик не знайдено",
+		"productNotFoundInCart": "Товар не знайдено у кошику",
+		"cartUpdateFailed": "Не вдалося оновити кошик",
 		"feedbackMaxLength": "Максимум 200 символів",
 		"feedbackMinLength": "Мінімум 5 символів"
 	},

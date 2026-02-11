@@ -10,13 +10,14 @@ import { mergePageMetadata, parseFaqContent } from '@/utils/contentPage';
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
 	const base = await getLocalizedMetadata(locale, 'faq', { pathname: '/faq' });
-	const page = await getPageBySlug('faq');
+	const page = await getPageBySlug('faq', locale);
 	return mergePageMetadata(base, page);
 }
 
-export default async function FAQ() {
+export default async function FAQ({ params }: LocaleParams) {
+	const { locale } = await params;
 	const navigationT = await getTranslations('navigation');
-	const page = await getPageBySlug('faq');
+	const page = await getPageBySlug('faq', locale);
 	const pageTitle = page?.title?.trim() || navigationT('sidebar.faq');
 	const parsedFaq = parseFaqContent(page?.content);
 	const fallbackFaq = page?.content ? null : faqData;

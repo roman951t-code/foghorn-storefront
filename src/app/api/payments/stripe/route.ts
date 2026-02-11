@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { z } from 'zod';
+import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
 import { auth } from '@/lib/auth';
@@ -9,6 +10,7 @@ import { env } from '@/config/env';
 import { STORE_CURRENCY_CODE_LOWER } from '@/config/currency';
 import { isProductPublished } from '@/utils/publishSchedule';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import type Stripe from 'stripe';
 import { getCouponDiscountPreview } from '@/lib/coupons';
 
@@ -49,6 +51,7 @@ export async function POST(req: NextRequest) {
 		couponCode: z.string().optional(),
 		shipmentMethod: z.string().max(64).optional(),
 		shippingAddress: z.string().max(500).optional(),
+		locale: z.string().trim().toLowerCase().max(16).optional(),
 		successUrl: z.string().url().optional(),
 		cancelUrl: z.string().url().optional(),
 	});
@@ -84,6 +87,8 @@ export async function POST(req: NextRequest) {
 		if (!parsed.success) {
 			return NextResponse.json({ error: 'invalid_payload' }, { status: 400 });
 		}
+		const locale = parsed.data.locale || DEFAULT_LOCALE;
+		const localeFallbacks = getLocaleFallbacks(locale);
 
 		const items: LineItemPayload[] = parsed.data.items.map((item) => ({
 			productId: item.productId.trim(),
@@ -106,6 +111,11 @@ export async function POST(req: NextRequest) {
 				status: true,
 				publishStartAt: true,
 				publishEndAt: true,
+				translations: {
+					where: { locale: { in: localeFallbacks } },
+					select: { locale: true, name: true },
+					orderBy: { updatedAt: 'desc' },
+				},
 			},
 		});
 		const productMap = new Map(products.map((p) => [p.id, p]));
@@ -194,6 +204,8 @@ export async function POST(req: NextRequest) {
 				const variantBase = variant.price?.toNumber?.() ?? 0;
 				const effectiveVariantPrice = discountAmount > 0 ? Math.max(0, variantBase - discountAmount) : variantBase;
 				const unitAmount = Math.max(1, Math.round(effectiveVariantPrice * 100));
+				const translation = pickLocalizedTranslation(product.translations, locale);
+				const displayProductName = translation?.name ?? product.name;
 
 				const variantLabel =
 					variant.attributes?.length
@@ -206,7 +218,9 @@ export async function POST(req: NextRequest) {
 					quantity,
 					price_data: {
 						currency,
-						product_data: { name: variantLabel ? `${product.name} (${variantLabel})` : product.name },
+						product_data: {
+							name: variantLabel ? `${displayProductName} (${variantLabel})` : displayProductName,
+						},
 						unit_amount: unitAmount,
 					},
 				};
@@ -269,6 +283,7 @@ export async function POST(req: NextRequest) {
 		const metadata: Record<string, string> = {
 			userId: session.user.id,
 			items: JSON.stringify(items),
+			locale,
 		};
 		if (resolvedCouponCode) metadata.couponCode = resolvedCouponCode;
 		if (resolvedCouponAmount != null) metadata.couponAmount = resolvedCouponAmount.toFixed(2);

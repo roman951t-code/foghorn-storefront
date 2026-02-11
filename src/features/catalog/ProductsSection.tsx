@@ -9,6 +9,7 @@ interface Props extends FlexProps {
 	tag: string;
 	products?: SubcategoryProduct[];
 	limit?: number;
+	locale?: string;
 }
 
 export default async function ProductsSection({
@@ -16,11 +17,12 @@ export default async function ProductsSection({
 	tag,
 	products: providedProducts,
 	limit = 10,
+	locale,
 	...restProps
 }: Props) {
 	const { products = [] } = providedProducts
 		? { products: providedProducts }
-		: await getProductsByTag(tag, false, limit);
+		: await getProductsByTag(tag, false, limit, 0, undefined, undefined, undefined, undefined, undefined, locale);
 
 	if (!products.length) return null;
 

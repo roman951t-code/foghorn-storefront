@@ -19,13 +19,14 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 	return getLocalizedMetadata(locale, 'main', { pathname: '/' });
 }
 
-export default async function Main() {
+export default async function Main({ params }: LocaleParams) {
+	const { locale } = await params;
 	const [genT, prodT, authT, validT, promoCards] = await Promise.all([
 		getTranslations('common'),
 		getTranslations('products'),
 		getTranslations('auth'),
 		getTranslations('validation'),
-		getPromoCards('promo'),
+		getPromoCards('promo', locale),
 	]);
 
 	const i18nData = extractI18nData(genT, ['seeCategory', 'seeAll']);
@@ -42,7 +43,7 @@ export default async function Main() {
 				<CatalogBtn fullText />
 			</Box>
 			<CatalogPanel i18nData={i18nData} promoCards={promoCards} />
-			<ProductsSection title={prodT('popular')} tag='popular' />
+			<ProductsSection title={prodT('popular')} tag='popular' locale={locale} />
 			{/* <ProductsSection title={prodT('new')} tag='new' />
 			<ProductsSection title={prodT('discount')} tag='discount' />
 			<ProductsSection title={prodT('promotional')} tag='promotional' /> */}

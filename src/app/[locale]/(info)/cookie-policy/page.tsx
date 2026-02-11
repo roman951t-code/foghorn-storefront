@@ -10,13 +10,14 @@ import { mergePageMetadata } from '@/utils/contentPage';
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
 	const base = await getLocalizedMetadata(locale, 'cookiePolicy', { pathname: '/cookie-policy' });
-	const page = await getPageBySlug('cookie-policy');
+	const page = await getPageBySlug('cookie-policy', locale);
 	return mergePageMetadata(base, page);
 }
 
-export default async function CookiePolicyPage() {
+export default async function CookiePolicyPage({ params }: LocaleParams) {
+	const { locale } = await params;
 	const navigationT = await getTranslations('navigation');
-	const page = await getPageBySlug('cookie-policy');
+	const page = await getPageBySlug('cookie-policy', locale);
 	const pageTitle = page?.title?.trim() || navigationT('sidebar.cookiePolicy');
 	const content = page?.content ?? cookiePolicy.content;
 

@@ -10,13 +10,14 @@ import { mergePageMetadata } from '@/utils/contentPage';
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
 	const base = await getLocalizedMetadata(locale, 'shippingTerms', { pathname: '/shipping-terms' });
-	const page = await getPageBySlug('shipping-terms');
+	const page = await getPageBySlug('shipping-terms', locale);
 	return mergePageMetadata(base, page);
 }
 
-export default async function ShippingTerms() {
+export default async function ShippingTerms({ params }: LocaleParams) {
+	const { locale } = await params;
 	const navigationT = await getTranslations('navigation');
-	const page = await getPageBySlug('shipping-terms');
+	const page = await getPageBySlug('shipping-terms', locale);
 	const pageTitle = page?.title?.trim() || navigationT('sidebar.shippingTerms');
 	const content = page?.content ?? shippingTermsData.content;
 

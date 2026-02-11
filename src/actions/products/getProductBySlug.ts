@@ -2,9 +2,11 @@
 import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
+import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
 import { buildProductImages } from '@/utils/productImages';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import {
 	PRODUCT_DETAIL_CACHE_TAG,
@@ -12,7 +14,8 @@ import {
 	productCacheTagById,
 } from '@/constants/products';
 
-async function fetchProductBySlug(slug: string) {
+async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE) {
+	const localeFallbacks = getLocaleFallbacks(locale);
 	const product = await prisma.product.findFirst({
 		where: { slug, AND: [getPublishedProductWhere()] },
 		select: {
@@ -21,6 +24,7 @@ async function fetchProductBySlug(slug: string) {
 			fullSlug: true,
 			slug: true,
 			description: true,
+			guarantee: true,
 			metaTitle: true,
 			metaDescription: true,
 			canonicalUrl: true,
@@ -40,6 +44,20 @@ async function fetchProductBySlug(slug: string) {
 			reviewCount: true,
 			categoryName: true,
 			subcategoryName: true,
+			translations: {
+				where: { locale: { in: localeFallbacks } },
+				select: {
+					locale: true,
+					name: true,
+					description: true,
+					guarantee: true,
+					metaTitle: true,
+					metaDescription: true,
+					categoryName: true,
+					subcategoryName: true,
+				},
+				orderBy: { updatedAt: 'desc' },
+			},
 			category: {
 				select: {
 					attributeSet: {
@@ -96,6 +114,7 @@ async function fetchProductBySlug(slug: string) {
 	});
 
 	if (!product) return null;
+	const translation = pickLocalizedTranslation(product.translations, locale);
 	const persistedImages = product.productImages.map((image) => image.url).filter(Boolean);
 	const images = persistedImages.length
 		? persistedImages
@@ -145,9 +164,16 @@ async function fetchProductBySlug(slug: string) {
 			? [...setAttributes, ...extraAttributes]
 			: extraAttributes.map((a) => ({ ...a, value: a.value }));
 
-	const { category, productImages, ...productWithoutCategory } = product;
+	const { category, productImages, translations, ...productWithoutCategory } = product;
 	return {
 		...productWithoutCategory,
+		name: translation?.name ?? product.name,
+		description: translation?.description ?? product.description,
+		guarantee: translation?.guarantee ?? product.guarantee,
+		metaTitle: translation?.metaTitle ?? product.metaTitle,
+		metaDescription: translation?.metaDescription ?? product.metaDescription,
+		categoryName: translation?.categoryName ?? product.categoryName,
+		subcategoryName: translation?.subcategoryName ?? product.subcategoryName,
 		basePrice,
 		discountPrice: getEffectiveDiscountPrice(
 			basePrice,
@@ -174,12 +200,12 @@ async function fetchProductBySlug(slug: string) {
 	};
 }
 
-export async function getProductBySlugCached(slug: string) {
+export async function getProductBySlugCached(slug: string, locale: string = DEFAULT_LOCALE) {
 	'use cache';
 	cacheLife('hours');
 	cacheTag(PRODUCT_DETAIL_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
 
-	const product = await fetchProductBySlug(slug);
+	const product = await fetchProductBySlug(slug, locale);
 	if (product?.id) {
 		cacheTag(productCacheTagById(product.id));
 	}
@@ -187,6 +213,6 @@ export async function getProductBySlugCached(slug: string) {
 	return product;
 }
 
-export async function getProductBySlug(slug: string) {
-	return fetchProductBySlug(slug);
+export async function getProductBySlug(slug: string, locale: string = DEFAULT_LOCALE) {
+	return fetchProductBySlug(slug, locale);
 }

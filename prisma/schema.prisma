@@ -187,12 +187,14 @@ model ProductCategory {
   children     ProductCategory[]    @relation("Subcategories")
   products     Product[]
   attributeSet ProductAttributeSet?
+  translations ProductCategoryTranslation[]
 }
 
 model Product {
   id                   String                  @id @default(uuid())
   name                 String
   description          String?
+  guarantee            String?                 @db.Text
   metaTitle            String?
   metaDescription      String?
   canonicalUrl         String?
@@ -229,9 +231,50 @@ model Product {
   auditEntries         ProductAuditEntry[]
   inventoryAdjustments InventoryAdjustment[]
   productImages        ProductImage[]
+  translations         ProductTranslation[]
   fullSlug             String                  @unique
   categoryName         String
   subcategoryName      String
+}
+
+model ProductTranslation {
+  id              String   @id @default(uuid())
+  productId       String
+  locale          String
+  name            String
+  description     String?
+  guarantee       String?  @db.Text
+  metaTitle       String?
+  metaDescription String?
+  categoryName    String?
+  subcategoryName String?
+  slug            String?
+  fullSlug        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, locale])
+  @@unique([locale, slug])
+  @@unique([locale, fullSlug])
+  @@index([locale, name])
+}
+
+model ProductCategoryTranslation {
+  id         String   @id @default(uuid())
+  categoryId String
+  locale     String
+  name       String
+  slug       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  category ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, locale])
+  @@unique([locale, slug])
+  @@index([locale, name])
 }
 
 model ProductImage {
@@ -409,17 +452,21 @@ model OrderDiscount {
 }
 
 model OrderItem {
-  id        String          @id @default(uuid())
-  orderId   String
-  productId String
-  variantId String?
-  quantity  Int
-  price     Decimal         @db.Decimal(10, 2)
-  baseUnitPrice Decimal?    @db.Decimal(10, 2)
-  unitPrice Decimal         @db.Decimal(10, 2)
-  order     Order           @relation(fields: [orderId], references: [id])
-  product   Product         @relation(fields: [productId], references: [id])
-  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  id                   String          @id @default(uuid())
+  orderId              String
+  productId            String
+  variantId            String?
+  quantity             Int
+  price                Decimal         @db.Decimal(10, 2)
+  baseUnitPrice        Decimal?        @db.Decimal(10, 2)
+  unitPrice            Decimal         @db.Decimal(10, 2)
+  snapshotLocale       String?
+  snapshotProductName  String?
+  snapshotVariantLabel String?
+  snapshotVariantSku   String?
+  order                Order           @relation(fields: [orderId], references: [id])
+  product              Product         @relation(fields: [productId], references: [id])
+  variant              ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 }
 
 enum OrderStatus {
@@ -495,18 +542,35 @@ enum InventoryAdjustmentSource {
 }
 
 model Banner {
-  id        String    @id @default(uuid())
+  id           String              @id @default(uuid())
+  title        String
+  subtitle     String?
+  imageUrl     String
+  linkLabel    String?
+  linkUrl      String?
+  placement    String              @default("home")
+  isActive     Boolean             @default(true)
+  startsAt     DateTime?
+  endsAt       DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  translations BannerTranslation[]
+}
+
+model BannerTranslation {
+  id        String   @id @default(uuid())
+  bannerId  String
+  locale    String
   title     String
   subtitle  String?
-  imageUrl  String
   linkLabel String?
-  linkUrl   String?
-  placement String    @default("home")
-  isActive  Boolean   @default(true)
-  startsAt  DateTime?
-  endsAt    DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  banner Banner @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+
+  @@unique([bannerId, locale])
+  @@index([locale, title])
 }
 
 model Page {
@@ -524,6 +588,27 @@ model Page {
   publishedAt     DateTime?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+  translations    PageTranslation[]
+}
+
+model PageTranslation {
+  id              String   @id @default(uuid())
+  pageId          String
+  locale          String
+  title           String
+  slug            String?
+  excerpt         String?
+  content         String?
+  metaTitle       String?
+  metaDescription String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, locale])
+  @@unique([locale, slug])
+  @@index([locale, title])
 }
 
 enum PageType {

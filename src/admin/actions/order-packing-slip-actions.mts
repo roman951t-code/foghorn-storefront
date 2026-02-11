@@ -45,11 +45,12 @@ const buildPackingPayload = (order: {
 		quantity: number;
 		unitPrice: unknown;
 		price: unknown;
+		snapshotProductName: string | null;
 		product: { name: string | null } | null;
 	}>;
 }): PackingSlipPayload => {
 	const items: PackingSlipItem[] = order.items.map((item) => ({
-		name: item.product?.name ?? 'Unknown',
+		name: item.snapshotProductName ?? item.product?.name ?? 'Unknown',
 		quantity: item.quantity,
 		unitPrice: Number(item.unitPrice ?? 0),
 		price: Number(item.price ?? 0),

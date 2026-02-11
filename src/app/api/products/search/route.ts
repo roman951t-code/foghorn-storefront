@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 export async function GET(req: Request) {
@@ -18,6 +20,8 @@ export async function GET(req: Request) {
 
 	const { searchParams } = new URL(req.url);
 	const query = searchParams.get('q')?.trim().slice(0, 64);
+	const locale = searchParams.get('locale')?.trim().toLowerCase() || DEFAULT_LOCALE;
+	const localeFallbacks = getLocaleFallbacks(locale);
 
 	if (!query || query.length < 2) {
 		return NextResponse.json({ products: [], subcategories: [] });
@@ -25,7 +29,17 @@ export async function GET(req: Request) {
 
 	const products = await prisma.product.findMany({
 		where: {
-			name: { contains: query, mode: 'insensitive' },
+			OR: [
+				{ name: { contains: query, mode: 'insensitive' } },
+				{
+					translations: {
+						some: {
+							locale: { in: localeFallbacks },
+							name: { contains: query, mode: 'insensitive' },
+						},
+					},
+				},
+			],
 			AND: [getPublishedProductWhere()],
 		},
 		orderBy: [{ stock: 'desc' }, { name: 'asc' }],
@@ -33,13 +47,34 @@ export async function GET(req: Request) {
 		select: {
 			name: true,
 			slug: true,
+			translations: {
+				where: { locale: { in: localeFallbacks } },
+				select: {
+					locale: true,
+					name: true,
+					categoryName: true,
+					subcategoryName: true,
+				},
+				orderBy: { updatedAt: 'desc' },
+			},
 			category: {
 				select: {
 					slug: true,
 					name: true,
+					translations: {
+						where: { locale: { in: localeFallbacks } },
+						select: { locale: true, name: true },
+						orderBy: { updatedAt: 'desc' },
+					},
 					parent: {
 						select: {
 							slug: true,
+							name: true,
+							translations: {
+								where: { locale: { in: localeFallbacks } },
+								select: { locale: true, name: true },
+								orderBy: { updatedAt: 'desc' },
+							},
 						},
 					},
 				},
@@ -47,12 +82,23 @@ export async function GET(req: Request) {
 		},
 	});
 
-	const productItems = products.map((p) => ({
-		name: p.name,
-		product: p.slug,
-		category: p.category.parent?.slug || '',
-		subcategory: p.category.slug,
-	}));
+	const productItems = products.map((p) => {
+		const productTranslation = pickLocalizedTranslation(p.translations, locale);
+		const subcategoryTranslation = pickLocalizedTranslation(p.category.translations, locale);
+		const categoryTranslation = pickLocalizedTranslation(p.category.parent?.translations, locale);
+
+		return {
+			type: 'product' as const,
+			name: productTranslation?.name ?? p.name,
+			product: p.slug,
+			category: p.category.parent?.slug || '',
+			subcategory: p.category.slug,
+			categoryName:
+				productTranslation?.categoryName ?? categoryTranslation?.name ?? p.category.parent?.name ?? '',
+			subcategoryName:
+				productTranslation?.subcategoryName ?? subcategoryTranslation?.name ?? p.category.name,
+		};
+	});
 
 	const uniqueSubcategoriesMap = new Map<
 		string,
@@ -64,8 +110,9 @@ export async function GET(req: Request) {
 
 		const key = p.category.slug;
 		if (!uniqueSubcategoriesMap.has(key)) {
+			const subcategoryTranslation = pickLocalizedTranslation(p.category.translations, locale);
 			uniqueSubcategoriesMap.set(key, {
-				name: p.category.name,
+				name: subcategoryTranslation?.name ?? p.category.name,
 				subcategory: p.category.slug,
 				category: p.category.parent?.slug || '',
 			});
@@ -74,6 +121,9 @@ export async function GET(req: Request) {
 
 	return NextResponse.json({
 		products: productItems,
-		subcategories: Array.from(uniqueSubcategoriesMap.values()),
+		subcategories: Array.from(uniqueSubcategoriesMap.values()).map((item) => ({
+			type: 'subcategory' as const,
+			...item,
+		})),
 	});
 }

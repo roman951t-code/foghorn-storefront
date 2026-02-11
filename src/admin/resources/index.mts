@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
 import type { ResourceOptions } from 'adminjs';
+import { ValidationError } from 'adminjs';
 import { prisma } from '../prisma.mts';
 import { archiveProduct, duplicateProduct, publishProduct } from '../actions/product-actions.mts';
 import { productVariantMatrix } from '../actions/product-variant-actions.mts';
@@ -87,6 +88,7 @@ import {
 	productBulkAdjustStockActionComponent,
 	productBulkToggleInStockActionComponent,
 	productBulkSeoTemplateActionComponent,
+	localizedTranslationsEditorComponent,
 	userShowComponent,
 	userSegmentsComponent,
 	orderStatusActionComponent,
@@ -94,6 +96,24 @@ import {
 } from '../config/components.mts';
 import { modelMap } from '../config/model-map.mts';
 import { disabled, hidden, readOnly, readOnlyActions } from '../config/property-options.mts';
+import {
+	type AdminTranslationLocale,
+	type LocalizedResourceId,
+	type LocalizedResourceDefinition,
+} from '../constants/localization';
+import * as localizationRuntime from '../constants/localization-runtime.mjs';
+
+const ADMIN_TRANSLATION_LOCALES =
+	localizationRuntime.ADMIN_TRANSLATION_LOCALES as readonly AdminTranslationLocale[];
+const ADMIN_DEFAULT_TRANSLATION_LOCALE =
+	localizationRuntime.ADMIN_DEFAULT_TRANSLATION_LOCALE as AdminTranslationLocale;
+const LOCALIZED_RESOURCE_DEFINITIONS =
+	localizationRuntime.LOCALIZED_RESOURCE_DEFINITIONS as Record<
+		LocalizedResourceId,
+		LocalizedResourceDefinition
+	>;
+const buildTranslationInputPath = (locale: AdminTranslationLocale, fieldKey: string) =>
+	localizationRuntime.buildTranslationInputPath(locale, fieldKey);
 
 const mapAttributeSetItemPayload = async (request: any) => {
 	const payload = request?.payload ?? {};
@@ -209,9 +229,12 @@ const hydrateProductGalleryField = async (response: any, request: any, context: 
 			select: { url: true, sortOrder: true, createdAt: true },
 			orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
 		});
-		const galleryUrlList = images.map((image) => image.url).filter(Boolean);
-		const galleryUrls = galleryUrlList.join('\n');
 		const persistedPrimaryImageUrl = normalizeGalleryUrl(response?.record?.params?.imageUrl);
+		const galleryUrlList = images.map((image) => image.url).filter(Boolean);
+		if (galleryUrlList.length === 0 && persistedPrimaryImageUrl) {
+			galleryUrlList.push(persistedPrimaryImageUrl);
+		}
+		const galleryUrls = galleryUrlList.join('\n');
 		const primaryGalleryUrl =
 			persistedPrimaryImageUrl && galleryUrlList.includes(persistedPrimaryImageUrl)
 				? persistedPrimaryImageUrl
@@ -290,7 +313,12 @@ const syncProductGalleryAfterHook = async (response: any, request: any, context:
 const productEditAfterHook = async (response: any, request: any, context: any) => {
 	const withAudit = await productAuditAfterHook(response, request, context);
 	const withHydratedGalleryField = await hydrateProductGalleryField(withAudit, request, context);
-	return syncProductGalleryAfterHook(withHydratedGalleryField, request, context);
+	const withGallerySynced = await syncProductGalleryAfterHook(
+		withHydratedGalleryField,
+		request,
+		context
+	);
+	return localizedAfterHook(withGallerySynced, request, context);
 };
 
 type AdminResource = {
@@ -309,6 +337,464 @@ const maybeResource = (model: unknown, options: ResourceOptions): AdminResource 
 const isOrderStatus = (record: { param: (key: string) => unknown } | undefined, status: string) =>
 	String(record?.param('status') ?? '') === status;
 
+const LOCALIZED_TRANSLATIONS_CONTEXT_KEY = '__localizedTranslationsPayload';
+
+const getRequestMethod = (request: any) => String(request?.method ?? 'get').toLowerCase();
+
+const normalizeLocalizedValue = (value: unknown): string | null | undefined => {
+	if (value === undefined) return undefined;
+	if (value == null) return null;
+	if (typeof value !== 'string') return String(value);
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : null;
+};
+
+const getLocalizedResourceDefinition = (
+	resourceId: string
+): LocalizedResourceDefinition | null => {
+	if (resourceId === 'Product') return LOCALIZED_RESOURCE_DEFINITIONS.Product;
+	if (resourceId === 'ProductCategory') return LOCALIZED_RESOURCE_DEFINITIONS.ProductCategory;
+	if (resourceId === 'Banner') return LOCALIZED_RESOURCE_DEFINITIONS.Banner;
+	if (resourceId === 'Page') return LOCALIZED_RESOURCE_DEFINITIONS.Page;
+	return null;
+};
+
+type LocaleFieldPatch = Record<string, string | null | undefined>;
+type LocalizedPayloadByLocale = Partial<Record<AdminTranslationLocale, LocaleFieldPatch>>;
+
+const collectLocalizedPayload = (
+	payload: Record<string, unknown>,
+	baseParams: Record<string, unknown>,
+	definition: LocalizedResourceDefinition
+) => {
+	const nextPayload: Record<string, unknown> = { ...payload };
+	const localizedByLocale: LocalizedPayloadByLocale = {};
+	const propertyErrors: Record<string, { message: string; type: string }> = {};
+
+	for (const locale of ADMIN_TRANSLATION_LOCALES) {
+		const localePatch: LocaleFieldPatch = {};
+		for (const field of definition.fields) {
+			const path = buildTranslationInputPath(locale, field.key);
+			const payloadValue = normalizeLocalizedValue(payload[path]);
+			const existingVirtual = normalizeLocalizedValue(baseParams[path]);
+			const existingBase = normalizeLocalizedValue(baseParams[field.baseField]);
+			const resolvedValue =
+				payloadValue !== undefined
+					? payloadValue
+					: existingVirtual !== undefined
+						? existingVirtual
+						: existingBase;
+
+			if (locale === ADMIN_DEFAULT_TRANSLATION_LOCALE && field.requiredInDefaultLocale) {
+				if (!resolvedValue) {
+					propertyErrors[path] = {
+						message: 'translation-validation-default-required',
+						type: 'validation',
+					};
+				}
+			}
+
+			if (locale === ADMIN_DEFAULT_TRANSLATION_LOCALE) {
+				localePatch[field.key] = resolvedValue;
+				if (resolvedValue !== undefined) {
+					nextPayload[field.baseField] = resolvedValue;
+				}
+			} else {
+				localePatch[field.key] =
+					payloadValue !== undefined || existingVirtual !== undefined
+						? resolvedValue
+						: undefined;
+			}
+
+			delete nextPayload[path];
+		}
+		localizedByLocale[locale] = localePatch;
+	}
+
+	delete nextPayload[definition.editorProperty];
+
+	return { nextPayload, localizedByLocale, propertyErrors };
+};
+
+const getResponseRecordId = (response: any, context: any): string | null => {
+	const fromResponse = response?.record?.params?.id;
+	if (typeof fromResponse === 'string' && fromResponse.trim()) return fromResponse;
+	const fromContext = context?.record?.param?.('id');
+	if (typeof fromContext === 'string' && fromContext.trim()) return fromContext;
+	return null;
+};
+
+const getRecordId = (record: any): string | null => {
+	const id = record?.id ?? record?.params?.id;
+	return typeof id === 'string' && id.trim() ? id : null;
+};
+
+const readLocalizedRows = async (
+	resourceId: LocalizedResourceId,
+	recordIds: string[]
+) => {
+	if (recordIds.length === 0) {
+		return [] as Array<Record<string, string | null>>;
+	}
+
+	if (resourceId === 'Product') {
+		return prisma.productTranslation.findMany({
+			where: { productId: { in: recordIds }, locale: { in: [...ADMIN_TRANSLATION_LOCALES] } },
+			select: {
+				productId: true,
+				locale: true,
+				name: true,
+				description: true,
+				guarantee: true,
+				metaTitle: true,
+				metaDescription: true,
+			},
+		});
+	}
+	if (resourceId === 'ProductCategory') {
+		return prisma.productCategoryTranslation.findMany({
+			where: { categoryId: { in: recordIds }, locale: { in: [...ADMIN_TRANSLATION_LOCALES] } },
+			select: {
+				categoryId: true,
+				locale: true,
+				name: true,
+			},
+		});
+	}
+	if (resourceId === 'Banner') {
+		return prisma.bannerTranslation.findMany({
+			where: { bannerId: { in: recordIds }, locale: { in: [...ADMIN_TRANSLATION_LOCALES] } },
+			select: {
+				bannerId: true,
+				locale: true,
+				title: true,
+				subtitle: true,
+				linkLabel: true,
+			},
+		});
+	}
+	return prisma.pageTranslation.findMany({
+		where: { pageId: { in: recordIds }, locale: { in: [...ADMIN_TRANSLATION_LOCALES] } },
+		select: {
+			pageId: true,
+			locale: true,
+			title: true,
+			excerpt: true,
+			content: true,
+			metaTitle: true,
+			metaDescription: true,
+		},
+	});
+};
+
+const mapRowEntityId = (resourceId: LocalizedResourceId, row: Record<string, unknown>): string => {
+	if (resourceId === 'Product') return String(row.productId ?? '');
+	if (resourceId === 'ProductCategory') return String(row.categoryId ?? '');
+	if (resourceId === 'Banner') return String(row.bannerId ?? '');
+	return String(row.pageId ?? '');
+};
+
+const formatTranslationCompleteness = (
+	definition: LocalizedResourceDefinition,
+	recordParams: Record<string, unknown>,
+	rowsByLocale: Map<string, Record<string, unknown>>
+) => {
+	const states = ADMIN_TRANSLATION_LOCALES.map((locale) => {
+		const row = rowsByLocale.get(locale);
+		const primaryField = definition.primaryFieldKey;
+		const primaryFromTranslation = normalizeLocalizedValue(row?.[primaryField]);
+		const primaryFromBase = normalizeLocalizedValue(
+			recordParams[definition.fields.find((field) => field.key === primaryField)?.baseField ?? primaryField]
+		);
+		const isComplete =
+			locale === ADMIN_DEFAULT_TRANSLATION_LOCALE
+				? Boolean(primaryFromTranslation ?? primaryFromBase)
+				: Boolean(primaryFromTranslation);
+		return `${locale.toUpperCase()}: ${isComplete ? 'ok' : 'missing'}`;
+	});
+
+	return states.join(' | ');
+};
+
+const applyLocalizationToRecord = (
+	resourceId: LocalizedResourceId,
+	record: any,
+	definition: LocalizedResourceDefinition,
+	rows: Array<Record<string, unknown>>
+) => {
+	const recordId = getRecordId(record);
+	if (!recordId) return;
+	const recordRows = rows.filter((row) => mapRowEntityId(resourceId, row) === recordId);
+	const rowsByLocale = new Map(
+		recordRows.map((row) => [String(row.locale), row] as [string, Record<string, unknown>])
+	);
+	const nextParams = { ...(record.params ?? {}) } as Record<string, unknown>;
+
+	for (const locale of ADMIN_TRANSLATION_LOCALES) {
+		const row = rowsByLocale.get(locale);
+		for (const field of definition.fields) {
+			const path = buildTranslationInputPath(locale, field.key);
+			const fallbackBaseValue =
+				locale === ADMIN_DEFAULT_TRANSLATION_LOCALE
+					? normalizeLocalizedValue(nextParams[field.baseField]) ?? ''
+					: '';
+			const value = normalizeLocalizedValue(row?.[field.key]);
+			nextParams[path] = value ?? fallbackBaseValue;
+		}
+	}
+
+	nextParams[definition.completenessProperty] = formatTranslationCompleteness(
+		definition,
+		nextParams,
+		rowsByLocale
+	);
+	record.params = nextParams;
+};
+
+const syncLocalizedTranslationsAfterSave = async (
+	resourceId: LocalizedResourceId,
+	recordId: string,
+	definition: LocalizedResourceDefinition,
+	patchByLocale: LocalizedPayloadByLocale
+) => {
+	const primaryField = definition.primaryFieldKey;
+
+	const runForProduct = async (locale: AdminTranslationLocale, data: Record<string, unknown>) => {
+		const primaryValue = normalizeLocalizedValue(data[primaryField]);
+		if (locale !== ADMIN_DEFAULT_TRANSLATION_LOCALE && !primaryValue) {
+			await prisma.productTranslation.deleteMany({
+				where: { productId: recordId, locale },
+			});
+			return;
+		}
+
+		await prisma.productTranslation.upsert({
+			where: {
+				productId_locale: {
+					productId: recordId,
+					locale,
+				},
+			},
+			update: data as any,
+			create: {
+				productId: recordId,
+				locale,
+				...data,
+			} as any,
+		});
+	};
+
+	const runForCategory = async (locale: AdminTranslationLocale, data: Record<string, unknown>) => {
+		const primaryValue = normalizeLocalizedValue(data[primaryField]);
+		if (locale !== ADMIN_DEFAULT_TRANSLATION_LOCALE && !primaryValue) {
+			await prisma.productCategoryTranslation.deleteMany({
+				where: { categoryId: recordId, locale },
+			});
+			return;
+		}
+
+		await prisma.productCategoryTranslation.upsert({
+			where: {
+				categoryId_locale: {
+					categoryId: recordId,
+					locale,
+				},
+			},
+			update: data as any,
+			create: {
+				categoryId: recordId,
+				locale,
+				...data,
+			} as any,
+		});
+	};
+
+	const runForBanner = async (locale: AdminTranslationLocale, data: Record<string, unknown>) => {
+		const primaryValue = normalizeLocalizedValue(data[primaryField]);
+		if (locale !== ADMIN_DEFAULT_TRANSLATION_LOCALE && !primaryValue) {
+			await prisma.bannerTranslation.deleteMany({
+				where: { bannerId: recordId, locale },
+			});
+			return;
+		}
+
+		await prisma.bannerTranslation.upsert({
+			where: {
+				bannerId_locale: {
+					bannerId: recordId,
+					locale,
+				},
+			},
+			update: data as any,
+			create: {
+				bannerId: recordId,
+				locale,
+				...data,
+			} as any,
+		});
+	};
+
+	const runForPage = async (locale: AdminTranslationLocale, data: Record<string, unknown>) => {
+		const primaryValue = normalizeLocalizedValue(data[primaryField]);
+		if (locale !== ADMIN_DEFAULT_TRANSLATION_LOCALE && !primaryValue) {
+			await prisma.pageTranslation.deleteMany({
+				where: { pageId: recordId, locale },
+			});
+			return;
+		}
+
+		await prisma.pageTranslation.upsert({
+			where: {
+				pageId_locale: {
+					pageId: recordId,
+					locale,
+				},
+			},
+			update: data as any,
+			create: {
+				pageId: recordId,
+				locale,
+				...data,
+			} as any,
+		});
+	};
+
+	for (const locale of ADMIN_TRANSLATION_LOCALES) {
+		const localePatch = patchByLocale[locale] ?? {};
+		const data: Record<string, unknown> = {};
+		for (const field of definition.fields) {
+			const value = localePatch[field.key];
+			if (value !== undefined) {
+				data[field.key] = value;
+			}
+		}
+
+		if (Object.keys(data).length === 0) continue;
+
+		if (resourceId === 'Product') {
+			await runForProduct(locale, data);
+		} else if (resourceId === 'ProductCategory') {
+			await runForCategory(locale, data);
+		} else if (resourceId === 'Banner') {
+			await runForBanner(locale, data);
+		} else {
+			await runForPage(locale, data);
+		}
+	}
+};
+
+const localizedBeforeHook = async (
+	request: any,
+	context: any,
+	resourceId: LocalizedResourceId
+) => {
+	const method = getRequestMethod(request);
+	if (method !== 'post') return request;
+
+	const payload = (request?.payload ?? {}) as Record<string, unknown>;
+	const baseParams = ((context as { record?: { params?: Record<string, unknown> } }).record?.params ??
+		{}) as Record<string, unknown>;
+	const definition = getLocalizedResourceDefinition(resourceId);
+	if (!definition) return request;
+
+	const { nextPayload, localizedByLocale, propertyErrors } = collectLocalizedPayload(
+		payload,
+		baseParams,
+		definition
+	);
+
+	if (Object.keys(propertyErrors).length > 0) {
+		throw new ValidationError(propertyErrors, {
+			message: 'translation-validation-error',
+			type: 'validationError',
+		} as any);
+	}
+
+	(context as Record<string, unknown>)[LOCALIZED_TRANSLATIONS_CONTEXT_KEY] = {
+		resourceId,
+		localizedByLocale,
+	};
+
+	return {
+		...request,
+		payload: nextPayload,
+	};
+};
+
+const localizedAfterHook = async (response: any, request: any, context: any) => {
+	const resourceId = String(context?.resource?._decorated?.id?.() ?? context?.resource?.id ?? '');
+	const definition = getLocalizedResourceDefinition(resourceId);
+	if (!definition) return response;
+	const typedResourceId = definition.resourceId;
+	const method = getRequestMethod(request);
+
+	if (method === 'post' && response?.notice?.type !== 'error') {
+		const recordId = getResponseRecordId(response, context);
+		const localizedPayload = (
+			context?.[LOCALIZED_TRANSLATIONS_CONTEXT_KEY] as
+				| { resourceId: LocalizedResourceId; localizedByLocale: LocalizedPayloadByLocale }
+				| undefined
+		)?.localizedByLocale;
+
+		if (recordId && localizedPayload) {
+			await syncLocalizedTranslationsAfterSave(
+				typedResourceId,
+				recordId,
+				definition,
+				localizedPayload
+			);
+		}
+	}
+
+	if (response?.record) {
+		const recordId = getRecordId(response.record);
+		if (recordId) {
+			const rows = await readLocalizedRows(typedResourceId, [recordId]);
+			applyLocalizationToRecord(typedResourceId, response.record, definition, rows);
+		}
+	}
+
+	if (Array.isArray(response?.records) && response.records.length > 0) {
+		const recordIds = response.records
+			.map((record: any) => getRecordId(record))
+			.filter((id: string | null): id is string => Boolean(id));
+		if (recordIds.length > 0) {
+			const rows = await readLocalizedRows(typedResourceId, recordIds);
+			response.records.forEach((record: any) => {
+				applyLocalizationToRecord(typedResourceId, record, definition, rows);
+			});
+		}
+	}
+
+	return response;
+};
+
+const buildLocalizedHiddenProperties = (definition: LocalizedResourceDefinition) =>
+	Object.fromEntries(
+		ADMIN_TRANSLATION_LOCALES.flatMap((locale) =>
+			definition.fields.map((field) => [
+				buildTranslationInputPath(locale, field.key),
+				{ isVisible: false },
+			])
+		)
+	);
+
+const buildLocalizedEditorProperty = (definition: LocalizedResourceDefinition) => ({
+	isVisible: { list: false, filter: false, show: false, edit: true },
+	components: { edit: localizedTranslationsEditorComponent },
+	custom: {
+		defaultLocale: ADMIN_DEFAULT_TRANSLATION_LOCALE,
+		locales: [...ADMIN_TRANSLATION_LOCALES],
+		fields: definition.fields.map((field) => ({
+			key: field.key,
+			label: field.label,
+			input: field.input,
+			requiredInDefaultLocale: Boolean(field.requiredInDefaultLocale),
+		})),
+		title: definition.editorTitle,
+	},
+});
+
 export const resources = [
 	{
 		resource: { model: modelMap.Product, client: prisma },
@@ -318,19 +804,20 @@ export const resources = [
 				sortBy: 'updatedAt',
 				direction: 'desc',
 			},
-			listProperties: [
-				'name',
-				'productCode',
-				'status',
-				'basePrice',
-				'discountPrice',
-				'currency',
-				'stock',
-				'inStock',
-				'brand',
-				'category',
-				'updatedAt',
-			],
+				listProperties: [
+					'name',
+					'productCode',
+					'status',
+					'basePrice',
+					'discountPrice',
+					'currency',
+					'stock',
+					'inStock',
+					'brand',
+					'category',
+					'translationCompleteness',
+					'updatedAt',
+				],
 			filterProperties: [
 				'name',
 				'productCode',
@@ -349,18 +836,27 @@ export const resources = [
 				'tags',
 				'updatedAt',
 			],
-			properties: {
-				id: hidden,
-				name: {
-					components: { list: productNameListComponent },
-					isTitle: true,
-				},
-				metaTitle: { isVisible: { list: false, filter: false, show: true, edit: true } },
-				metaDescription: { isVisible: { list: false, filter: false, show: true, edit: true } },
-				canonicalUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
-				openGraphImage: { isVisible: { list: false, filter: false, show: true, edit: true } },
-				basePrice: { type: 'currency' },
-				discountPrice: { type: 'currency' },
+				properties: {
+					id: hidden,
+					name: {
+						components: { list: productNameListComponent },
+						isTitle: true,
+						isVisible: { list: true, filter: true, show: true, edit: false },
+					},
+					description: { isVisible: { list: false, filter: false, show: true, edit: false } },
+					guarantee: { isVisible: { list: false, filter: false, show: true, edit: false } },
+					metaTitle: { isVisible: { list: false, filter: false, show: true, edit: false } },
+					metaDescription: { isVisible: { list: false, filter: false, show: true, edit: false } },
+					canonicalUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
+					openGraphImage: { isVisible: { list: false, filter: false, show: true, edit: true } },
+					categoryName: { isVisible: { list: false, filter: false, show: true, edit: false } },
+					subcategoryName: { isVisible: { list: false, filter: false, show: true, edit: false } },
+					translationCompleteness: { isVisible: { list: true, filter: false, show: true, edit: false } },
+					localizedContentEditor: buildLocalizedEditorProperty(
+						LOCALIZED_RESOURCE_DEFINITIONS.Product
+					),
+					basePrice: { type: 'currency' },
+					discountPrice: { type: 'currency' },
 				currency: {
 					isRequired: true,
 					availableValues: [{ value: 'USD', label: 'USD' }],
@@ -391,16 +887,18 @@ export const resources = [
 					],
 					components: { filter: selectFilterWithPlaceholderComponent },
 				},
-				createdAt: readOnly,
-				updatedAt: readOnly,
-			},
-			actions: {
-				delete: { isAccessible: false, isVisible: false },
-				bulkDelete: { isAccessible: false, isVisible: false },
-				list: {
-					actionType: 'resource',
-					component: productListComponent,
+					createdAt: readOnly,
+					updatedAt: readOnly,
+					...buildLocalizedHiddenProperties(LOCALIZED_RESOURCE_DEFINITIONS.Product),
 				},
+				actions: {
+					delete: { isAccessible: false, isVisible: false },
+					bulkDelete: { isAccessible: false, isVisible: false },
+					list: {
+						actionType: 'resource',
+						component: productListComponent,
+						after: localizedAfterHook,
+					},
 				bulkSetCategory: {
 					actionType: 'bulk',
 					icon: 'Tag',
@@ -449,26 +947,34 @@ export const resources = [
 					component: productBulkSeoTemplateActionComponent,
 					handler: bulkSeoTemplateHandler,
 				},
-				new: {
-					before: validateProductNewEdit,
-					after: syncProductGalleryAfterHook,
-					component: productNewComponent,
-				},
-				edit: {
-					before: async (request: any, context: any) => {
-						await captureProductAuditBeforeHook(request, context);
-						return validateProductNewEdit(request, context);
+					new: {
+						before: async (request: any, context: any) => {
+							const withLocalization = await localizedBeforeHook(request, context, 'Product');
+							return validateProductNewEdit(withLocalization, context);
+						},
+						after: async (response: any, request: any, context: any) => {
+							const withGallery = await syncProductGalleryAfterHook(response, request, context);
+							return localizedAfterHook(withGallery, request, context);
+						},
+						component: productNewComponent,
 					},
-					after: productEditAfterHook,
-					component: productEditComponent,
+					edit: {
+						before: async (request: any, context: any) => {
+							await captureProductAuditBeforeHook(request, context);
+							const withLocalization = await localizedBeforeHook(request, context, 'Product');
+							return validateProductNewEdit(withLocalization, context);
+						},
+						after: productEditAfterHook,
+						component: productEditComponent,
 				},
 				show: {
 					actionType: 'record',
 					component: productShowComponent,
-					custom: {
-						previewBaseUrl: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
+						custom: {
+							previewBaseUrl: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
+						},
+						after: localizedAfterHook,
 					},
-				},
 				activityTimeline: {
 					actionType: 'record',
 					icon: 'Activity',
@@ -570,8 +1076,34 @@ export const resources = [
 		resource: { model: modelMap.ProductCategory, client: prisma },
 		options: {
 			navigation: 'Catalog',
+			listProperties: ['name', 'slug', 'parent', 'translationCompleteness', 'id'],
+			filterProperties: ['name', 'slug', 'parent'],
 			properties: {
 				id: hidden,
+				name: { isVisible: { list: true, filter: true, show: true, edit: false } },
+				translationCompleteness: { isVisible: { list: true, filter: false, show: true, edit: false } },
+				localizedContentEditor: buildLocalizedEditorProperty(
+					LOCALIZED_RESOURCE_DEFINITIONS.ProductCategory
+				),
+				...buildLocalizedHiddenProperties(LOCALIZED_RESOURCE_DEFINITIONS.ProductCategory),
+			},
+			actions: {
+				new: {
+					before: async (request: any, context: any) =>
+						localizedBeforeHook(request, context, 'ProductCategory'),
+					after: localizedAfterHook,
+				},
+				edit: {
+					before: async (request: any, context: any) =>
+						localizedBeforeHook(request, context, 'ProductCategory'),
+					after: localizedAfterHook,
+				},
+				show: {
+					after: localizedAfterHook,
+				},
+				list: {
+					after: localizedAfterHook,
+				},
 			},
 		},
 	},
@@ -934,13 +1466,29 @@ export const resources = [
 	}),
 	maybeResource(modelMap.Banner, {
 		navigation: 'Content',
-		listProperties: ['title', 'placement', 'isActive', 'startsAt', 'endsAt', 'updatedAt'],
+		listProperties: [
+			'title',
+			'placement',
+			'isActive',
+			'startsAt',
+			'endsAt',
+			'translationCompleteness',
+			'updatedAt',
+		],
 		filterProperties: ['title', 'placement', 'isActive', 'startsAt', 'endsAt'],
 		properties: {
 			id: hidden,
+			title: { isVisible: { list: true, filter: true, show: true, edit: false } },
+			subtitle: { isVisible: { list: false, filter: false, show: true, edit: false } },
+			linkLabel: { isVisible: { list: false, filter: false, show: true, edit: false } },
 			imageUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			translationCompleteness: { isVisible: { list: true, filter: false, show: true, edit: false } },
+			localizedContentEditor: buildLocalizedEditorProperty(
+				LOCALIZED_RESOURCE_DEFINITIONS.Banner
+			),
 			createdAt: readOnly,
 			updatedAt: readOnly,
+			...buildLocalizedHiddenProperties(LOCALIZED_RESOURCE_DEFINITIONS.Banner),
 		},
 		actions: {
 			duplicateBanner: {
@@ -950,22 +1498,69 @@ export const resources = [
 				handler: duplicateBanner,
 				component: false,
 			},
+			new: {
+				before: async (request: any, context: any) =>
+					localizedBeforeHook(request, context, 'Banner'),
+				after: localizedAfterHook,
+			},
+			edit: {
+				before: async (request: any, context: any) =>
+					localizedBeforeHook(request, context, 'Banner'),
+				after: localizedAfterHook,
+			},
+			show: {
+				after: localizedAfterHook,
+			},
+			list: {
+				after: localizedAfterHook,
+			},
 		},
 	}),
 	maybeResource(modelMap.Page, {
 		navigation: 'Content',
-		listProperties: ['title', 'type', 'status', 'publishedAt', 'updatedAt'],
+		listProperties: [
+			'title',
+			'type',
+			'status',
+			'publishedAt',
+			'translationCompleteness',
+			'updatedAt',
+		],
 		filterProperties: ['title', 'type', 'status', 'publishedAt'],
 		properties: {
 			id: hidden,
-			content: { isVisible: { list: false, filter: false, show: true, edit: true } },
-			excerpt: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			title: { isVisible: { list: true, filter: true, show: true, edit: false } },
+			content: { isVisible: { list: false, filter: false, show: true, edit: false } },
+			excerpt: { isVisible: { list: false, filter: false, show: true, edit: false } },
 			coverImageUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
-			metaTitle: { isVisible: { list: false, filter: false, show: true, edit: true } },
-			metaDescription: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			metaTitle: { isVisible: { list: false, filter: false, show: true, edit: false } },
+			metaDescription: { isVisible: { list: false, filter: false, show: true, edit: false } },
 			canonicalUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
+			translationCompleteness: { isVisible: { list: true, filter: false, show: true, edit: false } },
+			localizedContentEditor: buildLocalizedEditorProperty(
+				LOCALIZED_RESOURCE_DEFINITIONS.Page
+			),
 			createdAt: readOnly,
 			updatedAt: readOnly,
+			...buildLocalizedHiddenProperties(LOCALIZED_RESOURCE_DEFINITIONS.Page),
+		},
+		actions: {
+			new: {
+				before: async (request: any, context: any) =>
+					localizedBeforeHook(request, context, 'Page'),
+				after: localizedAfterHook,
+			},
+			edit: {
+				before: async (request: any, context: any) =>
+					localizedBeforeHook(request, context, 'Page'),
+				after: localizedAfterHook,
+			},
+			show: {
+				after: localizedAfterHook,
+			},
+			list: {
+				after: localizedAfterHook,
+			},
 		},
 	}),
 	maybeResource(modelMap.StorefrontForm, {

@@ -4,8 +4,16 @@ import { Box, Text } from '@adminjs/design-system';
 
 const hintKeyByProperty: Record<string, string> = {
 	name: 'product-hint-name',
+	i18n_uk_name: 'product-hint-name',
+	i18n_en_name: 'product-hint-name',
 	metaTitle: 'product-hint-metaTitle',
+	i18n_uk_metaTitle: 'product-hint-metaTitle',
+	i18n_en_metaTitle: 'product-hint-metaTitle',
 	metaDescription: 'product-hint-metaDescription',
+	i18n_uk_metaDescription: 'product-hint-metaDescription',
+	i18n_en_metaDescription: 'product-hint-metaDescription',
+	i18n_uk_description: 'product-hint-metaDescription',
+	i18n_en_description: 'product-hint-metaDescription',
 	canonicalUrl: 'product-hint-canonicalUrl',
 	openGraphImage: 'product-hint-openGraphImage',
 	slug: 'product-hint-slug',
@@ -26,7 +34,10 @@ const hintKeyByProperty: Record<string, string> = {
 };
 
 const looksLikeTranslationKey = (value: unknown): value is string =>
-	typeof value === 'string' && (value.startsWith('product-') || value.startsWith('bulk-'));
+	typeof value === 'string' &&
+	(value.startsWith('product-') ||
+		value.startsWith('bulk-') ||
+		value.startsWith('translation-'));
 
 export default function ProductValidationErrorSummary(props: ActionProps) {
 	const { record, resource } = props;

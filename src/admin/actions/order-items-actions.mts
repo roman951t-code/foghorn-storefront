@@ -42,6 +42,7 @@ export const orderItemsSummary: ActionHandler<RecordActionResponse> = async (_re
 			price: true,
 			unitPrice: true,
 			productId: true,
+			snapshotProductName: true,
 			product: { select: { name: true, imageUrl: true } },
 		},
 	});
@@ -50,7 +51,7 @@ export const orderItemsSummary: ActionHandler<RecordActionResponse> = async (_re
 		items: items.map((item) => ({
 			id: item.id,
 			productId: item.productId,
-			productName: item.product?.name ?? '-',
+			productName: item.snapshotProductName ?? item.product?.name ?? '-',
 			productImageUrl: item.product?.imageUrl ?? null,
 			quantity: item.quantity,
 			unitPrice: toNumber(item.unitPrice),

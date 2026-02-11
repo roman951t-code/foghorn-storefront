@@ -69,6 +69,8 @@ import ProductBulkSeoTemplateAction from '../src/admin/components/ProductBulkSeo
 AdminJS.UserComponents.ProductBulkSeoTemplateAction = ProductBulkSeoTemplateAction
 import ReviewShow from '../src/admin/components/ReviewShow'
 AdminJS.UserComponents.ReviewShow = ReviewShow
+import LocalizedTranslationsEditor from '../src/admin/components/LocalizedTranslationsEditor'
+AdminJS.UserComponents.LocalizedTranslationsEditor = LocalizedTranslationsEditor
 import Dashboard from '../src/admin/components/Dashboard'
 AdminJS.UserComponents.Dashboard = Dashboard
 import Login from '../src/admin/components/Login'

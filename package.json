@@ -9,6 +9,8 @@
 		"lint": "npx tsc --noEmit",
 		"test": "node tests/getProductsFilters.test.js",
 		"db:push": "npx prisma db push && npx prisma generate",
+		"db:backfill:i18n": "tsx scripts/backfill-localized-content.ts",
+		"db:backfill:i18n:overwrite": "tsx scripts/backfill-localized-content.ts --overwrite",
 		"db:seed": "npm run db:push && npx prisma db seed",
 		"profile:search": "node --loader ts-node/esm scripts/profile-search.ts",
 		"admin:dev": "node --import tsx/esm src/admin/server.mts",

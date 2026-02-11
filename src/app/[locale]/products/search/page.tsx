@@ -87,7 +87,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	};
 }
 
-export default async function SearchProducts({ searchParams }: Props) {
+export default async function SearchProducts({ params, searchParams }: Props) {
+	const { locale } = await params;
 	const searchData = await searchParams;
 	const {
 		searchQuery = '',
@@ -133,7 +134,7 @@ export default async function SearchProducts({ searchParams }: Props) {
 		const session = await auth.api.getSession({ headers: await headers() });
 		const userId = session?.user?.id;
 		const viewed = userId
-			? await getRecentlyViewedProductsWithCount(userId, pageSize, offset)
+			? await getRecentlyViewedProductsWithCount(userId, pageSize, offset, locale)
 			: { products: [], totalCount: 0 };
 		const viewedProducts = viewed.products;
 
@@ -162,7 +163,8 @@ export default async function SearchProducts({ searchParams }: Props) {
 				maxPrice,
 				inStock,
 				orderBy,
-				dynamicFilters
+				dynamicFilters,
+				locale
 			),
 			getTagFilters(tagValue),
 		]);
@@ -186,9 +188,10 @@ export default async function SearchProducts({ searchParams }: Props) {
 				maxPrice,
 				inStock,
 				orderBy,
-				dynamicFilters
+				dynamicFilters,
+				locale
 			),
-			getSearchFilters(searchQuery),
+			getSearchFilters(searchQuery, locale),
 		]);
 
 		return {
@@ -271,7 +274,7 @@ export default async function SearchProducts({ searchParams }: Props) {
 				</Box>
 			</Group>
 
-			<ViewedProductsSection title={productsT('viewed')} tag='viewed' />
+			<ViewedProductsSection title={productsT('viewed')} tag='viewed' locale={locale} />
 		</Flex>
 	);
 }

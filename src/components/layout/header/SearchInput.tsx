@@ -16,6 +16,7 @@ import { SearchProductItem, SearchSubcategoryItem } from '@/types/product';
 import { IoPricetagsOutline } from 'react-icons/io5';
 import { CategorySearchItem, ProductSearchItem, SeeAllLink } from './SearchItem';
 import { useRouter } from '@/i18n/routing';
+import { useLocale } from 'next-intl';
 
 interface SearchResponse {
 	products: SearchProductItem[];
@@ -40,6 +41,7 @@ export default function SearchInput({
 	categories,
 }: Props) {
 	const router = useRouter();
+	const locale = useLocale();
 	const [inputValue, setInputValue] = useState('');
 	const [hasSearched, setHasSearched] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
@@ -84,9 +86,10 @@ export default function SearchInput({
 
 			setHasSearched(true);
 			setIsLoading(true);
+			const cacheKey = `${locale}:${inputValue}`;
 
-			if (cache.current.has(inputValue)) {
-				const cached = cache.current.get(inputValue)!;
+			if (cache.current.has(cacheKey)) {
+				const cached = cache.current.get(cacheKey)!;
 
 				const isRelevant = cached.products.some((p) =>
 					p.name.toLowerCase().includes(inputValue.toLowerCase())
@@ -101,9 +104,11 @@ export default function SearchInput({
 			}
 
 			try {
-				const res = await fetch(`/api/products/search?q=${encodeURIComponent(inputValue)}`);
+				const res = await fetch(
+					`/api/products/search?q=${encodeURIComponent(inputValue)}&locale=${encodeURIComponent(locale)}`
+				);
 				const data: SearchResponse = await res.json();
-				cache.current.set(inputValue, data);
+				cache.current.set(cacheKey, data);
 				set(data.products);
 				setSubcategories(data.subcategories);
 			} catch {
@@ -114,7 +119,7 @@ export default function SearchInput({
 			}
 		},
 		400,
-		[inputValue]
+		[inputValue, locale]
 	);
 
 	return (

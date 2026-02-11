@@ -123,6 +123,10 @@ const productBulkSeoTemplateActionComponent = componentLoader.add(
 	path.join(adminDir, 'components', 'ProductBulkSeoTemplateAction')
 );
 const reviewShowComponent = componentLoader.add('ReviewShow', path.join(adminDir, 'components', 'ReviewShow'));
+const localizedTranslationsEditorComponent = componentLoader.add(
+	'LocalizedTranslationsEditor',
+	path.join(adminDir, 'components', 'LocalizedTranslationsEditor')
+);
 const dashboardComponent = componentLoader.add(
 	'Dashboard',
 	path.join(adminDir, 'components', 'Dashboard')
@@ -171,6 +175,7 @@ export {
 	productBulkAdjustStockActionComponent,
 	productBulkToggleInStockActionComponent,
 	productBulkSeoTemplateActionComponent,
+	localizedTranslationsEditorComponent,
 	reviewShowComponent,
 	dashboardComponent,
 };

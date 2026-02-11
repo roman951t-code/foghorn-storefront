@@ -40,6 +40,8 @@ export type SearchProductItem = {
 	product: string;
 	category: string;
 	subcategory: string;
+	categoryName?: string;
+	subcategoryName?: string;
 };
 
 export type SearchSubcategoryItem = {

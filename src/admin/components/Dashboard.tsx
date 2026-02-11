@@ -455,14 +455,11 @@ export default function Dashboard() {
 			</Box>
 
 			<Box mt='xxl'>
-				<Box display='flex' alignItems='center' justifyContent='space-between' style={{ gap: 16, flexWrap: 'wrap' }}>
+				<Box>
 					<Box>
 						<H4>{translateMessage('dashboard.performance.title')}</H4>
 						<Text color='grey60'>{translateMessage('dashboard.performance.subtitle')}</Text>
 					</Box>
-					<Button variant='outlined' onClick={fetchMetrics} disabled={metricsLoading}>
-						{translateMessage('dashboard.metrics.refresh')}
-					</Button>
 				</Box>
 				{metricsLoading ? (
 					<Text color='grey60' mt='md'>

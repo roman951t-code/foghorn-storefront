@@ -2,12 +2,14 @@
 import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
+import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
 import { PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
 import { buildProductImages } from '@/utils/productImages';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 export async function getProductsBySearchQuery(
@@ -18,7 +20,8 @@ export async function getProductsBySearchQuery(
 	maxPrice?: number,
 	inStock?: boolean,
 	orderBy?: 'new' | 'expensive' | 'cheap',
-	filters?: Record<string, string[]>
+	filters?: Record<string, string[]>,
+	locale: string = DEFAULT_LOCALE
 ): Promise<{
 	products: SubcategoryProduct[];
 	totalCount: number;
@@ -34,6 +37,7 @@ export async function getProductsBySearchQuery(
 	cacheLife('hours');
 	cacheTag(PRODUCT_LIST_CACHE_TAG);
 
+	const localeFallbacks = getLocaleFallbacks(locale);
 	const now = new Date();
 
 	const priceFilter =
@@ -59,8 +63,25 @@ export async function getProductsBySearchQuery(
 		},
 	}));
 
+	const normalizedSearchQuery = searchQuery.trim();
+	const searchCondition: Prisma.ProductWhereInput | undefined = normalizedSearchQuery
+		? {
+				OR: [
+					{ name: { contains: normalizedSearchQuery, mode: 'insensitive' } },
+					{
+						translations: {
+							some: {
+								locale: { in: localeFallbacks },
+								name: { contains: normalizedSearchQuery, mode: 'insensitive' },
+							},
+						},
+					},
+				],
+			}
+		: undefined;
+
 	const whereClause: Prisma.ProductWhereInput = {
-		name: { contains: searchQuery, mode: 'insensitive' },
+		...(searchCondition ?? {}),
 		...(brandFilters.length > 0 ? { brand: { slug: { in: brandFilters } } } : {}),
 		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
@@ -112,7 +133,22 @@ export async function getProductsBySearchQuery(
 				select: {
 					slug: true,
 					name: true,
-					parent: { select: { slug: true, name: true } },
+					translations: {
+						where: { locale: { in: localeFallbacks } },
+						select: { locale: true, name: true },
+						orderBy: { updatedAt: 'desc' },
+					},
+					parent: {
+						select: {
+							slug: true,
+							name: true,
+							translations: {
+								where: { locale: { in: localeFallbacks } },
+								select: { locale: true, name: true },
+								orderBy: { updatedAt: 'desc' },
+							},
+						},
+					},
 				},
 			},
 		},
@@ -133,12 +169,14 @@ export async function getProductsBySearchQuery(
 	for (const p of allMatchingProducts) {
 		const category = p.category;
 		if (!category?.slug) continue;
+		const categoryTranslation = pickLocalizedTranslation(category.translations, locale);
+		const parentTranslation = pickLocalizedTranslation(category.parent?.translations, locale);
 		const subcategorySlug = category.slug;
 		if (!uniqueSubcategoriesMap.has(subcategorySlug)) {
 			uniqueSubcategoriesMap.set(subcategorySlug, {
-				categoryName: category.parent?.name || '',
+				categoryName: parentTranslation?.name ?? category.parent?.name ?? '',
 				categorySlug: category.parent?.slug || '',
-				subcategoryName: category.name || '',
+				subcategoryName: categoryTranslation?.name ?? category.name ?? '',
 				subcategorySlug,
 			});
 		}
@@ -175,6 +213,16 @@ export async function getProductsBySearchQuery(
 			basePrice: true,
 			categoryName: true,
 			subcategoryName: true,
+			translations: {
+				where: { locale: { in: localeFallbacks } },
+				select: {
+					locale: true,
+					name: true,
+					categoryName: true,
+					subcategoryName: true,
+				},
+				orderBy: { updatedAt: 'desc' },
+			},
 			discountPrice: true,
 			discountStartAt: true,
 			discountEndAt: true,
@@ -202,10 +250,12 @@ export async function getProductsBySearchQuery(
 	});
 
 	const productItems: SubcategoryProduct[] = products.map((product) => {
-		const { variants, reviews, productImages, ...rest } = product as typeof product & {
+		const translation = pickLocalizedTranslation(product.translations, locale);
+		const { variants, reviews, productImages, translations, ...rest } = product as typeof product & {
 			variants?: unknown;
 			reviews?: unknown;
 			productImages?: unknown;
+			translations?: unknown;
 		};
 		const ratings = product.reviews?.map((r) => r.rating) ?? [];
 		const averageRating =
@@ -222,14 +272,14 @@ export async function getProductsBySearchQuery(
 		return {
 			...rest,
 			id: product.id ?? '',
-			name: product.name ?? '',
+			name: translation?.name ?? product.name ?? '',
 			fullSlug: product.fullSlug ?? '',
 			imageUrl: product.imageUrl ?? null,
 			images: product.productImages.length
 				? product.productImages.map((image) => image.url)
 				: buildProductImages(product.imageUrl ?? undefined, 4),
-			categoryName: product.categoryName ?? '',
-			subcategoryName: product.subcategoryName ?? '',
+			categoryName: translation?.categoryName ?? product.categoryName ?? '',
+			subcategoryName: translation?.subcategoryName ?? product.subcategoryName ?? '',
 			inStock: !!product.inStock,
 			basePrice,
 			discountPrice: scheduledDiscountPrice,
