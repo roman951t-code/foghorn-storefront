@@ -4,7 +4,7 @@ import { Resend } from 'resend';
 import { env } from '@/config/env';
 
 export const resendClient = new Resend(env.RESEND_API_KEY);
-export const DEFAULT_FROM = 'Online Store <onboarding@resend.dev>';
+export const DEFAULT_FROM = env.EMAIL_FROM ?? 'Online Store <onboarding@resend.dev>';
 
 type DetailRow = {
 	label: string;

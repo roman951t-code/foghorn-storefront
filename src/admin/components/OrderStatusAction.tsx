@@ -19,16 +19,7 @@ export default function OrderStatusAction({ action, record, resource }: ActionPr
 	const isReadOnly = useIsReadOnlyAdmin();
 	const addNotice = useNotice();
 	const { translateAction, translateLabel, translateMessage } = useTranslation();
-
-	if (!localRecord) {
-		return (
-			<Box variant='white' p='xl'>
-				<Text>{translateMessage('status-update-failed')}</Text>
-			</Box>
-		);
-	}
-
-	const currentStatus = localRecord.params.status as OrderStatus | undefined;
+	const currentStatus = localRecord?.params?.status as OrderStatus | undefined;
 	const statusOptions = useMemo<StatusOption[]>(
 		() =>
 			statuses.map((status) => ({
@@ -42,6 +33,14 @@ export default function OrderStatusAction({ action, record, resource }: ActionPr
 		: translateMessage('status-unknown');
 	const selectedOption = statusOptions.find((option) => option.value === selectedStatus) ?? null;
 	const nextLabel = selectedStatus ? translateLabel(`status.${selectedStatus}`, resource.id) : null;
+
+	if (!localRecord) {
+		return (
+			<Box variant='white' p='xl'>
+				<Text>{translateMessage('status-update-failed')}</Text>
+			</Box>
+		);
+	}
 
 	const handleClick = async () => {
 		if (!localRecord || !selectedStatus) return;

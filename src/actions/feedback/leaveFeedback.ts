@@ -6,8 +6,9 @@ import { prisma } from '@/lib/prisma';
 import { FeedbackSchema, getFeedbackSchema } from 'validationSchemas/feedbackSchema';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
-import { revalidateTag, updateTag } from 'next/cache';
-import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
+import { updateTag } from 'next/cache';
+import { productCacheTagById } from '@/constants/products';
+import { syncProductReviewAggregate } from '@/lib/reviewAggregates';
 
 export async function leaveFeedback(
 	_: unknown,
@@ -51,31 +52,34 @@ export async function leaveFeedback(
 			});
 		}
 
-		await prisma.review.upsert({
-			where: {
-				userId_productId: {
+		await prisma.$transaction(async (tx) => {
+			await tx.review.upsert({
+				where: {
+					userId_productId: {
+						userId,
+						productId,
+					},
+				},
+				update: {
+					rating: formData.rating,
+					comment: formData.feedback,
+					advantages: formData.advantages ?? null,
+					disadvantages: formData.disAdvantages ?? null,
+				},
+				create: {
 					userId,
 					productId,
+					rating: formData.rating,
+					comment: formData.feedback,
+					advantages: formData.advantages ?? null,
+					disadvantages: formData.disAdvantages ?? null,
 				},
-			},
-			update: {
-				rating: formData.rating,
-				comment: formData.feedback,
-				advantages: formData.advantages ?? null,
-				disadvantages: formData.disAdvantages ?? null,
-			},
-			create: {
-				userId,
-				productId,
-				rating: formData.rating,
-				comment: formData.feedback,
-				advantages: formData.advantages ?? null,
-				disadvantages: formData.disAdvantages ?? null,
-			},
+			});
+
+			await syncProductReviewAggregate(tx, productId);
 		});
 
 		await updateTag(productCacheTagById(productId));
-		await revalidateTag(PRODUCT_LIST_CACHE_TAG, 'default');
 
 		return { success: true };
 	} catch (error: any) {

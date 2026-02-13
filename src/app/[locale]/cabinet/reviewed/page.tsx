@@ -6,7 +6,7 @@ import Pagination from '@/components/ui/Pagination';
 import { auth } from '@/lib/auth';
 import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedProducts';
 import ClearViewedButton from '../_components/viewed/ClearViewedButton';
-import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { PRODUCTS_PER_PAGE, resolveOffset, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
 import CabinetSectionHeading from '@/components/ui/CabinetSectionHeading';
 import { LocaleParams } from '@/types/routing';
 
@@ -36,14 +36,12 @@ export default async function Reviewed({ params, searchParams }: Props) {
 	const totalProductsCount = viewedProducts.length;
 	const hasViewedProducts = totalProductsCount > 0;
 	const search = await searchParams;
-	const pageParam = Number.parseInt(search?.page ?? '1', 10);
-	const requestedPerPage = Number.parseInt(search?.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
-	const pageSize =
-		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
+	const pageParam = resolvePageParam(search?.page ?? '1');
+	const pageSize = resolvePerPageParam(search?.perPage ?? `${PRODUCTS_PER_PAGE}`);
 	const totalPages = Math.max(1, Math.ceil(totalProductsCount / pageSize));
-	let currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+	let currentPage = pageParam;
 	currentPage = Math.min(currentPage, totalPages);
-	const startIndex = (currentPage - 1) * pageSize;
+	const startIndex = resolveOffset(currentPage, pageSize);
 	const paginatedProducts = viewedProducts.slice(startIndex, startIndex + pageSize);
 
 	return (

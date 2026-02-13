@@ -1,6 +1,7 @@
 import type { ActionHandler, ActionResponse } from 'adminjs';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../prisma.mts';
+import { buildCsvFromRows } from '../utils/csv.mts';
 
 type FilterValue = string | number | boolean | Record<string, unknown> | Array<string | number>;
 
@@ -213,14 +214,6 @@ const buildOrderWhere = (filters: Record<string, FilterValue>): Prisma.OrderWher
 	return where;
 };
 
-const escapeCsv = (value: string) => {
-	const needsQuotes = /[",\n\r]/.test(value);
-	const escaped = value.replace(/"/g, '""');
-	return needsQuotes ? `"${escaped}"` : escaped;
-};
-
-const buildCsv = (rows: string[][]) => rows.map((row) => row.map((cell) => escapeCsv(cell ?? '')).join(',')).join('\n');
-
 const ORDER_HEADERS = [
 	'id',
 	'createdAt',
@@ -321,7 +314,7 @@ export const exportOrdersCsv: ActionHandler<ActionResponse> = async (req) => {
 			options: { count: orders.length },
 		},
 		payload: {
-			csv: buildCsv(rows),
+			csv: buildCsvFromRows(rows),
 			filename: `orders-${new Date().toISOString().slice(0, 10)}.csv`,
 		},
 	};

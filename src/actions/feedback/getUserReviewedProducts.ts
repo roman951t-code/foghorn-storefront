@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
 import { Review, SubcategoryProduct } from '@/types/product';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
 
 export type UserReviewedProduct = {
 	product: SubcategoryProduct & { fullSlug: string };
@@ -14,6 +15,9 @@ export type UserReviewedProduct = {
 };
 
 export async function getUserReviewedProducts(limit: number, offset = 0) {
+	const safeLimit = Math.min(MAX_PRODUCTS_PER_PAGE, Math.max(1, Math.floor(limit || 1)));
+	const safeOffset = Math.max(0, Math.floor(offset || 0));
+
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
 
@@ -26,8 +30,8 @@ export async function getUserReviewedProducts(limit: number, offset = 0) {
 		prisma.review.findMany({
 			where: { userId },
 			orderBy: { createdAt: 'desc' },
-			skip: offset,
-			take: limit,
+			skip: safeOffset,
+			take: safeLimit,
 			include: {
 				product: {
 					select: {

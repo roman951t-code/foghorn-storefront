@@ -6,9 +6,9 @@ import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { getAccountSchemas } from 'validationSchemas/accountSchema';
 import { prisma } from '@/lib/prisma';
-import { autoVerifyPhoneNumber } from './phoneVerificationHelper';
 import { auth } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rateLimit';
+import { getActionErrorMessageKey } from './authActionError';
 
 const UPDATE_PHONE_LIMIT_PER_USER = 5;
 const UPDATE_PHONE_LIMIT_PER_PHONE = 4;
@@ -63,19 +63,27 @@ export async function updatePhoneNumberAction(
 	}
 
 	try {
-		await autoVerifyPhoneNumber({
-			phoneNumber: rawPhone,
-			updatePhoneNumber: true,
-			disableSession: true,
+		await prisma.verification.deleteMany({
+			where: {
+				identifier: rawPhone,
+			},
+		});
+
+		await auth.api.sendPhoneNumberOTP({
+			body: {
+				phoneNumber: rawPhone,
+			},
 		});
 
 		return { success: true };
-	} catch (error: any) {
-		const messageKey = error?.body?.message ?? error?.message ?? '';
+	} catch (error: unknown) {
+		const messageKey = getActionErrorMessageKey(error);
 		const errorMap: Record<string, string> = {
 			'Phone number already exists': validationT('userExists'),
 			'User not found': validationT('userNotFound'),
 			'Too many requests': validationT('tooManyRequests'),
+			phone_otp_provider_not_configured: validationT('smsSendFailed'),
+			'Unknown error': validationT('smsSendFailed'),
 		};
 
 		return {

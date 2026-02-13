@@ -7,6 +7,7 @@ import { getResetPassSchema } from 'validationSchemas/resetPassSchema';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { getActionErrorMessageKey } from './authActionError';
 
 const RESET_PASSWORD_LIMIT_PER_EMAIL = 3;
 const RESET_PASSWORD_LIMIT_PER_IP = 20;
@@ -54,7 +55,8 @@ export async function resetPasswordAction(
 		});
 
 		return { success: true };
-	} catch (error: any) {
+	} catch (error: unknown) {
+		const messageKey = getActionErrorMessageKey(error);
 		const errorMap: Record<string, string> = {
 			'Invalid email': validationT('wrongEmail'),
 			'Missing email': validationT('emailRequired'),
@@ -64,7 +66,7 @@ export async function resetPasswordAction(
 
 		return {
 			success: false,
-			message: errorMap[error?.body?.message ?? ''] || validationT('setNewPassFail'),
+			message: errorMap[messageKey] || validationT('setNewPassFail'),
 		};
 	}
 }

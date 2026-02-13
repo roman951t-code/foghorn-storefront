@@ -6,6 +6,7 @@ import { phoneNumber, emailOTP, customSession } from 'better-auth/plugins';
 import { prisma } from './prisma';
 import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
 import { APP_URL, env } from '@/config/env';
+import { sendPhoneOtpCode } from '@/lib/phoneOtp';
 
 export const auth = betterAuth({
 	baseURL: APP_URL,
@@ -75,13 +76,16 @@ export const auth = betterAuth({
 			clientSecret: env.GOOGLE_CLIENT_SECRET as string,
 		},
 	},
-	plugins: [
-		phoneNumber({
-			sendOTP: () => {},
-			signUpOnVerification: {
-				getTempEmail: (phoneNumber) => {
-					return `${phoneNumber.replace(/\D/g, '')}@mail`;
+		plugins: [
+			phoneNumber({
+				sendOTP: async ({ phoneNumber, code }) => {
+					await sendPhoneOtpCode({ phoneNumber, code });
 				},
+				requireVerification: true,
+				signUpOnVerification: {
+					getTempEmail: (phoneNumber) => {
+						return `${phoneNumber.replace(/\D/g, '')}@mail`;
+					},
 				getTempName: (phoneNumber) => {
 					return phoneNumber;
 				},

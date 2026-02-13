@@ -12,10 +12,12 @@ import {
 	SubcategoryProduct,
 } from '@/types/product';
 import { buildProductImages } from '@/utils/productImages';
-import { PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
+import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
+import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { getMaxEffectiveProductPrice } from '@/utils/maxEffectiveProductPrice';
 
 export async function getProductsByTag<T extends boolean>(
 	tag: string,
@@ -34,7 +36,7 @@ export async function getProductsByTag<T extends boolean>(
 	cacheTag(PRODUCT_LIST_CACHE_TAG);
 
 	const localeFallbacks = getLocaleFallbacks(locale);
-	const safeLimit = Math.min(50, Math.max(1, Math.floor(limit || 1)));
+	const safeLimit = Math.min(MAX_PRODUCTS_PER_PAGE, Math.max(1, Math.floor(limit || 1)));
 	const safeOffset = Math.max(0, Math.floor(offset || 0));
 	const now = new Date();
 
@@ -120,53 +122,62 @@ export async function getProductsByTag<T extends boolean>(
 		}
 	})();
 
-	const productsQuery = await prisma.product.findMany({
-		where: whereClause,
-		orderBy: orderByClause,
-		skip: safeOffset,
-		take: safeLimit,
-		select: {
-			id: true,
-			name: true,
-			fullSlug: true,
-			imageUrl: true,
-			productImages: {
-				select: { url: true, sortOrder: true, createdAt: true },
-				orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-				take: 6,
-			},
-			basePrice: true,
-			discountPrice: true,
-			discountStartAt: true,
-			discountEndAt: true,
-			inStock: true,
-			translations: {
-				where: { locale: { in: localeFallbacks } },
-				select: { locale: true, name: true },
-				orderBy: { updatedAt: 'desc' },
-			},
-			variants: {
-				where: { stock: { gt: 0 } },
-				orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
-				take: 1,
-				select: {
-					id: true,
-					sku: true,
-					price: true,
-					stock: true,
-					attributes: {
-						select: {
-							attribute: { select: { name: true, unit: true } },
-							value: true,
+	const [productsQuery, maxProductPrice] = await Promise.all([
+		prisma.product.findMany({
+			where: whereClause,
+			orderBy: orderByClause,
+			skip: safeOffset,
+			take: safeLimit,
+			select: {
+				id: true,
+				name: true,
+				fullSlug: true,
+				imageUrl: true,
+				productImages: {
+					select: { url: true, sortOrder: true, createdAt: true },
+					orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+					take: 6,
+				},
+				basePrice: true,
+				discountPrice: true,
+				discountStartAt: true,
+				discountEndAt: true,
+				inStock: true,
+				translations: {
+					where: { locale: { in: localeFallbacks } },
+					select: { locale: true, name: true },
+					orderBy: { updatedAt: 'desc' },
+				},
+				variants: {
+					where: { stock: { gt: 0 } },
+					orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
+					take: 1,
+					select: {
+						id: true,
+						sku: true,
+						price: true,
+						stock: true,
+						attributes: {
+							select: {
+								attribute: { select: { name: true, unit: true } },
+								value: true,
+							},
+							orderBy: { attribute: { name: 'asc' } },
 						},
-						orderBy: { attribute: { name: 'asc' } },
 					},
 				},
+				averageRating: true,
+				reviewCount: true,
+				createdAt: true,
 			},
-			reviews: { select: { rating: true } },
-			createdAt: true,
-		},
-	});
+		}),
+		getMaxEffectiveProductPrice(whereClause, now),
+	]);
+
+	const productIds = [...new Set(productsQuery.map((product) => product.id).filter(Boolean))];
+	for (const productId of productIds) {
+		cacheTag(productCacheTagById(productId));
+	}
 
 	const productsWithPrice = productsQuery.map((p) => {
 		const basePrice = Number(p.basePrice ?? 0);
@@ -187,16 +198,11 @@ export async function getProductsByTag<T extends boolean>(
 
 	const products: SubcategoryProduct[] = productsWithPrice.map((product) => {
 		const translation = pickLocalizedTranslation(product.translations, locale);
-		const { variants, reviews, productImages, translations, ...rest } = product as typeof product & {
+		const { variants, productImages, translations, ...rest } = product as typeof product & {
 			variants?: unknown;
-			reviews?: unknown;
 			productImages?: unknown;
 			translations?: unknown;
 		};
-		const ratings = product.reviews?.map((r) => r.rating) ?? [];
-		const averageRating = ratings.length
-			? ratings.reduce((sum, val) => sum + val, 0) / ratings.length
-			: 0;
 
 		return {
 			...rest,
@@ -210,9 +216,9 @@ export async function getProductsByTag<T extends boolean>(
 			inStock: !!product.inStock,
 			basePrice: Number(product.basePrice ?? 0),
 			discountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,
-			defaultVariant: product.variants?.[0]
-				? {
-						id: product.variants[0].id,
+				defaultVariant: product.variants?.[0]
+					? {
+							id: product.variants[0].id,
 						sku: product.variants[0].sku,
 						price: product.variants[0].price.toNumber(),
 						stock: product.variants[0].stock,
@@ -221,17 +227,12 @@ export async function getProductsByTag<T extends boolean>(
 								[a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' ')
 							)
 							.join(' / '),
-					}
-				: undefined,
-			averageRating,
-			reviewCount: product.reviews?.length ?? 0,
+						}
+					: undefined,
+			averageRating: Number(product.averageRating ?? 0),
+			reviewCount: Number(product.reviewCount ?? 0),
 		} as SubcategoryProduct;
 	});
-
-	const maxProductPrice = products.reduce(
-		(max, p) => Math.max(max, p.discountPrice ?? p.basePrice ?? 0),
-		0
-	);
 
 	if (!fetchAll) {
 		return { products, maxProductPrice } as T extends true ? ProductsWithMeta : ProductsOnly;

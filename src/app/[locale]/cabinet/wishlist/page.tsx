@@ -2,7 +2,7 @@ import { VStack } from '@chakra-ui/react';
 import WishList from '../_components/wishlist/WishList';
 import WishlistPagination from '../_components/wishlist/WishlistPagination';
 import CabinetSectionHeading from '@/components/ui/CabinetSectionHeading';
-import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { PRODUCTS_PER_PAGE, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
 import { getTranslations } from 'next-intl/server';
 
 type Props = {
@@ -21,11 +21,8 @@ export default async function Wishlist({ searchParams }: Props) {
 	]);
 
 	const params = await searchParams;
-	const requestedPage = Number.parseInt(params?.page ?? '1', 10);
-	const requestedPerPage = Number.parseInt(params?.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
-	const pageSize =
-		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
-	const currentPage = Number.isNaN(requestedPage) || requestedPage < 1 ? 1 : requestedPage;
+	const currentPage = resolvePageParam(params?.page ?? '1');
+	const pageSize = resolvePerPageParam(params?.perPage ?? `${PRODUCTS_PER_PAGE}`);
 
 	const sortI18n = {
 		new: prodT('new'),

@@ -7,11 +7,15 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { normalizeOrder } from './orderUtils';
 import type { UserOrder } from '@/types/order';
+import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
 
 export async function getUserOrders(limit: number, offset = 0): Promise<{
 	items: UserOrder[];
 	totalCount: number;
 }> {
+	const safeLimit = Math.min(MAX_PRODUCTS_PER_PAGE, Math.max(1, Math.floor(limit || 1)));
+	const safeOffset = Math.max(0, Math.floor(offset || 0));
+
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
 
@@ -24,8 +28,8 @@ export async function getUserOrders(limit: number, offset = 0): Promise<{
 		prisma.order.findMany({
 			where: { userId },
 			orderBy: { createdAt: 'desc' },
-			skip: offset,
-			take: limit,
+			skip: safeOffset,
+			take: safeLimit,
 			select: {
 				id: true,
 				total: true,

@@ -1,5 +1,12 @@
 import type { PrismaClient } from '@prisma/client';
-import type { ResourceOptions } from 'adminjs';
+import type {
+	ActionContext,
+	ActionHandler,
+	ActionRequest,
+	ActionResponse,
+	After,
+	ResourceOptions,
+} from 'adminjs';
 import { ValidationError } from 'adminjs';
 import { prisma } from '../prisma.mts';
 import { archiveProduct, duplicateProduct, publishProduct } from '../actions/product-actions.mts';
@@ -51,7 +58,9 @@ import { revokeSession, userSessions } from '../actions/user-session-actions.mts
 import { userSegments } from '../actions/user-segmentation-actions.mts';
 import { userRelatedData } from '../actions/user-related-actions.mts';
 import { reviewProductSummary } from '../actions/review-actions.mts';
+import { syncProductReviewAggregates } from '../lib/review-aggregates.mts';
 import { duplicateBanner } from '../actions/banner-actions.mts';
+import { revalidateStorefrontCacheTags } from '../actions/revalidate-cache-tags.mts';
 import {
 	PRODUCT_GALLERY_PRIMARY_URL_CONTEXT_KEY,
 	PRODUCT_GALLERY_URLS_CONTEXT_KEY,
@@ -118,10 +127,20 @@ const LOCALIZED_RESOURCE_DEFINITIONS =
 const buildTranslationInputPath = (locale: AdminTranslationLocale, fieldKey: string) =>
 	localizationRuntime.buildTranslationInputPath(locale, fieldKey);
 
-const mapAttributeSetItemPayload = async (request: any) => {
+type AdminRecordLike = {
+	id?: unknown;
+	params?: Record<string, unknown>;
+	param?: (key: string) => unknown;
+	[key: string]: unknown;
+};
+type AdminRequestLike = ActionRequest;
+type AdminResponseLike = ActionResponse;
+type AdminContextLike = ActionContext;
+
+const mapAttributeSetItemPayload = async (request: AdminRequestLike) => {
 	const payload = request?.payload ?? {};
 	if (!payload || typeof payload !== 'object') return request;
-	const next = { ...payload } as Record<string, any>;
+	const next = { ...payload } as Record<string, unknown>;
 	const mapIdToReference = (idKey: string, relationKey: string) => {
 		const idValue = next[idKey];
 		if (typeof idValue === 'string' && idValue.trim()) {
@@ -140,10 +159,10 @@ const mapAttributeSetItemPayload = async (request: any) => {
 	return { ...request, payload: next };
 };
 
-const mapCouponPayload = async (request: any) => {
+const mapCouponPayload = async (request: AdminRequestLike) => {
 	const payload = request?.payload ?? {};
 	if (!payload || typeof payload !== 'object') return request;
-	const next = { ...payload } as Record<string, any>;
+	const next = { ...payload } as Record<string, unknown>;
 	const promotionId = next.promotionId;
 	if (typeof promotionId === 'string' && promotionId.trim()) {
 		if (!next.promotion) next.promotion = promotionId;
@@ -152,10 +171,10 @@ const mapCouponPayload = async (request: any) => {
 	return { ...request, payload: next };
 };
 
-const mapOrderDiscountPayload = async (request: any) => {
+const mapOrderDiscountPayload = async (request: AdminRequestLike) => {
 	const payload = request?.payload ?? {};
 	if (!payload || typeof payload !== 'object') return request;
-	const next = { ...payload } as Record<string, any>;
+	const next = { ...payload } as Record<string, unknown>;
 	const mapIdToReference = (idKey: string, relationKey: string) => {
 		const idValue = next[idKey];
 		if (typeof idValue === 'string' && idValue.trim()) {
@@ -171,10 +190,10 @@ const mapOrderDiscountPayload = async (request: any) => {
 	return { ...request, payload: next };
 };
 
-const mapProductImagePayload = async (request: any) => {
+const mapProductImagePayload = async (request: AdminRequestLike) => {
 	const payload = request?.payload ?? {};
 	if (!payload || typeof payload !== 'object') return request;
-	const next = { ...payload } as Record<string, any>;
+	const next = { ...payload } as Record<string, unknown>;
 	const mapIdToReference = (idKey: string, relationKey: string) => {
 		const idValue = next[idKey];
 		if (typeof idValue === 'string' && idValue.trim()) {
@@ -192,7 +211,7 @@ const mapProductImagePayload = async (request: any) => {
 	return { ...request, payload: next };
 };
 
-const withProductGallerySyncErrorNotice = (response: any) => ({
+const withProductGallerySyncErrorNotice = (response: AdminResponseLike): AdminResponseLike => ({
 	...response,
 	notice: { message: 'product-gallery-sync-failed', type: 'error' },
 });
@@ -211,7 +230,10 @@ const normalizeGalleryUrls = (value: unknown): string[] | null => {
 	return Array.from(new Set(normalized));
 };
 
-const resolveProductIdForGallerySync = (response: any, context: any): string | null => {
+const resolveProductIdForGallerySync = (
+	response: AdminResponseLike,
+	context: AdminContextLike
+): string | null => {
 	const fromResponse = response?.record?.params?.id;
 	if (typeof fromResponse === 'string' && fromResponse.trim()) return fromResponse;
 	const fromContext = context?.record?.param?.('id');
@@ -219,7 +241,11 @@ const resolveProductIdForGallerySync = (response: any, context: any): string | n
 	return null;
 };
 
-const hydrateProductGalleryField = async (response: any, request: any, context: any) => {
+const hydrateProductGalleryField = async (
+	response: AdminResponseLike,
+	request: AdminRequestLike,
+	context: AdminContextLike
+) => {
 	const method = String(request?.method ?? 'get').toLowerCase();
 	if (method !== 'get') return response;
 
@@ -256,7 +282,11 @@ const hydrateProductGalleryField = async (response: any, request: any, context: 
 	return response;
 };
 
-const syncProductGalleryAfterHook = async (response: any, request: any, context: any) => {
+const syncProductGalleryAfterHook = async (
+	response: AdminResponseLike,
+	request: AdminRequestLike,
+	context: AdminContextLike
+) => {
 	const method = String(request?.method ?? 'get').toLowerCase();
 	if (method !== 'post') return response;
 	if (response?.notice?.type === 'error') return response;
@@ -313,8 +343,12 @@ const syncProductGalleryAfterHook = async (response: any, request: any, context:
 	}
 };
 
-const productEditAfterHook = async (response: any, request: any, context: any) => {
-	const withAudit = await productAuditAfterHook(response, request, context);
+const productEditAfterHook = async (
+	response: AdminResponseLike,
+	request: AdminRequestLike,
+	context: AdminContextLike
+) => {
+	const withAudit = (await productAuditAfterHook(response, request, context)) as ActionResponse;
 	const withHydratedGalleryField = await hydrateProductGalleryField(withAudit, request, context);
 	const withGallerySynced = await syncProductGalleryAfterHook(
 		withHydratedGalleryField,
@@ -342,7 +376,7 @@ const isOrderStatus = (record: { param: (key: string) => unknown } | undefined, 
 
 const LOCALIZED_TRANSLATIONS_CONTEXT_KEY = '__localizedTranslationsPayload';
 
-const getRequestMethod = (request: any) => String(request?.method ?? 'get').toLowerCase();
+const getRequestMethod = (request: AdminRequestLike) => String(request?.method ?? 'get').toLowerCase();
 
 const normalizeLocalizedValue = (value: unknown): string | null | undefined => {
 	if (value === undefined) return undefined;
@@ -419,7 +453,7 @@ const collectLocalizedPayload = (
 	return { nextPayload, localizedByLocale, propertyErrors };
 };
 
-const getResponseRecordId = (response: any, context: any): string | null => {
+const getResponseRecordId = (response: AdminResponseLike, context: AdminContextLike): string | null => {
 	const fromResponse = response?.record?.params?.id;
 	if (typeof fromResponse === 'string' && fromResponse.trim()) return fromResponse;
 	const fromContext = context?.record?.param?.('id');
@@ -427,10 +461,206 @@ const getResponseRecordId = (response: any, context: any): string | null => {
 	return null;
 };
 
-const getRecordId = (record: any): string | null => {
+const getRecordId = (record: AdminRecordLike | undefined): string | null => {
 	const id = record?.id ?? record?.params?.id;
 	return typeof id === 'string' && id.trim() ? id : null;
 };
+
+type CacheRevalidationArgs = {
+	response: AdminResponseLike;
+	request: AdminRequestLike;
+	context: AdminContextLike;
+};
+
+type CacheTagsResolver = (
+	args: CacheRevalidationArgs
+) => Array<string | null | undefined> | Promise<Array<string | null | undefined>>;
+
+type CacheRevalidationGuard = (args: CacheRevalidationArgs) => boolean;
+
+const PRODUCT_CACHE_REVALIDATE_TAGS = [
+	'products',
+	'product-by-slug',
+	'product-categories',
+	'product-filters',
+	'product-catalog',
+] as const;
+const PRODUCT_CATEGORY_CACHE_REVALIDATE_TAGS = [
+	'product-categories',
+	'product-catalog',
+	'products',
+] as const;
+
+const PAGE_CACHE_TAG = 'pages';
+const PROMO_CACHE_TAG = 'promo-cards';
+const STOREFRONT_FORMS_CACHE_TAG = 'storefront-forms';
+
+const normalizeCacheValue = (value: unknown): string | null => {
+	if (typeof value !== 'string') return null;
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : null;
+};
+
+const addNormalizedValue = (set: Set<string>, value: unknown) => {
+	if (Array.isArray(value)) {
+		value.forEach((entry) => addNormalizedValue(set, entry));
+		return;
+	}
+	const normalized = normalizeCacheValue(value);
+	if (normalized) {
+		set.add(normalized);
+	}
+};
+
+const addRecordValueByKey = (set: Set<string>, record: AdminRecordLike | undefined, key: string) => {
+	if (!record) return;
+	if (typeof record?.param === 'function') {
+		addNormalizedValue(set, record.param(key));
+	}
+	addNormalizedValue(set, record?.params?.[key]);
+	addNormalizedValue(set, record?.[key]);
+};
+
+const collectMutationFieldValues = (
+	key: string,
+	args: CacheRevalidationArgs,
+	options: { includeRequestPayload?: boolean } = {}
+) => {
+	const values = new Set<string>();
+	addRecordValueByKey(values, args.response?.record as unknown as AdminRecordLike, key);
+	if (Array.isArray(args.response?.records)) {
+		args.response.records.forEach((record) =>
+			addRecordValueByKey(values, record as unknown as AdminRecordLike, key)
+		);
+	}
+	addRecordValueByKey(values, args.context?.record as unknown as AdminRecordLike, key);
+	if (Array.isArray(args.context?.records)) {
+		args.context.records.forEach((record) =>
+			addRecordValueByKey(values, record as unknown as AdminRecordLike, key)
+		);
+	}
+	if (options.includeRequestPayload) {
+		addNormalizedValue(values, args.request?.payload?.[key]);
+	}
+	return Array.from(values);
+};
+
+const getProductTagById = (productId: string) => `product:${productId}`;
+
+const getProductMutationTags = (args: CacheRevalidationArgs) => {
+	const productIds = collectMutationFieldValues('id', args);
+	return [...PRODUCT_CACHE_REVALIDATE_TAGS, ...productIds.map(getProductTagById)];
+};
+
+const getReviewMutationTags = (args: CacheRevalidationArgs) => {
+	const productIds = collectMutationFieldValues('productId', args, {
+		includeRequestPayload: true,
+	});
+	return [...PRODUCT_CACHE_REVALIDATE_TAGS, ...productIds.map(getProductTagById)];
+};
+
+const getProductCategoryMutationTags = () => [...PRODUCT_CATEGORY_CACHE_REVALIDATE_TAGS];
+
+const getPageMutationTags = (args: CacheRevalidationArgs) => {
+	const slugs = collectMutationFieldValues('slug', args, { includeRequestPayload: true });
+	return [PAGE_CACHE_TAG, ...slugs.map((slug) => `page:${slug}`)];
+};
+
+const getBannerMutationTags = () => [PROMO_CACHE_TAG];
+
+const getStorefrontFormMutationTags = (args: CacheRevalidationArgs) => {
+	const placements = collectMutationFieldValues('placement', args, { includeRequestPayload: true });
+	return [
+		STOREFRONT_FORMS_CACHE_TAG,
+		...placements.map((placement) => `${STOREFRONT_FORMS_CACHE_TAG}:${placement}`),
+	];
+};
+
+const shouldRevalidateForSuccessfulPost = ({ request, response }: CacheRevalidationArgs) =>
+	getRequestMethod(request) === 'post' && response?.notice?.type !== 'error';
+
+const runStorefrontTagRevalidation = async (
+	resolveTags: CacheTagsResolver,
+	args: CacheRevalidationArgs
+) => {
+	try {
+		const tags = await resolveTags(args);
+		await revalidateStorefrontCacheTags(tags);
+	} catch (error) {
+		console.error('[admin-cache] Failed to resolve revalidation tags', error);
+	}
+};
+
+const withCacheRevalidationAfter = <T extends ActionResponse>(
+	afterHook: After<T>,
+	resolveTags: CacheTagsResolver,
+	shouldRevalidate?: CacheRevalidationGuard
+) => {
+	return async (response: T, request: ActionRequest, context: ActionContext): Promise<T> => {
+		const nextResponse = await afterHook(response, request, context);
+		const args: CacheRevalidationArgs = {
+			response: nextResponse as ActionResponse,
+			request,
+			context,
+		};
+		if (!shouldRevalidateForSuccessfulPost(args)) return nextResponse;
+		if (shouldRevalidate && !shouldRevalidate(args)) return nextResponse;
+		await runStorefrontTagRevalidation(resolveTags, args);
+		return nextResponse;
+	};
+};
+
+const syncReviewAggregatesAfter = async (
+	response: AdminResponseLike,
+	request: AdminRequestLike,
+	context: AdminContextLike
+) => {
+	const args: CacheRevalidationArgs = { response, request, context };
+	if (!shouldRevalidateForSuccessfulPost(args)) return response;
+
+	const productIds = collectMutationFieldValues('productId', args, {
+		includeRequestPayload: true,
+	});
+	if (productIds.length === 0) return response;
+
+	try {
+		await syncProductReviewAggregates(prisma, productIds);
+	} catch (error) {
+		console.error('[admin-review] Failed to sync review aggregates', error);
+	}
+
+	return response;
+};
+
+const reviewMutationAfterHook = withCacheRevalidationAfter(
+	syncReviewAggregatesAfter,
+	getReviewMutationTags
+);
+
+const withCacheRevalidationHandler = <T extends ActionResponse>(
+	handler: ActionHandler<T>,
+	resolveTags: CacheTagsResolver,
+	shouldRevalidate?: CacheRevalidationGuard
+) => {
+	return async (request: ActionRequest, response: unknown, context: ActionContext): Promise<T> => {
+		const nextResponse = await handler(request, response, context);
+		const args: CacheRevalidationArgs = {
+			response: nextResponse as ActionResponse,
+			request,
+			context,
+		};
+		if (!shouldRevalidateForSuccessfulPost(args)) return nextResponse;
+		if (shouldRevalidate && !shouldRevalidate(args)) return nextResponse;
+		await runStorefrontTagRevalidation(resolveTags, args);
+		return nextResponse;
+	};
+};
+
+const shouldRevalidateSeoTemplateApply = ({ request }: CacheRevalidationArgs) =>
+	String(request?.payload?.mode ?? '').toLowerCase() === 'apply';
+
+const shouldRevalidateImportCsvApply = ({ request }: CacheRevalidationArgs) =>
+	String(request?.payload?.dryRun ?? 'false').toLowerCase() !== 'true';
 
 const readLocalizedRows = async (
 	resourceId: LocalizedResourceId,
@@ -521,7 +751,7 @@ const formatTranslationCompleteness = (
 
 const applyLocalizationToRecord = (
 	resourceId: LocalizedResourceId,
-	record: any,
+	record: AdminRecordLike,
 	definition: LocalizedResourceDefinition,
 	rows: Array<Record<string, unknown>>
 ) => {
@@ -687,16 +917,15 @@ const syncLocalizedTranslationsAfterSave = async (
 };
 
 const localizedBeforeHook = async (
-	request: any,
-	context: any,
+	request: AdminRequestLike,
+	context: AdminContextLike,
 	resourceId: LocalizedResourceId
 ) => {
 	const method = getRequestMethod(request);
 	if (method !== 'post') return request;
 
 	const payload = (request?.payload ?? {}) as Record<string, unknown>;
-	const baseParams = ((context as { record?: { params?: Record<string, unknown> } }).record?.params ??
-		{}) as Record<string, unknown>;
+		const baseParams = (context.record?.params ?? {}) as Record<string, unknown>;
 	const definition = getLocalizedResourceDefinition(resourceId);
 	if (!definition) return request;
 
@@ -706,12 +935,12 @@ const localizedBeforeHook = async (
 		definition
 	);
 
-	if (Object.keys(propertyErrors).length > 0) {
-		throw new ValidationError(propertyErrors, {
-			message: 'translation-validation-error',
-			type: 'validationError',
-		} as any);
-	}
+		if (Object.keys(propertyErrors).length > 0) {
+			throw new ValidationError(propertyErrors, {
+				message: 'translation-validation-error',
+				type: 'validationError',
+			});
+		}
 
 	(context as Record<string, unknown>)[LOCALIZED_TRANSLATIONS_CONTEXT_KEY] = {
 		resourceId,
@@ -724,7 +953,11 @@ const localizedBeforeHook = async (
 	};
 };
 
-const localizedAfterHook = async (response: any, request: any, context: any) => {
+const localizedAfterHook = async (
+	response: AdminResponseLike,
+	request: AdminRequestLike,
+	context: AdminContextLike
+) => {
 	const resourceId = String(context?.resource?._decorated?.id?.() ?? context?.resource?.id ?? '');
 	const definition = getLocalizedResourceDefinition(resourceId);
 	if (!definition) return response;
@@ -747,24 +980,45 @@ const localizedAfterHook = async (response: any, request: any, context: any) => 
 				localizedPayload
 			);
 		}
+
+		const args: CacheRevalidationArgs = { response, request, context };
+		if (typedResourceId === 'Product') {
+			await runStorefrontTagRevalidation(getProductMutationTags, args);
+		} else if (typedResourceId === 'ProductCategory') {
+			await runStorefrontTagRevalidation(getProductCategoryMutationTags, args);
+		} else if (typedResourceId === 'Page') {
+			await runStorefrontTagRevalidation(getPageMutationTags, args);
+		} else if (typedResourceId === 'Banner') {
+			await runStorefrontTagRevalidation(getBannerMutationTags, args);
+		}
 	}
 
 	if (response?.record) {
-		const recordId = getRecordId(response.record);
+		const recordId = getRecordId(response.record as unknown as AdminRecordLike);
 		if (recordId) {
 			const rows = await readLocalizedRows(typedResourceId, [recordId]);
-			applyLocalizationToRecord(typedResourceId, response.record, definition, rows);
+			applyLocalizationToRecord(
+				typedResourceId,
+				response.record as unknown as AdminRecordLike,
+				definition,
+				rows
+			);
 		}
 	}
 
 	if (Array.isArray(response?.records) && response.records.length > 0) {
 		const recordIds = response.records
-			.map((record: any) => getRecordId(record))
+			.map((record) => getRecordId(record as unknown as AdminRecordLike))
 			.filter((id: string | null): id is string => Boolean(id));
 		if (recordIds.length > 0) {
 			const rows = await readLocalizedRows(typedResourceId, recordIds);
-			response.records.forEach((record: any) => {
-				applyLocalizationToRecord(typedResourceId, record, definition, rows);
+			response.records.forEach((record) => {
+				applyLocalizationToRecord(
+					typedResourceId,
+					record as unknown as AdminRecordLike,
+					definition,
+					rows
+				);
 			});
 		}
 	}
@@ -907,48 +1161,52 @@ export const resources = [
 					icon: 'Tag',
 					guard: 'product-bulk-set-category',
 					component: productBulkSetCategoryActionComponent,
-					handler: bulkSetCategory,
+					handler: withCacheRevalidationHandler(bulkSetCategory, getProductMutationTags),
 				},
 				bulkSetBrand: {
 					actionType: 'bulk',
 					icon: 'Tag',
 					guard: 'product-bulk-set-brand',
 					component: productBulkSetBrandActionComponent,
-					handler: bulkSetBrand,
+					handler: withCacheRevalidationHandler(bulkSetBrand, getProductMutationTags),
 				},
 				bulkEditTags: {
 					actionType: 'bulk',
 					icon: 'Edit',
 					guard: 'product-bulk-edit-tags',
 					component: productBulkEditTagsActionComponent,
-					handler: bulkEditTags,
+					handler: withCacheRevalidationHandler(bulkEditTags, getProductMutationTags),
 				},
 				bulkAdjustPrice: {
 					actionType: 'bulk',
 					icon: 'DollarSign',
 					guard: 'product-bulk-adjust-price',
 					component: productBulkAdjustPriceActionComponent,
-					handler: bulkAdjustPrice,
+					handler: withCacheRevalidationHandler(bulkAdjustPrice, getProductMutationTags),
 				},
 				bulkAdjustStock: {
 					actionType: 'bulk',
 					icon: 'Package',
 					guard: 'product-bulk-adjust-stock',
 					component: productBulkAdjustStockActionComponent,
-					handler: bulkAdjustStock,
+					handler: withCacheRevalidationHandler(bulkAdjustStock, getProductMutationTags),
 				},
 				bulkToggleInStock: {
 					actionType: 'bulk',
 					icon: 'Package',
 					guard: 'product-bulk-toggle-instock',
 					component: productBulkToggleInStockActionComponent,
-					handler: bulkToggleInStock,
+					handler: withCacheRevalidationHandler(bulkToggleInStock, getProductMutationTags),
 				},
 				bulkSeoTemplate: {
 					actionType: 'bulk',
 					icon: 'Search',
 					component: productBulkSeoTemplateActionComponent,
-					handler: bulkSeoTemplateHandler,
+					handler: withCacheRevalidationHandler(
+						bulkSeoTemplateHandler,
+						getProductMutationTags,
+						shouldRevalidateSeoTemplateApply
+					),
 				},
 					new: {
 						before: async (request: any, context: any) => {
@@ -988,13 +1246,17 @@ export const resources = [
 					actionType: 'record',
 					icon: 'Grid',
 					component: productVariantMatrixComponent,
-					handler: productVariantMatrix,
+					handler: withCacheRevalidationHandler(productVariantMatrix, getProductMutationTags),
 				},
 				importProductsCsv: {
 					actionType: 'resource',
 					icon: 'Upload',
 					component: productCsvImportExportActionComponent,
-					handler: importProductsCsv,
+					handler: withCacheRevalidationHandler(
+						importProductsCsv,
+						getProductMutationTags,
+						shouldRevalidateImportCsvApply
+					),
 				},
 				exportProductsCsv: {
 					actionType: 'resource',
@@ -1032,7 +1294,7 @@ export const resources = [
 					guard: 'publish-product',
 					isVisible: ({ record }: { record?: any }) =>
 						String(record?.param('status') ?? 'DRAFT') !== 'ACTIVE',
-					handler: publishProduct,
+					handler: withCacheRevalidationHandler(publishProduct, getProductMutationTags),
 					component: false,
 				},
 				archiveProduct: {
@@ -1041,35 +1303,35 @@ export const resources = [
 					guard: 'archive-product',
 					isVisible: ({ record }: { record?: any }) =>
 						String(record?.param('status') ?? 'DRAFT') !== 'ARCHIVED',
-					handler: archiveProduct,
+					handler: withCacheRevalidationHandler(archiveProduct, getProductMutationTags),
 					component: false,
 				},
 				duplicateProduct: {
 					actionType: 'record',
 					icon: 'Copy',
 					guard: 'duplicate-product',
-					handler: duplicateProduct,
+					handler: withCacheRevalidationHandler(duplicateProduct, getProductMutationTags),
 					component: false,
 				},
 				scheduleDiscount: {
 					actionType: 'record',
 					icon: 'Calendar',
 					guard: 'schedule-discount',
-					handler: scheduleDiscount,
+					handler: withCacheRevalidationHandler(scheduleDiscount, getProductMutationTags),
 					component: productScheduleDiscountActionComponent,
 				},
 				schedulePublish: {
 					actionType: 'record',
 					icon: 'Calendar',
 					guard: 'schedule-publish',
-					handler: schedulePublish,
+					handler: withCacheRevalidationHandler(schedulePublish, getProductMutationTags),
 					component: productSchedulePublishActionComponent,
 				},
 				deleteProduct: {
 					actionType: 'record',
 					icon: 'Trash',
 					guard: 'delete-product',
-					handler: deleteProduct,
+					handler: withCacheRevalidationHandler(deleteProduct, getProductMutationTags),
 					component: false,
 				},
 			},
@@ -1106,6 +1368,18 @@ export const resources = [
 				},
 				list: {
 					after: localizedAfterHook,
+				},
+				delete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductCategoryMutationTags
+					),
+				},
+				bulkDelete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductCategoryMutationTags
+					),
 				},
 			},
 		},
@@ -1535,7 +1809,7 @@ export const resources = [
 				actionType: 'record',
 				icon: 'Copy',
 				guard: 'duplicate-banner',
-				handler: duplicateBanner,
+				handler: withCacheRevalidationHandler(duplicateBanner, getBannerMutationTags),
 				component: false,
 			},
 			new: {
@@ -1553,6 +1827,18 @@ export const resources = [
 			},
 			list: {
 				after: localizedAfterHook,
+			},
+			delete: {
+				after: withCacheRevalidationAfter(
+					async (response: any) => response,
+					getBannerMutationTags
+				),
+			},
+			bulkDelete: {
+				after: withCacheRevalidationAfter(
+					async (response: any) => response,
+					getBannerMutationTags
+				),
 			},
 		},
 	}),
@@ -1601,6 +1887,18 @@ export const resources = [
 			list: {
 				after: localizedAfterHook,
 			},
+			delete: {
+				after: withCacheRevalidationAfter(
+					async (response: any) => response,
+					getPageMutationTags
+				),
+			},
+			bulkDelete: {
+				after: withCacheRevalidationAfter(
+					async (response: any) => response,
+					getPageMutationTags
+				),
+			},
 		},
 	}),
 	maybeResource(modelMap.StorefrontForm, {
@@ -1614,6 +1912,32 @@ export const resources = [
 			checkboxLabel: { isVisible: { list: false, filter: false, show: true, edit: true } },
 			createdAt: readOnly,
 			updatedAt: readOnly,
+		},
+		actions: {
+			new: {
+				after: withCacheRevalidationAfter(
+					async (response: any) => response,
+					getStorefrontFormMutationTags
+				),
+			},
+			edit: {
+				after: withCacheRevalidationAfter(
+					async (response: any) => response,
+					getStorefrontFormMutationTags
+				),
+			},
+			delete: {
+				after: withCacheRevalidationAfter(
+					async (response: any) => response,
+					getStorefrontFormMutationTags
+				),
+			},
+			bulkDelete: {
+				after: withCacheRevalidationAfter(
+					async (response: any) => response,
+					getStorefrontFormMutationTags
+				),
+			},
 		},
 	}),
 	maybeResource(modelMap.Coupon, {
@@ -1860,6 +2184,18 @@ export const resources = [
 				createdAt: readOnly,
 			},
 			actions: {
+				new: {
+					after: reviewMutationAfterHook,
+				},
+				edit: {
+					after: reviewMutationAfterHook,
+				},
+				delete: {
+					after: reviewMutationAfterHook,
+				},
+				bulkDelete: {
+					after: reviewMutationAfterHook,
+				},
 				show: {
 					actionType: 'record',
 					component: reviewShowComponent,

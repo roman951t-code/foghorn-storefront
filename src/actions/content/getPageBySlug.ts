@@ -6,10 +6,12 @@ import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 
+const PAGE_CACHE_TAG = 'pages';
+
 export async function getPageBySlug(slug: string, locale: string = DEFAULT_LOCALE) {
 	'use cache';
 	cacheLife('minutes');
-	cacheTag(`page:${slug}`);
+	cacheTag(PAGE_CACHE_TAG, `page:${slug}`);
 
 	const now = new Date();
 	const localeFallbacks = getLocaleFallbacks(locale);

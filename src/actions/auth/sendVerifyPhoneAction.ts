@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { getPhoneSignInSchema } from 'validationSchemas/phoneSignInSchema';
 import { headers } from 'next/headers';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { getActionErrorMessageKey } from './authActionError';
 
 const PHONE_OTP_SEND_LIMIT_PER_PHONE = 3;
 const PHONE_OTP_SEND_LIMIT_PER_IP = 20;
@@ -30,6 +31,12 @@ export async function sendVerifyPhoneAction(
 	const rawPhone = phone.replace(/\D/g, '');
 	const requestHeaders = await headers();
 	const ip = getClientIp(requestHeaders);
+	const session = await auth.api.getSession({ headers: requestHeaders });
+	const currentUserId = session?.user?.id;
+
+	if (!currentUserId) {
+		return { success: false, message: validationT('userNotFound') };
+	}
 
 	const [phoneRate, ipRate] = await Promise.all([
 		checkRateLimit({
@@ -49,6 +56,14 @@ export async function sendVerifyPhoneAction(
 	}
 
 	try {
+		const existingUser = await prisma.user.findUnique({
+			where: { phoneNumber: rawPhone },
+			select: { id: true },
+		});
+		if (existingUser && existingUser.id !== currentUserId) {
+			return { success: false, message: validationT('userExists') };
+		}
+
 		await prisma.verification.deleteMany({
 			where: {
 				identifier: rawPhone,
@@ -62,15 +77,17 @@ export async function sendVerifyPhoneAction(
 		});
 
 		return { success: true };
-	} catch (error: any) {
+	} catch (error: unknown) {
+		const messageKey = getActionErrorMessageKey(error);
 		const errorMap: Record<string, string> = {
 			'Too many requests': validationT('tooManyRequests'),
+			phone_otp_provider_not_configured: validationT('smsSendFailed'),
 			'Unknown error': validationT('smsSendFailed'),
 		};
 
 		return {
 			success: false,
-			message: errorMap[error?.body?.message ?? ''] || validationT('smsSendFailed'),
+			message: errorMap[messageKey] || validationT('smsSendFailed'),
 		};
 	}
 }

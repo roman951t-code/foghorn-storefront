@@ -7,10 +7,11 @@ import { revalidateTag, updateTag } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
+import { isCustomerOrderCancellable, isCustomerOrderDeletable } from '@/utils/orderStatusPolicy';
 
 type Result =
 	| { success: true; action: 'cancelled' | 'deleted' }
-	| { success: false; code: 'unauthorized' | 'not-found' };
+	| { success: false; code: 'unauthorized' | 'not-found' | 'not-allowed' };
 
 const INVENTORY_RESTOCKED_NOTE = 'Inventory restocked';
 
@@ -32,10 +33,13 @@ export async function deleteOrderAction(orderId: string): Promise<Result> {
 	});
 
 	if (!order || order.userId !== userId) return { success: false, code: 'not-found' };
+	if (!isCustomerOrderCancellable(order.status) && !isCustomerOrderDeletable(order.status)) {
+		return { success: false, code: 'not-allowed' };
+	}
 
 	const productIds = Array.from(new Set(order.items.map((item) => item.productId)));
 
-	if (order.status === 'PENDING') {
+	if (isCustomerOrderCancellable(order.status)) {
 		await prisma.$transaction(async (tx) => {
 			for (const item of order.items) {
 				if (!item.variantId) continue;

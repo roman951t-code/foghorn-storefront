@@ -10,6 +10,7 @@ import { PRODUCT_FILTERS_CACHE_TAG, PRODUCT_LIST_CACHE_TAG } from '@/constants/p
 import type { Filter } from '@/types/product';
 import { getLocaleFallbacks } from '@/utils/localeFallback';
 import { sortByAttributeSet } from '@/utils/attributeSetOrder';
+import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 const isNumericString = (value: string) => /^-?\d+(\.\d+)?$/.test(value.trim());
 
@@ -35,6 +36,8 @@ export async function getSubcategoryFilters(subcategorySlug: string) {
 	'use cache';
 	cacheLife('hours');
 	cacheTag(PRODUCT_FILTERS_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
+	const now = new Date();
+	const publishedWhere = getPublishedProductWhere(now);
 
 	const subcategory = await prisma.productCategory.findUnique({
 		where: { slug: subcategorySlug },
@@ -59,7 +62,13 @@ export async function getSubcategoryFilters(subcategorySlug: string) {
 	const attributes = await prisma.productAttribute.findMany({
 		where: {
 			...(attributeIdsInSet.length > 0 ? { id: { in: attributeIdsInSet } } : {}),
-			products: { some: { product: { categoryId: subcategory.id } } },
+			products: {
+				some: {
+					product: {
+						AND: [{ categoryId: subcategory.id }, publishedWhere],
+					},
+				},
+			},
 		},
 		select: {
 			id: true,
@@ -67,7 +76,9 @@ export async function getSubcategoryFilters(subcategorySlug: string) {
 			unit: true,
 			products: {
 				where: {
-					product: { categoryId: subcategory.id },
+					product: {
+						AND: [{ categoryId: subcategory.id }, publishedWhere],
+					},
 				},
 				select: { value: true },
 			},
@@ -78,7 +89,7 @@ export async function getSubcategoryFilters(subcategorySlug: string) {
 		where: {
 			products: {
 				some: {
-					categoryId: subcategory.id,
+					AND: [{ categoryId: subcategory.id }, publishedWhere],
 				},
 			},
 		},
@@ -118,12 +129,14 @@ export async function getTagFilters(tag: string) {
 	'use cache';
 	cacheLife('hours');
 	cacheTag(PRODUCT_FILTERS_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
+	const now = new Date();
+	const publishedWhere = getPublishedProductWhere(now);
 
 	const brands = await prisma.brand.findMany({
 		where: {
 			products: {
 				some: {
-					tags: { has: tag },
+					AND: [{ tags: { has: tag } }, publishedWhere],
 				},
 			},
 		},
@@ -137,7 +150,11 @@ export async function getTagFilters(tag: string) {
 			name: true,
 			unit: true,
 			products: {
-				where: { product: { tags: { has: tag } } },
+				where: {
+					product: {
+						AND: [{ tags: { has: tag } }, publishedWhere],
+					},
+				},
 				select: { value: true },
 			},
 		},
@@ -176,6 +193,8 @@ export async function getSearchFilters(
 	'use cache';
 	cacheLife('hours');
 	cacheTag(PRODUCT_FILTERS_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
+	const now = new Date();
+	const publishedWhere = getPublishedProductWhere(now);
 
 	const localeFallbacks = getLocaleFallbacks(locale);
 	const normalizedSearchQuery = searchQuery.trim();
@@ -192,14 +211,16 @@ export async function getSearchFilters(
 								},
 							},
 						},
-						],
-				  }
+					],
+				}
 			: {};
 
 	const brands = await prisma.brand.findMany({
 		where: {
 			products: {
-				some: searchCondition,
+				some: {
+					AND: [searchCondition, publishedWhere],
+				},
 			},
 		},
 		select: { id: true, name: true, slug: true },
@@ -211,12 +232,14 @@ export async function getSearchFilters(
 			id: true,
 			name: true,
 			unit: true,
-				products: {
-					where: {
-						product: searchCondition,
+			products: {
+				where: {
+					product: {
+						AND: [searchCondition, publishedWhere],
 					},
-					select: { value: true },
 				},
+				select: { value: true },
+			},
 		},
 	});
 

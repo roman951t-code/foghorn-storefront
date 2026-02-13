@@ -16,7 +16,7 @@ import { getSearchFilters, getTagFilters } from '@/actions/products/getProductsF
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getRecentlyViewedProductsWithCount } from '@/actions/products/getRecentlyViewedProducts';
-import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { PRODUCTS_PER_PAGE, resolveOffset, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
 import { absoluteUrl, buildLanguageAlternates } from '@/utils/seo';
 import { LocaleParams, ProductFiltersSearchParams } from '@/types/routing';
 import CountPill from '@/components/ui/CountPill';
@@ -102,12 +102,9 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 		getTranslations('navigation'),
 	]);
 
-	const parsedPage = Number.parseInt(pageParam, 10);
-	const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
-	const requestedPerPage = Number.parseInt(searchData.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
-	const pageSize =
-		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
-	const offset = (page - 1) * pageSize;
+	const page = resolvePageParam(pageParam);
+	const pageSize = resolvePerPageParam(searchData.perPage ?? `${PRODUCTS_PER_PAGE}`);
+	const offset = resolveOffset(page, pageSize);
 	const minPrice = min ? Number.parseFloat(min) : undefined;
 	const maxPrice = max ? Number.parseFloat(max) : undefined;
 	const orderBy = orderByParam as 'new' | 'expensive' | 'cheap' | undefined;

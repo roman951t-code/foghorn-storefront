@@ -5,6 +5,8 @@ import { cacheLife, cacheTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import type { StorefrontFormPlacement } from '@prisma/client';
 
+const STOREFRONT_FORMS_CACHE_TAG = 'storefront-forms';
+
 export type StorefrontFormPublic = {
 	key: string;
 	placement: StorefrontFormPlacement;
@@ -23,8 +25,8 @@ export type StorefrontFormPublic = {
 
 export async function getEnabledStorefrontForms(placement: StorefrontFormPlacement) {
 	'use cache';
-	cacheLife('minutes');
-	cacheTag(`storefront-forms:${placement}`);
+	cacheLife('hours');
+	cacheTag(STOREFRONT_FORMS_CACHE_TAG, `storefront-forms:${placement}`);
 
 	return prisma.storefrontForm.findMany({
 		where: { placement, enabled: true },
@@ -46,4 +48,3 @@ export async function getEnabledStorefrontForms(placement: StorefrontFormPlaceme
 		},
 	}) satisfies Promise<StorefrontFormPublic[]>;
 }
-

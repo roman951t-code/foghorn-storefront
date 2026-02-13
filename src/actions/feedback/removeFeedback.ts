@@ -6,8 +6,9 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
-import { revalidateTag, updateTag } from 'next/cache';
-import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
+import { updateTag } from 'next/cache';
+import { productCacheTagById } from '@/constants/products';
+import { syncProductReviewAggregate } from '@/lib/reviewAggregates';
 
 export async function removeFeedback(
 	productId: string
@@ -23,15 +24,18 @@ export async function removeFeedback(
 	}
 
 	try {
-		await prisma.review.deleteMany({
-			where: {
-				userId,
-				productId,
-			},
+		await prisma.$transaction(async (tx) => {
+			await tx.review.deleteMany({
+				where: {
+					userId,
+					productId,
+				},
+			});
+
+			await syncProductReviewAggregate(tx, productId);
 		});
 
 		await updateTag(productCacheTagById(productId));
-		await revalidateTag(PRODUCT_LIST_CACHE_TAG, 'default');
 
 		return { success: true };
 	} catch (error: any) {

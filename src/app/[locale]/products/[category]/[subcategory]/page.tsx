@@ -14,7 +14,7 @@ import Pagination from '@/components/ui/Pagination';
 import { getSubcategoryNameBySlug } from '@/actions/products/getSubcategoryNameBySlug';
 import { getSubcategoryFilters } from '@/actions/products/getProductsFilters';
 import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
-import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { PRODUCTS_PER_PAGE, resolveOffset, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
 import { SUBCATEGORY_FILTER_EXCLUDED_KEYS } from '@/constants/products';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
 import Script from 'next/script';
@@ -22,6 +22,7 @@ import { ProductFiltersSearchParams, SubcategoryParams } from '@/types/routing';
 import { ensureParams } from '@/utils/validateParams';
 import { subcategoryParamsSchema } from 'validationSchemas/productParamsSchemas';
 import CountPill from '@/components/ui/CountPill';
+import { headers } from 'next/headers';
 
 type Props = SubcategoryParams & {
 	searchParams: ProductFiltersSearchParams;
@@ -80,13 +81,13 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 export default async function Subcategory({ params, searchParams }: Props) {
 	const { category, subcategory, locale } = ensureParams(subcategoryParamsSchema, await params);
+	const headersList = await headers();
+	const cspNonce = headersList.get('x-csp-nonce') ?? undefined;
 	const searchData = await searchParams;
 
-	const page = Math.max(1, parseInt(searchData.page || '1', 10) || 1);
-	const requestedPerPage = parseInt(searchData.perPage || `${PRODUCTS_PER_PAGE}`, 10);
-	const pageSize =
-		Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
-	const offset = (page - 1) * pageSize;
+	const page = resolvePageParam(searchData.page || '1');
+	const pageSize = resolvePerPageParam(searchData.perPage || `${PRODUCTS_PER_PAGE}`);
+	const offset = resolveOffset(page, pageSize);
 
 	const [productsT, navigationT] = await Promise.all([
 		getTranslations('products'),
@@ -165,11 +166,11 @@ export default async function Subcategory({ params, searchParams }: Props) {
 		],
 	};
 
-	return (
-		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<Script id='subcategory-breadcrumbs-schema' type='application/ld+json'>
-				{JSON.stringify(breadcrumbsJsonLd)}
-			</Script>
+		return (
+			<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
+				<Script id='subcategory-breadcrumbs-schema' nonce={cspNonce} type='application/ld+json'>
+					{JSON.stringify(breadcrumbsJsonLd)}
+				</Script>
 			<Breadcrumbs
 				categorySlug={category}
 				subcategorySlug={subcategory}

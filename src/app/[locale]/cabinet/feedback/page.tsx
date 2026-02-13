@@ -1,7 +1,7 @@
 import { VStack } from '@chakra-ui/react';
 import { getTranslations } from 'next-intl/server';
 import Pagination from '@/components/ui/Pagination';
-import { PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { PRODUCTS_PER_PAGE, resolveOffset, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
 import { getUserReviewedProducts } from '@/actions/feedback/getUserReviewedProducts';
 import UserFeedbackList from '../_components/feedback/UserFeedbackList';
 import CabinetSectionHeading from '../../../../components/ui/CabinetSectionHeading';
@@ -21,17 +21,15 @@ export default async function Feedback({ searchParams }: Props) {
 	]);
 
 	const params = await searchParams;
-	const requestedPage = Number.parseInt(params?.page ?? '1', 10);
-	const requestedPerPage = Number.parseInt(params?.perPage ?? `${PRODUCTS_PER_PAGE}`, 10);
-	const pageSize = Number.isNaN(requestedPerPage) || requestedPerPage <= 0 ? PRODUCTS_PER_PAGE : requestedPerPage;
-	const rawPage = Number.isNaN(requestedPage) || requestedPage < 1 ? 1 : requestedPage;
-	const offset = (rawPage - 1) * pageSize;
+	const rawPage = resolvePageParam(params?.page ?? '1');
+	const pageSize = resolvePerPageParam(params?.perPage ?? `${PRODUCTS_PER_PAGE}`);
+	const offset = resolveOffset(rawPage, pageSize);
 
 	const { items, totalCount } = await getUserReviewedProducts(pageSize, offset);
 	const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 	const currentPage = Math.min(rawPage, totalPages);
 
-	const normalizedOffset = (currentPage - 1) * pageSize;
+	const normalizedOffset = resolveOffset(currentPage, pageSize);
 	const normalizedItems =
 		normalizedOffset === offset
 			? items

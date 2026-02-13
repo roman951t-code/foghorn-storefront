@@ -28,7 +28,8 @@ export async function getWishListProducts(
 					publishStartAt: true,
 					publishEndAt: true,
 					inStock: true,
-					reviews: { select: { rating: true } },
+					averageRating: true,
+					reviewCount: true,
 					tags: true,
 				},
 			},
@@ -42,10 +43,6 @@ export async function getWishListProducts(
 			if (!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)) {
 				return acc;
 			}
-			const ratings = product.reviews.map((r) => r.rating);
-			const averageRating =
-				ratings.length > 0 ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length : 0;
-
 			acc.push({
 				id: product.id,
 				name: product.name,
@@ -57,8 +54,8 @@ export async function getWishListProducts(
 				inStock: product.inStock ?? false,
 				basePrice: Number(product.basePrice),
 				discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
-				averageRating,
-				reviewCount: product.reviews.length,
+				averageRating: Number(product.averageRating ?? 0),
+				reviewCount: Number(product.reviewCount ?? 0),
 			});
 			return acc;
 		}, []) ?? [];

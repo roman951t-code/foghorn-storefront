@@ -89,6 +89,26 @@ const buildVariantLabel = (
 	return label || null;
 };
 
+const incrementCouponRedemptionWithGuard = async (
+	tx: Prisma.TransactionClient,
+	{
+		couponId,
+		maxRedemptions,
+	}: {
+		couponId: string;
+		maxRedemptions: number | null;
+	}
+) => {
+	const updated = await tx.coupon.updateMany({
+		where:
+			maxRedemptions != null
+				? { id: couponId, redemptionCount: { lt: maxRedemptions } }
+				: { id: couponId },
+		data: { redemptionCount: { increment: 1 } },
+	});
+	return updated.count > 0;
+};
+
 async function finalizeStripeOrderInternal(
 	sessionId: string,
 	{
@@ -424,6 +444,8 @@ async function finalizeStripeOrderInternal(
 	const couponCode = typeof checkoutSession.metadata?.couponCode === 'string'
 		? checkoutSession.metadata.couponCode.trim()
 		: '';
+	const couponIdFromMetadata = normalizeMetadataString(checkoutSession.metadata?.couponId, 64);
+	const promotionIdFromMetadata = normalizeMetadataString(checkoutSession.metadata?.promotionId, 64);
 	const couponPreview =
 		couponCode && amountDiscount > 0 ? await getCouponDiscountPreview(couponCode, calculatedTotal).catch(() => null) : null;
 
@@ -532,29 +554,53 @@ async function finalizeStripeOrderInternal(
 				let promotionId: string | null = null;
 				let label: string | null = null;
 				let code: string | null = couponCode;
+				let maxRedemptions: number | null = null;
 
 				if (couponPreview && couponPreview.ok) {
 					couponId = couponPreview.preview.couponId;
 					promotionId = couponPreview.preview.promotionId;
 					label = couponPreview.preview.label;
 					code = couponPreview.preview.code;
-					await tx.coupon.update({
-						where: { id: couponId },
-						data: { redemptionCount: { increment: 1 } },
-					});
+					maxRedemptions = couponPreview.maxRedemptions ?? null;
 				} else {
-					const existingCoupon = await tx.coupon.findFirst({
-						where: { code: { equals: couponCode, mode: 'insensitive' } },
-						select: { id: true, code: true, promotion: { select: { id: true, name: true } } },
-					});
+					const selectCouponFields = {
+						id: true,
+						code: true,
+						maxRedemptions: true,
+						promotion: { select: { id: true, name: true } },
+					} as const;
+					let existingCoupon =
+						couponIdFromMetadata
+							? await tx.coupon.findUnique({
+									where: { id: couponIdFromMetadata },
+									select: selectCouponFields,
+								})
+							: null;
+					if (!existingCoupon) {
+						existingCoupon = await tx.coupon.findFirst({
+							where: { code: { equals: couponCode, mode: 'insensitive' } },
+							select: selectCouponFields,
+						});
+					}
 					if (existingCoupon) {
 						couponId = existingCoupon.id;
-						promotionId = existingCoupon.promotion?.id ?? null;
+						promotionId = existingCoupon.promotion?.id ?? promotionIdFromMetadata ?? null;
 						label = existingCoupon.promotion?.name ?? null;
 						code = existingCoupon.code;
-						await tx.coupon.update({
-							where: { id: couponId },
-							data: { redemptionCount: { increment: 1 } },
+						maxRedemptions = existingCoupon.maxRedemptions ?? null;
+					}
+				}
+
+				if (couponId) {
+					const didIncrement = await incrementCouponRedemptionWithGuard(tx, {
+						couponId,
+						maxRedemptions,
+					});
+					if (!didIncrement) {
+						console.warn('[payments] Coupon redemption limit reached during finalize', {
+							sessionId,
+							couponId,
+							couponCode: code,
 						});
 					}
 				}

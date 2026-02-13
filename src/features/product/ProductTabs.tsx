@@ -30,10 +30,6 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 	const urlTab = searchParams?.get('tab') ?? tab;
 	const selectedTab: ProductTabValue = urlTab && isProductTabValue(urlTab) ? urlTab : 'about';
 
-	if (!product) {
-		return null;
-	}
-
 	const storeReviews = useReviewStore((state) => state.reviewsByProduct[product.id]);
 	const effectiveReviews = storeReviews ?? (product.reviews as Review[]);
 	const reviewCount = effectiveReviews?.length ?? product.reviewCount ?? 0;
@@ -41,6 +37,18 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 		reviewCount > 0
 			? effectiveReviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
 			: product.averageRating ?? 0;
+
+	const handleTabChange = (next: ProductTabValue) => {
+		const params = new URLSearchParams(searchParams?.toString());
+		if (next === 'about') {
+			params.delete('tab');
+		} else {
+			params.set('tab', next);
+		}
+		const query = params.toString();
+		const nextUrl = query ? `${pathname}?${query}` : pathname;
+		router.replace(nextUrl, { scroll: false });
+	};
 
 	const aboutContent =
 		selectedTab === 'about' ? (
@@ -83,18 +91,6 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 			content: feedbackContent,
 		},
 	];
-
-	const handleTabChange = (next: ProductTabValue) => {
-		const params = new URLSearchParams(searchParams?.toString());
-		if (next === 'about') {
-			params.delete('tab');
-		} else {
-			params.set('tab', next);
-		}
-		const query = params.toString();
-		const nextUrl = query ? `${pathname}?${query}` : pathname;
-		router.replace(nextUrl, { scroll: false });
-	};
 
 	return (
 		<Tabs.Root

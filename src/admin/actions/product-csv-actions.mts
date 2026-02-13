@@ -2,6 +2,7 @@ import type { ActionHandler, ActionResponse } from 'adminjs';
 import { Prisma, type ProductCurrency, type ProductStatus } from '@prisma/client';
 import { prisma } from '../prisma.mts';
 import { logInventoryAdjustment, resolveInventoryAdminEmail, resolveInventoryReason } from './inventory-adjustment-actions.mts';
+import { buildCsvFromRows } from '../utils/csv.mts';
 
 type CsvRowResult = {
 	row: number;
@@ -82,12 +83,6 @@ const parseTags = (value: string | undefined) => {
 		)
 	);
 };
-
-const buildCsv = (rows: string[][]) => rows.map((row) => row.map((cell) => {
-	const needsQuotes = /[",\n\r]/.test(cell);
-	const escaped = cell.replace(/"/g, '""');
-	return needsQuotes ? `"${escaped}"` : escaped;
-}).join(',')).join('\n');
 
 const PRODUCT_HEADERS = [
 	'id',
@@ -170,7 +165,7 @@ export const exportProductsCsv: ActionHandler<ActionResponse> = async (_req, _re
 
 	return {
 		payload: {
-			csv: buildCsv(rows),
+			csv: buildCsvFromRows(rows),
 			filename: `products-${new Date().toISOString().slice(0, 10)}.csv`,
 		},
 	};

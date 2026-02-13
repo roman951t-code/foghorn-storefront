@@ -12,6 +12,7 @@ import { CategoryParams } from '@/types/routing';
 import { ensureParams } from '@/utils/validateParams';
 import { categoryParamsSchema } from 'validationSchemas/productParamsSchemas';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
+import { headers } from 'next/headers';
 
 export async function generateMetadata({ params }: CategoryParams): Promise<Metadata> {
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
@@ -65,6 +66,8 @@ export async function generateMetadata({ params }: CategoryParams): Promise<Meta
 
 export default async function CategoryPage({ params }: CategoryParams) {
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
+	const headersList = await headers();
+	const cspNonce = headersList.get('x-csp-nonce') ?? undefined;
 	const categoryDataResponse = await getCategoryData(locale);
 
 	const category = categoryDataResponse.categoryData.find((cat) => cat.slug === categorySlug);
@@ -90,11 +93,11 @@ export default async function CategoryPage({ params }: CategoryParams) {
 		],
 	};
 
-	return (
-		<>
-			<Script id='category-breadcrumbs-schema' type='application/ld+json'>
-				{JSON.stringify(breadcrumbsJsonLd)}
-			</Script>
+		return (
+			<>
+				<Script id='category-breadcrumbs-schema' nonce={cspNonce} type='application/ld+json'>
+					{JSON.stringify(breadcrumbsJsonLd)}
+				</Script>
 			<Stack mx={{ base: '12px', '2xl': 0 }} gap={16} direction='column'>
 				<Breadcrumbs categoryName={category?.name} categorySlug={category?.slug} />
 

@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { SubcategoryProduct } from '@/types/product';
 import { WISHLIST_TAG_PRIORITY } from '@/constants/products';
 import { jsonNoStore } from '@/lib/response';
+import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 export async function GET() {
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -14,8 +15,12 @@ export async function GET() {
 	}
 
 	try {
+		const now = new Date();
 		const wishlist = await prisma.wishlist.findMany({
-			where: { userId: session.user.id },
+			where: {
+				userId: session.user.id,
+				product: getPublishedProductWhere(now),
+			},
 			include: {
 				product: {
 					select: {

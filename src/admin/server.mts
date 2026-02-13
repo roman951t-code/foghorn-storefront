@@ -1,6 +1,9 @@
 import 'dotenv/config';
+import crypto from 'node:crypto';
 import express from 'express';
+import session from 'express-session';
 import admin from './admin.mts';
+import { createAdminSessionStore } from './pg-session-store.mts';
 
 const adminEmail = process.env.ADMINJS_EMAIL;
 const adminPassword = process.env.ADMINJS_PASSWORD;
@@ -12,18 +15,160 @@ const readonlyPassword =
 	process.env.ADMINJS_READONLY_PASSWORD ?? (nodeEnv !== 'production' ? 'test' : undefined);
 const sessionSecret = process.env.ADMINJS_SESSION_SECRET;
 const cookiePassword = process.env.ADMINJS_COOKIE_PASSWORD ?? sessionSecret;
+const databaseUrl = process.env.DATABASE_URL;
+const parsePositiveInt = (value: string | undefined, fallback: number) => {
+	const parsed = Number.parseInt(value ?? '', 10);
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+const sessionTtlSeconds = parsePositiveInt(process.env.ADMINJS_SESSION_TTL_SECONDS, 60 * 60 * 24);
+const sessionCleanupIntervalSeconds = parsePositiveInt(
+	process.env.ADMINJS_SESSION_CLEANUP_INTERVAL_SECONDS,
+	60 * 15
+);
+const sessionTable = process.env.ADMINJS_SESSION_TABLE ?? 'admin_session';
+const loginMaxRetries = parsePositiveInt(process.env.ADMINJS_LOGIN_MAX_RETRIES, 8);
+const loginRetryWindowSeconds = parsePositiveInt(
+	process.env.ADMINJS_LOGIN_RETRY_WINDOW_SECONDS,
+	60 * 10
+);
+const adminThumbRateLimitPerMinute = parsePositiveInt(
+	process.env.ADMIN_THUMBNAIL_RATE_LIMIT_PER_MINUTE,
+	90
+);
+const allowedAdminIps = new Set(
+	(process.env.ADMINJS_ALLOWED_IPS ?? '')
+		.split(',')
+		.map((value) => value.trim())
+		.filter(Boolean)
+);
 
-if (!adminEmail || !adminPassword || !sessionSecret || !cookiePassword) {
+type AdminThumbRateState = {
+	count: number;
+	resetAt: number;
+};
+const adminThumbRateBuckets = new Map<string, AdminThumbRateState>();
+const ADMIN_THUMB_RATE_LIMIT_WINDOW_MS = 60_000;
+const ADMIN_THUMB_BUCKET_CLEANUP_INTERVAL_MS = 60_000;
+const ADMIN_THUMB_MAX_FALLBACK_BUCKETS = 8_000;
+let adminThumbCleanupTimer: ReturnType<typeof setInterval> | null = null;
+
+const pruneExpiredAdminThumbBuckets = (now = Date.now()) => {
+	for (const [bucketKey, state] of adminThumbRateBuckets) {
+		if (now >= state.resetAt) {
+			adminThumbRateBuckets.delete(bucketKey);
+		}
+	}
+};
+
+const trimOldestAdminThumbBuckets = (maxEntries: number) => {
+	if (adminThumbRateBuckets.size <= maxEntries) return;
+	const overflow = adminThumbRateBuckets.size - maxEntries;
+	for (let i = 0; i < overflow; i += 1) {
+		const oldestKey = adminThumbRateBuckets.keys().next().value as string | undefined;
+		if (!oldestKey) break;
+		adminThumbRateBuckets.delete(oldestKey);
+	}
+};
+
+const ensureAdminThumbCleanupLoop = () => {
+	if (adminThumbCleanupTimer) return;
+	adminThumbCleanupTimer = setInterval(() => {
+		pruneExpiredAdminThumbBuckets();
+		trimOldestAdminThumbBuckets(ADMIN_THUMB_MAX_FALLBACK_BUCKETS);
+	}, ADMIN_THUMB_BUCKET_CLEANUP_INTERVAL_MS);
+	(adminThumbCleanupTimer as { unref?: () => void }).unref?.();
+};
+
+const normalizeIp = (value: string) => {
+	const trimmed = value.trim();
+	return trimmed.startsWith('::ffff:') ? trimmed.slice(7) : trimmed;
+};
+
+const isAllowedAdminIp = (value: string) => {
+	if (allowedAdminIps.size === 0) return true;
+	const normalized = normalizeIp(value);
+	return allowedAdminIps.has(value) || allowedAdminIps.has(normalized);
+};
+
+const safeEqual = (left: string | undefined, right: string | undefined) => {
+	if (!left || !right) return false;
+	const leftBuffer = Buffer.from(left, 'utf8');
+	const rightBuffer = Buffer.from(right, 'utf8');
+	if (leftBuffer.length !== rightBuffer.length) return false;
+	return crypto.timingSafeEqual(leftBuffer, rightBuffer);
+};
+
+const checkAdminThumbRateLimit = (key: string) => {
+	const now = Date.now();
+	pruneExpiredAdminThumbBuckets(now);
+	trimOldestAdminThumbBuckets(ADMIN_THUMB_MAX_FALLBACK_BUCKETS);
+	const existing = adminThumbRateBuckets.get(key);
+	if (!existing || now >= existing.resetAt) {
+		adminThumbRateBuckets.set(key, {
+			count: 1,
+			resetAt: now + ADMIN_THUMB_RATE_LIMIT_WINDOW_MS,
+		});
+		return { allowed: true as const };
+	}
+	if (existing.count >= adminThumbRateLimitPerMinute) {
+		return {
+			allowed: false as const,
+			retryAfterSeconds: Math.max(1, Math.ceil((existing.resetAt - now) / 1000)),
+		};
+	}
+	existing.count += 1;
+	return { allowed: true as const };
+};
+
+const fallbackAdminSecurityHeaders: express.RequestHandler = (_req, res, next) => {
+	res.setHeader('X-Content-Type-Options', 'nosniff');
+	res.setHeader('X-Frame-Options', 'DENY');
+	res.setHeader('Referrer-Policy', 'no-referrer');
+	res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+	res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+	res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+	if (nodeEnv === 'production') {
+		res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+	}
+	next();
+};
+
+const createAdminSecurityMiddleware = async (): Promise<express.RequestHandler> => {
+	try {
+		const helmetModuleName = 'helmet';
+		const helmet = (await import(helmetModuleName)).default as (
+			options?: Record<string, unknown>
+		) => express.RequestHandler;
+
+		return helmet({
+			contentSecurityPolicy: false,
+			crossOriginEmbedderPolicy: false,
+			referrerPolicy: { policy: 'no-referrer' },
+			hsts:
+				nodeEnv === 'production'
+					? { maxAge: 31536000, includeSubDomains: true, preload: false }
+					: false,
+		});
+	} catch {
+		console.warn('Helmet package not found; using fallback admin security headers middleware.');
+		return fallbackAdminSecurityHeaders;
+	}
+};
+
+if (!adminEmail || !adminPassword || !sessionSecret || !cookiePassword || !databaseUrl) {
 	throw new Error(
-		'Missing ADMINJS_EMAIL, ADMINJS_PASSWORD, or ADMINJS_SESSION_SECRET in environment',
+		'Missing ADMINJS_EMAIL, ADMINJS_PASSWORD, ADMINJS_SESSION_SECRET, or DATABASE_URL in environment',
 	);
 }
 
 const authenticate = async (email: string, password: string) => {
-	if (email === adminEmail && password === adminPassword) {
+	if (safeEqual(email, adminEmail) && safeEqual(password, adminPassword)) {
 		return { email, role: 'admin' };
 	}
-	if (readonlyEmail && readonlyPassword && email === readonlyEmail && password === readonlyPassword) {
+	if (
+		safeEqual(email, readonlyEmail) &&
+		safeEqual(password, readonlyPassword)
+	) {
 		return { email, role: 'readonly' };
 	}
 	return null;
@@ -34,6 +179,37 @@ const start = async () => {
 		await admin.watch();
 	}
 	const { default: AdminJSExpress } = await import('@adminjs/express');
+	const app = express();
+	app.disable('x-powered-by');
+	app.use(await createAdminSecurityMiddleware());
+	if (nodeEnv === 'production') {
+		// Required when secure cookies are used behind TLS-terminating proxies.
+		app.set('trust proxy', 1);
+	}
+	ensureAdminThumbCleanupLoop();
+	const sessionStore = createAdminSessionStore({
+		connectionString: databaseUrl,
+		tableName: sessionTable,
+		defaultTtlSeconds: sessionTtlSeconds,
+		cleanupIntervalSeconds: sessionCleanupIntervalSeconds,
+	});
+	const adminSessionOptions = {
+		resave: false,
+		saveUninitialized: false,
+		secret: cookiePassword,
+		store: sessionStore,
+		proxy: nodeEnv === 'production',
+		cookie: {
+			httpOnly: true,
+			secure: nodeEnv === 'production',
+			sameSite: 'strict' as const,
+			maxAge: sessionTtlSeconds * 1000,
+		},
+	};
+	const adminSessionMiddleware = session({
+		...adminSessionOptions,
+		name: 'adminjs',
+	});
 
 	const router = AdminJSExpress.buildAuthenticatedRouter(
 		admin,
@@ -41,21 +217,15 @@ const start = async () => {
 			authenticate,
 			cookieName: 'adminjs',
 			cookiePassword,
-		},
-		undefined,
-		{
-			resave: false,
-			saveUninitialized: false,
-			secret: sessionSecret,
-			cookie: {
-				httpOnly: true,
-				secure: nodeEnv === 'production',
-				sameSite: 'lax',
+			maxRetries: {
+				count: loginMaxRetries,
+				duration: loginRetryWindowSeconds,
 			},
 		},
+		undefined,
+		adminSessionOptions,
 	);
 
-	const app = express();
 	app.use(express.static('public'));
 
 	const storeAppUrl =
@@ -76,7 +246,28 @@ const start = async () => {
 	);
 	const allowAnyThumbHost = nodeEnv !== 'production' && process.env.ADMIN_THUMBNAIL_ALLOW_ANY_HOST === 'true';
 
+	app.use('/admin-thumb', adminSessionMiddleware);
 	app.get('/admin-thumb', async (req, res) => {
+		const requesterIp = typeof req.ip === 'string' ? req.ip : '';
+		if (allowedAdminIps.size > 0 && (!requesterIp || !isAllowedAdminIp(requesterIp))) {
+			res.status(403).send('Forbidden');
+			return;
+		}
+
+		const currentAdmin = (req.session as any)?.adminUser as { email?: string } | undefined;
+		if (!currentAdmin?.email) {
+			res.status(401).send('Unauthorized');
+			return;
+		}
+
+		const rateKey = normalizeIp(requesterIp || 'unknown');
+		const thumbRate = checkAdminThumbRateLimit(rateKey);
+		if (!thumbRate.allowed) {
+			res.setHeader('Retry-After', String(thumbRate.retryAfterSeconds));
+			res.status(429).send('Too Many Requests');
+			return;
+		}
+
 		const urlParam = typeof req.query.url === 'string' ? req.query.url : '';
 		const widthParam = typeof req.query.w === 'string' ? req.query.w : '';
 		const qualityParam = typeof req.query.q === 'string' ? req.query.q : '';
@@ -181,6 +372,17 @@ const start = async () => {
 	});
 
 	const gatedRouter = express.Router();
+	if (allowedAdminIps.size > 0) {
+		gatedRouter.use((req, res, next) => {
+			const ip = typeof req.ip === 'string' ? req.ip : '';
+			if (!ip || !isAllowedAdminIp(ip)) {
+				res.status(403).send('Forbidden');
+				return;
+			}
+			next();
+		});
+	}
+
 	gatedRouter.use((req, res, next) => {
 		const currentAdmin = (req.session as any)?.adminUser as { role?: string } | undefined;
 		const isReadonly = currentAdmin?.role === 'readonly';

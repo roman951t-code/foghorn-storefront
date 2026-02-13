@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
+import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
@@ -13,33 +14,152 @@ import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import type Stripe from 'stripe';
 import { getCouponDiscountPreview } from '@/lib/coupons';
+import { recordApi5xxEvent } from '@/lib/opsMonitoring';
 import {
 	getMissingRequiredShippingAddressFields,
 	normalizeShippingAddress,
 	SHIPPING_ADDRESS_FIELD_LIMITS,
 } from '@/utils/shippingAddress';
+import { asErrorDetails, resolveSafeRedirectUrl } from './route-utils';
 
 type LineItemPayload = { productId: string; variantId: string | null; quantity: number };
 
 const currency = STORE_CURRENCY_CODE_LOWER;
+const STRIPE_COUPON_ID_PREFIX = 'appc_';
 
-function resolveSafeRedirectUrl(
-	value: unknown,
-	{ origin, fallbackPath }: { origin: string; fallbackPath: string }
-): string {
-	const fallback = new URL(fallbackPath, origin).toString();
-	if (typeof value !== 'string') return fallback;
+const toStripeCouponId = ({
+	couponId,
+	discountType,
+	discountValue,
+	currencyCode,
+	revision,
+}: {
+	couponId: string;
+	discountType: 'PERCENT' | 'FIXED';
+	discountValue: number;
+	currencyCode: string;
+	revision: number;
+}) => {
+	const key = [
+		couponId.trim(),
+		discountType,
+		discountValue.toFixed(2),
+		currencyCode.toLowerCase(),
+		String(revision),
+	].join('|');
+	const digest = createHash('sha256').update(key).digest('hex').slice(0, 24);
+	return `${STRIPE_COUPON_ID_PREFIX}${digest}`;
+};
 
-	const candidate = value.trim();
-	if (!candidate) return fallback;
-	if (candidate.length > 2048) return fallback;
+const isStripeResourceMissing = (error: unknown) =>
+	typeof error === 'object' &&
+	error !== null &&
+	((error as { statusCode?: unknown }).statusCode === 404 ||
+		(error as { code?: unknown }).code === 'resource_missing');
 
-	try {
-		const url = new URL(candidate, origin);
-		return url.origin === origin ? url.toString() : fallback;
-	} catch {
-		return fallback;
+const isStripeResourceAlreadyExists = (error: unknown) =>
+	typeof error === 'object' &&
+	error !== null &&
+	((error as { code?: unknown }).code === 'resource_already_exists' ||
+		(error as { code?: unknown }).code === 'id_already_exists');
+
+const isDeletedStripeCoupon = (coupon: Stripe.Coupon | Stripe.DeletedCoupon): coupon is Stripe.DeletedCoupon =>
+	'deleted' in coupon && coupon.deleted === true;
+
+const buildReusableStripeCouponCreateParams = ({
+	stripeCouponId,
+	discountType,
+	discountValue,
+	name,
+	couponCode,
+	couponId,
+	promotionId,
+}: {
+	stripeCouponId: string;
+	discountType: 'PERCENT' | 'FIXED';
+	discountValue: number;
+	name: string;
+	couponCode: string;
+	couponId: string;
+	promotionId: string;
+}): Stripe.CouponCreateParams => {
+	const metadata = {
+		appCouponCode: couponCode,
+		appCouponId: couponId,
+		appPromotionId: promotionId,
+	};
+
+	if (discountType === 'PERCENT') {
+		const percentOff = Math.max(0.01, Math.min(100, Math.round(discountValue * 100) / 100));
+		return {
+			id: stripeCouponId,
+			duration: 'once',
+			percent_off: percentOff,
+			name,
+			metadata,
+		};
 	}
+
+	const amountOff = Math.max(1, Math.round(discountValue * 100));
+	return {
+		id: stripeCouponId,
+		duration: 'once',
+		amount_off: amountOff,
+		currency,
+		name,
+		metadata,
+	};
+};
+
+async function getOrCreateReusableStripeCouponId({
+	preview,
+}: {
+	preview: {
+		code: string;
+		label: string;
+		couponId: string;
+		promotionId: string;
+		discountType: 'PERCENT' | 'FIXED';
+		discountValue: number;
+	};
+}) {
+	for (let revision = 0; revision < 2; revision += 1) {
+		const stripeCouponId = toStripeCouponId({
+			couponId: preview.couponId,
+			discountType: preview.discountType,
+			discountValue: preview.discountValue,
+			currencyCode: currency,
+			revision,
+		});
+
+		try {
+			const existing = await stripe!.coupons.retrieve(stripeCouponId);
+			if (!isDeletedStripeCoupon(existing)) return existing.id;
+		} catch (error) {
+			if (!isStripeResourceMissing(error)) throw error;
+		}
+
+		try {
+			const created = await stripe!.coupons.create(
+				buildReusableStripeCouponCreateParams({
+					stripeCouponId,
+					discountType: preview.discountType,
+					discountValue: preview.discountValue,
+					name: (preview.label || preview.code).slice(0, 40),
+					couponCode: preview.code,
+					couponId: preview.couponId,
+					promotionId: preview.promotionId,
+				})
+			);
+			return created.id;
+		} catch (error) {
+			if (!isStripeResourceAlreadyExists(error)) throw error;
+			const existing = await stripe!.coupons.retrieve(stripeCouponId);
+			if (!isDeletedStripeCoupon(existing)) return existing.id;
+		}
+	}
+
+	throw new Error('stripe_coupon_unavailable');
 }
 
 export async function POST(req: NextRequest) {
@@ -75,6 +195,11 @@ export async function POST(req: NextRequest) {
 
 	try {
 		if (!stripe) {
+			recordApi5xxEvent({
+				route: '/api/payments/stripe',
+				statusCode: 500,
+				error: 'stripe_not_configured',
+			});
 			return NextResponse.json({ error: 'stripe_not_configured' }, { status: 500 });
 		}
 
@@ -258,6 +383,8 @@ export async function POST(req: NextRequest) {
 		let resolvedCouponCode: string | null = null;
 		let resolvedCouponAmount: number | null = null;
 		let stripeCouponId: string | null = null;
+		let resolvedCouponId: string | null = null;
+		let resolvedPromotionId: string | null = null;
 		if (rawCouponCode) {
 			const subtotal = lineItems.reduce((sum, li) => {
 				const unit = li.price_data?.unit_amount ?? 0;
@@ -275,21 +402,21 @@ export async function POST(req: NextRequest) {
 				return NextResponse.json({ error: 'discount_too_large' }, { status: 400 });
 			}
 
-			const stripeCoupon = await stripe.coupons.create({
-				duration: 'once',
-				amount_off: discountCents,
-				currency,
-				name: (previewRes.preview.label || previewRes.preview.code).slice(0, 40),
-				metadata: {
-					appCouponCode: previewRes.preview.code,
-					appCouponId: previewRes.preview.couponId,
-					appPromotionId: previewRes.preview.promotionId,
+			stripeCouponId = await getOrCreateReusableStripeCouponId({
+				preview: {
+					code: previewRes.preview.code,
+					label: previewRes.preview.label,
+					couponId: previewRes.preview.couponId,
+					promotionId: previewRes.preview.promotionId,
+					discountType: previewRes.preview.discountType,
+					discountValue: previewRes.preview.discountValue,
 				},
 			});
 
 			resolvedCouponCode = previewRes.preview.code;
 			resolvedCouponAmount = previewRes.preview.amount;
-			stripeCouponId = stripeCoupon.id;
+			resolvedCouponId = previewRes.preview.couponId;
+			resolvedPromotionId = previewRes.preview.promotionId;
 		}
 
 		const successUrl = resolveSafeRedirectUrl(parsed.data.successUrl, {
@@ -308,6 +435,8 @@ export async function POST(req: NextRequest) {
 		};
 		if (resolvedCouponCode) metadata.couponCode = resolvedCouponCode;
 		if (resolvedCouponAmount != null) metadata.couponAmount = resolvedCouponAmount.toFixed(2);
+		if (resolvedCouponId) metadata.couponId = resolvedCouponId;
+		if (resolvedPromotionId) metadata.promotionId = resolvedPromotionId;
 		if (shipmentMethod) metadata.shipmentMethod = shipmentMethod;
 		if (shippingAddress.fullAddress) metadata.shippingAddress = shippingAddress.fullAddress;
 		if (shippingAddress.country) metadata.shippingCountry = shippingAddress.country;
@@ -330,28 +459,27 @@ export async function POST(req: NextRequest) {
 		});
 
 		return NextResponse.json({ sessionId: checkoutSession.id, url: checkoutSession.url });
-	} catch (error) {
-		console.error('Stripe session failed', error);
+		} catch (error) {
+			console.error('Stripe session failed', error);
+			const errorDetails = asErrorDetails(error);
 
-		const status =
-			typeof (error as any)?.statusCode === 'number'
-				? (error as any).statusCode
-				: 500;
-		const errorCode =
-			typeof (error as any)?.code === 'string'
-				? (error as any).code
-				: 'stripe_session_failed';
-
-		const message =
-			typeof (error as any)?.message === 'string'
-				? (error as any).message
-				: undefined;
+			const status = errorDetails.statusCode ?? 500;
+			const errorCode = errorDetails.code ?? 'stripe_session_failed';
+			const message = errorDetails.message;
+			const finalStatus = status >= 400 && status < 600 ? status : 500;
+			if (finalStatus >= 500) {
+			recordApi5xxEvent({
+				route: '/api/payments/stripe',
+				statusCode: finalStatus,
+				error: message ?? errorCode,
+			});
+		}
 
 		return NextResponse.json(
 			env.NODE_ENV === 'development'
 				? { error: errorCode, message }
 				: { error: errorCode },
-			{ status: status >= 400 && status < 600 ? status : 500 }
+			{ status: finalStatus }
 		);
 	}
 }

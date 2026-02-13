@@ -9,8 +9,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createPhoneVerifySchema, PhoneVerifySchema } from 'validationSchemas/phoneVerifySchema';
 import { authClient } from '@/lib/auth-client';
 import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
-import { showToaster } from '@/utils/toast';
-import { toasterMessages } from '@/data/toasterMessages';
 import { buildPhoneVerificationErrorMap } from '@/constants/auth';
 
 interface Props {
@@ -54,14 +52,16 @@ export default function PhoneUpdate({
 	}, [timer]);
 
 	const resendVerificationCode = async () => {
-		setTimer(120);
+		setVerifyError('');
 
 		try {
 			const result = await sendVerifyPhoneAction(null, { phone });
 
 			if (!result?.success) {
-				setVerifyError(result?.message!);
+				setVerifyError(result?.message || i18nData.invalidFormData);
+				return;
 			}
+			setTimer(120);
 		} catch (err) {
 			setVerifyError(i18nData.invalidFormData);
 		}
@@ -72,26 +72,25 @@ export default function PhoneUpdate({
 
 		try {
 			const { error } = await authClient.phoneNumber.verify({
-				phoneNumber: phone,
+				phoneNumber: phone.replace(/\D/g, ''),
 				code: formData.otp.join(''),
 				disableSession: true,
 				updatePhoneNumber: true,
 			});
 
-			if (error) {
-				const messageKey = error?.message ?? '';
-				const message =
-					(messageKey && messageKey in errorMap
-						? errorMap[messageKey as keyof typeof errorMap]
-						: null) || i18nData.userRegisterFail;
-				setVerifyError(message);
-				return;
-			} else {
-				showToaster('success', toasterMessages.phoneUpdated(i18nData));
-				onCloseAction();
+				if (error) {
+					const messageKey = error?.message ?? '';
+					const message =
+						(messageKey && messageKey in errorMap
+							? errorMap[messageKey as keyof typeof errorMap]
+							: null) || i18nData.userRegisterFail;
+					setVerifyError(message);
+					return;
+				} else {
+					onCloseAction();
 
-				await refreshSessionAction();
-			}
+					await refreshSessionAction();
+				}
 		} catch (err) {
 			setVerifyError(i18nData.invalidFormData);
 		}

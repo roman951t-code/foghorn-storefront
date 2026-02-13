@@ -41,6 +41,8 @@ export type CouponDiscountPreview = {
 	amount: number;
 	couponId: string;
 	promotionId: string;
+	discountType: DiscountType;
+	discountValue: number;
 };
 
 export type CouponValidationError =
@@ -118,8 +120,9 @@ export async function getCouponDiscountPreview(
 			amount,
 			couponId: coupon.id,
 			promotionId: promo.id,
+			discountType: promo.discountType,
+			discountValue,
 		},
 		maxRedemptions: coupon.maxRedemptions ?? null,
 	};
 }
-

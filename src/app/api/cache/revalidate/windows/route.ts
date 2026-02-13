@@ -1,0 +1,266 @@
+import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
+import { prisma } from '@/lib/prisma';
+import { env } from '@/config/env';
+import {
+	PRODUCT_CATALOG_CACHE_TAG,
+	PRODUCT_CATEGORY_CACHE_TAG,
+	PRODUCT_DETAIL_CACHE_TAG,
+	PRODUCT_FILTERS_CACHE_TAG,
+	PRODUCT_LIST_CACHE_TAG,
+	productCacheTagById,
+} from '@/constants/products';
+
+const DEFAULT_LOOKBACK_SECONDS = 180;
+const MAX_LOOKBACK_SECONDS = 3600;
+const DEFAULT_LIMIT = 500;
+const MAX_LIMIT = 2000;
+const MAX_ALERT_BODY_LENGTH = 1000;
+const REVALIDATE_SECRET_PATTERN = /^[A-Za-z0-9._~-]{24,256}$/;
+
+const parseIntegerInRange = (
+	raw: string | null,
+	defaultValue: number,
+	minValue: number,
+	maxValue: number
+) => {
+	if (!raw) return defaultValue;
+	const parsed = Number.parseInt(raw, 10);
+	if (!Number.isFinite(parsed)) return defaultValue;
+	return Math.min(maxValue, Math.max(minValue, parsed));
+};
+
+const truncate = (value: string, limit: number) =>
+	value.length > limit ? `${value.slice(0, Math.max(0, limit - 3))}...` : value;
+
+const toErrorMessage = (error: unknown) => {
+	if (error instanceof Error) return error.message;
+	return String(error);
+};
+
+const normalizeSecret = (value: string | null) => {
+	if (!value) return null;
+	const trimmed = value.trim();
+	return trimmed.length > 0 ? trimmed : null;
+};
+
+const resolveProvidedRevalidateSecret = (req: Request) => {
+	const fromHeader = normalizeSecret(req.headers.get('x-revalidate-secret'));
+	if (fromHeader) return fromHeader;
+
+	const authorization = normalizeSecret(req.headers.get('authorization'));
+	if (!authorization) return null;
+	const match = authorization.match(/^Bearer\s+(.+)$/i);
+	if (!match) return null;
+	return normalizeSecret(match[1] ?? null);
+};
+
+const resolveExpectedRevalidateSecrets = () =>
+	Array.from(
+		new Set(
+			[env.CACHE_REVALIDATE_SECRET, env.CRON_SECRET]
+				.map((value) => normalizeSecret(value ?? null))
+				.filter((value): value is string => Boolean(value))
+		)
+	);
+
+const logWindowEvent = (
+	level: 'info' | 'warn' | 'error',
+	event: string,
+	payload: Record<string, unknown>
+) => {
+	const entry = {
+		source: 'api-cache-revalidate-windows',
+		event,
+		level,
+		timestamp: new Date().toISOString(),
+		...payload,
+	};
+	if (level === 'error') {
+		console.error(entry);
+		return;
+	}
+	if (level === 'warn') {
+		console.warn(entry);
+		return;
+	}
+	console.info(entry);
+};
+
+const sendWindowAlert = async (event: string, payload: Record<string, unknown>) => {
+	if (!env.CACHE_REVALIDATE_ALERT_WEBHOOK_URL) return;
+	try {
+		const response = await fetch(env.CACHE_REVALIDATE_ALERT_WEBHOOK_URL, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({
+				source: 'api-cache-revalidate-windows',
+				event,
+				severity: 'error',
+				timestamp: new Date().toISOString(),
+				payload,
+			}),
+		});
+		if (!response.ok) {
+			const body = await response.text().catch(() => '');
+			logWindowEvent('warn', 'alert-webhook-non-ok', {
+				status: response.status,
+				body: truncate(body, MAX_ALERT_BODY_LENGTH),
+			});
+		}
+	} catch (error) {
+		logWindowEvent('warn', 'alert-webhook-failed', {
+			error: toErrorMessage(error),
+		});
+	}
+};
+
+const isBoundaryWithinWindow = (dateValue: Date | null, from: Date, to: Date) => {
+	if (!dateValue) return false;
+	const ts = dateValue.getTime();
+	return ts > from.getTime() && ts <= to.getTime();
+};
+
+const handleWindowRevalidation = async (req: Request) => {
+	const startedAt = Date.now();
+	const requestId = crypto.randomUUID();
+
+	const expectedSecrets = resolveExpectedRevalidateSecrets();
+	if (expectedSecrets.length === 0) {
+		logWindowEvent('error', 'revalidate-not-configured', { requestId });
+		return NextResponse.json({ error: 'cache-revalidate-not-configured' }, { status: 503 });
+	}
+
+	const providedSecret = resolveProvidedRevalidateSecret(req);
+	const hasValidSecretFormat =
+		typeof providedSecret === 'string' && REVALIDATE_SECRET_PATTERN.test(providedSecret);
+	if (!hasValidSecretFormat || !expectedSecrets.includes(providedSecret)) {
+		logWindowEvent('warn', 'revalidate-unauthorized', { requestId });
+		return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+	}
+
+	const url = new URL(req.url);
+	const lookbackSeconds = parseIntegerInRange(
+		url.searchParams.get('lookbackSeconds'),
+		DEFAULT_LOOKBACK_SECONDS,
+		30,
+		MAX_LOOKBACK_SECONDS
+	);
+	const limit = parseIntegerInRange(url.searchParams.get('limit'), DEFAULT_LIMIT, 1, MAX_LIMIT);
+	const dryRun = url.searchParams.get('dryRun') === 'true';
+
+	const now = new Date();
+	const from = new Date(now.getTime() - lookbackSeconds * 1000);
+
+	try {
+		const products = await prisma.product.findMany({
+			where: {
+				OR: [
+					{ discountStartAt: { gt: from, lte: now } },
+					{ discountEndAt: { gt: from, lte: now } },
+					{ publishStartAt: { gt: from, lte: now } },
+					{ publishEndAt: { gt: from, lte: now } },
+				],
+			},
+			select: {
+				id: true,
+				discountStartAt: true,
+				discountEndAt: true,
+				publishStartAt: true,
+				publishEndAt: true,
+				updatedAt: true,
+			},
+			orderBy: { updatedAt: 'desc' },
+			take: limit,
+		});
+
+		const boundarySummary = {
+			discountStart: products.filter((product) =>
+				isBoundaryWithinWindow(product.discountStartAt, from, now)
+			).length,
+			discountEnd: products.filter((product) =>
+				isBoundaryWithinWindow(product.discountEndAt, from, now)
+			).length,
+			publishStart: products.filter((product) =>
+				isBoundaryWithinWindow(product.publishStartAt, from, now)
+			).length,
+			publishEnd: products.filter((product) =>
+				isBoundaryWithinWindow(product.publishEndAt, from, now)
+			).length,
+		};
+
+		const productIds = products.map((product) => product.id);
+		const tags = Array.from(
+			new Set([
+				PRODUCT_LIST_CACHE_TAG,
+				PRODUCT_DETAIL_CACHE_TAG,
+				PRODUCT_CATEGORY_CACHE_TAG,
+				PRODUCT_FILTERS_CACHE_TAG,
+				PRODUCT_CATALOG_CACHE_TAG,
+				...productIds.map((productId) => productCacheTagById(productId)),
+			])
+		);
+
+		const isTruncated = products.length === limit;
+		if (isTruncated) {
+			const details = {
+				requestId,
+				limit,
+				lookbackSeconds,
+				productCount: products.length,
+				tagCount: tags.length,
+			};
+			logWindowEvent('warn', 'window-revalidation-truncated', details);
+			await sendWindowAlert('window-revalidation-truncated', details);
+		}
+
+		if (!dryRun && tags.length > 0) {
+			await Promise.all(tags.map((tag) => revalidateTag(tag, 'default')));
+		}
+
+		logWindowEvent('info', 'window-revalidation-success', {
+			requestId,
+			lookbackSeconds,
+			limit,
+			dryRun,
+			productCount: products.length,
+			tagCount: tags.length,
+			boundarySummary,
+			durationMs: Date.now() - startedAt,
+		});
+
+		return NextResponse.json({
+			ok: true,
+			requestId,
+			dryRun,
+			lookbackSeconds,
+			limit,
+			windowStart: from.toISOString(),
+			windowEnd: now.toISOString(),
+			productCount: products.length,
+			tagCount: tags.length,
+			truncated: isTruncated,
+			boundarySummary,
+			productIdsSample: productIds.slice(0, 100),
+		});
+	} catch (error) {
+		const details = {
+			requestId,
+			lookbackSeconds,
+			limit,
+			error: toErrorMessage(error),
+			durationMs: Date.now() - startedAt,
+		};
+		logWindowEvent('error', 'window-revalidation-failed', details);
+		await sendWindowAlert('window-revalidation-failed', details);
+		return NextResponse.json({ error: 'window-revalidation-failed', requestId }, { status: 500 });
+	}
+};
+
+export async function POST(req: Request) {
+	return handleWindowRevalidation(req);
+}
+
+export async function GET(req: Request) {
+	return handleWindowRevalidation(req);
+}

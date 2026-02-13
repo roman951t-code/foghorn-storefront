@@ -5,9 +5,10 @@ import 'server-only';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
 import { getPhoneSignUpSchema } from 'validationSchemas/phoneSignUpSchema';
-import { autoVerifyPhoneNumber } from './phoneVerificationHelper';
 import { headers } from 'next/headers';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { auth } from '@/lib/auth';
+import { getActionErrorMessageKey } from './authActionError';
 
 const PHONE_SIGN_UP_LIMIT_PER_PHONE = 6;
 const PHONE_SIGN_UP_LIMIT_PER_IP = 20;
@@ -25,7 +26,7 @@ export async function phoneSignUpAction(
 		return { success: false, message: validationT('invalidFormData') };
 	}
 
-	const { phone, name } = validated.data;
+	const { phone } = validated.data;
 	const rawPhone = phone.replace(/\D/g, '');
 	const requestHeaders = await headers();
 	const ip = getClientIp(requestHeaders);
@@ -48,31 +49,34 @@ export async function phoneSignUpAction(
 	}
 
 	try {
-		const verificationResult = await autoVerifyPhoneNumber({
-			phoneNumber: rawPhone,
-			disableSession: false,
-			updatePhoneNumber: false,
+		const existingUser = await prisma.user.findUnique({
+			where: { phoneNumber: rawPhone },
+			select: { id: true },
 		});
-
-		// Ensure the user's profile is up to date after auto-verification.
-		if (verificationResult?.user?.id) {
-			await prisma.user.update({
-				where: { id: verificationResult.user.id },
-				data: {
-					name,
-					notificationMethod: 'phone',
-					phoneNumberVerified: true,
-				},
-			});
+		if (existingUser) {
+			return { success: false, message: validationT('userExists') };
 		}
 
+		await prisma.verification.deleteMany({
+			where: {
+				identifier: rawPhone,
+			},
+		});
+
+		await auth.api.sendPhoneNumberOTP({
+			body: {
+				phoneNumber: rawPhone,
+			},
+		});
+
 		return { success: true };
-	} catch (error: any) {
-		const messageKey = error?.body?.message ?? error?.message ?? '';
+	} catch (error: unknown) {
+		const messageKey = getActionErrorMessageKey(error);
 		const errorMap: Record<string, string> = {
-			'Phone number already exists': validationT('userRegisterFail'),
+			'Phone number already exists': validationT('userExists'),
 			'Too many requests': validationT('tooManyRequests'),
-			'OTP not found': validationT('userRegisterFail'),
+			phone_otp_provider_not_configured: validationT('smsSendFailed'),
+			'Unknown error': validationT('smsSendFailed'),
 		};
 
 		return {

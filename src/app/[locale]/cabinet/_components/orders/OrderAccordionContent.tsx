@@ -15,6 +15,7 @@ import Image from 'next/image';
 import type { UserOrder } from '@/types/order';
 import { useRouter } from 'next/navigation';
 import { deleteOrderAction } from '@/actions/deleteOrderAction';
+import { isCustomerOrderCancellable, isCustomerOrderDeletable } from '@/utils/orderStatusPolicy';
 
 type Props = {
 	order: UserOrder;
@@ -28,8 +29,10 @@ export function OrderAccordionContent({ order }: Props) {
 	const [isRepeating, startRepeatTransition] = useTransition();
 	const [isDeleting, startDeleteTransition] = useTransition();
 	const router = useRouter();
-	const isPendingStatus = (order.status ?? '').toLowerCase() === 'pending';
-	const deleteLabel = isPendingStatus ? ordersT('cancelOrder') : ordersT('deleteOrder');
+	const canCancelOrder = isCustomerOrderCancellable(order.status);
+	const canDeleteOrder = isCustomerOrderDeletable(order.status);
+	const canMutateOrder = canCancelOrder || canDeleteOrder;
+	const deleteLabel = canCancelOrder ? ordersT('cancelOrder') : ordersT('deleteOrder');
 	const hasFulfillmentDetails = Boolean(order.carrier || order.trackingNumber);
 
 	const handleRepeatOrder = () => {
@@ -77,18 +80,24 @@ export function OrderAccordionContent({ order }: Props) {
 		<Accordion.ItemContent>
 			<Accordion.ItemBody p='0' pt='4' mt='2'>
 				<Flex
-					justifyContent={{ base: 'space-between', xs: 'space-between' } as any}
+					justifyContent={
+						(canMutateOrder
+							? { base: 'space-between', xs: 'space-between' }
+							: { base: 'flex-end', xs: 'flex-end' }) as any
+					}
 					alignItems='center'
 					gap='3'
 					flexWrap='wrap'
 					mb='4'
 				>
-					<SecondaryButton onClick={handleDeleteOrder} loading={isDeleting} disabled={isDeleting}>
-						{deleteLabel}
-					</SecondaryButton>
+					{canMutateOrder ? (
+						<SecondaryButton onClick={handleDeleteOrder} loading={isDeleting} disabled={isDeleting}>
+							{deleteLabel}
+						</SecondaryButton>
+					) : null}
 					<PrimaryButton onClick={handleRepeatOrder} loading={isRepeating}>
-						<BsArrowRepeat />
-						{productsT('repeatOrder')}
+							<BsArrowRepeat />
+							{productsT('repeatOrder')}
 					</PrimaryButton>
 				</Flex>
 

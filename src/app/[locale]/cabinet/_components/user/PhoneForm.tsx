@@ -7,10 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { PhoneSchemaData, type AccountSchemas } from 'validationSchemas/accountSchema';
 import { updatePhoneNumberAction } from '@/actions/auth/updatePhoneNumberAction';
 import { PHONE_INPUT_MASKS } from '@/constants/auth';
-import { showToaster } from '@/utils/toast';
-import { toasterMessages } from '@/data/toasterMessages';
 import { FIELD_ORIENTATION_MD } from '@/constants/forms';
 import { useMaskedInput } from '@/hooks/useMaskedInput';
+import PhoneUpdate from './PhoneUpdate';
 
 interface Props {
 	i18nData: I18nData;
@@ -21,6 +20,7 @@ interface Props {
 
 export default function PhoneForm({ i18nData, userPhone, schema, refreshSession }: Props) {
 	const [authError, setAuthError] = useState('');
+	const [pendingPhone, setPendingPhone] = useState<string | null>(null);
 	const phoneId = useId();
 
 	const {
@@ -46,12 +46,22 @@ export default function PhoneForm({ i18nData, userPhone, schema, refreshSession 
 				return;
 			}
 
-			showToaster('success', toasterMessages.phoneUpdated(i18nData));
-			await refreshSession();
+			setPendingPhone(formData.phone);
 		} catch {
 			setAuthError(i18nData.invalidFormData);
 		}
 	};
+
+	if (pendingPhone) {
+		return (
+			<PhoneUpdate
+				phone={pendingPhone}
+				i18nData={i18nData}
+				refreshSessionAction={refreshSession}
+				onCloseAction={() => setPendingPhone(null)}
+			/>
+		);
+	}
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>

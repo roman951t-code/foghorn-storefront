@@ -44,6 +44,12 @@ export default function OrderReturnAction({ action, record, resource }: ActionPr
 	const [refundAmount, setRefundAmount] = useState('');
 	const [refundReason, setRefundReason] = useState('');
 	const isReadOnly = useIsReadOnlyAdmin();
+	const total = useMemo(() => toNumber(record?.params?.total), [record?.params?.total]);
+	const existingRefund = useMemo(
+		() => toNumber(record?.params?.refundAmount),
+		[record?.params?.refundAmount]
+	);
+	const title = translateAction(action.name, resource.id);
 
 	if (!record) {
 		return (
@@ -52,10 +58,6 @@ export default function OrderReturnAction({ action, record, resource }: ActionPr
 			</Box>
 		);
 	}
-
-	const total = useMemo(() => toNumber(record.params.total), [record.params.total]);
-	const existingRefund = useMemo(() => toNumber(record.params.refundAmount), [record.params.refundAmount]);
-	const title = translateAction(action.name, resource.id);
 
 	const handleSubmit = async () => {
 		if (!record.id || loading) return;

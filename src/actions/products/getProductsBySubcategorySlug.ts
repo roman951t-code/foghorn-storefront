@@ -11,7 +11,110 @@ import { buildProductImages } from '@/utils/productImages';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
-import { PRODUCT_CATEGORY_CACHE_TAG, PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
+import { getMaxEffectiveProductPrice } from '@/utils/maxEffectiveProductPrice';
+import {
+	PRODUCT_CATEGORY_CACHE_TAG,
+	PRODUCT_LIST_CACHE_TAG,
+	productCacheTagById,
+} from '@/constants/products';
+import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
+
+const DEFAULT_TAG_PRIORITY = ['popular', 'new', 'discount', 'promotional'] as const;
+
+const buildTagPriorityBuckets = (): Prisma.ProductWhereInput[] => {
+	const hasTag = (tag: string): Prisma.ProductWhereInput => ({ tags: { has: tag } });
+	const [popularTag, newTag, discountTag, promotionalTag] = DEFAULT_TAG_PRIORITY;
+
+	return [
+		hasTag(popularTag),
+		{ AND: [hasTag(newTag), { NOT: hasTag(popularTag) }] },
+		{
+			AND: [
+				hasTag(discountTag),
+				{
+					NOT: {
+						OR: [hasTag(popularTag), hasTag(newTag)],
+					},
+				},
+			],
+		},
+		{
+			AND: [
+				hasTag(promotionalTag),
+				{
+					NOT: {
+						OR: [hasTag(popularTag), hasTag(newTag), hasTag(discountTag)],
+					},
+				},
+			],
+		},
+		{
+			NOT: {
+				OR: DEFAULT_TAG_PRIORITY.map((tag) => hasTag(tag)),
+			},
+		},
+	];
+};
+
+async function getDefaultSortedProductPageIds({
+	whereClause,
+	limit,
+	offset,
+}: {
+	whereClause: Prisma.ProductWhereInput;
+	limit: number;
+	offset: number;
+}): Promise<string[]> {
+	if (limit <= 0) return [];
+
+	const priorityBuckets = buildTagPriorityBuckets();
+	const bucketCounts = await Promise.all(
+		priorityBuckets.map((bucketWhere) =>
+			prisma.product.count({
+				where: {
+					AND: [whereClause, bucketWhere],
+				},
+			})
+		)
+	);
+
+	let remainingOffset = offset;
+	let remainingTake = limit;
+	const pageIds: string[] = [];
+
+	for (let bucketIndex = 0; bucketIndex < priorityBuckets.length && remainingTake > 0; bucketIndex += 1) {
+		const bucketCount = bucketCounts[bucketIndex] ?? 0;
+		if (bucketCount <= 0) continue;
+
+		if (remainingOffset >= bucketCount) {
+			remainingOffset -= bucketCount;
+			continue;
+		}
+
+		const skipInBucket = remainingOffset;
+		const takeInBucket = Math.min(remainingTake, bucketCount - skipInBucket);
+		if (takeInBucket <= 0) {
+			remainingOffset = 0;
+			continue;
+		}
+
+		const idsInBucket = await prisma.product.findMany({
+			where: {
+				AND: [whereClause, priorityBuckets[bucketIndex]],
+			},
+			orderBy: [{ inStock: 'desc' }, { name: 'asc' }],
+			skip: skipInBucket,
+			take: takeInBucket,
+			select: { id: true },
+		});
+
+		pageIds.push(...idsInBucket.map((product) => product.id));
+		remainingTake -= takeInBucket;
+		remainingOffset = 0;
+	}
+
+	return pageIds;
+}
 
 export async function getProductsBySubcategorySlug(
 	slug: string,
@@ -28,6 +131,9 @@ export async function getProductsBySubcategorySlug(
 	'use cache';
 	cacheLife('hours');
 	cacheTag(PRODUCT_LIST_CACHE_TAG, PRODUCT_CATEGORY_CACHE_TAG);
+
+	const safeLimit = Math.min(MAX_PRODUCTS_PER_PAGE, Math.max(1, Math.floor(limit || 1)));
+	const safeOffset = Math.max(0, Math.floor(offset || 0));
 
 	const localeFallbacks = getLocaleFallbacks(locale);
 	const subcategory = await prisma.productCategory.findUnique({
@@ -147,84 +253,105 @@ export async function getProductsBySubcategorySlug(
 		}
 	})();
 
-	const paginatedProducts = await prisma.product.findMany({
-		where: whereClause,
-		orderBy: orderByClause,
-		skip: offset,
-		take: limit,
-		select: {
-			id: true,
-			name: true,
-			fullSlug: true,
-			imageUrl: true,
-			productImages: {
-				select: { url: true, sortOrder: true, createdAt: true },
-				orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-				take: 6,
-			},
-			basePrice: true,
-			categoryName: true,
-			subcategoryName: true,
-			translations: {
-				where: { locale: { in: localeFallbacks } },
-				select: {
-					locale: true,
-					name: true,
-					categoryName: true,
-					subcategoryName: true,
-				},
-				orderBy: { updatedAt: 'desc' },
-			},
-			discountPrice: true,
-			discountStartAt: true,
-			discountEndAt: true,
-			inStock: true,
-			variants: {
-				where: { stock: { gt: 0 } },
-				orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
-				take: 1,
-				select: {
-					id: true,
-					sku: true,
-					price: true,
-					stock: true,
-					attributes: {
-						select: {
-							attribute: { select: { name: true, unit: true } },
-							value: true,
-						},
-						orderBy: { attribute: { name: 'asc' } },
-					},
-				},
-			},
-			reviews: { select: { rating: true } },
-			tags: true,
-		},
-	});
-
 	const totalCount = await prisma.product.count({ where: whereClause });
 
-	let finalProducts = paginatedProducts;
+	const fetchProducts = (args: Omit<Prisma.ProductFindManyArgs, 'select'>) =>
+		prisma.product.findMany({
+			...args,
+			select: {
+				id: true,
+				name: true,
+				fullSlug: true,
+				imageUrl: true,
+				productImages: {
+					select: { url: true, sortOrder: true, createdAt: true },
+					orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+					take: 6,
+				},
+				basePrice: true,
+				categoryName: true,
+				subcategoryName: true,
+				translations: {
+					where: { locale: { in: localeFallbacks } },
+					select: {
+						locale: true,
+						name: true,
+						categoryName: true,
+						subcategoryName: true,
+					},
+					orderBy: { updatedAt: 'desc' },
+				},
+				discountPrice: true,
+				discountStartAt: true,
+				discountEndAt: true,
+				inStock: true,
+				variants: {
+					where: { stock: { gt: 0 } },
+					orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
+					take: 1,
+					select: {
+						id: true,
+						sku: true,
+						price: true,
+						stock: true,
+						attributes: {
+							select: {
+								attribute: { select: { name: true, unit: true } },
+								value: true,
+							},
+							orderBy: { attribute: { name: 'asc' } },
+						},
+					},
+				},
+				averageRating: true,
+				reviewCount: true,
+				tags: true,
+			},
+		});
+
+	let paginatedProducts: Awaited<ReturnType<typeof fetchProducts>> = [];
 	if (!orderBy) {
-		const tagPriority = ['popular', 'new', 'discount', 'promotional'];
-		finalProducts = [...paginatedProducts].sort((a, b) => {
-			const score = (p: typeof a) =>
-				Math.min(...tagPriority.map((t, i) => (p.tags?.includes(t) ? i : tagPriority.length)));
-			return score(a) - score(b);
+		const pageIds = await getDefaultSortedProductPageIds({
+			whereClause,
+			limit: safeLimit,
+			offset: safeOffset,
+		});
+
+		if (pageIds.length === 0) {
+			paginatedProducts = [];
+		} else {
+			const pageProducts = await fetchProducts({
+				where: {
+					AND: [whereClause, { id: { in: pageIds } }],
+				},
+			});
+			const productById = new Map(pageProducts.map((product) => [product.id, product]));
+			paginatedProducts = pageIds
+				.map((productId) => productById.get(productId))
+				.filter((product): product is (typeof pageProducts)[number] => Boolean(product));
+		}
+	} else {
+		paginatedProducts = await fetchProducts({
+			where: whereClause,
+			orderBy: orderByClause,
+			skip: safeOffset,
+			take: safeLimit,
 		});
 	}
 
-	const products: SubcategoryProduct[] = finalProducts.map((p) => {
+	const productIds = [...new Set(paginatedProducts.map((product) => product.id).filter(Boolean))];
+	for (const productId of productIds) {
+		cacheTag(productCacheTagById(productId));
+	}
+
+	const products: SubcategoryProduct[] = paginatedProducts.map((p) => {
 		const translation = pickLocalizedTranslation(p.translations, locale);
-		const { variants, reviews, tags, productImages, translations, ...rest } = p as typeof p & {
+		const { variants, tags, productImages, translations, ...rest } = p as typeof p & {
 			variants?: unknown;
-			reviews?: unknown;
 			tags?: unknown;
 			productImages?: unknown;
 			translations?: unknown;
 		};
-		const ratings = p.reviews?.map((r) => r.rating) ?? [];
-		const averageRating = ratings.length ? ratings.reduce((s, v) => s + v, 0) / ratings.length : 0;
 
 		const basePrice = Number(p.basePrice ?? 0);
 		const scheduledDiscountPrice = getEffectiveDiscountPrice(
@@ -248,9 +375,9 @@ export async function getProductsBySubcategorySlug(
 			inStock: !!p.inStock,
 			basePrice,
 			discountPrice: scheduledDiscountPrice,
-			defaultVariant: p.variants?.[0]
-				? {
-						id: p.variants[0].id,
+				defaultVariant: p.variants?.[0]
+					? {
+							id: p.variants[0].id,
 						sku: p.variants[0].sku,
 						price: p.variants[0].price.toNumber(),
 						stock: p.variants[0].stock,
@@ -259,25 +386,15 @@ export async function getProductsBySubcategorySlug(
 								[a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' ')
 							)
 							.join(' / '),
-					}
-				: undefined,
-			averageRating,
-			reviewCount: p.reviews?.length ?? 0,
+						}
+					: undefined,
+			averageRating: Number(p.averageRating ?? 0),
+			reviewCount: Number(p.reviewCount ?? 0),
 			tags: p.tags ?? [],
 		} as SubcategoryProduct;
 	});
 
-	const maxProductPrice = paginatedProducts.reduce((max, p) => {
-		const basePrice = Number(p.basePrice ?? 0);
-		const discountPrice = getEffectiveDiscountPrice(
-			basePrice,
-			p.discountPrice != null ? Number(p.discountPrice) : null,
-			p.discountStartAt ?? null,
-			p.discountEndAt ?? null
-		);
-		const price = discountPrice ?? basePrice;
-		return Math.max(max, Number(price));
-	}, 0);
+	const maxProductPrice = await getMaxEffectiveProductPrice(whereClause, now);
 
 	const subcategoryTranslation = pickLocalizedTranslation(subcategory.translations, locale);
 	const parentTranslation = pickLocalizedTranslation(subcategory.parent?.translations, locale);

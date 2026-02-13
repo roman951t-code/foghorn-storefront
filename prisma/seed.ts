@@ -840,8 +840,8 @@ async function syncLocalizedSeedTranslations(locales: readonly SupportedLocale[]
 async function main() {
 	console.log('🌱 Seeding started...');
 
-	// Seed expects the database schema to be up-to-date. In this repo we typically use `prisma db push`
-	// (no migrations folder). If the schema wasn't applied, seeding will fail with cryptic "table does not exist".
+	// Seed expects the database schema to be up-to-date via Prisma migrations.
+	// If migrations weren't applied, seeding will fail with cryptic "table does not exist".
 	try {
 		await prisma.storefrontForm.count();
 	} catch (e) {
@@ -850,7 +850,7 @@ async function main() {
 			throw new Error(
 				[
 					'Database schema is not up to date (missing table for StorefrontForm).',
-					'Run `npx prisma db push --schema prisma/schema.prisma` and then rerun the seed.',
+					'Run `npx prisma migrate deploy` (or `npm run db:migrate:deploy`) and then rerun the seed.',
 				].join(' ')
 			);
 		}

@@ -18,9 +18,5 @@ export async function loginEmailAction(
 		return { success: false, message: validationT('invalidFormData') };
 	}
 
-	try {
-		return { success: true };
-	} catch (error: any) {
-		return { success: false, message: validationT('userLoginFail') };
-	}
+	return { success: true };
 }

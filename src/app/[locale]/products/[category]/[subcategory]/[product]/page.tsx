@@ -88,6 +88,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 	const { tab } = ensureParams(productSearchParamsSchema, await searchParams);
 
 	const headersList = await headers();
+	const cspNonce = headersList.get('x-csp-nonce') ?? undefined;
 	const [productData, session] = await Promise.all([
 		getProductBySlugCached(product, locale),
 		auth.api.getSession({ headers: headersList }),
@@ -208,10 +209,10 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 
 	return (
 		<>
-			<Script id='product-schema' type='application/ld+json'>
+			<Script id='product-schema' nonce={cspNonce} type='application/ld+json'>
 				{JSON.stringify(productJsonLd)}
 			</Script>
-			<Script id='breadcrumbs-schema' type='application/ld+json'>
+			<Script id='breadcrumbs-schema' nonce={cspNonce} type='application/ld+json'>
 				{JSON.stringify(breadcrumbsJsonLd)}
 			</Script>
 

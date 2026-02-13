@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Online Store
 
-## Getting Started
+Production-focused Next.js storefront with a separate AdminJS runtime.
 
-First, run the development server:
+## Stack
+
+- `next@16` (App Router)
+- `prisma` + PostgreSQL
+- `better-auth`
+- `stripe`
+- `resend`
+- `adminjs` (separate Express server)
+
+## Local Development
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Configure environment variables in `.env` / `.env.local`.
+
+3. Run database migrations and generate Prisma client:
+
+```bash
+npm run db:migrate:dev
+```
+
+4. Start storefront:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Start admin panel (separate terminal):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run admin:dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Storefront runs on `http://localhost:3000`, AdminJS runs on `http://localhost:3001/admin` by default.
 
-## Learn More
+## Production Runtime
 
-To learn more about Next.js, take a look at the following resources:
+Build and run storefront:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+npm run start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Run admin panel in production mode:
 
-## Deploy on Vercel
+```bash
+npm run admin:start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Critical Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `DATABASE_URL`
+- `NEXT_PUBLIC_APP_URL` (required in production, must be `https://` for non-localhost)
+- `RESEND_API_KEY`
+- `EMAIL_FROM` (required in production, must use your verified sender domain)
+- `ENCRYPTION_KEY` (required in production, 64-char hex)
+- `CACHE_REVALIDATE_SECRET` (required in production)
+- Stripe (if enabled): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+
+### Email Deliverability Note
+
+`EMAIL_FROM` must not use `@resend.dev` in production.  
+Use a verified sending domain in Resend and ensure SPF/DKIM/DMARC are configured.
+
+## Useful Scripts
+
+- `npm run lint` - Type-check only (`tsc --noEmit`)
+- `npm run db:migrate:dev` - Local migration + Prisma generate
+- `npm run db:migrate:deploy` - Deploy migrations
+- `npm run db:seed` - Seed database
+- `npm run perf:load` - Load test script
+- `npm run cache:revalidate:windows` - Cache window revalidation script

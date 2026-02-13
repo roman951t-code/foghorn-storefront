@@ -3,28 +3,14 @@ import bundleAnalyzer from '@next/bundle-analyzer';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { env } from './src/config/env';
 const isProd = env.NODE_ENV === 'production';
-
-const cspHeader = `
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' https://js.stripe.com;
-  style-src 'self' 'unsafe-inline' https:;
-  img-src 'self' data: blob: https:;
-  font-src 'self' data:;
-  connect-src 'self' https://api.stripe.com;
-  frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
-  object-src 'none';
-  base-uri 'self';
-  form-action 'self';
-  frame-ancestors 'none';
-  upgrade-insecure-requests;
-`;
+const enableProdBrowserSourceMaps = process.env.ENABLE_PROD_BROWSER_SOURCEMAPS === 'true';
 
 const baseConfig: NextConfig = {
 	experimental: {
 		// Reduce client bundle by rewriting imports to per-file entrypoints
 		optimizePackageImports: ['@chakra-ui/icons', 'react-icons'],
 	},
-	productionBrowserSourceMaps: true,
+	productionBrowserSourceMaps: enableProdBrowserSourceMaps,
 	cacheComponents: true,
 	images: {
 		remotePatterns: [
@@ -72,10 +58,6 @@ const baseConfig: NextConfig = {
 		];
 
 		const prodHeaders = [
-			{
-				key: 'Content-Security-Policy',
-				value: cspHeader.replace(/\n/g, ''),
-			},
 			{
 				key: 'Strict-Transport-Security',
 				value: 'max-age=31536000; includeSubDomains',

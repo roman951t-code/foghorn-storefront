@@ -7,9 +7,14 @@ import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import { useServerInsertedHTML } from 'next/navigation';
 
-export default function ChakraUIProvider({ children }: { children: ReactNode }) {
+type ChakraUIProviderProps = {
+	children: ReactNode;
+	nonce?: string;
+};
+
+export default function ChakraUIProvider({ children, nonce }: ChakraUIProviderProps) {
 	const [{ cache, flush }] = useState(() => {
-		const cache = createCache({ key: 'css', prepend: true });
+		const cache = createCache({ key: 'css', prepend: true, nonce });
 		cache.compat = true;
 
 		const prevInsert = cache.insert;
@@ -44,6 +49,7 @@ export default function ChakraUIProvider({ children }: { children: ReactNode }) 
 
 		return (
 			<style
+				nonce={nonce}
 				data-emotion={`${cache.key} ${names.join(' ')}`}
 				dangerouslySetInnerHTML={{ __html: styles }}
 			/>

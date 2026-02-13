@@ -5,9 +5,10 @@ import 'server-only';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
 import { getPhoneSignInSchema } from 'validationSchemas/phoneSignInSchema';
-import { autoVerifyPhoneNumber } from './phoneVerificationHelper';
 import { headers } from 'next/headers';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { auth } from '@/lib/auth';
+import { getActionErrorMessageKey } from './authActionError';
 
 const PHONE_SIGN_IN_LIMIT_PER_PHONE = 8;
 const PHONE_SIGN_IN_LIMIT_PER_IP = 30;
@@ -57,17 +58,24 @@ export async function phoneSignInAction(
 	}
 
 	try {
-		await autoVerifyPhoneNumber({
-			phoneNumber: rawPhone,
-			disableSession: false,
-			updatePhoneNumber: false,
+		await prisma.verification.deleteMany({
+			where: {
+				identifier: rawPhone,
+			},
+		});
+
+		await auth.api.sendPhoneNumberOTP({
+			body: {
+				phoneNumber: rawPhone,
+			},
 		});
 
 		return { success: true };
-	} catch (error: any) {
-		const messageKey = error?.body?.message ?? error?.message ?? '';
+	} catch (error: unknown) {
+		const messageKey = getActionErrorMessageKey(error);
 		const errorMap: Record<string, string> = {
 			'Too many requests': validationT('tooManyRequests'),
+			phone_otp_provider_not_configured: validationT('smsSendFailed'),
 			'Unknown error': validationT('smsSendFailed'),
 		};
 
