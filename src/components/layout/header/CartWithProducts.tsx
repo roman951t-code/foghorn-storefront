@@ -9,6 +9,7 @@ import { calculateCartTotals } from '@/utils/cartTotals';
 import CouponField from '@/components/ui/inputs/CouponField';
 import { useCheckoutStore } from '@/stores/checkoutStore';
 import CountPill from '@/components/ui/CountPill';
+import { formatUsdPrice } from '@/utils/priceFormatting';
 
 interface Props {
 	i18nData: I18nData;
@@ -34,7 +35,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 								{i18nData.totalAmount}
 							</Stat.Label>
 							<Stat.ValueText fontSize={{ base: '3xl', sm: '4xl' }}>
-								{`$${finalTotal.toFixed(2)}`}
+								{formatUsdPrice(finalTotal)}
 							</Stat.ValueText>
 						</Stat.Root>
 						{couponDiscount > 0 ? (
@@ -44,7 +45,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 								bg='main.secondary'
 								fontWeight='semibold'
 								mt='1'
-							>{`-$${couponDiscount.toFixed(2)} ${appliedCoupon?.code ?? ''}`}</Badge>
+							>{`-${formatUsdPrice(couponDiscount)} ${appliedCoupon?.code ?? ''}`}</Badge>
 						) : null}
 
 						<Flex align='center' gapX='4' mt='1'>

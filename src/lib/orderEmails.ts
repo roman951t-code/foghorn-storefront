@@ -6,6 +6,7 @@ import type { UserOrder } from '@/types/order';
 import { APP_URL } from '@/config/env';
 import { STORE_CURRENCY_CODE } from '@/config/currency';
 import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
+import { formatCurrencyPrice } from '@/utils/priceFormatting';
 
 const FALLBACK_LOCALE = 'en';
 
@@ -27,11 +28,10 @@ const getLocale = async (headersList?: HeaderSource) => {
 };
 
 const formatCurrency = (value: number, locale: string) =>
-	new Intl.NumberFormat(locale, {
-		style: 'currency',
+	formatCurrencyPrice(value, {
+		locale,
 		currency: STORE_CURRENCY_CODE,
-		maximumFractionDigits: 2,
-	}).format(value);
+	});
 
 const formatDateTime = (date: Date, locale: string) =>
 	new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(date);

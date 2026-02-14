@@ -109,6 +109,35 @@ const incrementCouponRedemptionWithGuard = async (
 	return updated.count > 0;
 };
 
+const isRenderPhaseCacheMutationError = (error: unknown): boolean => {
+	if (!(error instanceof Error)) return false;
+	const message = error.message.toLowerCase();
+	return (
+		message.includes('during render') &&
+		(message.includes('updatetag') || message.includes('revalidatetag'))
+	);
+};
+
+const revalidateProductCacheTags = async (productIds: string[]) => {
+	if (!productIds.length) return;
+	const productTags = productIds.map((id) => productCacheTagById(id));
+	try {
+		await Promise.all(productTags.map((tag) => updateTag(tag)));
+		await revalidateTag(PRODUCT_LIST_CACHE_TAG, 'default');
+	} catch (error) {
+		if (isRenderPhaseCacheMutationError(error)) {
+			console.warn(
+				'[payments] Skipped product cache revalidation during render-phase finalization',
+				{
+					productTags,
+				}
+			);
+			return;
+		}
+		throw error;
+	}
+};
+
 async function finalizeStripeOrderInternal(
 	sessionId: string,
 	{
@@ -628,9 +657,7 @@ async function finalizeStripeOrderInternal(
 	}
 
 	const normalized = await normalizeOrder(order);
-	const productTags = uniqueIds.map((id) => productCacheTagById(id));
-	await Promise.all(productTags.map((tag) => updateTag(tag)));
-	await revalidateTag(PRODUCT_LIST_CACHE_TAG, 'default');
+	await revalidateProductCacheTags(uniqueIds);
 
 	await sendOrderConfirmationEmail({
 		order: normalized,

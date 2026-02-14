@@ -2,7 +2,7 @@ import { authClient } from '@/lib/auth-client';
 import { Card } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { useSession } from '@/providers/SessionProvider';
-import { redirect } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import { TertiaryButton } from '@/components/ui/buttons/ActionButton';
 
 interface LogoutProps {
@@ -12,8 +12,9 @@ interface LogoutProps {
 export function LogoutSection({ onClose }: LogoutProps) {
 	const authT = useTranslations('auth');
 	const { refresh } = useSession();
+	const router = useRouter();
 
-	const handleLogogut = async () => {
+	const handleLogout = async () => {
 		await authClient.signOut();
 		await refresh();
 
@@ -22,13 +23,13 @@ export function LogoutSection({ onClose }: LogoutProps) {
 		bc.close();
 		onClose();
 
-		redirect('/');
+		router.replace('/');
 	};
 
 	return (
 		<Card.Root size='sm' bg='bg.tertiary' borderColor='border'>
 			<Card.Body gap={3}>
-				<TertiaryButton onClick={handleLogogut}>{authT('logOut')}</TertiaryButton>
+				<TertiaryButton onClick={handleLogout}>{authT('logOut')}</TertiaryButton>
 			</Card.Body>
 		</Card.Root>
 	);

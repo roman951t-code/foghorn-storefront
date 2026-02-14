@@ -1,4 +1,5 @@
 import { CartProduct } from '@/types/cart';
+import { roundPrice } from '@/utils/priceFormatting';
 
 export type CartTotals = {
 	totalCount: number;
@@ -22,7 +23,9 @@ export function calculateCartTotals(items: CartProduct[]): CartTotals {
 		{ totalCount: 0, baseTotal: 0, discountedTotal: 0, discountTotal: 0 }
 	);
 
-	totals.discountTotal = totals.baseTotal - totals.discountedTotal;
+	totals.baseTotal = roundPrice(totals.baseTotal);
+	totals.discountedTotal = roundPrice(totals.discountedTotal);
+	totals.discountTotal = roundPrice(totals.baseTotal - totals.discountedTotal);
 
 	return totals;
 }

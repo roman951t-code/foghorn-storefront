@@ -23,7 +23,7 @@ export default async function PrivacyPolicyPage({ params }: LocaleParams) {
 
 	return (
 		<Stack gap={6} p={4} pt={1}>
-			<Heading as='h1' size='3xl' fontWeight='normal' w='100%'>
+			<Heading as='h1' size='3xl' fontWeight='medium' w='100%'>
 				{pageTitle}
 			</Heading>
 			<Text whiteSpace='pre-line'>{content}</Text>

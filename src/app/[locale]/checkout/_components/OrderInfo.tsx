@@ -28,6 +28,7 @@ import CheckoutConsents from './CheckoutConsents';
 import type { StorefrontFormPublic } from '@/actions/storefront/getEnabledStorefrontForms';
 import { isBlockingCheckoutConsent } from './checkoutConsentUtils';
 import { hasRequiredShippingAddressFields } from '@/utils/shippingAddress';
+import { formatCurrencyPrice } from '@/utils/priceFormatting';
 
 export default function OrderInfo({
 	storefrontForms = [],
@@ -58,13 +59,11 @@ export default function OrderInfo({
 	const cartItems = cartData.items;
 	const { totalCount, baseTotal, discountedTotal, discountTotal } = calculateCartTotals(cartItems);
 	const formatMoney = (value: number) =>
-		new Intl.NumberFormat(locale, {
-			style: 'currency',
+		formatCurrencyPrice(value, {
+			locale,
 			currency: currencyCode,
 			currencyDisplay: 'narrowSymbol',
-			minimumFractionDigits: 2,
-			maximumFractionDigits: 2,
-		}).format(value);
+		});
 	const unitsLabel = commonT('units');
 	const productsLabel = `${t('productsInCart')}: ${totalCount} ${unitsLabel}`;
 	const orderSumText = formatMoney(baseTotal);
@@ -240,17 +239,19 @@ export default function OrderInfo({
 				<Text fontWeight='semibold'>{productsLabel}</Text>
 				<Text fontWeight='semibold'>{`${t('orderSum')}: ${orderSumText}`}</Text>
 
-				<Text>
-					{`${t('discountSum')}: `}
-					<Badge
-						variant='solid'
-						color='black'
-						bg='main.secondary'
-						fontWeight='semibold'
-					>
-						{discountText}
-					</Badge>
-				</Text>
+				{discountTotal > 0 ? (
+					<Text>
+						{`${t('discountSum')}: `}
+						<Badge
+							variant='solid'
+							color='black'
+							bg='main.secondary'
+							fontWeight='semibold'
+						>
+							{discountText}
+						</Badge>
+					</Text>
+				) : null}
 				{couponDiscount > 0 ? (
 					<Text>
 						{`${checkoutT('couponLine')}: `}
@@ -339,17 +340,19 @@ export default function OrderInfo({
 					<Text fontWeight='semibold'>{productsLabel}</Text>
 					<Text fontWeight='semibold'>{`${t('orderSum')}: ${orderSumText}`}</Text>
 
-					<Text>
-						{`${t('discountSum')}: `}
-						<Badge
-							variant='solid'
-							color='black'
-							bg='main.secondary'
-							fontWeight='semibold'
-						>
-							{discountText}
-						</Badge>
-					</Text>
+					{discountTotal > 0 ? (
+						<Text>
+							{`${t('discountSum')}: `}
+							<Badge
+								variant='solid'
+								color='black'
+								bg='main.secondary'
+								fontWeight='semibold'
+							>
+								{discountText}
+							</Badge>
+						</Text>
+					) : null}
 					{couponDiscount > 0 ? (
 						<Text>
 							{`${checkoutT('couponLine')}: `}

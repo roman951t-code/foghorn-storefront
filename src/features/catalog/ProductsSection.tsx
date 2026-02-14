@@ -28,7 +28,7 @@ export default async function ProductsSection({
 
 	return (
 		<Flex gap={6} direction='column' mt={24} {...restProps}>
-			<Heading fontWeight='normal'>
+			<Heading fontWeight='medium'>
 				<LocaleNavLink
 					href={`/products/search/?tag=${tag}`}
 					fontSize='28px'

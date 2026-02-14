@@ -16,6 +16,7 @@ import type { UserOrder } from '@/types/order';
 import { useRouter } from 'next/navigation';
 import { deleteOrderAction } from '@/actions/deleteOrderAction';
 import { isCustomerOrderCancellable, isCustomerOrderDeletable } from '@/utils/orderStatusPolicy';
+import { formatUsdPrice } from '@/utils/priceFormatting';
 
 type Props = {
 	order: UserOrder;
@@ -218,7 +219,7 @@ export function OrderAccordionContent({ order }: Props) {
 											mb={{ base: 4, sm: 0 }}
 											mr={{ base: 0, sm: 2 }}
 										>
-											{ordersT('unit')}: {`$${item.unitPrice.toFixed(2)}`}
+											{ordersT('unit')}: {formatUsdPrice(item.unitPrice)}
 										</Text>
 									</Flex>
 									<Text

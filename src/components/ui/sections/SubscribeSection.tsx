@@ -136,7 +136,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 			alignItems='center'
 			justifyContent={{ base: 'center', '2xl': 'space-between' }}
 		>
-			<Heading color='main' fontWeight='normal' size='lg' minW='260px'>
+			<Heading color='main' fontWeight='medium' size='lg' minW='260px'>
 				{isUserSubscribed ? i18nData.subscribed : i18nData.subscribeInfo}
 			</Heading>
 

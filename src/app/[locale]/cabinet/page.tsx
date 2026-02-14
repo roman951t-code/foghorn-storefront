@@ -21,7 +21,7 @@ export default function Cabinet() {
 
 	return (
 		<VStack w='100%' maxW='6xl' mx='auto'>
-			<Heading as='h2' size='2xl' fontWeight='normal'>
+			<Heading as='h2' size='2xl' fontWeight='medium'>
 				{authT('personalData')}
 			</Heading>
 			<PersonalDataForm i18nData={i18nData} />

@@ -58,7 +58,7 @@
 			"card": "Картка",
 			"cardForm": {
 				"title": "Дані картки",
-				"description": "Введіть дані картки, щоб продовжити оплату карткою.",
+				"description": "Ви будете перенаправлені на захищену сторінку Stripe Checkout для введення даних картки.",
 				"cardholder": "Ім'я власника картки",
 				"cardholderPlaceholder": "Як вказано на картці",
 				"number": "Номер картки",
@@ -66,7 +66,12 @@
 				"expiry": "Термін дії",
 				"expiryPlaceholder": "ММ/РР",
 				"cvv": "Код безпеки (CVV)",
-				"cvvPlaceholder": "123"
+				"cvvPlaceholder": "123",
+				"testModeTitle": "Тестовий режим Stripe",
+				"testCard": "Тестова картка",
+				"testExpiry": "Термін дії",
+				"testCvc": "CVC",
+				"testDeclineCard": "Тестова картка з відмовою"
 			}
 		},
 		"shipment": {

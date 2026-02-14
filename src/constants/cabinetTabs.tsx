@@ -40,7 +40,7 @@ export const TAB_ANIMATION_PROPS = {
 
 export const CABINET_TAB_TRIGGER_PROPS = {
 	color: 'main',
-	fontWeight: 'normal',
+	fontWeight: 'medium',
 	fontSize: 'md',
 	display: 'inline-flex',
 	gap: 2,

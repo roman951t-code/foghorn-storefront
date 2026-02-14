@@ -116,35 +116,84 @@ export default function CatalogDrawer() {
 							<AccordionItemTrigger
 								cursor='pointer'
 								px={{ base: 3, md: 4 }}
-								py={{ base: 5, md: 6 }}
+								py={{ base: 4, md: 6 }}
 								bg='bg.tertiary'
 								transition='all 0.18s ease-in-out'
 								_hover={{ bg: 'bgHover.promoCard' }}
 							>
-								<HStack gap={4} w='full' minW={0}>
-									<Box
-										boxSize='88px'
-										rounded='lg'
-										bgImage={`url(${categoryImage})`}
-										bgSize='cover'
-										bgPos='center'
-										borderWidth='0.5px'
-										borderStyle='solid'
-										borderColor='border'
-										flexShrink={0}
-									/>
+								<Box w='full' minW={0}>
+									<VStack display={{ base: 'flex', sm: 'none' }} align='center' gap='3' w='full'>
+										<Box
+											boxSize='100px'
+											rounded='lg'
+											bgImage={`url(${categoryImage})`}
+											bgSize='contain'
+											bgRepeat='no-repeat'
+											bgPos='center'
+											bgColor='bg.tertiary'
+											borderWidth='0.5px'
+											borderStyle='solid'
+											borderColor='border'
+											flexShrink={0}
+										/>
 
-									<Box flex='1' minW={0}>
-										<Text fontSize='xl' fontWeight='semibold' lineClamp={1}>
-											{category.name}
-										</Text>
-										<Text fontSize='md' opacity={0.75} lineClamp={1} title={subPreview}>
-											{subPreview}
-										</Text>
-									</Box>
+										<VStack align='center' gap='2.5' w='full'>
+											<HStack justify='center' align='center' gap='4' w='full'>
+												<Text
+													fontSize='xl'
+													fontWeight='semibold'
+													wordBreak='break-word'
+													textAlign='center'
+												>
+													{category.name}
+												</Text>
+												<CountPill value={subCount} px='2' py='1' labelProps={{ fontSize: 'md' }} />
+											</HStack>
+											<Text fontSize='md' opacity={0.75} wordBreak='break-word' textAlign='center' title={subPreview}>
+												{subPreview}
+											</Text>
+										</VStack>
+									</VStack>
 
-									<CountPill value={subCount} px='2' py='1' labelProps={{ fontSize: 'md' }} />
-								</HStack>
+									<HStack display={{ base: 'none', sm: 'flex' }} gap={3} minW={0} align='center' flex='1'>
+										<Box
+											boxSize='88px'
+											rounded='lg'
+											bgImage={`url(${categoryImage})`}
+											bgSize='cover'
+											bgPos='center'
+											bgColor='bg.tertiary'
+											borderWidth='0.5px'
+											borderStyle='solid'
+											borderColor='border'
+											flexShrink={0}
+										/>
+
+										<Box flex='1' minW={0}>
+											<HStack w='full' justify='space-between' align='center' gap={4}>
+												<Text
+													fontSize='xl'
+													fontWeight='semibold'
+													wordBreak='break-word'
+													textAlign='left'
+													flex='1'
+												>
+													{category.name}
+												</Text>
+												<CountPill value={subCount} px='2' py='1' labelProps={{ fontSize: 'md' }} />
+											</HStack>
+											<Text
+												fontSize='md'
+												opacity={0.75}
+												wordBreak='break-word'
+												textAlign='left'
+												title={subPreview}
+											>
+												{subPreview}
+											</Text>
+										</Box>
+									</HStack>
+								</Box>
 							</AccordionItemTrigger>
 
 							<AccordionItemContent
@@ -214,19 +263,27 @@ export default function CatalogDrawer() {
 																size='md'
 																borderWidth='0.5px'
 																bg='bg.tertiary'
-																px='2'
+																px='0'
 																py='1'
-																borderRadius='lg'
 																boxShadow='none'
-																borderColor='border'
+																border='none'
 															>
 																<DrawerActionTrigger asChild>
 																	<LocaleNavLink
 																		href={`/products/${product.fullSlug}`}
-																		fontSize='14px'
-																		variant='plain'
+																		fontSize='15px'
+																		fontWeight='medium'
 																		textWrap='wrap'
 																		wordBreak='break-word'
+																		textDecorationColor='main'
+																		color='main'
+																		variant='underline'
+																		_hover={{ color: 'link' }}
+																		_focusVisible={{
+																			outline: '2px solid',
+																			outlineColor: 'main.secondary',
+																			outlineOffset: '2px',
+																		}}
 																	>
 																		{product.name}
 																	</LocaleNavLink>

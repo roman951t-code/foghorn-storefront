@@ -24,6 +24,7 @@ import AddToFavourite from './AddToFavourite';
 import AddToCartButton from './AddToCartButton';
 import { Product } from '@/types/product';
 import { buildProductImages } from '@/utils/productImages';
+import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 import ProductDetails, { DetailOption } from './ProductDetails';
 import { VariantSelector } from './VariantSelector';
 
@@ -71,7 +72,7 @@ export default function AboutTab({
 		cartUpdateFailed: cartT('cartUpdateFailed'),
 	};
 
-	const variants = product.variants ?? [];
+	const variants = useMemo(() => product.variants ?? [], [product.variants]);
 	const initialVariantId = variants.find((v) => v.stock > 0)?.id ?? variants[0]?.id ?? null;
 	const [selectedVariantId, setSelectedVariantId] = useState<string | null>(initialVariantId);
 
@@ -86,13 +87,14 @@ export default function AboutTab({
 
 	const selectedInStock = selectedVariant ? selectedVariant.stock > 0 : product.inStock;
 
-	const unitBasePrice = selectedVariant?.price ?? product.basePrice;
-	const discountAmount = product.discountPrice
-		? Math.max(0, product.basePrice - product.discountPrice)
-		: 0;
+	const unitBasePrice = roundPrice(selectedVariant?.price ?? product.basePrice);
+	const discountPrice = product.discountPrice != null ? roundPrice(product.discountPrice) : null;
+	const productBasePrice = roundPrice(product.basePrice);
+	const discountAmount =
+		discountPrice != null ? roundPrice(Math.max(0, productBasePrice - discountPrice)) : 0;
 	const unitDiscountPrice = discountAmount > 0 ? Math.max(0, unitBasePrice - discountAmount) : null;
 	const unitEffectivePrice = unitDiscountPrice ?? unitBasePrice;
-	const discount = unitDiscountPrice != null ? unitBasePrice - unitDiscountPrice : 0;
+	const discount = unitDiscountPrice != null ? roundPrice(unitBasePrice - unitDiscountPrice) : 0;
 
 	const galleryImages =
 		product.images && product.images.length > 0
@@ -194,11 +196,11 @@ export default function AboutTab({
 						)}
 
 						<Box as='span' fontSize='3xl' fontWeight='semibold'>
-							{`$${unitEffectivePrice}`}
+							{formatUsdPrice(unitEffectivePrice)}
 							{discount > 0 && (
 								<Badge colorPalette='gray'>
 									<Box as='span' color='main' fontSize='sm' textDecoration='line-through'>
-										{`$${parseInt(unitBasePrice.toFixed(2))}`}
+										{formatUsdPrice(unitBasePrice)}
 										<Badge
 											variant='solid'
 											fontWeight='semibold'
@@ -206,7 +208,7 @@ export default function AboutTab({
 											bg='main.secondary'
 											marginLeft='12px'
 										>
-											-{`$${parseInt(discount.toFixed(2))}`}
+											-{formatUsdPrice(discount)}
 										</Badge>
 									</Box>
 								</Badge>

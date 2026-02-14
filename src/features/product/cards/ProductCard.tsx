@@ -15,6 +15,7 @@ import { useCart } from '@/hooks/useCart';
 import { useWishList } from '@/hooks/useWishList';
 import { SubcategoryProduct } from '@/types/product';
 import { buildProductImages } from '@/utils/productImages';
+import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 import { MdOutlineShoppingCart, MdShoppingCart } from 'react-icons/md';
 import { FaHeart } from 'react-icons/fa';
 
@@ -36,12 +37,15 @@ export default function ProductCard({ product }: Props) {
 	const t = useTranslations('products');
 	const cartT = useTranslations('cart');
 	const wishT = useTranslations('wishlist');
-	const basePrice = product.basePrice ?? 0;
-	const discountPrice = product.discountPrice ?? null;
+	const basePrice = roundPrice(product.basePrice ?? 0);
+	const discountPrice = product.discountPrice != null ? roundPrice(product.discountPrice) : null;
+	const rawDiscount = discountPrice != null ? roundPrice(basePrice - discountPrice) : 0;
+	const hasDiscount = rawDiscount > 0;
+	const displayPrice = hasDiscount && discountPrice != null ? discountPrice : basePrice;
 	const fullSlug = product.fullSlug ?? '#';
 	const name = product.name ?? '';
 	const isInStock = product.inStock ?? false;
-	const discount = discountPrice ? basePrice - discountPrice : 0;
+	const discount = hasDiscount ? rawDiscount : 0;
 	const ratingId = useId();
 
 	const [isLoading, setIsLoading] = useState(false);
@@ -199,10 +203,10 @@ export default function ProductCard({ product }: Props) {
 						textWrap='wrap'
 						textAlign={{ base: 'center', sm: 'left' }}
 					>
-						{`$${discountPrice ?? basePrice}`}
+						{formatUsdPrice(displayPrice)}
 						{discount > 0 && (
 							<Text as='span' pl='2' color='main' fontSize='sm' textDecoration='line-through'>
-								{`$${parseInt(basePrice.toFixed(2))}`}
+								{formatUsdPrice(basePrice)}
 								<Badge
 									variant='solid'
 									color='black'
@@ -210,7 +214,7 @@ export default function ProductCard({ product }: Props) {
 									fontWeight='semibold'
 									ml='8px'
 								>
-									-{`$${parseInt(discount.toFixed(2))}`}
+									-{formatUsdPrice(discount)}
 								</Badge>
 							</Text>
 						)}

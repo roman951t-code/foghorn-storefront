@@ -45,7 +45,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 						css={CATEGORY_DETAILS_GRID_CSS}
 						justifyContent='start'
 						gap='4'
-						pr={{ base: 0, lg: '244px', xl: '264px' }}
+						pr={{ base: 0, lg: '256px' }}
 					>
 						{subcategories.map((subcategory) => {
 							const subImage = subcategory.imageUrl ?? '/assets/images/temp/3Big.webp';
@@ -115,15 +115,19 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 												>
 													<LocaleNavLink
 														href={`/products/${product.fullSlug}`}
-														fontSize='14px'
-														fontWeight='normal'
+														fontSize='15px'
+														fontWeight='medium'
 														textWrap='wrap'
 														wordBreak='break-word'
 														textDecorationColor='main'
 														color='main'
 														variant='underline'
 														_hover={{ color: 'link' }}
-														_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
+														_focusVisible={{
+															outline: '2px solid',
+															outlineColor: 'main.secondary',
+															outlineOffset: '2px',
+														}}
 													>
 														{product.name}
 													</LocaleNavLink>
@@ -138,7 +142,11 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 												mt='1'
 												textDecoration='underline'
 												textUnderlineOffset='4px'
-												_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
+												_focusVisible={{
+													outline: '2px solid',
+													outlineColor: 'main.secondary',
+													outlineOffset: '2px',
+												}}
 											>
 												{i18nData.seeAll}
 											</LocaleNavLink>

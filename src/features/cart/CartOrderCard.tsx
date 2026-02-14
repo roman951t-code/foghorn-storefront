@@ -9,6 +9,7 @@ import { toasterMessages } from '@/data/toasterMessages';
 import { I18nData } from '@/types/i18n';
 import { CartProduct } from '@/types/cart';
 import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE } from '@/utils/productImages';
+import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 
 interface Props {
 	product: CartProduct;
@@ -20,12 +21,11 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 	const { handleRemoveLine, handleUpdateQuantity } = useCart();
 
 	const quantity = Math.max(1, product.quantity ?? 1);
-	const unitPrice = product.discountPrice ?? product.basePrice;
-	const hasDiscount =
-		product.discountPrice !== null &&
-		product.discountPrice !== undefined &&
-		product.discountPrice < product.basePrice;
-	const discountAmount = hasDiscount ? product.basePrice - (product.discountPrice ?? 0) : 0;
+	const basePrice = roundPrice(product.basePrice ?? 0);
+	const discountPrice = product.discountPrice != null ? roundPrice(product.discountPrice) : null;
+	const discountAmount = discountPrice != null ? roundPrice(Math.max(0, basePrice - discountPrice)) : 0;
+	const hasDiscount = discountAmount > 0;
+	const unitPrice = hasDiscount && discountPrice != null ? discountPrice : basePrice;
 	const lineTotal = unitPrice * quantity;
 	const totalLabel = i18nData.totalAmount || 'Total';
 
@@ -163,7 +163,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 					>
 						<VStack alignItems={{ base: 'center', sm: 'flex-start' }} gap='0.5' flex='1'>
 							<Text color='main' fontSize={{ base: 'md', sm: 'lg' }} fontWeight='semibold'>
-								{`$${unitPrice}`}
+								{formatUsdPrice(unitPrice)}
 								{hasDiscount && (
 									<Text
 										as='span'
@@ -172,7 +172,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 										textDecoration='line-through'
 										marginLeft='2'
 									>
-										{`$${product.basePrice}`}
+										{formatUsdPrice(basePrice)}
 										{discountAmount > 0 && (
 											<Badge
 												variant='solid'
@@ -183,7 +183,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 												px='2'
 												ml='4'
 											>
-												-{`$${discountAmount}`}
+												-{formatUsdPrice(discountAmount)}
 											</Badge>
 										)}
 									</Text>
@@ -191,7 +191,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 							</Text>
 
 							<Text fontSize='15px' color='main.disabled' hideBelow='sm'>
-								{totalLabel}: {`$${lineTotal.toFixed(2)}`}
+								{totalLabel}: {formatUsdPrice(lineTotal)}
 							</Text>
 						</VStack>
 

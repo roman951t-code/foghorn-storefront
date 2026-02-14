@@ -136,7 +136,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 									/>
 									<Text
 										fontSize='md'
-										fontWeight={isHighlighted ? 'semibold' : 'normal'}
+										fontWeight={isHighlighted ? 'semibold' : 'medium'}
 										lineClamp={1}
 									>
 										{category.name}

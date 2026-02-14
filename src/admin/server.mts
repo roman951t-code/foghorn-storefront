@@ -4,6 +4,7 @@ import express from 'express';
 import session from 'express-session';
 import admin from './admin.mts';
 import { createAdminSessionStore } from './pg-session-store.mts';
+import { prisma } from './prisma.mts';
 
 const adminEmail = process.env.ADMINJS_EMAIL;
 const adminPassword = process.env.ADMINJS_PASSWORD;
@@ -19,6 +20,17 @@ const databaseUrl = process.env.DATABASE_URL;
 const parsePositiveInt = (value: string | undefined, fallback: number) => {
 	const parsed = Number.parseInt(value ?? '', 10);
 	return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+const parseBoolean = (value: string | undefined, fallback: boolean) => {
+	if (!value || value.trim() === '') return fallback;
+	const normalized = value.trim().toLowerCase();
+	if (normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on') {
+		return true;
+	}
+	if (normalized === '0' || normalized === 'false' || normalized === 'no' || normalized === 'off') {
+		return false;
+	}
+	return fallback;
 };
 const sessionTtlSeconds = parsePositiveInt(process.env.ADMINJS_SESSION_TTL_SECONDS, 60 * 60 * 24);
 const sessionCleanupIntervalSeconds = parsePositiveInt(
@@ -40,6 +52,10 @@ const allowedAdminIps = new Set(
 		.split(',')
 		.map((value) => value.trim())
 		.filter(Boolean)
+);
+const requireActiveAdminUser = parseBoolean(
+	process.env.ADMINJS_REQUIRE_ACTIVE_USER,
+	nodeEnv === 'production'
 );
 
 type AdminThumbRateState = {
@@ -96,6 +112,23 @@ const safeEqual = (left: string | undefined, right: string | undefined) => {
 	const rightBuffer = Buffer.from(right, 'utf8');
 	if (leftBuffer.length !== rightBuffer.length) return false;
 	return crypto.timingSafeEqual(leftBuffer, rightBuffer);
+};
+
+const WEAK_SECRET_VALUES = new Set([
+	'test',
+	'password',
+	'admin',
+	'123456',
+	'dev-adminjs-session-secret',
+	'changeme',
+]);
+
+const hasStrongSecret = (value: string, minLength: number) => {
+	const normalized = value.trim();
+	if (normalized.length < minLength) {
+		return false;
+	}
+	return !WEAK_SECRET_VALUES.has(normalized.toLowerCase());
 };
 
 const checkAdminThumbRateLimit = (key: string) => {
@@ -161,17 +194,54 @@ if (!adminEmail || !adminPassword || !sessionSecret || !cookiePassword || !datab
 	);
 }
 
+if (nodeEnv === 'production') {
+	if (!hasStrongSecret(adminPassword, 12)) {
+		throw new Error(
+			'ADMINJS_PASSWORD must be a strong secret (minimum 12 characters and not a common default).'
+		);
+	}
+	if (!hasStrongSecret(sessionSecret, 24)) {
+		throw new Error(
+			'ADMINJS_SESSION_SECRET must be a strong secret (minimum 24 characters and not a common default).'
+		);
+	}
+	if (allowedAdminIps.size === 0) {
+		console.warn(
+			'[admin-security] ADMINJS_ALLOWED_IPS is not set. Consider IP allowlisting the admin panel in production.'
+		);
+	}
+}
+
+const hasActiveAdminProfile = async (email: string) => {
+	try {
+		const user = await prisma.user.findUnique({
+			where: { email },
+			select: { adminStatus: true },
+		});
+		return user?.adminStatus === 'ACTIVE';
+	} catch (error) {
+		console.error('[admin-auth] Failed to verify admin profile', error);
+		return false;
+	}
+};
+
 const authenticate = async (email: string, password: string) => {
-	if (safeEqual(email, adminEmail) && safeEqual(password, adminPassword)) {
-		return { email, role: 'admin' };
+	const isAdminCredential = safeEqual(email, adminEmail) && safeEqual(password, adminPassword);
+	const isReadonlyCredential =
+		safeEqual(email, readonlyEmail) && safeEqual(password, readonlyPassword);
+
+	if (!isAdminCredential && !isReadonlyCredential) {
+		return null;
 	}
-	if (
-		safeEqual(email, readonlyEmail) &&
-		safeEqual(password, readonlyPassword)
-	) {
-		return { email, role: 'readonly' };
+
+	if (requireActiveAdminUser) {
+		const isActiveAdmin = await hasActiveAdminProfile(email);
+		if (!isActiveAdmin) {
+			return null;
+		}
 	}
-	return null;
+
+	return { email, role: isAdminCredential ? 'admin' : 'readonly' };
 };
 
 const start = async () => {

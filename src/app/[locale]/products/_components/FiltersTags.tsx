@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FILTER_TAG_EXCLUDED_KEYS } from '@/constants/products';
 import type { Filter } from '@/types/product';
 import { localizeUnit } from '@/utils/unitLocalization';
+import { formatUsdPrice } from '@/utils/priceFormatting';
 
 type Props = {
 	filters?: Filter[] | null;
@@ -22,6 +23,12 @@ export default function FiltersTags({ filters }: Props) {
 	const orderByFilter = searchParams.get('orderBy');
 
 	const isPriceRangeSet = minPrice && maxPrice;
+	const toPriceTag = (value: string | null) => {
+		if (!value) return null;
+		const parsed = Number(value);
+		if (!Number.isFinite(parsed)) return value;
+		return formatUsdPrice(parsed);
+	};
 
 	const clearParam = (key: string, value?: string) => {
 		const params = new URLSearchParams(searchParams.toString());
@@ -88,7 +95,7 @@ export default function FiltersTags({ filters }: Props) {
 						borderColor='border'
 					>
 						<Tag.Label>
-							{`$${minPrice} – $${maxPrice}`}
+							{`${toPriceTag(minPrice)} – ${toPriceTag(maxPrice)}`}
 						</Tag.Label>
 						<Tag.EndElement onClick={clearFilters}>
 							<Tag.CloseTrigger cursor='pointer' aria-label={t('clearFilters')} />

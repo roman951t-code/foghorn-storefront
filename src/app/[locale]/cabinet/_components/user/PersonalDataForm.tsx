@@ -1,5 +1,5 @@
 'use client';
-import { Fieldset, VStack } from '@chakra-ui/react';
+import { Box, Fieldset, VStack } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
@@ -100,26 +100,29 @@ export default function PersonalDataForm({ i18nData }: Props) {
 			/>
 			<Fieldset.Root size='lg' alignItems='stretch' w='full'>
 				<Fieldset.Content
+					css={{ '--field-label-width': '150px' }}
+					bg='bg.tertiary'
 					gap='6'
 					borderWidth='0.5px'
 					borderStyle='solid'
 					borderColor='border'
 					borderRadius='lg'
 					p={{ base: 4, md: 6 }}
-					bg='bg.tertiary'
 					w='full'
-					css={{ '--field-label-width': '150px' }}
 				>
-					<EmailForm
-						i18nData={i18nData}
-						userEmail={userEmail}
-					/>
-					<PhoneForm
-						i18nData={i18nData}
-						userPhone={userPhone}
-						schema={phoneSchema}
-						refreshSession={refreshSession}
-					/>
+					<Box
+						display='grid'
+						gridTemplateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))' }}
+						gap='3'
+					>
+						<EmailForm i18nData={i18nData} userEmail={userEmail} />
+						<PhoneForm
+							i18nData={i18nData}
+							userPhone={userPhone}
+							schema={phoneSchema}
+							refreshSession={refreshSession}
+						/>
+					</Box>
 				</Fieldset.Content>
 			</Fieldset.Root>
 			<AddressForm

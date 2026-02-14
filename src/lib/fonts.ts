@@ -1,5 +1,21 @@
-export const fontVariableStyle = {
-	'--font-open-sans': '"Segoe UI", "Helvetica Neue", Arial, sans-serif',
-	'--font-montserrat': '"Trebuchet MS", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-	'--font-noto-sans': '"Noto Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-} as const;
+import { Montserrat, Noto_Sans, Open_Sans } from 'next/font/google';
+
+const openSans = Open_Sans({
+	subsets: ['latin', 'cyrillic'],
+	display: 'swap',
+	variable: '--font-open-sans',
+});
+
+const montserrat = Montserrat({
+	subsets: ['latin', 'cyrillic'],
+	display: 'swap',
+	variable: '--font-montserrat',
+});
+
+const notoSans = Noto_Sans({
+	subsets: ['latin', 'cyrillic'],
+	display: 'swap',
+	variable: '--font-noto-sans',
+});
+
+export const fontVariableClassName = `${openSans.variable} ${montserrat.variable} ${notoSans.variable}`;

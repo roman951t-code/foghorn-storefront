@@ -26,6 +26,14 @@ type LineItemPayload = { productId: string; variantId: string | null; quantity: 
 
 const currency = STORE_CURRENCY_CODE_LOWER;
 const STRIPE_COUPON_ID_PREFIX = 'appc_';
+const PHONE_AUTH_TEMP_EMAIL_PATTERN = /^\d+@mail$/i;
+
+const toStripeCustomerEmail = (email: string | null | undefined): string | undefined => {
+	if (typeof email !== 'string') return undefined;
+	const trimmed = email.trim();
+	if (!trimmed || PHONE_AUTH_TEMP_EMAIL_PATTERN.test(trimmed)) return undefined;
+	return trimmed;
+};
 
 const toStripeCouponId = ({
 	couponId,
@@ -454,7 +462,7 @@ export async function POST(req: NextRequest) {
 			discounts: stripeCouponId ? [{ coupon: stripeCouponId }] : undefined,
 			success_url: successUrl,
 			cancel_url: cancelUrl,
-			customer_email: session.user?.email ?? undefined,
+			customer_email: toStripeCustomerEmail(session.user?.email),
 			metadata,
 		});
 

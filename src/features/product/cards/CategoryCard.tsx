@@ -56,7 +56,7 @@ export default function CategoryCard({
 							<LocaleNavLink
 								href={product.href}
 								fontSize='md'
-								fontWeight='normal'
+								fontWeight='medium'
 								textWrap='wrap'
 								wordBreak='break-word'
 								textDecorationColor='main'

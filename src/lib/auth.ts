@@ -8,6 +8,18 @@ import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemp
 import { APP_URL, env } from '@/config/env';
 import { sendPhoneOtpCode } from '@/lib/phoneOtp';
 
+const PHONE_AUTH_TEMP_EMAIL_PATTERN = /^\d+@mail$/i;
+
+const isPhoneAuthTempEmail = (email: string | null | undefined): email is string =>
+	typeof email === 'string' && PHONE_AUTH_TEMP_EMAIL_PATTERN.test(email.trim());
+
+const sanitizeSessionEmail = (email: string | null | undefined): string | null => {
+	if (typeof email !== 'string') return null;
+	const trimmed = email.trim();
+	if (!trimmed || isPhoneAuthTempEmail(trimmed)) return null;
+	return trimmed;
+};
+
 export const auth = betterAuth({
 	baseURL: APP_URL,
 	user: {
@@ -82,6 +94,17 @@ export const auth = betterAuth({
 					await sendPhoneOtpCode({ phoneNumber, code });
 				},
 				requireVerification: true,
+				callbackOnVerification: async ({ user, phoneNumber }) => {
+					const expectedTempEmail = `${phoneNumber.replace(/\D/g, '')}@mail`;
+					if (user.email?.trim().toLowerCase() !== expectedTempEmail) return;
+					await prisma.user.update({
+						where: { id: user.id },
+						data: {
+							email: null,
+							emailVerified: false,
+						},
+					});
+				},
 				signUpOnVerification: {
 					getTempEmail: (phoneNumber) => {
 						return `${phoneNumber.replace(/\D/g, '')}@mail`;
@@ -175,6 +198,7 @@ export const auth = betterAuth({
 			return {
 				user: {
 					...user,
+					email: sanitizeSessionEmail(user.email),
 					...dbUser,
 					isGoogleUser: !!socialAccount,
 				},

@@ -58,7 +58,7 @@
 			"card": "Card",
 			"cardForm": {
 				"title": "Card details",
-				"description": "Enter your card information to continue with card payment.",
+				"description": "You will be redirected to secure Stripe Checkout to enter your card details.",
 				"cardholder": "Cardholder name",
 				"cardholderPlaceholder": "Name as shown on card",
 				"number": "Card number",
@@ -66,7 +66,12 @@
 				"expiry": "Expiry date",
 				"expiryPlaceholder": "MM/YY",
 				"cvv": "Security code (CVV)",
-				"cvvPlaceholder": "123"
+				"cvvPlaceholder": "123",
+				"testModeTitle": "Stripe test mode",
+				"testCard": "Test card",
+				"testExpiry": "Expiry",
+				"testCvc": "CVC",
+				"testDeclineCard": "Declined test card"
 			}
 		},
 		"shipment": {

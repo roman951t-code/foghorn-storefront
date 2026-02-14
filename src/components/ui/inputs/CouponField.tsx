@@ -8,6 +8,7 @@ import { showToaster } from '@/utils/toast';
 import { useCheckoutStore } from '@/stores/checkoutStore';
 import { previewCoupon } from '@/actions/checkout/previewCoupon';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
+import { formatUsdPrice } from '@/utils/priceFormatting';
 
 type Props = {
 	subtotal: number;
@@ -162,7 +163,7 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 							bg='main.secondary'
 							fontWeight='semibold'
 						>
-							{`-$${appliedCoupon.amount.toFixed(2)}`}
+							{`-${formatUsdPrice(appliedCoupon.amount)}`}
 						</Badge>
 					</Text>
 				) : (

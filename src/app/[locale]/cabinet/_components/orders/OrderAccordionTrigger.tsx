@@ -14,6 +14,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import DateWithLocale from '@/components/ui/DateWithLocale';
 import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
+import { formatUsdPrice } from '@/utils/priceFormatting';
 import type { OrderDetailTag, UserOrder } from '@/types/order';
 
 type Props = {
@@ -29,8 +30,8 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 
 	const totalDiscountText =
 		order.totalDiscount > 0
-			? `-$${order.totalDiscount.toFixed(2)}`
-			: `$${order.totalDiscount.toFixed(2)}`;
+			? `-${formatUsdPrice(order.totalDiscount)}`
+			: formatUsdPrice(order.totalDiscount);
 
 	return (
 		<Accordion.ItemTrigger w='full' p='0' cursor='pointer' flexDirection='column'>
@@ -44,13 +45,13 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 				<VStack gap='3' alignItems='flex-start' minW='160px'>
 					<Stat.Root>
 						<Stat.Label fontSize='sm'>{productsT('totalAmount')}</Stat.Label>
-						<Stat.ValueText fontSize='3xl'>{`$${order.total.toFixed(2)}`}</Stat.ValueText>
+						<Stat.ValueText fontSize='3xl'>{formatUsdPrice(order.total)}</Stat.ValueText>
 					</Stat.Root>
-					<Text textStyle='sm' fontWeight='normal'>
+					<Text textStyle='sm' fontWeight='medium'>
 						<Text as='span' fontWeight='bold'>{`${productsT('numOfProducts')}: ${totalItems}`}</Text>
 					</Text>
 					{order.totalDiscount > 0 ? (
-						<Text textStyle='sm' fontWeight='normal'>
+						<Text textStyle='sm' fontWeight='medium'>
 							{`${productsT('totalDiscount')}: `}
 							<Badge
 								variant='solid'

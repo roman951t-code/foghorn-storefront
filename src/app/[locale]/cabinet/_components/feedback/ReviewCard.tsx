@@ -21,6 +21,7 @@ import { FiTrash2 } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import type { Review, SubcategoryProduct } from '@/types/product';
 import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
+import { formatUsdPrice } from '@/utils/priceFormatting';
 
 type Props = {
 	product: SubcategoryProduct & { fullSlug: string };
@@ -76,8 +77,8 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 								</LocaleNavLink>
 							</Card.Title>
 							<Text color='main' fontSize='xl' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
-								{`$${price.current}`}
-								{price.previous && (
+								{formatUsdPrice(price.current)}
+								{price.previous != null && (
 									<Text
 										as='span'
 										color='main.disabled'
@@ -85,10 +86,10 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 										textDecoration='line-through'
 										marginLeft='8px'
 									>
-										{`$${price.previous}`}
+										{formatUsdPrice(price.previous)}
 									</Text>
 								)}
-								{price.savings && (
+								{price.savings != null && (
 									<Badge
 										variant='solid'
 										color='black'
@@ -96,7 +97,7 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 										fontWeight='semibold'
 										marginLeft='12px'
 									>
-										-{`$${price.savings}`}
+										-{formatUsdPrice(price.savings)}
 									</Badge>
 								)}
 							</Text>

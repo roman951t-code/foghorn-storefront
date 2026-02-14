@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import FeedbackModal from '@/features/product/FeedbackModal';
 import type { Review, SubcategoryProduct } from '@/types/product';
 import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
+import { formatUsdPrice } from '@/utils/priceFormatting';
 
 type Props = {
 	product: SubcategoryProduct & { fullSlug: string };
@@ -64,8 +65,8 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 						)}
 
 						<Text color='main' fontSize='md' mb={{ base: 4, sm: 0 }} mr={{ base: 0, sm: 2 }}>
-							{`$${price.current}`}
-							{price.previous && (
+							{formatUsdPrice(price.current)}
+							{price.previous != null && (
 								<Text
 									as='span'
 									color='main.disabled'
@@ -73,7 +74,7 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 									textDecoration='line-through'
 									marginLeft='8px'
 								>
-									{`$${price.previous}`}
+									{formatUsdPrice(price.previous)}
 								</Text>
 							)}
 						</Text>

@@ -8,6 +8,7 @@ import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import type { UserReviewedProduct } from '@/actions/feedback/getUserReviewedProducts';
 import type { Review } from '@/types/product';
+import { roundPrice } from '@/utils/priceFormatting';
 import { ReviewCard } from './ReviewCard';
 import { EmptyReviewCard } from './EmptyReviewCard';
 
@@ -23,13 +24,14 @@ type FeedbackItem = Omit<UserReviewedProduct, 'review'> & {
 };
 
 function formatPrice(basePrice?: number, discountPrice?: number | null) {
-	const base = basePrice ?? 0;
-	const discount = discountPrice ?? null;
-	if (discount && discount > 0) {
+	const base = roundPrice(basePrice ?? 0);
+	const discount = discountPrice != null ? roundPrice(discountPrice) : null;
+	const savings = discount != null ? roundPrice(base - discount) : 0;
+	if (discount != null && discount > 0 && savings > 0) {
 		return {
 			current: discount,
 			previous: base,
-			savings: base - discount,
+			savings,
 		};
 	}
 	return { current: base, previous: null, savings: null };

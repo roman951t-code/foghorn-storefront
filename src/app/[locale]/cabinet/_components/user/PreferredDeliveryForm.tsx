@@ -87,7 +87,7 @@ export default function PreferredDeliveryForm({
 										},
 									}}
 								>
-									<RadioCard.Label fontSize='md' mb='4' fontWeight='normal' mx='auto'>
+									<RadioCard.Label fontSize='md' mb='4' fontWeight='medium' mx='auto'>
 										{i18nData.preferredNotificationWay}
 									</RadioCard.Label>
 									<Stack direction={{ base: 'column', sm: 'row' }} gap='4' justifyContent='center'>

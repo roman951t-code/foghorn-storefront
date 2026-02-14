@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { CartProduct } from '@/types/cart';
 import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE } from '@/utils/productImages';
+import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 
 type CheckoutCardProps = {
 	product: CartProduct;
@@ -14,12 +15,12 @@ const getImage = (src?: string | null) =>
 	buildProductImages(src)?.[0] || src || PRODUCT_PLACEHOLDER_IMAGE;
 
 const usePriceParts = (product: CartProduct) => {
-	const price = product.discountPrice ?? product.basePrice;
-	const hasDiscount =
-		product.discountPrice !== null &&
-		product.discountPrice !== undefined &&
-		product.discountPrice < product.basePrice;
-	const discountAmount = hasDiscount ? product.basePrice - (product.discountPrice ?? 0) : 0;
+	const basePrice = roundPrice(product.basePrice ?? 0);
+	const discountPrice = product.discountPrice != null ? roundPrice(product.discountPrice) : null;
+	const discountAmount =
+		discountPrice != null ? roundPrice(Math.max(0, basePrice - discountPrice)) : 0;
+	const hasDiscount = discountAmount > 0;
+	const price = hasDiscount && discountPrice != null ? discountPrice : basePrice;
 
 	return { price, hasDiscount, discountAmount };
 };
@@ -68,11 +69,11 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 						</Text>
 					)}
 					<Text color='main' fontSize='xl'>
-						{`$${price}`}
+						{formatUsdPrice(price)}
 					</Text>
 					{hasDiscount && (
 						<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
-							{`$${product.basePrice}`}
+							{formatUsdPrice(product.basePrice)}
 							<Badge
 								variant='solid'
 								color='black'
@@ -80,7 +81,7 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 								fontWeight='semibold'
 								marginLeft='10px'
 							>
-								-{`$${discountAmount}`}
+								-{formatUsdPrice(discountAmount)}
 							</Badge>
 						</Text>
 					)}
@@ -173,7 +174,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 								mb={{ base: 4, xs: 0 } as any}
 								mr={{ base: 0, xs: 2 } as any}
 							>
-								{`$${price}`}
+								{formatUsdPrice(price)}
 								{hasDiscount && (
 									<Text
 										as='span'
@@ -182,7 +183,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 										textDecoration='line-through'
 										marginLeft='2'
 									>
-										{`$${product.basePrice}`}
+										{formatUsdPrice(product.basePrice)}
 									</Text>
 								)}
 								{hasDiscount && (
@@ -193,7 +194,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 										fontWeight='semibold'
 										ml='8px'
 									>
-										-{`$${discountAmount}`}
+										-{formatUsdPrice(discountAmount)}
 									</Badge>
 								)}
 							</Text>

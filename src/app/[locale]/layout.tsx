@@ -1,4 +1,4 @@
-import { ReactNode, Suspense, type CSSProperties } from 'react';
+import { ReactNode, Suspense } from 'react';
 import { Box, Link } from '@chakra-ui/react';
 import { hasLocale } from 'next-intl';
 import { NextIntlClientProvider } from 'next-intl';
@@ -20,7 +20,7 @@ import { ColorModeProvider } from '@/components/ui/chakra/color-mode';
 import { getCartItems } from '@/actions/cart/getCartItems';
 import { getCatalog } from '@/actions/products/getCatalog';
 import { getWishListProducts } from '@/actions/wishlist/getWishListProducts';
-import { fontVariableStyle } from '@/lib/fonts';
+import { fontVariableClassName } from '@/lib/fonts';
 import { AppStoreHydrator } from '@/providers/AppStoreHydrator';
 import { LOCALE_TO_HTML_LANG, DEFAULT_LOCALE } from '@/constants/locales';
 import { EMPTY_CART_DATA } from '@/constants/cart';
@@ -183,7 +183,7 @@ export default async function Layout({ children, params }: Props) {
 
 	return (
 		<html lang={htmlLang} suppressHydrationWarning>
-			<body style={fontVariableStyle as CSSProperties}>
+			<body className={fontVariableClassName}>
 				<ColorModeProvider>
 					<Suspense fallback={<LayoutFallback />}>
 						<LayoutProviders locale={locale}>{children}</LayoutProviders>

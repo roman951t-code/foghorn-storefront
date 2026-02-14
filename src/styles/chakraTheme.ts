@@ -23,10 +23,26 @@ const config = defineConfig({
 	theme: {
 		tokens: {
 			fonts: {
-				body: { value: '"SF NS", -apple-system, system-ui, sans-serif' },
-				heading: { value: 'var(--font-montserrat), var(--font-open-sans), system-ui, sans-serif' },
-				link: { value: 'var(--font-noto-sans), var(--font-open-sans), system-ui, sans-serif' },
-				ui: { value: '"SF NS", -apple-system, system-ui, sans-serif' },
+				body: {
+					value: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				},
+				heading: {
+					value:
+						'var(--font-montserrat), var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				},
+				link: {
+					value:
+						'var(--font-noto-sans), var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				},
+				ui: {
+					value: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				},
+			},
+			fontWeights: {
+				thin: { value: '500' },
+				extralight: { value: '500' },
+				light: { value: '500' },
+				normal: { value: '500' },
 			},
 		},
 		breakpoints: {
@@ -384,46 +400,51 @@ const config = defineConfig({
 			}),
 		},
 	},
-	globalCss: {
-		'html, body': {
-			margin: 0,
-			padding: 0,
-		},
-		body: {
-			display: 'flex',
-			flexDirection: 'column',
-			minWidth: '350px',
-			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',
-			textRendering: 'optimizeLegibility',
-		},
-		img: { userSelect: 'none' },
-		form: {
-			width: '100%',
-		},
-		svg: {
-			display: 'inline',
-		},
-		'a, a > span, button.chakra-tabs__trigger': {
-			fontFamily: 'var(--font-montserrat), var(--font-open-sans), system-ui, sans-serif !important',
-			fontWeight: 500,
-			fontSize: 16,
-		},
-		'h1,h2,h3,h4,h5,h6, .chakra-heading': {
-			fontFamily: 'var(--font-montserrat), var(--font-open-sans), system-ui, sans-serif !important',
-			userSelect: 'none',
-		},
-		'p, span, li': {
-			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',
-			fontWeight: 500,
-			userSelect: 'none',
-		},
-		'.chakra-stat__valueText': {
-			fontFamily: 'system-ui',
-			userSelect: 'none',
-		},
-		'label, button, input, textarea, select, small': {
-			fontFamily: '"SF NS", -apple-system, system-ui, sans-serif',
-		},
+		globalCss: {
+			'html, body': {
+				margin: 0,
+				padding: 0,
+			},
+			body: {
+				display: 'flex',
+				flexDirection: 'column',
+				minWidth: '350px',
+				fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				fontWeight: 500,
+				textRendering: 'optimizeLegibility',
+			},
+			img: { userSelect: 'none' },
+			form: {
+				width: '100%',
+			},
+			svg: {
+				display: 'inline',
+			},
+			'a, a > span, button.chakra-tabs__trigger': {
+				fontFamily:
+					'var(--font-montserrat), var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif !important',
+				fontWeight: 500,
+				fontSize: 16,
+			},
+			'h1,h2,h3,h4,h5,h6, .chakra-heading': {
+				fontFamily:
+					'var(--font-montserrat), var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif !important',
+				fontWeight: 500,
+				userSelect: 'none',
+			},
+			'p, span, li': {
+				fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				fontWeight: 500,
+				userSelect: 'none',
+			},
+			'.chakra-stat__valueText': {
+				fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				userSelect: 'none',
+			},
+			'label, button, input, textarea, select, small': {
+				fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				fontWeight: 500,
+			},
 		'.swiper-button-prev,.swiper-button-next': {
 			color: 'var(--chakra-colors-fg) !important',
 		},
