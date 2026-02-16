@@ -6,7 +6,7 @@ import { prisma } from '../prisma.mts';
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe =
 	stripeSecretKey && stripeSecretKey !== ''
-		? new Stripe(stripeSecretKey, { apiVersion: '2026-01-28.clover' })
+		? new Stripe(stripeSecretKey, { apiVersion: '2025-12-15.clover' })
 		: null;
 
 const INVENTORY_RESTOCKED_NOTE = 'Inventory restocked';
@@ -413,10 +413,20 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 	};
 };
 
-export const deleteOrder: ActionHandler<RecordActionResponse> = async (_req, _res, context) => {
+export const deleteOrder: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
 	const { record, resource, currentAdmin, h } = context;
+	const method = ((req as { method?: string }).method ?? 'get').toLowerCase();
 	if (!record || !resource) {
 		throw new Error('Missing record context');
+	}
+	if (method === 'get') {
+		return { record: record.toJSON(currentAdmin) };
+	}
+	if (method !== 'post' && method !== 'delete') {
+		return {
+			record: record.toJSON(currentAdmin),
+			notice: { message: 'order-delete-method-not-allowed', type: 'error' },
+		};
 	}
 	const orderId = record.param('id') as string;
 	const resourceId = typeof (resource as any).id === 'function' ? (resource as any).id() : (resource as any).id;

@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { CartProduct } from '@/types/cart';
-import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE } from '@/utils/productImages';
+import { buildProductImages, resolveProductPrimaryImage } from '@/utils/productImages';
 import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 
 type CheckoutCardProps = {
@@ -12,7 +12,7 @@ type CheckoutCardProps = {
 };
 
 const getImage = (src?: string | null) =>
-	buildProductImages(src)?.[0] || src || PRODUCT_PLACEHOLDER_IMAGE;
+	buildProductImages(src)?.[0] || resolveProductPrimaryImage(src);
 
 const usePriceParts = (product: CartProduct) => {
 	const basePrice = roundPrice(product.basePrice ?? 0);

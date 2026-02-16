@@ -15,7 +15,8 @@ const readonlyEmail =
 const readonlyPassword =
 	process.env.ADMINJS_READONLY_PASSWORD ?? (nodeEnv !== 'production' ? 'test' : undefined);
 const sessionSecret = process.env.ADMINJS_SESSION_SECRET;
-const cookiePassword = process.env.ADMINJS_COOKIE_PASSWORD ?? sessionSecret;
+const explicitCookiePassword = process.env.ADMINJS_COOKIE_PASSWORD;
+const cookiePassword = explicitCookiePassword ?? sessionSecret;
 const databaseUrl = process.env.DATABASE_URL;
 const parsePositiveInt = (value: string | undefined, fallback: number) => {
 	const parsed = Number.parseInt(value ?? '', 10);
@@ -203,6 +204,11 @@ if (nodeEnv === 'production') {
 	if (!hasStrongSecret(sessionSecret, 24)) {
 		throw new Error(
 			'ADMINJS_SESSION_SECRET must be a strong secret (minimum 24 characters and not a common default).'
+		);
+	}
+	if (explicitCookiePassword && !hasStrongSecret(explicitCookiePassword, 24)) {
+		throw new Error(
+			'ADMINJS_COOKIE_PASSWORD must be a strong secret (minimum 24 characters and not a common default).'
 		);
 	}
 	if (allowedAdminIps.size === 0) {
@@ -483,7 +489,7 @@ const start = async () => {
 
 	app.use(admin.options.rootPath, gatedRouter);
 
-	const port = Number(process.env.ADMINJS_PORT ?? 3001);
+	const port = Number(process.env.ADMINJS_PORT ?? process.env.PORT ?? 3001);
 	app.listen(port, () => {
 		console.log(`AdminJS available at http://localhost:${port}${admin.options.rootPath}`);
 	});

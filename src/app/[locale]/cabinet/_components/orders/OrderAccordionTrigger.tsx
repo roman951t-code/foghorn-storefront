@@ -13,7 +13,11 @@ import {
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import DateWithLocale from '@/components/ui/DateWithLocale';
-import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
+import {
+	buildProductImages,
+	resolveProductPrimaryImage,
+	toPreviewImage,
+} from '@/utils/productImages';
 import { formatUsdPrice } from '@/utils/priceFormatting';
 import type { OrderDetailTag, UserOrder } from '@/types/order';
 
@@ -67,7 +71,8 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 				<HStack gap='2' display={{ base: 'none', md: 'flex' }} overflowX='auto'>
 					{thumbItems.map((item) => {
 						const previewImage = toPreviewImage(
-							buildProductImages(item.product.imageUrl, 1)[0] || PRODUCT_PLACEHOLDER_IMAGE
+							buildProductImages(item.product.imageUrl, 1)[0] ||
+								resolveProductPrimaryImage(item.product.imageUrl)
 						);
 
 						return (

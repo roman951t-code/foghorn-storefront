@@ -6,7 +6,11 @@ import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { useMemo } from 'react';
 import FeedbackModal from '@/features/product/FeedbackModal';
 import type { Review, SubcategoryProduct } from '@/types/product';
-import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
+import {
+	buildProductImages,
+	resolveProductPrimaryImage,
+	toPreviewImage,
+} from '@/utils/productImages';
 import { formatUsdPrice } from '@/utils/priceFormatting';
 
 type Props = {
@@ -18,7 +22,7 @@ type Props = {
 export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 	const productHref = useMemo(() => `/products/${product.fullSlug}`, [product.fullSlug]);
 	const previewImage = toPreviewImage(
-		buildProductImages(product.imageUrl, 1)[0] || PRODUCT_PLACEHOLDER_IMAGE
+		buildProductImages(product.imageUrl, 1)[0] || resolveProductPrimaryImage(product.imageUrl)
 	);
 
 	return (

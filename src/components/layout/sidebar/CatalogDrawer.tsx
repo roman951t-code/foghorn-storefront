@@ -25,6 +25,11 @@ import { useCatalog } from '@/providers/CatalogProvider';
 import { BsChevronRight } from 'react-icons/bs';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import CountPill from '@/components/ui/CountPill';
+import {
+	buildImageBackgroundWithFallback,
+	CATEGORY_PLACEHOLDER_IMAGE,
+	SUBCATEGORY_PLACEHOLDER_IMAGE,
+} from '@/utils/categoryImages';
 
 export default function CatalogDrawer() {
 	const t = useTranslations('common');
@@ -96,7 +101,10 @@ export default function CatalogDrawer() {
 				borderBottom='none'
 			>
 				{categories.map((category, categoryIndex) => {
-					const categoryImage = category.imageUrl ?? '/assets/images/temp/2Big.webp';
+					const categoryImage = buildImageBackgroundWithFallback(
+						category.imageUrl,
+						CATEGORY_PLACEHOLDER_IMAGE
+					);
 					const subCount = category.children?.length ?? 0;
 					const subPreview = (category.children ?? [])
 						.slice(0, 3)
@@ -126,10 +134,10 @@ export default function CatalogDrawer() {
 										<Box
 											boxSize='100px'
 											rounded='lg'
-											bgImage={`url(${categoryImage})`}
-											bgSize='contain'
-											bgRepeat='no-repeat'
-											bgPos='center'
+											bgImage={categoryImage}
+											bgSize='contain, contain'
+											bgRepeat='no-repeat, no-repeat'
+											bgPos='center, center'
 											bgColor='bg.tertiary'
 											borderWidth='0.5px'
 											borderStyle='solid'
@@ -159,9 +167,9 @@ export default function CatalogDrawer() {
 										<Box
 											boxSize='88px'
 											rounded='lg'
-											bgImage={`url(${categoryImage})`}
-											bgSize='cover'
-											bgPos='center'
+											bgImage={categoryImage}
+											bgSize='cover, cover'
+											bgPos='center, center'
 											bgColor='bg.tertiary'
 											borderWidth='0.5px'
 											borderStyle='solid'
@@ -203,7 +211,10 @@ export default function CatalogDrawer() {
 							>
 								<SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap={5} w='full'>
 									{category.children?.map((subcategory) => {
-										const subImage = subcategory.imageUrl ?? '/assets/images/temp/3Big.webp';
+										const subImage = buildImageBackgroundWithFallback(
+											subcategory.imageUrl,
+											SUBCATEGORY_PLACEHOLDER_IMAGE
+										);
 										return (
 											<Box
 												key={subcategory.id}
@@ -218,9 +229,9 @@ export default function CatalogDrawer() {
 											>
 												<Box
 													h={{ base: '120px', md: '160px' }}
-													bgImage={`url(${subImage})`}
-													bgSize='cover'
-													bgPos='center'
+													bgImage={subImage}
+													bgSize='cover, cover'
+													bgPos='center, center'
 													position='relative'
 												>
 													<Box

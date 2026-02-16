@@ -14,7 +14,7 @@ import '@/styles/swiper.css';
 import { useCart } from '@/hooks/useCart';
 import { useWishList } from '@/hooks/useWishList';
 import { SubcategoryProduct } from '@/types/product';
-import { buildProductImages } from '@/utils/productImages';
+import { buildProductImages, resolveProductPrimaryImage } from '@/utils/productImages';
 import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 import { MdOutlineShoppingCart, MdShoppingCart } from 'react-icons/md';
 import { FaHeart } from 'react-icons/fa';
@@ -51,9 +51,15 @@ export default function ProductCard({ product }: Props) {
 	const [isLoading, setIsLoading] = useState(false);
 	const { productIds, handleAddItem, handleRemoveItem } = useCart();
 	const { ids: wishListIds, handleWishAdd, handleWishRemove } = useWishList();
-	const previewImages = product.images?.length
-		? product.images
-		: buildProductImages(product.imageUrl).slice(0, 3);
+	const normalizedImages = (product.images ?? []).filter(
+		(image): image is string => typeof image === 'string' && image.trim().length > 0
+	);
+	const generatedImages = buildProductImages(product.imageUrl, 3);
+	const previewImages = normalizedImages.length
+		? normalizedImages
+		: generatedImages.length > 0
+			? generatedImages
+			: [resolveProductPrimaryImage(product.imageUrl)];
 
 	if (!product) return null;
 

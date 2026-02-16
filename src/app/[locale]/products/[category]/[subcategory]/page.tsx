@@ -14,7 +14,12 @@ import Pagination from '@/components/ui/Pagination';
 import { getSubcategoryNameBySlug } from '@/actions/products/getSubcategoryNameBySlug';
 import { getSubcategoryFilters } from '@/actions/products/getProductsFilters';
 import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
-import { PRODUCTS_PER_PAGE, resolveOffset, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
+import {
+	PRODUCTS_PER_PAGE,
+	resolveOffset,
+	resolvePageParam,
+	resolvePerPageParam,
+} from '@/constants/pagination';
 import { SUBCATEGORY_FILTER_EXCLUDED_KEYS } from '@/constants/products';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
 import Script from 'next/script';
@@ -166,11 +171,11 @@ export default async function Subcategory({ params, searchParams }: Props) {
 		],
 	};
 
-		return (
-			<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-				<Script id='subcategory-breadcrumbs-schema' nonce={cspNonce} type='application/ld+json'>
-					{JSON.stringify(breadcrumbsJsonLd)}
-				</Script>
+	return (
+		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
+			<Script id='subcategory-breadcrumbs-schema' nonce={cspNonce} type='application/ld+json'>
+				{JSON.stringify(breadcrumbsJsonLd)}
+			</Script>
 			<Breadcrumbs
 				categorySlug={category}
 				subcategorySlug={subcategory}
@@ -203,18 +208,15 @@ export default async function Subcategory({ params, searchParams }: Props) {
 				>
 					<CatalogBtn fullText />
 					<VStack p='4' justifyContent='flex-start'>
-						<HStack w='full' justify='space-between' align='center'>
-							<Text fontSize='sm' color='fg.muted'>
+						<HStack w='full' gapX='4' align='center'>
+							<Text fontSize='md' color='main'>
 								{productsT('totalProducts')}
 							</Text>
 							<CountPill
 								value={subcategoryData?.totalCount ?? 0}
-								size='sm'
-								borderRadius='full'
-								borderColor='border.button'
-								px='2.5'
-								py='0.5'
-								labelProps={{ fontSize: 'xs' }}
+								px='2'
+								py='1'
+								labelProps={{ fontSize: 'md' }}
 							/>
 						</HStack>
 						<Separator color='border' w='full' my='2' />

@@ -27,6 +27,7 @@ type LineItemPayload = { productId: string; variantId: string | null; quantity: 
 const currency = STORE_CURRENCY_CODE_LOWER;
 const STRIPE_COUPON_ID_PREFIX = 'appc_';
 const PHONE_AUTH_TEMP_EMAIL_PATTERN = /^\d+@mail$/i;
+const MAX_CHECKOUT_ITEMS = 100;
 
 const toStripeCustomerEmail = (email: string | null | undefined): string | undefined => {
 	if (typeof email !== 'string') return undefined;
@@ -180,7 +181,8 @@ export async function POST(req: NextRequest) {
 					quantity: z.number().int().positive().max(99, 'quantity_too_high'),
 				})
 			)
-			.min(1, 'items_required'),
+			.min(1, 'items_required')
+			.max(MAX_CHECKOUT_ITEMS, 'items_too_many'),
 		couponCode: z.string().optional(),
 		shipmentMethod: z.string().max(64).optional(),
 		shippingAddress: z
@@ -329,8 +331,9 @@ export async function POST(req: NextRequest) {
 					!product ||
 					!product.inStock ||
 					!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
-				)
+				) {
 					return null;
+				}
 
 				const variant =
 					(item.variantId ? variantById.get(item.variantId) ?? null : null) ??
@@ -352,7 +355,8 @@ export async function POST(req: NextRequest) {
 					effectiveProductDiscount != null ? Math.max(0, productBase - effectiveProductDiscount) : 0;
 
 				const variantBase = variant.price?.toNumber?.() ?? 0;
-				const effectiveVariantPrice = discountAmount > 0 ? Math.max(0, variantBase - discountAmount) : variantBase;
+				const effectiveVariantPrice =
+					discountAmount > 0 ? Math.max(0, variantBase - discountAmount) : variantBase;
 				const unitAmount = Math.max(1, Math.round(effectiveVariantPrice * 100));
 				const translation = pickLocalizedTranslation(product.translations, locale);
 				const displayProductName = translation?.name ?? product.name;
@@ -365,6 +369,10 @@ export async function POST(req: NextRequest) {
 						: null;
 
 				return {
+					metadata: {
+						appProductId: product.id,
+						appVariantId: variant.id,
+					},
 					quantity,
 					price_data: {
 						currency,
@@ -438,7 +446,8 @@ export async function POST(req: NextRequest) {
 
 		const metadata: Record<string, string> = {
 			userId: session.user.id,
-			items: JSON.stringify(items),
+			itemCount: String(items.length),
+			cartHash: createHash('sha256').update(JSON.stringify(items)).digest('hex').slice(0, 24),
 			locale,
 		};
 		if (resolvedCouponCode) metadata.couponCode = resolvedCouponCode;

@@ -1,6 +1,8 @@
 const LOCAL_STORE_URL = 'http://localhost:3000';
 const REVALIDATE_PATH = '/api/cache/revalidate';
 const MAX_ALERT_BODY_LENGTH = 1000;
+const isProduction = process.env.NODE_ENV === 'production';
+const logDevRevalidateFailures = process.env.ADMIN_CACHE_REVALIDATE_VERBOSE === 'true';
 
 const normalizeTag = (tag: unknown): string | null => {
 	if (typeof tag !== 'string') return null;
@@ -79,6 +81,11 @@ const resolveStoreAppUrl = () => {
 	return LOCAL_STORE_URL;
 };
 
+const buildRevalidateEndpointHint = () => {
+	const base = resolveStoreAppUrl().trim().replace(/\/+$/, '');
+	return `${base}${REVALIDATE_PATH}`;
+};
+
 export const revalidateStorefrontCacheTags = async (tags: Array<string | null | undefined>) => {
 	const normalizedTags = Array.from(
 		new Set(tags.map(normalizeTag).filter((tag): tag is string => Boolean(tag)))
@@ -114,14 +121,19 @@ export const revalidateStorefrontCacheTags = async (tags: Array<string | null | 
 		if (!response.ok) {
 			const body = await response.text().catch(() => '');
 			const details = {
+				endpoint: endpoint.toString(),
 				status: response.status,
 				durationMs: Date.now() - startedAt,
 				tagCount: normalizedTags.length,
 				tags: normalizedTags,
 				body: truncate(body, MAX_ALERT_BODY_LENGTH),
 			};
-			logAdminCacheEvent('error', 'revalidate-request-failed', details);
-			await sendRevalidateAlert('revalidate-request-failed', details);
+			if (isProduction) {
+				logAdminCacheEvent('error', 'revalidate-request-failed', details);
+				await sendRevalidateAlert('revalidate-request-failed', details);
+			} else if (logDevRevalidateFailures) {
+				logAdminCacheEvent('info', 'revalidate-request-failed', details);
+			}
 			return;
 		}
 
@@ -132,12 +144,20 @@ export const revalidateStorefrontCacheTags = async (tags: Array<string | null | 
 		});
 	} catch (error) {
 		const details = {
+			endpoint: buildRevalidateEndpointHint(),
 			durationMs: Date.now() - startedAt,
 			tagCount: normalizedTags.length,
 			tags: normalizedTags,
 			error: toErrorMessage(error),
+			hint: isProduction
+				? undefined
+				: 'Ensure storefront Next.js app is running at NEXT_PUBLIC_APP_URL before admin mutations',
 		};
-		logAdminCacheEvent('error', 'revalidate-request-threw', details);
-		await sendRevalidateAlert('revalidate-request-threw', details);
+		if (isProduction) {
+			logAdminCacheEvent('error', 'revalidate-request-threw', details);
+			await sendRevalidateAlert('revalidate-request-threw', details);
+		} else if (logDevRevalidateFailures) {
+			logAdminCacheEvent('info', 'revalidate-request-threw', details);
+		}
 	}
 };

@@ -23,12 +23,16 @@ import {
 	normalizeShippingAddress,
 	SHIPPING_ADDRESS_FIELD_LIMITS,
 } from '@/utils/shippingAddress';
+import {
+	listStripeCheckoutSessionLineItems,
+	parseLegacyStripeCheckoutItemsMetadata,
+	parseStripeCheckoutLineItemMetadata,
+} from '@/utils/stripeCheckoutItems';
 
 type Result =
 	| { success: true; order?: UserOrder }
 	| { success: false; message: string };
 
-type OrderItemPayload = { productId: string; variantId: string | null; quantity: number };
 const MAX_ITEM_QUANTITY = 99;
 
 type FinalizeMode = 'user' | 'system';
@@ -190,9 +194,7 @@ async function finalizeStripeOrderInternal(
 		return { success: true, order: normalized };
 	}
 
-	const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId, {
-		expand: ['line_items'],
-	});
+	const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId);
 
 	if (checkoutSession.payment_status !== 'paid') {
 		return { success: false, message: 'not_paid' };
@@ -272,20 +274,13 @@ async function finalizeStripeOrderInternal(
 		normalizeMetadataString(checkoutSession.metadata?.locale, 16)?.toLowerCase() || DEFAULT_LOCALE;
 	const localeFallbacks = getLocaleFallbacks(checkoutLocale);
 
-	let itemsPayload: OrderItemPayload[] = [];
-	try {
-		const parsed = JSON.parse(checkoutSession.metadata?.items ?? '[]');
-		if (Array.isArray(parsed)) {
-			itemsPayload = parsed
-				.map((item) => ({
-					productId: String(item?.productId ?? '').trim(),
-					variantId: item?.variantId ? String(item?.variantId).trim() : null,
-					quantity: Math.max(1, Math.floor(item?.quantity ?? 1)),
-				}))
-				.filter((item) => item.productId);
-		}
-	} catch {
-		// ignore parsing issues
+	const checkoutLineItems = await listStripeCheckoutSessionLineItems({
+		stripeClient: stripe,
+		sessionId,
+	}).catch(() => []);
+	let itemsPayload = parseStripeCheckoutLineItemMetadata(checkoutLineItems);
+	if (!itemsPayload.length) {
+		itemsPayload = parseLegacyStripeCheckoutItemsMetadata(checkoutSession.metadata?.items);
 	}
 
 	if (!itemsPayload.length) {
@@ -649,6 +644,12 @@ async function finalizeStripeOrderInternal(
 			return created;
 		});
 	} catch (error) {
+		console.error('[payments] Failed to finalize Stripe order transaction', {
+			sessionId,
+			mode,
+			userId: userSnapshot.id,
+			error,
+		});
 		return { success: false, message: 'order-create-failed' };
 	}
 

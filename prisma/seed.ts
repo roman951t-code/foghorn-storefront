@@ -20,6 +20,27 @@ function createSlug(text: string) {
 }
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6);
+const usedProductCodes = new Set<string>();
+const isSeedToggleEnabled = (rawValue: string | undefined, defaultValue: string) =>
+	!['0', 'false', 'no', 'off'].includes((rawValue ?? defaultValue).trim().toLowerCase());
+// Default is CSV-first mode (no auto-generated categories). Set SEED_GENERATE_CATEGORIES=true to re-enable.
+const SHOULD_GENERATE_CATEGORIES = isSeedToggleEnabled(process.env.SEED_GENERATE_CATEGORIES, 'false');
+// Default is CSV-first mode (no auto-generated products). Set SEED_GENERATE_PRODUCTS=true to re-enable.
+const SHOULD_GENERATE_PRODUCTS = isSeedToggleEnabled(process.env.SEED_GENERATE_PRODUCTS, 'false');
+const SHOULD_GENERATE_SEED_PRODUCTS = SHOULD_GENERATE_CATEGORIES && SHOULD_GENERATE_PRODUCTS;
+
+const generateUniqueProductCode = () => {
+	let attempts = 0;
+	while (attempts < 1000) {
+		const candidate = faker.string.numeric(8);
+		if (!usedProductCodes.has(candidate)) {
+			usedProductCodes.add(candidate);
+			return candidate;
+		}
+		attempts += 1;
+	}
+	throw new Error('Failed to generate a unique productCode during seeding.');
+};
 
 const fallbackProductImages = [
 	'/assets/images/temp/1Big.webp',
@@ -57,11 +78,15 @@ const subcategoriesMap: Record<string, string[]> = {
 	Accessories: ['Chargers', 'Cables', 'Cases'],
 	Wearables: ['Smartwatches', 'Fitness Bands'],
 };
+const SEEDED_MAIN_CATEGORY_SLUGS = mainCategories.map((name) => createSlug(name));
+const SEEDED_SUBCATEGORY_SLUGS = Array.from(
+	new Set(Object.values(subcategoriesMap).flat().map((name) => createSlug(name)))
+);
 
 const mainCategoryUkMap: Record<string, string> = {
 	Smartphones: 'Смартфони',
 	Tablets: 'Планшети',
-	'Laptops & PCs': "Ноутбуки та ПК",
+	'Laptops & PCs': 'Ноутбуки та ПК',
 	TVs: 'Телевізори',
 	Cameras: 'Камери',
 	Audio: 'Аудіо',
@@ -78,7 +103,7 @@ const subcategoryUkMap: Record<string, string> = {
 	Laptops: 'Ноутбуки',
 	Ultrabooks: 'Ультрабуки',
 	'Gaming Laptops': 'Ігрові ноутбуки',
-	Desktops: "Настільні ПК",
+	Desktops: 'Настільні ПК',
 	Monitors: 'Монітори',
 	'4K TVs': 'Телевізори 4K',
 	'Smart TVs': 'Смарт-телевізори',
@@ -206,6 +231,59 @@ function buildKeywordImage(keyword: string, width: number, height: number, seed:
 	return `https://picsum.photos/seed/${normalizedKeyword}-${seed}/${width}/${height}`;
 }
 
+const updatePicsumVariantPath = (url: URL, variantIndex: number) => {
+	const segments = url.pathname.split('/').filter(Boolean);
+	const seedIndex = segments.findIndex((segment) => segment === 'seed');
+	if (seedIndex !== -1 && segments.length >= seedIndex + 4) {
+		const baseSeed = segments[seedIndex + 1] ?? 'product';
+		segments[seedIndex + 1] = `${baseSeed}-${variantIndex}`;
+		segments[seedIndex + 2] = '900';
+		segments[seedIndex + 3] = '900';
+		url.pathname = '/' + segments.join('/');
+		url.search = '';
+		return;
+	}
+	url.searchParams.set('variant', String(variantIndex));
+};
+
+const updateLoremFlickrVariantPath = (url: URL, variantIndex: number) => {
+	const segments = url.pathname.split('/').filter(Boolean);
+	if (segments.length >= 2 && /^\d+$/.test(segments[0]) && /^\d+$/.test(segments[1])) {
+		segments[0] = '900';
+		segments[1] = '900';
+		url.pathname = '/' + segments.join('/');
+	}
+	url.searchParams.set('lock', String(variantIndex));
+};
+
+const toVariantImageUrl = (primaryUrl: string, variantIndex: number) => {
+	try {
+		const parsed = new URL(primaryUrl);
+		if (parsed.hostname.includes('picsum.photos')) {
+			updatePicsumVariantPath(parsed, variantIndex);
+		} else if (parsed.hostname.includes('loremflickr.com')) {
+			updateLoremFlickrVariantPath(parsed, variantIndex);
+		} else {
+			parsed.searchParams.set('variant', String(variantIndex));
+		}
+		return parsed.toString();
+	} catch {
+		const separator = primaryUrl.includes('?') ? '&' : '?';
+		return `${primaryUrl}${separator}variant=${variantIndex}`;
+	}
+};
+
+const buildSeedProductGallery = (primaryUrl: string, extraImages = 3) => {
+	const normalizedPrimary = primaryUrl.trim();
+	if (!normalizedPrimary) return [];
+	const urls: string[] = [normalizedPrimary];
+	for (let i = 1; i <= extraImages; i += 1) {
+		const variantUrl = toVariantImageUrl(normalizedPrimary, i);
+		if (!urls.includes(variantUrl)) urls.push(variantUrl);
+	}
+	return urls;
+};
+
 const getCategoryImage = (name: string) => {
 	const keyword = categoryImageKeywords[name] ?? subcategoryImageKeywords[name] ?? 'tech-gadgets';
 	const seed = createSlug(name);
@@ -217,11 +295,7 @@ const getSubcategoryImage = (sub: string, seed: string) => {
 	return buildKeywordImage(keyword, 900, 900, seed) || stablePick(fallbackProductImages, seed);
 };
 
-const buildSemanticProductName = (
-	brandName: string,
-	subcategoryName: string,
-	seed: string
-) => {
+const buildSemanticProductName = (brandName: string, subcategoryName: string, seed: string) => {
 	const models = productModelsBySubcategory[subcategoryName] ?? fallbackProductModels;
 	const model = stablePick(models, seed);
 	return `${brandName} ${model}`;
@@ -236,16 +310,7 @@ const VARIANT_OPTIONS = {
 };
 
 const PRODUCT_ATTRIBUTE_OPTIONS = {
-	models: [
-		'AX-100',
-		'AX-200',
-		'AX-300',
-		'ZN-100',
-		'ZN-200',
-		'ZN-300',
-		'VT-100',
-		'VT-200',
-	],
+	models: ['AX-100', 'AX-200', 'AX-300', 'ZN-100', 'ZN-200', 'ZN-300', 'VT-100', 'VT-200'],
 	weightsKg: ['0.18', '0.22', '0.28', '0.45', '0.75', '1.20'], // kg
 	sizesMm: ['90', '120', '150', '210', '320', '420'], // mm
 	batteryMah: ['3500', '4500', '5000', '6000', '8000', '10000'], // mAh
@@ -279,14 +344,14 @@ const buildVariantTemplates = (category: string): VariantTemplate[] => {
 		case 'Tablets':
 			for (const color of colors) {
 				for (const size of storage) {
-					addCombo({ Колір: color, "Памʼять": size });
+					addCombo({ Колір: color, Памʼять: size });
 				}
 			}
 			break;
 		case 'Laptops & PCs':
 			for (const ramSize of ram) {
 				for (const size of storage) {
-					addCombo({ ОЗП: ramSize, "Памʼять": size });
+					addCombo({ ОЗП: ramSize, Памʼять: size });
 				}
 			}
 			break;
@@ -300,7 +365,7 @@ const buildVariantTemplates = (category: string): VariantTemplate[] => {
 		case 'Cameras':
 			for (const color of colors) {
 				for (const size of storage) {
-					addCombo({ Колір: color, "Памʼять": size });
+					addCombo({ Колір: color, Памʼять: size });
 				}
 			}
 			break;
@@ -313,7 +378,7 @@ const buildVariantTemplates = (category: string): VariantTemplate[] => {
 			break;
 		case 'Gaming':
 			for (const size of storage) {
-				addCombo({ "Памʼять": size });
+				addCombo({ Памʼять: size });
 			}
 			break;
 		default:
@@ -376,8 +441,12 @@ function buildLocalizedProductCopy(
 	const useCase = stablePick(isUkrainian ? productUseCasesUk : productUseCasesEn, product.id);
 	const name = product.name.trim();
 	const description = isUkrainian
-		? `${name} — ${subcategoryName.toLowerCase()} від ${product.brand.name}, що пропонує ${highlight}. Модель ${useCase}.`
-		: `${name} is a ${product.subcategoryName.toLowerCase()} by ${product.brand.name} that delivers ${highlight}. It is ${useCase}.`;
+		? `${name} — ${subcategoryName.toLowerCase()} від ${
+				product.brand.name
+		  }, що пропонує ${highlight}. Модель ${useCase}.`
+		: `${name} is a ${product.subcategoryName.toLowerCase()} by ${
+				product.brand.name
+		  } that delivers ${highlight}. It is ${useCase}.`;
 	const metaTitle = `${name} | ${categoryName} | Online Store`;
 	const metaDescription = isUkrainian
 		? `${name} від ${product.brand.name}: ${highlight}. Швидка доставка по Україні.`
@@ -562,8 +631,7 @@ const pageLocalizationBySlug: Record<string, Record<SupportedLocale, LocalizedPa
 			content:
 				'Ви можете обміняти або повернути товар протягом 14 днів з моменту покупки за умови, що він не був у використанні та збережений товарний вигляд.\n\nЩоб розпочати процедуру, зверніться до служби підтримки, і ми допоможемо пройти всі етапи.',
 			metaTitle: 'Обмін та повернення | Online Store',
-			metaDescription:
-				'Дізнайтеся про строки, умови та порядок повернення коштів в Online Store.',
+			metaDescription: 'Дізнайтеся про строки, умови та порядок повернення коштів в Online Store.',
 		},
 	},
 	'shipping-terms': {
@@ -582,8 +650,7 @@ const pageLocalizationBySlug: Record<string, Record<SupportedLocale, LocalizedPa
 			content:
 				'Ми доставляємо по всій території України через популярні служби доставки, зокрема Нова Пошта та Укрпошта.\n\nВартість і строки залежать від регіону та обраного способу доставки. Зазвичай доставка триває 1-3 робочі дні.',
 			metaTitle: 'Умови доставки | Online Store',
-			metaDescription:
-				'Перегляньте способи, строки та вартість доставки замовлень Online Store.',
+			metaDescription: 'Перегляньте способи, строки та вартість доставки замовлень Online Store.',
 		},
 	},
 	terms: {
@@ -839,6 +906,15 @@ async function syncLocalizedSeedTranslations(locales: readonly SupportedLocale[]
 
 async function main() {
 	console.log('🌱 Seeding started...');
+	console.log(
+		`🧭 Category/subcategory generation: ${SHOULD_GENERATE_CATEGORIES ? 'enabled' : 'disabled'}.`
+	);
+	console.log(`🛍️ Product generation: ${SHOULD_GENERATE_SEED_PRODUCTS ? 'enabled' : 'disabled'}.`);
+	if (SHOULD_GENERATE_PRODUCTS && !SHOULD_GENERATE_CATEGORIES) {
+		console.log(
+			'ℹ️ Product generation requested, but category generation is disabled. Skipping seed product creation.'
+		);
+	}
 
 	// Seed expects the database schema to be up-to-date via Prisma migrations.
 	// If migrations weren't applied, seeding will fail with cryptic "table does not exist".
@@ -874,6 +950,24 @@ async function main() {
 		prisma.product.deleteMany({}),
 	]);
 
+	if (!SHOULD_GENERATE_CATEGORIES) {
+		const deletedSeedSubcategories = await prisma.productCategory.deleteMany({
+			where: {
+				parentId: { not: null },
+				slug: { in: SEEDED_SUBCATEGORY_SLUGS },
+			},
+		});
+		const deletedSeedMainCategories = await prisma.productCategory.deleteMany({
+			where: {
+				parentId: null,
+				slug: { in: SEEDED_MAIN_CATEGORY_SLUGS },
+			},
+		});
+		console.log(
+			`🧹 Removed seeded categories/subcategories: ${deletedSeedMainCategories.count} main, ${deletedSeedSubcategories.count} subcategories.`
+		);
+	}
+
 	if (mainCategories.length !== 9) {
 		throw new Error(`Seed expects exactly 9 main categories, got ${mainCategories.length}`);
 	}
@@ -883,7 +977,9 @@ async function main() {
 	);
 	if (categoriesWithoutSubcategories.length > 0) {
 		throw new Error(
-			`Each main category must have at least one subcategory. Missing: ${categoriesWithoutSubcategories.join(', ')}`
+			`Each main category must have at least one subcategory. Missing: ${categoriesWithoutSubcategories.join(
+				', '
+			)}`
 		);
 	}
 
@@ -1028,10 +1124,7 @@ async function main() {
 			},
 		};
 
-	const ensureAttributeSetForCategory = async (
-		categoryId: string,
-		mainCategoryName: string
-	) => {
+	const ensureAttributeSetForCategory = async (categoryId: string, mainCategoryName: string) => {
 		const template = attributeSetTemplateByMainCategory[mainCategoryName];
 		if (!template) return;
 
@@ -1062,175 +1155,204 @@ async function main() {
 	};
 
 	// Categories + Products
-	for (const main of mainCategories) {
-		const parentSlug = createSlug(main);
-		const parentImage = getCategoryImage(main);
-		const parent = await prisma.productCategory.upsert({
-			where: { slug: parentSlug },
-			update: { name: main, parentId: null, imageUrl: parentImage },
-			create: { name: main, slug: parentSlug, parentId: null, imageUrl: parentImage },
-		});
-
-		const subs = subcategoriesMap[main] ?? [];
-		for (const sub of subs) {
-			const subSlug = createSlug(sub);
-			const subImage = getSubcategoryImage(sub, subSlug);
-			const subcategory = await prisma.productCategory.upsert({
-				where: { slug: subSlug },
-				update: { name: sub, parentId: parent.id, imageUrl: subImage },
-				create: { name: sub, slug: subSlug, parentId: parent.id, imageUrl: subImage },
+	if (SHOULD_GENERATE_CATEGORIES) {
+		for (const main of mainCategories) {
+			const parentSlug = createSlug(main);
+			const parentImage = getCategoryImage(main);
+			const parent = await prisma.productCategory.upsert({
+				where: { slug: parentSlug },
+				update: { name: main, parentId: null, imageUrl: parentImage },
+				create: { name: main, slug: parentSlug, parentId: null, imageUrl: parentImage },
 			});
 
-			await ensureAttributeSetForCategory(subcategory.id, main);
-
-			const count = faker.number.int({ min: 3, max: 5 });
-			for (let i = 0; i < count; i++) {
-				const productSeed = `${main}-${sub}-${i}-${nanoid()}`;
-				const pickedBrand = stablePick(brands, productSeed);
-				const name = buildSemanticProductName(pickedBrand.name, sub, productSeed);
-				const price = new Prisma.Decimal(
-					faker.number.float({ min: 100, max: 1500, fractionDigits: 2 })
-				);
-				const stock = faker.number.int({ min: 5, max: 50 });
-
-				// Discount validation
-				let discountPrice: Prisma.Decimal | null = null;
-				if (faker.datatype.boolean()) {
-					const discountValue = new Prisma.Decimal(faker.number.int({ min: 10, max: 100 }));
-					if (price.gt(discountValue)) {
-						discountPrice = price.sub(discountValue);
-					}
-				}
-
-				// Safe unique slug
-				const productSlug = createSlug(`${name}-${nanoid()}`);
-				const fullSlug = `${parentSlug}/${subSlug}/${productSlug}`;
-				const imageUrl = getSubcategoryImage(sub, productSlug);
-				const description = `${name} delivers ${stablePick(
-					productHighlightsEn,
-					productSlug
-				)}. This model is ${stablePick(productUseCasesEn, productSeed)}.`;
-				const product = await prisma.product.create({
-					data: {
-						name,
-						slug: productSlug,
-						fullSlug,
-						status: 'ACTIVE',
-						categoryName: main,
-						subcategoryName: sub,
-						description,
-						imageUrl,
-						basePrice: price,
-						discountPrice,
-						stock,
-						inStock: stock > 0,
-						averageRating: 0,
-						reviewCount: 0,
-						productCode: faker.string.numeric(6),
-						brandId: pickedBrand.id,
-						categoryId: subcategory.id,
-						tags: [],
-						attributes: {
-							create: buildProductAttributeValueCreates(main),
-						},
-					},
+			const subs = subcategoriesMap[main] ?? [];
+			for (const sub of subs) {
+				const subSlug = createSlug(sub);
+				const subImage = getSubcategoryImage(sub, subSlug);
+				const subcategory = await prisma.productCategory.upsert({
+					where: { slug: subSlug },
+					update: { name: sub, parentId: parent.id, imageUrl: subImage },
+					create: { name: sub, slug: subSlug, parentId: parent.id, imageUrl: subImage },
 				});
 
-				const variantTemplates = buildVariantTemplates(main);
-				for (const [index, variant] of variantTemplates.entries()) {
-					const variantAttributes = Object.entries(variant.attributes)
-						.map(([name, value]) => {
-							const attr = attributeByName.get(name);
-							if (!attr) return null;
-							return { attributeId: attr.id, value: String(value) };
-						})
-						.filter(Boolean) as { attributeId: string; value: string }[];
+				await ensureAttributeSetForCategory(subcategory.id, main);
+				if (!SHOULD_GENERATE_SEED_PRODUCTS) continue;
 
-					if (variantAttributes.length === 0) continue;
+				const count = faker.number.int({ min: 3, max: 5 });
+				for (let i = 0; i < count; i++) {
+					const productSeed = `${main}-${sub}-${i}-${nanoid()}`;
+					const pickedBrand = stablePick(brands, productSeed);
+					const name = buildSemanticProductName(pickedBrand.name, sub, productSeed);
+					const price = new Prisma.Decimal(
+						faker.number.float({ min: 100, max: 1500, fractionDigits: 2 })
+					);
+					const stock = faker.number.int({ min: 5, max: 50 });
 
-					await prisma.productVariant.create({
+					// Discount validation
+					let discountPrice: Prisma.Decimal | null = null;
+					if (faker.datatype.boolean()) {
+						const discountValue = new Prisma.Decimal(faker.number.int({ min: 10, max: 100 }));
+						if (price.gt(discountValue)) {
+							discountPrice = price.sub(discountValue);
+						}
+					}
+
+					// Safe unique slug
+					const productSlug = createSlug(`${name}-${nanoid()}`);
+					const fullSlug = `${parentSlug}/${subSlug}/${productSlug}`;
+					const imageUrl = getSubcategoryImage(sub, productSlug);
+					const description = `${name} delivers ${stablePick(
+						productHighlightsEn,
+						productSlug
+					)}. This model is ${stablePick(productUseCasesEn, productSeed)}.`;
+					const galleryImageUrls = buildSeedProductGallery(imageUrl, 3);
+					const product = await prisma.product.create({
 						data: {
-							productId: product.id,
-							sku: `${product.productCode}-${index + 1}`,
-							price: price.add(new Prisma.Decimal(variant.priceDelta)),
-							stock: faker.number.int({ min: 1, max: Math.max(2, Math.floor(stock / 2)) }),
-							attributes: { create: variantAttributes },
+							name,
+							slug: productSlug,
+							fullSlug,
+							status: 'ACTIVE',
+							categoryName: main,
+							subcategoryName: sub,
+							description,
+							imageUrl,
+							basePrice: price,
+							discountPrice,
+							stock,
+							inStock: stock > 0,
+							averageRating: 0,
+							reviewCount: 0,
+							productCode: generateUniqueProductCode(),
+							brandId: pickedBrand.id,
+							categoryId: subcategory.id,
+							tags: [],
+							attributes: {
+								create: buildProductAttributeValueCreates(main),
+							},
+							productImages: {
+								create: galleryImageUrls.map((url, sortOrder) => ({
+									url,
+									sortOrder,
+								})),
+							},
 						},
 					});
-				}
 
-				allProducts.push(product);
+					const variantTemplates = buildVariantTemplates(main);
+					for (const [index, variant] of variantTemplates.entries()) {
+						const variantAttributes = Object.entries(variant.attributes)
+							.map(([name, value]) => {
+								const attr = attributeByName.get(name);
+								if (!attr) return null;
+								return { attributeId: attr.id, value: String(value) };
+							})
+							.filter(Boolean) as { attributeId: string; value: string }[];
+
+						if (variantAttributes.length === 0) continue;
+
+						await prisma.productVariant.create({
+							data: {
+								productId: product.id,
+								sku: `${product.productCode}-${index + 1}`,
+								price: price.add(new Prisma.Decimal(variant.priceDelta)),
+								stock: faker.number.int({
+									min: 1,
+									max: Math.max(2, Math.floor(stock / 2)),
+								}),
+								attributes: { create: variantAttributes },
+							},
+						});
+					}
+
+					allProducts.push(product);
+				}
 			}
 		}
-	}
 
-	const seededMainCategoryRows = await prisma.productCategory.findMany({
-		where: { parentId: null, name: { in: mainCategories } },
-		select: {
-			name: true,
-			_count: {
-				select: {
-					children: true,
+		const seededMainCategoryRows = await prisma.productCategory.findMany({
+			where: { parentId: null, name: { in: mainCategories } },
+			select: {
+				name: true,
+				_count: {
+					select: {
+						children: true,
+					},
 				},
 			},
-		},
-	});
-	if (seededMainCategoryRows.length !== mainCategories.length) {
-		throw new Error(
-			`Expected ${mainCategories.length} main categories, created ${seededMainCategoryRows.length}`
-		);
-	}
-	const mainWithoutSubcategories = seededMainCategoryRows
-		.filter((category) => category._count.children < 1)
-		.map((category) => category.name);
-	if (mainWithoutSubcategories.length > 0) {
-		throw new Error(
-			`Each main category must have at least one subcategory. Missing subcategories for: ${mainWithoutSubcategories.join(', ')}`
-		);
-	}
+		});
+		if (seededMainCategoryRows.length !== mainCategories.length) {
+			throw new Error(
+				`Expected ${mainCategories.length} main categories, created ${seededMainCategoryRows.length}`
+			);
+		}
+		const mainWithoutSubcategories = seededMainCategoryRows
+			.filter((category) => category._count.children < 1)
+			.map((category) => category.name);
+		if (mainWithoutSubcategories.length > 0) {
+			throw new Error(
+				`Each main category must have at least one subcategory. Missing subcategories for: ${mainWithoutSubcategories.join(
+					', '
+				)}`
+			);
+		}
 
-	const expectedSubcategoryNames = Array.from(new Set(Object.values(subcategoriesMap).flat()));
-	const seededSubcategoryRows = await prisma.productCategory.findMany({
-		where: { parentId: { not: null }, name: { in: expectedSubcategoryNames } },
-		select: {
-			name: true,
-			_count: {
-				select: {
-					products: true,
+		const expectedSubcategoryNames = Array.from(new Set(Object.values(subcategoriesMap).flat()));
+		const seededSubcategoryRows = await prisma.productCategory.findMany({
+			where: { parentId: { not: null }, name: { in: expectedSubcategoryNames } },
+			select: {
+				name: true,
+				_count: {
+					select: {
+						products: true,
+					},
 				},
 			},
-		},
-	});
-	if (seededSubcategoryRows.length !== expectedSubcategoryNames.length) {
-		throw new Error(
-			`Expected ${expectedSubcategoryNames.length} seeded subcategories, created ${seededSubcategoryRows.length}`
-		);
-	}
-	const subcategoriesWithoutProducts = seededSubcategoryRows
-		.filter((subcategory) => subcategory._count.products < 1)
-		.map((subcategory) => subcategory.name);
-	if (subcategoriesWithoutProducts.length > 0) {
-		throw new Error(
-			`Each subcategory must have at least one product. Missing products for: ${subcategoriesWithoutProducts.join(', ')}`
+		});
+		if (seededSubcategoryRows.length !== expectedSubcategoryNames.length) {
+			throw new Error(
+				`Expected ${expectedSubcategoryNames.length} seeded subcategories, created ${seededSubcategoryRows.length}`
+			);
+		}
+		if (SHOULD_GENERATE_SEED_PRODUCTS) {
+			const subcategoriesWithoutProducts = seededSubcategoryRows
+				.filter((subcategory) => subcategory._count.products < 1)
+				.map((subcategory) => subcategory.name);
+			if (subcategoriesWithoutProducts.length > 0) {
+				throw new Error(
+					`Each subcategory must have at least one product. Missing products for: ${subcategoriesWithoutProducts.join(
+						', '
+					)}`
+				);
+			}
+		} else {
+			console.log('ℹ️ Skipping subcategory product validation (product generation disabled).');
+		}
+	} else {
+		console.log(
+			'ℹ️ Skipping category/subcategory generation and related validation (category generation disabled).'
 		);
 	}
 
 	// Backfill any existing categories/products with missing or unsupported images
-	const categoriesNeedingImages = await prisma.productCategory.findMany({
-		where: {},
-		select: { id: true, name: true, slug: true, parentId: true, imageUrl: true },
-	});
+	if (SHOULD_GENERATE_CATEGORIES) {
+		const categoriesNeedingImages = await prisma.productCategory.findMany({
+			where: {},
+			select: { id: true, name: true, slug: true, parentId: true, imageUrl: true },
+		});
 
-	for (const cat of categoriesNeedingImages) {
-		if (needsImageReplacement(cat.imageUrl)) {
-			const newImage = cat.parentId
-				? getSubcategoryImage(cat.name, cat.slug)
-				: getCategoryImage(cat.name);
-			await prisma.productCategory.update({
-				where: { id: cat.id },
-				data: { imageUrl: newImage },
-			});
+		for (const cat of categoriesNeedingImages) {
+			if (needsImageReplacement(cat.imageUrl)) {
+				const newImage = cat.parentId
+					? getSubcategoryImage(cat.name, cat.slug)
+					: getCategoryImage(cat.name);
+				await prisma.productCategory.update({
+					where: { id: cat.id },
+					data: { imageUrl: newImage },
+				});
+			}
 		}
+	} else {
+		console.log('ℹ️ Skipping category image backfill (category generation disabled).');
 	}
 
 	const productsNeedingImages = await prisma.product.findMany({
@@ -1253,6 +1375,28 @@ async function main() {
 				},
 			});
 		}
+	}
+
+	const productsMissingGallery = await prisma.product.findMany({
+		where: {
+			imageUrl: { not: null },
+			productImages: { none: {} },
+		},
+		select: { id: true, imageUrl: true },
+	});
+
+	for (const product of productsMissingGallery) {
+		const primaryUrl = product.imageUrl?.trim();
+		if (!primaryUrl) continue;
+		const galleryImageUrls = buildSeedProductGallery(primaryUrl, 3);
+		if (galleryImageUrls.length === 0) continue;
+		await prisma.productImage.createMany({
+			data: galleryImageUrls.map((url, sortOrder) => ({
+				productId: product.id,
+				url,
+				sortOrder,
+			})),
+		});
 	}
 
 	// Assign tags
@@ -1280,14 +1424,18 @@ async function main() {
 		viewed: 10,
 	};
 
-	for (const tag of TAGS) {
-		const productsForTag = pickProductsForTag(tag, tagCounts[tag] ?? 8);
-		for (const p of productsForTag) {
-			await prisma.product.update({
-				where: { id: p.id },
-				data: { tags: { push: tag } },
-			});
+	if (allProducts.length > 0) {
+		for (const tag of TAGS) {
+			const productsForTag = pickProductsForTag(tag, tagCounts[tag] ?? 8);
+			for (const p of productsForTag) {
+				await prisma.product.update({
+					where: { id: p.id },
+					data: { tags: { push: tag } },
+				});
+			}
 		}
+	} else {
+		console.log('ℹ️ Skipping tag assignment because no seed products were generated.');
 	}
 
 	// Promo banners for homepage Promo slider (admin-controlled via Banner)
@@ -1439,62 +1587,66 @@ async function main() {
 		},
 	});
 
-	const reviewedProducts = faker.helpers.arrayElements(allProducts, 10);
+	if (allProducts.length > 0) {
+		const reviewedProducts = faker.helpers.arrayElements(allProducts, 10);
 
-	for (const product of reviewedProducts) {
-		const rating = faker.number.int({ min: 3, max: 5 });
+		for (const product of reviewedProducts) {
+			const rating = faker.number.int({ min: 3, max: 5 });
 
-		await prisma.review.create({
+			await prisma.review.create({
+				data: {
+					userId: roman.id,
+					productId: product.id,
+					rating,
+					comment: faker.lorem.sentences(faker.number.int({ min: 1, max: 3 })),
+					advantages: faker.lorem.words(faker.number.int({ min: 2, max: 5 })),
+					disadvantages: faker.lorem.words(faker.number.int({ min: 2, max: 5 })),
+					createdAt: faker.date.recent({ days: 30 }),
+				},
+			});
+
+			// Update product rating + count properly
+			const reviews = await prisma.review.findMany({
+				where: { productId: product.id },
+				select: { rating: true },
+			});
+
+			const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+
+			await prisma.product.update({
+				where: { id: product.id },
+				data: {
+					averageRating: avgRating,
+					reviewCount: reviews.length,
+				},
+			});
+		}
+
+		// Orders
+		const orderedProducts = faker.helpers.arrayElements(allProducts, 2);
+		const total = orderedProducts.reduce<Prisma.Decimal>(
+			(sum, p) => sum.add(p.basePrice),
+			new Prisma.Decimal(0)
+		);
+
+		await prisma.order.create({
 			data: {
 				userId: roman.id,
-				productId: product.id,
-				rating,
-				comment: faker.lorem.sentences(faker.number.int({ min: 1, max: 3 })),
-				advantages: faker.lorem.words(faker.number.int({ min: 2, max: 5 })),
-				disadvantages: faker.lorem.words(faker.number.int({ min: 2, max: 5 })),
-				createdAt: faker.date.recent({ days: 30 }),
+				total,
+				status: OrderStatus.PAID,
+				items: {
+					create: orderedProducts.map((p) => ({
+						productId: p.id,
+						quantity: 1,
+						price: p.basePrice,
+						unitPrice: p.basePrice,
+					})),
+				},
 			},
 		});
-
-		// Update product rating + count properly
-		const reviews = await prisma.review.findMany({
-			where: { productId: product.id },
-			select: { rating: true },
-		});
-
-		const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-
-		await prisma.product.update({
-			where: { id: product.id },
-			data: {
-				averageRating: avgRating,
-				reviewCount: reviews.length,
-			},
-		});
+	} else {
+		console.log('ℹ️ Skipping demo reviews/orders because no seed products were generated.');
 	}
-
-	// Orders
-	const orderedProducts = faker.helpers.arrayElements(allProducts, 2);
-	const total = orderedProducts.reduce<Prisma.Decimal>(
-		(sum, p) => sum.add(p.basePrice),
-		new Prisma.Decimal(0)
-	);
-
-	await prisma.order.create({
-		data: {
-			userId: roman.id,
-			total,
-			status: OrderStatus.PAID,
-			items: {
-				create: orderedProducts.map((p) => ({
-					productId: p.id,
-					quantity: 1,
-					price: p.basePrice,
-					unitPrice: p.basePrice,
-				})),
-			},
-		},
-	});
 
 	// Content pages (editable via AdminJS)
 	const now = new Date();
@@ -1585,8 +1737,7 @@ async function main() {
 			placement: StorefrontFormPlacement.COOKIE_BANNER,
 			title: 'Cookies',
 			description: 'Cookie preferences',
-			body:
-				'We use cookies to make the site work. Optional cookies (analytics/marketing) are only used with consent where required.\n\nYou can change your choice later by clearing cookies in your browser.',
+			body: 'We use cookies to make the site work. Optional cookies (analytics/marketing) are only used with consent where required.\n\nYou can change your choice later by clearing cookies in your browser.',
 			enabled: false,
 			required: false,
 			acceptLabel: 'Accept all',

@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { Box, HStack, Skeleton, useBreakpointValue } from '@chakra-ui/react';
-import { KeyboardEvent, useState } from 'react';
+import { KeyboardEvent, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode, Navigation, Thumbs, Pagination, A11y, Keyboard } from 'swiper/modules';
@@ -58,9 +58,29 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 		!isSmallScreen && thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null;
 	const accessibleName = productName ?? 'product';
 
-	const galleryImages = images.length
-		? images
+	const normalizedImages = images.filter((src): src is string => src.trim().length > 0);
+	const galleryImages = normalizedImages.length
+		? normalizedImages
 		: Array.from({ length: 4 }, () => PRODUCT_PLACEHOLDER_IMAGE);
+	const gallerySignature = galleryImages.join('|');
+	const [failedIndexes, setFailedIndexes] = useState<Set<number>>(new Set());
+
+	useEffect(() => {
+		setFailedIndexes(new Set());
+	}, [gallerySignature]);
+
+	const markImageFailed = (index: number) => () => {
+		setFailedIndexes((prev) => {
+			if (prev.has(index)) return prev;
+			const next = new Set(prev);
+			next.add(index);
+			return next;
+		});
+	};
+
+	const resolvedGalleryImages = galleryImages.map((src, index) =>
+		failedIndexes.has(index) ? PRODUCT_PLACEHOLDER_IMAGE : src
+	);
 
 	const pagination = isSmallScreen
 		? {
@@ -74,9 +94,9 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 	const resetImage = () => setSelectedImage(null);
 	const openImage = (fallbackIndex?: number) => {
 		const currentIndex = mainSwiper?.realIndex ?? fallbackIndex ?? 0;
-		setSelectedImage(galleryImages[currentIndex] ?? null);
+		setSelectedImage(resolvedGalleryImages[currentIndex] ?? null);
 	};
-	const handleSlideKeyOpen = (src: string) => (event: KeyboardEvent<HTMLDivElement>) => {
+	const handleSlideKeyOpen = (event: KeyboardEvent<HTMLDivElement>) => {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
 			openImage();
@@ -108,7 +128,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 				className='thumbsSlider'
 				aria-label={`Image gallery for ${accessibleName}`}
 			>
-				{galleryImages.map((src, index) => {
+				{resolvedGalleryImages.map((src, index) => {
 					const isFirst = index === 0;
 					return (
 						<SwiperSlide
@@ -116,7 +136,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 							onClick={() => openImage(index)}
 							role='button'
 							tabIndex={0}
-							onKeyDown={handleSlideKeyOpen(src)}
+							onKeyDown={handleSlideKeyOpen}
 							aria-label={`Open larger view of ${accessibleName} image ${index + 1}`}
 						>
 							<Box
@@ -130,6 +150,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 								<Image
 									src={src}
 									alt={`${accessibleName} photo ${index + 1}`}
+									onError={markImageFailed(index)}
 									fill
 									priority={isFirst}
 									fetchPriority={isFirst ? 'high' : undefined}
@@ -164,7 +185,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 					}}
 					aria-label={`Thumbnail carousel for ${accessibleName}`}
 				>
-					{galleryImages.map((src, index) => (
+					{resolvedGalleryImages.map((src, index) => (
 						<SwiperSlide
 							key={index}
 							role='button'
@@ -181,6 +202,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 								<Image
 									src={src}
 									alt={`${accessibleName} thumbnail ${index + 1}`}
+									onError={markImageFailed(index)}
 									fill
 									style={{
 										objectFit: 'cover',

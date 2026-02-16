@@ -107,7 +107,7 @@ export default function UserShow(props: ActionProps) {
 		const nextNotes = (record?.params?.adminNotes as string | undefined) ?? '';
 		setAdminStatus(nextStatus);
 		setAdminNotes(nextNotes);
-	}, [record?.id]);
+	}, [record]);
 
 	useEffect(() => {
 		if (!recordId) return;

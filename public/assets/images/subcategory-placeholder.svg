@@ -1,0 +1,19 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="subcategory-bg" x1="0" y1="0" x2="1200" y2="1200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3F5FB"/>
+      <stop offset="1" stop-color="#DBE2F4"/>
+    </linearGradient>
+    <linearGradient id="subcategory-card" x1="220" y1="220" x2="980" y2="980" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#EEF2FB" stop-opacity="0.96"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1200" fill="url(#subcategory-bg)"/>
+  <rect x="220" y="220" width="760" height="760" rx="64" fill="url(#subcategory-card)" stroke="#C2CDE9" stroke-width="10"/>
+  <rect x="320" y="340" width="500" height="170" rx="24" fill="#DDE5F8" stroke="#C6D0EC" stroke-width="8"/>
+  <rect x="380" y="410" width="420" height="170" rx="24" fill="#CBD8F1" stroke="#B4C3E7" stroke-width="8"/>
+  <rect x="440" y="480" width="340" height="170" rx="24" fill="#BACBEA" stroke="#A5B9E2" stroke-width="8"/>
+  <rect x="320" y="790" width="560" height="26" rx="13" fill="#C5CFEA"/>
+  <rect x="320" y="852" width="450" height="26" rx="13" fill="#D8DEF1"/>
+</svg>

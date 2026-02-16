@@ -1,8 +1,10 @@
-import { useMemo, useState, type ChangeEvent } from 'react';
+import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
+import * as XLSX from 'xlsx';
 import {
 	Box,
 	Button,
+	Icon,
 	Input,
 	Label,
 	Table,
@@ -28,6 +30,13 @@ const actionButtonStyle = {
 	color: 'black',
 };
 
+const PRODUCT_CSV_IMPORT_MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
+const PRODUCT_CSV_IMPORT_MAX_ROW_COUNT = 5000;
+const PRODUCT_CSV_IMPORT_MAX_FILE_SIZE_MB = (
+	PRODUCT_CSV_IMPORT_MAX_FILE_SIZE_BYTES /
+	(1024 * 1024)
+).toString();
+
 const downloadText = (content: string, filename: string) => {
 	const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
 	const url = window.URL.createObjectURL(blob);
@@ -40,16 +49,75 @@ const downloadText = (content: string, filename: string) => {
 	window.URL.revokeObjectURL(url);
 };
 
+const parseCsvRows = (input: string): string[][] => {
+	const rows: string[][] = [];
+	let row: string[] = [];
+	let cell = '';
+	let inQuotes = false;
+	for (let i = 0; i < input.length; i += 1) {
+		const char = input[i];
+		const next = input[i + 1];
+		if (char === '"') {
+			if (inQuotes && next === '"') {
+				cell += '"';
+				i += 1;
+			} else {
+				inQuotes = !inQuotes;
+			}
+			continue;
+		}
+		if (char === ',' && !inQuotes) {
+			row.push(cell);
+			cell = '';
+			continue;
+		}
+		if ((char === '\n' || char === '\r') && !inQuotes) {
+			if (char === '\r' && next === '\n') i += 1;
+			row.push(cell);
+			cell = '';
+			if (row.some((entry) => entry.trim() !== '')) rows.push(row);
+			row = [];
+			continue;
+		}
+		cell += char;
+	}
+	row.push(cell);
+	if (row.some((entry) => entry.trim() !== '')) rows.push(row);
+	return rows;
+};
+
+const countSpreadsheetRows = (buffer: ArrayBuffer) => {
+	const workbook = XLSX.read(buffer, { type: 'array' });
+	const firstSheetName = workbook.SheetNames[0];
+	if (!firstSheetName) return 0;
+	const sheet = workbook.Sheets[firstSheetName];
+	if (!sheet) return 0;
+	const rows = XLSX.utils.sheet_to_json(sheet, {
+		header: 1,
+		raw: false,
+		defval: '',
+	}) as unknown[][];
+	return rows
+		.map((row) => row.map((cell) => String(cell ?? '')))
+		.filter((row) => row.some((entry) => entry.trim().length > 0)).length;
+};
+
 export default function ProductCsvImportExportAction(props: ActionProps) {
 	const { action, resource } = props;
 	const { translateAction, translateMessage } = useTranslation();
 	const addNotice = useNotice();
 	const [csvText, setCsvText] = useState('');
+	const [spreadsheetBase64, setSpreadsheetBase64] = useState('');
+	const [uploadFilename, setUploadFilename] = useState('');
 	const [dryRun, setDryRun] = useState(true);
 	const [reason, setReason] = useState('');
 	const [results, setResults] = useState<CsvResult[]>([]);
-	const [loading, setLoading] = useState(false);
+	const [isExporting, setIsExporting] = useState(false);
+	const [isImporting, setIsImporting] = useState(false);
 	const isReadOnly = useIsReadOnlyAdmin();
+	const isBusy = isExporting || isImporting;
+	const exportInFlightRef = useRef(false);
+	const importInFlightRef = useRef(false);
 
 	const summary = useMemo(() => {
 		const created = results.filter((r) => r.status === 'created').length;
@@ -61,17 +129,86 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 	const formatStatus = (status: CsvResult['status']) =>
 		translateMessage(`product-csv-status-${status}`, { defaultValue: status });
 
-	const handleFile = (file: File | null) => {
+	const isCsvFile = (file: File) => {
+		const filename = file.name.toLowerCase();
+		return filename.endsWith('.csv') || file.type.toLowerCase().includes('csv');
+	};
+
+	const isSpreadsheetFile = (file: File) => {
+		const filename = file.name.toLowerCase();
+		const type = file.type.toLowerCase();
+		return (
+			filename.endsWith('.xlsx') ||
+			filename.endsWith('.xls') ||
+			type.includes('spreadsheetml') ||
+			type.includes('ms-excel')
+		);
+	};
+
+	const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+		const bytes = new Uint8Array(buffer);
+		const chunkSize = 0x8000;
+		let binary = '';
+		for (let i = 0; i < bytes.length; i += chunkSize) {
+			const chunk = bytes.subarray(i, i + chunkSize);
+			binary += String.fromCharCode(...chunk);
+		}
+		return btoa(binary);
+	};
+
+	const clearImportFileState = () => {
+		setCsvText('');
+		setSpreadsheetBase64('');
+		setUploadFilename('');
+	};
+
+	const handleFile = async (file: File | null) => {
 		if (!file) return;
-		const reader = new FileReader();
-		reader.onload = () => {
-			setCsvText(String(reader.result ?? ''));
-		};
-		reader.readAsText(file);
+		try {
+			if (file.size > PRODUCT_CSV_IMPORT_MAX_FILE_SIZE_BYTES) {
+				clearImportFileState();
+				addNotice({ message: 'product-csv-file-too-large', type: 'error' });
+				return;
+			}
+			setUploadFilename(file.name);
+			if (isCsvFile(file)) {
+				const content = await file.text();
+				const rows = parseCsvRows(content);
+				const dataRowsCount = Math.max(0, rows.length - 1);
+				if (dataRowsCount > PRODUCT_CSV_IMPORT_MAX_ROW_COUNT) {
+					clearImportFileState();
+					addNotice({ message: 'product-csv-too-many-rows', type: 'error' });
+					return;
+				}
+				setCsvText(content);
+				setSpreadsheetBase64('');
+				return;
+			}
+			if (isSpreadsheetFile(file)) {
+				const content = await file.arrayBuffer();
+				const rowsCount = countSpreadsheetRows(content);
+				const dataRowsCount = Math.max(0, rowsCount - 1);
+				if (dataRowsCount > PRODUCT_CSV_IMPORT_MAX_ROW_COUNT) {
+					clearImportFileState();
+					addNotice({ message: 'product-csv-too-many-rows', type: 'error' });
+					return;
+				}
+				setSpreadsheetBase64(arrayBufferToBase64(content));
+				setCsvText('');
+				return;
+			}
+			clearImportFileState();
+			addNotice({ message: 'product-csv-invalid-file', type: 'error' });
+		} catch {
+			clearImportFileState();
+			addNotice({ message: 'product-csv-file-read-failed', type: 'error' });
+		}
 	};
 
 	const handleExport = async () => {
-		setLoading(true);
+		if (isBusy || exportInFlightRef.current) return;
+		exportInFlightRef.current = true;
+		setIsExporting(true);
 		try {
 			const response = await api.resourceAction({
 				resourceId: resource.id,
@@ -88,19 +225,24 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 		} catch {
 			addNotice({ message: 'product-csv-export-failed', type: 'error' });
 		} finally {
-			setLoading(false);
+			setIsExporting(false);
+			exportInFlightRef.current = false;
 		}
 	};
 
 	const handleImport = async () => {
-		if (!csvText.trim()) {
+		if (isBusy || importInFlightRef.current) return;
+		if (!csvText.trim() && !spreadsheetBase64.trim()) {
 			addNotice({ message: 'product-csv-empty', type: 'error' });
 			return;
 		}
-		setLoading(true);
+		importInFlightRef.current = true;
+		setIsImporting(true);
 		try {
 			const formData = new FormData();
-			formData.append('csv', csvText);
+			if (csvText.trim()) formData.append('csv', csvText);
+			if (spreadsheetBase64.trim()) formData.append('spreadsheetBase64', spreadsheetBase64);
+			if (uploadFilename.trim()) formData.append('filename', uploadFilename);
 			formData.append('dryRun', String(dryRun));
 			formData.append('reason', reason);
 			const response = await api.resourceAction({
@@ -114,7 +256,8 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 		} catch {
 			addNotice({ message: 'product-csv-import-failed', type: 'error' });
 		} finally {
-			setLoading(false);
+			setIsImporting(false);
+			importInFlightRef.current = false;
 		}
 	};
 
@@ -137,15 +280,23 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 				<Label>{translateMessage('product-csv-file-label')}</Label>
 				<Input
 					type='file'
-					accept='.csv,text/csv'
-					disabled={isReadOnly}
-					onChange={(event: ChangeEvent<HTMLInputElement>) => handleFile(event.target.files?.[0] ?? null)}
+					accept='.csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel'
+					disabled={isReadOnly || isImporting}
+					onChange={(event: ChangeEvent<HTMLInputElement>) => {
+						void handleFile(event.target.files?.[0] ?? null);
+					}}
 				/>
+				<Text color='grey60'>
+					{translateMessage('product-csv-import-limits', {
+						sizeMb: PRODUCT_CSV_IMPORT_MAX_FILE_SIZE_MB,
+						rows: String(PRODUCT_CSV_IMPORT_MAX_ROW_COUNT),
+					})}
+				</Text>
 				<Box style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 					<input
 						type='checkbox'
 						checked={dryRun}
-						disabled={isReadOnly}
+						disabled={isReadOnly || isImporting}
 						onChange={(event: ChangeEvent<HTMLInputElement>) => setDryRun(event.target.checked)}
 					/>
 					<Text>{translateMessage('product-csv-dry-run')}</Text>
@@ -154,25 +305,36 @@ export default function ProductCsvImportExportAction(props: ActionProps) {
 					<Label>{translateMessage('product-csv-reason-label')}</Label>
 					<Input
 						value={reason}
-						disabled={isReadOnly}
+						disabled={isReadOnly || isImporting}
 						onChange={(event: ChangeEvent<HTMLInputElement>) => setReason(event.target.value)}
 						placeholder={translateMessage('product-csv-reason-placeholder')}
 					/>
 				</Box>
-				<Box style={{ display: 'flex', gap: 12 }}>
-					<Button variant='outlined' onClick={handleExport} disabled={loading}>
-						{translateMessage('product-csv-export')}
+				<Box style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+					<Button variant='outlined' onClick={handleExport} disabled={isBusy}>
+						{isExporting
+							? translateMessage('product-csv-exporting')
+							: translateMessage('product-csv-export')}
 					</Button>
 					<Button
 						variant='contained'
 						color='primary'
-						style={actionButtonStyle}
+						style={{ ...actionButtonStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }}
 						onClick={handleImport}
-						disabled={isReadOnly || loading}
+						disabled={isReadOnly || isBusy}
 					>
-						{loading ? translateMessage('product-csv-importing') : translateMessage('product-csv-import')}
+						{isImporting ? <Icon icon='Loader' spin /> : null}
+						{isImporting
+							? translateMessage('product-csv-importing')
+							: translateMessage('product-csv-import')}
 					</Button>
 				</Box>
+				{isImporting ? (
+					<Box style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+						<Icon icon='Loader' spin />
+						<Text color='grey60'>{translateMessage('product-csv-importing')}</Text>
+					</Box>
+				) : null}
 			</Box>
 
 			{results.length > 0 ? (

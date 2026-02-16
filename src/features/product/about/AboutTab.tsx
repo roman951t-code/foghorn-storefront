@@ -23,7 +23,7 @@ import { LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
 import AddToFavourite from './AddToFavourite';
 import AddToCartButton from './AddToCartButton';
 import { Product } from '@/types/product';
-import { buildProductImages } from '@/utils/productImages';
+import { buildProductImages, resolveProductPrimaryImage } from '@/utils/productImages';
 import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 import ProductDetails, { DetailOption } from './ProductDetails';
 import { VariantSelector } from './VariantSelector';
@@ -96,10 +96,15 @@ export default function AboutTab({
 	const unitEffectivePrice = unitDiscountPrice ?? unitBasePrice;
 	const discount = unitDiscountPrice != null ? roundPrice(unitBasePrice - unitDiscountPrice) : 0;
 
-	const galleryImages =
-		product.images && product.images.length > 0
-			? product.images
-			: buildProductImages(product.imageUrl ?? undefined, 4);
+	const normalizedImages = (product.images ?? []).filter(
+		(image): image is string => typeof image === 'string' && image.trim().length > 0
+	);
+	const generatedImages = buildProductImages(product.imageUrl ?? undefined, 4);
+	const galleryImages = normalizedImages.length
+		? normalizedImages
+		: generatedImages.length > 0
+			? generatedImages
+			: [resolveProductPrimaryImage(product.imageUrl)];
 
 	const paymentOptions: DetailOption[] = [
 		{ key: 'paypal', label: checkoutT('payment.paypal'), icon: <RiPaypalFill /> },

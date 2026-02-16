@@ -433,6 +433,10 @@ export const uaAdminLocale = {
 		'product-views-recently-updated': 'Нещодавно оновлені',
 		'product-views-draft': 'Чернетки',
 		'product-views-clear': 'Очистити',
+		'product-search-label': 'Пошук за назвою товару',
+		'product-search-placeholder': 'Введіть назву товару (без урахування регістру)',
+		'product-search-apply': 'Знайти',
+		'product-search-clear': 'Очистити пошук',
 		'product-bulk-selected': 'Вибрано: {{count}} товарів',
 		'product-bulk-options-loading': 'Завантаження опцій...',
 		'product-bulk-no-options': 'Немає доступних опцій (спочатку створіть бренди/категорії)',
@@ -563,8 +567,8 @@ export const uaAdminLocale = {
 		'product-variant-saved': 'Варіанти збережено',
 		'product-variant-save-failed': 'Не вдалося зберегти варіанти',
 		'product-csv-description':
-			'Завантажте CSV для створення/оновлення товарів або експортуйте поточний каталог.',
-		'product-csv-file-label': 'CSV файл',
+			'Завантажте CSV/XLSX файл для створення/оновлення товарів або експортуйте поточний каталог. Якщо Cloudinary налаштовано, значення imageUrl, galleryUrls, categoryImageUrl та subcategoryImageUrl будуть завантажені автоматично.',
+		'product-csv-file-label': 'CSV/XLSX файл',
 		'product-csv-dry-run': 'Перевірка (дані не буде збережено)',
 		'product-csv-export': 'Експорт CSV',
 		'product-csv-exporting': 'Експорт...',
@@ -573,9 +577,36 @@ export const uaAdminLocale = {
 		'product-csv-export-empty': 'Експорт повернув порожній CSV',
 		'product-csv-export-failed': 'Не вдалося експортувати CSV',
 		'product-csv-import-failed': 'Не вдалося імпортувати CSV',
+		'product-csv-invalid-file': 'Некоректний формат файлу. Використовуйте .csv, .xlsx або .xls',
+		'product-csv-file-read-failed': 'Не вдалося прочитати вибраний файл',
+		'product-csv-file-too-large': 'Файл імпорту завеликий. Максимальний розмір файлу: 8 МБ',
+		'product-csv-too-many-rows':
+			'Файл імпорту містить забагато рядків. Максимум: 5000 рядків даних',
+		'product-csv-import-limits':
+			'Ліміти: до {{sizeMb}} МБ та {{rows}} рядків даних в одному файлі імпорту',
 		'product-csv-empty': 'CSV порожній',
 		'product-csv-no-rows': 'CSV не містить рядків даних',
 		'product-csv-duplicate-slug': 'Дублікат slug у CSV',
+		'product-csv-duplicate-productCode': 'Дублікат артикулу у CSV',
+		'product-csv-conflicting-identifiers':
+			'Ідентифікатори рядка вказують на різні товари (id/slug/productCode не збігаються)',
+		'product-csv-id-not-found': 'ID товару з CSV не знайдено',
+		'product-csv-brand-not-found': 'Бренд не знайдено за переданим brandId/brandSlug',
+		'product-csv-category-not-found': 'Категорію не знайдено за переданим categoryId',
+		'product-csv-category-must-be-subcategory':
+			'categoryId має вказувати на підкатегорію, а не на кореневу категорію',
+		'product-csv-missing-brand-reference':
+			'Потрібне посилання на бренд (brandId або brandSlug/brandName)',
+		'product-csv-missing-category-reference':
+			'Потрібне посилання на категорію (categoryId або categorySlug/categoryName)',
+		'product-csv-missing-subcategory-reference':
+			'Потрібне посилання на підкатегорію (subcategorySlug/subcategoryName)',
+		'product-csv-category-slug-conflict':
+			'categorySlug конфліктує з наявною структурою категорій',
+		'product-csv-subcategory-slug-conflict':
+			'subcategorySlug конфліктує з наявною структурою категорій',
+		'product-csv-brand-create-failed': 'Не вдалося створити бренд із рядка CSV',
+		'product-csv-category-create-failed': 'Не вдалося створити категорію із рядка CSV',
 		'product-csv-slug-exists': 'Slug вже існує в каталозі',
 		'product-csv-missing-name': 'Назва обовʼязкова',
 		'product-csv-missing-slug': 'Slug обовʼязковий',
@@ -589,6 +620,9 @@ export const uaAdminLocale = {
 		'product-csv-invalid-discountPrice': 'Ціна зі знижкою має бути меншою за базову',
 		'product-csv-invalid-slug': 'Некоректний формат slug',
 		'product-csv-missing-currency': 'Валюта обовʼязкова',
+		'product-csv-invalid-attributes':
+			'Колонка attributes має містити валідний JSON (масив обʼєктів {name, unit?, values[]})',
+		'product-csv-image-upload-failed': 'Не вдалося завантажити зображення рядка у Cloudinary',
 		'product-csv-save-failed': 'Не вдалося зберегти рядок',
 		'product-csv-dry-run-complete':
 			'Перевірку завершено ({{created}} створено, {{updated}} оновлено, {{errors}} помилок)',
@@ -759,6 +793,7 @@ export const uaAdminLocale = {
 		'status-not-allowed': 'Зміна статусу недоступна для цього замовлення',
 		'status-updated': 'Статус оновлено до {{status}}',
 		'delete-order-items': 'Видалити це замовлення та всі його позиції?',
+		'order-delete-method-not-allowed': 'Видалення доступне лише через POST/DELETE запит',
 		'invalid-status': 'Обрано некоректний статус',
 		'current-status': 'Поточний статус',
 		'select-status': 'Оберіть новий статус',

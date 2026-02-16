@@ -2,6 +2,24 @@ const SQUARE_FULL = 900;
 const SQUARE_PREVIEW = 160;
 export const PRODUCT_PLACEHOLDER_IMAGE = '/assets/images/product-placeholder.svg';
 
+const normalizeImageUrl = (value?: string | null): string | null => {
+	if (typeof value !== 'string') return null;
+	const trimmed = value.trim();
+	if (trimmed.length === 0) return null;
+	const lowered = trimmed.toLowerCase();
+	if (
+		lowered === 'null' ||
+		lowered === 'undefined' ||
+		lowered === 'none' ||
+		lowered === 'n/a' ||
+		lowered === 'na' ||
+		lowered === '-'
+	) {
+		return null;
+	}
+	return trimmed.length > 0 ? trimmed : null;
+};
+
 const updatePicsumPath = (url: URL, size: number, suffix?: string) => {
 	const segments = url.pathname.split('/').filter(Boolean);
 	const seedIndex = segments.findIndex((segment) => segment === 'seed');
@@ -25,10 +43,11 @@ const updateLoremFlickrPath = (url: URL, size: number) => {
 };
 
 export function buildProductImages(imageUrl?: string | null, count = 4): string[] {
-	if (!imageUrl) return [];
+	const normalizedImageUrl = normalizeImageUrl(imageUrl);
+	if (!normalizedImageUrl) return [];
 
 	try {
-		const baseUrl = new URL(imageUrl);
+		const baseUrl = new URL(normalizedImageUrl);
 		const isPicsum = baseUrl.hostname.includes('picsum.photos');
 		const isLorem = baseUrl.hostname.includes('loremflickr.com');
 
@@ -45,9 +64,12 @@ export function buildProductImages(imageUrl?: string | null, count = 4): string[
 			return clone.toString();
 		});
 	} catch {
-		return [imageUrl];
+		return [normalizedImageUrl];
 	}
 }
+
+export const resolveProductPrimaryImage = (imageUrl?: string | null): string =>
+	normalizeImageUrl(imageUrl) ?? PRODUCT_PLACEHOLDER_IMAGE;
 
 export function toPreviewImage(src: string): string {
 	try {

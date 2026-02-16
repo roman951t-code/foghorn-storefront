@@ -217,7 +217,7 @@ model Product {
   publishStartAt       DateTime?
   publishEndAt         DateTime?
   currency             ProductCurrency         @default(USD)
-  productCode          String
+  productCode          String                  @unique
   stock                Int
   inStock              Boolean                 @default(true)
   brandId              String

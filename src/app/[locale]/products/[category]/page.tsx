@@ -13,6 +13,7 @@ import { ensureParams } from '@/utils/validateParams';
 import { categoryParamsSchema } from 'validationSchemas/productParamsSchemas';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { headers } from 'next/headers';
+import { CATEGORY_PLACEHOLDER_IMAGE } from '@/utils/categoryImages';
 
 export async function generateMetadata({ params }: CategoryParams): Promise<Metadata> {
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
@@ -40,9 +41,11 @@ export async function generateMetadata({ params }: CategoryParams): Promise<Meta
 	const pagesT = await getTranslations('pages');
 	const title = pagesT('metadata.category', { category: categoryName });
 	const description = pagesT('metadata.categoryDescription', { category: categoryName });
-	const imageUrl = category.imageUrl
-		? absoluteUrl(category.imageUrl.startsWith('http') ? category.imageUrl : category.imageUrl)
-		: absoluteUrl('/assets/images/logoBig.webp');
+	const categoryImage =
+		typeof category.imageUrl === 'string' && category.imageUrl.trim().length > 0
+			? category.imageUrl
+			: CATEGORY_PLACEHOLDER_IMAGE;
+	const imageUrl = absoluteUrl(categoryImage);
 
 	return {
 		title,

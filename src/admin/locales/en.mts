@@ -433,6 +433,10 @@ export const enAdminLocale = {
 		'product-views-recently-updated': 'Recently updated',
 		'product-views-draft': 'Draft',
 		'product-views-clear': 'Clear',
+		'product-search-label': 'Search by product name',
+		'product-search-placeholder': 'Type product name (case-insensitive)',
+		'product-search-apply': 'Search',
+		'product-search-clear': 'Clear search',
 		'product-bulk-selected': 'Selected: {{count}} products',
 		'product-bulk-options-loading': 'Loading options...',
 		'product-bulk-no-options': 'No options available (create brands/categories first)',
@@ -563,8 +567,8 @@ export const enAdminLocale = {
 		'product-variant-saved': 'Variants saved',
 		'product-variant-save-failed': 'Failed to save variants',
 		'product-csv-description':
-			'Upload a CSV to create/update products or export the current catalog.',
-		'product-csv-file-label': 'CSV file',
+			'Upload a CSV/XLSX file to create/update products or export the current catalog. If Cloudinary is configured, imageUrl, galleryUrls, categoryImageUrl, and subcategoryImageUrl values are uploaded automatically.',
+		'product-csv-file-label': 'CSV/XLSX file',
 		'product-csv-dry-run': 'Dry run (no data will be saved)',
 		'product-csv-export': 'Export CSV',
 		'product-csv-exporting': 'Exporting...',
@@ -573,9 +577,36 @@ export const enAdminLocale = {
 		'product-csv-export-empty': 'Export returned empty CSV',
 		'product-csv-export-failed': 'Failed to export CSV',
 		'product-csv-import-failed': 'Failed to import CSV',
+		'product-csv-invalid-file': 'Invalid file format. Use .csv, .xlsx, or .xls',
+		'product-csv-file-read-failed': 'Failed to read the selected file',
+		'product-csv-file-too-large': 'Import file is too large. Maximum allowed file size is 8 MB',
+		'product-csv-too-many-rows':
+			'Import file has too many rows. Maximum allowed is 5000 data rows',
+		'product-csv-import-limits':
+			'Limits: up to {{sizeMb}} MB and {{rows}} data rows per import file',
 		'product-csv-empty': 'CSV content is empty',
 		'product-csv-no-rows': 'CSV has no data rows',
 		'product-csv-duplicate-slug': 'Duplicate slug in CSV file',
+		'product-csv-duplicate-productCode': 'Duplicate product code in CSV file',
+		'product-csv-conflicting-identifiers':
+			'Row identifiers point to different products (id/slug/productCode mismatch)',
+		'product-csv-id-not-found': 'Product ID from CSV was not found',
+		'product-csv-brand-not-found': 'Brand not found by provided brandId/brandSlug',
+		'product-csv-category-not-found': 'Category not found by provided categoryId',
+		'product-csv-category-must-be-subcategory':
+			'categoryId must point to a subcategory, not a top-level category',
+		'product-csv-missing-brand-reference':
+			'Brand reference is required (brandId or brandSlug/brandName)',
+		'product-csv-missing-category-reference':
+			'Category reference is required (categoryId or categorySlug/categoryName)',
+		'product-csv-missing-subcategory-reference':
+			'Subcategory reference is required (subcategorySlug/subcategoryName)',
+		'product-csv-category-slug-conflict':
+			'categorySlug conflicts with existing category structure',
+		'product-csv-subcategory-slug-conflict':
+			'subcategorySlug conflicts with existing category structure',
+		'product-csv-brand-create-failed': 'Failed to create brand from CSV row',
+		'product-csv-category-create-failed': 'Failed to create category from CSV row',
 		'product-csv-slug-exists': 'Slug already exists in catalog',
 		'product-csv-missing-name': 'Name is required',
 		'product-csv-missing-slug': 'Slug is required',
@@ -589,6 +620,9 @@ export const enAdminLocale = {
 		'product-csv-invalid-discountPrice': 'Discount price must be lower than base price',
 		'product-csv-invalid-slug': 'Slug format is invalid',
 		'product-csv-missing-currency': 'Currency is required',
+		'product-csv-invalid-attributes':
+			'Attributes column must contain valid JSON (array of {name, unit?, values[]})',
+		'product-csv-image-upload-failed': 'Failed to upload row image to Cloudinary',
 		'product-csv-save-failed': 'Failed to save row',
 		'product-csv-dry-run-complete':
 			'Dry run completed ({{created}} create, {{updated}} update, {{errors}} errors)',
@@ -755,6 +789,7 @@ export const enAdminLocale = {
 		'status-not-allowed': 'Status change not allowed for this order',
 		'status-updated': 'Status updated to {{status}}',
 		'delete-order-items': 'Delete this order and its items?',
+		'order-delete-method-not-allowed': 'Delete action must be submitted via POST/DELETE',
 		'invalid-status': 'Invalid status selected',
 		'current-status': 'Current status',
 		'select-status': 'Select new status',

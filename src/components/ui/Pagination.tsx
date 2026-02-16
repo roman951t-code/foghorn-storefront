@@ -7,9 +7,9 @@ import {
 	ButtonGroup,
 	HStack,
 	IconButton,
-	NumberInput,
 	Pagination as ChakraPagination,
 	Text,
+	NumberInput,
 } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
@@ -71,76 +71,139 @@ export default function Pagination({
 
 	const prevHref = buildUrl(Math.max(1, safePage - 1), safePageSize);
 	const nextHref = buildUrl(Math.min(totalPages, safePage + 1), safePageSize);
+	const navButtonStyles = {
+		rounded: 'full',
+		minW: '40px',
+		h: '40px',
+		borderWidth: '0.5px',
+		borderColor: 'gray',
+		bg: 'bg.tertiary',
+		color: 'main',
+		transition: 'all 0.2s ease',
+		_hover: {
+			bg: 'bgHover.promoCard',
+		},
+	} as const;
 
 	return (
 		<HStack
 			justifyContent='center'
 			alignItems='center'
 			flexWrap='wrap'
-			gap='6'
-			colorPalette='gray'
-			mt='24'
+			gap={{ base: '4', md: '6' }}
+			mt={{ base: '14', md: '20' }}
+			w='full'
 		>
-			<ChakraPagination.Root
-				pageSize={safePageSize}
-				defaultPage={1}
-				count={Math.max(totalItems, 1)}
-				page={safePage}
-				colorPalette='gray'
-				display='flex'
+			<HStack
 				justifyContent='center'
+				alignItems='center'
+				flexWrap='wrap'
+				gap={{ base: '3', md: '5' }}
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor='border'
+				bg='bg.tertiary'
+				rounded='2xl'
+				px={{ base: '3', md: '5' }}
+				py={{ base: '3', md: '3.5' }}
 			>
-				<ButtonGroup variant='ghost' size='md'>
-					{safePage === 1 ? (
-						<IconButton aria-label='Previous' rounded='md' disabled opacity={0.5}>
-							<LuChevronLeft />
-						</IconButton>
-					) : (
-						<Link href={prevHref} prefetch scroll={false}>
-							<IconButton as='span' aria-label='Previous' rounded='md'>
+				<ChakraPagination.Root
+					pageSize={safePageSize}
+					defaultPage={1}
+					count={Math.max(totalItems, 1)}
+					page={safePage}
+					colorPalette='gray'
+					display='flex'
+					justifyContent='center'
+				>
+					<ButtonGroup variant='ghost' size='md' gap='1.5'>
+						{safePage === 1 ? (
+							<IconButton
+								aria-label='Previous'
+								{...navButtonStyles}
+								disabled
+								opacity={0.45}
+								cursor='not-allowed'
+								_hover={undefined}
+							>
 								<LuChevronLeft />
 							</IconButton>
-						</Link>
-					)}
-
-					<ChakraPagination.Items
-						render={(page) => (
-							<Link
-								key={page.value}
-								href={buildUrl(page.value, safePageSize)}
-								prefetch
-								scroll={false}
-							>
-								<IconButton
-									as='span'
-									variant={safePage === page.value ? 'outline' : 'ghost'}
-									borderColor={safePage === page.value ? 'border' : 'transparent'}
-									aria-label={`Page ${page.value}`}
-									rounded='md'
-								>
-									{page.value}
+						) : (
+							<Link href={prevHref} prefetch scroll={false}>
+								<IconButton as='span' aria-label='Previous' {...navButtonStyles}>
+									<LuChevronLeft />
 								</IconButton>
 							</Link>
 						)}
-					/>
 
-					{safePage === totalPages ? (
-						<IconButton aria-label='Next' rounded='md' disabled opacity={0.5}>
-							<LuChevronRight />
-						</IconButton>
-					) : (
-						<Link href={nextHref} prefetch scroll={false}>
-							<IconButton as='span' aria-label='Next' rounded='md'>
+						<ChakraPagination.Items
+							render={(page) => {
+								const isActive = safePage === page.value;
+								return (
+									<Link
+										key={page.value}
+										href={buildUrl(page.value, safePageSize)}
+										prefetch
+										scroll={false}
+									>
+										<IconButton
+											as='span'
+											rounded='full'
+											minW='40px'
+											h='40px'
+											fontWeight={isActive ? 'semibold' : 'medium'}
+											borderWidth='0.5px'
+											borderColor={isActive ? 'main.secondary' : 'border'}
+											bg={isActive ? 'main.secondary' : 'bg.tertiary'}
+											color={isActive ? 'black' : 'main'}
+											aria-label={`Page ${page.value}`}
+											aria-current={isActive ? 'page' : undefined}
+											transition='all 0.2s ease'
+											_hover={
+												isActive
+													? undefined
+													: {
+															bg: 'bgHover.promoCard',
+													  }
+											}
+											_active={isActive ? undefined : { transform: 'translateY(0)' }}
+										>
+											{page.value}
+										</IconButton>
+									</Link>
+								);
+							}}
+						/>
+
+						{safePage === totalPages ? (
+							<IconButton
+								aria-label='Next'
+								{...navButtonStyles}
+								disabled
+								opacity={0.45}
+								cursor='not-allowed'
+								_hover={undefined}
+							>
 								<LuChevronRight />
 							</IconButton>
-						</Link>
-					)}
-				</ButtonGroup>
-			</ChakraPagination.Root>
+						) : (
+							<Link href={nextHref} prefetch scroll={false}>
+								<IconButton as='span' aria-label='Next' {...navButtonStyles}>
+									<LuChevronRight />
+								</IconButton>
+							</Link>
+						)}
+					</ButtonGroup>
+				</ChakraPagination.Root>
 
-			<HStack gap='4' alignItems='center' flexWrap='wrap'>
-				<HStack gap='2' alignItems='center'>
-					<Text fontSize='sm' color='fg.muted'>
+				<HStack gap='3.5' alignItems='center' rounded='xl' py='2.5'>
+					<Text
+						fontSize='sm'
+						letterSpacing='0.05em'
+						textTransform='uppercase'
+						color='fg.muted'
+						fontWeight='semibold'
+					>
 						{t('perPage')}
 					</Text>
 					<NumberInput.Root
@@ -155,14 +218,17 @@ export default function Pagination({
 								applyPageSize(parsed);
 							}
 						}}
-						maxW='70px'
+						maxW='62px'
 						aria-label={t('perPage')}
 					>
 						<NumberInput.Label srOnly>{t('perPage')}</NumberInput.Label>
-						<NumberInput.Control />
+						<NumberInput.Control fontSize='sm' />
 						<NumberInput.Input
+							rounded='md'
+							color='fg'
 							bg='none'
-							fontSize='15px'
+							borderColor='gray'
+							fontSize='md'
 							inputMode='numeric'
 							aria-label={t('perPage')}
 						/>

@@ -5,6 +5,7 @@ import CategoryCard from '@/features/product/cards/CategoryCard';
 import { Loading } from '@/components/ui/Skeleton';
 import type { CatalogCategory } from '@/types/product';
 import { Wrap } from '@chakra-ui/react';
+import { resolveSubcategoryImage } from '@/utils/categoryImages';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -17,9 +18,7 @@ function CategoryCardsInner({ category }: { category?: CatalogCategory }) {
 				<CategoryCard
 					key={sub.id}
 					title={sub.name}
-					imageUrl={
-						sub.imageUrl ?? sub.products[0]?.imageUrl ?? '/assets/images/temp/3Big.webp'
-					}
+					imageUrl={resolveSubcategoryImage(sub.imageUrl, sub.products[0]?.imageUrl)}
 					products={sub.products.map((product) => ({
 						name: product.name,
 						href: `/products/${product.fullSlug}`,

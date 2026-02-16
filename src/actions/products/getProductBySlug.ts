@@ -4,7 +4,7 @@ import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
-import { buildProductImages } from '@/utils/productImages';
+import { buildProductImages, resolveProductPrimaryImage } from '@/utils/productImages';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
@@ -116,6 +116,7 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 	if (!product) return null;
 	const translation = pickLocalizedTranslation(product.translations, locale);
 	const persistedImages = product.productImages.map((image) => image.url).filter(Boolean);
+	const primaryImageUrl = resolveProductPrimaryImage(product.imageUrl);
 	const images = persistedImages.length
 		? persistedImages
 		: buildProductImages(product.imageUrl ?? undefined, 4);
@@ -167,6 +168,7 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 	const { category, productImages, translations, ...productWithoutCategory } = product;
 	return {
 		...productWithoutCategory,
+		imageUrl: primaryImageUrl,
 		name: translation?.name ?? product.name,
 		description: translation?.description ?? product.description,
 		guarantee: translation?.guarantee ?? product.guarantee,
@@ -181,7 +183,7 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 			product.discountStartAt ?? null,
 			product.discountEndAt ?? null
 		),
-		images,
+		images: images.length > 0 ? images : [primaryImageUrl],
 		attributes: mergedAttributes.map((a) => ({
 			name: a.name,
 			unit: a.unit,

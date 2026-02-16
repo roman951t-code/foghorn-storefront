@@ -20,7 +20,11 @@ import DateWithLocale from '@/components/ui/DateWithLocale';
 import { FiTrash2 } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import type { Review, SubcategoryProduct } from '@/types/product';
-import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
+import {
+	buildProductImages,
+	resolveProductPrimaryImage,
+	toPreviewImage,
+} from '@/utils/productImages';
 import { formatUsdPrice } from '@/utils/priceFormatting';
 
 type Props = {
@@ -35,7 +39,7 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 	const prodT = useTranslations('products');
 	const productHref = useMemo(() => `/products/${product.fullSlug}`, [product.fullSlug]);
 	const previewImage = toPreviewImage(
-		buildProductImages(product.imageUrl, 1)[0] || PRODUCT_PLACEHOLDER_IMAGE
+		buildProductImages(product.imageUrl, 1)[0] || resolveProductPrimaryImage(product.imageUrl)
 	);
 
 	return (

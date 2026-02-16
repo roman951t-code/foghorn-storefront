@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Badge, Box, Flex, Heading, Icon, SimpleGrid, Text, Wrap } from '@chakra-ui/react';
 import Image from 'next/image';
 import { BsChevronRight } from 'react-icons/bs';
@@ -7,6 +8,12 @@ import { LocaleNavLink, LocaleNavButton } from '@/components/ui/links/LocaleNavL
 import { CATEGORY_DETAILS_GRID_CSS } from '@/constants/grids';
 import type { I18nData } from '@/types/i18n';
 import type { CatalogCategory } from '@/types/product';
+import {
+	buildImageBackgroundWithFallback,
+	CATEGORY_PLACEHOLDER_IMAGE,
+	resolveCategoryImage,
+	SUBCATEGORY_PLACEHOLDER_IMAGE,
+} from '@/utils/categoryImages';
 
 interface Props {
 	i18nData: I18nData;
@@ -14,9 +21,12 @@ interface Props {
 }
 
 export default function CategoryDetails({ category, i18nData }: Props) {
+	const categoryImageUrl = category?.imageUrl;
+	const [categoryBg, setCategoryBg] = useState(() => resolveCategoryImage(categoryImageUrl));
+	useEffect(() => {
+		setCategoryBg(resolveCategoryImage(categoryImageUrl));
+	}, [categoryImageUrl]);
 	if (!category) return null;
-
-	const categoryBg = category.imageUrl ?? '/assets/images/temp/1Big.webp';
 	const subcategories = category.children ?? [];
 
 	return (
@@ -48,7 +58,10 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 						pr={{ base: 0, lg: '256px' }}
 					>
 						{subcategories.map((subcategory) => {
-							const subImage = subcategory.imageUrl ?? '/assets/images/temp/3Big.webp';
+							const subImage = buildImageBackgroundWithFallback(
+								subcategory.imageUrl,
+								SUBCATEGORY_PLACEHOLDER_IMAGE
+							);
 
 							return (
 								<Box
@@ -65,9 +78,9 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 								>
 									<Box
 										h='72px'
-										bgImage={`url(${subImage})`}
-										bgSize='cover'
-										bgPos='center'
+										bgImage={subImage}
+										bgSize='cover, cover'
+										bgPos='center, center'
 										position='relative'
 									>
 										<Box
@@ -210,6 +223,11 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 								objectFit: 'cover',
 							}}
 							loading='lazy'
+							onError={() => {
+								if (categoryBg !== CATEGORY_PLACEHOLDER_IMAGE) {
+									setCategoryBg(CATEGORY_PLACEHOLDER_IMAGE);
+								}
+							}}
 						/>
 					</Box>
 

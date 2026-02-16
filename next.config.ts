@@ -30,6 +30,10 @@ const baseConfig: NextConfig = {
 				protocol: 'https',
 				hostname: 'fastly.picsum.photos',
 			},
+			{
+				protocol: 'https',
+				hostname: 'res.cloudinary.com',
+			},
 		],
 		qualities: [68, 75],
 	},

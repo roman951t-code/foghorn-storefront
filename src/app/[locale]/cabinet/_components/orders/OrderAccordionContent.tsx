@@ -7,7 +7,11 @@ import { FiTruck } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
-import { buildProductImages, PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
+import {
+	buildProductImages,
+	resolveProductPrimaryImage,
+	toPreviewImage,
+} from '@/utils/productImages';
 import { repeatOrderAction } from '@/actions/repeatOrderAction';
 import { useCartStore } from '@/stores/cartStore';
 import { showToaster } from '@/utils/toast';
@@ -172,7 +176,8 @@ export function OrderAccordionContent({ order }: Props) {
 				<Stack maxH='510px' overflowY='auto'>
 					{order.items.map((item, idx) => {
 						const previewImage = toPreviewImage(
-							buildProductImages(item.product.imageUrl, 1)[0] || PRODUCT_PLACEHOLDER_IMAGE
+							buildProductImages(item.product.imageUrl, 1)[0] ||
+								resolveProductPrimaryImage(item.product.imageUrl)
 						);
 
 						return (

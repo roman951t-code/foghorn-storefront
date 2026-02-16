@@ -1,6 +1,6 @@
 import { ApiClient, type ActionProps, OriginalList, useNotice, useTranslation } from 'adminjs';
-import { Box, Button, Text } from '@adminjs/design-system';
-import { useState } from 'react';
+import { Box, Button, Input, Label, Text } from '@adminjs/design-system';
+import { type ChangeEvent, type FormEvent, useEffect, useState } from 'react';
 
 const actionButtonStyle = {
 	borderColor: 'white',
@@ -25,6 +25,24 @@ const buildListHref = (resourceId: string, filters: Record<string, string>) => {
 	return `${root}/resources/${resourceId}${query ? `?${query}` : ''}`;
 };
 
+const getCurrentFilterParams = () => {
+	if (typeof window === 'undefined') return {} as Record<string, string>;
+	const params = new URLSearchParams(window.location.search);
+	const filters: Record<string, string> = {};
+	for (const [key, value] of params.entries()) {
+		if (!key.startsWith('filters.')) continue;
+		const filterKey = key.slice('filters.'.length);
+		if (!filterKey) continue;
+		filters[filterKey] = value;
+	}
+	return filters;
+};
+
+const getCurrentNameFilterValue = () => {
+	const filters = getCurrentFilterParams();
+	return filters.name ?? '';
+};
+
 const daysAgoIso = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
 export default function ProductList(props: ActionProps) {
@@ -32,8 +50,13 @@ export default function ProductList(props: ActionProps) {
 	const { translateMessage } = useTranslation();
 	const addNotice = useNotice();
 	const [exporting, setExporting] = useState(false);
+	const [nameSearch, setNameSearch] = useState('');
 
 	const api = new ApiClient();
+
+	useEffect(() => {
+		setNameSearch(getCurrentNameFilterValue());
+	}, []);
 
 	const downloadText = (content: string, filename: string) => {
 		const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
@@ -78,6 +101,33 @@ export default function ProductList(props: ActionProps) {
 		{ key: 'draft', filters: { status: 'DRAFT' } },
 	];
 
+	const applyNameSearch = () => {
+		const nextFilters = {
+			...getCurrentFilterParams(),
+		};
+		const normalizedNameSearch = nameSearch.trim();
+		if (normalizedNameSearch) {
+			nextFilters.name = normalizedNameSearch;
+		} else {
+			delete nextFilters.name;
+		}
+		window.location.href = buildListHref(resource.id, nextFilters);
+	};
+
+	const clearNameSearch = () => {
+		const nextFilters = {
+			...getCurrentFilterParams(),
+		};
+		delete nextFilters.name;
+		setNameSearch('');
+		window.location.href = buildListHref(resource.id, nextFilters);
+	};
+
+	const handleNameSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		applyNameSearch();
+	};
+
 	return (
 		<Box>
 			<Box
@@ -102,6 +152,37 @@ export default function ProductList(props: ActionProps) {
 					</a>
 					<Button variant='outlined' onClick={handleExport} disabled={exporting}>
 						{exporting ? translateMessage('product-csv-exporting') : translateMessage('product-csv-export')}
+					</Button>
+				</Box>
+			</Box>
+
+			<Box
+				as='form'
+				onSubmit={handleNameSearchSubmit}
+				variant='white'
+				p='lg'
+				borderRadius='xl'
+				boxShadow='sm'
+				mb='xl'
+				style={{
+					border: '1px solid #E2E8F0',
+					display: 'grid',
+					gap: 10,
+				}}
+			>
+				<Label>{translateMessage('product-search-label')}</Label>
+				<Box style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+					<Input
+						value={nameSearch}
+						onChange={(event: ChangeEvent<HTMLInputElement>) => setNameSearch(event.target.value)}
+						placeholder={translateMessage('product-search-placeholder')}
+						style={{ minWidth: 320, flex: 1 }}
+					/>
+					<Button variant='contained' color='primary' style={actionButtonStyle} type='submit'>
+						{translateMessage('product-search-apply')}
+					</Button>
+					<Button variant='outlined' type='button' onClick={clearNameSearch}>
+						{translateMessage('product-search-clear')}
 					</Button>
 				</Box>
 			</Box>

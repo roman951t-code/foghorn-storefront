@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Card, Badge, VStack, Flex, Box } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavButton, LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { useTranslations } from 'next-intl';
+import { SUBCATEGORY_PLACEHOLDER_IMAGE } from '@/utils/categoryImages';
 
 type CategoryCardProps = {
 	title: string;
@@ -17,6 +19,10 @@ export default function CategoryCard({
 	viewAllHref,
 }: CategoryCardProps) {
 	const t = useTranslations('products');
+	const [resolvedImageUrl, setResolvedImageUrl] = useState(imageUrl);
+	useEffect(() => {
+		setResolvedImageUrl(imageUrl);
+	}, [imageUrl]);
 
 	return (
 		<Card.Root
@@ -93,12 +99,17 @@ export default function CategoryCard({
 				borderColor='border'
 			>
 				<Image
-					src={imageUrl}
+					src={resolvedImageUrl}
 					alt={title}
 					fill
 					sizes='(min-width: 30em) 316px, 100vw'
 					loading='lazy'
 					style={{ objectFit: 'cover' }}
+					onError={() => {
+						if (resolvedImageUrl !== SUBCATEGORY_PLACEHOLDER_IMAGE) {
+							setResolvedImageUrl(SUBCATEGORY_PLACEHOLDER_IMAGE);
+						}
+					}}
 				/>
 			</Box>
 		</Card.Root>

@@ -19,6 +19,7 @@ const MAX_FALLBACK_BUCKETS = 20_000;
 const HIGH_RISK_KEY_PREFIXES = ['auth:', 'proxy:/api/auth:', 'proxy:/api/cart:', 'proxy:/api/payments/stripe:'];
 const DISTRIBUTED_DEGRADED_LOG_COOLDOWN_MS = 60_000;
 const DISTRIBUTED_FETCH_TIMEOUT_MS = 1_200;
+const DISTRIBUTED_UNAVAILABLE_RETRY_AFTER_SECONDS = 30;
 let bucketCleanupTimer: ReturnType<typeof setInterval> | null = null;
 const distributedDegradedLogAt = new Map<string, number>();
 
@@ -301,10 +302,22 @@ export async function checkRateLimit({
 	const preferDistributed =
 		env.NODE_ENV === 'production' &&
 		(requireDistributedInProduction ?? isHighRiskRateLimitKey(key));
+	const distributedUnavailableResult = (): Extract<RateLimitResult, { allowed: false }> => ({
+		allowed: false,
+		retryAfterSeconds: Math.max(
+			1,
+			Math.min(Math.ceil(windowMs / 1000), DISTRIBUTED_UNAVAILABLE_RETRY_AFTER_SECONDS)
+		),
+		statusCode: 503,
+		reason: 'backend_unavailable',
+	});
 
 	if (preferDistributed) {
 		if (!hasUpstashConfig) {
 			reportDistributedLimiterDegraded({ key, reason: 'missing_config' });
+			const blocked = distributedUnavailableResult();
+			reportBlockedRateLimit(key, blocked);
+			return blocked;
 		} else {
 			try {
 				const upstash = await upstashIncrement(key, windowMs);
@@ -327,17 +340,23 @@ export async function checkRateLimit({
 					key,
 					reason: 'non_ok_response',
 				});
+				const blocked = distributedUnavailableResult();
+				reportBlockedRateLimit(key, blocked);
+				return blocked;
 			} catch (error) {
 				reportDistributedLimiterDegraded({
 					key,
 					reason: 'request_failed',
 					details: error instanceof Error ? error.message : String(error),
 				});
+				const blocked = distributedUnavailableResult();
+				reportBlockedRateLimit(key, blocked);
+				return blocked;
 			}
 		}
 	}
 
-	// Fallback: in-memory limiter for local/dev and degraded distributed mode.
+	// Fallback: in-memory limiter for local/dev paths.
 	ensureFallbackCleanupLoop();
 	const now = Date.now();
 	pruneExpiredBuckets(now);

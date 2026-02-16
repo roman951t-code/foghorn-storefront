@@ -132,7 +132,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 										h='20px'
 										rounded='lg'
 										bg={isHighlighted ? 'main.secondary' : 'transparent'}
-										transition='background 0.18s ease-in-out'
+										transition='background 0.16s ease-in-out'
 									/>
 									<Text
 										fontSize='md'

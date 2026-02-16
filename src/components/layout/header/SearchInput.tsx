@@ -71,7 +71,7 @@ export default function SearchInput({
 	const { collection, set } = useListCollection<SearchProductItem>({
 		initialItems: [],
 		itemToString: (item) => item.name,
-		itemToValue: (item) => item.name,
+		itemToValue: (item) => `${item.category}/${item.subcategory}/${item.product}`,
 	});
 	const cache = useRef<Map<string, SearchResponse>>(new Map());
 	useDebounce(
@@ -210,7 +210,10 @@ export default function SearchInput({
 									{products}
 								</Heading>
 								{collection.items.map((item) => (
-									<ProductSearchItem key={`product-${item.name}`} item={item} />
+									<ProductSearchItem
+										key={`product-${item.category}-${item.subcategory}-${item.product}`}
+										item={item}
+									/>
 								))}
 
 								<SeeAllLink
@@ -235,7 +238,10 @@ export default function SearchInput({
 										</Heading>
 										<Wrap gap='4' my='3' pl='2'>
 											{subcategories.map((item) => (
-												<CategorySearchItem key={`category-${item.name}`} item={item} />
+												<CategorySearchItem
+													key={`category-${item.category}-${item.subcategory}`}
+													item={item}
+												/>
 											))}
 										</Wrap>
 									</>

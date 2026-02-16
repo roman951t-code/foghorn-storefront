@@ -20,11 +20,12 @@ const highlightStyles = {
 export function ProductSearchItem({ item }: { item: SearchProductItem }) {
 	const combobox = useComboboxContext();
 	const href = `/products/${item.category}/${item.subcategory}/${item.product}`;
+	const productKey = `${item.category}/${item.subcategory}/${item.product}`;
 	const categoryLabel = item.categoryName?.trim() || formatSearchMeta(item.category);
 	const subcategoryLabel = item.subcategoryName?.trim() || formatSearchMeta(item.subcategory);
 
 	return (
-		<Combobox.Item item={item} key={item.name} fontSize='sm' minW='90px' w='full' py='0'>
+		<Combobox.Item item={item} key={productKey} fontSize='sm' minW='90px' w='full' py='0'>
 			<Combobox.ItemText
 				fontWeight='medium'
 				as='div'
@@ -69,9 +70,10 @@ export function ProductSearchItem({ item }: { item: SearchProductItem }) {
 export function CategorySearchItem({ item }: { item: SearchSubcategoryItem }) {
 	const combobox = useComboboxContext();
 	const href = `/products/${item.category}/${item.subcategory}`;
+	const categoryKey = `${item.category}/${item.subcategory}`;
 
 	return (
-		<Combobox.Item item={item} key={item.name} flex='none' p='0' _hover={{ bg: 'transparent' }}>
+		<Combobox.Item item={item} key={categoryKey} flex='none' p='0' _hover={{ bg: 'transparent' }}>
 			<Tag.Root
 				variant='surface'
 				borderWidth='0.5px'

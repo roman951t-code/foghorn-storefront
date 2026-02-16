@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState, type JSX } from 'react';
+import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
 import { Box, VStack } from '@chakra-ui/react';
 import CenteredModal from '@/components/ui/dialogs/CenteredModal';
 import Image from 'next/image';
@@ -40,32 +40,30 @@ export default function Auth({ trigger, isOpen, setIsOpen }: Props) {
 	const [showSignup, setShowSignup] = useState(false);
 	const [isAuthOpen, setAuthOpen] = useState(false);
 
-	const refreshSession = async () => {
+	const refreshSession = useCallback(async () => {
 		await refresh();
 
 		const bc = new BroadcastChannel('auth');
 		bc.postMessage('session-updated');
 		bc.close();
-	};
+	}, [refresh]);
 
 	useEffect(() => {
 		if (!emailSignIn) return;
 
-		if (emailSignIn) {
-			const handleEmailSignIn = async () => {
-				const current = new URLSearchParams(window.location.search);
-				current.delete('email-sign-in');
-				const newSearch = current.toString();
-				const newPath = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
-				router.replace(newPath);
+		const handleEmailSignIn = async () => {
+			const current = new URLSearchParams(window.location.search);
+			current.delete('email-sign-in');
+			const newSearch = current.toString();
+			const newPath = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
+			router.replace(newPath);
 
-				await refreshSession();
-			};
+			await refreshSession();
+		};
 
-			handleEmailSignIn();
-			setAuthOpen(true);
-		}
-	}, [emailSignIn]);
+		handleEmailSignIn();
+		setAuthOpen(true);
+	}, [emailSignIn, refreshSession, router]);
 
 	const toggleSignup = () => {
 		setShowSignup((prevState) => !prevState);

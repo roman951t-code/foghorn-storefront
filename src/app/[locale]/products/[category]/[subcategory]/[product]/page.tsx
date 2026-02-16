@@ -17,6 +17,7 @@ import {
 } from 'validationSchemas/productParamsSchemas';
 import ProductTabs from '@/features/product/ProductTabs';
 import { STORE_CURRENCY_CODE } from '@/config/currency';
+import { resolveProductPrimaryImage } from '@/utils/productImages';
 
 type Props = ProductParams & { searchParams: { tab?: string } };
 
@@ -53,9 +54,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 		}
 	);
 	const canonical = toAbsolute(productData.canonicalUrl) ?? alternates?.canonical;
-	const fallbackImage = absoluteUrl('/assets/images/logoBig.webp');
-	const image = toAbsolute(productData.imageUrl);
-	const ogImage = toAbsolute(productData.openGraphImage) ?? image ?? fallbackImage;
+	const image = absoluteUrl(resolveProductPrimaryImage(productData.imageUrl));
+	const ogImage = toAbsolute(productData.openGraphImage) ?? image;
 
 	return {
 		title,
@@ -112,7 +112,8 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 		.map((src) => toAbsolute(src))
 		.filter(Boolean) as string[];
 	const openGraphImage = toAbsolute(productData.openGraphImage);
-	const primaryImage = images[0] ?? openGraphImage ?? toAbsolute(productData.imageUrl);
+	const primaryImage =
+		images[0] ?? openGraphImage ?? toAbsolute(resolveProductPrimaryImage(productData.imageUrl));
 	const price = productData.discountPrice ?? productData.basePrice;
 	const availability = productData.inStock
 		? 'https://schema.org/InStock'

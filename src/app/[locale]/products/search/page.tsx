@@ -16,7 +16,12 @@ import { getSearchFilters, getTagFilters } from '@/actions/products/getProductsF
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getRecentlyViewedProductsWithCount } from '@/actions/products/getRecentlyViewedProducts';
-import { PRODUCTS_PER_PAGE, resolveOffset, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
+import {
+	PRODUCTS_PER_PAGE,
+	resolveOffset,
+	resolvePageParam,
+	resolvePerPageParam,
+} from '@/constants/pagination';
 import { absoluteUrl, buildLanguageAlternates } from '@/utils/seo';
 import { LocaleParams, ProductFiltersSearchParams } from '@/types/routing';
 import CountPill from '@/components/ui/CountPill';
@@ -237,11 +242,11 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 					<CatalogBtn fullText />
 
 					<VStack p='4' justifyContent='flex-start'>
-						<HStack w='full' justify='flex-start' align='center' mb='1.5'>
-							<Text fontSize='sm' color='fg.muted'>
+						<HStack w='full' gapX='4' align='center'>
+							<Text fontSize='md' color='main'>
 								{productsT('totalProducts')}
 							</Text>
-							<CountPill value={totalCount ?? 0} labelProps={{ fontSize: 'sm' }} />
+							<CountPill value={totalCount ?? 0} px='2' py='1' labelProps={{ fontSize: 'md' }} />
 						</HStack>
 
 						<SearchCategories data={subcategories} allCategories={productsT('allCategories')} />

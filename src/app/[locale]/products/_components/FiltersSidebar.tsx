@@ -24,7 +24,13 @@ export default function FiltersSidebar({ btnText, maxProductPrice, filters }: Pr
 		<DrawerRoot placement='end'>
 			<DrawerBackdrop />
 			<DrawerTrigger asChild>
-				<SecondaryButton w='160px' alignSelf='flex-end' hideFrom='lg' rounded='md'>
+				<SecondaryButton
+					w='160px'
+					alignSelf='flex-end'
+					hideFrom='lg'
+					rounded='md'
+					fontSize='15px'
+				>
 					<IoFilter />
 					{btnText}
 				</SecondaryButton>
@@ -49,7 +55,7 @@ export default function FiltersSidebar({ btnText, maxProductPrice, filters }: Pr
 					minW={0}
 				>
 					<Box pb={3} borderBottomWidth='0.5px' borderBottomStyle='solid' borderColor='border'>
-						<Heading fontWeight='semibold' textStyle='xl' color='main'>
+						<Heading fontWeight='semibold' fontSize='15px' color='main'>
 							{btnText}
 						</Heading>
 					</Box>

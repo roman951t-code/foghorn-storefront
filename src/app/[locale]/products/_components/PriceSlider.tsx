@@ -47,7 +47,7 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 
 	return (
 		<>
-			<Text fontSize='sm' fontWeight='semibold' color='main' mb={4}>
+			<Text fontSize='15px' fontWeight='semibold' color='main' mb={4}>
 				{title} ($)
 			</Text>
 			<Flex justifyContent='space-between' alignItems='center' gap={3} w='100%' minW={0}>
@@ -109,7 +109,6 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 				mt={4}
 				min={0}
 				max={Math.max(1, maxPrice.current)}
-				aria-label={[`${title} minimum`, `${title} maximum`]}
 				value={[
 					Math.max(0, Math.min(values[0], maxPrice.current)),
 					Math.max(0, Math.min(values[1], maxPrice.current)),
