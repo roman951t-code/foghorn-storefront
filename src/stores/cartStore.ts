@@ -86,14 +86,20 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 
 		set({ cartData: { ...get().cartData, items: local }, productIds: uniqueProductIds(local) });
 
-		await mergeCartData(
-			local.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity }))
-		);
-		localStorage.removeItem(LOCAL_STORAGE_KEY);
+		try {
+			const merged = await mergeCartData(
+				local.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity }))
+			);
+			if (!merged?.success) return;
 
-		const fresh = await fetchCartFromApi();
-		if (fresh?.success) {
-			set({ cartData: { items: fresh.items }, productIds: uniqueProductIds(fresh.items) });
+			localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+			const fresh = await fetchCartFromApi();
+			if (fresh?.success) {
+				set({ cartData: { items: fresh.items }, productIds: uniqueProductIds(fresh.items) });
+			}
+		} catch {
+			// Keep local cache when merge fails unexpectedly.
 		}
 	},
 	handleAddItem: async (product, opts) => {
@@ -295,35 +301,53 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 			return { success: true };
 		}
 	},
-	handleUpdateQuantity: async (lineId, quantity) => {
-		if (get().isLoggedIn) {
-			const prevItems = get().cartData.items;
+		handleUpdateQuantity: async (lineId, quantity) => {
+			if (get().isLoggedIn) {
+				const prevItems = get().cartData.items;
+				const optimisticQty = Math.max(1, Math.floor(quantity));
 
-			set((state) => ({
-				cartData: {
-					...state.cartData,
-					items: state.cartData.items.map((item) =>
+				set((state) => ({
+					cartData: {
+						...state.cartData,
+						items: state.cartData.items.map((item) =>
+							item.lineId === lineId ? { ...item, quantity: optimisticQty } : item
+						),
+					},
+				}));
+
+				const res = await updateCartItemQuantity({ cartItemId: lineId, quantity });
+
+				if (!res.success || res.guest) {
+					set({ cartData: { ...get().cartData, items: prevItems } });
+					return { success: false };
+				}
+				const appliedQty =
+					'quantity' in res && typeof res.quantity === 'number' && Number.isFinite(res.quantity)
+						? Math.max(1, Math.floor(res.quantity))
+						: optimisticQty;
+				if (appliedQty !== optimisticQty) {
+					set((state) => ({
+						cartData: {
+							...state.cartData,
+							items: state.cartData.items.map((item) =>
+								item.lineId === lineId ? { ...item, quantity: appliedQty } : item
+							),
+						},
+					}));
+				}
+				return { success: true };
+			} else {
+				set((state) => {
+					const updated = state.cartData.items.map((item) =>
 						item.lineId === lineId ? { ...item, quantity: Math.max(1, Math.floor(quantity)) } : item
-					),
-				},
-			}));
-
-			const res = await updateCartItemQuantity({ cartItemId: lineId, quantity });
-
-			if (!res.success || res.guest) {
-				set({ cartData: { ...get().cartData, items: prevItems } });
-				return { success: false };
+					);
+					saveGuestCart(updated);
+					return {
+						cartData: { ...state.cartData, items: updated },
+						productIds: uniqueProductIds(updated),
+					};
+				});
+				return { success: true };
 			}
-			return { success: true };
-		} else {
-			set((state) => {
-				const updated = state.cartData.items.map((item) =>
-					item.lineId === lineId ? { ...item, quantity: Math.max(1, Math.floor(quantity)) } : item
-				);
-				saveGuestCart(updated);
-				return { cartData: { ...state.cartData, items: updated }, productIds: uniqueProductIds(updated) };
-			});
-			return { success: true };
-		}
-	},
+		},
 }));

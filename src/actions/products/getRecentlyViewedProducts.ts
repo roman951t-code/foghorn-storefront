@@ -3,18 +3,19 @@
 import 'server-only';
 
 import { DEFAULT_LOCALE } from '@/constants/locales';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
-import { isProductPublished } from '@/utils/publishSchedule';
+import { buildProductImages } from '@/utils/productImages';
+import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 function mapRecentlyViewedProducts(viewed: { product: any }[], locale: string): SubcategoryProduct[] {
 	return viewed
 		.map((entry) => {
 			const p = entry.product;
 			if (!p) return null;
-			if (!isProductPublished(p.status, p.publishStartAt, p.publishEndAt)) return null;
 			const translation = pickLocalizedTranslation(
 				p.translations as
 					| Array<{
@@ -39,6 +40,9 @@ function mapRecentlyViewedProducts(viewed: { product: any }[], locale: string): 
 				name: translation?.name ?? p.name ?? '',
 				fullSlug: p.fullSlug ?? '',
 				imageUrl: p.imageUrl ?? null,
+				images: p.productImages?.length
+					? p.productImages.map((image: { url: string }) => image.url)
+					: buildProductImages(p.imageUrl ?? undefined, 4),
 				categoryName: translation?.categoryName ?? p.categoryName ?? '',
 				subcategoryName: translation?.subcategoryName ?? p.subcategoryName ?? '',
 				inStock: !!p.inStock,
@@ -75,11 +79,18 @@ export async function getRecentlyViewedProductsWithCount(
 	const localeFallbacks = getLocaleFallbacks(locale);
 	const safeLimit = Math.min(50, Math.max(1, Math.floor(limit || 1)));
 	const safeOffset = Math.max(0, Math.floor(offset || 0));
+	const now = new Date();
+	const recentlyViewedWhere: Prisma.RecentlyViewedWhereInput = {
+		userId,
+		product: {
+			is: getPublishedProductWhere(now),
+		},
+	};
 
 	const [totalCount, viewed] = await prisma.$transaction([
-		prisma.recentlyViewed.count({ where: { userId } }),
+		prisma.recentlyViewed.count({ where: recentlyViewedWhere }),
 		prisma.recentlyViewed.findMany({
-			where: { userId },
+			where: recentlyViewedWhere,
 			orderBy: { updatedAt: 'desc' },
 			skip: safeOffset,
 			take: safeLimit,
@@ -90,13 +101,15 @@ export async function getRecentlyViewedProductsWithCount(
 						name: true,
 						fullSlug: true,
 						imageUrl: true,
+						productImages: {
+							select: { url: true, sortOrder: true, createdAt: true },
+							orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+							take: 6,
+						},
 						basePrice: true,
 						discountPrice: true,
 						discountStartAt: true,
 						discountEndAt: true,
-						status: true,
-						publishStartAt: true,
-						publishEndAt: true,
 						inStock: true,
 						categoryName: true,
 						subcategoryName: true,

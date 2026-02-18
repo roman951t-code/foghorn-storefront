@@ -288,15 +288,17 @@ export default function Dashboard() {
 
 	const statusCounts = metrics?.orderStatusCounts ?? [];
 	const statusMax = useMemo(() => {
-		if (!statusCounts.length) return 0;
-		return Math.max(...statusCounts.map((item) => item.count));
-	}, [statusCounts]);
+		const counts = metrics?.orderStatusCounts;
+		if (!counts?.length) return 0;
+		return Math.max(...counts.map((item) => item.count));
+	}, [metrics?.orderStatusCounts]);
 
 	const topProducts = metrics?.topProducts ?? [];
 	const topProductMax = useMemo(() => {
-		if (!topProducts.length) return 0;
-		return Math.max(...topProducts.map((item) => item.quantity));
-	}, [topProducts]);
+		const products = metrics?.topProducts;
+		if (!products?.length) return 0;
+		return Math.max(...products.map((item) => item.quantity));
+	}, [metrics?.topProducts]);
 
 	const outOfStockItems = lowStockPayload?.outOfStock?.items ?? [];
 	const topProductItems = lowStockPayload?.topProducts?.items ?? [];
@@ -305,15 +307,17 @@ export default function Dashboard() {
 
 	const salesTrendPoints = metrics?.salesTrend?.points ?? [];
 	const salesTrendMax = useMemo(() => {
-		if (!salesTrendPoints.length) return 0;
-		return Math.max(...salesTrendPoints.map((p) => p.total));
-	}, [salesTrendPoints]);
+		const points = metrics?.salesTrend?.points;
+		if (!points?.length) return 0;
+		return Math.max(...points.map((p) => p.total));
+	}, [metrics?.salesTrend?.points]);
 
 	const ordersTrendPoints = metrics?.ordersTrend?.points ?? [];
 	const ordersTrendMax = useMemo(() => {
-		if (!ordersTrendPoints.length) return 0;
-		return Math.max(...ordersTrendPoints.map((p) => p.orders));
-	}, [ordersTrendPoints]);
+		const points = metrics?.ordersTrend?.points;
+		if (!points?.length) return 0;
+		return Math.max(...points.map((p) => p.orders));
+	}, [metrics?.ordersTrend?.points]);
 
 	const comparisonCards = useMemo(() => {
 		if (!metrics) return [];

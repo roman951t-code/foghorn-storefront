@@ -41,7 +41,7 @@
 		"@types/lodash.pick": "^4.4.9",
 		"adminjs": "7.8.17",
 		"bcryptjs": "^3.0.3",
-		"better-auth": "^1.4.9",
+		"better-auth": "^1.4.18",
 		"cloudinary": "^2.9.0",
 		"date-fns": "^4.1.0",
 		"dotenv": "17.2.3",

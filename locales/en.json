@@ -245,6 +245,7 @@
 		"phoneRequired": "Phone number is required",
 		"invalidFormData": "Invalid form data.",
 		"smsSendFailed": "Failed to send verification code.",
+		"emailSendFailed": "Failed to send verification email.",
 		"userExists": "Such user already exists",
 		"userRegisterFail": "Failed to register user",
 		"userLoginFail": "Failed to sign in user",

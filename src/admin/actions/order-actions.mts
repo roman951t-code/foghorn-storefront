@@ -10,6 +10,19 @@ const stripe =
 		: null;
 
 const INVENTORY_RESTOCKED_NOTE = 'Inventory restocked';
+const RETURNABLE_ORDER_STATUSES: readonly OrderStatus[] = ['DELIVERED'];
+const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
+	PENDING: ['PAID', 'CANCELLED'],
+	PAID: ['SHIPPED', 'CANCELLED'],
+	SHIPPED: ['DELIVERED', 'CANCELLED'],
+	DELIVERED: ['RETURNED'],
+	CANCELLED: [],
+	RETURNED: [],
+};
+
+type OrderStatusUpdateResult =
+	| { success: true; changed: boolean; status: OrderStatus }
+	| { success: false; reason: 'not-found' | 'not-allowed'; status?: OrderStatus };
 
 const resolveAdminEmail = (currentAdmin: unknown): string | null => {
 	if (!currentAdmin || typeof currentAdmin !== 'object') {
@@ -21,6 +34,22 @@ const resolveAdminEmail = (currentAdmin: unknown): string | null => {
 	}
 	return email;
 };
+
+const canTransitionOrderStatus = (
+	currentStatus: OrderStatus,
+	nextStatus: OrderStatus,
+	allowedCurrent?: readonly OrderStatus[]
+) => {
+	if (currentStatus === nextStatus) {
+		return true;
+	}
+	if (allowedCurrent && !allowedCurrent.includes(currentStatus)) {
+		return false;
+	}
+	return (ORDER_STATUS_TRANSITIONS[currentStatus] ?? []).includes(nextStatus);
+};
+
+const isReturnableOrderStatus = (status: OrderStatus) => RETURNABLE_ORDER_STATUSES.includes(status);
 
 const restockOrderInventory = async (tx: Prisma.TransactionClient, orderId: string) => {
 	const items = await tx.orderItem.findMany({
@@ -54,26 +83,41 @@ const updateOrderStatusWithAudit = async (
 	orderId: string,
 	next: OrderStatus,
 	currentStatus: OrderStatus | undefined,
-	adminEmail: string | null
+	adminEmail: string | null,
+	allowedCurrent?: readonly OrderStatus[]
 ) => {
-	if (currentStatus === next) {
-		return;
-	}
-	await prisma.$transaction([
-		prisma.order.update({
+	const fallbackCurrentStatus = currentStatus;
+	return prisma.$transaction(async (tx): Promise<OrderStatusUpdateResult> => {
+		const order = await tx.order.findUnique({
+			where: { id: orderId },
+			select: { status: true },
+		});
+		if (!order) {
+			return { success: false, reason: 'not-found' };
+		}
+		const persistedStatus = order.status as OrderStatus;
+		if (!canTransitionOrderStatus(persistedStatus, next, allowedCurrent)) {
+			return { success: false, reason: 'not-allowed', status: persistedStatus };
+		}
+		if (persistedStatus === next) {
+			return { success: true, changed: false, status: persistedStatus };
+		}
+
+		await tx.order.update({
 			where: { id: orderId },
 			data: { status: next },
-		}),
-		prisma.orderAuditEntry.create({
+		});
+		await tx.orderAuditEntry.create({
 			data: {
 				orderId,
 				type: 'STATUS_CHANGE',
-				fromStatus: currentStatus ?? null,
+				fromStatus: fallbackCurrentStatus ?? persistedStatus,
 				toStatus: next,
 				adminEmail,
 			},
-		}),
-	]);
+		});
+		return { success: true, changed: true, status: persistedStatus };
+	});
 };
 
 const makeStatusAction = (
@@ -94,7 +138,16 @@ const makeStatusAction = (
 		}
 		const orderId = record.param('id') as string;
 		const adminEmail = resolveAdminEmail(currentAdmin);
-		await updateOrderStatusWithAudit(orderId, next, currentStatus, adminEmail);
+		const result = await updateOrderStatusWithAudit(orderId, next, currentStatus, adminEmail, allowedCurrent);
+		if (!result.success) {
+			return {
+				record: record.toJSON(currentAdmin),
+				notice: {
+					message: result.reason === 'not-found' ? 'order-not-found' : 'status-not-allowed',
+					type: 'error',
+				},
+			};
+		}
 		const updated = await resource.findOne(orderId);
 		return {
 			record: updated ? updated.toJSON(currentAdmin) : record.toJSON(currentAdmin),
@@ -118,24 +171,37 @@ const makeBulkStatusAction = (next: OrderStatus): ActionHandler<BulkActionRespon
 		}
 		try {
 			const adminEmail = resolveAdminEmail(currentAdmin);
-			const updates: Promise<void>[] = [];
+			let updatedCount = 0;
+			let blockedCount = 0;
 			for (const record of records) {
 				const orderId = record.param('id') as string | undefined;
 				if (!orderId) continue;
 				const currentStatus = record.param('status') as OrderStatus | undefined;
-				updates.push(updateOrderStatusWithAudit(orderId, next, currentStatus, adminEmail));
+				const result = await updateOrderStatusWithAudit(orderId, next, currentStatus, adminEmail);
+				if (!result.success) {
+					blockedCount += 1;
+					continue;
+				}
+				if (result.changed) {
+					updatedCount += 1;
+				}
 			}
-			await Promise.all(updates);
 			const refreshed = await Promise.all(ids.map((id) => resource.findOne(id)));
 			const jsonRecords = refreshed
 				.filter(Boolean)
 				.map((record) => record!.toJSON(currentAdmin));
+			if (updatedCount === 0 && blockedCount > 0) {
+				return {
+					records: jsonRecords,
+					notice: { message: 'bulk-status-update-failed', type: 'error' },
+				};
+			}
 			return {
 				records: jsonRecords,
 				notice: {
 					message: 'bulk-status-updated',
 					type: 'success',
-					options: { status: next, count: ids.length },
+					options: { status: next, count: updatedCount },
 				},
 			};
 		} catch {
@@ -169,7 +235,11 @@ const refundStripeSession = async (stripeSessionId: string) => {
 	});
 };
 
-const refundStripeSessionAmount = async (stripeSessionId: string, amount: number) => {
+const refundStripeSessionAmount = async (
+	stripeSessionId: string,
+	amount: number,
+	idempotencyKey?: string
+) => {
 	if (!stripe) {
 		throw new Error('refund-unavailable');
 	}
@@ -189,11 +259,14 @@ const refundStripeSessionAmount = async (stripeSessionId: string, amount: number
 	if (!amountCents) {
 		throw new Error('refund-unavailable');
 	}
-	await stripe.refunds.create({
-		payment_intent: paymentIntentId,
-		amount: amountCents,
-		reason: 'requested_by_customer',
-	});
+	await stripe.refunds.create(
+		{
+			payment_intent: paymentIntentId,
+			amount: amountCents,
+			reason: 'requested_by_customer',
+		},
+		idempotencyKey ? { idempotencyKey } : {}
+	);
 };
 
 const parseRefundAmount = (value: unknown): number | null => {
@@ -232,13 +305,20 @@ export const setStatus: ActionHandler<RecordActionResponse> = async (req, _res, 
 	if (requested === 'CANCELLED') {
 		const orderId = record.param('id') as string;
 		const adminEmail = resolveAdminEmail(currentAdmin);
-		await prisma.$transaction(async (tx) => {
+		const result = await prisma.$transaction(async (tx) => {
 			const order = await tx.order.findUnique({
 				where: { id: orderId },
 				select: { status: true },
 			});
-			if (!order || order.status === 'CANCELLED' || order.status === 'DELIVERED' || order.status === 'RETURNED') {
-				return;
+			if (!order) {
+				return { success: false as const, reason: 'not-found' as const };
+			}
+			const currentStatus = order.status as OrderStatus;
+			if (!canTransitionOrderStatus(currentStatus, 'CANCELLED')) {
+				return { success: false as const, reason: 'not-allowed' as const, status: currentStatus };
+			}
+			if (currentStatus === 'CANCELLED') {
+				return { success: true as const, changed: false as const };
 			}
 
 			await restockOrderInventory(tx, orderId);
@@ -250,7 +330,7 @@ export const setStatus: ActionHandler<RecordActionResponse> = async (req, _res, 
 				data: {
 					orderId,
 					type: 'STATUS_CHANGE',
-					fromStatus: order.status ?? null,
+					fromStatus: currentStatus,
 					toStatus: 'CANCELLED',
 					adminEmail,
 					note: 'Cancelled',
@@ -264,7 +344,17 @@ export const setStatus: ActionHandler<RecordActionResponse> = async (req, _res, 
 					adminEmail,
 				},
 			});
+			return { success: true as const, changed: true as const };
 		});
+		if (!result.success) {
+			return {
+				record: record.toJSON(currentAdmin),
+				notice: {
+					message: result.reason === 'not-found' ? 'order-not-found' : 'status-not-allowed',
+					type: 'error',
+				},
+			};
+		}
 		const updated = await resource.findOne(orderId);
 		return {
 			record: updated ? updated.toJSON(currentAdmin) : record.toJSON(currentAdmin),
@@ -481,7 +571,7 @@ export const processReturn: ActionHandler<RecordActionResponse> = async (req, _r
 
 	const order = await prisma.order.findUnique({
 		where: { id: orderId },
-		select: { total: true, stripeSessionId: true, status: true },
+		select: { total: true, stripeSessionId: true, status: true, refundedAt: true },
 	});
 
 	if (!order) {
@@ -491,7 +581,7 @@ export const processReturn: ActionHandler<RecordActionResponse> = async (req, _r
 		};
 	}
 
-	if (order.status === 'CANCELLED') {
+	if (!isReturnableOrderStatus(order.status as OrderStatus) || order.refundedAt) {
 		return {
 			record: record.toJSON(currentAdmin),
 			notice: { message: 'order-not-returnable', type: 'error' },
@@ -515,7 +605,7 @@ export const processReturn: ActionHandler<RecordActionResponse> = async (req, _r
 			};
 		}
 		try {
-			await refundStripeSessionAmount(order.stripeSessionId, refundAmount);
+			await refundStripeSessionAmount(order.stripeSessionId, refundAmount, `order-return:${orderId}`);
 		} catch (error) {
 			const message =
 				error instanceof Error && error.message === 'refund-unavailable'

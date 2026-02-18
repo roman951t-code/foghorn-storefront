@@ -228,7 +228,7 @@ export default function Pagination({
 							color='fg'
 							bg='none'
 							borderColor='gray'
-							fontSize='md'
+							fontSize='sm'
 							inputMode='numeric'
 							aria-label={t('perPage')}
 						/>

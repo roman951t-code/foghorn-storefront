@@ -22,6 +22,11 @@ const sanitizeSessionEmail = (email: string | null | undefined): string | null =
 
 export const auth = betterAuth({
 	baseURL: APP_URL,
+	emailVerification: {
+		// Signup is OTP-verified in our custom flow before signUpEmail is called.
+		// Keep Better Auth from sending another verification message on sign-up.
+		sendOnSignUp: false,
+	},
 	user: {
 		changeEmail: {
 			enabled: true,
@@ -54,7 +59,7 @@ export const auth = betterAuth({
 		emailAndPassword: {
 			enabled: true,
 			requireEmailVerification: true,
-			sendResetPassword: async ({ user, url, token }, request) => {
+			sendResetPassword: async ({ user, url }) => {
 				const [authT, emailsT] = await Promise.all([
 					getTranslations('auth'),
 					getTranslations('emails'),
@@ -139,8 +144,16 @@ export const auth = betterAuth({
 						return '';
 					}
 				})();
+				const isEmailSignUpRequest = requestPath.includes('/sign-up/email');
+				const isEmailSignInRequest = requestPath.includes('/sign-in/email');
 
-				if (type === 'email-verification' && requestPath.startsWith('/sign-up/email')) {
+				if (type === 'email-verification' && isEmailSignUpRequest) {
+					return;
+				}
+
+				// Our storefront signup flow verifies email with a custom OTP before account creation.
+				// Suppress Better Auth verification OTP on email/password sign-in to avoid redundant emails.
+				if (type === 'email-verification' && isEmailSignInRequest) {
 					return;
 				}
 

@@ -43,6 +43,7 @@ export function AppStoreHydrator({
 	const sessionContext = useOptionalSession();
 	const session = sessionContext?.session;
 	const currentUserId = session?.user?.id ?? null;
+	const resolvedIsLoggedIn = sessionContext ? !!currentUserId : isLoggedIn;
 	const prevUserIdRef = useRef<string | null>(currentUserId);
 
 	// Catalog
@@ -57,8 +58,8 @@ export function AppStoreHydrator({
 	}, [cartData, cartProductIds, setCartInitial]);
 
 	useLayoutEffect(() => {
-		setCartLoggedIn(isLoggedIn);
-	}, [isLoggedIn, setCartLoggedIn]);
+		setCartLoggedIn(resolvedIsLoggedIn);
+	}, [resolvedIsLoggedIn, setCartLoggedIn]);
 
 	// Wishlist init + login flag
 	useLayoutEffect(() => {
@@ -67,25 +68,22 @@ export function AppStoreHydrator({
 	}, [setWishInitial, wishListData, wishListIds]);
 
 	useLayoutEffect(() => {
-		setWishLoggedIn(isLoggedIn);
-	}, [isLoggedIn, setWishLoggedIn]);
+		setWishLoggedIn(resolvedIsLoggedIn);
+	}, [resolvedIsLoggedIn, setWishLoggedIn]);
 
-	// Handle Google auth merge
+	// Drop the Google auth marker from callback URLs after successful sign-in.
 	useEffect(() => {
-		if (!isLoggedIn) return;
+		if (!resolvedIsLoggedIn) return;
 		const url = new URL(window.location.href);
 		if (url.searchParams.get('auth') === 'google') {
-			(async () => {
-				await Promise.all([mergeGuestCart(), mergeGuestWish()]);
-				url.searchParams.delete('auth');
-				window.history.replaceState(
-					{},
-					'',
-					url.pathname + (url.search ? `?${url.searchParams.toString()}` : '')
-				);
-			})();
+			url.searchParams.delete('auth');
+			window.history.replaceState(
+				{},
+				'',
+				url.pathname + (url.search ? `?${url.searchParams.toString()}` : '')
+			);
 		}
-	}, [isLoggedIn, mergeGuestCart, mergeGuestWish]);
+	}, [resolvedIsLoggedIn]);
 
 	// Login/logout transitions
 	useEffect(() => {
@@ -93,24 +91,27 @@ export function AppStoreHydrator({
 
 		// Initial mount: hydrate guest carts if user starts unauthenticated.
 		if (wasLogged === null) {
-			if (!isLoggedIn) {
+			if (!resolvedIsLoggedIn) {
 				hydrateGuestCart();
 				hydrateGuestWish();
+			} else {
+				mergeGuestCart();
+				mergeGuestWish();
 			}
-			prevLoggedInRef.current = isLoggedIn;
+			prevLoggedInRef.current = resolvedIsLoggedIn;
 			return;
 		}
 
-		if (!wasLogged && isLoggedIn) {
+		if (!wasLogged && resolvedIsLoggedIn) {
 			mergeGuestCart();
 			mergeGuestWish();
-		} else if (wasLogged && !isLoggedIn) {
+		} else if (wasLogged && !resolvedIsLoggedIn) {
 			hydrateGuestCart();
 			hydrateGuestWish();
 		}
 
-		prevLoggedInRef.current = isLoggedIn;
-	}, [hydrateGuestCart, hydrateGuestWish, isLoggedIn, mergeGuestCart, mergeGuestWish]);
+		prevLoggedInRef.current = resolvedIsLoggedIn;
+	}, [hydrateGuestCart, hydrateGuestWish, mergeGuestCart, mergeGuestWish, resolvedIsLoggedIn]);
 
 	// Handle user switching: fetch fresh cart/wishlist per user
 	useEffect(() => {
@@ -128,11 +129,24 @@ export function AppStoreHydrator({
 				// noop
 			}
 		};
+		const fetchServerWish = async () => {
+			try {
+				const res = await fetch('/api/products/wishlist', { cache: 'no-store' });
+				if (!res.ok) return;
+				const data = await res.json();
+				if (data?.success && Array.isArray(data.items)) {
+					setWishInitial(data.items, data.items.map((item: any) => item.id));
+				}
+			} catch {
+				// noop
+			}
+		};
 
 		if (currentUserId && currentUserId !== prevUserId) {
 			setCartLoggedIn(true);
 			setWishLoggedIn(true);
 			fetchServerCart();
+			fetchServerWish();
 		}
 
 		if (!currentUserId && prevUserId) {
@@ -149,8 +163,8 @@ export function AppStoreHydrator({
 		hydrateGuestWish,
 		setCartInitial,
 		setCartLoggedIn,
+		setWishInitial,
 		setWishLoggedIn,
-		mergeGuestCart,
 	]);
 
 	return <>{children}</>;

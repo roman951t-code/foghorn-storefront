@@ -97,6 +97,6 @@ export async function sendVerifyEmailAction(
 
 		return { success: true };
 	} catch (error) {
-		return { success: false, message: validationT('smsSendFailed') };
+		return { success: false, message: validationT('emailSendFailed') };
 	}
 }

@@ -49,6 +49,7 @@ export function DeleteAccount({ onCloseAction }: Props) {
 		<Dialog.Root
 			role='alertdialog'
 			lazyMount
+			placement='center'
 			open={open}
 			onOpenChange={(e) => setOpen(e.open)}
 			ids={DELETE_ACCOUNT_DIALOG_IDS}

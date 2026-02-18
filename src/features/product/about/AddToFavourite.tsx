@@ -1,7 +1,6 @@
 'use client';
 import { FiHeart } from 'react-icons/fi';
 import { Icon, IconButton } from '@chakra-ui/react';
-import { useSession } from '@/providers/SessionProvider';
 import { useWishList } from '@/hooks/useWishList';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
@@ -14,10 +13,9 @@ interface Props {
 }
 
 export default function AddToFavourite({ wishlistUpdateFailed, product }: Props) {
-	const { session } = useSession();
 	const { ids: wishListIds, handleWishAdd, handleWishRemove } = useWishList();
 
-	if (!session?.session || !product) {
+	if (!product) {
 		return null;
 	}
 

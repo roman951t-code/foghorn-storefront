@@ -1,19 +1,17 @@
 'use client';
-import { useCallback, useEffect, useMemo, useState, type JSX } from 'react';
+import { useMemo, useState, type JSX } from 'react';
 import { Box, VStack } from '@chakra-ui/react';
 import CenteredModal from '@/components/ui/dialogs/CenteredModal';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
 import { useSession } from '@/providers/SessionProvider';
 import { PrimaryButton } from '@/components/ui/buttons/ActionButton';
 import Signup from './Signup';
 import Login from './Login';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { I18nData } from '@/types/i18n';
 import {
-	ACCOUNT_VALIDATION_MESSAGE_KEYS,
 	AUTH_MESSAGE_KEYS,
+	VALIDATION_MESSAGE_KEYS,
 } from '@/data/localeMessages/authMessages';
 import { ASSET_IMAGES } from '@/constants/assets';
 
@@ -26,44 +24,16 @@ interface Props {
 export default function Auth({ trigger, isOpen, setIsOpen }: Props) {
 	const authT = useTranslations('auth');
 	const validT = useTranslations('validation');
-	const { session, refresh } = useSession();
-	const router = useRouter();
-	const searchParams = useSearchParams();
-	const emailSignIn = searchParams?.get('email-sign-in') === 'true';
+	const { session } = useSession();
 
 	const i18nData = useMemo<I18nData>(() => {
 		const authEntries = AUTH_MESSAGE_KEYS.map((key) => [key, authT(key)]);
-		const validationEntries = ACCOUNT_VALIDATION_MESSAGE_KEYS.map((key) => [key, validT(key)]);
+		const validationEntries = VALIDATION_MESSAGE_KEYS.map((key) => [key, validT(key)]);
 		return Object.fromEntries([...authEntries, ...validationEntries]);
 	}, [authT, validT]);
 
 	const [showSignup, setShowSignup] = useState(false);
 	const [isAuthOpen, setAuthOpen] = useState(false);
-
-	const refreshSession = useCallback(async () => {
-		await refresh();
-
-		const bc = new BroadcastChannel('auth');
-		bc.postMessage('session-updated');
-		bc.close();
-	}, [refresh]);
-
-	useEffect(() => {
-		if (!emailSignIn) return;
-
-		const handleEmailSignIn = async () => {
-			const current = new URLSearchParams(window.location.search);
-			current.delete('email-sign-in');
-			const newSearch = current.toString();
-			const newPath = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
-			router.replace(newPath);
-
-			await refreshSession();
-		};
-
-		handleEmailSignIn();
-		setAuthOpen(true);
-	}, [emailSignIn, refreshSession, router]);
 
 	const toggleSignup = () => {
 		setShowSignup((prevState) => !prevState);

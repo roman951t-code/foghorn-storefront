@@ -7,8 +7,10 @@ import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
+import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { buildProductImages } from '@/utils/productImages';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getPaginatedIdsByEffectivePriceSort } from '@/utils/effectivePriceSorting';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import { getMaxEffectiveProductPrice } from '@/utils/maxEffectiveProductPrice';
@@ -17,7 +19,6 @@ import {
 	PRODUCT_LIST_CACHE_TAG,
 	productCacheTagById,
 } from '@/constants/products';
-import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
 
 const DEFAULT_TAG_PRIORITY = ['popular', 'new', 'discount', 'promotional'] as const;
 
@@ -240,18 +241,9 @@ export async function getProductsBySubcategorySlug(
 		AND: [getPublishedProductWhere(now), ...(dynamicConditions.length > 0 ? dynamicConditions : [])],
 	};
 
-	const orderByClause: Prisma.ProductOrderByWithRelationInput[] = (() => {
-		switch (orderBy) {
-			case 'new':
-				return [{ createdAt: 'desc' }];
-			case 'expensive':
-				return [{ basePrice: 'desc' }];
-			case 'cheap':
-				return [{ basePrice: 'asc' }];
-			default:
-				return [{ inStock: 'desc' }, { name: 'asc' }];
-		}
-	})();
+	const isEffectivePriceSort = orderBy === 'cheap' || orderBy === 'expensive';
+	const orderByClause: Prisma.ProductOrderByWithRelationInput[] =
+		orderBy === 'new' ? [{ createdAt: 'desc' }] : [{ inStock: 'desc' }, { name: 'asc' }];
 
 	const totalCount = await prisma.product.count({ where: whereClause });
 
@@ -330,6 +322,40 @@ export async function getProductsBySubcategorySlug(
 				.map((productId) => productById.get(productId))
 				.filter((product): product is (typeof pageProducts)[number] => Boolean(product));
 		}
+	} else if (isEffectivePriceSort) {
+		const candidateRows = await prisma.product.findMany({
+			where: whereClause,
+			select: {
+				id: true,
+				name: true,
+				inStock: true,
+				basePrice: true,
+				discountPrice: true,
+				discountStartAt: true,
+				discountEndAt: true,
+			},
+		});
+		const sortedPageIds = getPaginatedIdsByEffectivePriceSort(
+			candidateRows,
+			orderBy === 'cheap' ? 'asc' : 'desc',
+			safeOffset,
+			safeLimit,
+			now
+		);
+
+		if (sortedPageIds.length === 0) {
+			paginatedProducts = [];
+		} else {
+			const pageProducts = await fetchProducts({
+				where: {
+					AND: [whereClause, { id: { in: sortedPageIds } }],
+				},
+			});
+			const productById = new Map(pageProducts.map((product) => [product.id, product]));
+			paginatedProducts = sortedPageIds
+				.map((productId) => productById.get(productId))
+				.filter((product): product is (typeof pageProducts)[number] => Boolean(product));
+		}
 	} else {
 		paginatedProducts = await fetchProducts({
 			where: whereClause,
@@ -358,7 +384,8 @@ export async function getProductsBySubcategorySlug(
 			basePrice,
 			p.discountPrice != null ? Number(p.discountPrice) : null,
 			p.discountStartAt ?? null,
-			p.discountEndAt ?? null
+			p.discountEndAt ?? null,
+			now
 		);
 
 		return {

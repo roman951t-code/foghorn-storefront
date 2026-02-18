@@ -15,6 +15,10 @@ import { authClient } from '@/lib/auth-client';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { PasswordInput } from '@/components/ui/chakra/password-input';
+import {
+	buildResetPasswordVerificationErrorMap,
+	resolveAuthErrorMessage,
+} from '@/constants/auth';
 
 interface Props {
 	i18nData: I18nData;
@@ -26,6 +30,10 @@ const MAX_CHARACTERS = 60;
 
 export default function ResetPassConfirmation({ email, i18nData, backToLogin }: Props) {
 	const schema = useMemo(() => createConfirmResetPassSchema(i18nData), [i18nData]);
+	const verificationErrorMap = useMemo(
+		() => buildResetPasswordVerificationErrorMap(i18nData),
+		[i18nData]
+	);
 
 	const [timer, setTimer] = useState(0);
 	const [verifyError, setVerifyError] = useState('');
@@ -72,13 +80,6 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 	};
 
 	const onSubmit = async (formData: ConfirmResetPassSchema) => {
-		const errorMap: Record<string, string> = {
-			'OTP not found': i18nData.invalidOtp,
-			'OTP expired': i18nData.otpExpired,
-			'User not found': i18nData.userNotFound,
-			'Too many attempts': i18nData.tooManyAttempts,
-		};
-
 		try {
 			const { error: verifyError } = await authClient.emailOtp.checkVerificationOtp({
 				email,
@@ -87,8 +88,11 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 			});
 
 			if (verifyError) {
-				const messageKey = verifyError?.message ?? '';
-				const message = errorMap[messageKey] || i18nData.setNewPassFail;
+				const message = resolveAuthErrorMessage({
+					errorKey: verifyError?.message,
+					errorMap: verificationErrorMap,
+					fallback: i18nData.setNewPassFail,
+				});
 				setVerifyError(message);
 				return;
 			}
@@ -100,8 +104,11 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 			});
 
 			if (resetError) {
-				const messageKey = resetError?.message ?? '';
-				const message = errorMap[messageKey] || i18nData.setNewPassFail;
+				const message = resolveAuthErrorMessage({
+					errorKey: resetError?.message,
+					errorMap: verificationErrorMap,
+					fallback: i18nData.setNewPassFail,
+				});
 				setVerifyError(message);
 				return;
 			} else {

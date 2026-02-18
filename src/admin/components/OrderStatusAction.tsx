@@ -9,6 +9,14 @@ type StatusOption = { value: OrderStatus; label: string };
 const api = new ApiClient();
 
 const statuses: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED'];
+const statusTransitions: Record<OrderStatus, readonly OrderStatus[]> = {
+	PENDING: ['PAID', 'CANCELLED'],
+	PAID: ['SHIPPED', 'CANCELLED'],
+	SHIPPED: ['DELIVERED', 'CANCELLED'],
+	DELIVERED: ['RETURNED'],
+	CANCELLED: [],
+	RETURNED: [],
+};
 
 export default function OrderStatusAction({ action, record, resource }: ActionProps) {
 	const [localRecord, setLocalRecord] = useState(record);
@@ -20,19 +28,27 @@ export default function OrderStatusAction({ action, record, resource }: ActionPr
 	const addNotice = useNotice();
 	const { translateAction, translateLabel, translateMessage } = useTranslation();
 	const currentStatus = localRecord?.params?.status as OrderStatus | undefined;
+	const selectableStatuses = useMemo<OrderStatus[]>(() => {
+		if (!currentStatus) return statuses;
+		const allowed = new Set<OrderStatus>([currentStatus, ...(statusTransitions[currentStatus] ?? [])]);
+		return statuses.filter((status) => allowed.has(status));
+	}, [currentStatus]);
 	const statusOptions = useMemo<StatusOption[]>(
 		() =>
-			statuses.map((status) => ({
+			selectableStatuses.map((status) => ({
 				value: status,
 				label: translateLabel(`status.${status}`, resource.id),
 			})),
-		[resource.id, translateLabel]
+		[resource.id, selectableStatuses, translateLabel]
 	);
 	const currentLabel = currentStatus
 		? translateLabel(`status.${currentStatus}`, resource.id)
 		: translateMessage('status-unknown');
-	const selectedOption = statusOptions.find((option) => option.value === selectedStatus) ?? null;
-	const nextLabel = selectedStatus ? translateLabel(`status.${selectedStatus}`, resource.id) : null;
+	const selectedOption =
+		statusOptions.find((option) => option.value === selectedStatus) ??
+		(currentStatus ? statusOptions.find((option) => option.value === currentStatus) ?? null : null);
+	const nextStatus = selectedOption?.value ?? currentStatus ?? null;
+	const nextLabel = nextStatus ? translateLabel(`status.${nextStatus}`, resource.id) : null;
 
 	if (!localRecord) {
 		return (
@@ -43,11 +59,11 @@ export default function OrderStatusAction({ action, record, resource }: ActionPr
 	}
 
 	const handleClick = async () => {
-		if (!localRecord || !selectedStatus) return;
+		if (!localRecord || !nextStatus) return;
 		setLoading(true);
 		try {
 			const formData = new FormData();
-			formData.append('status', selectedStatus);
+			formData.append('status', nextStatus);
 			const response = await api.recordAction({
 				resourceId: resource.id,
 				recordId: localRecord.id,
@@ -61,7 +77,7 @@ export default function OrderStatusAction({ action, record, resource }: ActionPr
 				addNotice({
 					message: 'status-updated',
 					type: 'success',
-					options: { status: nextLabel ?? selectedStatus },
+					options: { status: nextLabel ?? nextStatus },
 				});
 			}
 			if (response.data.record) {
@@ -149,7 +165,7 @@ export default function OrderStatusAction({ action, record, resource }: ActionPr
 						variant='contained'
 						color='primary'
 						onClick={handleClick}
-						disabled={isReadOnly || !selectedStatus || loading}
+						disabled={isReadOnly || !nextStatus || loading}
 					>
 						{buttonLabel}
 					</Button>

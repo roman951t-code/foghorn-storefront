@@ -24,6 +24,8 @@ const normalizeString = (value: unknown): string => {
 const localeLabel = (locale: AdminTranslationLocale) =>
 	locale === 'uk' ? 'Українська' : 'English';
 
+const EMPTY_LOCALIZED_FIELDS: LocalizedFieldDefinition[] = [];
+
 export default function LocalizedTranslationsEditor(props: EditPropertyProps) {
 	const { property, record, onChange } = props;
 	const custom = (property.custom ?? {}) as EditorCustomConfig;
@@ -32,7 +34,7 @@ export default function LocalizedTranslationsEditor(props: EditPropertyProps) {
 		custom.locales && custom.locales.length > 0
 			? custom.locales
 			: [...ADMIN_TRANSLATION_LOCALES];
-	const fields = custom.fields ?? [];
+	const fields = custom.fields ?? EMPTY_LOCALIZED_FIELDS;
 
 	const [activeLocale, setActiveLocale] = useState<AdminTranslationLocale>(defaultLocale);
 

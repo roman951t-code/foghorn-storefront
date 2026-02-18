@@ -135,24 +135,25 @@ if (
 	];
 }
 
-if (Object.keys(additionalFieldErrors).length > 0) {
-	throwInvalidEnvironmentVariables(additionalFieldErrors);
-}
-
 if (parsedData.NODE_ENV === 'production' && !parsedData.EMAIL_FROM) {
 	environmentWarnings.push(
 		'EMAIL_FROM is not configured in production. Using fallback sender Online Store <onboarding@resend.dev>.'
 	);
 }
 
-if (
-	parsedData.NODE_ENV === 'production' &&
-	parsedData.STRIPE_SECRET_KEY &&
-	!parsedData.STRIPE_WEBHOOK_SECRET
-) {
+if (parsedData.STRIPE_SECRET_KEY && !parsedData.STRIPE_WEBHOOK_SECRET) {
+	if (parsedData.NODE_ENV === 'production') {
+		additionalFieldErrors.STRIPE_WEBHOOK_SECRET = [
+			'STRIPE_WEBHOOK_SECRET is required in production when STRIPE_SECRET_KEY is set',
+		];
+	}
 	environmentWarnings.push(
 		'STRIPE_WEBHOOK_SECRET is not configured while STRIPE_SECRET_KEY is set. /api/payments/stripe/webhook will return stripe_webhook_not_configured.'
 	);
+}
+
+if (Object.keys(additionalFieldErrors).length > 0) {
+	throwInvalidEnvironmentVariables(additionalFieldErrors);
 }
 
 if (environmentWarnings.length > 0) {

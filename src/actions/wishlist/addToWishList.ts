@@ -2,6 +2,7 @@
 
 import 'server-only';
 
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
@@ -28,14 +29,7 @@ export async function addToWishList(productId: string) {
 		});
 
 		if (existing) {
-			await prisma.wishlist.delete({
-				where: {
-					userId_productId: {
-						userId,
-						productId,
-					},
-				},
-			});
+			// "Add to wishlist" is idempotent; keep existing row.
 			return { success: true };
 		}
 
@@ -57,6 +51,10 @@ export async function addToWishList(productId: string) {
 
 		return { success: true };
 	} catch (error) {
+		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+			// Concurrent insert race: row already exists, which is a successful add.
+			return { success: true };
+		}
 		return { success: false, message: wishlistT('wishlistUpdateFailed') };
 	}
 }

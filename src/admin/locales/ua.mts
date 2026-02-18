@@ -332,7 +332,7 @@ export const uaAdminLocale = {
 		'return-load-failed': 'Не вдалося завантажити форму',
 		'return-save-failed': 'Не вдалося обробити повернення',
 		'return-refund-invalid': 'Сума рефанду має бути від 0 до суми замовлення',
-		'order-not-returnable': 'Замовлення не можна повернути, оскільки воно скасоване.',
+		'order-not-returnable': 'Замовлення не можна повернути в поточному статусі.',
 		'order-not-found': 'Замовлення не знайдено',
 		'customer-kpis': 'KPI клієнта',
 		'customer-kpis-loading': 'Завантаження KPI...',

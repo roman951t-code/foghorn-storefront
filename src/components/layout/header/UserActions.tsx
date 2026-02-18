@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { FiUser } from 'react-icons/fi';
 import { Box, IconButton } from '@chakra-ui/react';
 import Favourite from './Favourite';
@@ -7,8 +10,13 @@ import Auth from '@/features/auth/Auth';
 import { getCartModalI18nData } from '@/constants/cart';
 import CartModalLazy from './CartModalLazy';
 
-const AuthBtn = () => (
+type AuthBtnProps = {
+	onClick?: () => void;
+};
+
+const AuthBtn = ({ onClick }: AuthBtnProps) => (
 	<IconButton
+		onClick={onClick}
 		aria-label='Account'
 		size='md'
 		variant='ghost'
@@ -26,15 +34,20 @@ export default function UserActions() {
 	const cartT = useTranslations('cart');
 	const navT = useTranslations('navigation');
 	const prodT = useTranslations('products');
+	const [isAuthOpen, setAuthOpen] = useState(false);
 
 	const cartI18nData = getCartModalI18nData(cartT, navT, prodT);
 
 	return (
 		<>
-			<Auth trigger={<AuthBtn />} />
+			<Auth
+				trigger={<AuthBtn onClick={() => setAuthOpen(true)} />}
+				isOpen={isAuthOpen}
+				setIsOpen={setAuthOpen}
+			/>
 			<UpdateEmailModal />
 			<Box hideBelow='sm'>
-				<Favourite />
+				<Favourite onRequireAuth={() => setAuthOpen(true)} />
 			</Box>
 			<CartModalLazy i18nData={cartI18nData} />
 		</>

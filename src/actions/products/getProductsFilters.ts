@@ -23,7 +23,7 @@ const sortValues = (values: string[]) => {
 	return [...values].sort((a, b) => a.localeCompare(b));
 };
 
-const buildFilterValues = (values: string[], unit?: string | null) => {
+const buildFilterValues = (values: string[]) => {
 	const uniqueValues = [...new Set(values)].filter((v) => v !== null && v !== undefined && v !== '');
 	const sorted = sortValues(uniqueValues);
 	return sorted.map((value) => ({
@@ -104,7 +104,7 @@ export async function getSubcategoryFilters(subcategorySlug: string) {
 				key: attr.name,
 				name: attr.name,
 				unit: attr.unit,
-				values: buildFilterValues(attr.products.map((p) => p.value), attr.unit),
+				values: buildFilterValues(attr.products.map((p) => p.value)),
 			};
 		})
 		.filter((attr) => attr.values.length > 0);
@@ -167,7 +167,7 @@ export async function getTagFilters(tag: string) {
 				key: attr.name,
 				name: attr.name,
 				unit: attr.unit,
-				values: buildFilterValues(attr.products.map((p) => p.value), attr.unit),
+				values: buildFilterValues(attr.products.map((p) => p.value)),
 			};
 		})
 		.filter((attr) => attr.values.length > 0);
@@ -250,7 +250,7 @@ export async function getSearchFilters(
 				key: attr.name,
 				name: attr.name,
 				unit: attr.unit,
-				values: buildFilterValues(attr.products.map((p) => p.value), attr.unit),
+				values: buildFilterValues(attr.products.map((p) => p.value)),
 			};
 		})
 		.filter((attr) => attr.values.length > 0);

@@ -11,7 +11,12 @@ import { PrimaryButton, TertiaryButton } from '@/components/ui/buttons/ActionBut
 import { phoneSignUpAction } from '@/actions/auth/phoneSignUpAction';
 import { registerPhoneAction } from '@/actions/auth/registerPhoneAction';
 import { useSession } from '@/providers/SessionProvider';
-import { PHONE_INPUT_MASKS, MAX_NAME_LENGTH, buildPhoneVerificationErrorMap } from '@/constants/auth';
+import {
+	PHONE_INPUT_MASKS,
+	MAX_NAME_LENGTH,
+	buildPhoneVerificationErrorMap,
+	resolveAuthErrorMessage,
+} from '@/constants/auth';
 import { useMaskedInput } from '@/hooks/useMaskedInput';
 import { authClient } from '@/lib/auth-client';
 import { formatTime } from '@/utils/generalUtils';
@@ -24,6 +29,7 @@ interface PhoneAuthProps {
 export default function PhoneSignUp({ i18nData, disabled }: PhoneAuthProps) {
 	const signUpSchema = useMemo(() => createPhoneSignUpSchema(i18nData), [i18nData]);
 	const verifySchema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
+	const verificationErrorMap = useMemo(() => buildPhoneVerificationErrorMap(i18nData), [i18nData]);
 
 	const { refresh } = useSession();
 	const [authError, setAuthError] = useState('');
@@ -101,8 +107,6 @@ export default function PhoneSignUp({ i18nData, disabled }: PhoneAuthProps) {
 	const onVerify = async (formData: PhoneVerifySchema) => {
 		if (!pendingPhone || !pendingName) return;
 
-		const errorMap = buildPhoneVerificationErrorMap(i18nData);
-
 		try {
 			const verifyResponse = await authClient.phoneNumber.verify({
 				phoneNumber: pendingPhone.replace(/\D/g, ''),
@@ -112,11 +116,11 @@ export default function PhoneSignUp({ i18nData, disabled }: PhoneAuthProps) {
 			});
 
 			if (verifyResponse.error) {
-				const messageKey = verifyResponse.error?.message ?? '';
-				const message =
-					(messageKey && messageKey in errorMap
-						? errorMap[messageKey as keyof typeof errorMap]
-						: null) || i18nData.userRegisterFail;
+				const message = resolveAuthErrorMessage({
+					errorKey: verifyResponse.error?.message,
+					errorMap: verificationErrorMap,
+					fallback: i18nData.userRegisterFail,
+				});
 				setVerifyError(message);
 				return;
 			}

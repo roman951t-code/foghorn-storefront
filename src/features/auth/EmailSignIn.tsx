@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from '@/providers/SessionProvider';
 import { PrimaryButton, TertiaryButton } from '@/components/ui/buttons/ActionButton';
 import { PasswordInput } from '@/components/ui/chakra/password-input';
+import { buildEmailSignInErrorMap, resolveAuthErrorMessage } from '@/constants/auth';
 
 interface EmailAuthProps {
 	i18nData: I18nData;
@@ -59,7 +60,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 		};
 
 		handleEmailSignIn();
-	}, [emailSignIn]);
+	}, [emailSignIn, router]);
 
 	const {
 		register,
@@ -69,17 +70,11 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 		mode: 'onSubmit',
 		resolver: zodResolver(schema),
 	});
+	const errorMap = useMemo(() => buildEmailSignInErrorMap(i18nData), [i18nData]);
 
 	if (isRestorePassOpen) {
 		return <ResetPass i18nData={i18nData} backToLogin={() => setRestorePassOpen(false)} />;
 	}
-
-	const errorMap: Record<string, string> = {
-		'Invalid password': i18nData.userLoginFail,
-		'User not found': i18nData.userLoginFail,
-		'Email not verified': i18nData.emailNotVerified,
-		'Too many attempts': i18nData.tooManyAttempts,
-	};
 
 	const onSubmit = async (formData: EmailSchema) => {
 		try {
@@ -92,8 +87,11 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 				});
 
 				if (error) {
-					const messageKey = error?.message ?? '';
-					const message = errorMap[messageKey] || i18nData.userLoginFail;
+					const message = resolveAuthErrorMessage({
+						errorKey: error?.message,
+						errorMap,
+						fallback: i18nData.userLoginFail,
+					});
 					setAuthError(message);
 					return;
 				}

@@ -70,17 +70,17 @@ export async function updateCartItemQuantity({
 			: product.stock ?? 0;
 
 		const safeQty = Math.min(MAX_ITEM_QUANTITY, Math.min(availableStock, normalizedQty));
-		if (safeQty < 1) {
+			if (safeQty < 1) {
+				return { success: false, message: validationT('cartUpdateFailed') };
+			}
+
+			await prisma.cartItem.update({
+				where: { id: existingItem.id },
+				data: { quantity: safeQty },
+			});
+
+			return { success: true, quantity: safeQty };
+		} catch {
 			return { success: false, message: validationT('cartUpdateFailed') };
 		}
-
-		await prisma.cartItem.update({
-			where: { id: existingItem.id },
-			data: { quantity: safeQty },
-		});
-
-		return { success: true };
-	} catch {
-		return { success: false, message: validationT('cartUpdateFailed') };
 	}
-}

@@ -10,7 +10,11 @@ import { createPhoneVerifySchema, PhoneVerifySchema } from 'validationSchemas/ph
 import { PrimaryButton, TertiaryButton } from '@/components/ui/buttons/ActionButton';
 import { phoneSignInAction } from '@/actions/auth/phoneSignInAction';
 import { useSession } from '@/providers/SessionProvider';
-import { PHONE_INPUT_MASKS, buildPhoneVerificationErrorMap } from '@/constants/auth';
+import {
+	PHONE_INPUT_MASKS,
+	buildPhoneVerificationErrorMap,
+	resolveAuthErrorMessage,
+} from '@/constants/auth';
 import { useMaskedInput } from '@/hooks/useMaskedInput';
 import { authClient } from '@/lib/auth-client';
 import { formatTime } from '@/utils/generalUtils';
@@ -24,6 +28,7 @@ interface PhoneAuthProps {
 export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 	const signInSchema = useMemo(() => createPhoneSignInSchema(i18nData), [i18nData]);
 	const verifySchema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
+	const verificationErrorMap = useMemo(() => buildPhoneVerificationErrorMap(i18nData), [i18nData]);
 
 	const { refresh } = useSession();
 	const [authError, setAuthError] = useState('');
@@ -99,8 +104,6 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 	const onVerify = async (formData: PhoneVerifySchema) => {
 		if (!pendingPhone) return;
 
-		const errorMap = buildPhoneVerificationErrorMap(i18nData);
-
 		try {
 			const { error } = await authClient.phoneNumber.verify({
 				phoneNumber: pendingPhone.replace(/\D/g, ''),
@@ -110,11 +113,11 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 			});
 
 			if (error) {
-				const messageKey = error?.message ?? '';
-				const message =
-					(messageKey && messageKey in errorMap
-						? errorMap[messageKey as keyof typeof errorMap]
-						: null) || i18nData.userLoginFail;
+				const message = resolveAuthErrorMessage({
+					errorKey: error?.message,
+					errorMap: verificationErrorMap,
+					fallback: i18nData.userLoginFail,
+				});
 				setVerifyError(message);
 				return;
 			}

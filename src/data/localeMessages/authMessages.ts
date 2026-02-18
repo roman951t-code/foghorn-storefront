@@ -66,6 +66,7 @@ export const VALIDATION_MESSAGE_KEYS = [
 	'invalidPhone',
 	'invalidFormData',
 	'smsSendFailed',
+	'emailSendFailed',
 	'userExists',
 	'userRegisterFail',
 	'passwordsNotMatch',

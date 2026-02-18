@@ -1647,7 +1647,7 @@ export const resources = [
 					icon: 'RotateCcw',
 					guard: 'process-return',
 					isVisible: ({ record }: { record?: { param: (key: string) => unknown } }) =>
-						!isOrderStatus(record, 'CANCELLED'),
+						isOrderStatus(record, 'DELIVERED'),
 					component: orderReturnActionComponent,
 					handler: processReturn,
 				},
@@ -1700,6 +1700,8 @@ export const resources = [
 					actionType: 'bulk',
 					icon: 'Truck',
 					guard: 'bulk-mark-shipped',
+					isVisible: ({ records }: { records?: { param: (key: string) => unknown }[] }) =>
+						(records ?? []).some((record) => isOrderStatus(record, 'PAID')),
 					handler: bulkMarkShipped,
 					component: false,
 				},
@@ -1707,6 +1709,8 @@ export const resources = [
 					actionType: 'bulk',
 					icon: 'CheckCircle',
 					guard: 'bulk-mark-delivered',
+					isVisible: ({ records }: { records?: { param: (key: string) => unknown }[] }) =>
+						(records ?? []).some((record) => isOrderStatus(record, 'SHIPPED')),
 					handler: bulkMarkDelivered,
 					component: false,
 				},

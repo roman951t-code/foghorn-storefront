@@ -14,6 +14,12 @@ export default [
 		],
 	},
 	{
+		files: ['src/admin/components/**/*.{ts,tsx,mts,cts}'],
+		rules: {
+			'@next/next/no-img-element': 'off',
+		},
+	},
+	{
 		rules: {
 			'import/no-anonymous-default-export': 'off',
 			'react-hooks/set-state-in-effect': 'off',

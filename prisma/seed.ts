@@ -23,11 +23,14 @@ const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6);
 const usedProductCodes = new Set<string>();
 const isSeedToggleEnabled = (rawValue: string | undefined, defaultValue: string) =>
 	!['0', 'false', 'no', 'off'].includes((rawValue ?? defaultValue).trim().toLowerCase());
-// Default is CSV-first mode (no auto-generated categories). Set SEED_GENERATE_CATEGORIES=true to re-enable.
-const SHOULD_GENERATE_CATEGORIES = isSeedToggleEnabled(process.env.SEED_GENERATE_CATEGORIES, 'false');
-// Default is CSV-first mode (no auto-generated products). Set SEED_GENERATE_PRODUCTS=true to re-enable.
-const SHOULD_GENERATE_PRODUCTS = isSeedToggleEnabled(process.env.SEED_GENERATE_PRODUCTS, 'false');
+const SHOULD_GENERATE_CATEGORIES = isSeedToggleEnabled(process.env.SEED_GENERATE_CATEGORIES, 'true');
+const SHOULD_GENERATE_PRODUCTS = isSeedToggleEnabled(process.env.SEED_GENERATE_PRODUCTS, 'true');
 const SHOULD_GENERATE_SEED_PRODUCTS = SHOULD_GENERATE_CATEGORIES && SHOULD_GENERATE_PRODUCTS;
+const SEED_MAIN_CATEGORY_COUNT = 9;
+const SEED_SUBCATEGORY_MIN = 1;
+const SEED_SUBCATEGORY_MAX = 3;
+const SEED_PRODUCTS_PER_SUBCATEGORY_MIN = 1;
+const SEED_PRODUCTS_PER_SUBCATEGORY_MAX = 3;
 
 const generateUniqueProductCode = () => {
 	let attempts = 0;
@@ -950,7 +953,7 @@ async function main() {
 		prisma.product.deleteMany({}),
 	]);
 
-	if (!SHOULD_GENERATE_CATEGORIES) {
+	if (SHOULD_GENERATE_CATEGORIES) {
 		const deletedSeedSubcategories = await prisma.productCategory.deleteMany({
 			where: {
 				parentId: { not: null },
@@ -963,13 +966,17 @@ async function main() {
 				slug: { in: SEEDED_MAIN_CATEGORY_SLUGS },
 			},
 		});
-		console.log(
-			`🧹 Removed seeded categories/subcategories: ${deletedSeedMainCategories.count} main, ${deletedSeedSubcategories.count} subcategories.`
-		);
+		if (deletedSeedMainCategories.count > 0 || deletedSeedSubcategories.count > 0) {
+			console.log(
+				`🧹 Removed seeded categories/subcategories: ${deletedSeedMainCategories.count} main, ${deletedSeedSubcategories.count} subcategories.`
+			);
+		}
 	}
 
-	if (mainCategories.length !== 9) {
-		throw new Error(`Seed expects exactly 9 main categories, got ${mainCategories.length}`);
+	if (mainCategories.length !== SEED_MAIN_CATEGORY_COUNT) {
+		throw new Error(
+			`Seed expects exactly ${SEED_MAIN_CATEGORY_COUNT} main categories, got ${mainCategories.length}`
+		);
 	}
 
 	const categoriesWithoutSubcategories = mainCategories.filter(
@@ -1154,6 +1161,16 @@ async function main() {
 		);
 	};
 
+	const pickSeedSubcategories = (main: string) => {
+		const candidates = subcategoriesMap[main] ?? [];
+		if (candidates.length === 0) return [];
+		const maxCount = Math.min(SEED_SUBCATEGORY_MAX, candidates.length);
+		const count = faker.number.int({ min: SEED_SUBCATEGORY_MIN, max: maxCount });
+		return faker.helpers.arrayElements(candidates, count);
+	};
+
+	const generatedSubcategoriesByMain = new Map<string, string[]>();
+
 	// Categories + Products
 	if (SHOULD_GENERATE_CATEGORIES) {
 		for (const main of mainCategories) {
@@ -1165,7 +1182,8 @@ async function main() {
 				create: { name: main, slug: parentSlug, parentId: null, imageUrl: parentImage },
 			});
 
-			const subs = subcategoriesMap[main] ?? [];
+			const subs = pickSeedSubcategories(main);
+			generatedSubcategoriesByMain.set(main, subs);
 			for (const sub of subs) {
 				const subSlug = createSlug(sub);
 				const subImage = getSubcategoryImage(sub, subSlug);
@@ -1178,7 +1196,10 @@ async function main() {
 				await ensureAttributeSetForCategory(subcategory.id, main);
 				if (!SHOULD_GENERATE_SEED_PRODUCTS) continue;
 
-				const count = faker.number.int({ min: 3, max: 5 });
+				const count = faker.number.int({
+					min: SEED_PRODUCTS_PER_SUBCATEGORY_MIN,
+					max: SEED_PRODUCTS_PER_SUBCATEGORY_MAX,
+				});
 				for (let i = 0; i < count; i++) {
 					const productSeed = `${main}-${sub}-${i}-${nanoid()}`;
 					const pickedBrand = stablePick(brands, productSeed);
@@ -1295,8 +1316,20 @@ async function main() {
 				)}`
 			);
 		}
+		const mainWithTooManySubcategories = seededMainCategoryRows
+			.filter((category) => category._count.children > SEED_SUBCATEGORY_MAX)
+			.map((category) => category.name);
+		if (mainWithTooManySubcategories.length > 0) {
+			throw new Error(
+				`Each main category must have at most ${SEED_SUBCATEGORY_MAX} subcategories. Too many for: ${mainWithTooManySubcategories.join(
+					', '
+				)}`
+			);
+		}
 
-		const expectedSubcategoryNames = Array.from(new Set(Object.values(subcategoriesMap).flat()));
+		const expectedSubcategoryNames = Array.from(
+			new Set(Array.from(generatedSubcategoriesByMain.values()).flat())
+		);
 		const seededSubcategoryRows = await prisma.productCategory.findMany({
 			where: { parentId: { not: null }, name: { in: expectedSubcategoryNames } },
 			select: {
@@ -1320,6 +1353,16 @@ async function main() {
 			if (subcategoriesWithoutProducts.length > 0) {
 				throw new Error(
 					`Each subcategory must have at least one product. Missing products for: ${subcategoriesWithoutProducts.join(
+						', '
+					)}`
+				);
+			}
+			const subcategoriesWithTooManyProducts = seededSubcategoryRows
+				.filter((subcategory) => subcategory._count.products > SEED_PRODUCTS_PER_SUBCATEGORY_MAX)
+				.map((subcategory) => subcategory.name);
+			if (subcategoriesWithTooManyProducts.length > 0) {
+				throw new Error(
+					`Each subcategory must have at most ${SEED_PRODUCTS_PER_SUBCATEGORY_MAX} products. Too many for: ${subcategoriesWithTooManyProducts.join(
 						', '
 					)}`
 				);
@@ -1443,7 +1486,8 @@ async function main() {
 		{
 			legacyTitle: 'Laptop Deals Week',
 			linkUrl: '/products/search/?tag=discount',
-			imageUrl: buildKeywordImage('laptop-deals', 1200, 700, 'promo-laptops'),
+			imageUrl:
+				'https://fastly.picsum.photos/id/1018/900/900.jpg?hmac=ZOttfaRw0v1KBhmRxLeyN9z1fFAy8uTspj_HcCDbxcU',
 			placement: 'promo',
 			locales: {
 				uk: {
@@ -1461,7 +1505,8 @@ async function main() {
 		{
 			legacyTitle: 'New Arrivals',
 			linkUrl: '/products/search/?tag=new',
-			imageUrl: buildKeywordImage('new-tech', 1200, 700, 'promo-new'),
+			imageUrl:
+				'https://fastly.picsum.photos/id/573/900/900.jpg?hmac=om04nEh5ahI6QHbnsxmzH5HwwZpl9xVa4KOMt4hReuk',
 			placement: 'promo',
 			locales: {
 				uk: {
@@ -1479,7 +1524,8 @@ async function main() {
 		{
 			legacyTitle: 'Popular Right Now',
 			linkUrl: '/products/search/?tag=popular',
-			imageUrl: buildKeywordImage('popular-tech', 1200, 700, 'promo-popular'),
+			imageUrl:
+				'https://fastly.picsum.photos/id/522/900/900.jpg?hmac=WkjG1wM-inQRZ2Jw8HHWtvQeNdal69KOh84yuTX02Iw',
 			placement: 'promo',
 			locales: {
 				uk: {

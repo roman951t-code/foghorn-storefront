@@ -14,6 +14,7 @@ import {
 import { buildProductImages } from '@/utils/productImages';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getPaginatedIdsByEffectivePriceSort } from '@/utils/effectivePriceSorting';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
@@ -109,68 +110,103 @@ export async function getProductsByTag<T extends boolean>(
 		AND: [getPublishedProductWhere(now), ...(dynamicConditions.length > 0 ? dynamicConditions : [])],
 	};
 
-	const orderByClause: Prisma.ProductOrderByWithRelationInput[] = (() => {
-		switch (orderBy) {
-			case 'new':
-				return [{ createdAt: 'desc' }];
-			case 'expensive':
-				return [{ basePrice: 'desc' }];
-			case 'cheap':
-				return [{ basePrice: 'asc' }];
-			default:
-				return [{ inStock: 'desc' }, { name: 'asc' }];
-		}
-	})();
+	const isEffectivePriceSort = orderBy === 'cheap' || orderBy === 'expensive';
+	const orderByClause: Prisma.ProductOrderByWithRelationInput[] =
+		orderBy === 'new' ? [{ createdAt: 'desc' }] : [{ inStock: 'desc' }, { name: 'asc' }];
 
-	const [productsQuery, maxProductPrice] = await Promise.all([
-		prisma.product.findMany({
-			where: whereClause,
-			orderBy: orderByClause,
-			skip: safeOffset,
-			take: safeLimit,
+	const productSelect = {
+		id: true,
+		name: true,
+		fullSlug: true,
+		imageUrl: true,
+		productImages: {
+			select: { url: true, sortOrder: true, createdAt: true },
+			orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+			take: 6,
+		},
+		basePrice: true,
+		discountPrice: true,
+		discountStartAt: true,
+		discountEndAt: true,
+		inStock: true,
+		translations: {
+			where: { locale: { in: localeFallbacks } },
+			select: { locale: true, name: true },
+			orderBy: { updatedAt: 'desc' },
+		},
+		variants: {
+			where: { stock: { gt: 0 } },
+			orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
+			take: 1,
 			select: {
 				id: true,
-				name: true,
-				fullSlug: true,
-				imageUrl: true,
-				productImages: {
-					select: { url: true, sortOrder: true, createdAt: true },
-					orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-					take: 6,
-				},
-				basePrice: true,
-				discountPrice: true,
-				discountStartAt: true,
-				discountEndAt: true,
-				inStock: true,
-				translations: {
-					where: { locale: { in: localeFallbacks } },
-					select: { locale: true, name: true },
-					orderBy: { updatedAt: 'desc' },
-				},
-				variants: {
-					where: { stock: { gt: 0 } },
-					orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
-					take: 1,
+				sku: true,
+				price: true,
+				stock: true,
+				attributes: {
 					select: {
-						id: true,
-						sku: true,
-						price: true,
-						stock: true,
-						attributes: {
-							select: {
-								attribute: { select: { name: true, unit: true } },
-								value: true,
-							},
-							orderBy: { attribute: { name: 'asc' } },
-						},
+						attribute: { select: { name: true, unit: true } },
+						value: true,
 					},
+					orderBy: { attribute: { name: 'asc' } },
 				},
-				averageRating: true,
-				reviewCount: true,
-				createdAt: true,
 			},
-		}),
+		},
+		averageRating: true,
+		reviewCount: true,
+		createdAt: true,
+	} satisfies Prisma.ProductSelect;
+
+	type ProductRow = Prisma.ProductGetPayload<{ select: typeof productSelect }>;
+	const fetchProducts = (args: Omit<Prisma.ProductFindManyArgs, 'select'>) =>
+		prisma.product.findMany({
+			...args,
+			select: productSelect,
+		});
+
+	const [productsQuery, maxProductPrice] = await Promise.all([
+		(async (): Promise<ProductRow[]> => {
+			if (!isEffectivePriceSort) {
+				return fetchProducts({
+					where: whereClause,
+					orderBy: orderByClause,
+					skip: safeOffset,
+					take: safeLimit,
+				});
+			}
+
+			const candidateRows = await prisma.product.findMany({
+				where: whereClause,
+				select: {
+					id: true,
+					name: true,
+					inStock: true,
+					basePrice: true,
+					discountPrice: true,
+					discountStartAt: true,
+					discountEndAt: true,
+				},
+			});
+			const sortedPageIds = getPaginatedIdsByEffectivePriceSort(
+				candidateRows,
+				orderBy === 'cheap' ? 'asc' : 'desc',
+				safeOffset,
+				safeLimit,
+				now
+			);
+
+			if (sortedPageIds.length === 0) return [];
+
+			const pageRows = await fetchProducts({
+				where: {
+					AND: [whereClause, { id: { in: sortedPageIds } }],
+				},
+			});
+			const byId = new Map(pageRows.map((product) => [product.id, product]));
+			return sortedPageIds
+				.map((productId) => byId.get(productId))
+				.filter((product): product is ProductRow => Boolean(product));
+		})(),
 		getMaxEffectiveProductPrice(whereClause, now),
 	]);
 

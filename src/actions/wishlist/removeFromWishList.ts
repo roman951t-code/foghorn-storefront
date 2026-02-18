@@ -18,12 +18,10 @@ export async function removeFromWishList(productId: string) {
 	}
 
 	try {
-		await prisma.wishlist.delete({
+		await prisma.wishlist.deleteMany({
 			where: {
-				userId_productId: {
-					userId,
-					productId,
-				},
+				userId,
+				productId,
 			},
 		});
 		return { success: true };

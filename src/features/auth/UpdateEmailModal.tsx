@@ -1,13 +1,14 @@
 'use client';
 
 import { Fieldset, Highlight, Text } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { useTranslations } from 'next-intl';
 import CenteredModal from '@/components/ui/dialogs/CenteredModal';
+import { buildEmailChangeErrorMap, resolveAuthErrorMessage } from '@/constants/auth';
 
 export default function UpdateEmailModal() {
 	const authT = useTranslations('auth');
@@ -17,12 +18,15 @@ export default function UpdateEmailModal() {
 
 	const emailChange = searchParams?.get('email-change') === 'true';
 	const [isOpen, setIsOpen] = useState(false);
-
-	const errorMap: Record<string, string> = {
-		'Invalid password': validT('invalidFormData'),
-		'User not found': validT('userNotFound'),
-		'Too many attempts': validT('tooManyAttempts'),
-	};
+	const errorMap = useMemo(
+		() =>
+			buildEmailChangeErrorMap({
+				invalidFormData: validT('invalidFormData'),
+				userNotFound: validT('userNotFound'),
+				tooManyAttempts: validT('tooManyAttempts'),
+			}),
+		[validT]
+	);
 
 	useEffect(() => {
 		if (!emailChange) return;
@@ -35,8 +39,11 @@ export default function UpdateEmailModal() {
 				});
 
 				if (error) {
-					const messageKey = error?.message ?? '';
-					const message = errorMap[messageKey] || validT('editEmailFail');
+					const message = resolveAuthErrorMessage({
+						errorKey: error?.message,
+						errorMap,
+						fallback: validT('editEmailFail'),
+					});
 					showToaster('error', toasterMessages.updateEmailFailed(message));
 				} else {
 					setIsOpen(true);
@@ -45,7 +52,7 @@ export default function UpdateEmailModal() {
 		};
 
 		sendVerification();
-	}, [emailChange, session]);
+	}, [emailChange, session, errorMap, validT]);
 
 	if (!isOpen) return null;
 

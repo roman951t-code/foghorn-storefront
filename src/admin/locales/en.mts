@@ -332,7 +332,7 @@ export const enAdminLocale = {
 		'return-load-failed': 'Failed to load return form',
 		'return-save-failed': 'Failed to process return',
 		'return-refund-invalid': 'Refund amount must be between 0 and the order total',
-		'order-not-returnable': 'Order cannot be returned because it is cancelled.',
+		'order-not-returnable': 'Order cannot be returned in its current status.',
 		'order-not-found': 'Order not found',
 		'customer-kpis': 'Customer KPIs',
 		'customer-kpis-loading': 'Loading KPIs...',
