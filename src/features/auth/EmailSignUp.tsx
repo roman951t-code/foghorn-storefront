@@ -105,7 +105,7 @@ export default function EmailSignUp({ i18nData, disabled, backToLogin }: EmailAu
 					<Fieldset.ErrorText>{authError}</Fieldset.ErrorText>
 
 					{isSubmitted && !authError && !isSubmitting && (
-						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
+						<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} lineHeight='1.6' mb='2' mt='0'>
 							{i18nData.toPost}
 							{formData?.email && (
 								<Highlight query={formData?.email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>

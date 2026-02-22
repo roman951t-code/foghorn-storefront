@@ -333,7 +333,7 @@ export default function ProductShow(props: ActionProps) {
 						<Box style={{ padding: 14, borderRadius: 12, border: '1px solid #E2E8F0' }}>
 							<Text color='grey60'>{translateMessage('product-kpis-conversion-proxy')}</Text>
 							<Text fontWeight='bold'>{conversionText}</Text>
-							<Text color='grey60' style={{ fontSize: 13 }}>
+							<Text color='grey60' style={{ fontSize: 15 }}>
 								{payload.paidOrderCount} / {payload.recentlyViewedCount || 0}
 							</Text>
 						</Box>

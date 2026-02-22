@@ -21,6 +21,7 @@ interface Props {
 
 export default function EmailVerification({ email, i18nData, onCloseAction }: Props) {
 	const schema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
+	const EMPTY_OTP = ['', '', '', '', '', ''];
 
 	const { refresh } = useSession();
 
@@ -33,7 +34,11 @@ export default function EmailVerification({ email, i18nData, onCloseAction }: Pr
 		control,
 		reset,
 		formState: { errors, isSubmitting },
-	} = useForm<PhoneVerifySchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
+	} = useForm<PhoneVerifySchema>({
+		mode: 'onSubmit',
+		resolver: zodResolver(schema),
+		defaultValues: { otp: EMPTY_OTP },
+	});
 
 	useEffect(() => {
 		if (timer <= 0) return;
@@ -52,7 +57,8 @@ export default function EmailVerification({ email, i18nData, onCloseAction }: Pr
 	}, [timer]);
 
 	const resendVerificationCode = async () => {
-		reset();
+		reset({ otp: EMPTY_OTP });
+		setVerifyError('');
 
 		setTimer(120);
 		setIsResending(true);
@@ -61,7 +67,7 @@ export default function EmailVerification({ email, i18nData, onCloseAction }: Pr
 			const result = await sendVerifyEmailAction(null, { email });
 
 			if (!result?.success) {
-				setVerifyError(i18nData.editEmailFail);
+				setVerifyError(result?.message || i18nData.editEmailFail);
 			} else {
 				setVerifyError('');
 			}
@@ -100,7 +106,7 @@ export default function EmailVerification({ email, i18nData, onCloseAction }: Pr
 		>
 			<Fieldset.Root size='lg' invalid>
 				<Fieldset.Legend fontSize='17px'>{i18nData.emailConfirmation}</Fieldset.Legend>
-				<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mt='4'>
+				<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} lineHeight='1.6' mt='4'>
 					{i18nData.toPost}
 					<Highlight query={email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
 						{email}
@@ -152,7 +158,7 @@ export default function EmailVerification({ email, i18nData, onCloseAction }: Pr
 				</Button>
 
 				{timer > 0 ? (
-					<Fieldset.HelperText fontSize='15px' color='main'>
+					<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} color='main'>
 						{i18nData.resendAfter}:
 						<Highlight
 							query={formattedTime}
@@ -163,6 +169,7 @@ export default function EmailVerification({ email, i18nData, onCloseAction }: Pr
 					</Fieldset.HelperText>
 				) : (
 					<Button
+						type='button'
 						mt='4'
 						variant='outline'
 						rounded='md'

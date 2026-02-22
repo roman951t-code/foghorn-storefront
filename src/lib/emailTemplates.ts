@@ -71,10 +71,10 @@ export function renderEmailTemplate(content: EmailContent) {
 							.map(
 								(row) => `
 							<tr>
-								<td style="${baseFont}font-size:13px;color:#475467;padding:8px 10px 8px 0;width:45%;vertical-align:top;">${escapeHtml(
+								<td style="${baseFont}font-size:15px;color:#475467;padding:8px 10px 8px 0;width:45%;vertical-align:top;">${escapeHtml(
 									row.label
 								)}</td>
-								<td style="${baseFont}font-weight:600;font-size:14px;color:#111827;padding:8px 0 8px 10px;vertical-align:top;text-align:right;">${escapeHtml(
+								<td style="${baseFont}font-weight:600;font-size:15px;color:#111827;padding:8px 0 8px 10px;vertical-align:top;text-align:right;">${escapeHtml(
 									row.value
 								)}</td>
 							</tr>`
@@ -92,7 +92,7 @@ export function renderEmailTemplate(content: EmailContent) {
 						${content.listItems
 							.map(
 								(item) =>
-									`<li style="${baseFont}font-size:14px;line-height:20px;color:#111827;margin-bottom:6px;">${escapeHtml(
+									`<li style="${baseFont}font-size:15px;line-height:20px;color:#111827;margin-bottom:6px;">${escapeHtml(
 										item
 									)}</li>`
 							)
@@ -107,7 +107,7 @@ export function renderEmailTemplate(content: EmailContent) {
 					${content.outro
 						.map(
 							(line) =>
-								`<p style="${baseFont}margin:0 0 10px;font-size:14px;color:#374151;line-height:20px;">${escapeHtml(
+								`<p style="${baseFont}margin:0 0 10px;font-size:15px;color:#374151;line-height:20px;">${escapeHtml(
 									line
 								)}</p>`
 						)
@@ -117,14 +117,14 @@ export function renderEmailTemplate(content: EmailContent) {
 
 	const ctaHtml = content.cta
 		? `<div style="margin-top:20px;">
-				<a href="${escapeUrl(content.cta.url)}" style="${baseFont}display:inline-block;padding:12px 18px;background:#111827;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:14px;">
+				<a href="${escapeUrl(content.cta.url)}" style="${baseFont}display:inline-block;padding:12px 18px;background:#111827;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:15px;">
 					${escapeHtml(content.cta.label)}
 				</a>
 			</div>`
 		: '';
 
 	const footerHtml = content.footer
-		? `<div style="padding:14px 22px;border-top:1px solid #e5e7eb;background:#f8fafc;color:#475467;${baseFont}font-size:13px;line-height:19px;">
+		? `<div style="padding:14px 22px;border-top:1px solid #e5e7eb;background:#f8fafc;color:#475467;${baseFont}font-size:15px;line-height:19px;">
 				${escapeHtml(content.footer)}<br />${brandName}
 			</div>`
 		: '';
@@ -136,14 +136,14 @@ export function renderEmailTemplate(content: EmailContent) {
 					${escapeHtml(content.title)}
 				</div>
 				<div style="padding:22px;${baseFont}color:#111827;">
-					<p style="${baseFont}margin:0 0 12px;font-size:14px;color:#6b7280;">${brandName}</p>
+					<p style="${baseFont}margin:0 0 12px;font-size:15px;color:#6b7280;">${brandName}</p>
 					<p style="${baseFont}margin:0 0 12px;font-size:15px;font-weight:600;color:#0f172a;">${escapeHtml(
 						content.salutation
 					)}</p>
 					${content.intro
 						.map(
 							(line) =>
-								`<p style="${baseFont}margin:0 0 12px;font-size:14px;line-height:21px;color:#1f2937;">${escapeHtml(
+								`<p style="${baseFont}margin:0 0 12px;font-size:15px;line-height:21px;color:#1f2937;">${escapeHtml(
 									line
 								)}</p>`
 						)

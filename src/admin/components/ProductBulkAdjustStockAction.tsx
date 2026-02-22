@@ -130,7 +130,7 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 						padding: '10px 12px',
 						borderRadius: 8,
 						border: '1px solid #E2E8F0',
-						fontSize: 14,
+						fontSize: 15,
 					}}
 				/>
 			</FormGroup>
@@ -152,7 +152,7 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 						padding: '10px 12px',
 						borderRadius: 8,
 						border: '1px solid #E2E8F0',
-						fontSize: 14,
+						fontSize: 15,
 					}}
 				/>
 			</FormGroup>

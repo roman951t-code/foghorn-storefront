@@ -1629,7 +1629,6 @@ async function main() {
 			emailVerified: true,
 			phoneNumber: '+380951234567',
 			phoneNumberVerified: true,
-			image: 'https://picsum.photos/seed/roman-user/160/160',
 		},
 	});
 

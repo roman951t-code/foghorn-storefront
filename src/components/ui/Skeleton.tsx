@@ -63,14 +63,11 @@ export function Loading() {
 				maxWidth: '1444px',
 				paddingInline: '12px',
 				boxSizing: 'border-box',
-				display: 'grid',
-				gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-				columnGap: '16px',
-				rowGap: '16px',
+				display: 'flex',
+				flexDirection: 'column',
+				gap: '16px',
 			}}
 		>
-			<LoadingSkeleton />
-			<LoadingSkeleton />
 			<LoadingSkeleton />
 			<LoadingSkeleton />
 		</div>

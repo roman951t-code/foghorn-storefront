@@ -9,17 +9,76 @@ body,
 	font-family: var(--admin-font-stack);
 }
 
+#app {
+	min-width: 400px;
+}
+
+/* Enforce the admin minimum font size floor for third-party controls. */
+#app .react-datepicker {
+	font-size: 15px !important;
+}
+
+#app .adminjs_DatePicker .react-datepicker-wrapper,
+#app .adminjs_DatePicker .react-datepicker-wrapper input {
+	font-size: 15px !important;
+}
+
+#app .react-datepicker__close-icon::after {
+	font-size: 15px !important;
+}
+
+#app .adminjs_Checkbox,
+#app .adminjs_Checkbox * {
+	font-size: 15px !important;
+}
+
+#app :is(
+		[style*='font-size:12px'],
+		[style*='font-size: 12px'],
+		[style*='font-size:13px'],
+		[style*='font-size: 13px'],
+		[style*='font-size:14px'],
+		[style*='font-size: 14px'],
+		[style*='font-size:0.8rem'],
+		[style*='font-size: 0.8rem'],
+		[style*='font-size:0.944rem'],
+		[style*='font-size: 0.944rem'],
+		[style*='font-size:75%'],
+		[style*='font-size: 75%'],
+		[style*='font-size:85%'],
+		[style*='font-size: 85%']
+	) {
+	font-size: 15px !important;
+}
+
+#app svg text {
+	font-size: 15px !important;
+}
+
+#app .form-control,
+#app .invalid-number-message,
+#app .special-label,
+#app .country-list,
+#app .country-list * {
+	font-size: 15px !important;
+}
+
+/* AdminJS rich-text helpers can downscale to 75%-85%; keep the global minimum. */
+#app [data-css='app-content'] :is(code, sup, sub, small) {
+	font-size: 15px !important;
+}
+
 .admin-login-page .adminjs_Label {
-	font-size: 14px !important;
+	font-size:15px !important;
 }
 
 .admin-login-page input,
 .admin-login-page .adminjs_Input {
-	font-size: 14px !important;
+	font-size:15px !important;
 }
 
 .adminjs_Label {
-	font-size: 14px !important;
+	font-size:15px !important;
 }
 
 .admin-filter-overlay {
@@ -195,6 +254,10 @@ table.adminjs_Table {
 		padding-left: 12px;
 		padding-right: 12px;
 	}
+
+	.admin-locale-switcher {
+		display: none !important;
+	}
 }
 
 button[data-css$='filter-drawer-button-apply'] {
@@ -254,6 +317,15 @@ button[data-css$='-save-button']:hover {
 }
 
 [data-css='Order-deleteOrder-button']:hover {
+	color: #dc2626 !important;
+}
+
+[data-css='User-deleteUser-button'] {
+	color: #ef4444 !important;
+	background: transparent !important;
+}
+
+[data-css='User-deleteUser-button']:hover {
 	color: #dc2626 !important;
 }
 

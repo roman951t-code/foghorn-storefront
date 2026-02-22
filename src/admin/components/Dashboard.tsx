@@ -167,6 +167,29 @@ const formatSigned = (value: number, formatter: (next: number) => string) => {
 	return `${sign}${formatter(Math.abs(safeValue))}`;
 };
 
+const getTrendLabelStep = (pointsLength: number) => {
+	if (pointsLength <= 8) return 1;
+	if (pointsLength <= 14) return 2;
+	if (pointsLength <= 21) return 3;
+	return 4;
+};
+
+const TREND_COLUMN_WIDTH = 44;
+const TREND_COLUMN_GAP = 8;
+const TREND_BAR_WIDTH = 14;
+
+const getTrendChartMinWidth = (pointsLength: number) =>
+	Math.max(280, pointsLength * TREND_COLUMN_WIDTH + Math.max(0, pointsLength - 1) * TREND_COLUMN_GAP);
+
+const shouldShowTrendLabel = (index: number, pointsLength: number, labelStep: number) => {
+	if (pointsLength <= 0 || index < 0) return false;
+	const lastIndex = pointsLength - 1;
+	if (index === lastIndex) return true;
+	if (index % labelStep !== 0) return false;
+	// Prevent the second-to-last label from colliding with a forced-visible last label.
+	return !(lastIndex % labelStep !== 0 && index === lastIndex - 1);
+};
+
 const resolvePath = (path: string) => {
 	if (typeof window === 'undefined') return path;
 	const globalAny = window as typeof window & {
@@ -318,6 +341,19 @@ export default function Dashboard() {
 		if (!points?.length) return 0;
 		return Math.max(...points.map((p) => p.orders));
 	}, [metrics?.ordersTrend?.points]);
+	const salesTrendLabelStep = useMemo(() => getTrendLabelStep(salesTrendPoints.length), [salesTrendPoints.length]);
+	const ordersTrendLabelStep = useMemo(
+		() => getTrendLabelStep(ordersTrendPoints.length),
+		[ordersTrendPoints.length],
+	);
+	const salesTrendChartMinWidth = useMemo(
+		() => getTrendChartMinWidth(salesTrendPoints.length),
+		[salesTrendPoints.length],
+	);
+	const ordersTrendChartMinWidth = useMemo(
+		() => getTrendChartMinWidth(ordersTrendPoints.length),
+		[ordersTrendPoints.length],
+	);
 
 	const comparisonCards = useMemo(() => {
 		if (!metrics) return [];
@@ -527,14 +563,14 @@ export default function Dashboard() {
 						boxShadow='sm'
 						style={{ border: '1px solid #E2E8F0' }}
 					>
-						<Text color='grey60' fontSize='sm' mb='xs'>
+						<Text color='grey60' fontSize='15px' mb='xs'>
 							{item.label}
 						</Text>
 						<Text fontSize='xl' fontWeight='bold'>
 							{item.value}
 						</Text>
 						{item.secondary ? (
-							<Text color='grey60' fontSize='sm'>
+							<Text color='grey60' fontSize='15px'>
 								{item.secondary}
 							</Text>
 						) : null}
@@ -570,16 +606,16 @@ export default function Dashboard() {
 									boxShadow='sm'
 									style={{ border: '1px solid #E2E8F0' }}
 								>
-									<Text color='grey60' fontSize='sm' mb='xs'>
+									<Text color='grey60' fontSize='15px' mb='xs'>
 										{card.label}
 									</Text>
 									<Text fontSize='xl' fontWeight='bold'>
 										{card.current}
 									</Text>
-									<Text color='grey60' fontSize='sm'>
+									<Text color='grey60' fontSize='15px'>
 										{translateMessage('dashboard.compare.previous')}: {card.previous}
 									</Text>
-									<Text color='grey60' fontSize='sm'>
+									<Text color='grey60' fontSize='15px'>
 										{translateMessage('dashboard.compare.change')}: {card.change}{' '}
 										{card.change !== '—' ? `(${card.delta})` : ''}
 									</Text>
@@ -720,7 +756,7 @@ export default function Dashboard() {
 										</Box>
 									</Box>
 								))}
-								<Text color='grey60' fontSize='sm'>
+								<Text color='grey60' fontSize='15px'>
 									{translateMessage('dashboard.funnel.pending')}: {formatCount(metrics.funnel.pending)}
 								</Text>
 							</Box>
@@ -760,7 +796,7 @@ export default function Dashboard() {
 											: `${metrics.orderHealth.avgFulfillmentHours.toFixed(1)}h`}
 									</Text>
 								</Box>
-								<Text color='grey60' fontSize='sm'>
+								<Text color='grey60' fontSize='15px'>
 									{translateMessage('dashboard.health.sampleSize', {
 										count: metrics.orderHealth.fulfillmentSampleSize,
 									})}
@@ -879,19 +915,25 @@ export default function Dashboard() {
 				</Box>
 			</Box>
 
-			<Box
-				mt='lg'
-				style={{
-					display: 'grid',
-					gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-					gap: 16,
-				}}
-			>
-				<Box variant='white' p='xl' borderRadius='xl' boxShadow='sm' style={{ border: '1px solid #E2E8F0' }}>
-					<Text fontSize='lg' fontWeight='bold' mb='xs'>
-						{translateMessage('dashboard.charts.salesTrend.title')}
-					</Text>
-					<Text color='grey60' mb='lg'>
+				<Box
+					mt='lg'
+					style={{
+						display: 'grid',
+						gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
+						gap: 16,
+					}}
+				>
+					<Box
+						variant='white'
+						p='xl'
+						borderRadius='xl'
+						boxShadow='sm'
+						style={{ border: '1px solid #E2E8F0', minWidth: 0 }}
+					>
+						<Text fontSize='lg' fontWeight='bold' mb='xs'>
+							{translateMessage('dashboard.charts.salesTrend.title')}
+						</Text>
+						<Text color='grey60' mb='lg'>
 						{translateMessage('dashboard.charts.salesTrend.subtitle', {
 							days: formatCount(metrics?.salesTrend?.days ?? 14),
 						})}
@@ -900,62 +942,81 @@ export default function Dashboard() {
 						<Text color='grey60'>{translateMessage('dashboard.metrics.loading')}</Text>
 					) : salesTrendPoints.length === 0 ? (
 						<Text color='grey60'>{translateMessage('dashboard.charts.salesTrend.empty')}</Text>
-					) : (
-						<Box style={{ display: 'grid', gap: 10 }}>
-							<Box
-								style={{
-									display: 'grid',
-									gridTemplateColumns: `repeat(${salesTrendPoints.length}, 1fr)`,
-									gap: 6,
-									alignItems: 'end',
-									height: 120,
-								}}
-							>
-								{salesTrendPoints.map((p) => {
-									const height = salesTrendMax > 0 ? Math.round((p.total / salesTrendMax) * 100) : 0;
-									return (
+						) : (
+							<Box style={{ display: 'grid', gap: 10, minWidth: 0 }}>
+								<Box style={{ overflowX: 'auto', paddingBottom: 4 }}>
+									<Box style={{ display: 'grid', gap: 10, minWidth: salesTrendChartMinWidth }}>
 										<Box
-											key={p.day}
-											title={`${p.day}: ${formatMoney(p.total)}`}
 											style={{
-												height: `${Math.max(3, height)}%`,
-												borderRadius: 8,
-												background: '#FACC15',
+												display: 'grid',
+												gridTemplateColumns: `repeat(${salesTrendPoints.length}, ${TREND_COLUMN_WIDTH}px)`,
+												gap: TREND_COLUMN_GAP,
+												alignItems: 'end',
+												height: 120,
 											}}
-										/>
-									);
-								})}
+										>
+											{salesTrendPoints.map((p) => {
+												const height = salesTrendMax > 0 ? Math.round((p.total / salesTrendMax) * 100) : 0;
+												return (
+													<Box
+														key={p.day}
+														title={`${p.day}: ${formatMoney(p.total)}`}
+														style={{
+															width: TREND_BAR_WIDTH,
+															justifySelf: 'center',
+															height: `${Math.max(3, height)}%`,
+															borderRadius: 8,
+															background: '#FACC15',
+														}}
+													/>
+												);
+											})}
+										</Box>
+										<Box
+											style={{
+												display: 'grid',
+												gridTemplateColumns: `repeat(${salesTrendPoints.length}, ${TREND_COLUMN_WIDTH}px)`,
+												gap: TREND_COLUMN_GAP,
+											}}
+										>
+											{salesTrendPoints.map((p, idx) => (
+												<Text
+													key={p.day}
+													color='grey60'
+													style={{
+														fontSize: 12,
+														textAlign: 'center',
+														whiteSpace: 'nowrap',
+														opacity: shouldShowTrendLabel(
+															idx,
+															salesTrendPoints.length,
+															salesTrendLabelStep
+														)
+															? 1
+															: 0,
+													}}
+												>
+													{formatShortDay(p.day)}
+												</Text>
+											))}
+										</Box>
+									</Box>
+								</Box>
 							</Box>
-							<Box
-								style={{
-									display: 'grid',
-									gridTemplateColumns: `repeat(${salesTrendPoints.length}, 1fr)`,
-									gap: 6,
-								}}
-							>
-								{salesTrendPoints.map((p, idx) => (
-									<Text
-										key={p.day}
-										color='grey60'
-										style={{
-											fontSize: 12,
-											textAlign: 'center',
-											opacity: idx % 2 === 0 ? 1 : 0,
-										}}
-									>
-										{formatShortDay(p.day)}
-									</Text>
-								))}
-							</Box>
-						</Box>
-					)}
-				</Box>
+						)}
+					</Box>
 
-				<Box variant='white' p='xl' borderRadius='xl' boxShadow='sm' style={{ border: '1px solid #E2E8F0' }}>
-					<Text fontSize='lg' fontWeight='bold' mb='xs'>
-						{translateMessage('dashboard.charts.ordersTrend.title')}
-					</Text>
-					<Text color='grey60' mb='lg'>
+					<Box
+						variant='white'
+						p='xl'
+						borderRadius='xl'
+						boxShadow='sm'
+						style={{ border: '1px solid #E2E8F0', minWidth: 0 }}
+					>
+						<Text fontSize='lg' fontWeight='bold' mb='xs'>
+							{translateMessage('dashboard.charts.ordersTrend.title')}
+						</Text>
+						<Text color='grey60' mb='lg'>
 						{translateMessage('dashboard.charts.ordersTrend.subtitle', {
 							days: formatCount(metrics?.ordersTrend?.days ?? 14),
 						})}
@@ -964,57 +1025,70 @@ export default function Dashboard() {
 						<Text color='grey60'>{translateMessage('dashboard.metrics.loading')}</Text>
 					) : ordersTrendPoints.length === 0 ? (
 						<Text color='grey60'>{translateMessage('dashboard.charts.ordersTrend.empty')}</Text>
-					) : (
-						<Box style={{ display: 'grid', gap: 10 }}>
-							<Box
-								style={{
-									display: 'grid',
-									gridTemplateColumns: `repeat(${ordersTrendPoints.length}, 1fr)`,
-									gap: 6,
-									alignItems: 'end',
-									height: 120,
-								}}
-							>
-								{ordersTrendPoints.map((p) => {
-									const height = ordersTrendMax > 0 ? Math.round((p.orders / ordersTrendMax) * 100) : 0;
-									return (
+						) : (
+							<Box style={{ display: 'grid', gap: 10, minWidth: 0 }}>
+								<Box style={{ overflowX: 'auto', paddingBottom: 4 }}>
+									<Box style={{ display: 'grid', gap: 10, minWidth: ordersTrendChartMinWidth }}>
 										<Box
-											key={p.day}
-											title={`${p.day}: ${formatCount(p.orders)}`}
 											style={{
-												height: `${Math.max(3, height)}%`,
-												borderRadius: 8,
-												background: '#0EA5E9',
+												display: 'grid',
+												gridTemplateColumns: `repeat(${ordersTrendPoints.length}, ${TREND_COLUMN_WIDTH}px)`,
+												gap: TREND_COLUMN_GAP,
+												alignItems: 'end',
+												height: 120,
 											}}
-										/>
-									);
-								})}
+										>
+											{ordersTrendPoints.map((p) => {
+												const height = ordersTrendMax > 0 ? Math.round((p.orders / ordersTrendMax) * 100) : 0;
+												return (
+													<Box
+														key={p.day}
+														title={`${p.day}: ${formatCount(p.orders)}`}
+														style={{
+															width: TREND_BAR_WIDTH,
+															justifySelf: 'center',
+															height: `${Math.max(3, height)}%`,
+															borderRadius: 8,
+															background: '#0EA5E9',
+														}}
+													/>
+												);
+											})}
+										</Box>
+										<Box
+											style={{
+												display: 'grid',
+												gridTemplateColumns: `repeat(${ordersTrendPoints.length}, ${TREND_COLUMN_WIDTH}px)`,
+												gap: TREND_COLUMN_GAP,
+											}}
+										>
+											{ordersTrendPoints.map((p, idx) => (
+												<Text
+													key={p.day}
+													color='grey60'
+													style={{
+														fontSize: 12,
+														textAlign: 'center',
+														whiteSpace: 'nowrap',
+														opacity: shouldShowTrendLabel(
+															idx,
+															ordersTrendPoints.length,
+															ordersTrendLabelStep
+														)
+															? 1
+															: 0,
+													}}
+												>
+													{formatShortDay(p.day)}
+												</Text>
+											))}
+										</Box>
+									</Box>
+								</Box>
 							</Box>
-							<Box
-								style={{
-									display: 'grid',
-									gridTemplateColumns: `repeat(${ordersTrendPoints.length}, 1fr)`,
-									gap: 6,
-								}}
-							>
-								{ordersTrendPoints.map((p, idx) => (
-									<Text
-										key={p.day}
-										color='grey60'
-										style={{
-											fontSize: 12,
-											textAlign: 'center',
-											opacity: idx % 2 === 0 ? 1 : 0,
-										}}
-									>
-										{formatShortDay(p.day)}
-									</Text>
-								))}
-							</Box>
-						</Box>
-					)}
+						)}
+					</Box>
 				</Box>
-			</Box>
 
 			<Box
 				mt='lg'
@@ -1048,7 +1122,7 @@ export default function Dashboard() {
 										>
 											{item.name}
 										</a>
-										<Text color='grey60' style={{ fontSize: 13 }}>
+										<Text color='grey60' style={{ fontSize: 15 }}>
 											{resolveStatusLabel(item.status)}
 										</Text>
 									</Box>
@@ -1085,7 +1159,7 @@ export default function Dashboard() {
 										</a>
 										<Text fontWeight='bold'>{formatMoney(item.revenue)}</Text>
 									</Box>
-									<Text color='grey60' style={{ fontSize: 13 }}>
+									<Text color='grey60' style={{ fontSize: 15 }}>
 										{translateMessage('dashboard.widgets.topProducts.units', {
 											count: item.quantity,
 										})}
@@ -1120,47 +1194,49 @@ export default function Dashboard() {
 						</Box>
 					</Box>
 
-					<Box
-						style={{
-							display: 'grid',
-							gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-							gap: 12,
-							marginBottom: 18,
-						}}
-					>
+						<Box
+							style={{
+								display: 'grid',
+								gridTemplateColumns: '1fr',
+								gap: 12,
+								marginBottom: 18,
+							}}
+						>
 						<Box>
 							<Label>{translateMessage('dashboard.lowStock.criticalThreshold')}</Label>
-							<input
-								type='number'
-								min='0'
-								step='1'
-								value={criticalInput}
-								onChange={(event) => setCriticalInput(event.target.value)}
-								style={{
-									width: '100%',
-									padding: '10px 12px',
-									borderRadius: 8,
-									border: '1px solid #E2E8F0',
-									fontSize: 14,
-									marginTop: 8,
+								<input
+									type='number'
+									min='0'
+									step='1'
+									value={criticalInput}
+									onChange={(event) => setCriticalInput(event.target.value)}
+									style={{
+										width: '100%',
+										boxSizing: 'border-box',
+										padding: '10px 12px',
+										borderRadius: 8,
+										border: '1px solid #E2E8F0',
+										fontSize: 15,
+										marginTop: 8,
 								}}
 							/>
 						</Box>
 						<Box>
 							<Label>{translateMessage('dashboard.lowStock.lowThreshold')}</Label>
-							<input
-								type='number'
-								min='0'
-								step='1'
-								value={lowInput}
-								onChange={(event) => setLowInput(event.target.value)}
-								style={{
-									width: '100%',
-									padding: '10px 12px',
-									borderRadius: 8,
-									border: '1px solid #E2E8F0',
-									fontSize: 14,
-									marginTop: 8,
+								<input
+									type='number'
+									min='0'
+									step='1'
+									value={lowInput}
+									onChange={(event) => setLowInput(event.target.value)}
+									style={{
+										width: '100%',
+										boxSizing: 'border-box',
+										padding: '10px 12px',
+										borderRadius: 8,
+										border: '1px solid #E2E8F0',
+										fontSize: 15,
+										marginTop: 8,
 								}}
 							/>
 						</Box>
@@ -1233,20 +1309,20 @@ export default function Dashboard() {
 													>
 														{item.name}
 													</a>
-													<Text color='grey60' style={{ fontSize: 13 }}>
+													<Text color='grey60' style={{ fontSize: 15 }}>
 														{resolveStatusLabel(item.status)}
 													</Text>
 												</Box>
 											</Box>
 											<Box style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
 												<Box>
-													<Text color='grey60' style={{ fontSize: 13 }}>
+													<Text color='grey60' style={{ fontSize: 15 }}>
 														{translateMessage('dashboard.lowStock.headers.stock')}
 													</Text>
 													<Text fontWeight='bold'>{item.stock}</Text>
 												</Box>
 												<Box>
-													<Text color='grey60' style={{ fontSize: 13 }}>
+													<Text color='grey60' style={{ fontSize: 15 }}>
 														{translateMessage('dashboard.lowStock.headers.inStock')}
 													</Text>
 													<Text fontWeight='bold'>{resolveInStockLabel(item.inStock)}</Text>

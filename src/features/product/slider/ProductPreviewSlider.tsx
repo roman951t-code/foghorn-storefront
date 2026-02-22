@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-import { HStack, Skeleton, Box } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
@@ -16,14 +16,6 @@ type ProductPreviewSliderProps = {
 	images: string[];
 	productName?: string;
 };
-
-function ProductPreviewSkeleton() {
-	return (
-		<HStack overflowX='hidden' overflowY='hidden' alignSelf='center'>
-			<Skeleton width='116px' height='116px' borderRadius='lg' />
-		</HStack>
-	);
-}
 
 function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps) {
 	const normalizedImages = images.filter((src): src is string => src.trim().length > 0);
@@ -51,13 +43,16 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 	return (
 		<Swiper navigation loop modules={[Navigation]} className='productPreviewSwiper'>
 			{previewImages.map((src, i) => {
-				const isFirst = i === 0;
 				const resolvedSrc = failedIndexes.has(i) ? PRODUCT_PLACEHOLDER_IMAGE : src;
 				return (
 					<SwiperSlide key={i}>
 						<Box
 							as='div'
-							_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
+							_focusVisible={{
+								outline: '2px solid',
+								outlineColor: 'main.secondary',
+								outlineOffset: '2px',
+							}}
 							borderWidth='0.5px'
 							borderStyle='solid'
 							borderColor='border'
@@ -66,14 +61,14 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 							display='inline-block'
 						>
 							<Image
-								loading={isFirst ? undefined : 'lazy'}
+								loading='eager'
 								src={resolvedSrc}
 								width={120}
 								height={120}
 								alt={altText}
 								onError={markImageFailed(i)}
-								priority={isFirst}
-								fetchPriority={isFirst ? 'high' : undefined}
+								priority={i === 0}
+								fetchPriority='high'
 								style={{
 									width: '150px',
 									height: '150px',
@@ -91,9 +86,50 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 
 const DynamicProductPreviewSlider = dynamic(() => Promise.resolve(ProductPreviewSwiper), {
 	ssr: false,
-	loading: () => <ProductPreviewSkeleton />,
+	loading: () => null,
 });
 
 export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
-	return <DynamicProductPreviewSlider {...props} />;
+	const normalizedImages = props.images.filter((src): src is string => src.trim().length > 0);
+	const firstPreview = toPreviewImage(normalizedImages[0] ?? PRODUCT_PLACEHOLDER_IMAGE);
+	const altText = props.productName ? `${props.productName} photo` : 'Product photo';
+
+	return (
+		<Box position='relative' w='150px' h='150px' display='block' mx='auto'>
+			<Box
+				as='div'
+				_focusVisible={{
+					outline: '2px solid',
+					outlineColor: 'main.secondary',
+					outlineOffset: '2px',
+				}}
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor='border'
+				borderRadius='sm'
+				overflow='hidden'
+				display='block'
+				aria-hidden='true'
+			>
+				<Image
+					src={firstPreview}
+					width={120}
+					height={120}
+					alt={altText}
+					priority
+					loading='eager'
+					fetchPriority='high'
+					style={{
+						width: '150px',
+						height: '150px',
+						objectFit: 'cover',
+					}}
+					sizes='(max-width: 768px) 35vw, 120px'
+				/>
+			</Box>
+			<Box position='absolute' inset='0' zIndex={1}>
+				<DynamicProductPreviewSlider {...props} />
+			</Box>
+		</Box>
+	);
 }

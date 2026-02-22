@@ -116,7 +116,7 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 							color='main'
 							py='1'
 						>
-							<Tag.Label fontSize='sm' fontWeight='semibold'>
+							<Tag.Label fontSize={{ base: 'md', md: 'sm' }} fontWeight='semibold'>
 								{appliedCoupon.code}
 							</Tag.Label>
 							<IconButton
@@ -167,7 +167,7 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 						</Badge>
 					</Text>
 				) : (
-					<Text fontSize='sm' color='fg.muted'>
+					<Text fontSize={{ base: 'md', md: 'sm' }} color='fg.muted'>
 						{t('couponHint')}
 					</Text>
 				)}

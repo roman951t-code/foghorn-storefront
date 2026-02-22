@@ -123,7 +123,7 @@ export const PasswordStrengthMeter = React.forwardRef<
 				))}
 			</HStack>
 			{label && (
-				<HStack mt='1' textStyle='sm'>
+				<HStack mt='1' fontSize={{ base: 'md', md: 'sm' }}>
 					{label}
 				</HStack>
 			)}

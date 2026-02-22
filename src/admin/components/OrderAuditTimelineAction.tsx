@@ -145,7 +145,7 @@ export default function OrderAuditTimelineAction({ action, record, resource }: A
 							padding: '12px 14px',
 							borderRadius: 8,
 							border: '1px solid #E2E8F0',
-							fontSize: 14,
+							fontSize: 15,
 							marginTop: 12,
 						}}
 					/>
@@ -203,7 +203,7 @@ export default function OrderAuditTimelineAction({ action, record, resource }: A
 															to: toLabel,
 													  })}
 											</Text>
-											<Text color='grey60' fontSize='sm'>
+											<Text color='grey60' fontSize='15px'>
 												{timestamp}
 											</Text>
 										</Box>
@@ -218,7 +218,7 @@ export default function OrderAuditTimelineAction({ action, record, resource }: A
 										) : entry.note ? (
 											<Text>{entry.note}</Text>
 										) : null}
-										<Text color='grey60' fontSize='sm' mt='sm'>
+										<Text color='grey60' fontSize='15px' mt='sm'>
 											{translateMessage('audit-admin-label')}: {adminLabel}
 										</Text>
 									</Box>

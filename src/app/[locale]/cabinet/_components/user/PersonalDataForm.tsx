@@ -19,6 +19,7 @@ import AddressForm from './AddressForm';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { toShippingAddressFormValue } from '@/utils/shippingAddress';
+import PreferredDeliveryForm from './PreferredDeliveryForm';
 
 interface Props {
 	i18nData: I18nData;
@@ -29,6 +30,15 @@ export default function PersonalDataForm({ i18nData }: Props) {
 
 	const userEmail = session?.user?.email;
 	const userPhone = session?.user?.phoneNumber;
+	const userNotifMethod = session?.user?.notificationMethod;
+	const preferredNotificationMethod =
+		userNotifMethod === 'phone' || userNotifMethod === 'email'
+			? userNotifMethod
+			: userEmail
+				? 'email'
+				: userPhone
+					? 'phone'
+					: 'email';
 
 	const schemaShape = useMemo(() => createAccountSchema(i18nData), [i18nData]);
 	const nameSchema = useMemo(
@@ -123,6 +133,13 @@ export default function PersonalDataForm({ i18nData }: Props) {
 							refreshSession={refreshSession}
 						/>
 					</Box>
+					<PreferredDeliveryForm
+						i18nData={i18nData}
+						userEmail={userEmail}
+						userPhone={userPhone}
+						userNotifMethod={preferredNotificationMethod}
+						refreshSessionAction={refreshSession}
+					/>
 				</Fieldset.Content>
 			</Fieldset.Root>
 			<AddressForm

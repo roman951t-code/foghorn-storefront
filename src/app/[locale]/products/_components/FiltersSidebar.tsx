@@ -29,7 +29,7 @@ export default function FiltersSidebar({ btnText, maxProductPrice, filters }: Pr
 					alignSelf='flex-end'
 					hideFrom='lg'
 					rounded='md'
-					fontSize='15px'
+					fontSize={{ base: 'md', md: '15px' }}
 				>
 					<IoFilter />
 					{btnText}
@@ -55,7 +55,7 @@ export default function FiltersSidebar({ btnText, maxProductPrice, filters }: Pr
 					minW={0}
 				>
 					<Box pb={3} borderBottomWidth='0.5px' borderBottomStyle='solid' borderColor='border'>
-						<Heading fontWeight='semibold' fontSize='15px' color='main'>
+						<Heading fontWeight='semibold' fontSize={{ base: 'md', md: '15px' }} color='main'>
 							{btnText}
 						</Heading>
 					</Box>

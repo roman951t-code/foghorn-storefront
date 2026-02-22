@@ -62,7 +62,7 @@ const styles = {
 		padding: '12px 16px',
 		fontWeight: 700,
 		cursor: 'pointer',
-		fontSize: '15px',
+		fontSize: '16px',
 		boxShadow: '0 12px 30px rgba(34, 197, 94, 0.35)',
 	},
 };

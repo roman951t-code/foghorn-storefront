@@ -46,7 +46,7 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 						<Link href='/terms' target='blank'>
 							<ChakraLink
 								as='span'
-								fontSize='15px'
+								fontSize={{ base: 'md', md: '15px' }}
 								textDecoration='underline'
 								textUnderlineOffset='3px'
 								transition='all .15s ease-in-out'

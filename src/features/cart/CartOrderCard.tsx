@@ -79,8 +79,8 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 				>
 					<Box
 						position='relative'
-						w={{ base: '128px', sm: '106px' }}
-						h={{ base: '128px', sm: '106px' }}
+						w={{ base: '136px', sm: '114px' }}
+						h={{ base: '136px', sm: '114px' }}
 						borderRadius='lg'
 						borderWidth='0.5px'
 						borderStyle='solid'
@@ -91,7 +91,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 							src={previewImage}
 							alt={product.name}
 							fill
-							sizes='(max-width: 479px) 128px, 106px'
+							sizes='(max-width: 479px) 136px, 114px'
 							style={{
 								objectFit: 'contain',
 								paddingTop: '4px',
@@ -120,7 +120,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 								>
 									<LocaleNavLink
 										href={productHref}
-										fontSize='md'
+										fontSize={{ base: 'lg', sm: 'lg', md: 'md' }}
 										textDecorationColor='main'
 										color='main'
 										variant='underline'
@@ -135,7 +135,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 								<Text
 									color='main.disabled'
 									borderColor='border'
-									fontSize={{ base: '15px', sm: 'sm' }}
+									fontSize={{ base: 'md', sm: 'md', md: 'sm' }}
 									textAlign={{ base: 'center', sm: 'start' }}
 								>
 									{product.variantLabel}
@@ -190,7 +190,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 								)}
 							</Text>
 
-							<Text fontSize='15px' color='main.disabled' hideBelow='sm'>
+							<Text fontSize={{ base: 'md', md: '15px' }} color='main.disabled' hideBelow='sm'>
 								{totalLabel}: {formatUsdPrice(lineTotal)}
 							</Text>
 						</VStack>

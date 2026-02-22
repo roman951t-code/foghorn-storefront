@@ -1,6 +1,6 @@
 'use client';
 
-import { Accordion, Card, Flex, Stack, Text } from '@chakra-ui/react';
+import { Accordion, Card, Flex, Stack, Text, Box } from '@chakra-ui/react';
 import Image from 'next/image';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { useMemo } from 'react';
@@ -39,17 +39,27 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 			<Accordion.Item value={product.id} borderBottom='none'>
 				<Flex alignItems='center' direction={{ base: 'column', sm: 'row' }} gap='3' w='100%'>
 					<LocaleNavLink href={productHref} mr='2'>
-						<Image
-							src={previewImage}
-							alt={product.name ?? ''}
-							width={110}
-							height={110}
-							style={{
-								objectFit: 'contain',
-								borderRadius: 'var(--chakra-radii-md)',
-								border: '0.5px solid var(--chakra-colors-border)',
-							}}
-						/>
+						<Box
+							position='relative'
+							w={{ base: '136px', sm: '114px' }}
+							h={{ base: '136px', sm: '114px' }}
+							borderRadius='md'
+							borderWidth='0.5px'
+							borderStyle='solid'
+							borderColor='border'
+							overflow='hidden'
+						>
+							<Image
+								fill
+								sizes='(max-width: 479px) 136px, 114px'
+								src={previewImage}
+								alt={product.name ?? ''}
+								style={{
+									objectFit: 'contain',
+									paddingTop: '4px',
+								}}
+							/>
+						</Box>
 					</LocaleNavLink>
 					<Stack direction='column' gap={2} w='full' textAlign={{ base: 'center', sm: 'left' }}>
 						<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px' as='div'>
@@ -63,7 +73,7 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 							</LocaleNavLink>
 						</Card.Title>
 						{(product.subcategoryName || product.categoryName) && (
-							<Text color='main.disabled' fontSize='sm' mt='-2'>
+							<Text color='main.disabled' fontSize={{ base: 'md', md: 'sm' }} mt='-2'>
 								{[product.categoryName, product.subcategoryName].filter(Boolean).join(' / ')}
 							</Text>
 						)}
@@ -74,7 +84,7 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 								<Text
 									as='span'
 									color='main.disabled'
-									fontSize='sm'
+									fontSize={{ base: 'md', md: 'sm' }}
 									textDecoration='line-through'
 									marginLeft='8px'
 								>

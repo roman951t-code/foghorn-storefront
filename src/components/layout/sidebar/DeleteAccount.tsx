@@ -67,7 +67,7 @@ export function DeleteAccount({ onCloseAction }: Props) {
 							<Dialog.Title>{authT('areYouSure')}</Dialog.Title>
 						</Dialog.Header>
 						<Dialog.Body>
-							<Text fontSize='15px' lineHeight='1.45'>
+							<Text fontSize={{ base: 'md', md: '15px' }} lineHeight='1.45'>
 								{authT('confirmDeleteAcc')}
 							</Text>
 						</Dialog.Body>

@@ -134,7 +134,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 				<Stack gap='4' align='flex-start'>
 					<Fieldset.Root size='lg' invalid>
 						<Fieldset.Legend fontSize='17px'>{i18nData.phoneConfirmation}</Fieldset.Legend>
-						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mt='1'>
+						<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} lineHeight='1.6' mt='1'>
 							{i18nData.toPost}
 							<Highlight query={pendingPhone} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
 								{pendingPhone}
@@ -181,7 +181,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 					</PrimaryButton>
 
 					{timer > 0 ? (
-						<Text fontSize='15px' color='main'>
+						<Text fontSize={{ base: 'md', md: '15px' }} color='main'>
 							{i18nData.resendAfter}:
 							<Highlight
 								query={formatTime(timer)}

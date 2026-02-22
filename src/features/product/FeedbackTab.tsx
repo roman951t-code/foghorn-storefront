@@ -88,12 +88,9 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 											/>
 										</HStack>
 									</Tooltip>
-									<Text fontSize='sm' color='fg.muted'>
-										{prodT('feedbackTotal')}: {reviewCount}
-									</Text>
 								</HStack>
 							) : (
-								<Text fontSize='sm' color='fg.muted'>
+								<Text fontSize={{ base: 'md', md: 'sm' }} color='fg.muted'>
 									{prodT('feedbackAbsent')}
 								</Text>
 							)}
@@ -138,29 +135,41 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 						<DataList.Root flex='1'>
 							{review.advantages && (
 								<DataList.Item gap='2.5'>
-									<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
+									<DataList.ItemLabel
+										fontSize={{ base: 'md', md: '15px' }}
+										fontWeight='semibold'
+										color='main'
+									>
 										{prodT('advantages')}
 									</DataList.ItemLabel>
-									<DataList.ItemValue fontSize='15px' wordBreak='break-word'>
+									<DataList.ItemValue fontSize={{ base: 'md', md: '15px' }} wordBreak='break-word'>
 										{review.advantages}
 									</DataList.ItemValue>
 								</DataList.Item>
 							)}
 							{review.disadvantages && (
 								<DataList.Item gap='2.5'>
-									<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
+									<DataList.ItemLabel
+										fontSize={{ base: 'md', md: '15px' }}
+										fontWeight='semibold'
+										color='main'
+									>
 										{prodT('disAdvantages')}
 									</DataList.ItemLabel>
-									<DataList.ItemValue fontSize='15px' wordBreak='break-word'>
+									<DataList.ItemValue fontSize={{ base: 'md', md: '15px' }} wordBreak='break-word'>
 										{review.disadvantages}
 									</DataList.ItemValue>
 								</DataList.Item>
 							)}
 							<DataList.Item gap='2.5'>
-								<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
+								<DataList.ItemLabel
+									fontSize={{ base: 'md', md: '15px' }}
+									fontWeight='semibold'
+									color='main'
+								>
 									{prodT('comment')}
 								</DataList.ItemLabel>
-								<DataList.ItemValue fontSize='15px' wordBreak='break-word'>
+								<DataList.ItemValue fontSize={{ base: 'md', md: '15px' }} wordBreak='break-word'>
 									{review.comment}
 								</DataList.ItemValue>
 							</DataList.Item>

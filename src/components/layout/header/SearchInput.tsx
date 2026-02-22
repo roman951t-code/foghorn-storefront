@@ -189,7 +189,7 @@ export default function SearchInput({
 						)}
 
 						{hasSearched && !isLoading && collection.items.length === 0 && (
-							<Combobox.Empty fontSize='15px' fontWeight='medium'>
+							<Combobox.Empty fontSize={{ base: 'md', md: '15px' }} fontWeight='medium'>
 								{notFound}
 							</Combobox.Empty>
 						)}

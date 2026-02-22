@@ -87,6 +87,7 @@ export default function CookieConsentBanner({ form }: { form: StorefrontFormPubl
 
 					<HStack justifyContent={{ base: 'flex-end', md: 'flex-end' }} gap={3} flexWrap='wrap'>
 						<SecondaryButton
+							fontSize='md'
 							onClick={() => {
 								setCookie(COOKIE_NAME, 'essential', 180);
 								setIsOpen(false);
@@ -95,6 +96,7 @@ export default function CookieConsentBanner({ form }: { form: StorefrontFormPubl
 							{declineLabel}
 						</SecondaryButton>
 						<PrimaryButton
+							fontSize='md'
 							onClick={() => {
 								setCookie(COOKIE_NAME, 'all', 180);
 								setIsOpen(false);

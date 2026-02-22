@@ -198,7 +198,7 @@ export default function Pagination({
 
 				<HStack gap='3.5' alignItems='center' rounded='xl' py='2.5'>
 					<Text
-						fontSize='sm'
+						fontSize={{ base: 'md', md: 'sm' }}
 						letterSpacing='0.05em'
 						textTransform='uppercase'
 						color='fg.muted'
@@ -222,13 +222,13 @@ export default function Pagination({
 						aria-label={t('perPage')}
 					>
 						<NumberInput.Label srOnly>{t('perPage')}</NumberInput.Label>
-						<NumberInput.Control fontSize='sm' />
+						<NumberInput.Control fontSize={{ base: 'md', md: 'sm' }} />
 						<NumberInput.Input
 							rounded='md'
 							color='fg'
 							bg='none'
 							borderColor='gray'
-							fontSize='sm'
+							fontSize={{ base: 'md', md: 'sm' }}
 							inputMode='numeric'
 							aria-label={t('perPage')}
 						/>

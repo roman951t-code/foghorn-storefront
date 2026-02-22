@@ -218,7 +218,7 @@ export default function OrderShow(props: ActionProps) {
 													{discount.label ?? translateMessage('order-discount-generic')}
 												</Text>
 												{discount.code ? (
-														<Text color='grey60' style={{ fontSize: 13 }}>
+														<Text color='grey60' style={{ fontSize: 15 }}>
 															{translateMessage('order-discount-code', { code: discount.code })}
 														</Text>
 												) : null}
@@ -297,20 +297,20 @@ export default function OrderShow(props: ActionProps) {
 										>
 											{item.productName}
 										</a>
-										<Text color='grey60' style={{ fontSize: 13 }}>
+										<Text color='grey60' style={{ fontSize: 15 }}>
 											{translateMessage('order-items-qty', { count: item.quantity })}
 										</Text>
 									</Box>
 								</Box>
 								<Box style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
 									<Box>
-											<Text color='grey60' style={{ fontSize: 13 }}>
+											<Text color='grey60' style={{ fontSize: 15 }}>
 												{translateMessage('order-items-unit-price')}
 											</Text>
 										<Text fontWeight='bold'>{formatMoney(item.unitPrice)}</Text>
 									</Box>
 									<Box>
-											<Text color='grey60' style={{ fontSize: 13 }}>
+											<Text color='grey60' style={{ fontSize: 15 }}>
 												{translateMessage('order-items-line-total')}
 											</Text>
 										<Text fontWeight='bold'>{formatMoney(item.lineTotal)}</Text>

@@ -69,7 +69,7 @@ export default function UpdateEmailModal() {
 			<Fieldset.Root size='lg' invalid>
 				<Fieldset.Content>
 					{session?.user.email && (
-						<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mb='2' mt='0'>
+						<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} lineHeight='1.6' mb='2' mt='0'>
 							{authT('toNewPost')}
 
 							<Highlight query={session?.user.email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>

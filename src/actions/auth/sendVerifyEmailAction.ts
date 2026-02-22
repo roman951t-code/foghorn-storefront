@@ -47,6 +47,17 @@ export async function sendVerifyEmailAction(
 	}
 
 	try {
+		const existingUserWithEmail = await prisma.user.findFirst({
+			where: {
+				email: normalizedEmail,
+				id: { not: userId },
+			},
+			select: { id: true },
+		});
+		if (existingUserWithEmail) {
+			return { success: false, message: validationT('userExists') };
+		}
+
 		const sendRate = await checkRateLimit({
 			key: `auth:email-verify:send:${userId}`,
 			limit: OTP_SEND_LIMIT,

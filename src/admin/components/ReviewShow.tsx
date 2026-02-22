@@ -120,7 +120,7 @@ export default function ReviewShow(props: ActionProps) {
 								>
 									{productPayload.productName}
 								</a>
-												<Text color='grey60' style={{ fontSize: 13 }}>
+												<Text color='grey60' style={{ fontSize: 15 }}>
 													{resolveStatusLabel(productPayload.productStatus)}
 												</Text>
 							</Box>

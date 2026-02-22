@@ -27,7 +27,7 @@ const actionButtonStyle = {
 };
 
 const labelStyle = {
-	fontSize: 14,
+	fontSize: 15,
 };
 
 const getMessageText = (message: string, translateMessage: (key: string) => string) =>

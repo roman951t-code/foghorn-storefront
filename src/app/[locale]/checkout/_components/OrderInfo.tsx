@@ -81,6 +81,13 @@ export default function OrderInfo({
 			(user?.phoneNumber?.trim() || user?.email?.trim())
 	);
 	const hasRequiredShippingAddress = hasRequiredShippingAddressFields(shippingAddress);
+	const handleUnauthorizedSession = async () => {
+		try {
+			await refresh();
+		} finally {
+			showToaster('error', checkoutT('signinRequiredTitle'));
+		}
+	};
 
 	const requiredForms = storefrontForms.filter(isBlockingCheckoutConsent);
 	const missingRequiredConsents = requiredForms.filter((f) => consents[f.key] !== true);
@@ -133,6 +140,10 @@ export default function OrderInfo({
 					useCheckoutStore.getState().resetConsents();
 					router.push('/cabinet/orders');
 				} else {
+					if (result?.message === 'unauthorized') {
+						await handleUnauthorizedSession();
+						return;
+					}
 					if (result?.message === 'shipping-address-required') {
 						showToaster('error', checkoutT('shippingAddressRequired'));
 						return;
@@ -170,6 +181,10 @@ export default function OrderInfo({
 			const data = await response.json();
 			if (!response.ok) {
 				const message = data?.error ?? 'stripe_session_failed';
+				if (response.status === 401 || message === 'unauthorized') {
+					await handleUnauthorizedSession();
+					return;
+				}
 				if (message === 'shipping-address-required') {
 					showToaster('error', checkoutT('shippingAddressRequired'));
 					return;
@@ -190,6 +205,10 @@ export default function OrderInfo({
 		} catch (error) {
 			console.error('Stripe checkout error', error);
 			const message = error instanceof Error ? error.message : 'stripe_session_failed';
+			if (message === 'unauthorized') {
+				await handleUnauthorizedSession();
+				return;
+			}
 			showToaster('error', checkoutT('orderCreateFail') + ` (${message})`);
 		} finally {
 			setIsStripeRedirecting(false);
@@ -280,14 +299,14 @@ export default function OrderInfo({
 				) : null}
 				<Separator w='full' mt='2' color='border' />
 				<Stat.Root mt='2'>
-					<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
+					<Stat.Label fontSize={{ base: 'md', md: 'sm' }}>{t('totalAmount')}</Stat.Label>
 					<Stat.ValueText fontSize='3xl'>{totalAmountText}</Stat.ValueText>
 				</Stat.Root>
 				<Box mt='4' w='full'>
 					<CheckoutConsents forms={storefrontForms} />
 				</Box>
 				{disabledReason === 'address' ? (
-					<Text fontSize='sm' color='fg.muted'>
+					<Text fontSize={{ base: 'md', md: 'sm' }} color='fg.muted'>
 						{checkoutT('shippingAddressRequired')}
 					</Text>
 				) : null}
@@ -314,7 +333,7 @@ export default function OrderInfo({
 			>
 				<VStack alignItems='flex-start' order={{ base: 2, sm: 1 }} gapY='6'>
 					<Stat.Root mt={{ base: 2, sm: 0 }}>
-						<Stat.Label fontSize='sm'>{t('totalAmount')}</Stat.Label>
+						<Stat.Label fontSize={{ base: 'md', md: 'sm' }}>{t('totalAmount')}</Stat.Label>
 						<Stat.ValueText fontSize='3xl'>{totalAmountText}</Stat.ValueText>
 					</Stat.Root>
 
@@ -325,7 +344,7 @@ export default function OrderInfo({
 						onAccept={handleAcceptOrder}
 					/>
 					{disabledReason === 'address' ? (
-						<Text fontSize='sm' color='fg.muted'>
+						<Text fontSize={{ base: 'md', md: 'sm' }} color='fg.muted'>
 							{checkoutT('shippingAddressRequired')}
 						</Text>
 					) : null}

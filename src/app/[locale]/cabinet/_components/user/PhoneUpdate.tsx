@@ -10,11 +10,13 @@ import { createPhoneVerifySchema, PhoneVerifySchema } from 'validationSchemas/ph
 import { authClient } from '@/lib/auth-client';
 import { sendVerifyPhoneAction } from '@/actions/auth/sendVerifyPhoneAction';
 import { buildPhoneVerificationErrorMap } from '@/constants/auth';
+import { showToaster } from '@/utils/toast';
+import { toasterMessages } from '@/data/toasterMessages';
 
 interface Props {
 	i18nData: I18nData;
 	phone: string;
-	refreshSessionAction: () => void;
+	refreshSessionAction: () => Promise<void>;
 	onCloseAction: () => void;
 }
 
@@ -25,6 +27,7 @@ export default function PhoneUpdate({
 	onCloseAction,
 }: Props) {
 	const schema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
+	const EMPTY_OTP = ['', '', '', '', '', ''];
 
 	const [timer, setTimer] = useState(0);
 	const [verifyError, setVerifyError] = useState('');
@@ -32,8 +35,13 @@ export default function PhoneUpdate({
 	const {
 		handleSubmit,
 		control,
+		reset,
 		formState: { errors, isSubmitting },
-	} = useForm<PhoneVerifySchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
+	} = useForm<PhoneVerifySchema>({
+		mode: 'onSubmit',
+		resolver: zodResolver(schema),
+		defaultValues: { otp: EMPTY_OTP },
+	});
 
 	useEffect(() => {
 		if (timer <= 0) return;
@@ -52,6 +60,7 @@ export default function PhoneUpdate({
 	}, [timer]);
 
 	const resendVerificationCode = async () => {
+		reset({ otp: EMPTY_OTP });
 		setVerifyError('');
 
 		try {
@@ -62,7 +71,7 @@ export default function PhoneUpdate({
 				return;
 			}
 			setTimer(120);
-		} catch (err) {
+		} catch {
 			setVerifyError(i18nData.invalidFormData);
 		}
 	};
@@ -78,20 +87,22 @@ export default function PhoneUpdate({
 				updatePhoneNumber: true,
 			});
 
-				if (error) {
-					const messageKey = error?.message ?? '';
-					const message =
-						(messageKey && messageKey in errorMap
-							? errorMap[messageKey as keyof typeof errorMap]
-							: null) || i18nData.userRegisterFail;
-					setVerifyError(message);
-					return;
-				} else {
-					onCloseAction();
+			if (error) {
+				const messageKey = error?.message ?? '';
+				const message =
+					(messageKey && messageKey in errorMap
+						? errorMap[messageKey as keyof typeof errorMap]
+						: null) ||
+					i18nData.userRegisterFail ||
+					i18nData.invalidFormData;
+				setVerifyError(message);
+				return;
+			}
 
-					await refreshSessionAction();
-				}
-		} catch (err) {
+			onCloseAction();
+			await refreshSessionAction();
+			showToaster('success', toasterMessages.phoneUpdated(i18nData));
+		} catch {
 			setVerifyError(i18nData.invalidFormData);
 		}
 	};
@@ -99,10 +110,15 @@ export default function PhoneUpdate({
 	const formattedTime = formatTime(timer);
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)}>
+		<form
+			onSubmit={(e) => {
+				e.stopPropagation();
+				void handleSubmit(onSubmit)(e);
+			}}
+		>
 			<Fieldset.Root size='lg' invalid>
-				<Fieldset.Legend fontSize='17px'>{i18nData.phoneConfirmation}</Fieldset.Legend>
-				<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mt='4'>
+				<Fieldset.Legend fontSize='20px'>{i18nData.phoneConfirmation}</Fieldset.Legend>
+				<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} lineHeight='1.6' mt='4'>
 					{i18nData.toPost}
 					<Highlight query={phone} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
 						{phone}
@@ -154,7 +170,7 @@ export default function PhoneUpdate({
 				</Button>
 
 				{timer > 0 ? (
-					<Fieldset.HelperText fontSize='15px' color='main'>
+					<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} color='main'>
 						{i18nData.resendAfter}:
 						<Highlight
 							query={formattedTime}
@@ -165,6 +181,7 @@ export default function PhoneUpdate({
 					</Fieldset.HelperText>
 				) : (
 					<Button
+						type='button'
 						mt='4'
 						variant='outline'
 						rounded='md'

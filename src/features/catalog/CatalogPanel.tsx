@@ -19,11 +19,12 @@ interface Props {
 export default function CatalogPanel({ i18nData, promoCards }: Props) {
 	const { categories } = useCatalog();
 	const TARGET_CATEGORIES = 9;
-	const panelCategories = categories.slice(0, TARGET_CATEGORIES);
-	const uiCategories = Array.from(
-		{ length: TARGET_CATEGORIES },
-		(_, index) => panelCategories[index] ?? null
-	);
+	const categoriesWithChildren = categories.filter((category) => (category.children?.length ?? 0) > 0);
+	const panelCategories = categoriesWithChildren.slice(0, TARGET_CATEGORIES);
+	const uiCategories =
+		categories.length === 0
+			? Array.from({ length: TARGET_CATEGORIES }, () => null)
+			: panelCategories;
 
 	const [activeCategory, setActiveCategory] = useState<CatalogCategory | null>(null);
 	const [hoveredCategoryId, setHoveredCategoryId] = useState<string | null>(null);

@@ -13,6 +13,7 @@ import {
 } from '@/constants/subscribe';
 import { LocaleParams } from '@/types/routing';
 import { getPromoCards } from '@/actions/content/getPromoCards';
+import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
 
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
@@ -44,10 +45,10 @@ export default async function Main({ params }: LocaleParams) {
 			</Box>
 			<CatalogPanel i18nData={i18nData} promoCards={promoCards} />
 			<ProductsSection title={prodT('popular')} tag='popular' locale={locale} />
-			{/* <ProductsSection title={prodT('new')} tag='new' />
+			<ProductsSection title={prodT('new')} tag='new' />
 			<ProductsSection title={prodT('discount')} tag='discount' />
-			<ProductsSection title={prodT('promotional')} tag='promotional' /> */}
-			{/* <ViewedProductsSection title={prodT('viewed')} tag='viewed' /> */}
+			<ProductsSection title={prodT('promotional')} tag='promotional' />
+			<ViewedProductsSection title={prodT('viewed')} tag='viewed' />
 
 			<SubscribeSection i18nData={subscribeI18nData} />
 		</Flex>

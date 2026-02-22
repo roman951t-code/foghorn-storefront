@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { Accordion, Card, Flex, HStack, Icon, Separator, Stack, Tag, Text } from '@chakra-ui/react';
+import { Accordion, Card, Flex, HStack, Icon, Separator, Stack, Tag, Text, Box } from '@chakra-ui/react';
 import { BsArrowRepeat } from 'react-icons/bs';
 import { FiTruck } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
@@ -135,7 +135,7 @@ export function OrderAccordionContent({ order }: Props) {
 										color='main'
 										py='1.5'
 									>
-										<Tag.Label fontSize='sm'>
+										<Tag.Label fontSize={{ base: 'md', md: 'sm' }}>
 											<Text as='span' color='fg.muted'>
 												{ordersT('carrier')}:
 											</Text>{' '}
@@ -157,7 +157,7 @@ export function OrderAccordionContent({ order }: Props) {
 										color='main'
 										py='1.5'
 									>
-										<Tag.Label fontSize='sm'>
+										<Tag.Label fontSize={{ base: 'md', md: 'sm' }}>
 											<Text as='span' color='fg.muted'>
 												{ordersT('trackingNumber')}:
 											</Text>{' '}
@@ -184,17 +184,27 @@ export function OrderAccordionContent({ order }: Props) {
 							<div key={item.id}>
 								<Flex alignItems='center' direction={{ base: 'column', sm: 'row' }} gap='3'>
 									<LocaleNavLink href={`/products/${item.product.fullSlug}`} mr='2'>
-										<Image
-											width={110}
-											height={110}
-											src={previewImage}
-											alt={item.product.name}
-											style={{
-												objectFit: 'contain',
-												borderRadius: 'var(--chakra-radii-md)',
-												border: '0.5px solid var(--chakra-colors-border)',
-											}}
-										/>
+										<Box
+											position='relative'
+											w={{ base: '136px', sm: '114px' }}
+											h={{ base: '136px', sm: '114px' }}
+											borderRadius='md'
+											borderWidth='0.5px'
+											borderStyle='solid'
+											borderColor='border'
+											overflow='hidden'
+										>
+											<Image
+												fill
+												sizes='(max-width: 479px) 136px, 114px'
+												src={previewImage}
+												alt={item.product.name}
+												style={{
+													objectFit: 'contain',
+													paddingTop: '4px',
+												}}
+											/>
+										</Box>
 									</LocaleNavLink>
 
 									<Flex
@@ -214,7 +224,7 @@ export function OrderAccordionContent({ order }: Props) {
 											</LocaleNavLink>
 										</Card.Title>
 										{item.variantLabel && (
-											<Text color='main.disabled' fontSize='sm' mt='-2'>
+											<Text color='main.disabled' fontSize={{ base: 'md', md: 'sm' }} mt='-2'>
 												{item.variantLabel}
 											</Text>
 										)}

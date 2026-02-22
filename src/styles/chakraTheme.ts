@@ -44,6 +44,11 @@ const config = defineConfig({
 				light: { value: '500' },
 				normal: { value: '500' },
 			},
+			fontSizes: {
+				'2xs': { value: '15px' },
+				xs: { value: '15px' },
+				sm: { value: '15px' },
+			},
 		},
 		breakpoints: {
 			xs: '430px',
@@ -496,7 +501,7 @@ const config = defineConfig({
 			height: '20px !important',
 			textAlign: 'center !important',
 			lineHeight: '20px !important',
-			fontSize: '12px !important',
+			fontSize: '15px !important',
 			color: 'black !important',
 			backgroundColor: 'white !important',
 			opacity: '.8 !important',
@@ -505,7 +510,7 @@ const config = defineConfig({
 				width: '28px !important',
 				height: '28px !important',
 				lineHeight: '28px !important',
-				fontSize: '14px !important',
+				fontSize: '15px !important',
 				margin: '0 8px !important',
 			},
 		},
@@ -539,12 +544,12 @@ const config = defineConfig({
 			height: '100%',
 			width: '100%',
 		},
-		'span.chakra-rating-group__item:not([data-highlighted]) path, span.chakra-rating-group__item[data-half] svg:first-of-type path':
-			{
-				color: 'var(--mix-textDecorationColor, lightgray) !important',
-			},
-	},
-});
+			'span.chakra-rating-group__item:not([data-highlighted]) path, span.chakra-rating-group__item[data-half] svg:first-of-type path':
+				{
+					color: 'var(--mix-textDecorationColor, lightgray) !important',
+				},
+		},
+	});
 
 const system = createSystem(defaultConfig, config);
 

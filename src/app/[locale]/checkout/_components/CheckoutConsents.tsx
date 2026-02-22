@@ -71,7 +71,7 @@ export default function CheckoutConsents({ forms }: { forms: StorefrontFormPubli
 							inputProps={{ required: isRequired }}
 						>
 							<VStack alignItems='flex-start' gap={1}>
-								<Text fontSize='sm' lineHeight='1.35'>
+								<Text fontSize={{ base: 'md', md: 'sm' }} lineHeight='1.35'>
 									{label}
 									{isRequired ? (
 										<Text as='span' color='main.tertiary'>
@@ -82,7 +82,7 @@ export default function CheckoutConsents({ forms }: { forms: StorefrontFormPubli
 								</Text>
 
 								{form.description ? (
-									<Text fontSize='sm' color='main.disabled'>
+									<Text fontSize={{ base: 'md', md: 'sm' }} color='main.disabled'>
 										{form.description}
 									</Text>
 								) : null}
@@ -91,7 +91,7 @@ export default function CheckoutConsents({ forms }: { forms: StorefrontFormPubli
 									<HStack gap={2}>
 										<LocaleNavLink
 											href={form.linkHref}
-											fontSize='sm'
+											fontSize={{ base: 'md', md: 'sm' }}
 											color='link'
 											textDecoration='underline'
 											textUnderlineOffset='2px'

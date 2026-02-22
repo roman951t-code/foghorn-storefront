@@ -72,7 +72,10 @@ export async function verifyEmailRegisterOtpAction(email: string, code: string) 
 
 		await prisma.user.update({
 			where: { id: user.user.id },
-			data: { emailVerified: true },
+			data: {
+				emailVerified: true,
+				notificationMethod: 'email',
+			},
 		});
 
 		await prisma.emailRegistrationCode.delete({ where: { id: record.id } });

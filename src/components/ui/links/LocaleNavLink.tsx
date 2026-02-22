@@ -39,7 +39,7 @@ export function LocaleNavLink({ href, children, ...props }: LocaleLinkProps) {
 		<Link href={href}>
 			<ChakraLink
 				as='span'
-				fontSize='15px'
+				fontSize={{ base: 'md', md: '15px' }}
 				transition='all .15s ease-in-out'
 				textDecorationColor='main'
 				_hover={{ color: 'link' }}

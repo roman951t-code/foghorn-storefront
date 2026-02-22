@@ -103,7 +103,7 @@ export default function ShareProduct({ i18nData }: Props) {
 								</Clipboard.Trigger>
 							</Clipboard.Root>
 
-							<Text fontSize='sm' color='main'>
+							<Text fontSize={{ base: 'md', md: 'sm' }} color='main'>
 								{i18nData.pressToCopy}
 							</Text>
 
@@ -205,7 +205,7 @@ export default function ShareProduct({ i18nData }: Props) {
 								</IconButton>
 							</HStack>
 
-							<Text fontSize='sm' color='main'>
+							<Text fontSize={{ base: 'md', md: 'sm' }} color='main'>
 								{i18nData.shareSocial}
 							</Text>
 						</VStack>

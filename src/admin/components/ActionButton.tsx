@@ -6,6 +6,7 @@ import {
 	buildActionTestId,
 	useAction,
 	useCurrentAdmin,
+	useTranslation,
 } from 'adminjs';
 
 type Props = {
@@ -34,6 +35,7 @@ export default function ActionButton(props: Props) {
 	} = props;
 
 	const [currentAdmin] = useCurrentAdmin();
+	const { translateMessage } = useTranslation();
 	const isReadOnly = (currentAdmin as { role?: string } | null)?.role === 'readonly';
 	const shouldDisable = isReadOnly && action?.hasHandler && isImmediateAction(action);
 
@@ -79,7 +81,9 @@ export default function ActionButton(props: Props) {
 		href: shouldDisable ? undefined : href,
 		disabled: shouldDisable || baseChild.props?.disabled,
 		'aria-disabled': shouldDisable || baseChild.props?.['aria-disabled'],
-		title: baseChild.props?.title ?? (shouldDisable ? 'Read-only account: changes are disabled.' : undefined),
+		title:
+			baseChild.props?.title ??
+			(shouldDisable ? translateMessage('readonly-account-disabled') : undefined),
 		style: shouldDisable
 			? { ...baseStyle, pointerEvents: 'none', opacity: 0.6, cursor: 'not-allowed' }
 			: baseStyle,

@@ -78,16 +78,16 @@ const renderCellValues = (values: {
 	openGraphImage: string | null;
 }) => (
 	<Box style={{ display: 'grid', gap: 6 }}>
-		<Text fontSize='12px'>
+		<Text fontSize='15px'>
 			<strong>metaTitle:</strong> {values.metaTitle || '-'}
 		</Text>
-		<Text fontSize='12px'>
+		<Text fontSize='15px'>
 			<strong>metaDescription:</strong> {values.metaDescription || '-'}
 		</Text>
-		<Text fontSize='12px'>
+		<Text fontSize='15px'>
 			<strong>canonicalUrl:</strong> {values.canonicalUrl || '-'}
 		</Text>
-		<Text fontSize='12px'>
+		<Text fontSize='15px'>
 			<strong>openGraphImage:</strong> {values.openGraphImage || '-'}
 		</Text>
 	</Box>
@@ -263,7 +263,7 @@ export default function ProductBulkSeoTemplateAction({ action, resource, records
 							padding: '10px 12px',
 							borderRadius: 8,
 							border: '1px solid #E2E8F0',
-							fontSize: 14,
+							fontSize: 15,
 							fontFamily: 'inherit',
 							resize: 'vertical',
 						}}
@@ -281,7 +281,7 @@ export default function ProductBulkSeoTemplateAction({ action, resource, records
 							padding: '10px 12px',
 							borderRadius: 8,
 							border: '1px solid #E2E8F0',
-							fontSize: 14,
+							fontSize: 15,
 							fontFamily: 'inherit',
 							resize: 'vertical',
 						}}
@@ -299,7 +299,7 @@ export default function ProductBulkSeoTemplateAction({ action, resource, records
 							padding: '10px 12px',
 							borderRadius: 8,
 							border: '1px solid #E2E8F0',
-							fontSize: 14,
+							fontSize: 15,
 							fontFamily: 'inherit',
 							resize: 'vertical',
 						}}
@@ -317,7 +317,7 @@ export default function ProductBulkSeoTemplateAction({ action, resource, records
 							padding: '10px 12px',
 							borderRadius: 8,
 							border: '1px solid #E2E8F0',
-							fontSize: 14,
+							fontSize: 15,
 							fontFamily: 'inherit',
 							resize: 'vertical',
 						}}

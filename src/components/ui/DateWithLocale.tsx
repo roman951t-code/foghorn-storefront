@@ -18,7 +18,7 @@ export default function DateWithLocale({ date }: { date: string | Date }) {
 		.replace('.', '');
 
 	return (
-		<Text as='span' color='main' textStyle='sm'>
+		<Text as='span' color='main' fontSize={{ base: 'md', md: 'sm' }}>
 			{formattedDate}
 		</Text>
 	);

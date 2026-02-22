@@ -42,7 +42,7 @@ export default function ProductDetails({
 				py='1.5'
 				mt={{ base: 4, sm: 0 }}
 			>
-				<Tag.Label fontSize='sm'>
+				<Tag.Label fontSize={{ base: 'md', md: 'sm' }}>
 					<HStack gapX='2.5' alignItems='center'>
 						{item.icon ? (
 							<Box fontSize='lg' color='fg.muted' display='inline-flex'>

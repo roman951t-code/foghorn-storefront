@@ -22,12 +22,23 @@ export default async function ProductsSection({
 }: Props) {
 	const { products = [] } = providedProducts
 		? { products: providedProducts }
-		: await getProductsByTag(tag, false, limit, 0, undefined, undefined, undefined, undefined, undefined, locale);
+		: await getProductsByTag(
+				tag,
+				false,
+				limit,
+				0,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				locale
+		  );
 
 	if (!products.length) return null;
 
 	return (
-		<Flex gap={6} direction='column' mt={24} {...restProps}>
+		<Flex gap={6} direction='column' mt={28} {...restProps}>
 			<Heading fontWeight='medium'>
 				<LocaleNavLink
 					href={`/products/search/?tag=${tag}`}

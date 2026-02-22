@@ -127,7 +127,7 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 		<form onSubmit={handleSubmit(onSubmit)}>
 			<Fieldset.Root size='lg' invalid>
 				<Fieldset.Legend fontSize='17px'>{i18nData.resetPassConfirm}</Fieldset.Legend>
-				<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mt='4'>
+				<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} lineHeight='1.6' mt='4'>
 					{i18nData.toPost}
 					<Highlight query={email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
 						{email}
@@ -172,7 +172,7 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 				</Fieldset.Content>
 				{isPassUpdated && !isSubmitting && (
 					<>
-						<Alert.Root status='success' variant='solid' my='2' fontSize='15px'>
+						<Alert.Root status='success' variant='solid' my='2' fontSize={{ base: 'md', md: '15px' }}>
 							<Alert.Indicator />
 							<Alert.Title>{i18nData.passUpdated}</Alert.Title>
 						</Alert.Root>
@@ -210,7 +210,7 @@ export default function ResetPassConfirmation({ email, i18nData, backToLogin }: 
 				</Button>
 
 				{timer > 0 ? (
-					<Fieldset.HelperText fontSize='15px' color='main'>
+					<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} color='main'>
 						{i18nData.resendAfter}:
 						<Highlight
 							query={formattedTime}

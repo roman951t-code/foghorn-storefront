@@ -9,6 +9,7 @@ import { headers } from 'next/headers';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 import { auth } from '@/lib/auth';
 import { getActionErrorMessageKey } from './authActionError';
+import { buildUserRestrictionMessage, isRestrictedUserAdminStatus } from '@/lib/userAdminStatus';
 
 const PHONE_SIGN_IN_LIMIT_PER_PHONE = 8;
 const PHONE_SIGN_IN_LIMIT_PER_IP = 30;
@@ -50,11 +51,27 @@ export async function phoneSignInAction(
 
 	const existingUser = await prisma.user.findUnique({
 		where: { phoneNumber: rawPhone },
-		select: { id: true },
+		select: {
+			adminStatus: true,
+			adminNotes: true,
+		},
 	});
 
 	if (!existingUser) {
 		return { success: false, message: validationT('userLoginFail') };
+	}
+
+	if (isRestrictedUserAdminStatus(existingUser.adminStatus)) {
+		return {
+			success: false,
+			message: buildUserRestrictionMessage({
+				status: existingUser.adminStatus,
+				notes: existingUser.adminNotes,
+				accountSuspended: validationT('accountSuspended'),
+				accountBlocked: validationT('accountBlocked'),
+				formatReason: (reason) => validationT('accountStatusReason', { reason }),
+			}),
+		};
 	}
 
 	try {

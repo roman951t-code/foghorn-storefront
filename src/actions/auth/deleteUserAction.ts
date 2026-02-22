@@ -6,6 +6,13 @@ import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
+import { updateTag } from 'next/cache';
+import {
+	PRODUCT_DETAIL_CACHE_TAG,
+	PRODUCT_LIST_CACHE_TAG,
+	productCacheTagById,
+} from '@/constants/products';
+import { syncProductReviewAggregates } from '@/lib/reviewAggregates';
 
 export async function deleteUserAction(): Promise<{ success: boolean; message?: string }> {
 	const validationT = await getTranslations('validation');
@@ -20,6 +27,8 @@ export async function deleteUserAction(): Promise<{ success: boolean; message?: 
 	}
 
 	try {
+		let affectedReviewProductIds: string[] = [];
+
 		await prisma.$transaction(async (tx) => {
 			const user = await tx.user.findUnique({
 				where: { id: userId },
@@ -28,6 +37,13 @@ export async function deleteUserAction(): Promise<{ success: boolean; message?: 
 			if (!user) {
 				throw new Error('user_not_found');
 			}
+
+			const reviewProductIds = await tx.review.findMany({
+				where: { userId },
+				select: { productId: true },
+				distinct: ['productId'],
+			});
+			affectedReviewProductIds = reviewProductIds.map((review) => review.productId);
 
 			const [orderIds, cartIds] = await Promise.all([
 				tx.order.findMany({ where: { userId }, select: { id: true } }),
@@ -66,7 +82,19 @@ export async function deleteUserAction(): Promise<{ success: boolean; message?: 
 			]);
 
 			await tx.user.delete({ where: { id: userId } });
+
+			if (affectedReviewProductIds.length > 0) {
+				await syncProductReviewAggregates(tx, affectedReviewProductIds);
+			}
 		});
+
+		if (affectedReviewProductIds.length > 0) {
+			updateTag(PRODUCT_LIST_CACHE_TAG);
+			updateTag(PRODUCT_DETAIL_CACHE_TAG);
+			for (const productId of affectedReviewProductIds) {
+				updateTag(productCacheTagById(productId));
+			}
+		}
 
 		return { success: true };
 	} catch (error) {

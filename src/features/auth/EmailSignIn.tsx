@@ -131,7 +131,7 @@ export default function EmailSignIn({ i18nData, disabled }: EmailAuthProps) {
 					<Fieldset.ErrorText>{authError}</Fieldset.ErrorText>
 
 					{forceOpen && (
-						<Alert.Root status='success' variant='solid' my='2' fontSize='15px'>
+						<Alert.Root status='success' variant='solid' my='2' fontSize={{ base: 'md', md: '15px' }}>
 							<Alert.Indicator />
 							<Alert.Title>{i18nData.emailConfirmed}</Alert.Title>
 						</Alert.Root>

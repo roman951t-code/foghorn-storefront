@@ -19,7 +19,7 @@ export default function CountPill({ value, labelProps, ...props }: Props) {
 			py='1'
 			{...props}
 		>
-			<Tag.Label fontSize='sm' fontWeight='semibold' {...labelProps}>
+			<Tag.Label fontSize={{ base: 'md', md: 'sm' }} fontWeight='semibold' {...labelProps}>
 				{value}
 			</Tag.Label>
 		</Tag.Root>

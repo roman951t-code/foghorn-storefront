@@ -7,6 +7,7 @@ import { useCatalogStore } from '@/stores/catalogStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishListStore } from '@/stores/wishListStore';
 import { useOptionalSession } from '@/providers/SessionProvider';
+import { useRouter } from '@/i18n/routing';
 
 type Props = {
 	categories: CatalogCategory[];
@@ -27,6 +28,7 @@ export function AppStoreHydrator({
 	isLoggedIn,
 	children,
 }: Props) {
+	const router = useRouter();
 	const setCategories = useCatalogStore((state) => state.setCategories);
 
 	const setCartInitial = useCartStore((state) => state.setInitialData);
@@ -154,6 +156,7 @@ export function AppStoreHydrator({
 			setWishLoggedIn(false);
 			hydrateGuestCart();
 			hydrateGuestWish();
+			router.replace('/');
 		}
 
 		prevUserIdRef.current = currentUserId;
@@ -161,6 +164,7 @@ export function AppStoreHydrator({
 		currentUserId,
 		hydrateGuestCart,
 		hydrateGuestWish,
+		router,
 		setCartInitial,
 		setCartLoggedIn,
 		setWishInitial,

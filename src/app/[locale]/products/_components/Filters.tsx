@@ -76,16 +76,19 @@ export default function Filters({ filters }: Props) {
 								py={3}
 								bg='bg.tertiary'
 								fontWeight='semibold'
-								fontSize='15px'
+								fontSize={{ base: 'md', md: '15px' }}
 								transition='all 0.15s ease-in-out'
 								_hover={{ bg: 'bgHover.promoCard' }}
 							>
 								<HStack justify='space-between' w='full' minW={0}>
-									<Text lineClamp={1} fontSize='15px'>
+									<Text lineClamp={1} fontSize={{ base: 'md', md: '15px' }}>
 										{filterLabelWithUnit}
 									</Text>
 									{selectedCount > 0 ? (
-										<CountPill value={selectedCount} labelProps={{ fontSize: '15px' }} />
+										<CountPill
+											value={selectedCount}
+											labelProps={{ fontSize: { base: 'md', md: '15px' } }}
+										/>
 									) : null}
 								</HStack>
 							</AccordionItemTrigger>
@@ -111,7 +114,7 @@ export default function Filters({ filters }: Props) {
 													borderColor='border'
 													transition='all 0.15s ease-in-out'
 													_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-													fontSize='15px'
+													fontSize={{ base: 'md', md: '15px' }}
 													whiteSpace='normal'
 													wordBreak='break-word'
 												>

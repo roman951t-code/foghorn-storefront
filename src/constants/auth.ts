@@ -39,6 +39,8 @@ export const buildEmailSignInErrorMap = (i18nData: I18nData) =>
 		'Invalid credentials': i18nData.userLoginFail,
 		'Invalid email or password': i18nData.userLoginFail,
 		'User not found': i18nData.userLoginFail,
+		account_suspended: i18nData.accountSuspended,
+		account_blocked: i18nData.accountBlocked,
 		'Email not verified': i18nData.emailNotVerified,
 		'Too many attempts': i18nData.tooManyAttempts,
 		'Too many requests': i18nData.tooManyAttempts,
@@ -50,6 +52,9 @@ export const buildPhoneVerificationErrorMap = (i18nData: I18nData) =>
 		'Invalid OTP': i18nData.invalidOtp,
 		'OTP expired': i18nData.otpExpired,
 		'User not found': i18nData.userNotFound,
+		'Phone number already exists': i18nData.userExists,
+		account_suspended: i18nData.accountSuspended,
+		account_blocked: i18nData.accountBlocked,
 		'Too many attempts': i18nData.tooManyAttempts,
 		'Too many requests': i18nData.tooManyAttempts,
 	});

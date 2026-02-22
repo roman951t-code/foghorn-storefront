@@ -168,7 +168,7 @@ export default function ProductActivityTimeline(props: Props) {
 							padding: '12px 14px',
 							borderRadius: 8,
 							border: '1px solid #E2E8F0',
-							fontSize: 14,
+							fontSize: 15,
 							marginTop: 12,
 						}}
 					/>
@@ -210,12 +210,12 @@ export default function ProductActivityTimeline(props: Props) {
 									>
 										<Box display='flex' alignItems='center' justifyContent='space-between' mb='sm'>
 											<Text fontWeight='600'>{renderEntryTitle(entry)}</Text>
-											<Text color='grey60' fontSize='sm'>
+											<Text color='grey60' fontSize='15px'>
 												{timestamp}
 											</Text>
 										</Box>
 										{renderEntryBody(entry)}
-										<Text color='grey60' fontSize='sm' mt='sm'>
+										<Text color='grey60' fontSize='15px' mt='sm'>
 											{translateMessage('product-activity-admin-label')}: {adminLabel}
 										</Text>
 									</Box>

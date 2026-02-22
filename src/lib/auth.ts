@@ -7,6 +7,7 @@ import { prisma } from './prisma';
 import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
 import { APP_URL, env } from '@/config/env';
 import { sendPhoneOtpCode } from '@/lib/phoneOtp';
+import { isRestrictedUserAdminStatus } from '@/lib/userAdminStatus';
 
 const PHONE_AUTH_TEMP_EMAIL_PATTERN = /^\d+@mail$/i;
 
@@ -19,6 +20,9 @@ const sanitizeSessionEmail = (email: string | null | undefined): string | null =
 	if (!trimmed || isPhoneAuthTempEmail(trimmed)) return null;
 	return trimmed;
 };
+
+const resolveDefaultNotificationMethod = (path: string | undefined) =>
+	path?.includes('/phone-number/verify') ? 'phone' : 'email';
 
 export const auth = betterAuth({
 	baseURL: APP_URL,
@@ -38,14 +42,44 @@ export const auth = betterAuth({
 	database: prismaAdapter(prisma, {
 		provider: 'postgresql',
 	}),
+	databaseHooks: {
+		user: {
+			create: {
+				async before(user, context) {
+					if (user.notificationMethod === 'email' || user.notificationMethod === 'phone') return;
+					return {
+						data: {
+							...user,
+							notificationMethod: resolveDefaultNotificationMethod(context?.path),
+						},
+					};
+				},
+			},
+		},
+		session: {
+			create: {
+				async before(session) {
+					const userId = typeof session.userId === 'string' ? session.userId : null;
+					if (!userId) return;
+
+					const user = await prisma.user.findUnique({
+						where: { id: userId },
+						select: { adminStatus: true },
+					});
+
+					if (!user || !isRestrictedUserAdminStatus(user.adminStatus)) return;
+					return false;
+				},
+			},
+		},
+	},
 	session: {
 		expiresIn: 60 * 60 * 24 * 7,
-			updateAge: 60 * 60 * 24,
-			cookieCache: {
-				enabled: true,
-				maxAge: 5 * 60,
-				secure: env.NODE_ENV === 'production',
-			},
+		updateAge: 60 * 60 * 24,
+		// Keep revocations effective immediately across storefront and server actions.
+		cookieCache: {
+			enabled: false,
+		},
 	},
 	advanced: {
 		useSecureCookies: env.NODE_ENV === 'production',

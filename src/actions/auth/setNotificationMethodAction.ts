@@ -26,34 +26,34 @@ export async function setNotificationMethodAction(
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
+	const userId = session?.user?.id;
 
-	if (!session?.user?.email && !session?.user?.phoneNumber) {
+	if (!userId) {
 		return { success: false, message: validationT('userNotFound') };
 	}
 
 	try {
-		if (session?.user?.email) {
-			await prisma.user.update({
-				where: { email: session.user.email },
-				data: {
-					notificationMethod: parsed.data.notificationMethod,
-				},
-			});
-
-			return { success: true };
+		const user = await prisma.user.findUnique({
+			where: { id: userId },
+			select: { id: true, email: true, phoneNumber: true },
+		});
+		if (!user) {
+			return { success: false, message: validationT('userNotFound') };
 		}
 
-		if (session?.user?.phoneNumber) {
-			await prisma.user.update({
-				where: { phoneNumber: session.user.phoneNumber },
-				data: {
-					notificationMethod: parsed.data.notificationMethod,
-				},
-			});
-
-			return { success: true };
+		const wantsEmail = parsed.data.notificationMethod === 'email';
+		const wantsPhone = parsed.data.notificationMethod === 'phone';
+		if ((wantsEmail && !user.email) || (wantsPhone && !user.phoneNumber)) {
+			return { success: false, message: validationT('preferedNotifFailed') };
 		}
-	} catch (error) {
+
+		await prisma.user.update({
+			where: { id: user.id },
+			data: { notificationMethod: parsed.data.notificationMethod },
+		});
+
+		return { success: true };
+	} catch {
 		return { success: false, message: validationT('preferedNotifFailed') };
 	}
 }

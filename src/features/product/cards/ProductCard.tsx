@@ -211,7 +211,7 @@ export default function ProductCard({ product }: Props) {
 					>
 						{formatUsdPrice(displayPrice)}
 						{discount > 0 && (
-							<Text as='span' pl='2' color='main' fontSize='sm' textDecoration='line-through'>
+							<Text as='span' pl='2' color='main' fontSize={{ base: 'md', md: 'sm' }} textDecoration='line-through'>
 								{formatUsdPrice(basePrice)}
 								<Badge
 									variant='solid'
@@ -237,7 +237,7 @@ export default function ProductCard({ product }: Props) {
 					<Link
 						href={`/products/${fullSlug}/?tab=feedback`}
 						variant='underline'
-						fontSize='sm'
+						fontSize={{ base: 'md', md: 'sm' }}
 						aria-label={`${t('feedback')} (${product.reviewCount ?? 0}) — ${name}`}
 						color='main'
 						_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}

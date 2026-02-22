@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ApiClient, type ActionProps, OriginalShow, useNotice, useTranslation } from 'adminjs';
 import {
-	Badge,
 	Box,
 	Button,
 	FormGroup,
@@ -204,16 +203,6 @@ export default function UserShow(props: ActionProps) {
 		return Number.isNaN(parsed) ? payload.lastOrderDate : new Date(parsed).toLocaleString();
 	}, [payload?.lastOrderDate]);
 
-	const statusBadgeStyle = useMemo(() => {
-		if (adminStatus === 'BLOCKED') {
-			return { background: '#FED7D7', borderColor: '#E53E3E', color: '#742A2A' };
-		}
-		if (adminStatus === 'SUSPENDED') {
-			return { background: '#FEEBC8', borderColor: '#DD6B20', color: '#7B341E' };
-		}
-		return { background: '#C6F6D5', borderColor: '#38A169', color: '#22543D' };
-	}, [adminStatus]);
-
 	const isDirty = useMemo(() => {
 		const baseStatus = (localRecord?.params?.adminStatus as UserAdminStatus | undefined) ?? 'ACTIVE';
 		const baseNotes = (localRecord?.params?.adminNotes as string | undefined) ?? '';
@@ -296,11 +285,6 @@ export default function UserShow(props: ActionProps) {
 						<Text color='grey60' mb='sm'>
 							{translateMessage('customer-status')}
 						</Text>
-						<Box display='flex' alignItems='center' justifyContent='space-between'>
-							<Badge fontSize='md' outline style={statusBadgeStyle}>
-								{selectedStatusOption?.label ?? adminStatus}
-							</Badge>
-						</Box>
 						<Box mt='md'>
 							<FormGroup label={translateMessage('customer-status-change')} mb='0'>
 								<Select
@@ -332,7 +316,7 @@ export default function UserShow(props: ActionProps) {
 								padding: '12px 14px',
 								borderRadius: 8,
 								border: '1px solid #E2E8F0',
-								fontSize: 14,
+								fontSize: 15,
 								marginTop: 12,
 							}}
 						/>
@@ -369,53 +353,57 @@ export default function UserShow(props: ActionProps) {
 				{sessionsLoading || !sessions ? (
 					<Text color='grey60'>{translateMessage('customer-sessions-loading')}</Text>
 				) : sessions.length ? (
-					<Table>
-						<TableHead>
-							<TableRow>
-								<TableCell>{translateMessage('customer-sessions-created')}</TableCell>
-								<TableCell>{translateMessage('customer-sessions-updated')}</TableCell>
-								<TableCell>{translateMessage('customer-sessions-expires')}</TableCell>
-								<TableCell>{translateMessage('customer-sessions-ip')}</TableCell>
-								<TableCell>{translateMessage('customer-sessions-agent')}</TableCell>
-								<TableCell>{translateMessage('customer-sessions-revoke')}</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{sessions.map((session) => (
-								<TableRow key={session.id}>
-									<TableCell>{formatDate(session.createdAt)}</TableCell>
-									<TableCell>{formatDate(session.updatedAt)}</TableCell>
-									<TableCell>{formatDate(session.expiresAt)}</TableCell>
-									<TableCell>{session.ipAddress ?? '-'}</TableCell>
-									<TableCell>
-										<Text
-											style={{
-												maxWidth: 320,
-												whiteSpace: 'nowrap',
-												overflow: 'hidden',
-												textOverflow: 'ellipsis',
-											}}
-										>
-											{session.userAgent ?? '-'}
-										</Text>
-									</TableCell>
-									<TableCell>
-										<Button
-											variant='outlined'
-											size='sm'
-											onClick={() => handleRevokeSession(session.id)}
-											disabled={isReadOnly || revokingSessionId === session.id}
-											style={{ borderColor: '#E53E3E', color: '#E53E3E' }}
-										>
-											{revokingSessionId === session.id
-												? translateMessage('customer-sessions-revoking')
-												: translateMessage('customer-sessions-revoke')}
-										</Button>
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
+					<Box style={{ overflowX: 'auto' }}>
+						<Box style={{ minWidth: 980 }}>
+							<Table>
+								<TableHead>
+									<TableRow>
+										<TableCell>{translateMessage('customer-sessions-created')}</TableCell>
+										<TableCell>{translateMessage('customer-sessions-updated')}</TableCell>
+										<TableCell>{translateMessage('customer-sessions-expires')}</TableCell>
+										<TableCell>{translateMessage('customer-sessions-ip')}</TableCell>
+										<TableCell>{translateMessage('customer-sessions-agent')}</TableCell>
+										<TableCell>{translateMessage('customer-sessions-revoke')}</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{sessions.map((session) => (
+										<TableRow key={session.id}>
+											<TableCell>{formatDate(session.createdAt)}</TableCell>
+											<TableCell>{formatDate(session.updatedAt)}</TableCell>
+											<TableCell>{formatDate(session.expiresAt)}</TableCell>
+											<TableCell>{session.ipAddress ?? '-'}</TableCell>
+											<TableCell>
+												<Text
+													style={{
+														maxWidth: 320,
+														whiteSpace: 'nowrap',
+														overflow: 'hidden',
+														textOverflow: 'ellipsis',
+													}}
+												>
+													{session.userAgent ?? '-'}
+												</Text>
+											</TableCell>
+											<TableCell>
+												<Button
+													variant='outlined'
+													size='sm'
+													onClick={() => handleRevokeSession(session.id)}
+													disabled={isReadOnly || revokingSessionId === session.id}
+													style={{ borderColor: '#E53E3E', color: '#E53E3E' }}
+												>
+													{revokingSessionId === session.id
+														? translateMessage('customer-sessions-revoking')
+														: translateMessage('customer-sessions-revoke')}
+												</Button>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</Box>
+					</Box>
 				) : (
 					<Text color='grey60'>{translateMessage('customer-sessions-empty')}</Text>
 				)}

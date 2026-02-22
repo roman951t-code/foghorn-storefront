@@ -15,7 +15,7 @@ export const StepperInput = React.forwardRef<HTMLDivElement, StepperInputProps>(
 				{label && <NumberInput.Label>{label}</NumberInput.Label>}
 				<HStack gap='1' px='0.5' py='0.5' rounded='lg' borderWidth='0.5px' borderColor='border'>
 					<DecrementTrigger />
-					<NumberInput.ValueText textAlign='center' fontSize='sm' fontWeight='bold' minW='3ch' />
+					<NumberInput.ValueText textAlign='center' fontSize={{ base: 'md', md: 'sm' }} fontWeight='bold' minW='3ch' />
 					<IncrementTrigger />
 				</HStack>
 			</NumberInput.Root>

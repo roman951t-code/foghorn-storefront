@@ -45,7 +45,7 @@ export default function AddToCartButton({ i18nData, product, variantId }: AddToC
 	return (
 		<>
 			{!isInCart && (
-				<PrimaryButton fontSize='15px' gapX='3' w='200px' onClick={handleAdd} loading={isLoading}>
+				<PrimaryButton fontSize={{ base: 'md', md: '15px' }} gapX='3' w='200px' onClick={handleAdd} loading={isLoading}>
 					<FiShoppingCart />
 					{i18nData.buyText}
 				</PrimaryButton>

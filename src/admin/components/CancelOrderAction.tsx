@@ -83,7 +83,7 @@ export default function CancelOrderAction({ action, record, resource }: ActionPr
 					<Text>{translateMessage('refund-payment')}</Text>
 				</Box>
 				{!canRefund ? (
-					<Text color='grey60' fontSize='sm'>
+					<Text color='grey60' fontSize='15px'>
 						{translateMessage('refund-payment-hint')}
 					</Text>
 				) : null}

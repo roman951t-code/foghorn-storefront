@@ -1,4 +1,4 @@
-import { Text, VStack, Card, Badge, Separator, Flex, Group, Stat } from '@chakra-ui/react';
+import { Text, VStack, Card, Badge, Separator, Flex, Group, Stat, Box } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
@@ -36,16 +36,27 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 			<Group p='0'>
 				<VStack mr='1'>
 					<LocaleNavLink href={productHref} display='inline-block' lineHeight='0'>
-						<Image
-							style={{
-								borderRadius: 'var(--chakra-radii-md)',
-								border: '0.5px solid var(--chakra-colors-border)',
-							}}
-							width={100}
-							height={100}
-							src={getImage(product.imageUrl)}
-							alt={product.name}
-						/>
+						<Box
+							position='relative'
+							w={{ base: '136px', sm: '114px' }}
+							h={{ base: '136px', sm: '114px' }}
+							borderRadius='md'
+							borderWidth='0.5px'
+							borderStyle='solid'
+							borderColor='border'
+							overflow='hidden'
+						>
+							<Image
+								fill
+								sizes='(max-width: 479px) 136px, 114px'
+								src={getImage(product.imageUrl)}
+								alt={product.name}
+								style={{
+									objectFit: 'contain',
+									paddingTop: '4px',
+								}}
+							/>
+						</Box>
 					</LocaleNavLink>
 					<Text as='span' textStyle='md' minW='56px' fontWeight='semibold'>
 						{`x ${quantity}${t('units')}`}
@@ -64,7 +75,7 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 						</LocaleNavLink>
 					</Card.Title>
 					{product.variantLabel && (
-						<Text color='main.disabled' fontSize='sm' mt='-2'>
+						<Text color='main.disabled' fontSize={{ base: 'md', md: 'sm' }} mt='-2'>
 							{product.variantLabel}
 						</Text>
 					)}
@@ -72,7 +83,11 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 						{formatUsdPrice(price)}
 					</Text>
 					{hasDiscount && (
-						<Text color='main.disabled' fontSize='sm' textDecoration='line-through'>
+						<Text
+							color='main.disabled'
+							fontSize={{ base: 'md', md: 'sm' }}
+							textDecoration='line-through'
+						>
 							{formatUsdPrice(product.basePrice)}
 							<Badge
 								variant='solid'
@@ -126,18 +141,27 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 							lineHeight='0'
 							mx={{ base: 0, xs: 3 } as any}
 						>
-							<Image
-								width={112}
-								height={112}
-								src={getImage(product.imageUrl)}
-								style={{
-									objectFit: 'contain',
-									borderRadius: 'var(--chakra-radii-md)',
-									marginLeft: '4px',
-									border: '0.5px solid var(--chakra-colors-border)',
-								}}
-								alt={product.name}
-							/>
+							<Box
+								position='relative'
+								w={{ base: '136px', sm: '114px' }}
+								h={{ base: '136px', sm: '114px' }}
+								borderRadius='md'
+								borderWidth='0.5px'
+								borderStyle='solid'
+								borderColor='border'
+								overflow='hidden'
+							>
+								<Image
+									fill
+									sizes='(max-width: 479px) 136px, 114px'
+									src={getImage(product.imageUrl)}
+									alt={product.name}
+									style={{
+										objectFit: 'contain',
+										paddingTop: '4px',
+									}}
+								/>
+							</Box>
 						</LocaleNavLink>
 						<Flex direction='column' gap={3} pt={{ base: 2, xs: 0 } as any} w='full' minW={0}>
 							<Card.Title
@@ -160,7 +184,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 									textAlign={{ base: 'center', xs: 'left' } as any}
 									color='main.disabled'
 									borderColor='border'
-									fontSize='sm'
+									fontSize={{ base: 'md', md: 'sm' }}
 									mt='-1'
 								>
 									{product.variantLabel}
@@ -179,7 +203,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 									<Text
 										as='span'
 										color='main.disabled'
-										fontSize='sm'
+										fontSize={{ base: 'md', md: 'sm' }}
 										textDecoration='line-through'
 										marginLeft='2'
 									>

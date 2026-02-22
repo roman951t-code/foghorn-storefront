@@ -45,12 +45,16 @@
 	height: 34;
 }
 
+.productsSlider .productPreviewSwiper {
+	/* Keep preview arrows centered as a pair, with ~2x larger horizontal gap. */
+	--product-preview-arrow-side-offset: 12%;
+}
 .productsSlider .productPreviewSwiper .swiper-button-prev {
 	right: initial;
-	left: 28%;
+	left: var(--product-preview-arrow-side-offset);
 }
 .productsSlider .productPreviewSwiper .swiper-button-next {
-	right: 24%;
+	right: var(--product-preview-arrow-side-offset);
 	left: initial;
 }
 

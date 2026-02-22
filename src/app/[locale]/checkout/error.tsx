@@ -29,7 +29,7 @@ export default function CheckoutError({ error, reset }: ErrorProps) {
 				{t('checkoutUnavailableDesc')}
 			</p>
 			{error?.digest ? (
-				<p style={{ marginTop: '10px', marginBottom: 0, opacity: 0.75, fontSize: '14px' }}>
+				<p style={{ marginTop: '10px', marginBottom: 0, opacity: 0.75, fontSize: '16px' }}>
 					{t('ref', { value: error.digest })}
 				</p>
 			) : null}

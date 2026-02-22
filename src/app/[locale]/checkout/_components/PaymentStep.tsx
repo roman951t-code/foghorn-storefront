@@ -72,7 +72,7 @@ export default function PaymentStep() {
 				>
 					<VStack align='stretch' gap='3'>
 						<Text fontWeight='semibold'>{t('payment.cardForm.title')}</Text>
-						<Text fontSize='sm' color='fg.muted'>
+						<Text fontSize={{ base: 'md', md: 'sm' }} color='fg.muted'>
 							{t('payment.cardForm.description')}
 						</Text>
 						{isStripeTestMode ? (
@@ -83,19 +83,19 @@ export default function PaymentStep() {
 								borderRadius='md'
 								p='3'
 							>
-								<Text fontSize='sm' fontWeight='semibold'>
+								<Text fontSize={{ base: 'md', md: 'sm' }} fontWeight='semibold'>
 									{t('payment.cardForm.testModeTitle')}
 								</Text>
-								<Text fontSize='sm' mt='1'>
+								<Text fontSize={{ base: 'md', md: 'sm' }} mt='1'>
 									{t('payment.cardForm.testCard')}: 4242 4242 4242 4242
 								</Text>
-								<Text fontSize='sm'>
+								<Text fontSize={{ base: 'md', md: 'sm' }}>
 									{t('payment.cardForm.testExpiry')}: 12/34
 								</Text>
-								<Text fontSize='sm'>
+								<Text fontSize={{ base: 'md', md: 'sm' }}>
 									{t('payment.cardForm.testCvc')}: 123
 								</Text>
-								<Text fontSize='sm' mt='1'>
+								<Text fontSize={{ base: 'md', md: 'sm' }} mt='1'>
 									{t('payment.cardForm.testDeclineCard')}: 4000 0000 0000 0002
 								</Text>
 							</Box>

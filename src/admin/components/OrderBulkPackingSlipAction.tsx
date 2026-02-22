@@ -188,25 +188,25 @@ export default function OrderBulkPackingSlipAction({ action, resource, records }
 							>
 								<Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
 									<Box style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-										<Text color='grey60' fontSize='sm'>
+										<Text color='grey60' fontSize='15px'>
 											{translateMessage('packing-slip-order')}
 										</Text>
 										<Text fontWeight='bold'>{order.orderId}</Text>
-										<Text color='grey60' fontSize='sm'>
+										<Text color='grey60' fontSize='15px'>
 											{new Date(order.createdAt).toLocaleString()}
 										</Text>
 									</Box>
 									<Box style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-										<Text color='grey60' fontSize='sm'>
+										<Text color='grey60' fontSize='15px'>
 											{translateMessage('packing-slip-customer')}
 										</Text>
 										<Text fontWeight='bold'>{customer ?? '-'}</Text>
-										<Text color='grey60' fontSize='sm'>
+										<Text color='grey60' fontSize='15px'>
 											{order.contactPhone ?? order.contactEmail ?? '-'}
 										</Text>
 									</Box>
 									<Box style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-										<Text color='grey60' fontSize='sm'>
+										<Text color='grey60' fontSize='15px'>
 											{translateMessage('packing-slip-shipping-address')}
 										</Text>
 										{shippingAddressLines.length ? (
@@ -222,11 +222,11 @@ export default function OrderBulkPackingSlipAction({ action, resource, records }
 										)}
 									</Box>
 									<Box style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-										<Text color='grey60' fontSize='sm'>
+										<Text color='grey60' fontSize='15px'>
 											{translateMessage('packing-slip-fulfillment')}
 										</Text>
 										<Text fontWeight='bold'>{order.carrier ?? '-'}</Text>
-										<Text color='grey60' fontSize='sm'>
+										<Text color='grey60' fontSize='15px'>
 											{order.trackingNumber ?? '-'}
 										</Text>
 									</Box>
@@ -257,7 +257,7 @@ export default function OrderBulkPackingSlipAction({ action, resource, records }
 
 								<Box display='flex' justifyContent='flex-end' mt='lg'>
 									<Box style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14, minWidth: 260 }}>
-										<Text color='grey60' fontSize='sm'>
+										<Text color='grey60' fontSize='15px'>
 											{translateMessage('total')}
 										</Text>
 										<Text fontSize='xl' fontWeight='bold'>

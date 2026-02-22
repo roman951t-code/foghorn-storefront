@@ -31,7 +31,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 				<Flex justifyContent='space-between' alignItems='stretch' gap='4'>
 					<VStack alignItems='flex-start' gap='3' flex='1'>
 						<Stat.Root>
-							<Stat.Label fontSize='sm' color='main.disabled'>
+							<Stat.Label fontSize={{ base: 'md', md: 'sm' }} color='main.disabled'>
 								{i18nData.totalAmount}
 							</Stat.Label>
 							<Stat.ValueText fontSize={{ base: '3xl', sm: '4xl' }}>
@@ -49,7 +49,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 						) : null}
 
 						<Flex align='center' gapX='4' mt='1'>
-							<Text fontSize='15px' color='main'>
+							<Text fontSize={{ base: 'md', md: '15px' }} color='main'>
 								{i18nData.numOfProducts}
 							</Text>
 							<CountPill value={totalCount} px='2' labelProps={{ fontWeight: 'bold' }} />

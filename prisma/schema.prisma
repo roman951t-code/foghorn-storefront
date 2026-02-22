@@ -65,7 +65,7 @@ model User {
   name               String
   middleName         String?
   lastName           String?
-  notificationMethod String?         @default("email")
+  notificationMethod String          @default("email")
   adminStatus        UserAdminStatus @default(ACTIVE)
   adminNotes         String?         @db.Text
   email              String?         @unique

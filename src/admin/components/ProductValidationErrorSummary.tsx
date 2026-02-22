@@ -76,7 +76,7 @@ export default function ProductValidationErrorSummary(props: ActionProps) {
 							<Text fontWeight='bold'>{translateProperty(propertyPath, resource.id)}</Text>
 							<Text>{messageText}</Text>
 							{hintKey ? (
-								<Text color='grey60' style={{ fontSize: 13, marginTop: 6 }}>
+								<Text color='grey60' style={{ fontSize: 15, marginTop: 6 }}>
 									{translateMessage(hintKey)}
 								</Text>
 							) : null}

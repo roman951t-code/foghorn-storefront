@@ -197,25 +197,25 @@ export default function OrderBulkShippingLabelAction({ action, resource, records
 
 								<Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
 									<Box style={{ border: '1px solid #CBD5E1', borderRadius: 10, padding: 10 }}>
-										<Text color='grey60' style={{ fontSize: 12 }}>
+										<Text color='grey60' style={{ fontSize: 15 }}>
 											{translateMessage('shipping-label-order')}
 										</Text>
 										<Text fontWeight='bold'>{order.orderId}</Text>
 									</Box>
 									<Box style={{ border: '1px solid #CBD5E1', borderRadius: 10, padding: 10 }}>
-										<Text color='grey60' style={{ fontSize: 12 }}>
+										<Text color='grey60' style={{ fontSize: 15 }}>
 											{translateMessage('shipping-label-service')}
 										</Text>
 										<Text fontWeight='bold'>{order.shipmentMethod ?? '-'}</Text>
 									</Box>
 									<Box style={{ border: '1px solid #CBD5E1', borderRadius: 10, padding: 10 }}>
-										<Text color='grey60' style={{ fontSize: 12 }}>
+										<Text color='grey60' style={{ fontSize: 15 }}>
 											{translateMessage('shipping-label-carrier')}
 										</Text>
 										<Text fontWeight='bold'>{order.carrier ?? '-'}</Text>
 									</Box>
 									<Box style={{ border: '1px solid #CBD5E1', borderRadius: 10, padding: 10 }}>
-										<Text color='grey60' style={{ fontSize: 12 }}>
+										<Text color='grey60' style={{ fontSize: 15 }}>
 											{translateMessage('shipping-label-tracking')}
 										</Text>
 										<Text fontWeight='bold'>{order.trackingNumber ?? '-'}</Text>

@@ -204,7 +204,7 @@ export default function AboutTab({
 							{formatUsdPrice(unitEffectivePrice)}
 							{discount > 0 && (
 								<Badge colorPalette='gray'>
-									<Box as='span' color='main' fontSize='sm' textDecoration='line-through'>
+									<Box as='span' color='main' fontSize={{ base: 'md', md: 'sm' }} textDecoration='line-through'>
 										{formatUsdPrice(unitBasePrice)}
 										<Badge
 											variant='solid'
@@ -234,7 +234,7 @@ export default function AboutTab({
 						<Link
 							href={`/products/${product.fullSlug}?tab=feedback`}
 							variant='underline'
-							fontSize='sm'
+							fontSize={{ base: 'md', md: 'sm' }}
 							color='main'
 							_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 							onClick={(e) => {

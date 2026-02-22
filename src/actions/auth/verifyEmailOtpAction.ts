@@ -3,6 +3,7 @@
 import 'server-only';
 
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { auth } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
@@ -69,15 +70,42 @@ export async function verifyEmailOtpAction(email: string, code: string) {
 	}
 
 	try {
-		await prisma.user.update({
-			where: { id: userId },
-			data: { email: normalizedEmail, emailVerified: true },
+		const existingUserWithEmail = await prisma.user.findFirst({
+			where: {
+				email: normalizedEmail,
+				id: { not: userId },
+			},
+			select: { id: true },
+		});
+		if (existingUserWithEmail) {
+			return { success: false, message: validationT('userExists') };
+		}
+
+		await prisma.$transaction(async (tx) => {
+			await tx.user.update({
+				where: { id: userId },
+				data: { email: normalizedEmail, emailVerified: true },
+			});
+
+			// Cleanup is best-effort and should not make successful verification fail.
+			await tx.emailVerificationCode.deleteMany({
+				where: {
+					userId,
+					email: normalizedEmail,
+				},
+			});
 		});
 
-		await prisma.emailVerificationCode.delete({ where: { id: record.id } });
-
 		return { success: true };
-	} catch {
+	} catch (error) {
+		if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			if (error.code === 'P2002') {
+				return { success: false, message: validationT('userExists') };
+			}
+			if (error.code === 'P2025') {
+				return { success: false, message: validationT('userNotFound') };
+			}
+		}
 		return { success: false, message: validationT('verificationFailed') };
 	}
 }

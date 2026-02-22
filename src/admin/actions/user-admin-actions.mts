@@ -36,12 +36,20 @@ export const updateUserAdminMeta: ActionHandler<RecordActionResponse> = async (r
 		};
 	}
 
-	await prisma.user.update({
-		where: { id: userId },
-		data: {
-			adminStatus,
-			adminNotes,
-		},
+	await prisma.$transaction(async (tx) => {
+		await tx.user.update({
+			where: { id: userId },
+			data: {
+				adminStatus,
+				adminNotes,
+			},
+		});
+
+		if (adminStatus !== 'ACTIVE') {
+			await tx.session.deleteMany({
+				where: { userId },
+			});
+		}
 	});
 
 	const updated = await resource.findOne(userId);

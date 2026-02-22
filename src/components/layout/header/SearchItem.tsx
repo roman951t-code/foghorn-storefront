@@ -25,7 +25,7 @@ export function ProductSearchItem({ item }: { item: SearchProductItem }) {
 	const subcategoryLabel = item.subcategoryName?.trim() || formatSearchMeta(item.subcategory);
 
 	return (
-		<Combobox.Item item={item} key={productKey} fontSize='sm' minW='90px' w='full' py='0'>
+		<Combobox.Item item={item} key={productKey} fontSize={{ base: 'md', md: 'sm' }} minW='90px' w='full' py='0'>
 			<Combobox.ItemText
 				fontWeight='medium'
 				as='div'
@@ -36,10 +36,10 @@ export function ProductSearchItem({ item }: { item: SearchProductItem }) {
 					},
 				}}
 			>
-				<LocaleSearchLink asChild href={href} textDecoration='none' fontSize='15px'>
+				<LocaleSearchLink asChild href={href} textDecoration='none' fontSize={{ base: 'md', md: '15px' }}>
 					<Box py='1' minH='38px' display='flex' flexWrap='wrap' alignItems='center' columnGap='3'>
 						<Text
-							fontSize='15px'
+							fontSize={{ base: 'md', md: '15px' }}
 							lineHeight='1.25'
 							flex='1 1 auto'
 							minW='0'
@@ -52,7 +52,7 @@ export function ProductSearchItem({ item }: { item: SearchProductItem }) {
 							</Highlight>
 						</Text>
 						<Text
-							fontSize='15px'
+							fontSize={{ base: 'md', md: '15px' }}
 							color='fg.muted'
 							lineHeight='1.25'
 							flex='0 0 auto'
@@ -85,7 +85,7 @@ export function CategorySearchItem({ item }: { item: SearchSubcategoryItem }) {
 				py='2'
 				w='max-content'
 			>
-				<LocaleSearchLink asChild href={href} textDecoration='none' fontSize='15px'>
+				<LocaleSearchLink asChild href={href} textDecoration='none' fontSize={{ base: 'md', md: '15px' }}>
 					<Tag.Label fontWeight='medium' w='auto'>
 						<Icon mr='1'>
 							<FiSearch />
@@ -114,7 +114,7 @@ export function SeeAllLink({ linkTo, seeAll }: SeeAllLinkProps) {
 		<Combobox.Item
 			item='seeAll'
 			key='seeAll'
-			fontSize='sm'
+			fontSize={{ base: 'md', md: 'sm' }}
 			minW='90px'
 			w='full'
 			py='0'

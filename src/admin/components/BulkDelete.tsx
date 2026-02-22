@@ -95,7 +95,7 @@ export default function BulkDelete(props: ActionProps) {
 			})
 			.catch((error) => {
 				setLoading(false);
-				addNotice({ message: translateMessage('bulkDeleteError', resource.id), type: 'error' });
+				addNotice({ message: 'bulkDeleteError', resourceId: resource.id, type: 'error' });
 				throw error;
 			});
 	};

@@ -47,7 +47,7 @@ const styles = {
 		color: '#cbd5e1',
 		fontWeight: 700,
 		letterSpacing: '0.08em',
-		fontSize: '12px',
+		fontSize: '16px',
 		textTransform: 'uppercase',
 		marginBottom: '10px',
 	},
@@ -73,7 +73,7 @@ const styles = {
 		padding: '12px 16px',
 		fontWeight: 700,
 		textDecoration: 'none',
-		fontSize: '15px',
+		fontSize: '16px',
 		boxShadow: '0 12px 30px rgba(34, 197, 94, 0.35)',
 	},
 };

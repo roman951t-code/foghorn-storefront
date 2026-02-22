@@ -13,6 +13,7 @@ import {
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import DateWithLocale from '@/components/ui/DateWithLocale';
+import CountPill from '@/components/ui/CountPill';
 import {
 	buildProductImages,
 	resolveProductPrimaryImage,
@@ -48,14 +49,17 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 			>
 				<VStack gap='3' alignItems='flex-start' minW='160px'>
 					<Stat.Root>
-						<Stat.Label fontSize='sm'>{productsT('totalAmount')}</Stat.Label>
+						<Stat.Label fontSize={{ base: 'md', md: 'sm' }}>{productsT('totalAmount')}</Stat.Label>
 						<Stat.ValueText fontSize='3xl'>{formatUsdPrice(order.total)}</Stat.ValueText>
 					</Stat.Root>
-					<Text textStyle='sm' fontWeight='medium'>
-						<Text as='span' fontWeight='bold'>{`${productsT('numOfProducts')}: ${totalItems}`}</Text>
-					</Text>
+					<HStack gap='2' flexWrap='wrap'>
+						<Text fontSize={{ base: 'md', md: 'sm' }} fontWeight='semibold'>
+							{`${productsT('numOfProducts')}:`}
+						</Text>
+						<CountPill value={totalItems} />
+					</HStack>
 					{order.totalDiscount > 0 ? (
-						<Text textStyle='sm' fontWeight='medium'>
+						<Text fontSize={{ base: 'md', md: 'sm' }} fontWeight='medium'>
 							{`${productsT('totalDiscount')}: `}
 							<Badge
 								variant='solid'
@@ -78,8 +82,8 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 						return (
 								<Image
 									key={item.id}
-									width={100}
-									height={100}
+									width={114}
+									height={114}
 									src={previewImage}
 									alt={item.product.name}
 									style={{
@@ -128,7 +132,7 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 							py='1.5'
 							mt={{ base: 4, sm: 0 }}
 						>
-							<Tag.Label fontSize='sm'>
+							<Tag.Label fontSize={{ base: 'md', md: 'sm' }}>
 								{key === 'status' ? (
 									<Status.Root size='md' gap='2.5'>
 										<Status.Indicator colorPalette={colorPalette ?? 'gray'} />

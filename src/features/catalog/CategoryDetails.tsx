@@ -1,17 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Badge, Box, Flex, Heading, Icon, SimpleGrid, Text, Wrap } from '@chakra-ui/react';
-import Image from 'next/image';
 import { BsChevronRight } from 'react-icons/bs';
 import { LocaleNavLink, LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
+import PriorityImageWithFallback from '@/components/ui/PriorityImageWithFallback';
 import { CATEGORY_DETAILS_GRID_CSS } from '@/constants/grids';
 import type { I18nData } from '@/types/i18n';
 import type { CatalogCategory } from '@/types/product';
+import { useTranslations } from 'next-intl';
 import {
-	buildImageBackgroundWithFallback,
 	CATEGORY_PLACEHOLDER_IMAGE,
 	resolveCategoryImage,
+	resolveSubcategoryImage,
 	SUBCATEGORY_PLACEHOLDER_IMAGE,
 } from '@/utils/categoryImages';
 
@@ -21,12 +21,10 @@ interface Props {
 }
 
 export default function CategoryDetails({ category, i18nData }: Props) {
-	const categoryImageUrl = category?.imageUrl;
-	const [categoryBg, setCategoryBg] = useState(() => resolveCategoryImage(categoryImageUrl));
-	useEffect(() => {
-		setCategoryBg(resolveCategoryImage(categoryImageUrl));
-	}, [categoryImageUrl]);
+	const productsT = useTranslations('products');
 	if (!category) return null;
+
+	const categoryBg = resolveCategoryImage(category.imageUrl);
 	const subcategories = category.children ?? [];
 
 	return (
@@ -58,7 +56,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 						pr={{ base: 0, lg: '256px' }}
 					>
 						{subcategories.map((subcategory) => {
-							const subImage = buildImageBackgroundWithFallback(
+							const subImage = resolveSubcategoryImage(
 								subcategory.imageUrl,
 								SUBCATEGORY_PLACEHOLDER_IMAGE
 							);
@@ -78,11 +76,17 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 								>
 									<Box
 										h='72px'
-										bgImage={subImage}
-										bgSize='cover, cover'
-										bgPos='center, center'
 										position='relative'
 									>
+										<PriorityImageWithFallback
+											src={subImage}
+											fallbackSrc={SUBCATEGORY_PLACEHOLDER_IMAGE}
+											alt={subcategory.name}
+											sizes='(max-width: 1024px) 100vw, 320px'
+											loading='eager'
+											fetchPriority='high'
+											objectFit='cover'
+										/>
 										<Box
 											position='absolute'
 											inset='0'
@@ -114,42 +118,48 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 										</LocaleNavLink>
 
 										<Wrap mt={3} gap={4} align='center'>
-											{subcategory.products.map((product) => (
-												<Badge
-													key={product.id}
-													variant='outline'
-													size='md'
-													borderWidth='0.5px'
-													bg='bg.tertiary'
-													px='0'
-													py='1'
-													boxShadow='none'
-													border='none'
-												>
-													<LocaleNavLink
-														href={`/products/${product.fullSlug}`}
-														fontSize='15px'
-														fontWeight='medium'
-														textWrap='wrap'
-														wordBreak='break-word'
-														textDecorationColor='main'
-														color='main'
-														variant='underline'
-														_hover={{ color: 'link' }}
-														_focusVisible={{
-															outline: '2px solid',
-															outlineColor: 'main.secondary',
-															outlineOffset: '2px',
-														}}
+											{subcategory.products.length > 0 ? (
+												subcategory.products.map((product) => (
+													<Badge
+														key={product.id}
+														variant='outline'
+														size='md'
+														borderWidth='0.5px'
+														bg='bg.tertiary'
+														px='0'
+														py='1'
+														boxShadow='none'
+														border='none'
 													>
-														{product.name}
-													</LocaleNavLink>
-												</Badge>
-											))}
+														<LocaleNavLink
+															href={`/products/${product.fullSlug}`}
+															fontSize={{ base: 'md', md: '15px' }}
+															fontWeight='medium'
+															textWrap='wrap'
+															wordBreak='break-word'
+															textDecorationColor='main'
+															color='main'
+															variant='underline'
+															_hover={{ color: 'link' }}
+															_focusVisible={{
+																outline: '2px solid',
+																outlineColor: 'main.secondary',
+																outlineOffset: '2px',
+															}}
+														>
+															{product.name}
+														</LocaleNavLink>
+													</Badge>
+												))
+											) : (
+												<Text fontSize={{ base: 'md', md: 'sm' }} color='gray.500'>
+													{productsT('productsNotFound')}
+												</Text>
+											)}
 
 											<LocaleNavLink
 												href={`/products/${category.slug}/${subcategory.slug}`}
-												fontSize='sm'
+												fontSize={{ base: 'md', md: 'sm' }}
 												variant='plain'
 												color='link'
 												mt='1'
@@ -213,21 +223,14 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 						borderStyle='solid'
 						borderColor='border'
 					>
-						<Image
-							key={categoryBg}
+						<PriorityImageWithFallback
 							src={categoryBg}
+							fallbackSrc={CATEGORY_PLACEHOLDER_IMAGE}
 							alt={category.name}
-							fill
 							sizes='(min-width: 80em) 260px, 240px'
-							style={{
-								objectFit: 'cover',
-							}}
-							loading='lazy'
-							onError={() => {
-								if (categoryBg !== CATEGORY_PLACEHOLDER_IMAGE) {
-									setCategoryBg(CATEGORY_PLACEHOLDER_IMAGE);
-								}
-							}}
+							loading='eager'
+							fetchPriority='high'
+							objectFit='cover'
 						/>
 					</Box>
 

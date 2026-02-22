@@ -19,6 +19,7 @@ interface Props {
 
 export default function EmailConfirmation({ resendData, i18nData, backToLogin }: Props) {
 	const schema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
+	const EMPTY_OTP = ['', '', '', '', '', ''];
 
 	const [timer, setTimer] = useState(0);
 	const [verifyError, setVerifyError] = useState('');
@@ -28,8 +29,13 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 	const {
 		handleSubmit,
 		control,
+		reset,
 		formState: { errors, isSubmitting },
-	} = useForm<PhoneVerifySchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
+	} = useForm<PhoneVerifySchema>({
+		mode: 'onSubmit',
+		resolver: zodResolver(schema),
+		defaultValues: { otp: EMPTY_OTP },
+	});
 
 	useEffect(() => {
 		if (timer <= 0) return;
@@ -48,6 +54,8 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 	}, [timer]);
 
 	const resendVerificationCode = async () => {
+		reset({ otp: EMPTY_OTP });
+		setVerifyError('');
 		setTimer(120);
 		try {
 			const result = await sendRegisterEmailAction(null, resendData);
@@ -86,7 +94,7 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 		<form onSubmit={handleSubmit(onSubmit)}>
 			<Fieldset.Root size='lg' invalid>
 				<Fieldset.Legend fontSize='17px'>{i18nData.emailConfirmation}</Fieldset.Legend>
-				<Fieldset.HelperText fontSize='15px' lineHeight='1.6' mt='4'>
+				<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} lineHeight='1.6' mt='4'>
 					{i18nData.toPost}
 					<Highlight query={email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
 						{email}
@@ -138,7 +146,7 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 				</Button>
 
 				{timer > 0 ? (
-					<Fieldset.HelperText fontSize='15px' color='main'>
+					<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} color='main'>
 						{i18nData.resendAfter}:
 						<Highlight
 							query={formattedTime}
@@ -149,6 +157,7 @@ export default function EmailConfirmation({ resendData, i18nData, backToLogin }:
 					</Fieldset.HelperText>
 				) : (
 					<Button
+						type='button'
 						mt='4'
 						variant='outline'
 						rounded='md'

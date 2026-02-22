@@ -53,6 +53,7 @@ import { setFulfillment } from '../actions/order-fulfillment-actions.mts';
 import { bulkPackingSlips, packingSlip } from '../actions/order-packing-slip-actions.mts';
 import { bulkShippingLabels, shippingLabel } from '../actions/order-shipping-label-actions.mts';
 import { attachUserListKpis, userKpis } from '../actions/user-kpi-actions.mts';
+import { deleteUser } from '../actions/user-delete-actions.mts';
 import { updateUserAdminMeta } from '../actions/user-admin-actions.mts';
 import { revokeSession, userSessions } from '../actions/user-session-actions.mts';
 import { userSegments } from '../actions/user-segmentation-actions.mts';
@@ -2099,6 +2100,7 @@ export const resources = [
 			],
 			properties: {
 				id: hidden,
+				image: hidden,
 				adminStatus: {
 					isVisible: { list: true, filter: true, show: true, edit: false },
 					availableValues: [
@@ -2120,9 +2122,6 @@ export const resources = [
 					type: 'datetime',
 					isVisible: { list: true, filter: false, show: false, edit: false },
 				},
-				image: {
-					isVisible: { list: false, filter: false, show: true, edit: false },
-				},
 				email: disabled,
 				emailVerified: disabled,
 				phoneNumber: disabled,
@@ -2141,6 +2140,13 @@ export const resources = [
 					icon: 'Filter',
 					component: userSegmentsComponent,
 					handler: userSegments,
+				},
+				deleteUser: {
+					actionType: 'record',
+					icon: 'Trash',
+					guard: 'delete-user',
+					handler: deleteUser,
+					component: false,
 				},
 				show: {
 					actionType: 'record',

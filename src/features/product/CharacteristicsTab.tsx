@@ -22,7 +22,7 @@ export default function CharacteristicsTab({ attributes }: CharacteristicsTabPro
 				p='4'
 			>
 				{attributes.map((attr) => (
-					<DataList.Item key={attr.name} pt='4' fontSize='14px'>
+					<DataList.Item key={attr.name} pt='4' fontSize={{ base: 'md', md: '14px' }}>
 						<DataList.ItemLabel fontWeight='semibold' color='main' w='164px'>
 							{attr.name}
 						</DataList.ItemLabel>

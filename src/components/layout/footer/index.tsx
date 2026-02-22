@@ -38,12 +38,21 @@ export default function Footer() {
 				gap={2}
 			>
 				<Text mr={{ base: '12px', md: '0' }} color='main.lightOnly'>
-					© 2025 Prosperity.com
+					© 2026 Prosperity.com
 				</Text>
 				<MediaContacts hideBelow='md' />
 				<Group>
 					<Text color='main.lightOnly'>{t('design')}</Text>
-					<Link href='#' variant='underline' color='main.secondary' _focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}>
+					<Link
+						href='#'
+						variant='underline'
+						color='main.secondary'
+						_focusVisible={{
+							outline: '2px solid',
+							outlineColor: 'main.secondary',
+							outlineOffset: '2px',
+						}}
+					>
 						Foghorn
 					</Link>
 				</Group>

@@ -8,7 +8,7 @@ function CustomBreadcrumbLink({ href, children }: { href: string; children: Reac
 		<LocaleNavLink
 			href={href}
 			wordBreak='break-word'
-			fontSize='15px'
+			fontSize={{ base: 'md', md: '15px' }}
 			color='main.breadcrumb'
 			textDecoration='none'
 			display='inline-flex'
@@ -41,7 +41,7 @@ function BreadcrumbCurrentLink({ children }: { children: React.ReactNode }) {
 			wordBreak='break-word'
 			cursor='default'
 			fontWeight='medium'
-			fontSize='15px'
+			fontSize={{ base: 'md', md: '15px' }}
 			textDecoration='none'
 			_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 		>
@@ -91,7 +91,7 @@ export default function Breadcrumbs({
 						height='30px'
 						minW='auto'
 						rounded='md'
-						fontSize='15px'
+						fontSize={{ base: 'md', md: '15px' }}
 						fontWeight='medium'
 						color='main.breadcrumb'
 						_hover={{

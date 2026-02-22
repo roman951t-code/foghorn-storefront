@@ -3,6 +3,7 @@
 import {
 	Accordion,
 	Badge,
+	Box,
 	Card,
 	DataList,
 	Flex,
@@ -57,17 +58,27 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 				<Accordion.ItemTrigger w='100%' p='0' cursor='pointer'>
 					<Flex alignItems='center' direction={{ base: 'column', sm: 'row' }} w='100%'>
 						<LocaleNavLink href={productHref} mr='4'>
-							<Image
-								src={previewImage}
-								alt={product.name ?? ''}
-								width={120}
-								height={120}
-								style={{
-									objectFit: 'contain',
-									borderRadius: 'var(--chakra-radii-md)',
-									border: '0.5px solid var(--chakra-colors-border)',
-								}}
-							/>
+							<Box
+								position='relative'
+								w={{ base: '136px', sm: '114px' }}
+								h={{ base: '136px', sm: '114px' }}
+								borderRadius='md'
+								borderWidth='0.5px'
+								borderStyle='solid'
+								borderColor='border'
+								overflow='hidden'
+							>
+								<Image
+									fill
+									sizes='(max-width: 479px) 136px, 114px'
+									src={previewImage}
+									alt={product.name ?? ''}
+									style={{
+										objectFit: 'contain',
+										paddingTop: '4px',
+									}}
+								/>
+							</Box>
 						</LocaleNavLink>
 						<Flex direction='column' gap={2} w='100%'>
 							<Card.Title fontWeight='medium' fontSize='md' lineHeight='24px'>
@@ -86,7 +97,7 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 									<Text
 										as='span'
 										color='main.disabled'
-										fontSize='sm'
+										fontSize={{ base: 'md', md: 'sm' }}
 										textDecoration='line-through'
 										marginLeft='8px'
 									>
@@ -151,29 +162,29 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 							<DataList.Root flex='1'>
 								{review.advantages && (
 									<DataList.Item gap='2.5'>
-										<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
+										<DataList.ItemLabel fontSize={{ base: 'md', md: '15px' }} fontWeight='semibold' color='main'>
 											{prodT('advantages')}
 										</DataList.ItemLabel>
-										<DataList.ItemValue fontSize='15px' wordBreak='break-word'>
+										<DataList.ItemValue fontSize={{ base: 'md', md: '15px' }} wordBreak='break-word'>
 											{review.advantages}
 										</DataList.ItemValue>
 									</DataList.Item>
 								)}
 								{review.disadvantages && (
 									<DataList.Item gap='2.5'>
-										<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
+										<DataList.ItemLabel fontSize={{ base: 'md', md: '15px' }} fontWeight='semibold' color='main'>
 											{prodT('disAdvantages')}
 										</DataList.ItemLabel>
-										<DataList.ItemValue fontSize='15px' wordBreak='break-word'>
+										<DataList.ItemValue fontSize={{ base: 'md', md: '15px' }} wordBreak='break-word'>
 											{review.disadvantages}
 										</DataList.ItemValue>
 									</DataList.Item>
 								)}
 								<DataList.Item gap='2.5'>
-									<DataList.ItemLabel fontSize='15px' fontWeight='medium' color='main'>
+									<DataList.ItemLabel fontSize={{ base: 'md', md: '15px' }} fontWeight='semibold' color='main'>
 										{prodT('comment')}
 									</DataList.ItemLabel>
-									<DataList.ItemValue fontSize='15px' wordBreak='break-word'>
+									<DataList.ItemValue fontSize={{ base: 'md', md: '15px' }} wordBreak='break-word'>
 										{review.comment}
 									</DataList.ItemValue>
 								</DataList.Item>

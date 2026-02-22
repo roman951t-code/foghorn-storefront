@@ -79,7 +79,7 @@ export default function FiltersTags({ filters }: Props) {
 
 	return (
 		<Wrap gap='4'>
-			<HStack wrap='wrap'>
+			<HStack wrap='wrap' gap='3'>
 				{isPriceRangeSet && (
 					<Tag.Root
 						variant='solid'

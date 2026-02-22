@@ -25,15 +25,19 @@ import { useCatalog } from '@/providers/CatalogProvider';
 import { BsChevronRight } from 'react-icons/bs';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import CountPill from '@/components/ui/CountPill';
+import PriorityImageWithFallback from '@/components/ui/PriorityImageWithFallback';
 import {
-	buildImageBackgroundWithFallback,
 	CATEGORY_PLACEHOLDER_IMAGE,
 	SUBCATEGORY_PLACEHOLDER_IMAGE,
+	resolveCategoryImage,
+	resolveSubcategoryImage,
 } from '@/utils/categoryImages';
 
 export default function CatalogDrawer() {
 	const t = useTranslations('common');
+	const productsT = useTranslations('products');
 	const { categories } = useCatalog();
+	const categoriesWithChildren = categories.filter((category) => (category.children?.length ?? 0) > 0);
 
 	const [openValues, setOpenValues] = useState<string[]>([]);
 
@@ -100,11 +104,8 @@ export default function CatalogDrawer() {
 				}}
 				borderBottom='none'
 			>
-				{categories.map((category, categoryIndex) => {
-					const categoryImage = buildImageBackgroundWithFallback(
-						category.imageUrl,
-						CATEGORY_PLACEHOLDER_IMAGE
-					);
+				{categoriesWithChildren.map((category, categoryIndex) => {
+					const categoryImage = resolveCategoryImage(category.imageUrl);
 					const subCount = category.children?.length ?? 0;
 					const subPreview = (category.children ?? [])
 						.slice(0, 3)
@@ -134,16 +135,24 @@ export default function CatalogDrawer() {
 										<Box
 											boxSize='100px'
 											rounded='lg'
-											bgImage={categoryImage}
-											bgSize='contain, contain'
-											bgRepeat='no-repeat, no-repeat'
-											bgPos='center, center'
+											position='relative'
+											overflow='hidden'
 											bgColor='bg.tertiary'
 											borderWidth='0.5px'
 											borderStyle='solid'
 											borderColor='border'
 											flexShrink={0}
-										/>
+										>
+											<PriorityImageWithFallback
+												src={categoryImage}
+												fallbackSrc={CATEGORY_PLACEHOLDER_IMAGE}
+												alt={category.name}
+												sizes='100px'
+												loading='eager'
+												fetchPriority='high'
+												objectFit='contain'
+											/>
+										</Box>
 
 										<VStack align='center' gap='2.5' w='full'>
 											<HStack justify='center' align='center' gap='4' w='full'>
@@ -167,15 +176,24 @@ export default function CatalogDrawer() {
 										<Box
 											boxSize='88px'
 											rounded='lg'
-											bgImage={categoryImage}
-											bgSize='cover, cover'
-											bgPos='center, center'
+											position='relative'
+											overflow='hidden'
 											bgColor='bg.tertiary'
 											borderWidth='0.5px'
 											borderStyle='solid'
 											borderColor='border'
 											flexShrink={0}
-										/>
+										>
+											<PriorityImageWithFallback
+												src={categoryImage}
+												fallbackSrc={CATEGORY_PLACEHOLDER_IMAGE}
+												alt={category.name}
+												sizes='88px'
+												loading='eager'
+												fetchPriority='high'
+												objectFit='cover'
+											/>
+										</Box>
 
 										<Box flex='1' minW={0}>
 											<HStack w='full' justify='space-between' align='center' gap={4}>
@@ -211,7 +229,7 @@ export default function CatalogDrawer() {
 							>
 								<SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap={5} w='full'>
 									{category.children?.map((subcategory) => {
-										const subImage = buildImageBackgroundWithFallback(
+										const subImage = resolveSubcategoryImage(
 											subcategory.imageUrl,
 											SUBCATEGORY_PLACEHOLDER_IMAGE
 										);
@@ -229,11 +247,17 @@ export default function CatalogDrawer() {
 											>
 												<Box
 													h={{ base: '120px', md: '160px' }}
-													bgImage={subImage}
-													bgSize='cover, cover'
-													bgPos='center, center'
 													position='relative'
 												>
+													<PriorityImageWithFallback
+														src={subImage}
+														fallbackSrc={SUBCATEGORY_PLACEHOLDER_IMAGE}
+														alt={subcategory.name}
+														sizes='(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw'
+														loading='eager'
+														fetchPriority='high'
+														objectFit='cover'
+													/>
 													<Box
 														position='absolute'
 														inset='0'
@@ -267,45 +291,51 @@ export default function CatalogDrawer() {
 													</DrawerActionTrigger>
 
 													<Wrap mt={3} gap={3} align='center'>
-														{subcategory.products.map((product) => (
-															<Badge
-																key={product.id}
-																variant='outline'
-																size='md'
-																borderWidth='0.5px'
-																bg='bg.tertiary'
-																px='0'
-																py='1'
-																boxShadow='none'
-																border='none'
-															>
-																<DrawerActionTrigger asChild>
-																	<LocaleNavLink
-																		href={`/products/${product.fullSlug}`}
-																		fontSize='15px'
-																		fontWeight='medium'
-																		textWrap='wrap'
-																		wordBreak='break-word'
-																		textDecorationColor='main'
-																		color='main'
-																		variant='underline'
-																		_hover={{ color: 'link' }}
-																		_focusVisible={{
-																			outline: '2px solid',
-																			outlineColor: 'main.secondary',
-																			outlineOffset: '2px',
-																		}}
-																	>
-																		{product.name}
-																	</LocaleNavLink>
-																</DrawerActionTrigger>
-															</Badge>
-														))}
+														{subcategory.products.length > 0 ? (
+															subcategory.products.map((product) => (
+																<Badge
+																	key={product.id}
+																	variant='outline'
+																	size='md'
+																	borderWidth='0.5px'
+																	bg='bg.tertiary'
+																	px='0'
+																	py='1'
+																	boxShadow='none'
+																	border='none'
+																>
+																	<DrawerActionTrigger asChild>
+																		<LocaleNavLink
+																			href={`/products/${product.fullSlug}`}
+																			fontSize={{ base: 'md', md: '15px' }}
+																			fontWeight='medium'
+																			textWrap='wrap'
+																			wordBreak='break-word'
+																			textDecorationColor='main'
+																			color='main'
+																			variant='underline'
+																			_hover={{ color: 'link' }}
+																			_focusVisible={{
+																				outline: '2px solid',
+																				outlineColor: 'main.secondary',
+																				outlineOffset: '2px',
+																			}}
+																		>
+																			{product.name}
+																		</LocaleNavLink>
+																	</DrawerActionTrigger>
+																</Badge>
+															))
+														) : (
+															<Text fontSize={{ base: 'md', md: 'sm' }} color='gray.500'>
+																{productsT('productsNotFound')}
+															</Text>
+														)}
 
 														<DrawerActionTrigger asChild>
 															<LocaleNavLink
 																href={`/products/${category.slug}/${subcategory.slug}`}
-																fontSize='sm'
+																fontSize={{ base: 'md', md: 'sm' }}
 																variant='plain'
 																color='link'
 																textDecoration='underline'
