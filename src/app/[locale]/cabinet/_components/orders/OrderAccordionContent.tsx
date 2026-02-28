@@ -8,7 +8,6 @@ import { useTranslations } from 'next-intl';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import {
-	buildProductImages,
 	resolveProductPrimaryImage,
 	toPreviewImage,
 } from '@/utils/productImages';
@@ -176,8 +175,7 @@ export function OrderAccordionContent({ order }: Props) {
 				<Stack maxH='510px' overflowY='auto'>
 					{order.items.map((item, idx) => {
 						const previewImage = toPreviewImage(
-							buildProductImages(item.product.imageUrl, 1)[0] ||
-								resolveProductPrimaryImage(item.product.imageUrl)
+							resolveProductPrimaryImage(item.product.imageUrl)
 						);
 
 						return (

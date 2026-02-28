@@ -10,7 +10,7 @@ body,
 }
 
 #app {
-	min-width: 400px;
+	min-width: 764px;
 }
 
 /* Enforce the admin minimum font size floor for third-party controls. */
@@ -81,6 +81,63 @@ body,
 	font-size:15px !important;
 }
 
+.admin-property-description {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	margin-left: 8px;
+	color: #2b6cb0;
+	cursor: help;
+}
+
+.admin-property-description::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: calc(100% + 3px);
+	transform: translateY(-50%);
+	border-width: 6px;
+	border-style: solid;
+	border-color: transparent rgba(15, 23, 42, 0.95) transparent transparent;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	z-index: 1000;
+	transition: opacity 0.14s ease;
+}
+
+.admin-property-description::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	top: 50%;
+	left: calc(100% + 15px);
+	transform: translateY(-50%);
+	min-width: 200px;
+	max-width: 320px;
+	padding: 8px 10px;
+	border-radius: 8px;
+	background: rgba(15, 23, 42, 0.95);
+	color: #f8fafc;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.35;
+	white-space: normal;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	z-index: 1000;
+	box-shadow: 0 12px 24px rgba(2, 6, 23, 0.28);
+	transition: opacity 0.14s ease;
+}
+
+.admin-property-description:hover::before,
+.admin-property-description:hover::after,
+.admin-property-description:focus-visible::before,
+.admin-property-description:focus-visible::after {
+	opacity: 1;
+	visibility: visible;
+}
+
 .admin-filter-overlay {
 	position: fixed;
 	inset: 0;
@@ -121,8 +178,53 @@ body,
 	transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.admin-logout-link {
+.admin-menu-toggle-button {
+	color: #000000 !important;
+}
+
+.admin-menu-toggle-button .adminjs_Icon svg {
+	fill: #000000 !important;
+	stroke: #000000 !important;
+}
+
+.admin-user-menu-trigger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	color: #0f172a !important;
 	margin-right: 16px;
+	max-width: 360px;
+}
+
+.admin-user-menu-email {
+	display: inline-flex;
+	align-items: center;
+	max-width: 220px;
+	line-height: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.admin-user-menu-trigger .adminjs_Icon {
+	display: inline-flex;
+	align-items: center;
+}
+
+.admin-user-menu-trigger .adminjs_Icon svg {
+	display: block;
+	width: 16px;
+	height: 16px;
+}
+
+.admin-user-menu-logout-item .adminjs_Icon {
+	margin-right: 8px;
+}
+
+.admin-user-menu-logout-item .adminjs_Icon svg {
+	width: 16px;
+	height: 16px;
 }
 
 .admin-home-link:hover {

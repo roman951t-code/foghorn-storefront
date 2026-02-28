@@ -6,10 +6,7 @@ export const roundPrice = (value: number, decimals = DEFAULT_DECIMALS): number =
 	return Math.round((value + Number.EPSILON) * factor) / factor;
 };
 
-export const toFixedPrice = (value: number, decimals = DEFAULT_DECIMALS): string =>
-	roundPrice(value, decimals).toFixed(decimals);
-
-export const formatPriceAmount = (value: number, decimals = DEFAULT_DECIMALS): string => {
+const formatPriceAmount = (value: number, decimals = DEFAULT_DECIMALS): string => {
 	const rounded = roundPrice(value, decimals);
 	return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(decimals);
 };

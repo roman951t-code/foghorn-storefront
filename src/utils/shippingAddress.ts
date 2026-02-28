@@ -16,16 +16,16 @@ export type ShippingAddressFormValue = {
 	addressLine2: string;
 };
 
-export const REQUIRED_SHIPPING_ADDRESS_FIELDS = [
+const REQUIRED_SHIPPING_ADDRESS_FIELDS = [
 	'country',
 	'region',
 	'city',
 	'postalCode',
 	'addressLine1',
 ] as const;
-export type RequiredShippingAddressField = (typeof REQUIRED_SHIPPING_ADDRESS_FIELDS)[number];
+type RequiredShippingAddressField = (typeof REQUIRED_SHIPPING_ADDRESS_FIELDS)[number];
 
-export type NormalizedShippingAddress = {
+type NormalizedShippingAddress = {
 	country: string | null;
 	region: string | null;
 	city: string | null;

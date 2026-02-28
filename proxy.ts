@@ -14,53 +14,142 @@ const allowedHosts = new Set<string>([
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_DEFAULT_MAX = 80;
 const RATE_LIMIT_STRIPE_SESSION_MAX = 12;
+const RATE_LIMIT_REVALIDATE_MAX = 18;
+const RATE_LIMIT_WEBHOOK_MAX = 120;
+const RATE_LIMIT_SESSION_EXTENDED_MAX = 120;
+const RATE_LIMIT_WISHLIST_MAX = 120;
+const RATE_LIMIT_VIEWED_PRODUCTS_MAX = 120;
+const RATE_LIMIT_API_READ_MAX = 180;
+const RATE_LIMIT_API_MUTATION_MAX = 90;
 const ALLOWED_EXTERNAL_MUTATION_PATHS = new Set<string>([
 	'/api/payments/stripe/webhook',
 	'/api/security/csp-report',
 ]);
 const REVALIDATE_SECRET_PATTERN = /^[A-Za-z0-9._~-]{24,256}$/;
 const CSP_REPORT_GROUP = 'csp-endpoint';
-const CSP_ENFORCEMENT_ENABLED = env.NODE_ENV === 'production';
-const CSP_REPORT_ONLY_ENABLED = CSP_ENFORCEMENT_ENABLED && process.env.CSP_REPORT_ONLY !== 'false';
+const SAFE_API_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+const resolveBooleanEnvFlag = (value: string | undefined, fallback: boolean) => {
+	if (typeof value !== 'string') return fallback;
+	const normalized = value.trim().toLowerCase();
+	if (!normalized) return fallback;
+	if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+	if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+	return fallback;
+};
+
+type DevCspMode = 'off' | 'report-only' | 'enforce';
+
+const resolveDevCspMode = (): DevCspMode => {
+	if (env.NODE_ENV !== 'development') return 'off';
+	const normalized = process.env.DEV_CSP_MODE?.trim().toLowerCase();
+	if (normalized === 'report-only' || normalized === 'enforce') return normalized;
+	return 'off';
+};
+
+const LOCAL_HARDENED_PROFILE_ENABLED =
+	env.NODE_ENV === 'development' && resolveBooleanEnvFlag(process.env.LOCAL_HARDENED_PROFILE, true);
+const BROAD_API_RATE_LIMITS_ENABLED =
+	env.NODE_ENV === 'production' || LOCAL_HARDENED_PROFILE_ENABLED;
+const DEV_CSP_MODE = resolveDevCspMode();
+const CSP_ENFORCEMENT_ENABLED = env.NODE_ENV === 'production' || DEV_CSP_MODE === 'enforce';
+const CSP_REPORT_ONLY_ENABLED =
+	(env.NODE_ENV === 'production' && process.env.CSP_REPORT_ONLY !== 'false') ||
+	DEV_CSP_MODE === 'report-only';
+const CSP_ENABLED = CSP_ENFORCEMENT_ENABLED || CSP_REPORT_ONLY_ENABLED;
 
 type RateLimitRule = {
 	bucket: string;
 	limit: number;
 	requireDistributedInProduction?: boolean;
-	matches: (pathname: string) => boolean;
+	matches: (request: NextRequest) => boolean;
 };
 
 type CspContext = {
-	policy: string;
+	policy: string | null;
 	reportOnlyPolicy: string | null;
 	reportEndpointUrl: string;
 	requestHeaders: Headers;
 };
 
-const RATE_LIMIT_RULES: RateLimitRule[] = [
+const isSafeApiMethod = (method: string) => SAFE_API_METHODS.has(method.toUpperCase());
+
+const BASE_RATE_LIMIT_RULES: RateLimitRule[] = [
 	{
 		bucket: '/api/auth',
 		limit: RATE_LIMIT_DEFAULT_MAX,
 		requireDistributedInProduction: true,
-		matches: (pathname) => pathname.startsWith('/api/auth'),
+		matches: (request) => request.nextUrl.pathname.startsWith('/api/auth'),
 	},
 	{
 		bucket: '/api/cart',
 		limit: RATE_LIMIT_DEFAULT_MAX,
 		requireDistributedInProduction: true,
-		matches: (pathname) => pathname.startsWith('/api/cart'),
+		matches: (request) => request.nextUrl.pathname.startsWith('/api/cart'),
 	},
 	{
 		bucket: '/api/payments/stripe',
 		limit: RATE_LIMIT_STRIPE_SESSION_MAX,
 		requireDistributedInProduction: true,
-		matches: (pathname) => pathname === '/api/payments/stripe',
+		matches: (request) => request.nextUrl.pathname === '/api/payments/stripe',
+	},
+	{
+		bucket: '/api/cache/revalidate',
+		limit: RATE_LIMIT_REVALIDATE_MAX,
+		requireDistributedInProduction: true,
+		matches: (request) => request.nextUrl.pathname === '/api/cache/revalidate',
+	},
+	{
+		bucket: '/api/cache/revalidate/windows',
+		limit: RATE_LIMIT_REVALIDATE_MAX,
+		requireDistributedInProduction: true,
+		matches: (request) => request.nextUrl.pathname === '/api/cache/revalidate/windows',
 	},
 ];
 
-const resolveRateLimitRule = (pathname: string): RateLimitRule | null => {
+const BROAD_API_RATE_LIMIT_RULES: RateLimitRule[] = [
+	{
+		bucket: '/api/payments/stripe/webhook',
+		limit: RATE_LIMIT_WEBHOOK_MAX,
+		requireDistributedInProduction: true,
+		matches: (request) => request.nextUrl.pathname === '/api/payments/stripe/webhook',
+	},
+	{
+		bucket: '/api/products/wishlist',
+		limit: RATE_LIMIT_WISHLIST_MAX,
+		matches: (request) => request.nextUrl.pathname === '/api/products/wishlist',
+	},
+	{
+		bucket: '/api/session/extended',
+		limit: RATE_LIMIT_SESSION_EXTENDED_MAX,
+		matches: (request) => request.nextUrl.pathname === '/api/session/extended',
+	},
+	{
+		bucket: '/api/viewed-products',
+		limit: RATE_LIMIT_VIEWED_PRODUCTS_MAX,
+		matches: (request) => request.nextUrl.pathname === '/api/viewed-products',
+	},
+	{
+		bucket: '/api/mutation',
+		limit: RATE_LIMIT_API_MUTATION_MAX,
+		matches: (request) =>
+			request.nextUrl.pathname.startsWith('/api') && !isSafeApiMethod(request.method),
+	},
+	{
+		bucket: '/api/read',
+		limit: RATE_LIMIT_API_READ_MAX,
+		matches: (request) =>
+			request.nextUrl.pathname.startsWith('/api') && isSafeApiMethod(request.method),
+	},
+];
+
+const RATE_LIMIT_RULES = BROAD_API_RATE_LIMITS_ENABLED
+	? [...BASE_RATE_LIMIT_RULES, ...BROAD_API_RATE_LIMIT_RULES]
+	: BASE_RATE_LIMIT_RULES;
+
+const resolveRateLimitRule = (request: NextRequest): RateLimitRule | null => {
 	for (const rule of RATE_LIMIT_RULES) {
-		if (rule.matches(pathname)) return rule;
+		if (rule.matches(request)) return rule;
 	}
 	return null;
 };
@@ -139,11 +228,13 @@ const buildCspReportOnlyPolicy = (nonce: string) =>
 	].join('; ');
 
 const buildCspContext = (request: NextRequest): CspContext | null => {
-	if (!CSP_ENFORCEMENT_ENABLED) return null;
+	if (!CSP_ENABLED) return null;
 	const nonce = generateCspNonce();
-	const policy = buildCspPolicy(nonce);
+	const policy = CSP_ENFORCEMENT_ENABLED ? buildCspPolicy(nonce) : null;
 	const requestHeaders = new Headers(request.headers);
-	requestHeaders.set('content-security-policy', policy);
+	if (policy) {
+		requestHeaders.set('content-security-policy', policy);
+	}
 	requestHeaders.set('x-csp-nonce', nonce);
 	return {
 		policy,
@@ -165,7 +256,9 @@ const applyRequestHeadersToResponse = (response: NextResponse, requestHeaders: H
 
 const applyCspHeaders = (response: NextResponse, cspContext: CspContext | null) => {
 	if (!cspContext) return response;
-	response.headers.set('Content-Security-Policy', cspContext.policy);
+	if (cspContext.policy) {
+		response.headers.set('Content-Security-Policy', cspContext.policy);
+	}
 	if (cspContext.reportOnlyPolicy) {
 		response.headers.set('Content-Security-Policy-Report-Only', cspContext.reportOnlyPolicy);
 		response.headers.set(
@@ -188,7 +281,7 @@ export default async function middleware(request: NextRequest) {
 	// CSRF/Origin check for API mutations
 	if (pathname.startsWith('/api')) {
 		// Shared rate limiting (Upstash when configured, in-memory fallback otherwise).
-		const rateLimitRule = resolveRateLimitRule(pathname);
+		const rateLimitRule = resolveRateLimitRule(request);
 		if (rateLimitRule) {
 			const clientIp = getClientIp(request);
 			const rate = await checkRateLimit({
@@ -227,7 +320,7 @@ export default async function middleware(request: NextRequest) {
 			}
 			return NextResponse.next();
 		}
-		if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
+		if (isSafeApiMethod(method)) {
 			return NextResponse.next();
 		}
 		if (ALLOWED_EXTERNAL_MUTATION_PATHS.has(pathname)) {

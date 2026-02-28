@@ -71,6 +71,15 @@ npm run admin:start
 `EMAIL_FROM` must not use `@resend.dev` in production.  
 Use a verified sending domain in Resend and ensure SPF/DKIM/DMARC are configured.
 
+## Local Hardened Profile
+
+- Revalidate secret is required in all environments (`CACHE_REVALIDATE_SECRET` or `CRON_SECRET`).
+- `LOCAL_HARDENED_PROFILE` (default: `true` in development) enables broader middleware API rate limits.
+- `DEV_CSP_MODE` controls CSP in development:
+  - `off` (default)
+  - `report-only`
+  - `enforce`
+
 ## Useful Scripts
 
 - `npm run lint` - Type-check only (`tsc --noEmit`)

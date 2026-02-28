@@ -37,21 +37,21 @@ function PromoCardSlide({
 	isDraggingRef: { current: boolean };
 }) {
 	const overlayContent = (
-		<VStack
-			gapY='3'
-			bg='rgba(24,24,24,0.5)'
-			alignItems='flex-start'
-			backdropFilter='blur(10px)'
-			borderWidth='0.5px'
-			borderStyle='solid'
-			borderColor='rgba(255,255,255,0.2)'
-			borderRadius='lg'
-			p={{ base: 3.5, md: 4 }}
-			maxW={{ base: '100%', md: '84%' }}
-			minW='300px'
-			transition='all 0.2s ease'
-			_hover={{ bg: 'rgba(24,24,24,0.62)', borderColor: 'rgba(255,255,255,0.20)' }}
-		>
+			<VStack
+				gapY='3'
+				bg='rgba(18,18,18,0.72)'
+				alignItems='flex-start'
+				backdropFilter='blur(10px)'
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor='rgba(255,255,255,0.2)'
+				borderRadius='lg'
+				p={{ base: 3.5, md: 4 }}
+				maxW={{ base: '100%', md: '84%' }}
+				minW='300px'
+				transition='all 0.2s ease'
+				_hover={{ bg: 'rgba(18,18,18,0.8)', borderColor: 'rgba(255,255,255,0.2)' }}
+			>
 			<Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight='semibold' lineClamp={2}>
 				{promo.text}
 			</Text>
@@ -147,7 +147,11 @@ function PromoSlider({ promos }: PromoProps) {
 			breakpoints={promoBreakpoints}
 			slidesPerView={1}
 			modules={[Autoplay, Mousewheel]}
-			autoplay={false}
+			autoplay={{
+				delay: 20_000,
+				disableOnInteraction: false,
+				pauseOnMouseEnter: true,
+			}}
 			loop
 			className='promoSlider'
 			grabCursor={true}

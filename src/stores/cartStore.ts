@@ -8,6 +8,7 @@ import { removeFromCart } from '@/actions/cart/removeFromCart';
 import { updateCartItemQuantity } from '@/actions/cart/updateCartItemQuantity';
 import type { CartData, CartProduct } from '@/types/cart';
 import type { Product, SubcategoryProduct } from '@/types/product';
+import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
 
 const LOCAL_STORAGE_KEY = 'guest_cart';
 
@@ -153,12 +154,15 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 				: null) ??
 			null;
 
-		const discountAmount =
-			product.discountPrice != null && product.basePrice != null
-				? Math.max(0, product.basePrice - product.discountPrice)
-				: 0;
 		const unitDiscountPrice =
-			discountAmount > 0 ? Math.max(0, unitBasePrice - discountAmount) : null;
+			(defaultVariant?.id === effectiveVariantId ? defaultVariant?.discountPrice : null) ??
+			(selectedVariant?.id === effectiveVariantId
+				? ((selectedVariant as { discountPrice?: number | null }).discountPrice ?? null)
+				: null) ??
+			(fallbackVariant?.id === effectiveVariantId
+				? ((fallbackVariant as { discountPrice?: number | null }).discountPrice ?? null)
+				: null) ??
+			(product.discountPrice ?? null);
 
 		const cartProduct: CartProduct = {
 			lineId: guestLineId(productId, effectiveVariantId),
@@ -168,7 +172,10 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 			variantLabel: chosenLabel,
 			basePrice: unitBasePrice,
 			discountPrice: unitDiscountPrice,
-			imageUrl: product.imageUrl!,
+			imageUrl: resolveProductPrimaryImageFromGallery(
+				product.imageUrl,
+				'images' in product && Array.isArray(product.images) ? product.images : undefined
+			),
 			name: product.name!,
 			quantity: 1,
 			fullSlug: product.fullSlug!,

@@ -22,7 +22,6 @@ import { FiTrash2 } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import type { Review, SubcategoryProduct } from '@/types/product';
 import {
-	buildProductImages,
 	resolveProductPrimaryImage,
 	toPreviewImage,
 } from '@/utils/productImages';
@@ -40,7 +39,7 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 	const prodT = useTranslations('products');
 	const productHref = useMemo(() => `/products/${product.fullSlug}`, [product.fullSlug]);
 	const previewImage = toPreviewImage(
-		buildProductImages(product.imageUrl, 1)[0] || resolveProductPrimaryImage(product.imageUrl)
+		resolveProductPrimaryImage(product.imageUrl)
 	);
 
 	return (

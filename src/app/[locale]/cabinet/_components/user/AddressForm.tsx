@@ -12,7 +12,10 @@ import { editShippingAddressAction } from '@/actions/auth/editAccountAction';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { getCountryOptions } from '@/utils/countries';
-import { SHIPPING_ADDRESS_FIELD_LIMITS, type ShippingAddressFormValue } from '@/utils/shippingAddress';
+import {
+	SHIPPING_ADDRESS_FIELD_LIMITS,
+	type ShippingAddressFormValue,
+} from '@/utils/shippingAddress';
 import CountryField from './CountryField';
 
 interface Props {
@@ -21,11 +24,7 @@ interface Props {
 	refreshSession: () => Promise<void>;
 }
 
-export default function AddressForm({
-	i18nData,
-	initialAddress,
-	refreshSession,
-}: Props) {
+export default function AddressForm({ i18nData, initialAddress, refreshSession }: Props) {
 	const checkoutT = useTranslations('checkout');
 	const locale = useLocale();
 	const countryInputId = useId();
@@ -117,7 +116,7 @@ export default function AddressForm({
 						<Box
 							display='grid'
 							gridTemplateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))' }}
-							gap='3'
+							gap='4'
 						>
 							<CountryField
 								control={control}
@@ -138,9 +137,7 @@ export default function AddressForm({
 										{...register('region')}
 										placeholder={checkoutT('shippingRegionPlaceholder')}
 									/>
-									<Field.ErrorText>
-										{errors.region?.message?.toString()}
-									</Field.ErrorText>
+									<Field.ErrorText>{errors.region?.message?.toString()}</Field.ErrorText>
 								</VStack>
 							</Field.Root>
 
@@ -150,13 +147,8 @@ export default function AddressForm({
 									<Field.RequiredIndicator />
 								</Field.Label>
 								<VStack alignItems='flex-start' w='full'>
-									<Input
-										{...register('city')}
-										placeholder={checkoutT('shippingCityPlaceholder')}
-									/>
-									<Field.ErrorText>
-										{errors.city?.message?.toString()}
-									</Field.ErrorText>
+									<Input {...register('city')} placeholder={checkoutT('shippingCityPlaceholder')} />
+									<Field.ErrorText>{errors.city?.message?.toString()}</Field.ErrorText>
 								</VStack>
 							</Field.Root>
 
@@ -170,9 +162,7 @@ export default function AddressForm({
 										{...register('postalCode')}
 										placeholder={checkoutT('shippingPostalCodePlaceholder')}
 									/>
-									<Field.ErrorText>
-										{errors.postalCode?.message?.toString()}
-									</Field.ErrorText>
+									<Field.ErrorText>{errors.postalCode?.message?.toString()}</Field.ErrorText>
 								</VStack>
 							</Field.Root>
 						</Box>
@@ -187,9 +177,7 @@ export default function AddressForm({
 									{...register('addressLine1')}
 									placeholder={checkoutT('shippingAddressLine1Placeholder')}
 								/>
-								<Field.ErrorText>
-									{errors.addressLine1?.message?.toString()}
-								</Field.ErrorText>
+								<Field.ErrorText>{errors.addressLine1?.message?.toString()}</Field.ErrorText>
 							</VStack>
 						</Field.Root>
 
@@ -200,9 +188,7 @@ export default function AddressForm({
 									{...register('addressLine2')}
 									placeholder={checkoutT('shippingAddressLine2Placeholder')}
 								/>
-								<Field.ErrorText>
-									{errors.addressLine2?.message?.toString()}
-								</Field.ErrorText>
+								<Field.ErrorText>{errors.addressLine2?.message?.toString()}</Field.ErrorText>
 							</VStack>
 						</Field.Root>
 

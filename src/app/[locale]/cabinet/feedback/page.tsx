@@ -4,7 +4,6 @@ import Pagination from '@/components/ui/Pagination';
 import { PRODUCTS_PER_PAGE, resolveOffset, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
 import { getUserReviewedProducts } from '@/actions/feedback/getUserReviewedProducts';
 import UserFeedbackList from '../_components/feedback/UserFeedbackList';
-import CabinetSectionHeading from '../../../../components/ui/CabinetSectionHeading';
 
 type Props = {
 	searchParams?: Promise<{
@@ -14,11 +13,7 @@ type Props = {
 };
 
 export default async function Feedback({ searchParams }: Props) {
-	const [navT, prodT, validT] = await Promise.all([
-		getTranslations('navigation'),
-		getTranslations('products'),
-		getTranslations('validation'),
-	]);
+	const [prodT, validT] = await Promise.all([getTranslations('products'), getTranslations('validation')]);
 
 	const params = await searchParams;
 	const rawPage = resolvePageParam(params?.page ?? '1');
@@ -37,8 +32,6 @@ export default async function Feedback({ searchParams }: Props) {
 
 	return (
 		<VStack w='100%'>
-			<CabinetSectionHeading title={navT('sidebar.myFeedback')} mb='8' />
-
 			<UserFeedbackList
 				items={normalizedItems}
 				emptyText={prodT('feedbackAbsent')}

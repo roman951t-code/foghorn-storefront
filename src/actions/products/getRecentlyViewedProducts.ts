@@ -6,9 +6,15 @@ import { DEFAULT_LOCALE } from '@/constants/locales';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
-import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import {
+	getEffectiveDiscountPrice,
+	getEffectiveVariantDiscountPrice,
+} from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
-import { buildProductImages } from '@/utils/productImages';
+import {
+	buildProductImageGallery,
+	resolveProductPrimaryImageFromGallery,
+} from '@/utils/productImages';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 function mapRecentlyViewedProducts(viewed: { product: any }[], locale: string): SubcategoryProduct[] {
@@ -27,22 +33,42 @@ function mapRecentlyViewedProducts(viewed: { product: any }[], locale: string): 
 					| undefined,
 				locale
 			);
-			const basePrice = Number(p.basePrice ?? 0);
-			const scheduledDiscountPrice = getEffectiveDiscountPrice(
-				basePrice,
-				p.discountPrice != null ? Number(p.discountPrice) : null,
-				p.discountStartAt ?? null,
-				p.discountEndAt ?? null
+			const productBasePrice = Number(p.basePrice ?? 0);
+			const defaultVariant = p.variants?.[0];
+			const basePrice = defaultVariant
+				? defaultVariant.price?.toNumber?.() ?? Number(defaultVariant.price ?? 0)
+				: productBasePrice;
+			const persistedImages =
+				p.productImages?.map((image: { url: string }) => image.url).filter(Boolean) ?? [];
+			const primaryImageUrl = resolveProductPrimaryImageFromGallery(
+				p.imageUrl,
+				persistedImages
 			);
+			const images = buildProductImageGallery(p.imageUrl, persistedImages, 4);
+			const scheduledDiscountPrice = defaultVariant
+				? getEffectiveVariantDiscountPrice({
+						variantBasePrice: basePrice,
+						variantDiscountPrice: defaultVariant.discountPrice?.toNumber?.() ?? null,
+						variantDiscountStartAt: defaultVariant.discountStartAt ?? null,
+						variantDiscountEndAt: defaultVariant.discountEndAt ?? null,
+						productBasePrice,
+						productDiscountPrice: p.discountPrice != null ? Number(p.discountPrice) : null,
+						productDiscountStartAt: p.discountStartAt ?? null,
+						productDiscountEndAt: p.discountEndAt ?? null,
+				  })
+				: getEffectiveDiscountPrice(
+						productBasePrice,
+						p.discountPrice != null ? Number(p.discountPrice) : null,
+						p.discountStartAt ?? null,
+						p.discountEndAt ?? null
+				  );
 
 			return {
 				id: p.id ?? '',
 				name: translation?.name ?? p.name ?? '',
 				fullSlug: p.fullSlug ?? '',
-				imageUrl: p.imageUrl ?? null,
-				images: p.productImages?.length
-					? p.productImages.map((image: { url: string }) => image.url)
-					: buildProductImages(p.imageUrl ?? undefined, 4),
+				imageUrl: primaryImageUrl,
+				images,
 				categoryName: translation?.categoryName ?? p.categoryName ?? '',
 				subcategoryName: translation?.subcategoryName ?? p.subcategoryName ?? '',
 				inStock: !!p.inStock,
@@ -55,6 +81,17 @@ function mapRecentlyViewedProducts(viewed: { product: any }[], locale: string): 
 							id: p.variants[0].id,
 							sku: p.variants[0].sku,
 							price: p.variants[0].price?.toNumber?.() ?? Number(p.variants[0].price ?? 0),
+							discountPrice: getEffectiveVariantDiscountPrice({
+								variantBasePrice:
+									p.variants[0].price?.toNumber?.() ?? Number(p.variants[0].price ?? 0),
+								variantDiscountPrice: p.variants[0].discountPrice?.toNumber?.() ?? null,
+								variantDiscountStartAt: p.variants[0].discountStartAt ?? null,
+								variantDiscountEndAt: p.variants[0].discountEndAt ?? null,
+								productBasePrice,
+								productDiscountPrice: p.discountPrice != null ? Number(p.discountPrice) : null,
+								productDiscountStartAt: p.discountStartAt ?? null,
+								productDiscountEndAt: p.discountEndAt ?? null,
+							}),
 							stock: p.variants[0].stock,
 							label: (p.variants[0].attributes ?? [])
 								.map((a: any) =>
@@ -65,7 +102,8 @@ function mapRecentlyViewedProducts(viewed: { product: any }[], locale: string): 
 					: undefined,
 			} as SubcategoryProduct;
 		})
-		.filter(Boolean) as SubcategoryProduct[];
+		.filter(Boolean)
+		.sort((a, b) => Number(Boolean(b.inStock)) - Number(Boolean(a.inStock))) as SubcategoryProduct[];
 }
 
 export async function getRecentlyViewedProductsWithCount(
@@ -128,6 +166,9 @@ export async function getRecentlyViewedProductsWithCount(
 								id: true,
 								sku: true,
 								price: true,
+								discountPrice: true,
+								discountStartAt: true,
+								discountEndAt: true,
 								stock: true,
 								attributes: {
 									select: {

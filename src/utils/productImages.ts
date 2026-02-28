@@ -42,7 +42,7 @@ const updateLoremFlickrPath = (url: URL, size: number) => {
 	}
 };
 
-export function buildProductImages(imageUrl?: string | null, count = 4): string[] {
+function buildProductImages(imageUrl?: string | null, count = 4): string[] {
 	const normalizedImageUrl = normalizeImageUrl(imageUrl);
 	if (!normalizedImageUrl) return [];
 
@@ -70,6 +70,40 @@ export function buildProductImages(imageUrl?: string | null, count = 4): string[
 
 export const resolveProductPrimaryImage = (imageUrl?: string | null): string =>
 	normalizeImageUrl(imageUrl) ?? PRODUCT_PLACEHOLDER_IMAGE;
+
+export function resolveProductPrimaryImageFromGallery(
+	imageUrl?: string | null,
+	images?: Array<string | null | undefined>
+): string {
+	const galleryPrimary = (images ?? [])
+		.map((image) => normalizeImageUrl(image))
+		.find((image): image is string => Boolean(image));
+
+	return resolveProductPrimaryImage(galleryPrimary ?? imageUrl);
+}
+
+export function buildProductImageGallery(
+	imageUrl?: string | null,
+	images?: Array<string | null | undefined>,
+	count = 4
+): string[] {
+	const primaryImage = resolveProductPrimaryImageFromGallery(imageUrl, images);
+	const normalizedImages = (images ?? [])
+		.map((image) => normalizeImageUrl(image))
+		.filter((image): image is string => Boolean(image));
+
+	if (normalizedImages.length > 0) {
+		return [primaryImage, ...normalizedImages.filter((image) => image !== primaryImage)];
+	}
+
+	if (count <= 1) {
+		return [primaryImage];
+	}
+
+	const generatedImages = buildProductImages(primaryImage, count - 1);
+
+	return [primaryImage, ...generatedImages.filter((image) => image !== primaryImage)];
+}
 
 export function toPreviewImage(src: string): string {
 	try {

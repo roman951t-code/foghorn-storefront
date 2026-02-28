@@ -2,7 +2,8 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
 import { jsonNoStore } from '@/lib/response';
-import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getEffectiveVariantDiscountPrice } from '@/utils/discountSchedule';
+import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
 
 export async function GET() {
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -24,6 +25,11 @@ export async function GET() {
 								name: true,
 								fullSlug: true,
 								imageUrl: true,
+								productImages: {
+									select: { url: true, sortOrder: true, createdAt: true },
+									orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+									take: 1,
+								},
 								basePrice: true,
 								discountPrice: true,
 								discountStartAt: true,
@@ -35,6 +41,9 @@ export async function GET() {
 								id: true,
 								sku: true,
 								price: true,
+								discountPrice: true,
+								discountStartAt: true,
+								discountEndAt: true,
 								stock: true,
 								attributes: {
 									select: {
@@ -53,21 +62,17 @@ export async function GET() {
 		const reshapedItems =
 			cart?.items.map((item) => {
 				const productBasePrice = item.product.basePrice?.toNumber?.() ?? 0;
-				const productDiscountPriceRaw = item.product.discountPrice?.toNumber?.() ?? null;
-				const effectiveProductDiscountPrice = getEffectiveDiscountPrice(
-					productBasePrice,
-					productDiscountPriceRaw,
-					item.product.discountStartAt ?? null,
-					item.product.discountEndAt ?? null
-				);
-				const discountAmount =
-					effectiveProductDiscountPrice != null
-						? Math.max(0, productBasePrice - effectiveProductDiscountPrice)
-						: 0;
-
 				const variantBasePrice = item.variant?.price?.toNumber?.() ?? productBasePrice;
-				const variantDiscountPrice =
-					discountAmount > 0 ? Math.max(0, variantBasePrice - discountAmount) : null;
+				const variantDiscountPrice = getEffectiveVariantDiscountPrice({
+					variantBasePrice,
+					variantDiscountPrice: item.variant?.discountPrice?.toNumber?.() ?? null,
+					variantDiscountStartAt: item.variant?.discountStartAt ?? null,
+					variantDiscountEndAt: item.variant?.discountEndAt ?? null,
+					productBasePrice,
+					productDiscountPrice: item.product.discountPrice?.toNumber?.() ?? null,
+					productDiscountStartAt: item.product.discountStartAt ?? null,
+					productDiscountEndAt: item.product.discountEndAt ?? null,
+				});
 
 				const variantLabel =
 					item.variant?.attributes?.length
@@ -89,7 +94,10 @@ export async function GET() {
 					discountPrice: variantDiscountPrice,
 					name: item.product.name,
 					fullSlug: item.product.fullSlug,
-					imageUrl: item.product.imageUrl,
+					imageUrl: resolveProductPrimaryImageFromGallery(
+						item.product.imageUrl,
+						item.product.productImages.map((image) => image.url)
+					),
 				};
 			}) ?? [];
 

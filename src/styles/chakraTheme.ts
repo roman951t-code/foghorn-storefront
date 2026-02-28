@@ -9,7 +9,13 @@ import {
 const storefrontInputFocusStyles = {
 	borderWidth: '0.5px',
 	borderStyle: 'solid',
-	borderColor: { base: 'orange.400', _dark: 'yellow.400' },
+	borderColor: 'main.secondary',
+	outline: 'none',
+	boxShadow: 'none',
+} as const;
+
+const storefrontFlushedInputFocusStyles = {
+	borderColor: 'main.secondary',
 	outline: 'none',
 	boxShadow: 'none',
 } as const;
@@ -22,22 +28,22 @@ const config = defineConfig({
 	strictTokens: false,
 	theme: {
 		tokens: {
-			fonts: {
-				body: {
-					value: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				fonts: {
+					body: {
+						value: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+					},
+					heading: {
+						value:
+							'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+					},
+					link: {
+						value:
+							'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+					},
+					ui: {
+						value: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+					},
 				},
-				heading: {
-					value:
-						'var(--font-montserrat), var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-				},
-				link: {
-					value:
-						'var(--font-noto-sans), var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-				},
-				ui: {
-					value: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-				},
-			},
 			fontWeights: {
 				thin: { value: '500' },
 				extralight: { value: '500' },
@@ -188,52 +194,64 @@ const config = defineConfig({
 			},
 		},
 		recipes: {
-			input: defineRecipe({
-				...chakraDefaultRecipes.input,
-				defaultVariants: {
-					...chakraDefaultRecipes.input.defaultVariants,
-					variant: 'subtle',
-				},
+				input: defineRecipe({
+					...chakraDefaultRecipes.input,
+					defaultVariants: {
+						...chakraDefaultRecipes.input.defaultVariants,
+						variant: 'flushed',
+					},
 				variants: {
 					...chakraDefaultRecipes.input.variants,
-					variant: {
-						...chakraDefaultRecipes.input.variants!.variant,
-						subtle: {
-							...chakraDefaultRecipes.input.variants!.variant.subtle,
+						variant: {
+							...chakraDefaultRecipes.input.variants!.variant,
+							subtle: {
+								...chakraDefaultRecipes.input.variants!.variant.subtle,
 							bg: { base: 'transparent', _dark: 'bg.muted' },
 							borderWidth: '0.5px',
 							borderStyle: 'solid',
 							borderColor: 'border.button',
 							focusVisibleRing: 'none',
-							_focus: storefrontInputFocusStyles,
-							_focusVisible: storefrontInputFocusStyles,
+								_focus: storefrontInputFocusStyles,
+								_focusVisible: storefrontInputFocusStyles,
+							},
+							flushed: {
+								...chakraDefaultRecipes.input.variants!.variant.flushed,
+								focusVisibleRing: 'none',
+								_focus: storefrontFlushedInputFocusStyles,
+								_focusVisible: storefrontFlushedInputFocusStyles,
+							},
 						},
 					},
-				},
-			}),
-			textarea: defineRecipe({
-				...chakraDefaultRecipes.textarea,
-				defaultVariants: {
-					...chakraDefaultRecipes.textarea.defaultVariants,
-					variant: 'subtle',
-				},
+				}),
+				textarea: defineRecipe({
+					...chakraDefaultRecipes.textarea,
+					defaultVariants: {
+						...chakraDefaultRecipes.textarea.defaultVariants,
+						variant: 'subtle',
+					},
 				variants: {
 					...chakraDefaultRecipes.textarea.variants,
-					variant: {
-						...chakraDefaultRecipes.textarea.variants!.variant,
-						subtle: {
-							...chakraDefaultRecipes.textarea.variants!.variant.subtle,
+						variant: {
+							...chakraDefaultRecipes.textarea.variants!.variant,
+							subtle: {
+								...chakraDefaultRecipes.textarea.variants!.variant.subtle,
 							bg: { base: 'transparent', _dark: 'bg.muted' },
 							borderWidth: '0.5px',
 							borderStyle: 'solid',
 							borderColor: 'border.button',
 							focusVisibleRing: 'none',
-							_focus: storefrontInputFocusStyles,
-							_focusVisible: storefrontInputFocusStyles,
+								_focus: storefrontInputFocusStyles,
+								_focusVisible: storefrontInputFocusStyles,
+							},
+							flushed: {
+								...chakraDefaultRecipes.textarea.variants!.variant.flushed,
+								focusVisibleRing: 'none',
+								_focus: storefrontFlushedInputFocusStyles,
+								_focusVisible: storefrontFlushedInputFocusStyles,
+							},
 						},
 					},
-				},
-			}),
+				}),
 		},
 		slotRecipes: {
 			checkbox: defineSlotRecipe({
@@ -304,14 +322,18 @@ const config = defineConfig({
 					},
 				},
 			}),
-			combobox: defineSlotRecipe({
-				...chakraDefaultSlotRecipes.combobox,
-				variants: {
+				combobox: defineSlotRecipe({
+					...chakraDefaultSlotRecipes.combobox,
+					defaultVariants: {
+						...chakraDefaultSlotRecipes.combobox.defaultVariants,
+						variant: 'flushed',
+					},
+					variants: {
 					...chakraDefaultSlotRecipes.combobox.variants,
-					variant: {
-						...chakraDefaultSlotRecipes.combobox.variants!.variant,
-						subtle: {
-							...chakraDefaultSlotRecipes.combobox.variants!.variant.subtle,
+						variant: {
+							...chakraDefaultSlotRecipes.combobox.variants!.variant,
+							subtle: {
+								...chakraDefaultSlotRecipes.combobox.variants!.variant.subtle,
 							input: {
 								...chakraDefaultSlotRecipes.combobox.variants!.variant.subtle.input,
 								bg: { base: 'transparent', _dark: 'bg.muted' },
@@ -319,50 +341,68 @@ const config = defineConfig({
 								borderStyle: 'solid',
 								borderColor: 'border.button',
 								focusVisibleRing: 'none',
-								_focus: storefrontInputFocusStyles,
-								_focusVisible: storefrontInputFocusStyles,
+									_focus: storefrontInputFocusStyles,
+									_focusVisible: storefrontInputFocusStyles,
+								},
+							},
+							flushed: {
+								...chakraDefaultSlotRecipes.combobox.variants!.variant.flushed,
+								input: {
+									...chakraDefaultSlotRecipes.combobox.variants!.variant.flushed.input,
+									focusVisibleRing: 'none',
+									_focus: storefrontFlushedInputFocusStyles,
+									_focusVisible: storefrontFlushedInputFocusStyles,
+								},
 							},
 						},
 					},
-				},
-			}),
-			numberInput: defineSlotRecipe({
-				...chakraDefaultSlotRecipes.numberInput,
-				defaultVariants: {
-					...chakraDefaultSlotRecipes.numberInput.defaultVariants,
-					variant: 'subtle',
-				},
+				}),
+				numberInput: defineSlotRecipe({
+					...chakraDefaultSlotRecipes.numberInput,
+					defaultVariants: {
+						...chakraDefaultSlotRecipes.numberInput.defaultVariants,
+						variant: 'flushed',
+					},
 				variants: {
 					...chakraDefaultSlotRecipes.numberInput.variants,
-					variant: {
-						...chakraDefaultSlotRecipes.numberInput.variants!.variant,
-						subtle: {
-							...chakraDefaultSlotRecipes.numberInput.variants!.variant.subtle,
+						variant: {
+							...chakraDefaultSlotRecipes.numberInput.variants!.variant,
+							subtle: {
+								...chakraDefaultSlotRecipes.numberInput.variants!.variant.subtle,
 							input: {
 								...chakraDefaultSlotRecipes.numberInput.variants!.variant.subtle.input,
 								borderWidth: '0.5px',
 								borderStyle: 'solid',
 								borderColor: 'border.button',
 								focusVisibleRing: 'none',
-								_focus: storefrontInputFocusStyles,
-								_focusVisible: storefrontInputFocusStyles,
+									_focus: storefrontInputFocusStyles,
+									_focusVisible: storefrontInputFocusStyles,
+								},
+							},
+							flushed: {
+								...chakraDefaultSlotRecipes.numberInput.variants!.variant.flushed,
+								input: {
+									...chakraDefaultSlotRecipes.numberInput.variants!.variant.flushed.input,
+									focusVisibleRing: 'none',
+									_focus: storefrontFlushedInputFocusStyles,
+									_focusVisible: storefrontFlushedInputFocusStyles,
+								},
 							},
 						},
 					},
-				},
-			}),
-			pinInput: defineSlotRecipe({
-				...chakraDefaultSlotRecipes.pinInput,
-				defaultVariants: {
-					...chakraDefaultSlotRecipes.pinInput.defaultVariants,
-					variant: 'subtle',
-				},
+				}),
+				pinInput: defineSlotRecipe({
+					...chakraDefaultSlotRecipes.pinInput,
+					defaultVariants: {
+						...chakraDefaultSlotRecipes.pinInput.defaultVariants,
+						variant: 'flushed',
+					},
 				variants: {
 					...chakraDefaultSlotRecipes.pinInput.variants,
-					variant: {
-						...chakraDefaultSlotRecipes.pinInput.variants!.variant,
-						subtle: {
-							...chakraDefaultSlotRecipes.pinInput.variants!.variant.subtle,
+						variant: {
+							...chakraDefaultSlotRecipes.pinInput.variants!.variant,
+							subtle: {
+								...chakraDefaultSlotRecipes.pinInput.variants!.variant.subtle,
 							input: {
 								...chakraDefaultSlotRecipes.pinInput.variants!.variant.subtle.input,
 								bg: { base: 'transparent', _dark: 'bg.muted' },
@@ -370,13 +410,22 @@ const config = defineConfig({
 								borderStyle: 'solid',
 								borderColor: 'border.button',
 								focusVisibleRing: 'none',
-								_focus: storefrontInputFocusStyles,
-								_focusVisible: storefrontInputFocusStyles,
+									_focus: storefrontInputFocusStyles,
+									_focusVisible: storefrontInputFocusStyles,
+								},
+							},
+							flushed: {
+								...chakraDefaultSlotRecipes.pinInput.variants!.variant.flushed,
+								input: {
+									...chakraDefaultSlotRecipes.pinInput.variants!.variant.flushed.input,
+									focusVisibleRing: 'none',
+									_focus: storefrontFlushedInputFocusStyles,
+									_focusVisible: storefrontFlushedInputFocusStyles,
+								},
 							},
 						},
 					},
-				},
-			}),
+				}),
 			select: defineSlotRecipe({
 				...chakraDefaultSlotRecipes.select,
 				defaultVariants: {
@@ -405,51 +454,51 @@ const config = defineConfig({
 			}),
 		},
 	},
-		globalCss: {
-			'html, body': {
-				margin: 0,
-				padding: 0,
-			},
-			body: {
-				display: 'flex',
-				flexDirection: 'column',
-				minWidth: '350px',
-				fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-				fontWeight: 500,
-				textRendering: 'optimizeLegibility',
-			},
-			img: { userSelect: 'none' },
-			form: {
-				width: '100%',
-			},
-			svg: {
-				display: 'inline',
-			},
+	globalCss: {
+		'html, body': {
+			margin: 0,
+			padding: 0,
+		},
+		body: {
+			display: 'flex',
+			flexDirection: 'column',
+			minWidth: '350px',
+			fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+			fontWeight: 500,
+			textRendering: 'optimizeLegibility',
+		},
+		img: { userSelect: 'none' },
+		form: {
+			width: '100%',
+		},
+		svg: {
+			display: 'inline',
+		},
 			'a, a > span, button.chakra-tabs__trigger': {
 				fontFamily:
-					'var(--font-montserrat), var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif !important',
+					'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif !important',
 				fontWeight: 500,
 				fontSize: 16,
 			},
 			'h1,h2,h3,h4,h5,h6, .chakra-heading': {
 				fontFamily:
-					'var(--font-montserrat), var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif !important',
+					'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif !important',
 				fontWeight: 500,
 				userSelect: 'none',
 			},
-			'p, span, li': {
-				fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-				fontWeight: 500,
-				userSelect: 'none',
-			},
-			'.chakra-stat__valueText': {
-				fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-				userSelect: 'none',
-			},
-			'label, button, input, textarea, select, small': {
-				fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-				fontWeight: 500,
-			},
+		'p, span, li': {
+			fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+			fontWeight: 500,
+			userSelect: 'none',
+		},
+		'.chakra-stat__valueText': {
+			fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+			userSelect: 'none',
+		},
+		'label, button, input, textarea, select, small': {
+			fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+			fontWeight: 500,
+		},
 		'.swiper-button-prev,.swiper-button-next': {
 			color: 'var(--chakra-colors-fg) !important',
 		},
@@ -465,8 +514,8 @@ const config = defineConfig({
 			borderWidth: '0.5px',
 			borderRadius: 'sm',
 			borderColor: 'var(--chakra-colors-border)',
-			height: '88px !important',
-			width: '28px !important',
+			height: '78px !important',
+			width: '24px !important',
 		},
 		'.thumbsSlider .swiper-button-prev .swiper-navigation-icon, .thumbsSlider .swiper-button-next .swiper-navigation-icon':
 			{
@@ -544,12 +593,12 @@ const config = defineConfig({
 			height: '100%',
 			width: '100%',
 		},
-			'span.chakra-rating-group__item:not([data-highlighted]) path, span.chakra-rating-group__item[data-half] svg:first-of-type path':
-				{
-					color: 'var(--mix-textDecorationColor, lightgray) !important',
-				},
-		},
-	});
+		'span.chakra-rating-group__item:not([data-highlighted]) path, span.chakra-rating-group__item[data-half] svg:first-of-type path':
+			{
+				color: 'var(--mix-textDecorationColor, lightgray) !important',
+			},
+	},
+});
 
 const system = createSystem(defaultConfig, config);
 

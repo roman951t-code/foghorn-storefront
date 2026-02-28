@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { getTranslations } from 'next-intl/server';
 import type { I18nData } from '@/types/i18n';
 
-export const feedbackSchemaShape = (t: {
+const feedbackSchemaShape = (t: {
 	nameRequired: string;
 	lastNameRequired: string;
 	feedbackRequired: string;

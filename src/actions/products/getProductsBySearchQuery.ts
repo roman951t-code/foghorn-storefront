@@ -7,13 +7,20 @@ import { prisma } from '@/lib/prisma';
 import { SubcategoryProduct } from '@/types/product';
 import { Prisma } from '@prisma/client';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
-import { buildProductImages } from '@/utils/productImages';
-import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import {
+	buildProductImageGallery,
+	resolveProductPrimaryImageFromGallery,
+} from '@/utils/productImages';
+import {
+	getEffectiveDiscountPrice,
+	getEffectiveVariantDiscountPrice,
+} from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import { getMaxEffectiveProductPrice } from '@/utils/maxEffectiveProductPrice';
 import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { getPaginatedIdsByEffectivePriceSort } from '@/utils/effectivePriceSorting';
+import { getAttributeNameCandidatesForFilterKey } from '@/utils/attributeLocalization';
 
 export async function getProductsBySearchQuery(
 	searchQuery: string,
@@ -63,7 +70,7 @@ export async function getProductsBySearchQuery(
 	const dynamicConditions = attributeFilters.map(([key, values]) => ({
 		attributes: {
 			some: {
-				attribute: { name: key },
+				attribute: { name: { in: getAttributeNameCandidatesForFilterKey(key) } },
 				value: { in: values.flat() },
 			},
 		},
@@ -196,7 +203,9 @@ export async function getProductsBySearchQuery(
 
 	const isEffectivePriceSort = orderBy === 'cheap' || orderBy === 'expensive';
 	const orderByClause: Prisma.ProductOrderByWithRelationInput[] =
-		orderBy === 'new' ? [{ createdAt: 'desc' }] : [{ inStock: 'desc' }, { name: 'asc' }];
+		orderBy === 'new'
+			? [{ inStock: 'desc' }, { createdAt: 'desc' }, { name: 'asc' }]
+			: [{ inStock: 'desc' }, { name: 'asc' }];
 
 	const productSelect = {
 		id: true,
@@ -233,6 +242,9 @@ export async function getProductsBySearchQuery(
 				id: true,
 				sku: true,
 				price: true,
+				discountPrice: true,
+				discountStartAt: true,
+				discountEndAt: true,
 				stock: true,
 				attributes: {
 					select: {
@@ -261,6 +273,17 @@ export async function getProductsBySearchQuery(
 				discountPrice: true,
 				discountStartAt: true,
 				discountEndAt: true,
+				variants: {
+					where: { stock: { gt: 0 } },
+					orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
+					take: 1,
+					select: {
+						price: true,
+						discountPrice: true,
+						discountStartAt: true,
+						discountEndAt: true,
+					},
+				},
 			},
 		});
 		const sortedPageIds = getPaginatedIdsByEffectivePriceSort(
@@ -306,42 +329,72 @@ export async function getProductsBySearchQuery(
 			translations?: unknown;
 		};
 
-		const basePrice = Number(product.basePrice ?? 0);
-		const scheduledDiscountPrice = getEffectiveDiscountPrice(
-			basePrice,
-			product.discountPrice != null ? Number(product.discountPrice) : null,
-			product.discountStartAt ?? null,
-			product.discountEndAt ?? null,
-			now
+		const productBasePrice = Number(product.basePrice ?? 0);
+		const defaultVariant = product.variants?.[0];
+		const basePrice = defaultVariant ? defaultVariant.price.toNumber() : productBasePrice;
+		const persistedImages = product.productImages.map((image) => image.url);
+		const primaryImageUrl = resolveProductPrimaryImageFromGallery(
+			product.imageUrl,
+			persistedImages
 		);
+		const images = buildProductImageGallery(product.imageUrl, persistedImages, 4);
+		const scheduledDiscountPrice = defaultVariant
+			? getEffectiveVariantDiscountPrice({
+					variantBasePrice: basePrice,
+					variantDiscountPrice: defaultVariant.discountPrice?.toNumber() ?? null,
+					variantDiscountStartAt: defaultVariant.discountStartAt ?? null,
+					variantDiscountEndAt: defaultVariant.discountEndAt ?? null,
+					productBasePrice,
+					productDiscountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,
+					productDiscountStartAt: product.discountStartAt ?? null,
+					productDiscountEndAt: product.discountEndAt ?? null,
+					now,
+				})
+			: getEffectiveDiscountPrice(
+					productBasePrice,
+					product.discountPrice != null ? Number(product.discountPrice) : null,
+					product.discountStartAt ?? null,
+					product.discountEndAt ?? null,
+					now
+				);
 
 		return {
 			...rest,
 			id: product.id ?? '',
 			name: translation?.name ?? product.name ?? '',
 			fullSlug: product.fullSlug ?? '',
-			imageUrl: product.imageUrl ?? null,
-			images: product.productImages.length
-				? product.productImages.map((image) => image.url)
-				: buildProductImages(product.imageUrl ?? undefined, 4),
+			imageUrl: primaryImageUrl,
+			images,
 			categoryName: translation?.categoryName ?? product.categoryName ?? '',
 			subcategoryName: translation?.subcategoryName ?? product.subcategoryName ?? '',
 			inStock: !!product.inStock,
 			basePrice,
 			discountPrice: scheduledDiscountPrice,
-				defaultVariant: product.variants?.[0]
-					? {
-							id: product.variants[0].id,
+			defaultVariant: product.variants?.[0]
+				? {
+						id: product.variants[0].id,
 						sku: product.variants[0].sku,
 						price: product.variants[0].price.toNumber(),
+						discountPrice: getEffectiveVariantDiscountPrice({
+							variantBasePrice: product.variants[0].price.toNumber(),
+							variantDiscountPrice: product.variants[0].discountPrice?.toNumber() ?? null,
+							variantDiscountStartAt: product.variants[0].discountStartAt ?? null,
+							variantDiscountEndAt: product.variants[0].discountEndAt ?? null,
+							productBasePrice,
+							productDiscountPrice:
+								product.discountPrice != null ? Number(product.discountPrice) : null,
+							productDiscountStartAt: product.discountStartAt ?? null,
+							productDiscountEndAt: product.discountEndAt ?? null,
+							now,
+						}),
 						stock: product.variants[0].stock,
 						label: product.variants[0].attributes
 							.map((a) =>
 								[a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' ')
 							)
 							.join(' / '),
-						}
-					: undefined,
+				  }
+				: undefined,
 			averageRating: Number(product.averageRating ?? 0),
 			reviewCount: Number(product.reviewCount ?? 0),
 		};

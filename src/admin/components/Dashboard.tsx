@@ -168,18 +168,21 @@ const formatSigned = (value: number, formatter: (next: number) => string) => {
 };
 
 const getTrendLabelStep = (pointsLength: number) => {
-	if (pointsLength <= 8) return 1;
-	if (pointsLength <= 14) return 2;
-	if (pointsLength <= 21) return 3;
+	if (pointsLength <= 21) return 1;
+	if (pointsLength <= 31) return 2;
+	if (pointsLength <= 45) return 3;
 	return 4;
 };
 
-const TREND_COLUMN_WIDTH = 44;
+const TREND_COLUMN_MIN_WIDTH = 32;
 const TREND_COLUMN_GAP = 8;
 const TREND_BAR_WIDTH = 14;
 
 const getTrendChartMinWidth = (pointsLength: number) =>
-	Math.max(280, pointsLength * TREND_COLUMN_WIDTH + Math.max(0, pointsLength - 1) * TREND_COLUMN_GAP);
+	Math.max(
+		280,
+		pointsLength * TREND_COLUMN_MIN_WIDTH + Math.max(0, pointsLength - 1) * TREND_COLUMN_GAP
+	);
 
 const shouldShowTrendLabel = (index: number, pointsLength: number, labelStep: number) => {
 	if (pointsLength <= 0 || index < 0) return false;
@@ -915,14 +918,14 @@ export default function Dashboard() {
 				</Box>
 			</Box>
 
-				<Box
-					mt='lg'
-					style={{
-						display: 'grid',
-						gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
-						gap: 16,
-					}}
-				>
+					<Box
+						mt='lg'
+						style={{
+							display: 'grid',
+							gridTemplateColumns: '1fr',
+							gap: 16,
+						}}
+					>
 					<Box
 						variant='white'
 						p='xl'
@@ -943,17 +946,17 @@ export default function Dashboard() {
 					) : salesTrendPoints.length === 0 ? (
 						<Text color='grey60'>{translateMessage('dashboard.charts.salesTrend.empty')}</Text>
 						) : (
-							<Box style={{ display: 'grid', gap: 10, minWidth: 0 }}>
-								<Box style={{ overflowX: 'auto', paddingBottom: 4 }}>
-									<Box style={{ display: 'grid', gap: 10, minWidth: salesTrendChartMinWidth }}>
-										<Box
-											style={{
-												display: 'grid',
-												gridTemplateColumns: `repeat(${salesTrendPoints.length}, ${TREND_COLUMN_WIDTH}px)`,
-												gap: TREND_COLUMN_GAP,
-												alignItems: 'end',
-												height: 120,
-											}}
+								<Box style={{ display: 'grid', gap: 10, minWidth: 0 }}>
+									<Box style={{ overflowX: 'auto', paddingBottom: 4 }}>
+										<Box style={{ display: 'grid', gap: 10, minWidth: salesTrendChartMinWidth, width: '100%' }}>
+											<Box
+												style={{
+													display: 'grid',
+													gridTemplateColumns: `repeat(${salesTrendPoints.length}, minmax(${TREND_COLUMN_MIN_WIDTH}px, 1fr))`,
+													gap: TREND_COLUMN_GAP,
+													alignItems: 'end',
+													height: 120,
+												}}
 										>
 											{salesTrendPoints.map((p) => {
 												const height = salesTrendMax > 0 ? Math.round((p.total / salesTrendMax) * 100) : 0;
@@ -972,13 +975,13 @@ export default function Dashboard() {
 												);
 											})}
 										</Box>
-										<Box
-											style={{
-												display: 'grid',
-												gridTemplateColumns: `repeat(${salesTrendPoints.length}, ${TREND_COLUMN_WIDTH}px)`,
-												gap: TREND_COLUMN_GAP,
-											}}
-										>
+											<Box
+												style={{
+													display: 'grid',
+													gridTemplateColumns: `repeat(${salesTrendPoints.length}, minmax(${TREND_COLUMN_MIN_WIDTH}px, 1fr))`,
+													gap: TREND_COLUMN_GAP,
+												}}
+											>
 											{salesTrendPoints.map((p, idx) => (
 												<Text
 													key={p.day}
@@ -1026,17 +1029,17 @@ export default function Dashboard() {
 					) : ordersTrendPoints.length === 0 ? (
 						<Text color='grey60'>{translateMessage('dashboard.charts.ordersTrend.empty')}</Text>
 						) : (
-							<Box style={{ display: 'grid', gap: 10, minWidth: 0 }}>
-								<Box style={{ overflowX: 'auto', paddingBottom: 4 }}>
-									<Box style={{ display: 'grid', gap: 10, minWidth: ordersTrendChartMinWidth }}>
-										<Box
-											style={{
-												display: 'grid',
-												gridTemplateColumns: `repeat(${ordersTrendPoints.length}, ${TREND_COLUMN_WIDTH}px)`,
-												gap: TREND_COLUMN_GAP,
-												alignItems: 'end',
-												height: 120,
-											}}
+								<Box style={{ display: 'grid', gap: 10, minWidth: 0 }}>
+									<Box style={{ overflowX: 'auto', paddingBottom: 4 }}>
+										<Box style={{ display: 'grid', gap: 10, minWidth: ordersTrendChartMinWidth, width: '100%' }}>
+											<Box
+												style={{
+													display: 'grid',
+													gridTemplateColumns: `repeat(${ordersTrendPoints.length}, minmax(${TREND_COLUMN_MIN_WIDTH}px, 1fr))`,
+													gap: TREND_COLUMN_GAP,
+													alignItems: 'end',
+													height: 120,
+												}}
 										>
 											{ordersTrendPoints.map((p) => {
 												const height = ordersTrendMax > 0 ? Math.round((p.orders / ordersTrendMax) * 100) : 0;
@@ -1055,13 +1058,13 @@ export default function Dashboard() {
 												);
 											})}
 										</Box>
-										<Box
-											style={{
-												display: 'grid',
-												gridTemplateColumns: `repeat(${ordersTrendPoints.length}, ${TREND_COLUMN_WIDTH}px)`,
-												gap: TREND_COLUMN_GAP,
-											}}
-										>
+											<Box
+												style={{
+													display: 'grid',
+													gridTemplateColumns: `repeat(${ordersTrendPoints.length}, minmax(${TREND_COLUMN_MIN_WIDTH}px, 1fr))`,
+													gap: TREND_COLUMN_GAP,
+												}}
+											>
 											{ordersTrendPoints.map((p, idx) => (
 												<Text
 													key={p.day}

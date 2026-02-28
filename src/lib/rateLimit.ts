@@ -16,7 +16,15 @@ type HeadersLike = Request | Headers;
 const buckets = new Map<string, RateLimitState>();
 const BUCKET_CLEANUP_INTERVAL_MS = 60_000;
 const MAX_FALLBACK_BUCKETS = 20_000;
-const HIGH_RISK_KEY_PREFIXES = ['auth:', 'proxy:/api/auth:', 'proxy:/api/cart:', 'proxy:/api/payments/stripe:'];
+const HIGH_RISK_KEY_PREFIXES = [
+	'auth:',
+	'proxy:/api/auth:',
+	'proxy:/api/cart:',
+	'proxy:/api/payments/stripe:',
+	'proxy:/api/payments/stripe/webhook:',
+	'proxy:/api/cache/revalidate:',
+	'proxy:/api/cache/revalidate/windows:',
+];
 const DISTRIBUTED_DEGRADED_LOG_COOLDOWN_MS = 60_000;
 const DISTRIBUTED_FETCH_TIMEOUT_MS = 1_200;
 const DISTRIBUTED_UNAVAILABLE_RETRY_AFTER_SECONDS = 30;

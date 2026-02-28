@@ -3,7 +3,8 @@
 import 'server-only';
 
 import { prisma } from '@/lib/prisma';
-import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getEffectiveVariantDiscountPrice } from '@/utils/discountSchedule';
+import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
 
 export async function getCartItems(userId: string) {
 	if (!userId) {
@@ -22,6 +23,11 @@ export async function getCartItems(userId: string) {
 								name: true,
 								fullSlug: true,
 								imageUrl: true,
+								productImages: {
+									select: { url: true, sortOrder: true, createdAt: true },
+									orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+									take: 1,
+								},
 								basePrice: true,
 								discountPrice: true,
 								discountStartAt: true,
@@ -33,6 +39,9 @@ export async function getCartItems(userId: string) {
 								id: true,
 								sku: true,
 								price: true,
+								discountPrice: true,
+								discountStartAt: true,
+								discountEndAt: true,
 								stock: true,
 								attributes: {
 									select: {
@@ -51,21 +60,17 @@ export async function getCartItems(userId: string) {
 		const reshapedItems =
 			cart?.items.map((item) => {
 				const productBasePrice = item.product.basePrice?.toNumber?.() ?? 0;
-				const productDiscountPriceRaw = item.product.discountPrice?.toNumber?.() ?? null;
-				const effectiveProductDiscountPrice = getEffectiveDiscountPrice(
-					productBasePrice,
-					productDiscountPriceRaw,
-					item.product.discountStartAt ?? null,
-					item.product.discountEndAt ?? null
-				);
-				const discountAmount =
-					effectiveProductDiscountPrice != null
-						? Math.max(0, productBasePrice - effectiveProductDiscountPrice)
-						: 0;
-
 				const variantBasePrice = item.variant?.price?.toNumber?.() ?? productBasePrice;
-				const variantDiscountPrice =
-					discountAmount > 0 ? Math.max(0, variantBasePrice - discountAmount) : null;
+				const variantDiscountPrice = getEffectiveVariantDiscountPrice({
+					variantBasePrice,
+					variantDiscountPrice: item.variant?.discountPrice?.toNumber?.() ?? null,
+					variantDiscountStartAt: item.variant?.discountStartAt ?? null,
+					variantDiscountEndAt: item.variant?.discountEndAt ?? null,
+					productBasePrice,
+					productDiscountPrice: item.product.discountPrice?.toNumber?.() ?? null,
+					productDiscountStartAt: item.product.discountStartAt ?? null,
+					productDiscountEndAt: item.product.discountEndAt ?? null,
+				});
 
 				const variantLabel =
 					item.variant?.attributes?.length
@@ -87,7 +92,10 @@ export async function getCartItems(userId: string) {
 					discountPrice: variantDiscountPrice,
 					name: item.product.name,
 					fullSlug: item.product.fullSlug,
-					imageUrl: item.product.imageUrl,
+					imageUrl: resolveProductPrimaryImageFromGallery(
+						item.product.imageUrl,
+						item.product.productImages.map((image) => image.url)
+					),
 				};
 			}) ?? [];
 

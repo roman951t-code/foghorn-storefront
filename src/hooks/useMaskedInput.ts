@@ -214,5 +214,3 @@ export function useMaskedInput<T extends FieldValues, D extends RegisterOptions>
 		};
 	};
 }
-
-export default useMaskedInput;

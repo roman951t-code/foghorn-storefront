@@ -2,50 +2,66 @@ import 'server-only';
 
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-
-const getActiveDiscountScheduleWhere = (now: Date): Prisma.ProductWhereInput => ({
-	OR: [
-		{ discountStartAt: null, discountEndAt: null },
-		{ discountStartAt: { lte: now }, discountEndAt: { gt: now } },
-	],
-});
-
-const getValidActiveDiscountWhere = (now: Date): Prisma.ProductWhereInput => ({
-	AND: [
-		{
-			discountPrice: {
-				not: null,
-				gt: 0,
-				lt: prisma.product.fields.basePrice,
-			},
-		},
-		getActiveDiscountScheduleWhere(now),
-	],
-});
+import {
+	getEffectiveDiscountPrice,
+	getEffectiveVariantDiscountPrice,
+} from '@/utils/discountSchedule';
 
 export async function getMaxEffectiveProductPrice(
 	whereClause: Prisma.ProductWhereInput,
 	now: Date
 ): Promise<number> {
-	const validActiveDiscountWhere = getValidActiveDiscountWhere(now);
-
-	const [maxDiscountPrice, maxBasePrice] = await prisma.$transaction([
-		prisma.product.aggregate({
-			where: {
-				AND: [whereClause, validActiveDiscountWhere],
+	const rows = await prisma.product.findMany({
+		where: whereClause,
+		select: {
+			basePrice: true,
+			discountPrice: true,
+			discountStartAt: true,
+			discountEndAt: true,
+			variants: {
+				where: { stock: { gt: 0 } },
+				orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
+				take: 1,
+				select: {
+					price: true,
+					discountPrice: true,
+					discountStartAt: true,
+					discountEndAt: true,
+				},
 			},
-			_max: { discountPrice: true },
-		}),
-		prisma.product.aggregate({
-			where: {
-				AND: [whereClause, { NOT: validActiveDiscountWhere }],
-			},
-			_max: { basePrice: true },
-		}),
-	]);
+		},
+	});
 
-	const discountCandidate = Number(maxDiscountPrice._max.discountPrice ?? 0);
-	const baseCandidate = Number(maxBasePrice._max.basePrice ?? 0);
+	let maxPrice = 0;
+	for (const row of rows) {
+		const productBasePrice = Number(row.basePrice ?? 0);
+		const defaultVariant = row.variants?.[0];
+		const basePrice = defaultVariant ? Number(defaultVariant.price ?? 0) : productBasePrice;
 
-	return Math.max(discountCandidate, baseCandidate, 0);
+		const effectiveDiscountPrice = defaultVariant
+			? getEffectiveVariantDiscountPrice({
+					variantBasePrice: basePrice,
+					variantDiscountPrice:
+						defaultVariant.discountPrice != null ? Number(defaultVariant.discountPrice) : null,
+					variantDiscountStartAt: defaultVariant.discountStartAt ?? null,
+					variantDiscountEndAt: defaultVariant.discountEndAt ?? null,
+					productBasePrice,
+					productDiscountPrice: row.discountPrice != null ? Number(row.discountPrice) : null,
+					productDiscountStartAt: row.discountStartAt ?? null,
+					productDiscountEndAt: row.discountEndAt ?? null,
+					now,
+				})
+			: getEffectiveDiscountPrice(
+					productBasePrice,
+					row.discountPrice != null ? Number(row.discountPrice) : null,
+					row.discountStartAt ?? null,
+					row.discountEndAt ?? null,
+					now
+				);
+
+		const effectivePrice = Number(effectiveDiscountPrice ?? basePrice ?? 0);
+		if (effectivePrice > maxPrice) maxPrice = effectivePrice;
+	}
+
+	return maxPrice;
 }

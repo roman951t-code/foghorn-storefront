@@ -13,14 +13,14 @@ import { IoBagCheckOutline } from 'react-icons/io5';
 import { LuUserRoundCheck, LuUserRoundCog } from 'react-icons/lu';
 import { VscFeedback } from 'react-icons/vsc';
 
-export type SidebarLink = {
+type SidebarLink = {
 	href: string;
 	labelKey: string;
 	icon: IconType;
 	useUserName?: boolean;
 };
 
-export type SidebarSection = {
+type SidebarSection = {
 	value: 'cabinet' | 'info' | 'clients';
 	requiresAuth?: boolean;
 	links: SidebarLink[];

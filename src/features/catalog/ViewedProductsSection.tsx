@@ -21,13 +21,14 @@ export default async function ViewedProductsSection({
 	if (!userId) return null;
 
 	const viewed = await getRecentlyViewedProductsWithCount(userId, limit, 0, locale);
-	if (!viewed.products.length) return null;
+	const inStockViewedProducts = viewed.products.filter((product) => Boolean(product?.inStock));
+	if (!inStockViewedProducts.length) return null;
 
 	return (
 		<ProductsSection
 			title={title}
 			tag={tag}
-			products={viewed.products}
+			products={inStockViewedProducts}
 			limit={limit}
 			locale={locale}
 		/>

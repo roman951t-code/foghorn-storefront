@@ -11,14 +11,21 @@ import {
 	SubcategoryInfo,
 	SubcategoryProduct,
 } from '@/types/product';
-import { buildProductImages } from '@/utils/productImages';
+import {
+	buildProductImageGallery,
+	resolveProductPrimaryImageFromGallery,
+} from '@/utils/productImages';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
-import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import {
+	getEffectiveDiscountPrice,
+	getEffectiveVariantDiscountPrice,
+} from '@/utils/discountSchedule';
 import { getPaginatedIdsByEffectivePriceSort } from '@/utils/effectivePriceSorting';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { getMaxEffectiveProductPrice } from '@/utils/maxEffectiveProductPrice';
+import { getAttributeNameCandidatesForFilterKey } from '@/utils/attributeLocalization';
 
 export async function getProductsByTag<T extends boolean>(
 	tag: string,
@@ -40,6 +47,7 @@ export async function getProductsByTag<T extends boolean>(
 	const safeLimit = Math.min(MAX_PRODUCTS_PER_PAGE, Math.max(1, Math.floor(limit || 1)));
 	const safeOffset = Math.max(0, Math.floor(offset || 0));
 	const now = new Date();
+	const isDiscountTag = tag === 'discount';
 
 	const priceFilter =
 		minPrice !== undefined && maxPrice !== undefined
@@ -58,14 +66,37 @@ export async function getProductsByTag<T extends boolean>(
 	const dynamicConditions = attributeFilters.map(([key, values]) => ({
 		attributes: {
 			some: {
-				attribute: { name: key },
+				attribute: { name: { in: getAttributeNameCandidatesForFilterKey(key) } },
 				value: { in: values.flat() },
 			},
 		},
 	}));
 
+	const activeDiscountCondition: Prisma.ProductWhereInput = {
+		discountPrice: { not: null },
+		OR: [
+			{ discountStartAt: null, discountEndAt: null },
+			{ discountStartAt: { lte: now }, discountEndAt: { gt: now } },
+		],
+	};
+	const activeVariantDiscountCondition: Prisma.ProductWhereInput = {
+		variants: {
+			some: {
+				discountPrice: { not: null },
+				OR: [
+					{ discountStartAt: null, discountEndAt: null },
+					{ discountStartAt: { lte: now }, discountEndAt: { gt: now } },
+				],
+			},
+		},
+	};
+
 	const whereClause: Prisma.ProductWhereInput = {
-		tags: { has: tag },
+		...(isDiscountTag
+			? {
+					OR: [{ tags: { has: tag } }, activeDiscountCondition, activeVariantDiscountCondition],
+				}
+			: { tags: { has: tag } }),
 		...(brandFilters.length > 0 ? { brand: { slug: { in: brandFilters } } } : {}),
 		...(inStock !== undefined ? { inStock } : {}),
 		...(priceFilter
@@ -112,7 +143,9 @@ export async function getProductsByTag<T extends boolean>(
 
 	const isEffectivePriceSort = orderBy === 'cheap' || orderBy === 'expensive';
 	const orderByClause: Prisma.ProductOrderByWithRelationInput[] =
-		orderBy === 'new' ? [{ createdAt: 'desc' }] : [{ inStock: 'desc' }, { name: 'asc' }];
+		orderBy === 'new'
+			? [{ inStock: 'desc' }, { createdAt: 'desc' }, { name: 'asc' }]
+			: [{ inStock: 'desc' }, { name: 'asc' }];
 
 	const productSelect = {
 		id: true,
@@ -142,6 +175,9 @@ export async function getProductsByTag<T extends boolean>(
 				id: true,
 				sku: true,
 				price: true,
+				discountPrice: true,
+				discountStartAt: true,
+				discountEndAt: true,
 				stock: true,
 				attributes: {
 					select: {
@@ -185,6 +221,17 @@ export async function getProductsByTag<T extends boolean>(
 					discountPrice: true,
 					discountStartAt: true,
 					discountEndAt: true,
+					variants: {
+						where: { stock: { gt: 0 } },
+						orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
+						take: 1,
+						select: {
+							price: true,
+							discountPrice: true,
+							discountStartAt: true,
+							discountEndAt: true,
+						},
+					},
 				},
 			});
 			const sortedPageIds = getPaginatedIdsByEffectivePriceSort(
@@ -216,14 +263,28 @@ export async function getProductsByTag<T extends boolean>(
 	}
 
 	const productsWithPrice = productsQuery.map((p) => {
-		const basePrice = Number(p.basePrice ?? 0);
-		const discountPrice = getEffectiveDiscountPrice(
-			basePrice,
-			p.discountPrice != null ? Number(p.discountPrice) : null,
-			p.discountStartAt ?? null,
-			p.discountEndAt ?? null,
-			now
-		);
+		const productBasePrice = Number(p.basePrice ?? 0);
+		const defaultVariant = p.variants?.[0];
+		const basePrice = defaultVariant ? defaultVariant.price.toNumber() : productBasePrice;
+		const discountPrice = defaultVariant
+			? getEffectiveVariantDiscountPrice({
+					variantBasePrice: basePrice,
+					variantDiscountPrice: defaultVariant.discountPrice?.toNumber() ?? null,
+					variantDiscountStartAt: defaultVariant.discountStartAt ?? null,
+					variantDiscountEndAt: defaultVariant.discountEndAt ?? null,
+					productBasePrice,
+					productDiscountPrice: p.discountPrice != null ? Number(p.discountPrice) : null,
+					productDiscountStartAt: p.discountStartAt ?? null,
+					productDiscountEndAt: p.discountEndAt ?? null,
+					now,
+				})
+			: getEffectiveDiscountPrice(
+					productBasePrice,
+					p.discountPrice != null ? Number(p.discountPrice) : null,
+					p.discountStartAt ?? null,
+					p.discountEndAt ?? null,
+					now
+				);
 		return {
 			...p,
 			basePrice,
@@ -239,32 +300,37 @@ export async function getProductsByTag<T extends boolean>(
 			productImages?: unknown;
 			translations?: unknown;
 		};
+		const persistedImages = product.productImages.map((image) => image.url);
+		const primaryImageUrl = resolveProductPrimaryImageFromGallery(
+			product.imageUrl,
+			persistedImages
+		);
+		const images = buildProductImageGallery(product.imageUrl, persistedImages, 4);
 
 		return {
 			...rest,
 			id: product.id ?? '',
 			name: translation?.name ?? product.name ?? '',
 			fullSlug: product.fullSlug ?? '',
-			imageUrl: product.imageUrl ?? null,
-			images: product.productImages.length
-				? product.productImages.map((image) => image.url)
-				: buildProductImages(product.imageUrl ?? undefined, 4),
+			imageUrl: primaryImageUrl,
+			images,
 			inStock: !!product.inStock,
 			basePrice: Number(product.basePrice ?? 0),
 			discountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,
-				defaultVariant: product.variants?.[0]
-					? {
-							id: product.variants[0].id,
+			defaultVariant: product.variants?.[0]
+				? {
+						id: product.variants[0].id,
 						sku: product.variants[0].sku,
 						price: product.variants[0].price.toNumber(),
+						discountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,
 						stock: product.variants[0].stock,
 						label: product.variants[0].attributes
 							.map((a) =>
 								[a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' ')
 							)
 							.join(' / '),
-						}
-					: undefined,
+				  }
+				: undefined,
 			averageRating: Number(product.averageRating ?? 0),
 			reviewCount: Number(product.reviewCount ?? 0),
 		} as SubcategoryProduct;

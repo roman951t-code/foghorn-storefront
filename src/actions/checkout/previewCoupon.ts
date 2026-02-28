@@ -10,7 +10,7 @@ const PreviewCouponSchema = z.object({
 	subtotal: z.number().finite().nonnegative(),
 });
 
-export type PreviewCouponResult =
+type PreviewCouponResult =
 	| { success: true; coupon: CouponDiscountPreview }
 	| { success: false; error: CouponValidationError | 'invalid_payload' | 'unknown' };
 
@@ -29,4 +29,3 @@ export async function previewCoupon(
 		return { success: false, error: 'unknown' };
 	}
 }
-

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { getTranslations } from 'next-intl/server';
 import type { I18nData } from '@/types/i18n';
 
-export const phoneSignInSchemaShape = (t: { phoneRequired: string; invalidPhone: string }) =>
+const phoneSignInSchemaShape = (t: { phoneRequired: string; invalidPhone: string }) =>
 	z.object({
 		phone: z
 			.string({ message: t.phoneRequired })

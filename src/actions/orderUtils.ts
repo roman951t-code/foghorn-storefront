@@ -3,6 +3,7 @@
 import 'server-only';
 
 import type { OrderItem, UserOrder } from '@/types/order';
+import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
 
 const toNumber = (value: unknown): number => {
 	if (typeof value === 'number') return value;
@@ -40,7 +41,10 @@ export async function normalizeOrder(order: any): Promise<UserOrder> {
 				id: item.product?.id ?? item.productId,
 				name: item.snapshotProductName ?? item.product?.name ?? '',
 				fullSlug: item.product?.fullSlug ?? '',
-				imageUrl: item.product?.imageUrl ?? null,
+				imageUrl: resolveProductPrimaryImageFromGallery(
+					item.product?.imageUrl ?? null,
+					item.product?.productImages?.map((image: { url: string }) => image.url) ?? []
+				),
 			},
 		})) ?? [];
 

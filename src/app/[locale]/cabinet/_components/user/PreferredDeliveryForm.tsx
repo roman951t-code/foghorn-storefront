@@ -119,11 +119,20 @@ export default function PreferredDeliveryForm({
 											disabled={!hasEmail}
 											value='email'
 											boxShadow='none'
+											borderWidth='0.5px'
 											_hover={{ cursor: 'pointer' }}
 											w='full'
 											borderColor={{ base: 'initial', _disabled: 'border' }}
 											bg={{ base: 'main', _disabled: 'bg.dark' }}
 											justifyContent={{ base: 'initial', sm: 'center' }}
+											css={{
+												'&[data-state="checked"]': {
+													borderWidth: '0.5px',
+												},
+												'&[data-disabled], &[aria-disabled="true"]': {
+													borderWidth: '0.5px',
+												},
+											}}
 										>
 											<RadioCard.ItemHiddenInput />
 											<RadioCard.ItemControl alignItems='center'>
@@ -139,10 +148,19 @@ export default function PreferredDeliveryForm({
 											disabled={!hasPhone}
 											value='phone'
 											boxShadow='none'
+											borderWidth='0.5px'
 											_hover={{ cursor: 'pointer' }}
 											w='full'
 											bg={{ base: 'main', _disabled: 'bg.dark' }}
 											justifyContent={{ base: 'initial', sm: 'center' }}
+											css={{
+												'&[data-state="checked"]': {
+													borderWidth: '0.5px',
+												},
+												'&[data-disabled], &[aria-disabled="true"]': {
+													borderWidth: '0.5px',
+												},
+											}}
 										>
 											<RadioCard.ItemHiddenInput />
 											<RadioCard.ItemControl alignItems='center'>
@@ -161,7 +179,7 @@ export default function PreferredDeliveryForm({
 							{form.formState.errors.notificationMethod?.message?.toString()}
 						</Field.ErrorText>
 					</Field.Root>
-					<Box display='flex' justifyContent={{ base: 'stretch', sm: 'flex-end' }}>
+					<Box display='flex' justifyContent={{ base: 'stretch', sm: 'flex-end' }} mt='4'>
 						<SecondaryButton
 							type='submit'
 							loading={form.formState.isSubmitting}

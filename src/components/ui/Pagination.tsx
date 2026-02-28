@@ -206,21 +206,22 @@ export default function Pagination({
 					>
 						{t('perPage')}
 					</Text>
-					<NumberInput.Root
-						size='sm'
-						min={1}
-						max={32}
-						value={inputValue}
-						onValueChange={(details) => {
-							setInputValue(details.value);
-							const parsed = Number.parseInt(details.value, 10);
-							if (!Number.isNaN(parsed)) {
-								applyPageSize(parsed);
-							}
-						}}
-						maxW='62px'
-						aria-label={t('perPage')}
-					>
+						<NumberInput.Root
+							variant='subtle'
+							size='sm'
+							min={1}
+							max={32}
+							value={inputValue}
+							onValueChange={(details) => {
+								setInputValue(details.value);
+								const parsed = Number.parseInt(details.value, 10);
+								if (!Number.isNaN(parsed)) {
+									applyPageSize(parsed);
+								}
+							}}
+							maxW='62px'
+							aria-label={t('perPage')}
+						>
 						<NumberInput.Label srOnly>{t('perPage')}</NumberInput.Label>
 						<NumberInput.Control fontSize={{ base: 'md', md: 'sm' }} />
 						<NumberInput.Input

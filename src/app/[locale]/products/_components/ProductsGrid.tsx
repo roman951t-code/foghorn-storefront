@@ -32,8 +32,8 @@ export default function ProductsGrid({ products, notFound, limit }: Props) {
 	return (
 		<Grid
 			className='productsSlider'
-			columnGap={2}
-			rowGap={4}
+			columnGap={4}
+			rowGap={6}
 			px={{ base: 1, sm: 0 }}
 			css={PRODUCTS_GRID_CSS}
 		>

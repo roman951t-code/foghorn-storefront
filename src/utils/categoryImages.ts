@@ -4,8 +4,6 @@ const normalizeImageUrl = (value?: string | null): string | null => {
 	return trimmed.length > 0 ? trimmed : null;
 };
 
-const toCssUrlLayer = (value: string) => `url("${value.replace(/"/g, '%22')}")`;
-
 export const CATEGORY_PLACEHOLDER_IMAGE = '/assets/images/category-placeholder.svg';
 export const SUBCATEGORY_PLACEHOLDER_IMAGE = '/assets/images/subcategory-placeholder.svg';
 
@@ -19,14 +17,3 @@ export const resolveSubcategoryImage = (
 	normalizeImageUrl(imageUrl) ??
 	normalizeImageUrl(fallbackImageUrl) ??
 	SUBCATEGORY_PLACEHOLDER_IMAGE;
-
-export const buildImageBackgroundWithFallback = (
-	imageUrl: string | null | undefined,
-	fallbackImageUrl: string
-) => {
-	const primary = normalizeImageUrl(imageUrl);
-	const fallback = normalizeImageUrl(fallbackImageUrl) ?? fallbackImageUrl;
-
-	if (!primary || primary === fallback) return toCssUrlLayer(fallback);
-	return `${toCssUrlLayer(primary)}, ${toCssUrlLayer(fallback)}`;
-};

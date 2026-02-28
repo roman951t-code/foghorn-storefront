@@ -4,6 +4,10 @@ import { headers } from 'next/headers';
 import { SubcategoryProduct } from '@/types/product';
 import { WISHLIST_TAG_PRIORITY } from '@/constants/products';
 import { jsonNoStore } from '@/lib/response';
+import {
+	getEffectiveDiscountPrice,
+	getEffectiveVariantDiscountPrice,
+} from '@/utils/discountSchedule';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 export async function GET() {
@@ -32,9 +36,32 @@ export async function GET() {
 						categoryName: true,
 						subcategoryName: true,
 						discountPrice: true,
+						discountStartAt: true,
+						discountEndAt: true,
 						inStock: true,
 						reviews: { select: { rating: true } },
 						tags: true,
+						variants: {
+							where: { stock: { gt: 0 } },
+							orderBy: [{ price: 'asc' }, { createdAt: 'asc' }],
+							take: 1,
+							select: {
+								id: true,
+								sku: true,
+								price: true,
+								discountPrice: true,
+								discountStartAt: true,
+								discountEndAt: true,
+								stock: true,
+								attributes: {
+									select: {
+										attribute: { select: { name: true, unit: true } },
+										value: true,
+									},
+									orderBy: { attribute: { name: 'asc' } },
+								},
+							},
+						},
 					},
 				},
 			},
@@ -45,11 +72,51 @@ export async function GET() {
 				const ratings = product.reviews.map((r) => r.rating);
 				const averageRating =
 					ratings.length > 0 ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length : 0;
+				const productBasePrice = Number(product.basePrice ?? 0);
+				const defaultVariant = product.variants?.[0];
+				const basePrice = defaultVariant
+					? defaultVariant.price?.toNumber?.() ?? Number(defaultVariant.price ?? 0)
+					: productBasePrice;
+				const discountPrice = defaultVariant
+					? getEffectiveVariantDiscountPrice({
+							variantBasePrice: basePrice,
+							variantDiscountPrice: defaultVariant.discountPrice?.toNumber?.() ?? null,
+							variantDiscountStartAt: defaultVariant.discountStartAt ?? null,
+							variantDiscountEndAt: defaultVariant.discountEndAt ?? null,
+							productBasePrice,
+							productDiscountPrice: product.discountPrice ? Number(product.discountPrice) : null,
+							productDiscountStartAt: product.discountStartAt ?? null,
+							productDiscountEndAt: product.discountEndAt ?? null,
+					  })
+					: getEffectiveDiscountPrice(
+							productBasePrice,
+							product.discountPrice ? Number(product.discountPrice) : null,
+							product.discountStartAt ?? null,
+							product.discountEndAt ?? null
+					  );
+				const variantLabel =
+					defaultVariant?.attributes?.length
+						? defaultVariant.attributes
+								.map((a) =>
+									[a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' ')
+								)
+								.join(' / ')
+						: '';
 
 				return {
 					...product,
-					basePrice: Number(product.basePrice),
-					discountPrice: product.discountPrice ? Number(product.discountPrice) : null,
+					basePrice,
+					discountPrice,
+					defaultVariant: defaultVariant
+						? {
+								id: defaultVariant.id,
+								sku: defaultVariant.sku,
+								price: basePrice,
+								discountPrice,
+								stock: defaultVariant.stock,
+								label: variantLabel,
+						  }
+						: undefined,
 					averageRating,
 					reviewCount: product.reviews.length,
 				};

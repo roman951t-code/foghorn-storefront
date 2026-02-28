@@ -29,6 +29,7 @@ export type SubcategoryProduct = {
 		id: string;
 		sku: string;
 		price: number;
+		discountPrice: number | null;
 		stock: number;
 		label: string;
 	};

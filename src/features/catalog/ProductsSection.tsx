@@ -10,18 +10,24 @@ interface Props extends FlexProps {
 	products?: SubcategoryProduct[];
 	limit?: number;
 	locale?: string;
+	href?: string;
 }
+
+export const DEFAULT_PRODUCTS_SECTION_LIMIT = 10;
 
 export default async function ProductsSection({
 	title,
 	tag,
 	products: providedProducts,
-	limit = 10,
+	limit = DEFAULT_PRODUCTS_SECTION_LIMIT,
 	locale,
+	href,
 	...restProps
 }: Props) {
 	const { products = [] } = providedProducts
-		? { products: providedProducts }
+		? {
+				products: providedProducts.filter((product) => Boolean(product?.inStock)),
+			}
 		: await getProductsByTag(
 				tag,
 				false,
@@ -29,19 +35,20 @@ export default async function ProductsSection({
 				0,
 				undefined,
 				undefined,
-				undefined,
+				true,
 				undefined,
 				undefined,
 				locale
 		  );
+	const visibleProducts = products.slice(0, limit);
 
-	if (!products.length) return null;
+	if (!visibleProducts.length) return null;
 
 	return (
 		<Flex gap={6} direction='column' mt={28} {...restProps}>
 			<Heading fontWeight='medium'>
 				<LocaleNavLink
-					href={`/products/search/?tag=${tag}`}
+					href={href ?? `/products/search/?tag=${tag}`}
 					fontSize='28px'
 					variant='underline'
 					textUnderlineOffset='12px'
@@ -55,7 +62,7 @@ export default async function ProductsSection({
 					{title}
 				</LocaleNavLink>
 			</Heading>
-			<ProductsSlider products={products} />
+			<ProductsSlider products={visibleProducts} />
 		</Flex>
 	);
 }

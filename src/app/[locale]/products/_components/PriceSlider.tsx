@@ -51,11 +51,12 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 				{title} ($)
 			</Text>
 			<Flex justifyContent='space-between' alignItems='center' gap={3} w='100%' minW={0}>
-				<HStack gap={2} flex='1' minW={0}>
-					<Input
-						fontSize={{ base: 'md', md: '15px' }}
-						color='main'
-						h='40px'
+					<HStack gap={2} flex='1' minW={0}>
+						<Input
+							variant='subtle'
+							fontSize={{ base: 'md', md: '15px' }}
+							color='main'
+							h='40px'
 						flex='1'
 						minW={0}
 						type='number'
@@ -69,10 +70,11 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 						bg='bg.tertiary'
 						borderColor='border'
 					/>
-					<Input
-						fontSize={{ base: 'md', md: '15px' }}
-						color='main'
-						h='40px'
+						<Input
+							variant='subtle'
+							fontSize={{ base: 'md', md: '15px' }}
+							color='main'
+							h='40px'
 						flex='1'
 						minW={0}
 						type='number'

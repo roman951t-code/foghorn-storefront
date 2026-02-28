@@ -15,8 +15,14 @@
 	margin-right: auto;
 	overflow: initial;
 	overflow-x: clip;
-	/* min-height: 124px; */
 	align-content: center;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.productsSlider * {
+	-webkit-user-select: none;
+	user-select: none;
 }
 .productsSlider .swiper-slide {
 	display: flex;

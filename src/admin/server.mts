@@ -58,16 +58,74 @@ const requireActiveAdminUser = parseBoolean(
 	process.env.ADMINJS_REQUIRE_ACTIVE_USER,
 	nodeEnv === 'production'
 );
+const adminPort = Number(process.env.ADMINJS_PORT ?? process.env.PORT ?? 3001);
+
+type AdminCspMode = 'off' | 'report-only' | 'enforce';
+
+const parseAdminCspMode = (value: string | undefined, fallback: AdminCspMode): AdminCspMode => {
+	if (!value || value.trim() === '') return fallback;
+	const normalized = value.trim().toLowerCase();
+	if (normalized === 'off' || normalized === 'report-only' || normalized === 'enforce') {
+		return normalized;
+	}
+	return fallback;
+};
+
+const normalizeAllowedOriginHost = (value: string): string | null => {
+	const trimmed = value.trim();
+	if (!trimmed) return null;
+	try {
+		return new URL(trimmed).host.toLowerCase();
+	} catch {
+		return /^[A-Za-z0-9.-]+(?::\d+)?$/.test(trimmed) ? trimmed.toLowerCase() : null;
+	}
+};
+
+const adminCspMode = parseAdminCspMode(
+	process.env.ADMIN_CSP_MODE,
+	nodeEnv === 'production' ? 'enforce' : 'off'
+);
+const adminApiReadRateLimitPerMinute = parsePositiveInt(
+	process.env.ADMIN_API_READ_RATE_LIMIT_PER_MINUTE,
+	180
+);
+const adminApiMutationRateLimitPerMinute = parsePositiveInt(
+	process.env.ADMIN_API_MUTATION_RATE_LIMIT_PER_MINUTE,
+	90
+);
+const adminApiRateLimitWindowMs =
+	parsePositiveInt(process.env.ADMIN_API_RATE_LIMIT_WINDOW_SECONDS, 60) * 1000;
+const safeHttpMethods = new Set(['GET', 'HEAD', 'OPTIONS']);
+const SAFE_READONLY_POST_ACTIONS = new Set(['lowStockAlerts']);
+const adminAllowedOriginHosts = new Set<string>([
+	`localhost:${adminPort}`,
+	`127.0.0.1:${adminPort}`,
+	`[::1]:${adminPort}`,
+	...[
+		process.env.ADMINJS_PUBLIC_URL ?? '',
+		...(process.env.ADMINJS_ALLOWED_ORIGINS ?? '').split(','),
+	]
+		.map((origin) => normalizeAllowedOriginHost(origin))
+		.filter((origin): origin is string => Boolean(origin)),
+]);
 
 type AdminThumbRateState = {
 	count: number;
 	resetAt: number;
 };
+type AdminApiRateState = {
+	count: number;
+	resetAt: number;
+};
 const adminThumbRateBuckets = new Map<string, AdminThumbRateState>();
+const adminApiRateBuckets = new Map<string, AdminApiRateState>();
 const ADMIN_THUMB_RATE_LIMIT_WINDOW_MS = 60_000;
 const ADMIN_THUMB_BUCKET_CLEANUP_INTERVAL_MS = 60_000;
 const ADMIN_THUMB_MAX_FALLBACK_BUCKETS = 8_000;
+const ADMIN_API_BUCKET_CLEANUP_INTERVAL_MS = 60_000;
+const ADMIN_API_MAX_FALLBACK_BUCKETS = 12_000;
 let adminThumbCleanupTimer: ReturnType<typeof setInterval> | null = null;
+let adminApiCleanupTimer: ReturnType<typeof setInterval> | null = null;
 
 const pruneExpiredAdminThumbBuckets = (now = Date.now()) => {
 	for (const [bucketKey, state] of adminThumbRateBuckets) {
@@ -100,6 +158,8 @@ const normalizeIp = (value: string) => {
 	const trimmed = value.trim();
 	return trimmed.startsWith('::ffff:') ? trimmed.slice(7) : trimmed;
 };
+
+const isSafeHttpMethod = (method: string) => safeHttpMethods.has(method.toUpperCase());
 
 const isAllowedAdminIp = (value: string) => {
 	if (allowedAdminIps.size === 0) return true;
@@ -152,6 +212,93 @@ const checkAdminThumbRateLimit = (key: string) => {
 	}
 	existing.count += 1;
 	return { allowed: true as const };
+};
+
+const pruneExpiredAdminApiBuckets = (now = Date.now()) => {
+	for (const [bucketKey, state] of adminApiRateBuckets) {
+		if (now >= state.resetAt) {
+			adminApiRateBuckets.delete(bucketKey);
+		}
+	}
+};
+
+const trimOldestAdminApiBuckets = (maxEntries: number) => {
+	if (adminApiRateBuckets.size <= maxEntries) return;
+	const overflow = adminApiRateBuckets.size - maxEntries;
+	for (let i = 0; i < overflow; i += 1) {
+		const oldestKey = adminApiRateBuckets.keys().next().value as string | undefined;
+		if (!oldestKey) break;
+		adminApiRateBuckets.delete(oldestKey);
+	}
+};
+
+const ensureAdminApiCleanupLoop = () => {
+	if (adminApiCleanupTimer) return;
+	adminApiCleanupTimer = setInterval(() => {
+		pruneExpiredAdminApiBuckets();
+		trimOldestAdminApiBuckets(ADMIN_API_MAX_FALLBACK_BUCKETS);
+	}, ADMIN_API_BUCKET_CLEANUP_INTERVAL_MS);
+	(adminApiCleanupTimer as { unref?: () => void }).unref?.();
+};
+
+const checkAdminApiRateLimit = (key: string, limit: number, windowMs: number) => {
+	const now = Date.now();
+	pruneExpiredAdminApiBuckets(now);
+	trimOldestAdminApiBuckets(ADMIN_API_MAX_FALLBACK_BUCKETS);
+	const existing = adminApiRateBuckets.get(key);
+	if (!existing || now >= existing.resetAt) {
+		adminApiRateBuckets.set(key, {
+			count: 1,
+			resetAt: now + windowMs,
+		});
+		return { allowed: true as const };
+	}
+	if (existing.count >= limit) {
+		return {
+			allowed: false as const,
+			retryAfterSeconds: Math.max(1, Math.ceil((existing.resetAt - now) / 1000)),
+		};
+	}
+	existing.count += 1;
+	return { allowed: true as const };
+};
+
+const resolveAdminMutationOriginHeader = (req: express.Request) =>
+	req.get('origin') ?? req.get('referer') ?? null;
+
+const isAllowedAdminMutationOrigin = (originHeader: string, req: express.Request) => {
+	try {
+		const origin = new URL(originHeader);
+		const originHost = origin.host.toLowerCase();
+		const requestHost = (req.get('host') ?? '').toLowerCase();
+		if (requestHost && originHost === requestHost) return true;
+		return adminAllowedOriginHosts.has(originHost);
+	} catch {
+		return false;
+	}
+};
+
+const ADMIN_CSP_POLICY = [
+	"default-src 'self'",
+	"base-uri 'self'",
+	"frame-ancestors 'none'",
+	"form-action 'self'",
+	"object-src 'none'",
+	"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+	"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+	"img-src 'self' data: blob: https:",
+	"font-src 'self' data: https://fonts.gstatic.com",
+	"connect-src 'self'",
+].join('; ');
+
+const createAdminCspMiddleware = (mode: AdminCspMode): express.RequestHandler => {
+	if (mode === 'off') return (_req, _res, next) => next();
+	const headerName =
+		mode === 'enforce' ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only';
+	return (_req, res, next) => {
+		res.setHeader(headerName, ADMIN_CSP_POLICY);
+		next();
+	};
 };
 
 const fallbackAdminSecurityHeaders: express.RequestHandler = (_req, res, next) => {
@@ -406,11 +553,13 @@ const start = async () => {
 	const app = express();
 	app.disable('x-powered-by');
 	app.use(await createAdminSecurityMiddleware());
+	app.use(admin.options.rootPath, createAdminCspMiddleware(adminCspMode));
 	if (nodeEnv === 'production') {
 		// Required when secure cookies are used behind TLS-terminating proxies.
 		app.set('trust proxy', 1);
 	}
 	ensureAdminThumbCleanupLoop();
+	ensureAdminApiCleanupLoop();
 	const sessionStore = createAdminSessionStore({
 		connectionString: databaseUrl,
 		tableName: sessionTable,
@@ -454,7 +603,9 @@ const start = async () => {
 
 	const storeAppUrl =
 		process.env.ADMIN_THUMBNAIL_APP_URL ??
-		(nodeEnv !== 'production' ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
+		(nodeEnv !== 'production'
+			? 'http://localhost:3000'
+			: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
 	const allowedThumbHosts = new Set(
 		[
 			new URL(storeAppUrl).hostname,
@@ -468,7 +619,8 @@ const start = async () => {
 				.filter(Boolean),
 		].filter(Boolean)
 	);
-	const allowAnyThumbHost = nodeEnv !== 'production' && process.env.ADMIN_THUMBNAIL_ALLOW_ANY_HOST === 'true';
+	const allowAnyThumbHost =
+		nodeEnv !== 'production' && process.env.ADMIN_THUMBNAIL_ALLOW_ANY_HOST === 'true';
 
 	app.use('/admin-thumb', adminSessionMiddleware);
 	app.get('/admin-thumb', async (req, res) => {
@@ -606,6 +758,7 @@ const start = async () => {
 			next();
 		});
 	}
+	gatedRouter.use(adminSessionMiddleware);
 
 	gatedRouter.use((req, res, next) => {
 		const path = typeof req.path === 'string' ? req.path : '';
@@ -623,17 +776,62 @@ const start = async () => {
 	});
 
 	gatedRouter.use((req, res, next) => {
+		const path = typeof req.path === 'string' ? req.path : '';
+		if (!path.startsWith('/api/') || isSafeHttpMethod(req.method)) {
+			next();
+			return;
+		}
+		const originHeader = resolveAdminMutationOriginHeader(req);
+		if (!originHeader || !isAllowedAdminMutationOrigin(originHeader, req)) {
+			res.status(403).json({
+				notice: {
+					message: 'anyForbiddenError',
+					type: 'error',
+				},
+			});
+			return;
+		}
+		next();
+	});
+
+	gatedRouter.use((req, res, next) => {
+		const path = typeof req.path === 'string' ? req.path : '';
+		if (!path.startsWith('/api/')) {
+			next();
+			return;
+		}
+		const requesterIp = typeof req.ip === 'string' ? req.ip : 'unknown';
+		const normalizedIp = normalizeIp(requesterIp || 'unknown');
+		const isMutation = !isSafeHttpMethod(req.method);
+		const rateLimit = isMutation ? adminApiMutationRateLimitPerMinute : adminApiReadRateLimitPerMinute;
+		const bucketKey = `admin-api:${isMutation ? 'mutation' : 'read'}:${normalizedIp}`;
+		const rate = checkAdminApiRateLimit(bucketKey, rateLimit, adminApiRateLimitWindowMs);
+		if (rate.allowed) {
+			next();
+			return;
+		}
+		res.setHeader('Retry-After', String(rate.retryAfterSeconds));
+		res.setHeader('Cache-Control', 'no-store');
+		res.status(429).json({
+			notice: {
+				message: 'too-many-requests',
+				type: 'error',
+			},
+		});
+	});
+
+	gatedRouter.use((req, res, next) => {
 		const currentAdmin = (req.session as any)?.adminUser as { role?: string } | undefined;
 		const isReadonly = currentAdmin?.role === 'readonly';
 		const path = typeof req.path === 'string' ? req.path : '';
-		if (isReadonly && req.method === 'POST' && path.startsWith('/api/')) {
-			const safePostActions = new Set(['lowStockAlerts']);
+		const isMutation = !isSafeHttpMethod(req.method);
+		if (isReadonly && isMutation && path.startsWith('/api/')) {
 			const matchResourceAction = path.match(/^\/api\/resources\/[^/]+\/actions\/([^/]+)$/);
 			const matchRecordAction = path.match(/^\/api\/resources\/[^/]+\/records\/[^/]+\/([^/]+)$/);
 			const matchBulkAction = path.match(/^\/api\/resources\/[^/]+\/bulk\/([^/]+)$/);
 			const actionName = matchResourceAction?.[1] ?? matchRecordAction?.[1] ?? matchBulkAction?.[1] ?? null;
 
-			if (actionName && safePostActions.has(actionName)) {
+			if (req.method.toUpperCase() === 'POST' && actionName && SAFE_READONLY_POST_ACTIONS.has(actionName)) {
 				next();
 				return;
 			}
@@ -652,9 +850,8 @@ const start = async () => {
 
 	app.use(admin.options.rootPath, gatedRouter);
 
-	const port = Number(process.env.ADMINJS_PORT ?? process.env.PORT ?? 3001);
-	app.listen(port, () => {
-		console.log(`AdminJS available at http://localhost:${port}${admin.options.rootPath}`);
+	app.listen(adminPort, () => {
+		console.log(`AdminJS available at http://localhost:${adminPort}${admin.options.rootPath}`);
 	});
 };
 

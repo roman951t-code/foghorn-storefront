@@ -18,6 +18,11 @@ import {
 import ProductTabs from '@/features/product/ProductTabs';
 import { STORE_CURRENCY_CODE } from '@/config/currency';
 import { resolveProductPrimaryImage } from '@/utils/productImages';
+import ProductsSection, {
+	DEFAULT_PRODUCTS_SECTION_LIMIT,
+} from '@/features/catalog/ProductsSection';
+import { getProductsBySubcategorySlug } from '@/actions/products/getProductsBySubcategorySlug';
+import { isProductTabValue } from '@/constants/products';
 
 type Props = ProductParams & { searchParams: { tab?: string } };
 
@@ -86,16 +91,34 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 		await params
 	);
 	const { tab } = ensureParams(productSearchParamsSchema, await searchParams);
+	const selectedTab = tab && isProductTabValue(tab) ? tab : 'about';
 
 	const headersList = await headers();
 	const cspNonce = headersList.get('x-csp-nonce') ?? undefined;
-	const [productData, session] = await Promise.all([
+	const [productData, session, productsT, subcategoryProductsData] = await Promise.all([
 		getProductBySlugCached(product, locale),
 		auth.api.getSession({ headers: headersList }),
+		getTranslations('products'),
+		getProductsBySubcategorySlug(
+			subcategory,
+			DEFAULT_PRODUCTS_SECTION_LIMIT + 1,
+			0,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			locale
+		),
 	]);
 	const userId = session?.user?.id;
 
 	if (!productData) notFound();
+
+	const sameSubcategoryProducts = (subcategoryProductsData?.products ?? [])
+		.filter((sameSubcategoryProduct) => sameSubcategoryProduct.id !== productData.id)
+		.slice(0, DEFAULT_PRODUCTS_SECTION_LIMIT);
 
 	if (userId) {
 		await trackProductView(userId, productData.id);
@@ -114,7 +137,15 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 	const openGraphImage = toAbsolute(productData.openGraphImage);
 	const primaryImage =
 		images[0] ?? openGraphImage ?? toAbsolute(resolveProductPrimaryImage(productData.imageUrl));
-	const price = productData.discountPrice ?? productData.basePrice;
+	const defaultVariant =
+		productData.variants?.find((variant) => (variant.stock ?? 0) > 0) ??
+		productData.variants?.[0] ??
+		null;
+	const price =
+		defaultVariant?.discountPrice ??
+		defaultVariant?.price ??
+		productData.discountPrice ??
+		productData.basePrice;
 	const availability = productData.inStock
 		? 'https://schema.org/InStock'
 		: 'https://schema.org/OutOfStock';
@@ -233,6 +264,17 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 					category={category}
 					subcategory={subcategory}
 				/>
+
+				{selectedTab === 'about' && (
+					<ProductsSection
+						title={productsT('sameSubcategory')}
+						tag='similar'
+						href={`/products/${category}/${subcategory}`}
+						products={sameSubcategoryProducts}
+						limit={DEFAULT_PRODUCTS_SECTION_LIMIT}
+						locale={locale}
+					/>
+				)}
 			</Flex>
 		</>
 	);

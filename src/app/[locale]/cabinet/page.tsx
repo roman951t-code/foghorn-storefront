@@ -1,4 +1,4 @@
-import { VStack, Heading } from '@chakra-ui/react';
+import { VStack } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import PersonalDataForm from './_components/user/PersonalDataForm';
 import { extractI18nData } from '@/utils/i18nUtils';
@@ -21,9 +21,6 @@ export default function Cabinet() {
 
 	return (
 		<VStack w='100%' maxW='6xl' mx='auto'>
-			<Heading as='h2' size='2xl' fontWeight='medium'>
-				{authT('personalData')}
-			</Heading>
 			<PersonalDataForm i18nData={i18nData} />
 		</VStack>
 	);

@@ -217,7 +217,9 @@ export const auth = betterAuth({
 			},
 		}),
 		customSession(async ({ user, session }) => {
-			const dbUser = await prisma.user.findUnique({
+			const sessionEmail = sanitizeSessionEmail(user.email);
+
+			const dbUserPromise = prisma.user.findUnique({
 				where: {
 					id: user.id,
 				},
@@ -227,7 +229,6 @@ export const auth = betterAuth({
 					lastName: true,
 					middleName: true,
 					notificationMethod: true,
-					subscribed: true,
 					shippingCountry: true,
 					shippingRegion: true,
 					shippingCity: true,
@@ -237,16 +238,35 @@ export const auth = betterAuth({
 				},
 			});
 
-			const socialAccount = await prisma.account.findFirst({
+			const socialAccountPromise = prisma.account.findFirst({
 				where: { userId: user.id, providerId: 'google' },
 				select: { id: true },
 			});
 
+			const newsletterSubscriptionPromise = sessionEmail
+				? prisma.newsletterSubscription.findFirst({
+						where: {
+							email: {
+								equals: sessionEmail,
+								mode: 'insensitive',
+							},
+						},
+						select: { id: true },
+					})
+				: Promise.resolve(null);
+
+			const [dbUser, socialAccount, newsletterSubscription] = await Promise.all([
+				dbUserPromise,
+				socialAccountPromise,
+				newsletterSubscriptionPromise,
+			]);
+
 			return {
 				user: {
 					...user,
-					email: sanitizeSessionEmail(user.email),
+					email: sessionEmail,
 					...dbUser,
+					subscribed: Boolean(newsletterSubscription),
 					isGoogleUser: !!socialAccount,
 				},
 				session,

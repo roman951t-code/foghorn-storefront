@@ -8,7 +8,7 @@ import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { I18nData } from '@/types/i18n';
 import { CartProduct } from '@/types/cart';
-import { buildProductImages, resolveProductPrimaryImage } from '@/utils/productImages';
+import { resolveProductPrimaryImage } from '@/utils/productImages';
 import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 
 interface Props {
@@ -29,8 +29,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 	const lineTotal = unitPrice * quantity;
 	const totalLabel = i18nData.totalAmount || 'Total';
 
-	const previewImage =
-		buildProductImages(product.imageUrl)?.[0] || resolveProductPrimaryImage(product.imageUrl);
+	const previewImage = resolveProductPrimaryImage(product.imageUrl);
 	const productHref = `/products/${product.fullSlug}`;
 	const handleNavigate = () => {
 		if (typeof onNavigate === 'function') onNavigate();

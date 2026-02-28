@@ -6,6 +6,7 @@ import { FILTER_TAG_EXCLUDED_KEYS } from '@/constants/products';
 import type { Filter } from '@/types/product';
 import { localizeUnit } from '@/utils/unitLocalization';
 import { formatUsdPrice } from '@/utils/priceFormatting';
+import { localizeAttributeName } from '@/utils/attributeLocalization';
 
 type Props = {
 	filters?: Filter[] | null;
@@ -59,7 +60,8 @@ export default function FiltersTags({ filters }: Props) {
 	const valueLabelByKey = new Map<string, Map<string, string>>();
 	const unitByKey = new Map<string, string | null>();
 	(filters ?? []).forEach((filter) => {
-		const baseLabel = filter.key === 'brand' ? t('brand') : filter.name;
+		const baseLabel =
+			filter.key === 'brand' ? t('brand') : localizeAttributeName(filter.name, locale);
 		filterLabelByKey.set(filter.key, baseLabel);
 		const labels = new Map<string, string>();
 		filter.values.forEach((val) => labels.set(val.value, val.label));

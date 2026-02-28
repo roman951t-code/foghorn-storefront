@@ -171,7 +171,7 @@ export const captureProductAuditBeforeHook = async (request: ActionRequest, cont
 	return request;
 };
 
-export const logProductFieldChanges = async (context: ActionContext) => {
+const logProductFieldChanges = async (context: ActionContext) => {
 	const available = await ensureProductAuditStorage();
 	if (!available) return;
 	const record = context.record as any;

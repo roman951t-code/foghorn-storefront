@@ -19,9 +19,7 @@ export const FILTER_TAG_EXCLUDED_KEYS: string[] = [
 	'orderBy',
 ];
 
-export const WISHLIST_SORT_KEYS = ['new', 'expensiveToCheap', 'cheapToExpensive'] as const;
-
-export const PRODUCT_TABS = ['about', 'characteristics', 'feedback'] as const;
+const PRODUCT_TABS = ['about', 'characteristics', 'feedback'] as const;
 export type ProductTabValue = (typeof PRODUCT_TABS)[number];
 export const isProductTabValue = (value: string): value is ProductTabValue =>
 	(PRODUCT_TABS as readonly string[]).includes(value);
@@ -35,5 +33,3 @@ export const PRODUCT_FILTERS_CACHE_TAG = 'product-filters';
 export const PRODUCT_CATALOG_CACHE_TAG = 'product-catalog';
 
 export const productCacheTagById = (productId: string) => `product:${productId}`;
-
-export const PRODUCT_CACHE_TAGS = [PRODUCT_LIST_CACHE_TAG, PRODUCT_DETAIL_CACHE_TAG] as const;

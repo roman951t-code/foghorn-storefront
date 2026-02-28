@@ -78,6 +78,10 @@ const productNameListComponent = componentLoader.add(
 	path.join(adminDir, 'components', 'ProductNameList')
 );
 const productListComponent = componentLoader.add('ProductList', path.join(adminDir, 'components', 'ProductList'));
+const productAttributeValueListComponent = componentLoader.add(
+	'ProductAttributeValueList',
+	path.join(adminDir, 'components', 'ProductAttributeValueList')
+);
 const orderListComponent = componentLoader.add('OrderList', path.join(adminDir, 'components', 'OrderList'));
 const productShowComponent = componentLoader.add('ProductShow', path.join(adminDir, 'components', 'ProductShow'));
 const productVariantMatrixComponent = componentLoader.add(
@@ -169,6 +173,7 @@ export {
 	productSchedulePublishActionComponent,
 	productNameListComponent,
 	productListComponent,
+	productAttributeValueListComponent,
 	orderListComponent,
 	productShowComponent,
 	productVariantMatrixComponent,

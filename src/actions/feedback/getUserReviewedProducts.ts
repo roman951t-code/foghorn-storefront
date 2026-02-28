@@ -8,6 +8,7 @@ import { headers } from 'next/headers';
 import { Review, SubcategoryProduct } from '@/types/product';
 import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
 import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
 
 export type UserReviewedProduct = {
 	product: SubcategoryProduct & { fullSlug: string };
@@ -39,6 +40,11 @@ export async function getUserReviewedProducts(limit: number, offset = 0) {
 						name: true,
 						fullSlug: true,
 						imageUrl: true,
+						productImages: {
+							select: { url: true, sortOrder: true, createdAt: true },
+							orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+							take: 1,
+						},
 						basePrice: true,
 						discountPrice: true,
 						discountStartAt: true,
@@ -64,7 +70,10 @@ export async function getUserReviewedProducts(limit: number, offset = 0) {
 				id: r.product.id,
 				name: r.product.name,
 				fullSlug: r.product.fullSlug,
-				imageUrl: r.product.imageUrl,
+				imageUrl: resolveProductPrimaryImageFromGallery(
+					r.product.imageUrl,
+					r.product.productImages.map((image) => image.url)
+				),
 				basePrice: Number(r.product.basePrice ?? 0),
 				discountPrice: getEffectiveDiscountPrice(
 					Number(r.product.basePrice ?? 0),

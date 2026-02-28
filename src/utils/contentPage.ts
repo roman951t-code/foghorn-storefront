@@ -7,7 +7,7 @@ type PageMeta = {
 	excerpt?: string | null;
 };
 
-export type FaqItem = { question: string; answer: string };
+type FaqItem = { question: string; answer: string };
 
 export function mergePageMetadata(base: Metadata, page: PageMeta | null): Metadata {
 	if (!page) return base;

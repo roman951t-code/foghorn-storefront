@@ -1,7 +1,7 @@
 import { Breadcrumb, type SystemStyleObject } from '@chakra-ui/react';
 import * as React from 'react';
 
-export interface BreadcrumbRootProps extends Breadcrumb.RootProps {
+interface BreadcrumbRootProps extends Breadcrumb.RootProps {
 	separator?: React.ReactNode;
 	separatorGap?: SystemStyleObject['gap'];
 }
@@ -31,5 +31,3 @@ export const BreadcrumbRoot = React.forwardRef<HTMLDivElement, BreadcrumbRootPro
 );
 
 export const BreadcrumbLink = Breadcrumb.Link;
-export const BreadcrumbCurrentLink = Breadcrumb.CurrentLink;
-export const BreadcrumbEllipsis = Breadcrumb.Ellipsis;

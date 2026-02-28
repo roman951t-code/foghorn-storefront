@@ -59,7 +59,7 @@ export default function ProductDetails({
 
 	return (
 		<Stack w='100%' gap='4' mt='6'>
-			<Wrap>
+			<Wrap gap='4'>
 				<Card.Root flex='1' minW='280px' size='sm' bg='bg.tertiary' borderColor='border'>
 					<Card.Header>
 						<Heading size='md'>{paymentTitle}</Heading>

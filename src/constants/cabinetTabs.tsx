@@ -27,17 +27,6 @@ export const CABINET_TAB_ROUTE_SUFFIXES: Record<CabinetTabValue, string> = {
 	reviewed: '/reviewed',
 };
 
-export const TAB_ANIMATION_PROPS = {
-	_open: {
-		animationName: 'fade-in, scale-in',
-		animationDuration: '300ms',
-	},
-	_closed: {
-		animationName: 'fade-out, scale-out',
-		animationDuration: '120ms',
-	},
-};
-
 export const CABINET_TAB_TRIGGER_PROPS = {
 	color: 'main',
 	fontWeight: 'medium',

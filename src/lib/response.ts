@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export const PRIVATE_NO_STORE_HEADERS = {
+const PRIVATE_NO_STORE_HEADERS = {
 	'Cache-Control': 'no-store, private',
 } as const;
 

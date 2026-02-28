@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { getTranslations } from 'next-intl/server';
 import { I18nData } from '@/types/i18n';
 
-export const accountSchemaShape = (t: {
+const accountSchemaShape = (t: {
 	nameRequired: string;
 	nameMax: string;
 	emailRequired: string;

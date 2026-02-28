@@ -6,9 +6,9 @@ type Translator = ReturnType<typeof useTranslations>;
 
 export const EMPTY_CART_DATA: CartData = { items: [] };
 
-export const CART_MESSAGE_KEYS = ['cart', 'emptyCart', 'emptyCartDescr', 'cartRemoveFailed'] as const;
-export const CART_NAV_MESSAGE_KEYS = ['order'] as const;
-export const CART_PRODUCT_MESSAGE_KEYS = ['totalAmount', 'numOfProducts'] as const;
+const CART_MESSAGE_KEYS = ['cart', 'emptyCart', 'emptyCartDescr', 'cartRemoveFailed'] as const;
+const CART_NAV_MESSAGE_KEYS = ['order'] as const;
+const CART_PRODUCT_MESSAGE_KEYS = ['totalAmount', 'numOfProducts'] as const;
 
 export const getCartModalI18nData = (
 	cartT: Translator,

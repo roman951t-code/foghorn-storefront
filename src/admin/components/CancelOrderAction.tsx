@@ -1,14 +1,27 @@
 import { useState } from 'react';
 import { ApiClient, type ActionProps, useNotice, useTranslation } from 'adminjs';
 import { Box, Button, Text } from '@adminjs/design-system';
+import { useNavigate } from 'react-router';
 import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
+const STALE_CANCEL_ACTION_ERROR = 'does not have an action with name: cancelOrder';
+
+const appendForceRefresh = (url: string, search?: string) => {
+	const searchParamsIdx = url.lastIndexOf('?');
+	const urlSearchParams = searchParamsIdx !== -1 ? url.substring(searchParamsIdx + 1) : null;
+	const oldParams = new URLSearchParams(search ?? urlSearchParams ?? window.location.search ?? '');
+	const newParams = new URLSearchParams(oldParams.toString());
+	newParams.set('refresh', 'true');
+	const newUrl = searchParamsIdx !== -1 ? url.substring(0, searchParamsIdx) : url;
+	return `${newUrl}?${newParams.toString()}`;
+};
 
 export default function CancelOrderAction({ action, record, resource }: ActionProps) {
 	const [localRecord, setLocalRecord] = useState(record);
 	const [refundPayment, setRefundPayment] = useState(false);
 	const [loading, setLoading] = useState(false);
+	const navigate = useNavigate();
 	const isReadOnly = useIsReadOnlyAdmin();
 	const addNotice = useNotice();
 	const { translateAction, translateMessage } = useTranslation();
@@ -35,17 +48,30 @@ export default function CancelOrderAction({ action, record, resource }: ActionPr
 			const response = await api.recordAction({
 				resourceId: resource.id,
 				recordId: localRecord.id,
-				actionName: 'cancelOrder',
+				actionName: action.name,
 				method: 'post',
 				data: formData,
 			});
+			if (response.data.redirectUrl) {
+				navigate(appendForceRefresh(response.data.redirectUrl));
+				return;
+			}
 			if (response.data.notice) {
 				addNotice(response.data.notice);
 			}
 			if (response.data.record) {
 				setLocalRecord(response.data.record);
 			}
-		} catch {
+		} catch (error) {
+			const errorMessage =
+				(error as { response?: { data?: { message?: unknown } }; message?: unknown })?.response?.data?.message ??
+				(error as { message?: unknown })?.message;
+			const normalizedError = typeof errorMessage === 'string' ? errorMessage.toLowerCase() : '';
+			if (normalizedError.includes(STALE_CANCEL_ACTION_ERROR.toLowerCase()) || normalizedError.includes('order-not-found')) {
+				addNotice({ message: 'order-not-found', type: 'error' });
+				navigate(appendForceRefresh(resource.href ?? `/admin/resources/${resource.id}`));
+				return;
+			}
 			addNotice({ message: 'status-update-failed', type: 'error' });
 		} finally {
 			setLoading(false);

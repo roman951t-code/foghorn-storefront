@@ -4,7 +4,7 @@ import pickBy from 'lodash/pickBy.js';
 import { type FormEventHandler, useEffect, useRef, useState } from 'react';
 import { BasePropertyComponent, useFilterDrawer, useQueryParams, useTranslation } from 'adminjs';
 
-export type FilterProps = {
+type FilterProps = {
 	resource: { id: string; filterProperties: Array<{ propertyPath: string }> };
 };
 

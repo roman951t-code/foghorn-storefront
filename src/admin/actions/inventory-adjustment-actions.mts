@@ -1,9 +1,9 @@
 import type { ActionHandler, RecordActionResponse } from 'adminjs';
 import { prisma } from '../prisma.mts';
 
-export type InventoryAdjustmentSource = 'EDIT' | 'BULK_ADJUST' | 'CSV_IMPORT';
+type InventoryAdjustmentSource = 'EDIT' | 'BULK_ADJUST' | 'CSV_IMPORT';
 
-export type InventoryAdjustmentEntry = {
+type InventoryAdjustmentEntry = {
 	id: string;
 	source: InventoryAdjustmentSource;
 	reason: string;

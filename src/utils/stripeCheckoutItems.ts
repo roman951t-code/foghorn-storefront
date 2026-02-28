@@ -1,6 +1,6 @@
 import type Stripe from 'stripe';
 
-export type StripeCheckoutOrderItemPayload = {
+type StripeCheckoutOrderItemPayload = {
 	productId: string;
 	variantId: string | null;
 	quantity: number;

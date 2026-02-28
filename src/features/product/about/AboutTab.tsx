@@ -23,7 +23,7 @@ import { LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
 import AddToFavourite from './AddToFavourite';
 import AddToCartButton from './AddToCartButton';
 import { Product } from '@/types/product';
-import { buildProductImages, resolveProductPrimaryImage } from '@/utils/productImages';
+import { buildProductImageGallery } from '@/utils/productImages';
 import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 import ProductDetails, { DetailOption } from './ProductDetails';
 import { VariantSelector } from './VariantSelector';
@@ -88,23 +88,19 @@ export default function AboutTab({
 	const selectedInStock = selectedVariant ? selectedVariant.stock > 0 : product.inStock;
 
 	const unitBasePrice = roundPrice(selectedVariant?.price ?? product.basePrice);
-	const discountPrice = product.discountPrice != null ? roundPrice(product.discountPrice) : null;
-	const productBasePrice = roundPrice(product.basePrice);
-	const discountAmount =
-		discountPrice != null ? roundPrice(Math.max(0, productBasePrice - discountPrice)) : 0;
-	const unitDiscountPrice = discountAmount > 0 ? Math.max(0, unitBasePrice - discountAmount) : null;
+	const unitDiscountPrice =
+		selectedVariant?.discountPrice != null
+			? roundPrice(selectedVariant.discountPrice)
+			: selectedVariant
+				? null
+				: product.discountPrice != null
+					? roundPrice(product.discountPrice)
+					: null;
 	const unitEffectivePrice = unitDiscountPrice ?? unitBasePrice;
-	const discount = unitDiscountPrice != null ? roundPrice(unitBasePrice - unitDiscountPrice) : 0;
+	const discount =
+		unitDiscountPrice != null ? roundPrice(Math.max(0, unitBasePrice - unitDiscountPrice)) : 0;
 
-	const normalizedImages = (product.images ?? []).filter(
-		(image): image is string => typeof image === 'string' && image.trim().length > 0
-	);
-	const generatedImages = buildProductImages(product.imageUrl ?? undefined, 4);
-	const galleryImages = normalizedImages.length
-		? normalizedImages
-		: generatedImages.length > 0
-			? generatedImages
-			: [resolveProductPrimaryImage(product.imageUrl)];
+	const galleryImages = buildProductImageGallery(product.imageUrl, product.images, 4);
 
 	const paymentOptions: DetailOption[] = [
 		{ key: 'paypal', label: checkoutT('payment.paypal'), icon: <RiPaypalFill /> },

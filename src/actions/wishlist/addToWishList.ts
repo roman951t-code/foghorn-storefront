@@ -35,10 +35,13 @@ export async function addToWishList(productId: string) {
 
 		const product = await prisma.product.findUnique({
 			where: { id: productId },
-			select: { id: true, inStock: true, status: true, publishStartAt: true, publishEndAt: true },
+			select: { id: true, status: true, publishStartAt: true, publishEndAt: true },
 		});
 
-		if (!product || !product.inStock || !isProductPublished(product.status, product.publishStartAt, product.publishEndAt)) {
+		if (
+			!product ||
+			!isProductPublished(product.status, product.publishStartAt, product.publishEndAt)
+		) {
 			return { success: false, message: wishlistT('wishlistUpdateFailed') };
 		}
 

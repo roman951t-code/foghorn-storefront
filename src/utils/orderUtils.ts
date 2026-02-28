@@ -24,7 +24,7 @@ export const formatMethodLabel = (value?: string | null) =>
 				.join(' ')
 		: '';
 
-export const normalizeKey = (value?: string | null) =>
+const normalizeKey = (value?: string | null) =>
 	value
 		? value
 				.toLowerCase()

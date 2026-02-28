@@ -4,7 +4,6 @@ import Pagination from '@/components/ui/Pagination';
 import { PRODUCTS_PER_PAGE, resolveOffset, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
 import { getUserOrders } from '@/actions/getUserOrders';
 import UserOrdersList from '../_components/orders/UserOrdersList';
-import CabinetSectionHeading from '../../../../components/ui/CabinetSectionHeading';
 
 type Props = {
 	searchParams?: Promise<{
@@ -16,10 +15,7 @@ type Props = {
 };
 
 export default async function Orders({ searchParams }: Props) {
-	const [navT, ordersT] = await Promise.all([
-		getTranslations('navigation'),
-		getTranslations('orders'),
-	]);
+	const ordersT = await getTranslations('orders');
 
 	const params = await searchParams;
 	if (params?.payment === 'success' && params?.session_id) {
@@ -42,7 +38,6 @@ export default async function Orders({ searchParams }: Props) {
 
 	return (
 		<VStack w='100%'>
-			<CabinetSectionHeading title={navT('sidebar.myOrders')} mb='8' />
 			<UserOrdersList orders={normalizedItems} emptyText={ordersT('empty')} />
 			{totalCount > 0 && (
 				<Pagination

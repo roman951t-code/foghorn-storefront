@@ -1,4 +1,4 @@
-export type AttributeSetItem = {
+type AttributeSetItem = {
 	attributeId: string;
 	sortOrder: number;
 };
@@ -38,4 +38,3 @@ export function sortByAttributeSet<T extends { id: string; name: string }>(
 		return a.name.localeCompare(b.name);
 	});
 }
-

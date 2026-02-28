@@ -74,10 +74,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 									transition='all 0.18s ease-in-out'
 									_hover={{ transform: 'translateY(-1px)', borderColor: 'main.secondary' }}
 								>
-									<Box
-										h='72px'
-										position='relative'
-									>
+									<Box h='100px' position='relative'>
 										<PriorityImageWithFallback
 											src={subImage}
 											fallbackSrc={SUBCATEGORY_PLACEHOLDER_IMAGE}

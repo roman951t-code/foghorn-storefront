@@ -17,10 +17,24 @@ export async function GET() {
 		}
 
 		const { user, ...rest } = session;
-		const socialAccount = await prisma.account.findFirst({
-			where: { userId: user.id, providerId: 'google' },
-			select: { id: true },
-		});
+		const sessionEmail = typeof user.email === 'string' ? user.email.trim() : '';
+		const [socialAccount, newsletterSubscription] = await Promise.all([
+			prisma.account.findFirst({
+				where: { userId: user.id, providerId: 'google' },
+				select: { id: true },
+			}),
+			sessionEmail
+				? prisma.newsletterSubscription.findFirst({
+						where: {
+							email: {
+								equals: sessionEmail,
+								mode: 'insensitive',
+							},
+						},
+						select: { id: true },
+					})
+				: Promise.resolve(null),
+		]);
 
 		return jsonNoStore({
 			...rest,
@@ -34,7 +48,7 @@ export async function GET() {
 				middleName: user.middleName,
 				notificationMethod: user.notificationMethod,
 				emailVerified: user.emailVerified,
-				subscribed: user.subscribed,
+				subscribed: Boolean(newsletterSubscription),
 				shippingCountry: (user as any).shippingCountry ?? null,
 				shippingRegion: (user as any).shippingRegion ?? null,
 				shippingCity: (user as any).shippingCity ?? null,

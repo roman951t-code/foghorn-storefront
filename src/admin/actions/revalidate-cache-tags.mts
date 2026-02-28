@@ -2,6 +2,16 @@ const LOCAL_STORE_URL = 'http://localhost:3000';
 const REVALIDATE_PATH = '/api/cache/revalidate';
 const MAX_ALERT_BODY_LENGTH = 1000;
 const isProduction = process.env.NODE_ENV === 'production';
+const isLocalHardenedProfileEnabled =
+	process.env.NODE_ENV === 'development' &&
+	!['0', 'false', 'no', 'off'].includes(
+		(typeof process.env.LOCAL_HARDENED_PROFILE === 'string'
+			? process.env.LOCAL_HARDENED_PROFILE
+			: ''
+		)
+			.trim()
+			.toLowerCase()
+	);
 const logDevRevalidateFailures = process.env.ADMIN_CACHE_REVALIDATE_VERBOSE === 'true';
 
 const normalizeTag = (tag: unknown): string | null => {
@@ -93,16 +103,24 @@ export const revalidateStorefrontCacheTags = async (tags: Array<string | null | 
 	if (normalizedTags.length === 0) return;
 	const startedAt = Date.now();
 
-	const secret = process.env.CACHE_REVALIDATE_SECRET;
-	if (!secret) {
-		if (process.env.NODE_ENV === 'production') {
-			const details = {
-				reason: 'missing-secret',
-				tagCount: normalizedTags.length,
-				tagsSample: normalizedTags.slice(0, 20),
-			};
+	const secret =
+		typeof process.env.CACHE_REVALIDATE_SECRET === 'string' &&
+		process.env.CACHE_REVALIDATE_SECRET.trim()
+			? process.env.CACHE_REVALIDATE_SECRET.trim()
+			: typeof process.env.CRON_SECRET === 'string' && process.env.CRON_SECRET.trim()
+				? process.env.CRON_SECRET.trim()
+				: null;
+	if (!secret && (isProduction || isLocalHardenedProfileEnabled)) {
+		const details = {
+			reason: 'missing-secret',
+			tagCount: normalizedTags.length,
+			tagsSample: normalizedTags.slice(0, 20),
+		};
+		if (isProduction) {
 			logAdminCacheEvent('error', 'revalidate-skipped', details);
 			await sendRevalidateAlert('revalidate-skipped', details);
+		} else if (logDevRevalidateFailures) {
+			logAdminCacheEvent('info', 'revalidate-skipped', details);
 		}
 		return;
 	}
@@ -113,7 +131,7 @@ export const revalidateStorefrontCacheTags = async (tags: Array<string | null | 
 			method: 'POST',
 			headers: {
 				'content-type': 'application/json',
-				'x-revalidate-secret': secret,
+				...(secret ? { 'x-revalidate-secret': secret } : {}),
 			},
 			body: JSON.stringify({ tags: normalizedTags }),
 		});

@@ -1,6 +1,5 @@
-export type UserAdminStatus = 'ACTIVE' | 'SUSPENDED' | 'BLOCKED';
-export type RestrictedUserAdminStatus = Exclude<UserAdminStatus, 'ACTIVE'>;
-export type UserRestrictionErrorCode = 'account_suspended' | 'account_blocked';
+type UserAdminStatus = 'ACTIVE' | 'SUSPENDED' | 'BLOCKED';
+type RestrictedUserAdminStatus = Exclude<UserAdminStatus, 'ACTIVE'>;
 
 const REASON_WHITESPACE = /\s+/g;
 
@@ -8,11 +7,7 @@ export const isRestrictedUserAdminStatus = (
 	status: UserAdminStatus | string | null | undefined
 ): status is RestrictedUserAdminStatus => status === 'SUSPENDED' || status === 'BLOCKED';
 
-export const toUserRestrictionErrorCode = (
-	status: RestrictedUserAdminStatus
-): UserRestrictionErrorCode => (status === 'SUSPENDED' ? 'account_suspended' : 'account_blocked');
-
-export const normalizeAdminNotes = (value: string | null | undefined): string | null => {
+const normalizeAdminNotes = (value: string | null | undefined): string | null => {
 	if (typeof value !== 'string') return null;
 	const normalized = value.trim().replace(REASON_WHITESPACE, ' ');
 	return normalized.length > 0 ? normalized : null;

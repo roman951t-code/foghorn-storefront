@@ -40,4 +40,3 @@ const publicEnv = {
 };
 
 export const PUBLIC_APP_URL = publicEnv.NEXT_PUBLIC_APP_URL;
-export { publicEnv };

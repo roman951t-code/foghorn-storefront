@@ -53,9 +53,7 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 								outlineColor: 'main.secondary',
 								outlineOffset: '2px',
 							}}
-							borderWidth='0.5px'
-							borderStyle='solid'
-							borderColor='border'
+							border='none'
 							borderRadius='sm'
 							overflow='hidden'
 							display='inline-block'
@@ -70,7 +68,7 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 								priority={i === 0}
 								fetchPriority='high'
 								style={{
-									width: '150px',
+									width: '160px',
 									height: '150px',
 									objectFit: 'cover',
 								}}
@@ -95,7 +93,7 @@ export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 	const altText = props.productName ? `${props.productName} photo` : 'Product photo';
 
 	return (
-		<Box position='relative' w='150px' h='150px' display='block' mx='auto'>
+		<Box position='relative' w='160px' h='149px' display='block' mx='auto'>
 			<Box
 				as='div'
 				_focusVisible={{
@@ -120,8 +118,8 @@ export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 					loading='eager'
 					fetchPriority='high'
 					style={{
-						width: '150px',
-						height: '150px',
+						width: '160px',
+						height: '147px',
 						objectFit: 'cover',
 					}}
 					sizes='(max-width: 768px) 35vw, 120px'

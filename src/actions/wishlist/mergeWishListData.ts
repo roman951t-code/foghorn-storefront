@@ -30,7 +30,7 @@ export async function mergeWishListData(localItems: { id: string }[]) {
 		}
 
 		const products = await prisma.product.findMany({
-			where: { id: { in: normalizedIds }, inStock: true, AND: [getPublishedProductWhere()] },
+			where: { id: { in: normalizedIds }, AND: [getPublishedProductWhere()] },
 			select: { id: true },
 		});
 		const validIds = new Set(products.map((p) => p.id));

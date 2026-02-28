@@ -15,7 +15,6 @@ import { useTranslations } from 'next-intl';
 import DateWithLocale from '@/components/ui/DateWithLocale';
 import CountPill from '@/components/ui/CountPill';
 import {
-	buildProductImages,
 	resolveProductPrimaryImage,
 	toPreviewImage,
 } from '@/utils/productImages';
@@ -75,8 +74,7 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 				<HStack gap='2' display={{ base: 'none', md: 'flex' }} overflowX='auto'>
 					{thumbItems.map((item) => {
 						const previewImage = toPreviewImage(
-							buildProductImages(item.product.imageUrl, 1)[0] ||
-								resolveProductPrimaryImage(item.product.imageUrl)
+							resolveProductPrimaryImage(item.product.imageUrl)
 						);
 
 						return (

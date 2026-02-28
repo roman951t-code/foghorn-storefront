@@ -11,6 +11,7 @@ import type { Filter } from '@/types/product';
 import { getLocaleFallbacks } from '@/utils/localeFallback';
 import { sortByAttributeSet } from '@/utils/attributeSetOrder';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
+import { toAttributeFilterKey } from '@/utils/attributeLocalization';
 
 const isNumericString = (value: string) => /^-?\d+(\.\d+)?$/.test(value.trim());
 
@@ -101,7 +102,7 @@ export async function getSubcategoryFilters(subcategorySlug: string) {
 		.map((attr) => {
 			return {
 				id: attr.id,
-				key: attr.name,
+				key: toAttributeFilterKey(attr.name, attr.id),
 				name: attr.name,
 				unit: attr.unit,
 				values: buildFilterValues(attr.products.map((p) => p.value)),
@@ -164,7 +165,7 @@ export async function getTagFilters(tag: string) {
 		.map((attr) => {
 			return {
 				id: attr.id,
-				key: attr.name,
+				key: toAttributeFilterKey(attr.name, attr.id),
 				name: attr.name,
 				unit: attr.unit,
 				values: buildFilterValues(attr.products.map((p) => p.value)),
@@ -247,7 +248,7 @@ export async function getSearchFilters(
 		.map((attr) => {
 			return {
 				id: attr.id,
-				key: attr.name,
+				key: toAttributeFilterKey(attr.name, attr.id),
 				name: attr.name,
 				unit: attr.unit,
 				values: buildFilterValues(attr.products.map((p) => p.value)),

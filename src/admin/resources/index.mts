@@ -85,6 +85,7 @@ import {
 	productSchedulePublishActionComponent,
 	productNameListComponent,
 	productListComponent,
+	productAttributeValueListComponent,
 	orderListComponent,
 	productShowComponent,
 	productVariantMatrixComponent,
@@ -210,6 +211,129 @@ const mapProductImagePayload = async (request: AdminRequestLike) => {
 		next.sortOrder = Number.isFinite(parsed) ? parsed : 0;
 	}
 	return { ...request, payload: next };
+};
+
+const PRODUCT_ATTRIBUTE_VALUE_PRODUCT_NAME_FILTER_KEY = 'filters.productNameSearch';
+const PRODUCT_ATTRIBUTE_VALUE_PRODUCT_FILTER_KEY = 'filters.product';
+const PRODUCT_ATTRIBUTE_VALUE_PRODUCT_ID_FILTER_KEY = 'filters.productId';
+
+const mapProductAttributeValueProductNameFilter = async (request: AdminRequestLike) => {
+	const query = request?.query;
+	if (!query || typeof query !== 'object') return request;
+
+	const nextQuery = { ...query } as Record<string, unknown>;
+	const nestedFiltersRaw =
+		typeof nextQuery.filters === 'object' && nextQuery.filters !== null
+			? (nextQuery.filters as Record<string, unknown>)
+			: null;
+	const nextNestedFilters = nestedFiltersRaw ? { ...nestedFiltersRaw } : null;
+
+	const rawSearchFromFlat = nextQuery[PRODUCT_ATTRIBUTE_VALUE_PRODUCT_NAME_FILTER_KEY];
+	const rawSearchFromNested = nextNestedFilters?.productNameSearch;
+	const rawSearch =
+		rawSearchFromFlat !== undefined && rawSearchFromFlat !== null
+			? rawSearchFromFlat
+			: rawSearchFromNested;
+	const searchValue = Array.isArray(rawSearch) ? rawSearch[0] : rawSearch;
+	const selectedProductFromFlat = nextQuery[PRODUCT_ATTRIBUTE_VALUE_PRODUCT_FILTER_KEY];
+	const selectedProductFromNested = nextNestedFilters?.product;
+
+	delete nextQuery[PRODUCT_ATTRIBUTE_VALUE_PRODUCT_NAME_FILTER_KEY];
+	delete nextQuery[PRODUCT_ATTRIBUTE_VALUE_PRODUCT_ID_FILTER_KEY];
+	if (nextNestedFilters && 'productNameSearch' in nextNestedFilters) {
+		delete nextNestedFilters.productNameSearch;
+	}
+	if (nextNestedFilters && 'productId' in nextNestedFilters) {
+		delete nextNestedFilters.productId;
+	}
+	if (nextNestedFilters) {
+		if (Object.keys(nextNestedFilters).length === 0) {
+			delete nextQuery.filters;
+		} else {
+			nextQuery.filters = nextNestedFilters;
+		}
+	}
+
+	const hasSelectedProductFilter =
+		(typeof selectedProductFromFlat === 'string' && selectedProductFromFlat.trim().length > 0) ||
+		(typeof selectedProductFromNested === 'string' && selectedProductFromNested.trim().length > 0);
+	if (hasSelectedProductFilter && !nextQuery.perPage) {
+		nextQuery.perPage = '200';
+	}
+
+	if (typeof searchValue !== 'string') {
+		return { ...request, query: nextQuery as AdminRequestLike['query'] };
+	}
+
+	const normalizedSearch = searchValue.trim();
+
+	if (!normalizedSearch) {
+		return { ...request, query: nextQuery as AdminRequestLike['query'] };
+	}
+
+	const exactMatchedProduct = await prisma.product.findFirst({
+		where: {
+			OR: [
+				{
+					name: {
+						equals: normalizedSearch,
+						mode: 'insensitive',
+					},
+				},
+				{
+					translations: {
+						some: {
+							name: {
+								equals: normalizedSearch,
+								mode: 'insensitive',
+							},
+						},
+					},
+				},
+			],
+		},
+		select: { id: true },
+		orderBy: { updatedAt: 'desc' },
+	});
+
+	const fuzzyMatchedProduct =
+		exactMatchedProduct ??
+		(await prisma.product.findFirst({
+			where: {
+				OR: [
+					{
+						name: {
+							contains: normalizedSearch,
+							mode: 'insensitive',
+						},
+					},
+					{
+						translations: {
+							some: {
+								name: {
+									contains: normalizedSearch,
+									mode: 'insensitive',
+								},
+							},
+						},
+					},
+				],
+			},
+			select: { id: true },
+			orderBy: { updatedAt: 'desc' },
+		}));
+
+	nextQuery[PRODUCT_ATTRIBUTE_VALUE_PRODUCT_FILTER_KEY] =
+		fuzzyMatchedProduct?.id ?? '__admin_no_matching_product__';
+	if (nextNestedFilters) {
+		nextNestedFilters.product = nextQuery[PRODUCT_ATTRIBUTE_VALUE_PRODUCT_FILTER_KEY];
+		nextQuery.filters = nextNestedFilters;
+	}
+	if (!nextQuery.perPage) {
+		nextQuery.perPage = '200';
+	}
+
+	return { ...request, query: nextQuery as AdminRequestLike['query'] };
 };
 
 const withProductGallerySyncErrorNotice = (response: AdminResponseLike): AdminResponseLike => ({
@@ -560,6 +684,37 @@ const getReviewMutationTags = (args: CacheRevalidationArgs) => {
 	return [...PRODUCT_CACHE_REVALIDATE_TAGS, ...productIds.map(getProductTagById)];
 };
 
+const normalizeRelationId = (value: unknown): string | null => {
+	const normalizedString = normalizeCacheValue(value);
+	if (normalizedString) return normalizedString;
+	if (!value || typeof value !== 'object') return null;
+	const relation = value as Record<string, unknown>;
+	return (
+		normalizeCacheValue(relation.id) ??
+		normalizeCacheValue(relation.value) ??
+		normalizeCacheValue(relation.recordId)
+	);
+};
+
+const getProductAttributeValueMutationTags = (args: CacheRevalidationArgs) => {
+	const productIds = new Set<string>();
+	collectMutationFieldValues('productId', args, { includeRequestPayload: true }).forEach((id) =>
+		productIds.add(id)
+	);
+	const productRelationValues = collectMutationFieldValues('product', args, {
+		includeRequestPayload: true,
+	});
+	productRelationValues
+		.map((value) => normalizeRelationId(value))
+		.filter((value): value is string => Boolean(value))
+		.forEach((id) => productIds.add(id));
+	const payloadProductId = normalizeRelationId(args.request?.payload?.product);
+	if (payloadProductId) {
+		productIds.add(payloadProductId);
+	}
+	return [...PRODUCT_CACHE_REVALIDATE_TAGS, ...Array.from(productIds).map(getProductTagById)];
+};
+
 const getProductCategoryMutationTags = () => [...PRODUCT_CATEGORY_CACHE_REVALIDATE_TAGS];
 
 const getPageMutationTags = (args: CacheRevalidationArgs) => {
@@ -637,6 +792,105 @@ const reviewMutationAfterHook = withCacheRevalidationAfter(
 	syncReviewAggregatesAfter,
 	getReviewMutationTags
 );
+
+const NEWSLETTER_MUTATION_EMAILS_CONTEXT_KEY = '__newsletterMutationEmails';
+
+const normalizeEmailValue = (value: unknown): string | null => {
+	if (typeof value !== 'string') return null;
+	const normalized = value.trim().toLowerCase();
+	return normalized.length > 0 ? normalized : null;
+};
+
+const normalizeUniqueEmails = (values: unknown[]): string[] => {
+	const unique = new Set<string>();
+	values.forEach((value) => {
+		const normalized = normalizeEmailValue(value);
+		if (normalized) unique.add(normalized);
+	});
+	return Array.from(unique);
+};
+
+const collectContextRecordFieldValues = (context: AdminContextLike, key: string): unknown[] => {
+	const values: unknown[] = [];
+	const addFromRecord = (record: unknown) => {
+		if (!record || typeof record !== 'object') return;
+		const typedRecord = record as AdminRecordLike;
+		if (typeof typedRecord.param === 'function') {
+			values.push(typedRecord.param(key));
+		}
+		values.push(typedRecord.params?.[key]);
+		values.push(typedRecord[key]);
+	};
+
+	addFromRecord(context?.record as unknown as AdminRecordLike);
+	if (Array.isArray(context?.records)) {
+		context.records.forEach((record) => addFromRecord(record as unknown as AdminRecordLike));
+	}
+
+	return values;
+};
+
+const buildEmailOrFilters = (emails: string[]) =>
+	emails.map((email) => ({
+		email: { equals: email, mode: 'insensitive' as const },
+	}));
+
+const captureNewsletterMutationEmailsBefore = async (
+	request: AdminRequestLike,
+	context: AdminContextLike
+) => {
+	const contextEmails = normalizeUniqueEmails(collectContextRecordFieldValues(context, 'email'));
+	const payloadEmail = normalizeEmailValue(request?.payload?.email);
+	const capturedEmails = payloadEmail ? [...contextEmails, payloadEmail] : contextEmails;
+
+	context[NEWSLETTER_MUTATION_EMAILS_CONTEXT_KEY] = normalizeUniqueEmails(capturedEmails);
+	return request;
+};
+
+const syncNewsletterUserSubscriptionStateAfter = async (
+	response: AdminResponseLike,
+	request: AdminRequestLike,
+	context: AdminContextLike
+) => {
+	if (response?.notice?.type === 'error') return response;
+
+	const args: CacheRevalidationArgs = { response, request, context };
+	const capturedEmailsFromContext = Array.isArray(context[NEWSLETTER_MUTATION_EMAILS_CONTEXT_KEY])
+		? (context[NEWSLETTER_MUTATION_EMAILS_CONTEXT_KEY] as unknown[])
+		: [];
+	const affectedEmails = normalizeUniqueEmails([
+		...capturedEmailsFromContext,
+		...collectMutationFieldValues('email', args, { includeRequestPayload: true }),
+	]);
+	if (affectedEmails.length === 0) return response;
+
+	const affectedEmailFilters = buildEmailOrFilters(affectedEmails);
+
+	try {
+		const activeSubscriptions = await prisma.newsletterSubscription.findMany({
+			where: { OR: affectedEmailFilters },
+			select: { email: true },
+		});
+		const subscribedEmails = normalizeUniqueEmails(activeSubscriptions.map((item) => item.email));
+		const subscribedEmailFilters = buildEmailOrFilters(subscribedEmails);
+
+		await prisma.user.updateMany({
+			where: { OR: affectedEmailFilters },
+			data: { subscribed: false },
+		});
+
+		if (subscribedEmailFilters.length > 0) {
+			await prisma.user.updateMany({
+				where: { OR: subscribedEmailFilters },
+				data: { subscribed: true },
+			});
+		}
+	} catch (error) {
+		console.error('[admin-newsletter] Failed to sync subscription state', error);
+	}
+
+	return response;
+};
 
 const withCacheRevalidationHandler = <T extends ActionResponse>(
 	handler: ActionHandler<T>,
@@ -1448,8 +1702,41 @@ export const resources = [
 		resource: { model: modelMap.ProductAttributeValue, client: prisma },
 		options: {
 			navigation: 'Catalog',
+			listProperties: ['product', 'attribute', 'value'],
+			filterProperties: ['product', 'attribute', 'value'],
 			properties: {
 				id: hidden,
+			},
+			actions: {
+				list: {
+					actionType: 'resource',
+					component: productAttributeValueListComponent,
+					before: mapProductAttributeValueProductNameFilter,
+				},
+				new: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductAttributeValueMutationTags
+					),
+				},
+				edit: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductAttributeValueMutationTags
+					),
+				},
+				delete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductAttributeValueMutationTags
+					),
+				},
+				bulkDelete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductAttributeValueMutationTags
+					),
+				},
 			},
 		},
 	},
@@ -2043,7 +2330,10 @@ export const resources = [
 		},
 		actions: {
 			new: { before: mapOrderDiscountPayload, after: syncOrderTotalsAfterDiscountChange },
-			edit: { before: mapOrderDiscountPayload, after: syncOrderTotalsAfterDiscountChange },
+			edit: {
+				isVisible: false,
+				isAccessible: false,
+			},
 			delete: { after: syncOrderTotalsAfterDiscountChange },
 		},
 	}),
@@ -2233,6 +2523,24 @@ export const resources = [
 				id: hidden,
 				email: { isTitle: true },
 				createdAt: readOnly,
+			},
+			actions: {
+				new: {
+					before: captureNewsletterMutationEmailsBefore,
+					after: syncNewsletterUserSubscriptionStateAfter,
+				},
+				edit: {
+					isVisible: false,
+					isAccessible: false,
+				},
+				delete: {
+					before: captureNewsletterMutationEmailsBefore,
+					after: syncNewsletterUserSubscriptionStateAfter,
+				},
+				bulkDelete: {
+					before: captureNewsletterMutationEmailsBefore,
+					after: syncNewsletterUserSubscriptionStateAfter,
+				},
 			},
 		},
 	},

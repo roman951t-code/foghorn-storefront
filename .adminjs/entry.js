@@ -39,6 +39,8 @@ import ProductNameList from '../src/admin/components/ProductNameList'
 AdminJS.UserComponents.ProductNameList = ProductNameList
 import ProductList from '../src/admin/components/ProductList'
 AdminJS.UserComponents.ProductList = ProductList
+import ProductAttributeValueList from '../src/admin/components/ProductAttributeValueList'
+AdminJS.UserComponents.ProductAttributeValueList = ProductAttributeValueList
 import OrderList from '../src/admin/components/OrderList'
 AdminJS.UserComponents.OrderList = OrderList
 import ProductShow from '../src/admin/components/ProductShow'

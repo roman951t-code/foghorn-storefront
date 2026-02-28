@@ -4,7 +4,7 @@ import 'server-only';
 
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
-import { emailSubscribeSchema } from 'validationSchemas/emailSubscribeSchema';
+import { createEmailSubscribeSchema } from 'validationSchemas/emailSubscribeSchema';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
@@ -24,7 +24,7 @@ export async function sendVerifyEmailAction(
 		getTranslations('emails'),
 	]);
 
-	const schema = await emailSubscribeSchema({
+	const schema = createEmailSubscribeSchema({
 		emailRequired: validationT('emailRequired'),
 		inputMaxLength: validationT('inputMaxLength'),
 		wrongEmail: validationT('wrongEmail'),

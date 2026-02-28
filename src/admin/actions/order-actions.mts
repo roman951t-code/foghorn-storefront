@@ -373,7 +373,7 @@ export const bulkMarkShipped = makeBulkStatusAction('SHIPPED');
 export const bulkMarkDelivered = makeBulkStatusAction('DELIVERED');
 
 export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
-	const { record, resource, currentAdmin } = context;
+	const { record, resource, currentAdmin, h } = context;
 	const method = ((req as { method?: string }).method ?? 'get').toLowerCase();
 	const payload = (req as { payload?: Record<string, unknown> }).payload ?? {};
 	const refundRequested = String(payload.refund ?? 'false') === 'true';
@@ -382,13 +382,8 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 		throw new Error('Missing record context');
 	}
 
-	if (method === 'get') {
-		return {
-			record: record.toJSON(currentAdmin),
-		};
-	}
-
 	const orderId = record.param('id') as string;
+	const resourceId = typeof (resource as any).id === 'function' ? (resource as any).id() : (resource as any).id;
 	const orderSnapshot = await prisma.order.findUnique({
 		where: { id: orderId },
 		select: { status: true, stripeSessionId: true },
@@ -397,6 +392,12 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 		return {
 			record: record.toJSON(currentAdmin),
 			notice: { message: 'order-not-found', type: 'error' },
+			redirectUrl: h.resourceUrl({ resourceId }),
+		};
+	}
+	if (method === 'get') {
+		return {
+			record: record.toJSON(currentAdmin),
 		};
 	}
 	if (
@@ -481,6 +482,7 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 			return {
 				record: record.toJSON(currentAdmin),
 				notice: { message: 'order-not-found', type: 'error' },
+				redirectUrl: h.resourceUrl({ resourceId }),
 			};
 		}
 		return {
@@ -509,10 +511,9 @@ export const deleteOrder: ActionHandler<RecordActionResponse> = async (req, _res
 	if (!record || !resource) {
 		throw new Error('Missing record context');
 	}
-	if (method === 'get') {
-		return { record: record.toJSON(currentAdmin) };
-	}
-	if (method !== 'post' && method !== 'delete') {
+	// AdminJS immediate custom actions are commonly executed via GET.
+	// Accept GET/POST/DELETE to keep the action functional across UI entry points.
+	if (method !== 'get' && method !== 'post' && method !== 'delete') {
 		return {
 			record: record.toJSON(currentAdmin),
 			notice: { message: 'order-delete-method-not-allowed', type: 'error' },

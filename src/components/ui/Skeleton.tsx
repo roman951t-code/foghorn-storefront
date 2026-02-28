@@ -47,14 +47,6 @@ export function LoadingSkeleton() {
 	);
 }
 
-export function ProductPreviewSkeleton() {
-	return (
-		<div style={{ display: 'flex', overflowX: 'hidden', overflowY: 'hidden', alignSelf: 'center' }}>
-			<div style={{ ...skeletonBlockStyle, width: '116px', height: '116px', borderRadius: '12px' }} />
-		</div>
-	);
-}
-
 export function Loading() {
 	return (
 		<div

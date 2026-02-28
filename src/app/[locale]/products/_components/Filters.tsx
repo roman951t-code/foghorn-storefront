@@ -14,6 +14,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 import { localizeUnit } from '@/utils/unitLocalization';
+import { localizeAttributeName } from '@/utils/attributeLocalization';
 
 type Props = {
 	filters: Filter[] | null;
@@ -52,7 +53,8 @@ export default function Filters({ filters }: Props) {
 			>
 				{filters.map((filter) => {
 					const selectedValues = searchParams.getAll(filter.key);
-					const filterLabel = filter.key === 'brand' ? t('brand') : filter.name;
+					const filterLabel =
+						filter.key === 'brand' ? t('brand') : localizeAttributeName(filter.name, locale);
 					const localizedUnit = filter.key === 'brand' ? null : localizeUnit(filter.unit, locale);
 					const filterLabelWithUnit = localizedUnit
 						? `${filterLabel} (${localizedUnit})`
@@ -125,8 +127,8 @@ export default function Filters({ filters }: Props) {
 									</CheckboxGroup>
 								</Fieldset.Root>
 							</AccordionItemContent>
-						</AccordionItem>
-					);
+							</AccordionItem>
+						);
 				})}
 			</AccordionRoot>
 		</Box>

@@ -9,7 +9,7 @@ import { revalidateTag, updateTag } from 'next/cache';
 import { DEFAULT_LOCALE } from '@/constants/locales';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getEffectiveVariantDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { isProductPublished } from '@/utils/publishSchedule';
 import { normalizeOrder } from './orderUtils';
@@ -26,7 +26,7 @@ import {
 
 type CreateOrderItemPayload = { productId: string; variantId: string | null; quantity: number };
 
-export type CreateOrderPayload = {
+type CreateOrderPayload = {
 	items: CreateOrderItemPayload[];
 	paymentMethod?: string;
 	shipmentMethod?: string;
@@ -155,6 +155,9 @@ export async function createOrderAction(
 					productId: true,
 					sku: true,
 					price: true,
+					discountPrice: true,
+					discountStartAt: true,
+					discountEndAt: true,
 					stock: true,
 					attributes: {
 						select: {
@@ -178,6 +181,9 @@ export async function createOrderAction(
 					id: true,
 					productId: true,
 					price: true,
+					discountPrice: true,
+					discountStartAt: true,
+					discountEndAt: true,
 					stock: true,
 					sku: true,
 					attributes: {
@@ -222,19 +228,18 @@ export async function createOrderAction(
 				return null;
 			}
 
-			const basePrice = Number(product.basePrice ?? 0);
-			const scheduledDiscountPrice = getEffectiveDiscountPrice(
-				basePrice,
-				product.discountPrice != null ? Number(product.discountPrice) : null,
-				product.discountStartAt ?? null,
-				product.discountEndAt ?? null
-			);
-			const discountAmount =
-				scheduledDiscountPrice != null ? Math.max(0, basePrice - scheduledDiscountPrice) : 0;
-
 			const variantBasePrice = variant.price?.toNumber?.() ?? 0;
 			const effectiveVariantPrice =
-				discountAmount > 0 ? Math.max(0, variantBasePrice - discountAmount) : variantBasePrice;
+				getEffectiveVariantDiscountPrice({
+					variantBasePrice,
+					variantDiscountPrice: variant.discountPrice?.toNumber?.() ?? null,
+					variantDiscountStartAt: variant.discountStartAt ?? null,
+					variantDiscountEndAt: variant.discountEndAt ?? null,
+					productBasePrice: Number(product.basePrice ?? 0),
+					productDiscountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,
+					productDiscountStartAt: product.discountStartAt ?? null,
+					productDiscountEndAt: product.discountEndAt ?? null,
+				}) ?? variantBasePrice;
 
 			const baseUnitPrice = toCurrency(Number(variantBasePrice));
 			const unitPrice = toCurrency(Number(effectiveVariantPrice));

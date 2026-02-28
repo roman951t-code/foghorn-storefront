@@ -72,6 +72,11 @@ export async function getUserOrders(limit: number, offset = 0): Promise<{
 								name: true,
 								fullSlug: true,
 								imageUrl: true,
+								productImages: {
+									select: { url: true, sortOrder: true, createdAt: true },
+									orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+									take: 1,
+								},
 							},
 						},
 						variant: {

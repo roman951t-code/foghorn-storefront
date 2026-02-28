@@ -10,7 +10,8 @@ export default function TabsList() {
 
 	return (
 		<Tabs.List
-			my='4'
+			mt='4'
+			mb='4'
 			gapX='4'
 			rowGap='3'
 			hideBelow='xs'

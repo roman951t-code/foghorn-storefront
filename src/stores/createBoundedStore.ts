@@ -20,5 +20,5 @@ export function createBoundedStore<TState>(initializer: StateCreator<TState>): B
 	return useBoundStore;
 }
 
-export type BoundStore<TState> = (<TSlice>(selector: Selector<TState, TSlice>) => TSlice) &
+type BoundStore<TState> = (<TSlice>(selector: Selector<TState, TSlice>) => TSlice) &
 	StoreApi<TState> & { getServerState: () => TState };

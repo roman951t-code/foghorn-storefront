@@ -6,8 +6,12 @@ import Pagination from '@/components/ui/Pagination';
 import { auth } from '@/lib/auth';
 import { getRecentlyViewedProducts } from '@/actions/products/getRecentlyViewedProducts';
 import ClearViewedButton from '../_components/viewed/ClearViewedButton';
-import { PRODUCTS_PER_PAGE, resolveOffset, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
-import CabinetSectionHeading from '@/components/ui/CabinetSectionHeading';
+import {
+	PRODUCTS_PER_PAGE,
+	resolveOffset,
+	resolvePageParam,
+	resolvePerPageParam,
+} from '@/constants/pagination';
 import { LocaleParams } from '@/types/routing';
 
 const VIEWED_LIMIT = 32;
@@ -21,8 +25,7 @@ type Props = LocaleParams & {
 
 export default async function Reviewed({ params, searchParams }: Props) {
 	const { locale } = await params;
-	const [navT, genT, productsT] = await Promise.all([
-		getTranslations('navigation'),
+	const [genT, productsT] = await Promise.all([
 		getTranslations('common'),
 		getTranslations('products'),
 	]);
@@ -46,13 +49,12 @@ export default async function Reviewed({ params, searchParams }: Props) {
 
 	return (
 		<VStack w='100%'>
-			<CabinetSectionHeading title={navT('sidebar.reviewedProducts')} />
 			{hasViewedProducts && (
 				<ClearViewedButton
 					text={genT('clear')}
-					w={{ base: 'full', sm: '140px' }}
-					alignSelf='flex-end'
-					mt={{ base: '8', sm: '0' }}
+					w='160px'
+					alignSelf={{ base: 'center', sm: 'flex-end' }}
+					mt={{ base: '4', sm: '0' }}
 				/>
 			)}
 

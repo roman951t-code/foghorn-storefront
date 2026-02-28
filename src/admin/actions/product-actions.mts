@@ -17,6 +17,24 @@ const makeUniqueCopySlug = async (baseSlug: string) => {
 	return candidate;
 };
 
+const PRODUCT_CODE_MAX_LENGTH = 64;
+
+const makeUniqueCopyProductCode = async (baseCode: string) => {
+	const normalized = baseCode.trim();
+	const safeBase = normalized === '' ? 'product' : normalized.replace(/[^A-Za-z0-9_-]/g, '_');
+	const buildCandidate = (suffix: string) => {
+		const baseLimit = Math.max(1, PRODUCT_CODE_MAX_LENGTH - suffix.length);
+		return `${safeBase.slice(0, baseLimit)}${suffix}`;
+	};
+	let counter = 1;
+	let candidate = buildCandidate('-copy');
+	while (await prisma.product.findUnique({ where: { productCode: candidate }, select: { id: true } })) {
+		counter += 1;
+		candidate = buildCandidate(`-copy-${counter}`);
+	}
+	return candidate;
+};
+
 const replaceSlugInFullSlug = (fullSlug: string, nextSlug: string) => {
 	const idx = fullSlug.lastIndexOf('/');
 	if (idx === -1) return nextSlug;
@@ -128,6 +146,7 @@ export const duplicateProduct: ActionHandler<RecordActionResponse> = async (_req
 
 	const nextSlug = await makeUniqueCopySlug(product.slug);
 	const nextFullSlug = replaceSlugInFullSlug(product.fullSlug, nextSlug);
+	const nextProductCode = await makeUniqueCopyProductCode(product.productCode);
 
 	try {
 		const created = await prisma.product.create({
@@ -143,7 +162,7 @@ export const duplicateProduct: ActionHandler<RecordActionResponse> = async (_req
 				imageUrl: product.imageUrl,
 				basePrice: product.basePrice,
 				discountPrice: product.discountPrice,
-				productCode: product.productCode,
+				productCode: nextProductCode,
 				stock: product.stock,
 				inStock: product.inStock,
 				brandId: product.brandId,
@@ -168,7 +187,8 @@ export const duplicateProduct: ActionHandler<RecordActionResponse> = async (_req
 			notice: { message: 'product-duplicated', type: 'success' },
 			redirectUrl,
 		};
-	} catch {
+	} catch (error) {
+		console.error('[admin] Failed to duplicate product', { productId, error });
 		return { record: record.toJSON(currentAdmin), notice: { message: 'product-duplicate-failed', type: 'error' } };
 	}
 };

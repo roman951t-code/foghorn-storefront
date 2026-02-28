@@ -7,7 +7,6 @@ import { useMemo } from 'react';
 import FeedbackModal from '@/features/product/FeedbackModal';
 import type { Review, SubcategoryProduct } from '@/types/product';
 import {
-	buildProductImages,
 	resolveProductPrimaryImage,
 	toPreviewImage,
 } from '@/utils/productImages';
@@ -22,7 +21,7 @@ type Props = {
 export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 	const productHref = useMemo(() => `/products/${product.fullSlug}`, [product.fullSlug]);
 	const previewImage = toPreviewImage(
-		buildProductImages(product.imageUrl, 1)[0] || resolveProductPrimaryImage(product.imageUrl)
+		resolveProductPrimaryImage(product.imageUrl)
 	);
 
 	return (

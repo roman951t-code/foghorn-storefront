@@ -126,7 +126,10 @@ export default function SearchInput({
 		<Group
 			as='form'
 			role='search'
-			onSubmit={(event) => event.preventDefault()}
+			onSubmit={(event) => {
+				event.preventDefault();
+				redirectToSearch();
+			}}
 			flex='1'
 			hideBelow={hideBelow}
 			px={{ base: '0px', md: '20px' }}

@@ -12,7 +12,7 @@ import { stripe } from '@/lib/stripe';
 import { STORE_CURRENCY_CODE_LOWER } from '@/config/currency';
 import { normalizeOrder } from '../orderUtils';
 import { isProductPublished } from '@/utils/publishSchedule';
-import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import { getEffectiveVariantDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
@@ -325,6 +325,9 @@ async function finalizeStripeOrderInternal(
 					productId: true,
 					sku: true,
 					price: true,
+					discountPrice: true,
+					discountStartAt: true,
+					discountEndAt: true,
 					stock: true,
 					attributes: {
 						select: {
@@ -349,6 +352,9 @@ async function finalizeStripeOrderInternal(
 					productId: true,
 					sku: true,
 					price: true,
+					discountPrice: true,
+					discountStartAt: true,
+					discountEndAt: true,
 					stock: true,
 					attributes: {
 						select: {
@@ -395,19 +401,18 @@ async function finalizeStripeOrderInternal(
 				return null;
 			}
 
-			const productBase = product.basePrice?.toNumber?.() ?? 0;
-			const effectiveProductDiscount = getEffectiveDiscountPrice(
-				productBase,
-				product.discountPrice?.toNumber?.() ?? null,
-				product.discountStartAt ?? null,
-				product.discountEndAt ?? null
-			);
-			const discountAmount =
-				effectiveProductDiscount != null ? Math.max(0, productBase - effectiveProductDiscount) : 0;
-
 			const variantBase = variant.price?.toNumber?.() ?? 0;
 			const effectiveVariantPrice =
-				discountAmount > 0 ? Math.max(0, variantBase - discountAmount) : variantBase;
+				getEffectiveVariantDiscountPrice({
+					variantBasePrice: variantBase,
+					variantDiscountPrice: variant.discountPrice?.toNumber?.() ?? null,
+					variantDiscountStartAt: variant.discountStartAt ?? null,
+					variantDiscountEndAt: variant.discountEndAt ?? null,
+					productBasePrice: product.basePrice?.toNumber?.() ?? 0,
+					productDiscountPrice: product.discountPrice?.toNumber?.() ?? null,
+					productDiscountStartAt: product.discountStartAt ?? null,
+					productDiscountEndAt: product.discountEndAt ?? null,
+				}) ?? variantBase;
 
 			const baseUnitPrice = toCurrency(Number(variantBase));
 			const unitPrice = toCurrency(Number(effectiveVariantPrice));

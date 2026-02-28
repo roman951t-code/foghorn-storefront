@@ -4,8 +4,14 @@ import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 import { DEFAULT_LOCALE } from '@/constants/locales';
 import { prisma } from '@/lib/prisma';
-import { buildProductImages, resolveProductPrimaryImage } from '@/utils/productImages';
-import { getEffectiveDiscountPrice } from '@/utils/discountSchedule';
+import {
+	buildProductImageGallery,
+	resolveProductPrimaryImageFromGallery,
+} from '@/utils/productImages';
+import {
+	getEffectiveDiscountPrice,
+	getEffectiveVariantDiscountPrice,
+} from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import {
@@ -86,6 +92,9 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 					id: true,
 					sku: true,
 					price: true,
+					discountPrice: true,
+					discountStartAt: true,
+					discountEndAt: true,
 					stock: true,
 					attributes: {
 						select: {
@@ -116,23 +125,43 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 	if (!product) return null;
 	const translation = pickLocalizedTranslation(product.translations, locale);
 	const persistedImages = product.productImages.map((image) => image.url).filter(Boolean);
-	const primaryImageUrl = resolveProductPrimaryImage(product.imageUrl);
-	const images = persistedImages.length
-		? persistedImages
-		: buildProductImages(product.imageUrl ?? undefined, 4);
+	const primaryImageUrl = resolveProductPrimaryImageFromGallery(product.imageUrl, persistedImages);
+	const images = buildProductImageGallery(product.imageUrl, persistedImages, 4);
 	const basePrice = product.basePrice.toNumber();
 	const attributeSetItems = product.category?.attributeSet?.items ?? [];
 
+	const addUniqueAttributeValue = (values: string[], nextValueRaw: string) => {
+		const nextValue = nextValueRaw.trim();
+		if (!nextValue) return;
+		const hasValue = values.some((value) => value.toLowerCase() === nextValue.toLowerCase());
+		if (!hasValue) values.push(nextValue);
+	};
+
+	const toAttributeDisplayValue = (values: string[]) =>
+		values.length > 0
+			? values
+					.slice()
+					.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+					.join(', ')
+			: null;
+
 	const attributeValueById = new Map<
 		string,
-		{ id: string; name: string; unit: string | null; value: string }
+		{ id: string; name: string; unit: string | null; values: string[] }
 	>();
 	for (const a of product.attributes) {
+		const existing = attributeValueById.get(a.attribute.id);
+		if (existing) {
+			addUniqueAttributeValue(existing.values, a.value);
+			continue;
+		}
+		const values: string[] = [];
+		addUniqueAttributeValue(values, a.value);
 		attributeValueById.set(a.attribute.id, {
 			id: a.attribute.id,
 			name: a.attribute.name,
 			unit: a.attribute.unit,
-			value: a.value,
+			values,
 		});
 	}
 
@@ -147,7 +176,7 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 						id,
 						name: item.attribute.name,
 						unit: item.attribute.unit,
-						value: existing?.value ?? null,
+						value: existing ? toAttributeDisplayValue(existing.values) : null,
 					};
 			  })
 			: [];
@@ -157,13 +186,15 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 			? [...attributeValueById.values()]
 					.filter((a) => !attributeIdsInSet.has(a.id))
 					.sort((a, b) => a.name.localeCompare(b.name))
-					.map((a) => ({ ...a, value: a.value }))
-			: [...attributeValueById.values()].sort((a, b) => a.name.localeCompare(b.name));
+					.map((a) => ({ ...a, value: toAttributeDisplayValue(a.values) }))
+			: [...attributeValueById.values()]
+					.sort((a, b) => a.name.localeCompare(b.name))
+					.map((a) => ({ ...a, value: toAttributeDisplayValue(a.values) }));
 
 	const mergedAttributes =
 		attributeSetItems.length > 0
 			? [...setAttributes, ...extraAttributes]
-			: extraAttributes.map((a) => ({ ...a, value: a.value }));
+			: extraAttributes;
 
 	const { category, productImages, translations, ...productWithoutCategory } = product;
 	return {
@@ -183,7 +214,7 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 			product.discountStartAt ?? null,
 			product.discountEndAt ?? null
 		),
-		images: images.length > 0 ? images : [primaryImageUrl],
+		images,
 		attributes: mergedAttributes.map((a) => ({
 			name: a.name,
 			unit: a.unit,
@@ -192,6 +223,16 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 		variants: product.variants.map((v) => ({
 			...v,
 			price: v.price.toNumber(),
+			discountPrice: getEffectiveVariantDiscountPrice({
+				variantBasePrice: v.price.toNumber(),
+				variantDiscountPrice: v.discountPrice?.toNumber() ?? null,
+				variantDiscountStartAt: v.discountStartAt ?? null,
+				variantDiscountEndAt: v.discountEndAt ?? null,
+				productBasePrice: basePrice,
+				productDiscountPrice: product.discountPrice?.toNumber() ?? null,
+				productDiscountStartAt: product.discountStartAt ?? null,
+				productDiscountEndAt: product.discountEndAt ?? null,
+			}),
 			attributes: v.attributes.map((a) => ({
 				attributeId: a.attribute.id,
 				name: a.attribute.name,

@@ -1,7 +1,6 @@
 import { VStack } from '@chakra-ui/react';
 import WishList from '../_components/wishlist/WishList';
 import WishlistPagination from '../_components/wishlist/WishlistPagination';
-import CabinetSectionHeading from '@/components/ui/CabinetSectionHeading';
 import { PRODUCTS_PER_PAGE, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
 import { getTranslations } from 'next-intl/server';
 
@@ -13,8 +12,7 @@ type Props = {
 };
 
 export default async function Wishlist({ searchParams }: Props) {
-	const [navT, prodT, genT, wishT] = await Promise.all([
-		getTranslations('navigation'),
+	const [prodT, genT, wishT] = await Promise.all([
 		getTranslations('products'),
 		getTranslations('common'),
 		getTranslations('wishlist'),
@@ -33,7 +31,6 @@ export default async function Wishlist({ searchParams }: Props) {
 
 	return (
 		<VStack>
-			<CabinetSectionHeading title={navT('sidebar.wishList')} />
 			<WishList
 				emptyText={wishT('wishListEmpty')}
 				currentPage={currentPage}

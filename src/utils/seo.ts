@@ -43,7 +43,7 @@ export const localizePath = (locale: AppLocale, pathname: string) =>
 
 export const absoluteUrl = (pathWithQuery: string) => new URL(pathWithQuery, APP_URL).toString();
 
-export const toHrefLang = (locale: AppLocale) => LOCALE_TO_HTML_LANG[locale] ?? locale;
+const toHrefLang = (locale: AppLocale) => LOCALE_TO_HTML_LANG[locale] ?? locale;
 
 export function buildLanguageAlternates(
 	locale: AppLocale,

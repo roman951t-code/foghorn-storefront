@@ -1,7 +1,7 @@
 import { CartProduct } from '@/types/cart';
 import { roundPrice } from '@/utils/priceFormatting';
 
-export type CartTotals = {
+type CartTotals = {
 	totalCount: number;
 	baseTotal: number;
 	discountedTotal: number;

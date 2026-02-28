@@ -60,7 +60,7 @@ const LanguageSelect = () => {
 	}
 
 	return (
-		<Box flex alignItems='center'>
+		<Box flex alignItems='center' className='admin-locale-switcher'>
 			<DropDown>
 				<DropDownTrigger>
 					<Button color='text'>
@@ -84,15 +84,50 @@ const LanguageSelect = () => {
 	);
 };
 
+const UserMenu = ({
+	session,
+	paths,
+}: {
+	session?: AdminState['session'];
+	paths?: AdminState['paths'];
+}) => {
+	const { translateButton } = useTranslation();
+
+	if (!session?.email) {
+		return null;
+	}
+
+	const rootPath = paths?.rootPath ?? '/admin';
+	const logoutPath = paths?.logoutPath ?? `${rootPath}/logout`;
+
+	return (
+		<Box flex alignItems='center'>
+				<DropDown stick='right'>
+					<DropDownTrigger>
+						<Button color='text' className='admin-user-menu-trigger' title={session.email}>
+							<Icon icon='User' />
+							<span className='admin-user-menu-email'>{session.email}</span>
+						</Button>
+					</DropDownTrigger>
+				<DropDownMenu minWidth='100%'>
+					<DropDownItem as='a' href={logoutPath} className='admin-user-menu-logout-item'>
+						<Icon icon='LogOut' />
+						<Text as='span'>{translateButton('logout')}</Text>
+					</DropDownItem>
+				</DropDownMenu>
+			</DropDown>
+		</Box>
+	);
+};
+
 export default function TopBar({ toggleSidebar }: TopBarProps) {
 	const windowState = typeof window === 'undefined' ? null : (window as WindowWithAdminState);
 	const reduxState = windowState?.REDUX_STATE ?? {};
 	const session = reduxState.session;
 	const paths = reduxState.paths;
 	const versions = reduxState.versions;
-	const { translateMessage, translateButton } = useTranslation();
+	const { translateMessage } = useTranslation();
 	const rootPath = paths?.rootPath ?? '/admin';
-	const logoutPath = paths?.logoutPath ?? `${rootPath}/logout`;
 	const homeLabel = translateMessage('admin-home');
 
 	return (
@@ -116,6 +151,7 @@ export default function TopBar({ toggleSidebar }: TopBarProps) {
 					px={['default', 'lg']}
 					onClick={toggleSidebar}
 					aria-label='Toggle sidebar'
+					className='admin-menu-toggle-button'
 					display={['block', 'block', 'block', 'block', 'none']}
 				>
 					<Icon icon='Menu' size={24} />
@@ -127,12 +163,7 @@ export default function TopBar({ toggleSidebar }: TopBarProps) {
 			</Box>
 			<Version versions={versions ?? {}} />
 			<LanguageSelect />
-			{session?.email ? (
-				<a href={logoutPath} className='admin-home-link admin-logout-link'>
-					<Icon icon='LogOut' />
-					{translateButton('logout')}
-				</a>
-			) : null}
+			<UserMenu session={session} paths={paths} />
 		</Box>
 	);
 }

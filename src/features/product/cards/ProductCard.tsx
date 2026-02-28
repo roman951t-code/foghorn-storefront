@@ -1,6 +1,6 @@
 'use client';
 import { useId, useState } from 'react';
-import { FiHeart } from 'react-icons/fi';
+import { FiHeart, FiShoppingCart } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
 import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link, Icon } from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
@@ -14,10 +14,9 @@ import '@/styles/swiper.css';
 import { useCart } from '@/hooks/useCart';
 import { useWishList } from '@/hooks/useWishList';
 import { SubcategoryProduct } from '@/types/product';
-import { buildProductImages, resolveProductPrimaryImage } from '@/utils/productImages';
+import { buildProductImageGallery } from '@/utils/productImages';
 import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
-import { MdOutlineShoppingCart, MdShoppingCart } from 'react-icons/md';
-import { FaHeart } from 'react-icons/fa';
+import { BsBagCheck, BsBagHeart } from 'react-icons/bs';
 
 export type CardProduct = SubcategoryProduct & {
 	imageUrl?: string | null;
@@ -51,15 +50,7 @@ export default function ProductCard({ product }: Props) {
 	const [isLoading, setIsLoading] = useState(false);
 	const { productIds, handleAddItem, handleRemoveItem } = useCart();
 	const { ids: wishListIds, handleWishAdd, handleWishRemove } = useWishList();
-	const normalizedImages = (product.images ?? []).filter(
-		(image): image is string => typeof image === 'string' && image.trim().length > 0
-	);
-	const generatedImages = buildProductImages(product.imageUrl, 3);
-	const previewImages = normalizedImages.length
-		? normalizedImages
-		: generatedImages.length > 0
-			? generatedImages
-			: [resolveProductPrimaryImage(product.imageUrl)];
+	const previewImages = buildProductImageGallery(product.imageUrl, product.images, 3);
 
 	if (!product) return null;
 
@@ -126,10 +117,10 @@ export default function ProductCard({ product }: Props) {
 		<Card.Root
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			w='full'
+			h='full'
 			maxW='300px'
 			minW='250px'
 			mx='auto'
-			h='full'
 			borderWidth='0.5px'
 			borderStyle='solid'
 			borderColor='border'
@@ -150,15 +141,15 @@ export default function ProductCard({ product }: Props) {
 						disabled={!isInStock}
 						rounded='md'
 						colorPalette='green'
-						color={{ base: 'colorPalette.600', _dark: 'colorPalette.500' }}
+						color={{ base: 'colorPalette.600', _dark: 'colorPalette.400' }}
 						transition='all 0.2s ease-in-out'
 						_hover={{
 							bg: 'colorPalette.600',
 							color: 'main.lightOnly',
 						}}
 					>
-						<Icon size='lg' aria-label='Wish'>
-							{isInCart ? <MdShoppingCart /> : <MdOutlineShoppingCart />}
+						<Icon size='md' aria-label='Wish'>
+							{isInCart ? <BsBagCheck /> : <FiShoppingCart />}
 						</Icon>
 					</IconButton>
 
@@ -175,7 +166,7 @@ export default function ProductCard({ product }: Props) {
 							color: 'main.lightOnly',
 						}}
 					>
-						{isInWishlist ? <FaHeart /> : <FiHeart />}
+						{isInWishlist ? <BsBagHeart /> : <FiHeart />}
 					</IconButton>
 				</Flex>
 
@@ -196,7 +187,7 @@ export default function ProductCard({ product }: Props) {
 						</LocaleNavLink>
 
 						{!isInStock && (
-							<Text color='main' fontSize='md' mt='3'>
+							<Text color='main' fontSize='md' mt='2'>
 								{t('productIsOutOfStock')}
 							</Text>
 						)}
@@ -211,7 +202,13 @@ export default function ProductCard({ product }: Props) {
 					>
 						{formatUsdPrice(displayPrice)}
 						{discount > 0 && (
-							<Text as='span' pl='2' color='main' fontSize={{ base: 'md', md: 'sm' }} textDecoration='line-through'>
+							<Text
+								as='span'
+								pl='2'
+								color='main'
+								fontSize={{ base: 'md', md: 'sm' }}
+								textDecoration='line-through'
+							>
 								{formatUsdPrice(basePrice)}
 								<Badge
 									variant='solid'
@@ -240,7 +237,11 @@ export default function ProductCard({ product }: Props) {
 						fontSize={{ base: 'md', md: 'sm' }}
 						aria-label={`${t('feedback')} (${product.reviewCount ?? 0}) — ${name}`}
 						color='main'
-						_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
+						_focusVisible={{
+							outline: '2px solid',
+							outlineColor: 'main.secondary',
+							outlineOffset: '2px',
+						}}
 					>
 						{t('feedback')} ({product.reviewCount ?? 0})
 					</Link>
