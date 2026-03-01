@@ -1281,8 +1281,8 @@ export default function Dashboard() {
 											<Box style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
 												<Box
 													style={{
-														width: 50,
-														height: 50,
+														width: 76,
+														height: 76,
 														borderRadius: 10,
 														overflow: 'hidden',
 														background: '#F1F5F9',

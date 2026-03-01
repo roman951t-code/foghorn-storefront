@@ -22,9 +22,9 @@ const AuthBtn = ({ onClick }: AuthBtnProps) => (
 		variant='ghost'
 		color='main.lightOnly'
 		rounded='md'
-		colorPalette='blue'
+		colorPalette='orange'
 		bg={{ _hover: 'colorPalette.400' }}
-		_focusVisible={{ boxShadow: '0 0 0 2px var(--chakra-colors-blue-400)' }}
+		_focusVisible={{ boxShadow: '0 0 0 2px var(--chakra-colors-cyan-400)' }}
 	>
 		<FiUser />
 	</IconButton>

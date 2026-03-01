@@ -105,3 +105,22 @@
 	width: 100%;
 	height: 100%;
 }
+
+.imageModalSwiper {
+	width: 100%;
+	height: 100%;
+}
+
+.imageModalSwiper .swiper-slide {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.imageModalSwiper.swiper-grab-cursor .swiper-slide {
+	cursor: grab;
+}
+
+.imageModalSwiper.swiper-grab-cursor .swiper-slide:active {
+	cursor: grabbing;
+}

@@ -23,6 +23,14 @@ type Props = {
 	onSuccessAction?: (review: Review) => void;
 };
 
+const inputLikeFocusStyles = {
+	borderWidth: '0.5px',
+	borderStyle: 'solid',
+	borderColor: 'main.secondary',
+	outline: 'none',
+	boxShadow: 'none',
+} as const;
+
 export default function FeedbackModal({ productId, initialReviews, onSuccessAction }: Props) {
 	const authT = useTranslations('auth');
 	const prodT = useTranslations('products');
@@ -215,7 +223,15 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 							<Field.Root invalid={!!errors.advantages} gap='2' justifyContent='center'>
 								<Field.Label maxH='20px'>{i18nData.advantages}</Field.Label>
 
-								<Textarea minH='80px' maxH='300px' {...register('advantages')} />
+								<Textarea
+									variant='outline'
+									minH='80px'
+									maxH='300px'
+									focusVisibleRing='none'
+									_focus={inputLikeFocusStyles}
+									_focusVisible={inputLikeFocusStyles}
+									{...register('advantages')}
+								/>
 								<Field.ErrorText alignSelf='flex-start'>
 									{errors.advantages?.message?.toString()}
 								</Field.ErrorText>
@@ -224,7 +240,15 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 							<Field.Root invalid={!!errors.disAdvantages} gap='2' justifyContent='center'>
 								<Field.Label maxH='20px'>{i18nData.disAdvantages}</Field.Label>
 
-								<Textarea minH='80px' maxH='300px' {...register('disAdvantages')} />
+								<Textarea
+									variant='outline'
+									minH='80px'
+									maxH='300px'
+									focusVisibleRing='none'
+									_focus={inputLikeFocusStyles}
+									_focusVisible={inputLikeFocusStyles}
+									{...register('disAdvantages')}
+								/>
 								<Field.ErrorText alignSelf='flex-start'>
 									{errors.disAdvantages?.message?.toString()}
 								</Field.ErrorText>
@@ -236,8 +260,12 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 								</Field.Label>
 
 								<Textarea
+									variant='outline'
 									minH='80px'
 									maxH='300px'
+									focusVisibleRing='none'
+									_focus={inputLikeFocusStyles}
+									_focusVisible={inputLikeFocusStyles}
 									{...register('feedback', { required: i18nData.myRate + ' is required' })}
 								/>
 								<Field.ErrorText alignSelf='flex-start'>

@@ -266,8 +266,8 @@ export default function OrderShow(props: ActionProps) {
 								<Box style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
 									<Box
 										style={{
-											width: 50,
-											height: 50,
+											width: 76,
+											height: 76,
 											borderRadius: 10,
 											overflow: 'hidden',
 											background: '#F1F5F9',
@@ -304,15 +304,15 @@ export default function OrderShow(props: ActionProps) {
 								</Box>
 								<Box style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
 									<Box>
-											<Text color='grey60' style={{ fontSize: 15 }}>
-												{translateMessage('order-items-unit-price')}
-											</Text>
+										<Text color='grey60' style={{ fontSize: 15 }}>
+											{translateMessage('order-items-unit-price')}
+										</Text>
 										<Text fontWeight='bold'>{formatMoney(item.unitPrice)}</Text>
 									</Box>
 									<Box>
-											<Text color='grey60' style={{ fontSize: 15 }}>
-												{translateMessage('order-items-line-total')}
-											</Text>
+										<Text color='grey60' style={{ fontSize: 15 }}>
+											{translateMessage('order-items-line-total')}
+										</Text>
 										<Text fontWeight='bold'>{formatMoney(item.lineTotal)}</Text>
 									</Box>
 								</Box>

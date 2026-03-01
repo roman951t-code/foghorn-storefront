@@ -13,6 +13,8 @@ import {
 	Tag,
 	Status,
 	Icon,
+	Card,
+	Text,
 } from '@chakra-ui/react';
 import { MdOutlineManageSearch } from 'react-icons/md';
 import { RiPaypalFill, RiMoneyDollarCircleFill, RiBankCardFill } from 'react-icons/ri';
@@ -36,6 +38,7 @@ interface Props {
 	subcategory: string;
 	averageRating: number;
 	reviewCount: number;
+	initialImageIndex?: number;
 	onTabChange?: (tab: 'about' | 'characteristics' | 'feedback') => void;
 }
 
@@ -45,6 +48,7 @@ export default function AboutTab({
 	subcategory,
 	averageRating,
 	reviewCount,
+	initialImageIndex = 0,
 	onTabChange,
 }: Props) {
 	const cartT = useTranslations('cart');
@@ -92,10 +96,10 @@ export default function AboutTab({
 		selectedVariant?.discountPrice != null
 			? roundPrice(selectedVariant.discountPrice)
 			: selectedVariant
-				? null
-				: product.discountPrice != null
-					? roundPrice(product.discountPrice)
-					: null;
+			? null
+			: product.discountPrice != null
+			? roundPrice(product.discountPrice)
+			: null;
 	const unitEffectivePrice = unitDiscountPrice ?? unitBasePrice;
 	const discount =
 		unitDiscountPrice != null ? roundPrice(Math.max(0, unitBasePrice - unitDiscountPrice)) : 0;
@@ -115,21 +119,26 @@ export default function AboutTab({
 	];
 
 	return (
-		<VStack gap='8' colorPalette='gray'>
+		<VStack gap='8' colorPalette='gray' w='100%' alignItems='stretch'>
 			<Group
-				align={{ base: 'center', lg: 'flex-start' }}
-				flexDirection={{ base: 'column', lg: 'row' }}
+				align={{ base: 'center', xl: 'flex-start' }}
+				flexDirection={{ base: 'column', xl: 'row' }}
 				gap='8'
+				w='100%'
 			>
 				<Box
-					maxW={{ base: '90vw', md: '86vw', lg: '600px' }}
-					minW={{ base: '340px', md: '440px', lg: '500px' }}
+					maxW={{ base: '100vw', md: '100vw', lg: '828px', xl: '690px' }}
+					minW={{ base: 'min(490px, 100vw)', md: '634px', lg: '828px', xl: '690px' }}
 					w='full'
 					bg='bg.tertiary'
 					mb='4'
 					rounded='lg'
 				>
-					<ProductThumbsSlider images={galleryImages} productName={product.name} />
+					<ProductThumbsSlider
+						images={galleryImages}
+						productName={product.name}
+						initialIndex={initialImageIndex}
+					/>
 				</Box>
 				<VStack gap='2' alignItems='flex-start'>
 					<Heading as='h1' size={{ base: '2xl', sm: '3xl' }} fontWeight='medium'>
@@ -200,7 +209,12 @@ export default function AboutTab({
 							{formatUsdPrice(unitEffectivePrice)}
 							{discount > 0 && (
 								<Badge colorPalette='gray'>
-									<Box as='span' color='main' fontSize={{ base: 'md', md: 'sm' }} textDecoration='line-through'>
+									<Box
+										as='span'
+										color='main'
+										fontSize={{ base: 'md', md: 'sm' }}
+										textDecoration='line-through'
+									>
 										{formatUsdPrice(unitBasePrice)}
 										<Badge
 											variant='solid'
@@ -232,7 +246,11 @@ export default function AboutTab({
 							variant='underline'
 							fontSize={{ base: 'md', md: 'sm' }}
 							color='main'
-							_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
+							_focusVisible={{
+								outline: '2px solid',
+								outlineColor: 'main.secondary',
+								outlineOffset: '2px',
+							}}
 							onClick={(e) => {
 								if (onTabChange) {
 									e.preventDefault();
@@ -247,14 +265,22 @@ export default function AboutTab({
 						paymentTitle={prodT('payment')}
 						shipmentTitle={prodT('shipment')}
 						guaranteeTitle={prodT('guarantee')}
-						descriptionTitle={prodT('description')}
 						guaranteeText={product.guarantee?.trim() || prodT('guaranteeText')}
-						descriptionText={product.description?.trim() || prodT('descriptionText')}
 						paymentOptions={paymentOptions}
 						shipmentOptions={shipmentOptions}
 					/>
 				</VStack>
 			</Group>
+			<Card.Root size='sm' bg='bg.tertiary' borderColor='border' w='100%'>
+				<Card.Header>
+					<Heading size='md'>{prodT('description')}</Heading>
+				</Card.Header>
+				<Card.Body>
+					<Text whiteSpace='pre-line'>
+						{product.description?.trim() || prodT('descriptionText')}
+					</Text>
+				</Card.Body>
+			</Card.Root>
 		</VStack>
 	);
 }

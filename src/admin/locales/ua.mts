@@ -817,6 +817,7 @@ export const uaAdminLocale = {
 		'status-update-progress': 'Оновлення...',
 		'status-unknown': 'Невідомо',
 		'order-deleted': 'Замовлення видалено',
+		'order-delete-failed': 'Не вдалося видалити замовлення',
 		'audit-timeline': 'Хронологія',
 		'audit-timeline-empty': 'Поки немає записів у хронології',
 		'audit-load-progress': 'Завантаження хронології...',

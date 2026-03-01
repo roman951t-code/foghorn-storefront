@@ -813,6 +813,7 @@ export const enAdminLocale = {
 		'status-update-progress': 'Updating...',
 		'status-unknown': 'Unknown',
 		'order-deleted': 'Order deleted',
+		'order-delete-failed': 'Failed to delete order',
 		'audit-timeline': 'Timeline',
 		'audit-timeline-empty': 'No timeline entries yet',
 		'audit-load-progress': 'Loading timeline...',

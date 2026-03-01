@@ -19,16 +19,17 @@ const ImageModal = dynamic(() => import('./ImageModal'));
 type ProductThumbsSliderProps = {
 	images: string[];
 	productName?: string;
+	initialIndex?: number;
 };
 
 function ThumbsSliderSkeleton() {
-	const isSmallScreen = useBreakpointValue({ base: true, md: false });
+	const isSmallScreen = useBreakpointValue({ base: true, sm: false });
 
 	const skeletonCount = isSmallScreen ? 1 : 4;
 
 	return (
 		<>
-			<Skeleton height={{ base: '400px', md: '700px' }} width='100%' />
+			<Skeleton width='100%' aspectRatio={1} />
 			{!isSmallScreen && (
 				<HStack mt={4} p={4}>
 					{Array.from({ length: skeletonCount }).map((_, i) => (
@@ -49,11 +50,11 @@ export default function ProductThumbsSlider(props: ProductThumbsSliderProps) {
 	return <DynamicProductThumbsSlider {...props} />;
 }
 
-function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps) {
+function ThumbsSliderInternal({ images, productName, initialIndex = 0 }: ProductThumbsSliderProps) {
 	const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
 	const [mainSwiper, setMainSwiper] = useState<SwiperType | null>(null);
-	const [selectedImage, setSelectedImage] = useState<string | null>(null);
-	const isSmallScreen = useBreakpointValue({ base: true, md: false });
+	const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+	const isSmallScreen = useBreakpointValue({ base: true, sm: false });
 	const thumbInstance =
 		!isSmallScreen && thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null;
 	const accessibleName = productName ?? 'product';
@@ -81,6 +82,18 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 	const resolvedGalleryImages = galleryImages.map((src, index) =>
 		failedIndexes.has(index) ? PRODUCT_PLACEHOLDER_IMAGE : src
 	);
+	const normalizedInitialIndex = Number.isFinite(initialIndex) ? Math.max(0, Math.floor(initialIndex)) : 0;
+	const safeInitialIndex = Math.min(normalizedInitialIndex, Math.max(0, resolvedGalleryImages.length - 1));
+
+	useEffect(() => {
+		if (!mainSwiper || mainSwiper.destroyed) return;
+		mainSwiper.slideToLoop(safeInitialIndex, 0);
+	}, [mainSwiper, safeInitialIndex, gallerySignature]);
+
+	useEffect(() => {
+		if (!thumbInstance || thumbInstance.destroyed) return;
+		thumbInstance.slideToLoop(safeInitialIndex, 0);
+	}, [thumbInstance, safeInitialIndex, gallerySignature]);
 
 	const pagination = isSmallScreen
 		? {
@@ -91,10 +104,14 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 		  }
 		: false;
 
-	const resetImage = () => setSelectedImage(null);
+	const resetImage = () => setSelectedImageIndex(null);
 	const openImage = (fallbackIndex?: number) => {
 		const currentIndex = mainSwiper?.realIndex ?? fallbackIndex ?? 0;
-		setSelectedImage(resolvedGalleryImages[currentIndex] ?? null);
+		const boundedIndex = Math.min(
+			Math.max(currentIndex, 0),
+			Math.max(0, resolvedGalleryImages.length - 1)
+		);
+		setSelectedImageIndex(boundedIndex);
 	};
 	const handleSlideKeyOpen = (event: KeyboardEvent<HTMLDivElement>) => {
 		if (event.key === 'Enter' || event.key === ' ') {
@@ -107,6 +124,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 		<>
 			<Swiper
 				onSwiper={(swiper) => setMainSwiper(swiper)}
+				initialSlide={safeInitialIndex}
 				loop
 				zoom
 				navigation
@@ -142,7 +160,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 							<Box
 								position='relative'
 								width='100%'
-								height={{ base: '400px', md: '700px' }}
+								aspectRatio={1}
 								cursor='pointer'
 								overflow='hidden'
 								rounded='lg'
@@ -165,7 +183,7 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 				})}
 			</Swiper>
 
-			<Box hideBelow='md' mt={4}>
+			<Box hideBelow='sm' mt={4}>
 				<Swiper
 					onSwiper={(swiper) => setThumbsSwiper(swiper)}
 					loop
@@ -198,7 +216,16 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 								}
 							}}
 						>
-							<Box position='relative' width='94%' height='90px' cursor='pointer' overflow='hidden'>
+							<Box
+								position='relative'
+								width='100%'
+								maxW='98px'
+								aspectRatio={1}
+								mx='auto'
+								cursor='pointer'
+								overflow='hidden'
+								rounded='sm'
+							>
 								<Image
 									src={src}
 									alt={`${accessibleName} thumbnail ${index + 1}`}
@@ -206,9 +233,8 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 									fill
 									style={{
 										objectFit: 'cover',
-										borderRadius: '4px',
 									}}
-									sizes='(max-width: 768px) 25vw, 10vw'
+									sizes='72px'
 									draggable={false}
 								/>
 							</Box>
@@ -217,7 +243,12 @@ function ThumbsSliderInternal({ images, productName }: ProductThumbsSliderProps)
 				</Swiper>
 			</Box>
 
-			<ImageModal image={selectedImage} resetModal={resetImage} />
+			<ImageModal
+				images={resolvedGalleryImages}
+				initialIndex={selectedImageIndex}
+				productName={accessibleName}
+				resetModal={resetImage}
+			/>
 		</>
 	);
 }

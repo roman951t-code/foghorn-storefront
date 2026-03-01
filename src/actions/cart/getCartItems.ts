@@ -23,6 +23,7 @@ export async function getCartItems(userId: string) {
 								name: true,
 								fullSlug: true,
 								imageUrl: true,
+								stock: true,
 								productImages: {
 									select: { url: true, sortOrder: true, createdAt: true },
 									orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
@@ -85,6 +86,7 @@ export async function getCartItems(userId: string) {
 					lineId: item.id,
 					productId: item.product.id,
 					variantId: item.variant?.id ?? item.variantId ?? null,
+					availableStock: item.variant?.stock ?? item.product.stock ?? null,
 					sku: item.variant?.sku ?? null,
 					variantLabel,
 					quantity: item.quantity,

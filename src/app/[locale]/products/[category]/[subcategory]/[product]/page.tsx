@@ -24,7 +24,7 @@ import ProductsSection, {
 import { getProductsBySubcategorySlug } from '@/actions/products/getProductsBySubcategorySlug';
 import { isProductTabValue } from '@/constants/products';
 
-type Props = ProductParams & { searchParams: { tab?: string } };
+type Props = ProductParams & { searchParams: { tab?: string; image?: string } };
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
 	const {
@@ -90,8 +90,11 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 		productParamsSchema,
 		await params
 	);
-	const { tab } = ensureParams(productSearchParamsSchema, await searchParams);
+	const { tab, image } = ensureParams(productSearchParamsSchema, await searchParams);
 	const selectedTab = tab && isProductTabValue(tab) ? tab : 'about';
+	const parsedImageIndex = image ? Number(image) - 1 : 0;
+	const initialImageIndex =
+		Number.isFinite(parsedImageIndex) && parsedImageIndex >= 0 ? Math.floor(parsedImageIndex) : 0;
 
 	const headersList = await headers();
 	const cspNonce = headersList.get('x-csp-nonce') ?? undefined;
@@ -263,6 +266,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 					product={productData}
 					category={category}
 					subcategory={subcategory}
+					initialImageIndex={initialImageIndex}
 				/>
 
 				{selectedTab === 'about' && (

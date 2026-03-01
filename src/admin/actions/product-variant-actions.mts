@@ -19,7 +19,7 @@ const optionSchema = z.object({
 
 const variantSchema = z.object({
 	sku: z.string().trim().min(1),
-	price: z.preprocess((value) => toNumber(value), z.number().positive()),
+	price: z.preprocess((value) => toNumber(value), z.number().min(0)),
 	stock: z.preprocess((value) => toNumber(value), z.number().int().min(0)),
 	options: z.array(optionSchema).min(1),
 });
@@ -58,7 +58,7 @@ export const productVariantMatrix: ActionHandler<RecordActionResponse> = async (
 		const [product, attributes, variants] = await Promise.all([
 			prisma.product.findUnique({
 				where: { id: productId },
-				select: { basePrice: true, currency: true, productCode: true, categoryId: true },
+				select: { name: true, basePrice: true, currency: true, productCode: true, categoryId: true },
 			}),
 			prisma.productAttribute.findMany({
 				select: { id: true, name: true, unit: true },
@@ -107,6 +107,7 @@ export const productVariantMatrix: ActionHandler<RecordActionResponse> = async (
 
 		const productPayload = product
 			? {
+					name: product.name,
 					basePrice: product.basePrice.toNumber(),
 					currency: product.currency,
 					productCode: product.productCode,
@@ -315,6 +316,19 @@ export const productVariantMatrix: ActionHandler<RecordActionResponse> = async (
 			if (toRemove.length > 0) {
 				await tx.productVariant.deleteMany({ where: { id: { in: toRemove } } });
 			}
+
+			const variantAggregate = await tx.productVariant.aggregate({
+				where: { productId },
+				_sum: { stock: true },
+			});
+			const totalVariantStock = Math.max(0, Number(variantAggregate._sum.stock ?? 0));
+			await tx.product.update({
+				where: { id: productId },
+				data: {
+					stock: totalVariantStock,
+					inStock: totalVariantStock > 0,
+				},
+			});
 		});
 	} catch {
 		return {

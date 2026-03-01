@@ -5,7 +5,6 @@ import { Box, Field, Fieldset, Input, VStack } from '@chakra-ui/react';
 import { useEffect, useId, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocale, useTranslations } from 'next-intl';
-import { z } from 'zod';
 import type { I18nData } from '@/types/i18n';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { editShippingAddressAction } from '@/actions/auth/editAccountAction';
@@ -13,9 +12,9 @@ import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { getCountryOptions } from '@/utils/countries';
 import {
-	SHIPPING_ADDRESS_FIELD_LIMITS,
 	type ShippingAddressFormValue,
 } from '@/utils/shippingAddress';
+import { createShippingAddressSchema } from 'validationSchemas/shippingAddressSchema';
 import CountryField from './CountryField';
 
 interface Props {
@@ -31,35 +30,7 @@ export default function AddressForm({ i18nData, initialAddress, refreshSession }
 
 	const requiredMessage = i18nData.fieldRequired || i18nData.invalidFormData;
 	const schema = useMemo(
-		() =>
-			z.object({
-				country: z
-					.string()
-					.trim()
-					.min(1, { message: requiredMessage })
-					.max(SHIPPING_ADDRESS_FIELD_LIMITS.country),
-				region: z
-					.string()
-					.trim()
-					.min(1, { message: requiredMessage })
-					.max(SHIPPING_ADDRESS_FIELD_LIMITS.region),
-				city: z
-					.string()
-					.trim()
-					.min(1, { message: requiredMessage })
-					.max(SHIPPING_ADDRESS_FIELD_LIMITS.city),
-				postalCode: z
-					.string()
-					.trim()
-					.min(1, { message: requiredMessage })
-					.max(SHIPPING_ADDRESS_FIELD_LIMITS.postalCode),
-				addressLine1: z
-					.string()
-					.trim()
-					.min(1, { message: requiredMessage })
-					.max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine1),
-				addressLine2: z.string().trim().max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine2),
-			}),
+		() => createShippingAddressSchema(requiredMessage),
 		[requiredMessage]
 	);
 

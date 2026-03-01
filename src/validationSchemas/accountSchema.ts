@@ -46,6 +46,22 @@ const accountSchemaShape = (t: {
 export const createAccountSchema = (t: I18nData) =>
 	accountSchemaShape(t as Parameters<typeof accountSchemaShape>[0]);
 
+const createNameSchemaFromShape = (shape: ReturnType<typeof accountSchemaShape>) =>
+	z.object({
+		name: shape.name,
+		lastName: shape.lastName,
+		middleName: shape.middleName,
+	});
+
+const createPhoneSchemaFromShape = (shape: ReturnType<typeof accountSchemaShape>) =>
+	z.object({ phone: shape.phone });
+
+export const createNameSchema = (t: I18nData) =>
+	createNameSchemaFromShape(createAccountSchema(t));
+
+export const createPhoneSchema = (t: I18nData) =>
+	createPhoneSchemaFromShape(createAccountSchema(t));
+
 export async function getAccountSchemas() {
 	const validationT = await getTranslations('validation');
 
@@ -64,13 +80,9 @@ export async function getAccountSchemas() {
 	});
 
 	return {
-		nameSchema: z.object({
-			name: shape.name,
-			lastName: shape.lastName,
-			middleName: shape.middleName,
-		}),
+		nameSchema: createNameSchemaFromShape(shape),
 		emailSchema: z.object({ email: shape.email }),
-		phoneSchema: z.object({ phone: shape.phone }),
+		phoneSchema: createPhoneSchemaFromShape(shape),
 		addressSchema: z.object({ shipmentAddress: shape.shipmentAddress }),
 	};
 }

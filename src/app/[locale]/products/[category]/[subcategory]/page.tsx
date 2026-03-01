@@ -102,7 +102,8 @@ export default async function Subcategory({ params, searchParams }: Props) {
 	const minPrice = searchData?.min ? parseFloat(searchData?.min) : undefined;
 	const maxPrice = searchData?.max ? parseFloat(searchData?.max) : undefined;
 
-	const onlyInStock = searchData.search === 'similar';
+	const isSimilarSearchMode = searchData.search === 'similar';
+	const onlyInStock = isSimilarSearchMode;
 	const orderBy = searchData?.orderBy as 'new' | 'expensive' | 'cheap' | undefined;
 
 	const inStockParam = searchData?.inStock;
@@ -185,45 +186,49 @@ export default async function Subcategory({ params, searchParams }: Props) {
 			<Heading as='h1' size='3xl' fontWeight='medium'>
 				{subcategoryData.subcategoryName}
 			</Heading>
-			<Flex hideFrom='lg' justifyContent='flex-end'>
-				<FiltersSidebar
-					filters={subcategoryFilters}
-					maxProductPrice={subcategoryData.maxProductPrice}
-					btnText={navigationT('sidebar.filters')}
-				/>
-			</Flex>
-			<FiltersTags filters={subcategoryFilters} />
+			{!isSimilarSearchMode ? (
+				<Flex hideFrom='lg' justifyContent='flex-end'>
+					<FiltersSidebar
+						filters={subcategoryFilters}
+						maxProductPrice={subcategoryData.maxProductPrice}
+						btnText={navigationT('sidebar.filters')}
+					/>
+				</Flex>
+			) : null}
+			{!isSimilarSearchMode ? <FiltersTags filters={subcategoryFilters} /> : null}
 
 			<Group justifyContent='space-between' align='flex-start' gap='3'>
-				<Box
-					as='aside'
-					w='304px'
-					flexShrink={0}
-					bg='bg.tertiary'
-					minH='800px'
-					rounded='lg'
-					hideBelow='lg'
-					position='sticky'
-					top='74px'
-				>
-					<CatalogBtn fullText />
-					<VStack p='4' justifyContent='flex-start'>
-						<HStack w='full' gapX='4' align='center'>
-							<Text fontSize='md' color='main'>
-								{productsT('totalProducts')}
-							</Text>
-							<CountPill
-								value={subcategoryData?.totalCount ?? 0}
-								px='2'
-								py='1'
-								labelProps={{ fontSize: 'md' }}
-							/>
-						</HStack>
-						<Separator color='border' w='full' my='2' />
-						<QuickFilters maxProductPrice={subcategoryData.maxProductPrice} />
-						<Filters filters={subcategoryFilters} />
-					</VStack>
-				</Box>
+				{!isSimilarSearchMode ? (
+					<Box
+						as='aside'
+						w='304px'
+						flexShrink={0}
+						bg='bg.tertiary'
+						minH='800px'
+						rounded='lg'
+						hideBelow='lg'
+						position='sticky'
+						top='74px'
+					>
+						<CatalogBtn fullText />
+						<VStack p='4' justifyContent='flex-start'>
+							<HStack w='full' gapX='4' align='center'>
+								<Text fontSize='md' color='main'>
+									{productsT('totalProducts')}
+								</Text>
+								<CountPill
+									value={subcategoryData?.totalCount ?? 0}
+									px='2'
+									py='1'
+									labelProps={{ fontSize: 'md' }}
+								/>
+							</HStack>
+							<Separator color='border' w='full' my='2' />
+							<QuickFilters maxProductPrice={subcategoryData.maxProductPrice} />
+							<Filters filters={subcategoryFilters} />
+						</VStack>
+					</Box>
+				) : null}
 
 				<Box as='section' w='100%' flex='1' minW={0}>
 					<ProductsGrid

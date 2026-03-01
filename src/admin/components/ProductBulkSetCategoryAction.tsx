@@ -6,6 +6,7 @@ import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 const api = new ApiClient();
 
 type Option = { id: string; label: string };
+type SelectOption = { value: string; label: string };
 
 const actionButtonStyle = {
 	borderColor: 'white',
@@ -45,6 +46,11 @@ export default function ProductBulkSetCategoryAction({ action, resource, records
 	}, [action.name, recordIds, resource.id]);
 
 	const title = translateAction(action.name, resource.id);
+	const selectOptions = useMemo<SelectOption[]>(
+		() => options.map((option) => ({ value: option.id, label: option.label })),
+		[options]
+	);
+	const selectedOption = selectOptions.find((option) => option.value === categoryId) ?? null;
 
 	const hasOptions = options.length > 0;
 	const canSave = !loading && hasOptions && categoryId.trim().length > 0 && recordIds.length > 0;
@@ -87,17 +93,13 @@ export default function ProductBulkSetCategoryAction({ action, resource, records
 				<FormGroup>
 					<Label>{translateMessage('product-bulk-category')}</Label>
 					<Select
-						value={categoryId}
-						disabled={isReadOnly}
-						onChange={(e: any) => setCategoryId(String(e?.target?.value ?? ''))}
-					>
-						<option value=''>{translateMessage('select-placeholder')}</option>
-						{options.map((o) => (
-							<option key={o.id} value={o.id}>
-								{o.label}
-							</option>
-						))}
-					</Select>
+						options={selectOptions}
+						value={selectedOption}
+						isClearable
+						placeholder={translateMessage('select-placeholder')}
+						isDisabled={isReadOnly}
+						onChange={(option: SelectOption | null) => setCategoryId(String(option?.value ?? ''))}
+					/>
 				</FormGroup>
 			) : (
 				<Text color='grey60' mb='xl'>

@@ -37,7 +37,7 @@ export default async function Orders({ searchParams }: Props) {
 		normalizedOffset === offset ? items : (await getUserOrders(pageSize, normalizedOffset)).items;
 
 	return (
-		<VStack w='100%'>
+		<VStack w='100%' mt='4'>
 			<UserOrdersList orders={normalizedItems} emptyText={ordersT('empty')} />
 			{totalCount > 0 && (
 				<Pagination

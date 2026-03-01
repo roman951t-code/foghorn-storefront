@@ -103,6 +103,8 @@ const adminAllowedOriginHosts = new Set<string>([
 	`[::1]:${adminPort}`,
 	...[
 		process.env.ADMINJS_PUBLIC_URL ?? '',
+		process.env.APP_URL ?? '',
+		process.env.NEXT_PUBLIC_APP_URL ?? '',
 		...(process.env.ADMINJS_ALLOWED_ORIGINS ?? '').split(','),
 	]
 		.map((origin) => normalizeAllowedOriginHost(origin))
@@ -266,12 +268,25 @@ const checkAdminApiRateLimit = (key: string, limit: number, windowMs: number) =>
 const resolveAdminMutationOriginHeader = (req: express.Request) =>
 	req.get('origin') ?? req.get('referer') ?? null;
 
+const resolveRequestHosts = (req: express.Request) => {
+	const hosts = new Set<string>();
+	const rawHostHeaders = [req.get('host') ?? '', req.get('x-forwarded-host') ?? ''];
+	for (const rawHostHeader of rawHostHeaders) {
+		for (const rawHost of rawHostHeader.split(',')) {
+			const normalizedHost = normalizeAllowedOriginHost(rawHost);
+			if (normalizedHost) {
+				hosts.add(normalizedHost);
+			}
+		}
+	}
+	return hosts;
+};
+
 const isAllowedAdminMutationOrigin = (originHeader: string, req: express.Request) => {
 	try {
 		const origin = new URL(originHeader);
 		const originHost = origin.host.toLowerCase();
-		const requestHost = (req.get('host') ?? '').toLowerCase();
-		if (requestHost && originHost === requestHost) return true;
+		if (resolveRequestHosts(req).has(originHost)) return true;
 		return adminAllowedOriginHosts.has(originHost);
 	} catch {
 		return false;

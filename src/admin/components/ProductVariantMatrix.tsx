@@ -25,6 +25,7 @@ type VariantPayload = {
 	options: AttributeValue[];
 };
 type ProductPayload = {
+	name: string;
 	basePrice: number;
 	currency: string;
 	productCode: string | null;
@@ -246,8 +247,10 @@ export default function ProductVariantMatrix(props: ActionProps) {
 	};
 
 	const handleVariantChange = (index: number, field: 'sku' | 'price' | 'stock', value: string) => {
+		const nextValue =
+			(field === 'stock' || field === 'price') && value.trim().startsWith('-') ? '0' : value;
 		setVariants((prev) =>
-			prev.map((variant, idx) => (idx === index ? { ...variant, [field]: value } : variant))
+			prev.map((variant, idx) => (idx === index ? { ...variant, [field]: nextValue } : variant))
 		);
 	};
 
@@ -305,6 +308,11 @@ export default function ProductVariantMatrix(props: ActionProps) {
 					{title}
 				</Text>
 			</Box>
+			{product?.name ? (
+				<Text mb='lg' fontWeight='bold'>
+					{product.name}
+				</Text>
+			) : null}
 
 			{loading ? (
 				<Text color='grey60'>{translateMessage('product-variant-loading')}</Text>
@@ -384,63 +392,78 @@ export default function ProductVariantMatrix(props: ActionProps) {
 							{translateMessage('product-variant-matrix-title')}
 						</Text>
 						{hasVariants ? (
-							<Table>
-								<TableHead>
-									<TableRow>
-										{orderedAttributes
-											.filter((attr) => attr.enabled)
-											.map((attr) => (
-												<TableCell key={attr.id}>{attr.name}</TableCell>
-											))}
-										<TableCell>{translateMessage('product-variant-sku-label')}</TableCell>
-										<TableCell>{translateMessage('product-variant-price-label')}</TableCell>
-										<TableCell>{translateMessage('product-variant-stock-label')}</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{variants.map((variant, index) => (
-										<TableRow key={variant.signature}>
+							<Box
+								style={{
+									width: '100%',
+									maxWidth: '100%',
+									overflowX: 'auto',
+									overflowY: 'hidden',
+									border: '1px solid #E2E8F0',
+									borderRadius: 8,
+								}}
+							>
+								<Table style={{ minWidth: 920 }}>
+									<TableHead>
+										<TableRow>
 											{orderedAttributes
 												.filter((attr) => attr.enabled)
-												.map((attr) => {
-													const value =
-														variant.options.find((opt) => opt.attributeId === attr.id)?.value ??
-														'-';
-													return <TableCell key={attr.id}>{value}</TableCell>;
-												})}
-											<TableCell>
-												<Input
-													value={variant.sku}
-													disabled={isReadOnly}
-													onChange={(event: ChangeEvent<HTMLInputElement>) =>
-														handleVariantChange(index, 'sku', event.target.value)
-													}
-												/>
-											</TableCell>
-											<TableCell>
-												<Input
-													type='number'
-													value={variant.price}
-													disabled={isReadOnly}
-													onChange={(event: ChangeEvent<HTMLInputElement>) =>
-														handleVariantChange(index, 'price', event.target.value)
-													}
-												/>
-											</TableCell>
-											<TableCell>
-												<Input
-													type='number'
-													value={variant.stock}
-													disabled={isReadOnly}
-													onChange={(event: ChangeEvent<HTMLInputElement>) =>
-														handleVariantChange(index, 'stock', event.target.value)
-													}
-												/>
-											</TableCell>
+												.map((attr) => (
+													<TableCell key={attr.id}>{attr.name}</TableCell>
+												))}
+											<TableCell>{translateMessage('product-variant-sku-label')}</TableCell>
+											<TableCell>{translateMessage('product-variant-price-label')}</TableCell>
+											<TableCell>{translateMessage('product-variant-stock-label')}</TableCell>
 										</TableRow>
-									))}
-								</TableBody>
-							</Table>
+									</TableHead>
+									<TableBody>
+										{variants.map((variant, index) => (
+											<TableRow key={variant.signature}>
+												{orderedAttributes
+													.filter((attr) => attr.enabled)
+													.map((attr) => {
+														const value =
+															variant.options.find((opt) => opt.attributeId === attr.id)?.value ??
+															'-';
+														return <TableCell key={attr.id}>{value}</TableCell>;
+													})}
+												<TableCell>
+													<Input
+														value={variant.sku}
+														disabled={isReadOnly}
+														onChange={(event: ChangeEvent<HTMLInputElement>) =>
+															handleVariantChange(index, 'sku', event.target.value)
+														}
+													/>
+												</TableCell>
+												<TableCell>
+													<Input
+														type='number'
+														min={0}
+														step={0.01}
+														value={variant.price}
+														disabled={isReadOnly}
+														onChange={(event: ChangeEvent<HTMLInputElement>) =>
+															handleVariantChange(index, 'price', event.target.value)
+														}
+													/>
+												</TableCell>
+												<TableCell>
+													<Input
+														type='number'
+														min={0}
+														step={1}
+														value={variant.stock}
+														disabled={isReadOnly}
+														onChange={(event: ChangeEvent<HTMLInputElement>) =>
+															handleVariantChange(index, 'stock', event.target.value)
+														}
+													/>
+												</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							</Box>
 						) : (
 							<Text color='grey60'>{translateMessage('product-variant-no-variants')}</Text>
 						)}

@@ -23,6 +23,7 @@ const resolveRecordIds = (records: ActionProps['records']) => {
 };
 
 type Mode = 'set' | 'increase' | 'decrease';
+type ModeOption = { value: Mode; label: string };
 
 export default function ProductBulkAdjustStockAction({ action, resource, records }: ActionProps) {
 	const addNotice = useNotice();
@@ -45,6 +46,12 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 		const translated = translateMessage(key);
 		return translated && translated !== key ? translated : fallback;
 	};
+	const modeOptions: ModeOption[] = [
+		{ value: 'set', label: translateWithFallback('product-bulk-stock-adjust-set', 'Set stock (reconcile)') },
+		{ value: 'increase', label: translateWithFallback('product-bulk-stock-adjust-increase', 'Increase stock') },
+		{ value: 'decrease', label: translateWithFallback('product-bulk-stock-adjust-decrease', 'Decrease stock') },
+	];
+	const selectedModeOption = modeOptions.find((option) => option.value === mode) ?? modeOptions[0] ?? null;
 
 	const initialValue = useMemo(() => {
 		const source = records ?? [];
@@ -102,18 +109,12 @@ export default function ProductBulkAdjustStockAction({ action, resource, records
 			<FormGroup>
 				<Label>{translateWithFallback('product-bulk-stock-adjust-mode', 'Mode')}</Label>
 				<Select
-					value={mode}
-					disabled={isReadOnly}
-					onChange={(e: any) => setMode(String(e?.target?.value ?? 'set') as Mode)}
-				>
-					<option value='set'>{translateWithFallback('product-bulk-stock-adjust-set', 'Set stock (reconcile)')}</option>
-					<option value='increase'>
-						{translateWithFallback('product-bulk-stock-adjust-increase', 'Increase stock')}
-					</option>
-					<option value='decrease'>
-						{translateWithFallback('product-bulk-stock-adjust-decrease', 'Decrease stock')}
-					</option>
-				</Select>
+					options={modeOptions}
+					value={selectedModeOption}
+					isClearable={false}
+					isDisabled={isReadOnly}
+					onChange={(option: ModeOption | null) => setMode(option?.value ?? 'set')}
+				/>
 			</FormGroup>
 
 			<FormGroup>

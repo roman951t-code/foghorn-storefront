@@ -4,6 +4,10 @@ import { Box, Button, FormGroup, Label, Select, Text } from '@adminjs/design-sys
 import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
+type PriceDirection = 'increase' | 'decrease';
+type PriceKind = 'percent' | 'fixed';
+type PriceDirectionOption = { value: PriceDirection; label: string };
+type PriceKindOption = { value: PriceKind; label: string };
 
 const actionButtonStyle = {
 	borderColor: 'white',
@@ -27,14 +31,31 @@ export default function ProductBulkAdjustPriceAction({ action, resource, records
 	const { translateAction, translateMessage } = useTranslation();
 
 	const recordIds = useMemo(() => resolveRecordIds(records), [records]);
-	const [direction, setDirection] = useState<'increase' | 'decrease'>('increase');
-	const [kind, setKind] = useState<'percent' | 'fixed'>('percent');
+	const [direction, setDirection] = useState<PriceDirection>('increase');
+	const [kind, setKind] = useState<PriceKind>('percent');
 	const [value, setValue] = useState('10');
 	const [applyToDiscount, setApplyToDiscount] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const isReadOnly = useIsReadOnlyAdmin();
 
 	const title = translateAction(action.name, resource.id);
+	const directionOptions = useMemo<PriceDirectionOption[]>(
+		() => [
+			{ value: 'increase', label: translateMessage('product-bulk-price-increase') },
+			{ value: 'decrease', label: translateMessage('product-bulk-price-decrease') },
+		],
+		[translateMessage]
+	);
+	const kindOptions = useMemo<PriceKindOption[]>(
+		() => [
+			{ value: 'percent', label: translateMessage('product-bulk-price-percent') },
+			{ value: 'fixed', label: translateMessage('product-bulk-price-fixed') },
+		],
+		[translateMessage]
+	);
+	const selectedDirectionOption =
+		directionOptions.find((option) => option.value === direction) ?? directionOptions[0] ?? null;
+	const selectedKindOption = kindOptions.find((option) => option.value === kind) ?? kindOptions[0] ?? null;
 	const parsedValue = Number(value);
 	const canSave = recordIds.length > 0 && Number.isFinite(parsedValue) && parsedValue > 0;
 
@@ -75,26 +96,22 @@ export default function ProductBulkAdjustPriceAction({ action, resource, records
 				<FormGroup>
 					<Label>{translateMessage('product-bulk-price-direction')}</Label>
 					<Select
-						value={direction}
-						disabled={isReadOnly}
-						onChange={(e: any) =>
-							setDirection(String(e?.target?.value ?? 'increase') as any)
-						}
-					>
-						<option value='increase'>{translateMessage('product-bulk-price-increase')}</option>
-						<option value='decrease'>{translateMessage('product-bulk-price-decrease')}</option>
-					</Select>
+						options={directionOptions}
+						value={selectedDirectionOption}
+						isClearable={false}
+						isDisabled={isReadOnly}
+						onChange={(option: PriceDirectionOption | null) => setDirection(option?.value ?? 'increase')}
+					/>
 				</FormGroup>
 				<FormGroup>
 					<Label>{translateMessage('product-bulk-price-kind')}</Label>
 					<Select
-						value={kind}
-						disabled={isReadOnly}
-						onChange={(e: any) => setKind(String(e?.target?.value ?? 'percent') as any)}
-					>
-						<option value='percent'>{translateMessage('product-bulk-price-percent')}</option>
-						<option value='fixed'>{translateMessage('product-bulk-price-fixed')}</option>
-					</Select>
+						options={kindOptions}
+						value={selectedKindOption}
+						isClearable={false}
+						isDisabled={isReadOnly}
+						onChange={(option: PriceKindOption | null) => setKind(option?.value ?? 'percent')}
+					/>
 				</FormGroup>
 				<FormGroup>
 					<Label>{translateMessage('product-bulk-price-value')}</Label>

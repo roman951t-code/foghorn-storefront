@@ -11,13 +11,7 @@ interface Props {
 	onRequireAuth?: () => void;
 }
 
-function WishListButton({
-	count,
-	onClick,
-}: {
-	count: number;
-	onClick?: () => void;
-}) {
+function WishListButton({ count, onClick }: { count: number; onClick?: () => void }) {
 	return (
 		<IconButton
 			onClick={onClick}
@@ -32,7 +26,7 @@ function WishListButton({
 		>
 			{count > 0 && (
 				<Float offset='0.5'>
-					<Circle size='4.5' bg='bg.accent' color='black' fontSize='xs' fontWeight='semibold'>
+					<Circle size='5' bg='bg.accent' color='black' fontSize='14px' fontWeight='semibold'>
 						{count}
 					</Circle>
 				</Float>

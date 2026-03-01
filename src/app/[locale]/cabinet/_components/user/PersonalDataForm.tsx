@@ -5,11 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { I18nData } from '@/types/i18n';
 import { useMemo } from 'react';
 import {
-	createAccountSchema,
+	createNameSchema,
+	createPhoneSchema,
 	EditNameActionPayload,
 	NameSchemaData,
 } from 'validationSchemas/accountSchema';
-import { z } from 'zod';
 import { useSession } from '@/providers/SessionProvider';
 import { editNameAction } from '@/actions/auth/editAccountAction';
 import NameForm from './NameForm';
@@ -40,17 +40,8 @@ export default function PersonalDataForm({ i18nData }: Props) {
 					? 'phone'
 					: 'email';
 
-	const schemaShape = useMemo(() => createAccountSchema(i18nData), [i18nData]);
-	const nameSchema = useMemo(
-		() =>
-			z.object({
-				name: schemaShape.name,
-				lastName: schemaShape.lastName,
-				middleName: schemaShape.middleName,
-			}),
-		[schemaShape]
-	);
-	const phoneSchema = useMemo(() => z.object({ phone: schemaShape.phone }), [schemaShape]);
+	const nameSchema = useMemo(() => createNameSchema(i18nData), [i18nData]);
+	const phoneSchema = useMemo(() => createPhoneSchema(i18nData), [i18nData]);
 	const shippingAddressDefault = useMemo(
 		() =>
 			toShippingAddressFormValue({

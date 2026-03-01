@@ -15,9 +15,10 @@ import { PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages
 type ProductPreviewSliderProps = {
 	images: string[];
 	productName?: string;
+	onActiveIndexChange?: (index: number) => void;
 };
 
-function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps) {
+function ProductPreviewSwiper({ images, productName, onActiveIndexChange }: ProductPreviewSliderProps) {
 	const normalizedImages = images.filter((src): src is string => src.trim().length > 0);
 	const baseImages = normalizedImages.length
 		? normalizedImages
@@ -30,6 +31,10 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 		setFailedIndexes(new Set());
 	}, [previewSignature]);
 
+	useEffect(() => {
+		onActiveIndexChange?.(0);
+	}, [onActiveIndexChange, previewSignature]);
+
 	const markImageFailed = (index: number) => () => {
 		setFailedIndexes((prev) => {
 			if (prev.has(index)) return prev;
@@ -41,7 +46,14 @@ function ProductPreviewSwiper({ images, productName }: ProductPreviewSliderProps
 	const altText = productName ? `${productName} photo` : 'Product photo';
 
 	return (
-		<Swiper navigation loop modules={[Navigation]} className='productPreviewSwiper'>
+		<Swiper
+			navigation
+			loop
+			modules={[Navigation]}
+			className='productPreviewSwiper'
+			onSwiper={(swiper) => onActiveIndexChange?.(swiper.realIndex ?? 0)}
+			onSlideChange={(swiper) => onActiveIndexChange?.(swiper.realIndex ?? 0)}
+		>
 			{previewImages.map((src, i) => {
 				const resolvedSrc = failedIndexes.has(i) ? PRODUCT_PLACEHOLDER_IMAGE : src;
 				return (

@@ -527,8 +527,8 @@ export default function UserShow(props: ActionProps) {
 													<Box style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
 														<Box
 															style={{
-																width: 50,
-																height: 50,
+																width: 76,
+																height: 76,
 																borderRadius: 10,
 																overflow: 'hidden',
 																background: '#F1F5F9',

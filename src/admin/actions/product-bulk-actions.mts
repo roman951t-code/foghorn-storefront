@@ -4,11 +4,17 @@ import { resolveInventoryAdminEmail, resolveInventoryReason } from './inventory-
 
 type CategoryOption = { id: string; label: string };
 type BrandOption = { id: string; label: string };
+type LocalizedCategoryMeta = { name: string; slug: string };
 
 const getRecordIds = (records: Array<{ param: (key: string) => unknown }>): string[] =>
 	records.map((r) => r.param('id')).filter((id): id is string => typeof id === 'string' && id.length > 0);
 
 const getMethod = (req: unknown) => String((req as { method?: unknown }).method ?? 'get').toLowerCase();
+const normalizeSlugPart = (value: unknown) =>
+	String(value ?? '')
+		.trim()
+		.toLowerCase()
+		.replace(/^\/+|\/+$/g, '');
 
 const parseCsvTags = (value: unknown): string[] => {
 	if (typeof value !== 'string') return [];
@@ -30,7 +36,7 @@ export const bulkSetCategory: ActionHandler<BulkActionResponse> = async (req, _r
 	const categories = await prisma.productCategory.findMany({
 		where: { parentId: { not: null } },
 		orderBy: [{ parent: { name: 'asc' } }, { name: 'asc' }],
-		select: { id: true, name: true, slug: true, parent: { select: { name: true, slug: true } } },
+		select: { id: true, name: true, slug: true, parent: { select: { id: true, name: true, slug: true } } },
 	});
 
 	const options: CategoryOption[] = categories.map((c) => ({
@@ -78,20 +84,75 @@ export const bulkSetCategory: ActionHandler<BulkActionResponse> = async (req, _r
 		select: { id: true, slug: true },
 	});
 
+	const categoryTranslations = await prisma.productCategoryTranslation.findMany({
+		where: { categoryId: { in: [selected.id, selected.parent.id] } },
+		select: { categoryId: true, locale: true, name: true, slug: true },
+	});
+
+	const parentByLocale = new Map<string, LocalizedCategoryMeta>();
+	const subcategoryByLocale = new Map<string, LocalizedCategoryMeta>();
+	for (const translation of categoryTranslations) {
+		const meta: LocalizedCategoryMeta = {
+			name: translation.name,
+			slug:
+				normalizeSlugPart(translation.slug) ||
+				(translation.categoryId === selected.parent.id ? selected.parent.slug : selected.slug),
+		};
+		if (translation.categoryId === selected.parent.id) {
+			parentByLocale.set(translation.locale, meta);
+		} else if (translation.categoryId === selected.id) {
+			subcategoryByLocale.set(translation.locale, meta);
+		}
+	}
+
+	const productTranslations = await prisma.productTranslation.findMany({
+		where: { productId: { in: ids } },
+		select: { id: true, productId: true, locale: true, slug: true },
+	});
+
+	const productSlugById = new Map(products.map((product) => [product.id, normalizeSlugPart(product.slug)]));
+
 	try {
-		await prisma.$transaction(
-			products.map((p) =>
-				prisma.product.update({
-					where: { id: p.id },
+		const productUpdates = products.map((product) => {
+			const productSlug = normalizeSlugPart(product.slug);
+			return prisma.product.update({
+				where: { id: product.id },
+				data: {
+					categoryId: selected.id,
+					categoryName: selected.parent!.name,
+					subcategoryName: selected.name,
+					fullSlug: `${selected.parent!.slug}/${selected.slug}/${productSlug}`,
+				},
+			});
+		});
+
+		const translationUpdates = productTranslations
+			.map((translation) => {
+				const productSlug = productSlugById.get(translation.productId);
+				if (!productSlug) return null;
+
+				const parentMeta = parentByLocale.get(translation.locale);
+				const subcategoryMeta = subcategoryByLocale.get(translation.locale);
+
+				const localizedParentName = parentMeta?.name ?? selected.parent!.name;
+				const localizedSubcategoryName = subcategoryMeta?.name ?? selected.name;
+				const localizedParentSlug = parentMeta?.slug ?? selected.parent!.slug;
+				const localizedSubcategorySlug = subcategoryMeta?.slug ?? selected.slug;
+				const localizedLeafSlug = normalizeSlugPart(translation.slug) || productSlug;
+
+				return prisma.productTranslation.update({
+					where: { id: translation.id },
 					data: {
-						categoryId: selected.id,
-						categoryName: selected.parent!.name,
-						subcategoryName: selected.name,
-						fullSlug: `${selected.parent!.slug}/${selected.slug}/${p.slug}`,
+						categoryName: localizedParentName,
+						subcategoryName: localizedSubcategoryName,
+						fullSlug: `${localizedParentSlug}/${localizedSubcategorySlug}/${localizedLeafSlug}`,
 					},
-				})
-			)
-		);
+				});
+			})
+			.filter((query): query is ReturnType<typeof prisma.productTranslation.update> => Boolean(query));
+
+		await prisma.$transaction([...productUpdates, ...translationUpdates]);
+
 		const refreshed = await Promise.all(ids.map((id) => resource.findOne(id)));
 		return {
 			records: refreshed.filter(Boolean).map((r) => r!.toJSON(currentAdmin)),

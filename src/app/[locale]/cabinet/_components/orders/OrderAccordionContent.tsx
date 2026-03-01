@@ -64,18 +64,22 @@ export function OrderAccordionContent({ order }: Props) {
 
 	const handleDeleteOrder = () => {
 		startDeleteTransition(async () => {
-			const result = await deleteOrderAction(order.id);
+			try {
+				const result = await deleteOrderAction(order.id);
 
-			if (result.success) {
-				showToaster(
-					'success',
-					ordersT(result.action === 'cancelled' ? 'orderCancelSuccess' : 'orderDeleteSuccess')
-				);
-				router.refresh();
-			} else {
-				const key =
-					result.code === 'unauthorized' ? 'orderDeleteUnauthorized' : 'orderDeleteFailed';
-				showToaster('error', ordersT(key));
+				if (result.success) {
+					showToaster(
+						'success',
+						ordersT(result.action === 'cancelled' ? 'orderCancelSuccess' : 'orderDeleteSuccess')
+					);
+					router.refresh();
+				} else {
+					const key =
+						result.code === 'unauthorized' ? 'orderDeleteUnauthorized' : 'orderDeleteFailed';
+					showToaster('error', ordersT(key));
+				}
+			} catch {
+				showToaster('error', ordersT('orderDeleteFailed'));
 			}
 		});
 	};

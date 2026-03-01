@@ -6,6 +6,7 @@ export type CartProduct = {
 	lineId: string;
 	productId: string;
 	variantId: string | null;
+	availableStock?: number | null;
 	sku?: string | null;
 	variantLabel?: string | null;
 	basePrice: number;

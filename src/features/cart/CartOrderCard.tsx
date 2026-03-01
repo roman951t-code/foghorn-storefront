@@ -21,6 +21,10 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 	const { handleRemoveLine, handleUpdateQuantity } = useCart();
 
 	const quantity = Math.max(1, product.quantity ?? 1);
+	const maxQuantity =
+		typeof product.availableStock === 'number' && Number.isFinite(product.availableStock)
+			? Math.max(1, Math.floor(product.availableStock))
+			: undefined;
 	const basePrice = roundPrice(product.basePrice ?? 0);
 	const discountPrice = product.discountPrice != null ? roundPrice(product.discountPrice) : null;
 	const discountAmount = discountPrice != null ? roundPrice(Math.max(0, basePrice - discountPrice)) : 0;
@@ -46,7 +50,8 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 	const handleQuantityChange = async (e: { value: number | string }) => {
 		const qty = Number(e.value);
 		if (Number.isFinite(qty) && qty >= 1) {
-			const res = await handleUpdateQuantity(product.lineId, qty);
+			const nextQty = maxQuantity ? Math.min(maxQuantity, qty) : qty;
+			const res = await handleUpdateQuantity(product.lineId, nextQty);
 			if (!res.success) {
 				showToaster('error', toasterMessages.cartUpdateFailed(i18nData.cartUpdateFailed));
 			}
@@ -196,8 +201,9 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 
 						<HStack gap={{ base: '8', sm: '2' }} alignSelf={{ base: 'center', sm: 'auto' }}>
 							<StepperInput
-								defaultValue={quantity.toString()}
+								value={quantity.toString()}
 								min={1}
+								max={maxQuantity}
 								size='sm'
 								aria-label='Quantity'
 								onValueChange={handleQuantityChange}

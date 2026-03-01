@@ -30,7 +30,7 @@ export default async function Wishlist({ searchParams }: Props) {
 	const shareCopiedText = wishT('shareCopied');
 
 	return (
-		<VStack>
+		<VStack w='100%' mt='4'>
 			<WishList
 				emptyText={wishT('wishListEmpty')}
 				currentPage={currentPage}

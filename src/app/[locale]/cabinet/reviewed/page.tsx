@@ -48,7 +48,7 @@ export default async function Reviewed({ params, searchParams }: Props) {
 	const paginatedProducts = viewedProducts.slice(startIndex, startIndex + pageSize);
 
 	return (
-		<VStack w='100%'>
+		<VStack w='100%' mt='4'>
 			{hasViewedProducts && (
 				<ClearViewedButton
 					text={genT('clear')}

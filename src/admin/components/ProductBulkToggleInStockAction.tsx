@@ -4,6 +4,10 @@ import { Box, Button, FormGroup, Label, Select, Text } from '@adminjs/design-sys
 import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
+type ToggleMode = 'toggle' | 'set';
+type InStockValue = 'true' | 'false';
+type ToggleModeOption = { value: ToggleMode; label: string };
+type InStockValueOption = { value: InStockValue; label: string };
 
 const actionButtonStyle = {
 	borderColor: 'white',
@@ -27,12 +31,28 @@ export default function ProductBulkToggleInStockAction({ action, resource, recor
 	const { translateAction, translateLabel, translateMessage } = useTranslation();
 
 	const recordIds = useMemo(() => resolveRecordIds(records), [records]);
-	const [mode, setMode] = useState<'toggle' | 'set'>('toggle');
-	const [value, setValue] = useState<'true' | 'false'>('true');
+	const [mode, setMode] = useState<ToggleMode>('toggle');
+	const [value, setValue] = useState<InStockValue>('true');
 	const [saving, setSaving] = useState(false);
 	const isReadOnly = useIsReadOnlyAdmin();
 
 	const title = translateAction(action.name, resource.id);
+	const modeOptions = useMemo<ToggleModeOption[]>(
+		() => [
+			{ value: 'toggle', label: translateMessage('product-bulk-stock-toggle') },
+			{ value: 'set', label: translateMessage('product-bulk-stock-set') },
+		],
+		[translateMessage]
+	);
+	const valueOptions = useMemo<InStockValueOption[]>(
+		() => [
+			{ value: 'true', label: translateLabel('inStock.true', resource.id) },
+			{ value: 'false', label: translateLabel('inStock.false', resource.id) },
+		],
+		[resource.id, translateLabel]
+	);
+	const selectedModeOption = modeOptions.find((option) => option.value === mode) ?? modeOptions[0] ?? null;
+	const selectedValueOption = valueOptions.find((option) => option.value === value) ?? valueOptions[0] ?? null;
 	const canSave = recordIds.length > 0;
 
 	const handleSave = async () => {
@@ -69,26 +89,24 @@ export default function ProductBulkToggleInStockAction({ action, resource, recor
 			<FormGroup>
 				<Label>{translateMessage('product-bulk-stock-mode')}</Label>
 				<Select
-					value={mode}
-					disabled={isReadOnly}
-					onChange={(e: any) => setMode(String(e?.target?.value ?? 'toggle') as any)}
-				>
-					<option value='toggle'>{translateMessage('product-bulk-stock-toggle')}</option>
-					<option value='set'>{translateMessage('product-bulk-stock-set')}</option>
-				</Select>
+					options={modeOptions}
+					value={selectedModeOption}
+					isClearable={false}
+					isDisabled={isReadOnly}
+					onChange={(option: ToggleModeOption | null) => setMode(option?.value ?? 'toggle')}
+				/>
 			</FormGroup>
 
 			{mode === 'set' ? (
 				<FormGroup>
 					<Label>{translateMessage('product-bulk-stock-value')}</Label>
 					<Select
-						value={value}
-						disabled={isReadOnly}
-						onChange={(e: any) => setValue(String(e?.target?.value ?? 'true') as any)}
-					>
-						<option value='true'>{translateLabel('inStock.true', resource.id)}</option>
-						<option value='false'>{translateLabel('inStock.false', resource.id)}</option>
-					</Select>
+						options={valueOptions}
+						value={selectedValueOption}
+						isClearable={false}
+						isDisabled={isReadOnly}
+						onChange={(option: InStockValueOption | null) => setValue(option?.value ?? 'true')}
+					/>
 				</FormGroup>
 			) : null}
 

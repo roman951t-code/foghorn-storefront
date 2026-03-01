@@ -31,7 +31,7 @@ export default async function Feedback({ searchParams }: Props) {
 			: (await getUserReviewedProducts(pageSize, normalizedOffset)).items;
 
 	return (
-		<VStack w='100%'>
+		<VStack w='100%' mt='4'>
 			<UserFeedbackList
 				items={normalizedItems}
 				emptyText={prodT('feedbackAbsent')}

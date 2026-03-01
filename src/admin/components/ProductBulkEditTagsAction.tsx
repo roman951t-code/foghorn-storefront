@@ -4,6 +4,8 @@ import { Box, Button, FormGroup, Label, Select, Text } from '@adminjs/design-sys
 import { useIsReadOnlyAdmin } from '../hooks/useIsReadOnlyAdmin';
 
 const api = new ApiClient();
+type TagMode = 'add' | 'remove' | 'replace';
+type TagModeOption = { value: TagMode; label: string };
 
 const actionButtonStyle = {
 	borderColor: 'white',
@@ -27,12 +29,21 @@ export default function ProductBulkEditTagsAction({ action, resource, records }:
 	const { translateAction, translateMessage } = useTranslation();
 
 	const recordIds = useMemo(() => resolveRecordIds(records), [records]);
-	const [mode, setMode] = useState<'add' | 'remove' | 'replace'>('add');
+	const [mode, setMode] = useState<TagMode>('add');
 	const [tags, setTags] = useState('');
 	const [saving, setSaving] = useState(false);
 	const isReadOnly = useIsReadOnlyAdmin();
 
 	const title = translateAction(action.name, resource.id);
+	const modeOptions = useMemo<TagModeOption[]>(
+		() => [
+			{ value: 'add', label: translateMessage('product-bulk-tags-add') },
+			{ value: 'remove', label: translateMessage('product-bulk-tags-remove') },
+			{ value: 'replace', label: translateMessage('product-bulk-tags-replace') },
+		],
+		[translateMessage]
+	);
+	const selectedModeOption = modeOptions.find((option) => option.value === mode) ?? modeOptions[0] ?? null;
 	const canSave = recordIds.length > 0 && tags.trim().length > 0;
 
 	const handleSave = async () => {
@@ -69,14 +80,12 @@ export default function ProductBulkEditTagsAction({ action, resource, records }:
 			<FormGroup>
 				<Label>{translateMessage('product-bulk-tags-mode')}</Label>
 				<Select
-					value={mode}
-					disabled={isReadOnly}
-					onChange={(e: any) => setMode(String(e?.target?.value ?? 'add') as any)}
-				>
-					<option value='add'>{translateMessage('product-bulk-tags-add')}</option>
-					<option value='remove'>{translateMessage('product-bulk-tags-remove')}</option>
-					<option value='replace'>{translateMessage('product-bulk-tags-replace')}</option>
-				</Select>
+					options={modeOptions}
+					value={selectedModeOption}
+					isClearable={false}
+					isDisabled={isReadOnly}
+					onChange={(option: TagModeOption | null) => setMode(option?.value ?? 'add')}
+				/>
 			</FormGroup>
 
 			<FormGroup>

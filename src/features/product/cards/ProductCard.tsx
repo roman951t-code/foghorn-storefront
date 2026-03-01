@@ -48,9 +48,13 @@ export default function ProductCard({ product }: Props) {
 	const ratingId = useId();
 
 	const [isLoading, setIsLoading] = useState(false);
+	const [activePreviewIndex, setActivePreviewIndex] = useState(0);
 	const { productIds, handleAddItem, handleRemoveItem } = useCart();
 	const { ids: wishListIds, handleWishAdd, handleWishRemove } = useWishList();
 	const previewImages = buildProductImageGallery(product.imageUrl, product.images, 3);
+	const maxPreviewIndex = Math.max(0, previewImages.length - 1);
+	const safePreviewIndex = Math.min(Math.max(activePreviewIndex, 0), maxPreviewIndex);
+	const sliderHref = fullSlug === '#' ? '#' : `/products/${fullSlug}?image=${safePreviewIndex + 1}`;
 
 	if (!product) return null;
 
@@ -170,8 +174,12 @@ export default function ProductCard({ product }: Props) {
 					</IconButton>
 				</Flex>
 
-				<LocaleNavLink href={`/products/${fullSlug}`} display='block' aria-label={name}>
-					<ProductPreviewSlider images={previewImages} productName={name} />
+				<LocaleNavLink href={sliderHref} display='block' aria-label={name}>
+					<ProductPreviewSlider
+						images={previewImages}
+						productName={name}
+						onActiveIndexChange={setActivePreviewIndex}
+					/>
 				</LocaleNavLink>
 
 				<LinkBox mt='2' textAlign={{ base: 'center', sm: 'left' }}>

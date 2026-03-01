@@ -466,6 +466,7 @@ const config = defineConfig({
 			fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
 			fontWeight: 500,
 			textRendering: 'optimizeLegibility',
+			userSelect: 'none',
 		},
 		img: { userSelect: 'none' },
 		form: {
@@ -499,17 +500,22 @@ const config = defineConfig({
 			fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
 			fontWeight: 500,
 		},
+		'input, textarea, select, [contenteditable="true"]': {
+			userSelect: 'text',
+		},
 		'.swiper-button-prev,.swiper-button-next': {
 			color: 'var(--chakra-colors-fg) !important',
 		},
-		'.thumbsSlider .swiper-button-prev:after, .thumbsSlider .swiper-button-next:after': {
+		'.thumbsSlider .swiper-button-prev:after, .thumbsSlider .swiper-button-next:after, .imageModalSwiper .swiper-button-prev:after, .imageModalSwiper .swiper-button-next:after':
+			{
 			color: 'var(--chakra-colors-bg-inverted) !important',
 			fontSize: '24px !important',
 			backgroundColor: 'transparent',
 			padding: '8px',
 			borderRadius: '60%',
 		},
-		'.thumbsSlider .swiper-button-prev, .thumbsSlider .swiper-button-next': {
+		'.thumbsSlider .swiper-button-prev, .thumbsSlider .swiper-button-next, .imageModalSwiper .swiper-button-prev, .imageModalSwiper .swiper-button-next':
+			{
 			backgroundColor: 'bg.tertiary',
 			borderWidth: '0.5px',
 			borderRadius: 'sm',
@@ -517,7 +523,7 @@ const config = defineConfig({
 			height: '78px !important',
 			width: '24px !important',
 		},
-		'.thumbsSlider .swiper-button-prev .swiper-navigation-icon, .thumbsSlider .swiper-button-next .swiper-navigation-icon':
+		'.thumbsSlider .swiper-button-prev .swiper-navigation-icon, .thumbsSlider .swiper-button-next .swiper-navigation-icon, .imageModalSwiper .swiper-button-prev .swiper-navigation-icon, .imageModalSwiper .swiper-button-next .swiper-navigation-icon':
 			{
 				height: '52px !important',
 				width: '16px !important',
@@ -568,7 +574,7 @@ const config = defineConfig({
 				backgroundColor: 'var(--chakra-colors-main-accent) !important',
 				opacity: '1 !important',
 			},
-		'.thumbsSlider .swiper-button-prev:focus-visible, .thumbsSlider .swiper-button-next:focus-visible, .thumbsSlider .swiper-pagination-bullet:focus-visible':
+		'.thumbsSlider .swiper-button-prev:focus-visible, .thumbsSlider .swiper-button-next:focus-visible, .thumbsSlider .swiper-pagination-bullet:focus-visible, .imageModalSwiper .swiper-button-prev:focus-visible, .imageModalSwiper .swiper-button-next:focus-visible':
 			{
 				outline: '2px solid var(--chakra-colors-main-accent)',
 				outlineOffset: '4px',

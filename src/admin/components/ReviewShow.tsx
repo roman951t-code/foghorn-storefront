@@ -89,8 +89,8 @@ export default function ReviewShow(props: ActionProps) {
 						<Box style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
 							<Box
 								style={{
-									width: 50,
-									height: 50,
+									width: 76,
+									height: 76,
 									borderRadius: 10,
 									overflow: 'hidden',
 									background: '#F1F5F9',
@@ -120,9 +120,9 @@ export default function ReviewShow(props: ActionProps) {
 								>
 									{productPayload.productName}
 								</a>
-												<Text color='grey60' style={{ fontSize: 15 }}>
-													{resolveStatusLabel(productPayload.productStatus)}
-												</Text>
+								<Text color='grey60' style={{ fontSize: 15 }}>
+									{resolveStatusLabel(productPayload.productStatus)}
+								</Text>
 							</Box>
 						</Box>
 					</Box>

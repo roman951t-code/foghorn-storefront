@@ -31,6 +31,7 @@ const SEED_SUBCATEGORY_MIN = 1;
 const SEED_SUBCATEGORY_MAX = 3;
 const SEED_PRODUCTS_PER_SUBCATEGORY_MIN = 1;
 const SEED_PRODUCTS_PER_SUBCATEGORY_MAX = 3;
+const SEEDED_IMAGE_SIZE = 1100;
 
 const generateUniqueProductCode = () => {
 	let attempts = 0;
@@ -240,8 +241,8 @@ const updatePicsumVariantPath = (url: URL, variantIndex: number) => {
 	if (seedIndex !== -1 && segments.length >= seedIndex + 4) {
 		const baseSeed = segments[seedIndex + 1] ?? 'product';
 		segments[seedIndex + 1] = `${baseSeed}-${variantIndex}`;
-		segments[seedIndex + 2] = '900';
-		segments[seedIndex + 3] = '900';
+		segments[seedIndex + 2] = String(SEEDED_IMAGE_SIZE);
+		segments[seedIndex + 3] = String(SEEDED_IMAGE_SIZE);
 		url.pathname = '/' + segments.join('/');
 		url.search = '';
 		return;
@@ -252,11 +253,54 @@ const updatePicsumVariantPath = (url: URL, variantIndex: number) => {
 const updateLoremFlickrVariantPath = (url: URL, variantIndex: number) => {
 	const segments = url.pathname.split('/').filter(Boolean);
 	if (segments.length >= 2 && /^\d+$/.test(segments[0]) && /^\d+$/.test(segments[1])) {
-		segments[0] = '900';
-		segments[1] = '900';
+		segments[0] = String(SEEDED_IMAGE_SIZE);
+		segments[1] = String(SEEDED_IMAGE_SIZE);
 		url.pathname = '/' + segments.join('/');
 	}
 	url.searchParams.set('lock', String(variantIndex));
+};
+
+const resizeSeedImageUrl = (url?: string | null): string | null => {
+	if (!url) return url ?? null;
+	const normalizedUrl = url.trim();
+	if (!normalizedUrl) return normalizedUrl;
+
+	try {
+		const parsed = new URL(normalizedUrl);
+		const targetSize = String(SEEDED_IMAGE_SIZE);
+
+		if (parsed.hostname.includes('picsum.photos')) {
+			const segments = parsed.pathname.split('/').filter(Boolean);
+			const seedIndex = segments.findIndex((segment) => segment === 'seed');
+			if (seedIndex !== -1 && segments.length >= seedIndex + 4) {
+				if (segments[seedIndex + 2] === targetSize && segments[seedIndex + 3] === targetSize) {
+					return normalizedUrl;
+				}
+				segments[seedIndex + 2] = targetSize;
+				segments[seedIndex + 3] = targetSize;
+				parsed.pathname = '/' + segments.join('/');
+				parsed.search = '';
+				return parsed.toString();
+			}
+			return normalizedUrl;
+		}
+
+		if (parsed.hostname.includes('loremflickr.com')) {
+			const segments = parsed.pathname.split('/').filter(Boolean);
+			if (segments.length >= 2 && /^\d+$/.test(segments[0]) && /^\d+$/.test(segments[1])) {
+				if (segments[0] === targetSize && segments[1] === targetSize) return normalizedUrl;
+				segments[0] = targetSize;
+				segments[1] = targetSize;
+				parsed.pathname = '/' + segments.join('/');
+				return parsed.toString();
+			}
+			return normalizedUrl;
+		}
+
+		return normalizedUrl;
+	} catch {
+		return normalizedUrl;
+	}
 };
 
 const toVariantImageUrl = (primaryUrl: string, variantIndex: number) => {
@@ -290,12 +334,18 @@ const buildSeedProductGallery = (primaryUrl: string, extraImages = 3) => {
 const getCategoryImage = (name: string) => {
 	const keyword = categoryImageKeywords[name] ?? subcategoryImageKeywords[name] ?? 'tech-gadgets';
 	const seed = createSlug(name);
-	return buildKeywordImage(keyword, 900, 900, seed) || stablePick(fallbackCategoryImages, seed);
+	return (
+		buildKeywordImage(keyword, SEEDED_IMAGE_SIZE, SEEDED_IMAGE_SIZE, seed) ||
+		stablePick(fallbackCategoryImages, seed)
+	);
 };
 
 const getSubcategoryImage = (sub: string, seed: string) => {
 	const keyword = subcategoryImageKeywords[sub] ?? categoryImageKeywords[sub] ?? 'tech-gadgets';
-	return buildKeywordImage(keyword, 900, 900, seed) || stablePick(fallbackProductImages, seed);
+	return (
+		buildKeywordImage(keyword, SEEDED_IMAGE_SIZE, SEEDED_IMAGE_SIZE, seed) ||
+		stablePick(fallbackProductImages, seed)
+	);
 };
 
 const buildSemanticProductName = (brandName: string, subcategoryName: string, seed: string) => {
@@ -1384,15 +1434,17 @@ async function main() {
 		});
 
 		for (const cat of categoriesNeedingImages) {
-			if (needsImageReplacement(cat.imageUrl)) {
-				const newImage = cat.parentId
+			const resizedImage = resizeSeedImageUrl(cat.imageUrl);
+			const newImage = needsImageReplacement(cat.imageUrl)
+				? cat.parentId
 					? getSubcategoryImage(cat.name, cat.slug)
-					: getCategoryImage(cat.name);
-				await prisma.productCategory.update({
-					where: { id: cat.id },
-					data: { imageUrl: newImage },
-				});
-			}
+					: getCategoryImage(cat.name)
+				: resizedImage;
+			if (!newImage || newImage === cat.imageUrl) continue;
+			await prisma.productCategory.update({
+				where: { id: cat.id },
+				data: { imageUrl: newImage },
+			});
 		}
 	} else {
 		console.log('ℹ️ Skipping category image backfill (category generation disabled).');
@@ -1404,20 +1456,35 @@ async function main() {
 	});
 
 	for (const product of productsNeedingImages) {
-		if (needsImageReplacement(product.imageUrl)) {
-			const seed = product.slug ?? product.id;
-			const keyword =
-				subcategoryImageKeywords[product.subcategoryName] ??
-				categoryImageKeywords[product.categoryName] ??
-				'tech-gadgets';
+		const seed = product.slug ?? product.id;
+		const keyword =
+			subcategoryImageKeywords[product.subcategoryName] ??
+			categoryImageKeywords[product.categoryName] ??
+			'tech-gadgets';
+		const resizedImage = resizeSeedImageUrl(product.imageUrl);
+		const newImage = needsImageReplacement(product.imageUrl)
+			? buildKeywordImage(keyword, SEEDED_IMAGE_SIZE, SEEDED_IMAGE_SIZE, seed)
+			: resizedImage;
+		if (!newImage || newImage === product.imageUrl) continue;
+		await prisma.product.update({
+			where: { id: product.id },
+			data: {
+				imageUrl: newImage,
+			},
+		});
+	}
 
-			await prisma.product.update({
-				where: { id: product.id },
-				data: {
-					imageUrl: buildKeywordImage(keyword, 900, 900, seed),
-				},
-			});
-		}
+	const productGalleryImages = await prisma.productImage.findMany({
+		select: { id: true, url: true },
+	});
+
+	for (const image of productGalleryImages) {
+		const resizedImage = resizeSeedImageUrl(image.url);
+		if (!resizedImage || resizedImage === image.url) continue;
+		await prisma.productImage.update({
+			where: { id: image.id },
+			data: { url: resizedImage },
+		});
 	}
 
 	const productsMissingGallery = await prisma.product.findMany({

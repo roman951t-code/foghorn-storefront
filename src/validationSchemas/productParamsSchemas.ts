@@ -21,4 +21,5 @@ export const productParamsSchema = z.object({
 
 export const productSearchParamsSchema = z.object({
 	tab: z.string().optional(),
+	image: z.string().optional(),
 });

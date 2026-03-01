@@ -1,4 +1,4 @@
-const SQUARE_FULL = 900;
+const SQUARE_FULL = 1100;
 const SQUARE_PREVIEW = 160;
 export const PRODUCT_PLACEHOLDER_IMAGE = '/assets/images/product-placeholder.svg';
 

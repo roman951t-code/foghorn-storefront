@@ -521,31 +521,51 @@ export const deleteOrder: ActionHandler<RecordActionResponse> = async (req, _res
 	}
 	const orderId = record.param('id') as string;
 	const resourceId = typeof (resource as any).id === 'function' ? (resource as any).id() : (resource as any).id;
-	await prisma.$transaction(async (tx) => {
-		const order = await tx.order.findUnique({
-			where: { id: orderId },
-			select: { status: true },
-		});
-		if (order && (order.status === 'PENDING' || order.status === 'PAID')) {
-			await restockOrderInventory(tx, orderId);
-		}
-		if (order && order.status === 'CANCELLED') {
-			const restocked = await tx.orderAuditEntry.findFirst({
-				where: { orderId, type: 'NOTE', note: INVENTORY_RESTOCKED_NOTE },
-				select: { id: true },
+	try {
+		await prisma.$transaction(async (tx) => {
+			const order = await tx.order.findUnique({
+				where: { id: orderId },
+				select: { status: true },
 			});
-			if (!restocked) {
+			if (!order) {
+				throw new Error('order-not-found');
+			}
+
+			if (order.status === 'PENDING' || order.status === 'PAID') {
 				await restockOrderInventory(tx, orderId);
 			}
+			if (order.status === 'CANCELLED') {
+				const restocked = await tx.orderAuditEntry.findFirst({
+					where: { orderId, type: 'NOTE', note: INVENTORY_RESTOCKED_NOTE },
+					select: { id: true },
+				});
+				if (!restocked) {
+					await restockOrderInventory(tx, orderId);
+				}
+			}
+			await tx.orderItem.deleteMany({ where: { orderId } });
+			await tx.order.delete({ where: { id: orderId } });
+		});
+		return {
+			record: record.toJSON(currentAdmin),
+			notice: { message: 'order-deleted', type: 'success' },
+			redirectUrl: h.resourceUrl({ resourceId }),
+		};
+	} catch (error) {
+		if (error instanceof Error && error.message === 'order-not-found') {
+			return {
+				record: record.toJSON(currentAdmin),
+				notice: { message: 'order-not-found', type: 'error' },
+				redirectUrl: h.resourceUrl({ resourceId }),
+			};
 		}
-		await tx.orderItem.deleteMany({ where: { orderId } });
-		await tx.order.delete({ where: { id: orderId } });
-	});
-	return {
-		record: record.toJSON(currentAdmin),
-		notice: { message: 'order-deleted', type: 'success' },
-		redirectUrl: h.resourceUrl({ resourceId }),
-	};
+
+		console.error('[admin] Failed to delete order', { orderId, error });
+		return {
+			record: record.toJSON(currentAdmin),
+			notice: { message: 'order-delete-failed', type: 'error' },
+		};
+	}
 };
 
 export const processReturn: ActionHandler<RecordActionResponse> = async (req, _res, context) => {

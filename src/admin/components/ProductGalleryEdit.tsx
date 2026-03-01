@@ -124,8 +124,8 @@ export default function ProductGalleryEdit(props: EditPropertyProps) {
 						>
 							<Box
 								style={{
-									width: 52,
-									height: 52,
+									width: 76,
+									height: 76,
 									borderRadius: 8,
 									overflow: 'hidden',
 									border: '1px solid #CBD5E1',

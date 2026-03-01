@@ -18,9 +18,16 @@ interface Props {
 	subcategory: string;
 	tab?: string;
 	product: NonNullable<Product>;
+	initialImageIndex?: number;
 }
 
-export default function ProductTabs({ tab = 'about', product, category, subcategory }: Props) {
+export default function ProductTabs({
+	tab = 'about',
+	product,
+	category,
+	subcategory,
+	initialImageIndex = 0,
+}: Props) {
 	const prodT = useTranslations('products');
 	const validT = useTranslations('validation');
 	const pathname = usePathname();
@@ -58,6 +65,7 @@ export default function ProductTabs({ tab = 'about', product, category, subcateg
 				subcategory={subcategory}
 				averageRating={averageRating}
 				reviewCount={reviewCount}
+				initialImageIndex={initialImageIndex}
 				onTabChange={(nextTab) => handleTabChange(nextTab)}
 			/>
 		) : null;

@@ -11,9 +11,7 @@ type Props = {
 	paymentTitle: string;
 	shipmentTitle: string;
 	guaranteeTitle: string;
-	descriptionTitle: string;
 	guaranteeText: string;
-	descriptionText: string;
 	paymentOptions: DetailOption[];
 	shipmentOptions: DetailOption[];
 };
@@ -22,9 +20,7 @@ export default function ProductDetails({
 	paymentTitle,
 	shipmentTitle,
 	guaranteeTitle,
-	descriptionTitle,
 	guaranteeText,
-	descriptionText,
 	paymentOptions,
 	shipmentOptions,
 }: Props) {
@@ -81,15 +77,6 @@ export default function ProductDetails({
 				</Card.Header>
 				<Card.Body>
 					<Text whiteSpace='pre-line'>{guaranteeText}</Text>
-				</Card.Body>
-			</Card.Root>
-
-			<Card.Root size='sm' bg='bg.tertiary' borderColor='border'>
-				<Card.Header>
-					<Heading size='md'>{descriptionTitle}</Heading>
-				</Card.Header>
-				<Card.Body>
-					<Text whiteSpace='pre-line'>{descriptionText}</Text>
 				</Card.Body>
 			</Card.Root>
 		</Stack>
