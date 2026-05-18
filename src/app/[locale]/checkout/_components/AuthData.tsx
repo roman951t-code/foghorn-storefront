@@ -29,14 +29,10 @@ const Auth = dynamic(() => import('@/features/auth/Auth'), {
 export default function AuthData({ i18nData }: { i18nData: I18nData }) {
 	const { session } = useSession();
 
-	if (!session) {
-		return <AuthStepSkeleton />;
-	}
-
 	return session?.session ? (
 		<PersonalDataForm i18nData={i18nData} />
 	) : (
-		<Card.Header p='0'>
+		<Card.Header p='0' w='full'>
 			<Flex
 				gap='4'
 				flexWrap='wrap'

@@ -18,7 +18,7 @@ import {
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 
 function mapRecentlyViewedProducts(viewed: { product: any }[], locale: string): SubcategoryProduct[] {
-	return viewed
+	const mapped = viewed
 		.map((entry) => {
 			const p = entry.product;
 			if (!p) return null;
@@ -94,16 +94,21 @@ function mapRecentlyViewedProducts(viewed: { product: any }[], locale: string): 
 							}),
 							stock: p.variants[0].stock,
 							label: (p.variants[0].attributes ?? [])
-								.map((a: any) =>
-									[a.attribute?.name, a.value, a.attribute?.unit].filter(Boolean).join(' ')
-								)
+								.map((a: any) => {
+									const name = String(a.attribute?.name ?? '').trim();
+									const valueWithUnit = [a.value, a.attribute?.unit].filter(Boolean).join(' ').trim();
+									if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+									return name || valueWithUnit;
+								})
 								.join(' / '),
 						}
 					: undefined,
 			} as SubcategoryProduct;
-		})
-		.filter(Boolean)
-		.sort((a, b) => Number(Boolean(b.inStock)) - Number(Boolean(a.inStock))) as SubcategoryProduct[];
+		});
+
+	return mapped
+		.filter((item): item is SubcategoryProduct => item !== null)
+		.sort((a, b) => Number(Boolean(b.inStock)) - Number(Boolean(a.inStock)));
 }
 
 export async function getRecentlyViewedProductsWithCount(

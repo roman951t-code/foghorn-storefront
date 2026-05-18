@@ -126,16 +126,14 @@ export function buildLocalizedVariantLabel(
 ) {
 	if (!parts?.length) return null;
 	const chunks = parts
-		.map((part) =>
-			[
-				part.name ? localizeAttributeName(part.name, locale) : '',
-				part.value ?? '',
-				part.unit ? localizeAttributeUnit(part.unit, locale) : '',
-			]
-				.filter(Boolean)
-				.join(' ')
-				.trim()
-		)
+		.map((part) => {
+			const name = part.name ? localizeAttributeName(part.name, locale).trim() : '';
+			const value = (part.value ?? '').trim();
+			const unit = part.unit ? localizeAttributeUnit(part.unit, locale)?.trim() ?? '' : '';
+			const valueWithUnit = [value, unit].filter(Boolean).join(' ').trim();
+			if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+			return name || valueWithUnit;
+		})
 		.filter(Boolean);
 	if (!chunks.length) return null;
 	return chunks.join(' / ');

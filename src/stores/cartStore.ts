@@ -155,12 +155,22 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 			(defaultVariant?.id === effectiveVariantId ? defaultVariant?.label : null) ??
 			(selectedVariant?.id === effectiveVariantId
 				? selectedVariant.attributes
-						?.map((a: any) => [a.name, a.value, a.unit].filter(Boolean).join(' '))
+						?.map((a: any) => {
+							const name = String(a.name ?? '').trim();
+							const valueWithUnit = [a.value, a.unit].filter(Boolean).join(' ').trim();
+							if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+							return name || valueWithUnit;
+						})
 						.join(' / ')
 				: null) ??
 			(fallbackVariant?.id === effectiveVariantId
 				? fallbackVariant.attributes
-						?.map((a: any) => [a.name, a.value, a.unit].filter(Boolean).join(' '))
+						?.map((a: any) => {
+							const name = String(a.name ?? '').trim();
+							const valueWithUnit = [a.value, a.unit].filter(Boolean).join(' ').trim();
+							if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+							return name || valueWithUnit;
+						})
 						.join(' / ')
 				: null) ??
 			null;

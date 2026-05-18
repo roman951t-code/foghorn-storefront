@@ -1,10 +1,17 @@
 import type { ActionHandler, RecordActionResponse } from 'adminjs';
 import { prisma } from '../prisma.mts';
 
-export const duplicateBanner: ActionHandler<RecordActionResponse> = async (_req, _res, context) => {
+const getMethod = (req: unknown) => String((req as { method?: unknown }).method ?? 'get').toLowerCase();
+
+export const duplicateBanner: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
 	const { record, resource, currentAdmin, h } = context;
 	if (!record || !resource) {
 		throw new Error('Missing record context');
+	}
+	if (getMethod(req) !== 'post') {
+		return {
+			record: record.toJSON(currentAdmin),
+		};
 	}
 
 	const bannerId = record.param('id') as string;

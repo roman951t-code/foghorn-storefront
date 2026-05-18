@@ -78,7 +78,8 @@ export type Review = {
 	advantages: string | null;
 	disadvantages: string | null;
 	createdAt: Date;
-	user: { name: string; lastName: string | null; id: string };
+	isMine: boolean;
+	user: { name: string; lastName: string | null };
 };
 
 export type FilterValue = {

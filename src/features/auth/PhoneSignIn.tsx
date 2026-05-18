@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Input, Stack, Field, Fieldset, Highlight, Text, PinInput } from '@chakra-ui/react';
+import { Alert, Input, Stack, Field, Fieldset, Highlight, Text, PinInput } from '@chakra-ui/react';
 import { Controller, useForm } from 'react-hook-form';
 import type { I18nData } from '@/types/i18n';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,6 +25,8 @@ interface PhoneAuthProps {
 	isSignup?: boolean;
 }
 
+const createEmptyOtp = () => ['', '', '', '', '', ''];
+
 export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 	const signInSchema = useMemo(() => createPhoneSignInSchema(i18nData), [i18nData]);
 	const verifySchema = useMemo(() => createPhoneVerifySchema(i18nData), [i18nData]);
@@ -34,6 +36,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 	const [authError, setAuthError] = useState('');
 	const [verifyError, setVerifyError] = useState('');
 	const [pendingPhone, setPendingPhone] = useState<string | null>(null);
+	const [hasTestOtpAutofill, setHasTestOtpAutofill] = useState(false);
 	const [timer, setTimer] = useState(0);
 
 	const {
@@ -48,7 +51,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 		formState: { errors: verifyErrors, isSubmitting: isVerifying },
 	} = useForm<PhoneVerifySchema>({
 		mode: 'onSubmit',
-		defaultValues: { otp: ['', '', '', '', '', ''] },
+		defaultValues: { otp: createEmptyOtp() },
 		resolver: zodResolver(verifySchema),
 	});
 	const registerWithMask = useMaskedInput(register);
@@ -88,8 +91,9 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 		}
 
 		setPendingPhone(phone);
+		setHasTestOtpAutofill(Boolean(result.devOtp));
 		setTimer(120);
-		resetVerifyForm({ otp: ['', '', '', '', '', ''] });
+		resetVerifyForm({ otp: result.devOtp ? result.devOtp.split('') : createEmptyOtp() });
 		return true;
 	};
 
@@ -139,10 +143,25 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 							<Highlight query={pendingPhone} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
 								{pendingPhone}
 							</Highlight>
-							<Text color='fg.muted'>{i18nData.signUpCodeSent}</Text>
+							<Text color='fg.muted'>{i18nData.phoneCodeSent}</Text>
 						</Fieldset.HelperText>
 
 						<Fieldset.Content>
+							<Alert.Root status='info' variant='subtle' mt='2'>
+								<Alert.Indicator />
+								<Stack gap='1'>
+									<Alert.Title>{i18nData.phoneCodeInfoTitle}</Alert.Title>
+									<Text fontSize={{ base: 'sm', md: 'sm' }} lineHeight='1.5'>
+										{i18nData.phoneCodeInfoDescription}
+									</Text>
+									{hasTestOtpAutofill ? (
+										<Text fontSize={{ base: 'sm', md: 'sm' }} lineHeight='1.5' color='fg.muted'>
+											{i18nData.phoneOtpAutofillNote}
+										</Text>
+									) : null}
+								</Stack>
+							</Alert.Root>
+
 							<Field.Root required invalid={!!verifyErrors.otp} alignItems='center'>
 								<Controller
 									control={verifyControl}
@@ -212,6 +231,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 						type='button'
 						onClick={() => {
 							setPendingPhone(null);
+							setHasTestOtpAutofill(false);
 							setTimer(0);
 							setVerifyError('');
 						}}

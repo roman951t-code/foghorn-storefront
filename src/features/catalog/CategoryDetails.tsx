@@ -53,7 +53,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 						css={CATEGORY_DETAILS_GRID_CSS}
 						justifyContent='start'
 						gap='4'
-						pr={{ base: 0, lg: '256px' }}
+						pr={{ base: 0, lg: '264px' }}
 					>
 						{subcategories.map((subcategory) => {
 							const subImage = resolveSubcategoryImage(

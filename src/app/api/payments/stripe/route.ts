@@ -22,6 +22,8 @@ import {
 } from '@/utils/shippingAddress';
 import { asErrorDetails, resolveSafeRedirectUrl } from './route-utils';
 
+export const maxDuration = 60;
+
 type LineItemPayload = { productId: string; variantId: string | null; quantity: number };
 
 const currency = STORE_CURRENCY_CODE_LOWER;
@@ -369,7 +371,12 @@ export async function POST(req: NextRequest) {
 				const variantLabel =
 					variant.attributes?.length
 						? variant.attributes
-								.map((a) => [a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' '))
+								.map((a) => {
+									const name = a.attribute.name?.trim?.() ?? '';
+									const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
+									if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+									return name || valueWithUnit;
+								})
 								.join(' / ')
 						: null;
 

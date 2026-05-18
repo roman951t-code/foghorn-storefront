@@ -124,10 +124,16 @@ const makeStatusAction = (
 	next: OrderStatus,
 	allowedCurrent?: OrderStatus[]
 ): ActionHandler<RecordActionResponse> => {
-	return async (_req, _res, context) => {
+	return async (req, _res, context) => {
 		const { record, resource, currentAdmin } = context;
 		if (!record || !resource) {
 			throw new Error('Missing record context');
+		}
+		const method = ((req as { method?: string }).method ?? 'get').toLowerCase();
+		if (method !== 'post' && method !== 'delete') {
+			return {
+				record: record.toJSON(currentAdmin),
+			};
 		}
 		const currentStatus = record.param('status') as OrderStatus | undefined;
 		if (allowedCurrent && currentStatus && !allowedCurrent.includes(currentStatus)) {
@@ -157,10 +163,16 @@ const makeStatusAction = (
 };
 
 const makeBulkStatusAction = (next: OrderStatus): ActionHandler<BulkActionResponse> => {
-	return async (_req, _res, context) => {
+	return async (req, _res, context) => {
 		const { records, resource, currentAdmin } = context;
 		if (!records || !resource) {
 			throw new Error('Missing record context');
+		}
+		const method = ((req as { method?: string }).method ?? 'get').toLowerCase();
+		if (method !== 'post' && method !== 'delete') {
+			return {
+				records: records.map((record) => record.toJSON(currentAdmin)),
+			};
 		}
 		const ids = records.map((record) => record.param('id')).filter(Boolean) as string[];
 		if (!ids.length) {
@@ -511,9 +523,13 @@ export const deleteOrder: ActionHandler<RecordActionResponse> = async (req, _res
 	if (!record || !resource) {
 		throw new Error('Missing record context');
 	}
-	// AdminJS immediate custom actions are commonly executed via GET.
-	// Accept GET/POST/DELETE to keep the action functional across UI entry points.
-	if (method !== 'get' && method !== 'post' && method !== 'delete') {
+	if (method === 'get') {
+		return {
+			record: record.toJSON(currentAdmin),
+		};
+	}
+
+	if (method !== 'post' && method !== 'delete') {
 		return {
 			record: record.toJSON(currentAdmin),
 			notice: { message: 'order-delete-method-not-allowed', type: 'error' },

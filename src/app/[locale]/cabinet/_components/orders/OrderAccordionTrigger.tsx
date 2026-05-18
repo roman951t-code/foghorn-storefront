@@ -28,6 +28,8 @@ type Props = {
 	orderDetailTags: OrderDetailTag[];
 };
 
+const XS_MEDIA_QUERY = '@media screen and (min-width: 430px)';
+
 export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDetailTags }: Props) {
 	const productsT = useTranslations('products');
 	const commonT = useTranslations('common');
@@ -41,10 +43,16 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 		<Accordion.ItemTrigger w='full' p='0' cursor='pointer' flexDirection='column'>
 			<Flex
 				w='full'
-				alignItems={{ base: 'flex-start', xs: 'center' } as any}
+				alignItems='flex-start'
 				justifyContent='space-between'
-				direction={{ base: 'column', xs: 'row' } as any}
+				direction='column'
 				gap='3'
+				css={{
+					[XS_MEDIA_QUERY]: {
+						alignItems: 'center',
+						flexDirection: 'row',
+					},
+				}}
 			>
 				<VStack gap='3' alignItems='flex-start' minW='160px'>
 					<Stat.Root>
@@ -112,10 +120,16 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 			</Flex>
 			<HStack justifyContent='space-between' w='full'>
 				<HStack
-					gap={{ base: '2', xs: '4' } as any}
-					mt={{ base: '2', xs: '4.5' } as any}
+					gap='2'
+					mt='2'
 					flexWrap='wrap'
 					w='full'
+					css={{
+						[XS_MEDIA_QUERY]: {
+							gap: '4',
+							marginTop: '4.5',
+						},
+					}}
 				>
 					{orderDetailTags.map(({ key, label, value, colorPalette, icon }) => (
 						<Tag.Root

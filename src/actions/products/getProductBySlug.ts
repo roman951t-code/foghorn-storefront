@@ -114,7 +114,7 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 					disadvantages: true,
 					createdAt: true,
 					user: {
-						select: { id: true, name: true, lastName: true },
+						select: { name: true, lastName: true },
 					},
 				},
 				orderBy: { createdAt: 'desc' },
@@ -196,7 +196,7 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 			? [...setAttributes, ...extraAttributes]
 			: extraAttributes;
 
-	const { category, productImages, translations, ...productWithoutCategory } = product;
+	const { category, productImages, translations, reviews, ...productWithoutCategory } = product;
 	return {
 		...productWithoutCategory,
 		imageUrl: primaryImageUrl,
@@ -239,6 +239,10 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 				unit: a.attribute.unit,
 				value: a.value,
 			})),
+		})),
+		reviews: reviews.map((review) => ({
+			...review,
+			isMine: false as boolean,
 		})),
 	};
 }

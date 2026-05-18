@@ -88,11 +88,7 @@ export function OrderAccordionContent({ order }: Props) {
 		<Accordion.ItemContent>
 			<Accordion.ItemBody p='0' pt='4' mt='2'>
 				<Flex
-					justifyContent={
-						(canMutateOrder
-							? { base: 'space-between', xs: 'space-between' }
-							: { base: 'flex-end', xs: 'flex-end' }) as any
-					}
+					justifyContent={canMutateOrder ? 'space-between' : 'flex-end'}
 					alignItems='center'
 					gap='3'
 					flexWrap='wrap'

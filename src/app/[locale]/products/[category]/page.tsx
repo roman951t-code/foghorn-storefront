@@ -2,41 +2,25 @@ import type { Metadata } from 'next';
 import Breadcrumbs from '@/components/ui/links/Breadcrumbs';
 import { Heading, Stack } from '@chakra-ui/react';
 import { getTranslations } from 'next-intl/server';
-import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import { getCategoryData } from '@/actions/products/getCategoryData';
+import { getCategoryBySlug } from '@/actions/products/getCategoryBySlug';
 import CategoryCards from './_components/CategoryCards';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
 import Script from 'next/script';
 import { CategoryParams } from '@/types/routing';
 import { ensureParams } from '@/utils/validateParams';
 import { categoryParamsSchema } from 'validationSchemas/productParamsSchemas';
-import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { headers } from 'next/headers';
 import { CATEGORY_PLACEHOLDER_IMAGE } from '@/utils/categoryImages';
 
 export async function generateMetadata({ params }: CategoryParams): Promise<Metadata> {
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
-	const localeFallbacks = getLocaleFallbacks(locale);
-
-	const category = await prisma.productCategory.findUnique({
-		where: { slug: categorySlug },
-		select: {
-			name: true,
-			imageUrl: true,
-			translations: {
-				where: { locale: { in: localeFallbacks } },
-				select: { locale: true, name: true },
-				orderBy: { updatedAt: 'desc' },
-			},
-		},
-	});
+	const category = await getCategoryBySlug(categorySlug, locale);
 
 	if (!category) {
 		notFound();
 	}
-	const categoryTranslation = pickLocalizedTranslation(category.translations, locale);
-	const categoryName = categoryTranslation?.name ?? category.name;
+	const categoryName = category.name;
 
 	const pagesT = await getTranslations('pages');
 	const title = pagesT('metadata.category', { category: categoryName });
@@ -71,9 +55,7 @@ export default async function CategoryPage({ params }: CategoryParams) {
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
 	const headersList = await headers();
 	const cspNonce = headersList.get('x-csp-nonce') ?? undefined;
-	const categoryDataResponse = await getCategoryData(locale);
-
-	const category = categoryDataResponse.categoryData.find((cat) => cat.slug === categorySlug);
+	const category = await getCategoryBySlug(categorySlug, locale);
 
 	if (!category) notFound();
 
@@ -96,11 +78,11 @@ export default async function CategoryPage({ params }: CategoryParams) {
 		],
 	};
 
-		return (
-			<>
-				<Script id='category-breadcrumbs-schema' nonce={cspNonce} type='application/ld+json'>
-					{JSON.stringify(breadcrumbsJsonLd)}
-				</Script>
+	return (
+		<>
+			<Script id='category-breadcrumbs-schema' nonce={cspNonce} type='application/ld+json'>
+				{JSON.stringify(breadcrumbsJsonLd)}
+			</Script>
 			<Stack mx={{ base: '12px', '2xl': 0 }} gap={16} direction='column'>
 				<Breadcrumbs categoryName={category?.name} categorySlug={category?.slug} />
 

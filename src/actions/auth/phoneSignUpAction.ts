@@ -8,6 +8,7 @@ import { getPhoneSignUpSchema } from 'validationSchemas/phoneSignUpSchema';
 import { headers } from 'next/headers';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 import { auth } from '@/lib/auth';
+import { getPhoneOtpCodeForTesting } from '@/lib/phoneOtp';
 import { getActionErrorMessageKey } from './authActionError';
 
 const PHONE_SIGN_UP_LIMIT_PER_PHONE = 6;
@@ -17,7 +18,7 @@ const PHONE_SIGN_UP_WINDOW_MS = 10 * 60 * 1000;
 export async function phoneSignUpAction(
 	_: unknown,
 	formData: unknown
-): Promise<{ success: boolean; message?: string } | undefined> {
+): Promise<{ success: boolean; message?: string; devOtp?: string } | undefined> {
 	const validationT = await getTranslations('validation');
 	const schema = await getPhoneSignUpSchema();
 	const validated = schema.safeParse(formData);
@@ -69,7 +70,10 @@ export async function phoneSignUpAction(
 			},
 		});
 
-		return { success: true };
+		return {
+			success: true,
+			devOtp: await getPhoneOtpCodeForTesting(rawPhone),
+		};
 	} catch (error: unknown) {
 		const messageKey = getActionErrorMessageKey(error);
 		const errorMap: Record<string, string> = {

@@ -1,26 +1,14 @@
 import { z } from 'zod';
+import { DEFAULT_LOCAL_APP_URL, normalizeAppUrl, resolveAppUrlFromEnv } from './appUrl';
 
-const LOCAL_APP_URL = 'http://localhost:3000';
 const ENCRYPTION_KEY_HEX_256_REGEX = /^[0-9a-fA-F]{64}$/;
 const MIN_BETTER_AUTH_SECRET_LENGTH = 32;
+const URL_SAFE_SECRET_REGEX = /^[A-Za-z0-9._~-]{24,256}$/;
 
 const normalizeOptionalEnvValue = (value: string | undefined) => {
 	if (typeof value !== 'string') return undefined;
 	const trimmed = value.trim();
 	return trimmed.length > 0 ? trimmed : undefined;
-};
-
-const normalizeAppUrl = (raw: string | undefined): string | null => {
-	if (!raw) return null;
-	const trimmed = raw.trim();
-	if (!trimmed) return null;
-	try {
-		const parsed = new URL(trimmed);
-		if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
-		return parsed.origin;
-	} catch {
-		return null;
-	}
 };
 
 const isLocalhostOrigin = (origin: string) => {
@@ -60,12 +48,24 @@ const envSchema = z.object({
 	UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 	CACHE_REVALIDATE_SECRET: z.string().optional(),
 	CRON_SECRET: z.string().optional(),
+	ALLOWED_APP_HOSTS: z.string().optional().transform(normalizeOptionalEnvValue),
 	CACHE_REVALIDATE_ALERT_WEBHOOK_URL: z.string().url().optional(),
 	OPS_ALERT_WEBHOOK_URL: z.string().url().optional(),
 	CSP_REPORT_ONLY: z
 		.string()
 		.optional()
 		.transform((value) => (value == null ? undefined : value)),
+	VERCEL_ENV: z.string().optional().transform(normalizeOptionalEnvValue),
+	VERCEL_URL: z.string().optional().transform(normalizeOptionalEnvValue),
+	VERCEL_BRANCH_URL: z.string().optional().transform(normalizeOptionalEnvValue),
+	VERCEL_PROJECT_PRODUCTION_URL: z.string().optional().transform(normalizeOptionalEnvValue),
+	NEXT_PUBLIC_VERCEL_ENV: z.string().optional().transform(normalizeOptionalEnvValue),
+	NEXT_PUBLIC_VERCEL_URL: z.string().optional().transform(normalizeOptionalEnvValue),
+	NEXT_PUBLIC_VERCEL_BRANCH_URL: z.string().optional().transform(normalizeOptionalEnvValue),
+	NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL: z
+		.string()
+		.optional()
+		.transform(normalizeOptionalEnvValue),
 });
 
 const parsedResult = envSchema.safeParse({
@@ -77,7 +77,9 @@ const parsedData = parsedResult.success
 	? parsedResult.data
 	: throwInvalidEnvironmentVariables(parsedResult.error.flatten().fieldErrors);
 
-const normalizedAppUrl = normalizeAppUrl(parsedData.NEXT_PUBLIC_APP_URL);
+const normalizedAppUrl = resolveAppUrlFromEnv({
+	env: process.env as Record<string, string | undefined>,
+});
 const additionalFieldErrors: Record<string, string[]> = {};
 const environmentWarnings: string[] = [];
 
@@ -85,6 +87,10 @@ if (parsedData.NODE_ENV === 'production' && !parsedData.CACHE_REVALIDATE_SECRET)
 	additionalFieldErrors.CACHE_REVALIDATE_SECRET = [
 		'CACHE_REVALIDATE_SECRET is required in production',
 	];
+}
+
+if (parsedData.NODE_ENV === 'production' && !parsedData.CRON_SECRET) {
+	additionalFieldErrors.CRON_SECRET = ['CRON_SECRET is required in production'];
 }
 
 if (parsedData.NODE_ENV === 'production' && !parsedData.ENCRYPTION_KEY) {
@@ -105,6 +111,19 @@ if (
 }
 
 if (
+	parsedData.CACHE_REVALIDATE_SECRET &&
+	!URL_SAFE_SECRET_REGEX.test(parsedData.CACHE_REVALIDATE_SECRET)
+) {
+	additionalFieldErrors.CACHE_REVALIDATE_SECRET = [
+		'CACHE_REVALIDATE_SECRET must be 24-256 URL-safe characters',
+	];
+}
+
+if (parsedData.CRON_SECRET && !URL_SAFE_SECRET_REGEX.test(parsedData.CRON_SECRET)) {
+	additionalFieldErrors.CRON_SECRET = ['CRON_SECRET must be 24-256 URL-safe characters'];
+}
+
+if (
 	parsedData.NODE_ENV === 'production' &&
 	parsedData.EMAIL_FROM &&
 	parsedData.EMAIL_FROM.toLowerCase().includes('@resend.dev')
@@ -120,13 +139,13 @@ if (parsedData.ENCRYPTION_KEY && !ENCRYPTION_KEY_HEX_256_REGEX.test(parsedData.E
 	];
 }
 
-if (parsedData.NODE_ENV === 'production' && !normalizedAppUrl) {
+if (parsedData.NODE_ENV === 'production' && normalizedAppUrl === DEFAULT_LOCAL_APP_URL) {
 	additionalFieldErrors.NEXT_PUBLIC_APP_URL = ['NEXT_PUBLIC_APP_URL is required in production'];
 }
 
 if (
 	parsedData.NODE_ENV === 'production' &&
-	normalizedAppUrl &&
+	normalizeAppUrl(parsedData.NEXT_PUBLIC_APP_URL) &&
 	normalizedAppUrl.startsWith('http://') &&
 	!isLocalhostOrigin(normalizedAppUrl)
 ) {
@@ -152,6 +171,18 @@ if (parsedData.STRIPE_SECRET_KEY && !parsedData.STRIPE_WEBHOOK_SECRET) {
 	);
 }
 
+if (
+	parsedData.NODE_ENV === 'production' &&
+	(!parsedData.UPSTASH_REDIS_REST_URL || !parsedData.UPSTASH_REDIS_REST_TOKEN)
+) {
+	additionalFieldErrors.UPSTASH_REDIS_REST_URL = [
+		'UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production',
+	];
+	additionalFieldErrors.UPSTASH_REDIS_REST_TOKEN = [
+		'UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production',
+	];
+}
+
 if (Object.keys(additionalFieldErrors).length > 0) {
 	throwInvalidEnvironmentVariables(additionalFieldErrors);
 }
@@ -162,7 +193,7 @@ if (environmentWarnings.length > 0) {
 
 export const env = {
 	...parsedData,
-	NEXT_PUBLIC_APP_URL: normalizedAppUrl ?? LOCAL_APP_URL,
+	NEXT_PUBLIC_APP_URL: normalizedAppUrl,
 };
 
 export const APP_URL = env.NEXT_PUBLIC_APP_URL;

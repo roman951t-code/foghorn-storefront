@@ -5,6 +5,7 @@ import { Metadata } from 'next';
 import { getProductBySlugCached } from '@/actions/products/getProductBySlug';
 import { notFound } from 'next/navigation';
 import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
 import { trackProductView } from '@/actions/products/trackProductView';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
@@ -118,6 +119,27 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 	const userId = session?.user?.id;
 
 	if (!productData) notFound();
+	const ownReviewId =
+		userId && productData.reviews.length > 0
+			? (
+					await prisma.review.findUnique({
+						where: {
+							userId_productId: {
+								userId,
+								productId: productData.id,
+							},
+						},
+						select: { id: true },
+					})
+			  )?.id ?? null
+			: null;
+	const productWithReviewOwnership = {
+		...productData,
+		reviews: productData.reviews.map((review) => ({
+			...review,
+			isMine: !!ownReviewId && review.id === ownReviewId,
+		})),
+	};
 
 	const sameSubcategoryProducts = (subcategoryProductsData?.products ?? [])
 		.filter((sameSubcategoryProduct) => sameSubcategoryProduct.id !== productData.id)
@@ -263,7 +285,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 
 				<ProductTabs
 					tab={tab}
-					product={productData}
+					product={productWithReviewOwnership}
 					category={category}
 					subcategory={subcategory}
 					initialImageIndex={initialImageIndex}

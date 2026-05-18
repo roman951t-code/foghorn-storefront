@@ -212,7 +212,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 					>
 						<CatalogBtn fullText />
 						<VStack p='4' justifyContent='flex-start'>
-							<HStack w='full' gapX='4' align='center'>
+							<HStack w='full' gapX='4' mt='2' align='center'>
 								<Text fontSize='md' color='main'>
 									{productsT('totalProducts')}
 								</Text>
@@ -220,7 +220,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 									value={subcategoryData?.totalCount ?? 0}
 									px='2'
 									py='1'
-									labelProps={{ fontSize: 'md' }}
+									labelProps={{ fontSize: 'sm' }}
 								/>
 							</HStack>
 							<Separator color='border' w='full' my='2' />

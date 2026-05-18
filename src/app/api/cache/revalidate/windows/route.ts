@@ -11,6 +11,10 @@ import {
 	productCacheTagById,
 } from '@/constants/products';
 
+export const maxDuration = 60;
+
+const PAGE_CACHE_TAG = 'pages';
+const PROMO_CACHE_TAG = 'promo-cards';
 const DEFAULT_LOOKBACK_SECONDS = 180;
 const MAX_LOOKBACK_SECONDS = 3600;
 const DEFAULT_LIMIT = 500;
@@ -153,43 +157,82 @@ const handleWindowRevalidation = async (req: Request) => {
 	const from = new Date(now.getTime() - lookbackSeconds * 1000);
 
 	try {
-		const products = await prisma.product.findMany({
-			where: {
-				OR: [
-					{ discountStartAt: { gt: from, lte: now } },
-					{ discountEndAt: { gt: from, lte: now } },
-					{ publishStartAt: { gt: from, lte: now } },
-					{ publishEndAt: { gt: from, lte: now } },
-				],
-			},
-			select: {
-				id: true,
-				discountStartAt: true,
-				discountEndAt: true,
-				publishStartAt: true,
-				publishEndAt: true,
-				updatedAt: true,
-			},
-			orderBy: { updatedAt: 'desc' },
-			take: limit,
-		});
+		const [products, banners, pages] = await Promise.all([
+			prisma.product.findMany({
+				where: {
+					OR: [
+						{ discountStartAt: { gt: from, lte: now } },
+						{ discountEndAt: { gt: from, lte: now } },
+						{ publishStartAt: { gt: from, lte: now } },
+						{ publishEndAt: { gt: from, lte: now } },
+					],
+				},
+				select: {
+					id: true,
+					discountStartAt: true,
+					discountEndAt: true,
+					publishStartAt: true,
+					publishEndAt: true,
+					updatedAt: true,
+				},
+				orderBy: { updatedAt: 'desc' },
+				take: limit,
+			}),
+			prisma.banner.findMany({
+				where: {
+					isActive: true,
+					OR: [{ startsAt: { gt: from, lte: now } }, { endsAt: { gt: from, lte: now } }],
+				},
+				select: {
+					id: true,
+					startsAt: true,
+					endsAt: true,
+					updatedAt: true,
+				},
+				orderBy: { updatedAt: 'desc' },
+				take: limit,
+			}),
+			prisma.page.findMany({
+				where: {
+					status: 'PUBLISHED',
+					publishedAt: { gt: from, lte: now },
+				},
+				select: {
+					slug: true,
+					publishedAt: true,
+					updatedAt: true,
+				},
+				orderBy: { updatedAt: 'desc' },
+				take: limit,
+			}),
+		]);
 
 		const boundarySummary = {
-			discountStart: products.filter((product) =>
-				isBoundaryWithinWindow(product.discountStartAt, from, now)
-			).length,
-			discountEnd: products.filter((product) =>
-				isBoundaryWithinWindow(product.discountEndAt, from, now)
-			).length,
-			publishStart: products.filter((product) =>
-				isBoundaryWithinWindow(product.publishStartAt, from, now)
-			).length,
-			publishEnd: products.filter((product) =>
-				isBoundaryWithinWindow(product.publishEndAt, from, now)
-			).length,
+			products: {
+				discountStart: products.filter((product) =>
+					isBoundaryWithinWindow(product.discountStartAt, from, now)
+				).length,
+				discountEnd: products.filter((product) =>
+					isBoundaryWithinWindow(product.discountEndAt, from, now)
+				).length,
+				publishStart: products.filter((product) =>
+					isBoundaryWithinWindow(product.publishStartAt, from, now)
+				).length,
+				publishEnd: products.filter((product) =>
+					isBoundaryWithinWindow(product.publishEndAt, from, now)
+				).length,
+			},
+			banners: {
+				start: banners.filter((banner) => isBoundaryWithinWindow(banner.startsAt, from, now)).length,
+				end: banners.filter((banner) => isBoundaryWithinWindow(banner.endsAt, from, now)).length,
+			},
+			pages: {
+				publish: pages.filter((page) => isBoundaryWithinWindow(page.publishedAt, from, now)).length,
+			},
 		};
 
 		const productIds = products.map((product) => product.id);
+		const pageSlugs = pages.map((page) => page.slug);
 		const tags = Array.from(
 			new Set([
 				PRODUCT_LIST_CACHE_TAG,
@@ -197,18 +240,28 @@ const handleWindowRevalidation = async (req: Request) => {
 				PRODUCT_CATEGORY_CACHE_TAG,
 				PRODUCT_FILTERS_CACHE_TAG,
 				PRODUCT_CATALOG_CACHE_TAG,
+				...(banners.length > 0 ? [PROMO_CACHE_TAG] : []),
+				...(pages.length > 0 ? [PAGE_CACHE_TAG, ...pageSlugs.map((slug) => `page:${slug}`)] : []),
 				...productIds.map((productId) => productCacheTagById(productId)),
 			])
 		);
 
-		const isTruncated = products.length === limit;
+		const truncation = {
+			products: products.length === limit,
+			banners: banners.length === limit,
+			pages: pages.length === limit,
+		};
+		const isTruncated = truncation.products || truncation.banners || truncation.pages;
 		if (isTruncated) {
 			const details = {
 				requestId,
 				limit,
 				lookbackSeconds,
 				productCount: products.length,
+				bannerCount: banners.length,
+				pageCount: pages.length,
 				tagCount: tags.length,
+				truncation,
 			};
 			logWindowEvent('warn', 'window-revalidation-truncated', details);
 			await sendWindowAlert('window-revalidation-truncated', details);
@@ -224,6 +277,8 @@ const handleWindowRevalidation = async (req: Request) => {
 			limit,
 			dryRun,
 			productCount: products.length,
+			bannerCount: banners.length,
+			pageCount: pages.length,
 			tagCount: tags.length,
 			boundarySummary,
 			durationMs: Date.now() - startedAt,
@@ -238,10 +293,14 @@ const handleWindowRevalidation = async (req: Request) => {
 			windowStart: from.toISOString(),
 			windowEnd: now.toISOString(),
 			productCount: products.length,
+			bannerCount: banners.length,
+			pageCount: pages.length,
 			tagCount: tags.length,
 			truncated: isTruncated,
+			truncation,
 			boundarySummary,
 			productIdsSample: productIds.slice(0, 100),
+			pageSlugsSample: pageSlugs.slice(0, 100),
 		});
 	} catch (error) {
 		const details = {

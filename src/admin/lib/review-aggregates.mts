@@ -1,4 +1,6 @@
-import type { PrismaClient } from '@prisma/client';
+import type { Prisma, PrismaClient } from '@prisma/client';
+
+type ReviewAggregateClient = PrismaClient | Prisma.TransactionClient;
 
 const normalizeProductIds = (productIds: readonly string[]) =>
 	Array.from(
@@ -10,7 +12,7 @@ const normalizeProductIds = (productIds: readonly string[]) =>
 	);
 
 export async function syncProductReviewAggregates(
-	client: PrismaClient,
+	client: ReviewAggregateClient,
 	productIds: readonly string[]
 ): Promise<void> {
 	const uniqueProductIds = normalizeProductIds(productIds);

@@ -77,6 +77,7 @@ import {
 	orderShippingLabelActionComponent,
 	orderBulkShippingLabelActionComponent,
 	orderCsvExportActionComponent,
+	recordDeleteActionComponent,
 	orderShowComponent,
 	orderTotalListComponent,
 	orderTotalRangeFilterComponent,
@@ -138,6 +139,9 @@ type AdminRecordLike = {
 type AdminRequestLike = ActionRequest;
 type AdminResponseLike = ActionResponse;
 type AdminContextLike = ActionContext;
+
+const isFullAdmin = ({ currentAdmin }: { currentAdmin?: unknown }) =>
+	(currentAdmin as { role?: string } | undefined)?.role === 'admin';
 
 const mapAttributeSetItemPayload = async (request: AdminRequestLike) => {
 	const payload = request?.payload ?? {};
@@ -672,16 +676,23 @@ const collectMutationFieldValues = (
 
 const getProductTagById = (productId: string) => `product:${productId}`;
 
+const getGlobalProductMutationTags = () => [...PRODUCT_CACHE_REVALIDATE_TAGS];
+
+const withProductScopedTags = (productIds: Iterable<string>) => [
+	...getGlobalProductMutationTags(),
+	...Array.from(productIds).map(getProductTagById),
+];
+
 const getProductMutationTags = (args: CacheRevalidationArgs) => {
 	const productIds = collectMutationFieldValues('id', args);
-	return [...PRODUCT_CACHE_REVALIDATE_TAGS, ...productIds.map(getProductTagById)];
+	return withProductScopedTags(productIds);
 };
 
 const getReviewMutationTags = (args: CacheRevalidationArgs) => {
 	const productIds = collectMutationFieldValues('productId', args, {
 		includeRequestPayload: true,
 	});
-	return [...PRODUCT_CACHE_REVALIDATE_TAGS, ...productIds.map(getProductTagById)];
+	return withProductScopedTags(productIds);
 };
 
 const normalizeRelationId = (value: unknown): string | null => {
@@ -696,26 +707,42 @@ const normalizeRelationId = (value: unknown): string | null => {
 	);
 };
 
-const getProductAttributeValueMutationTags = (args: CacheRevalidationArgs) => {
-	const productIds = new Set<string>();
-	collectMutationFieldValues('productId', args, { includeRequestPayload: true }).forEach((id) =>
-		productIds.add(id)
+const collectRelationIds = (
+	args: CacheRevalidationArgs,
+	directKey: string,
+	relationKey: string
+) => {
+	const relationIds = new Set<string>();
+	collectMutationFieldValues(directKey, args, { includeRequestPayload: true }).forEach((id) =>
+		relationIds.add(id)
 	);
-	const productRelationValues = collectMutationFieldValues('product', args, {
+	const relationValues = collectMutationFieldValues(relationKey, args, {
 		includeRequestPayload: true,
 	});
-	productRelationValues
+	relationValues
 		.map((value) => normalizeRelationId(value))
 		.filter((value): value is string => Boolean(value))
-		.forEach((id) => productIds.add(id));
-	const payloadProductId = normalizeRelationId(args.request?.payload?.product);
-	if (payloadProductId) {
-		productIds.add(payloadProductId);
+		.forEach((id) => relationIds.add(id));
+	const payloadRelationId = normalizeRelationId(args.request?.payload?.[relationKey]);
+	if (payloadRelationId) {
+		relationIds.add(payloadRelationId);
 	}
-	return [...PRODUCT_CACHE_REVALIDATE_TAGS, ...Array.from(productIds).map(getProductTagById)];
+	return Array.from(relationIds);
+};
+
+const getProductAttributeValueMutationTags = (args: CacheRevalidationArgs) => {
+	const productIds = collectRelationIds(args, 'productId', 'product');
+	return withProductScopedTags(productIds);
 };
 
 const getProductCategoryMutationTags = () => [...PRODUCT_CATEGORY_CACHE_REVALIDATE_TAGS];
+
+const getProductMetadataMutationTags = () => getGlobalProductMutationTags();
+
+const getProductImageMutationTags = (args: CacheRevalidationArgs) => {
+	const productIds = collectRelationIds(args, 'productId', 'product');
+	return withProductScopedTags(productIds);
+};
 
 const getPageMutationTags = (args: CacheRevalidationArgs) => {
 	const slugs = collectMutationFieldValues('slug', args, { includeRequestPayload: true });
@@ -909,6 +936,44 @@ const withCacheRevalidationHandler = <T extends ActionResponse>(
 		await runStorefrontTagRevalidation(resolveTags, args);
 		return nextResponse;
 	};
+};
+
+const syncPrimaryProductImagesAfterMutation = async (
+	response: AdminResponseLike,
+	request: AdminRequestLike,
+	context: AdminContextLike
+) => {
+	const args: CacheRevalidationArgs = { response, request, context };
+	const productIds = collectRelationIds(args, 'productId', 'product');
+	if (productIds.length === 0) return response;
+
+	try {
+		const images = await prisma.productImage.findMany({
+			where: { productId: { in: productIds } },
+			select: { productId: true, url: true },
+			orderBy: [{ productId: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
+		});
+
+		const primaryImageUrlByProductId = new Map<string, string | null>();
+		productIds.forEach((productId) => primaryImageUrlByProductId.set(productId, null));
+		images.forEach((image) => {
+			if (primaryImageUrlByProductId.get(image.productId) !== null) return;
+			primaryImageUrlByProductId.set(image.productId, image.url);
+		});
+
+		await prisma.$transaction(
+			productIds.map((productId) =>
+				prisma.product.update({
+					where: { id: productId },
+					data: { imageUrl: primaryImageUrlByProductId.get(productId) ?? null },
+				})
+			)
+		);
+	} catch (error) {
+		console.error('[admin-product-image] Failed to sync primary image', error);
+	}
+
+	return response;
 };
 
 const shouldRevalidateSeoTemplateApply = ({ request }: CacheRevalidationArgs) =>
@@ -1652,8 +1717,32 @@ export const resources = [
 			updatedAt: readOnly,
 		},
 		actions: {
-			new: { before: mapProductImagePayload },
-			edit: { before: mapProductImagePayload },
+			new: {
+				before: mapProductImagePayload,
+				after: withCacheRevalidationAfter(
+					syncPrimaryProductImagesAfterMutation,
+					getProductImageMutationTags
+				),
+			},
+			edit: {
+				before: mapProductImagePayload,
+				after: withCacheRevalidationAfter(
+					syncPrimaryProductImagesAfterMutation,
+					getProductImageMutationTags
+				),
+			},
+			delete: {
+				after: withCacheRevalidationAfter(
+					syncPrimaryProductImagesAfterMutation,
+					getProductImageMutationTags
+				),
+			},
+			bulkDelete: {
+				after: withCacheRevalidationAfter(
+					syncPrimaryProductImagesAfterMutation,
+					getProductImageMutationTags
+				),
+			},
 		},
 	}),
 	{
@@ -1662,6 +1751,32 @@ export const resources = [
 			navigation: 'Catalog',
 			properties: {
 				id: hidden,
+			},
+			actions: {
+				new: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				edit: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				delete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				bulkDelete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
 			},
 		},
 	},
@@ -1672,6 +1787,32 @@ export const resources = [
 			properties: {
 				id: hidden,
 			},
+			actions: {
+				new: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				edit: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				delete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				bulkDelete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+			},
 		},
 	},
 	{
@@ -1680,6 +1821,32 @@ export const resources = [
 			navigation: 'Catalog',
 			properties: {
 				id: hidden,
+			},
+			actions: {
+				new: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				edit: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				delete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				bulkDelete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
 			},
 		},
 	},
@@ -1693,8 +1860,32 @@ export const resources = [
 				attributeId: hidden,
 			},
 			actions: {
-				new: { before: mapAttributeSetItemPayload },
-				edit: { before: mapAttributeSetItemPayload },
+				new: {
+					before: mapAttributeSetItemPayload,
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				edit: {
+					before: mapAttributeSetItemPayload,
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				delete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
+				bulkDelete: {
+					after: withCacheRevalidationAfter(
+						async (response: any) => response,
+						getProductMetadataMutationTags
+					),
+				},
 			},
 		},
 	},
@@ -2007,8 +2198,10 @@ export const resources = [
 					actionType: 'record',
 					icon: 'Trash',
 					guard: 'delete-order-items',
+					isAccessible: isFullAdmin,
+					isVisible: isFullAdmin,
 					handler: deleteOrder,
-					component: false,
+					component: recordDeleteActionComponent,
 				},
 			},
 		},
@@ -2435,8 +2628,10 @@ export const resources = [
 					actionType: 'record',
 					icon: 'Trash',
 					guard: 'delete-user',
+					isAccessible: isFullAdmin,
+					isVisible: isFullAdmin,
 					handler: deleteUser,
-					component: false,
+					component: recordDeleteActionComponent,
 				},
 				show: {
 					actionType: 'record',

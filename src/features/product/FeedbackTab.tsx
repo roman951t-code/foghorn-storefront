@@ -25,8 +25,7 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 	const { session } = useSession();
 	const prodT = useTranslations('products');
 
-	const userId = session?.user?.id;
-	const userReview = userId ? storeReviews.find((r) => r.user.id === userId) : undefined;
+	const userReview = session?.user?.id ? storeReviews.find((r) => r.isMine) : undefined;
 
 	const reviewCount = storeReviews.length;
 	const effectiveAverageRating =
@@ -175,7 +174,7 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 							</DataList.Item>
 						</DataList.Root>
 
-						{userId === review.user.id && (
+						{review.isMine && (
 							<IconButton
 								onClick={onRemoveFeedback}
 								alignSelf='flex-end'

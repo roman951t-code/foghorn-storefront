@@ -28,9 +28,9 @@ interface Props {
 export default function PersonalDataForm({ i18nData }: Props) {
 	const { session, refresh } = useSession();
 
-	const userEmail = session?.user?.email;
-	const userPhone = session?.user?.phoneNumber;
-	const userNotifMethod = session?.user?.notificationMethod;
+	const userEmail = session?.user?.email ?? undefined;
+	const userPhone = session?.user?.phoneNumber ?? undefined;
+	const userNotifMethod = session?.user?.notificationMethod ?? null;
 	const preferredNotificationMethod =
 		userNotifMethod === 'phone' || userNotifMethod === 'email'
 			? userNotifMethod
@@ -45,21 +45,28 @@ export default function PersonalDataForm({ i18nData }: Props) {
 	const shippingAddressDefault = useMemo(
 		() =>
 			toShippingAddressFormValue({
-				country: (session?.user as any)?.shippingCountry ?? null,
-				region: (session?.user as any)?.shippingRegion ?? null,
-				city: (session?.user as any)?.shippingCity ?? null,
-				postalCode: (session?.user as any)?.shippingPostalCode ?? null,
-				addressLine1: (session?.user as any)?.shippingAddressLine1 ?? null,
-				addressLine2: (session?.user as any)?.shippingAddressLine2 ?? null,
+				country: session?.user?.shippingCountry ?? null,
+				region: session?.user?.shippingRegion ?? null,
+				city: session?.user?.shippingCity ?? null,
+				postalCode: session?.user?.shippingPostalCode ?? null,
+				addressLine1: session?.user?.shippingAddressLine1 ?? null,
+				addressLine2: session?.user?.shippingAddressLine2 ?? null,
 			}),
-		[session?.user]
+		[
+			session?.user?.shippingAddressLine1,
+			session?.user?.shippingAddressLine2,
+			session?.user?.shippingCity,
+			session?.user?.shippingCountry,
+			session?.user?.shippingPostalCode,
+			session?.user?.shippingRegion,
+		]
 	);
 
 	const nameForm = useForm({
 		defaultValues: {
-			name: session?.user?.name,
-			lastName: session?.user?.lastName,
-			middleName: session?.user?.middleName,
+			name: session?.user?.name ?? '',
+			lastName: session?.user?.lastName ?? '',
+			middleName: session?.user?.middleName ?? '',
 		},
 		resolver: zodResolver(nameSchema),
 	});

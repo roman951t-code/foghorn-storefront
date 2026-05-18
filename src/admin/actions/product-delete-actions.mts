@@ -2,10 +2,17 @@ import type { ActionHandler, RecordActionResponse } from 'adminjs';
 import { prisma } from '../prisma.mts';
 import { archiveProductAndZeroStock } from './product-unavailable-utils.mts';
 
-export const deleteProduct: ActionHandler<RecordActionResponse> = async (_req, _res, context) => {
+const getMethod = (req: unknown) => String((req as { method?: unknown }).method ?? 'get').toLowerCase();
+
+export const deleteProduct: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
 	const { record, resource, currentAdmin, h } = context;
 	if (!record || !resource) {
 		throw new Error('Missing record context');
+	}
+	if (getMethod(req) !== 'post' && getMethod(req) !== 'delete') {
+		return {
+			record: record.toJSON(currentAdmin),
+		};
 	}
 
 	const productId = record.param('id') as string;

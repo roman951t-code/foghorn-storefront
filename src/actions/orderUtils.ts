@@ -19,10 +19,29 @@ const roundCurrency = (value: number) => Math.round(value * 100) / 100;
 const buildVariantLabel = (attributes: any[] | undefined | null): string | null => {
 	if (!Array.isArray(attributes) || attributes.length === 0) return null;
 	const label = attributes
-		.map((a) => [a.attribute?.name, a.value, a.attribute?.unit].filter(Boolean).join(' '))
+		.map((a) => {
+			const name = String(a.attribute?.name ?? '').trim();
+			const valueWithUnit = [a.value, a.attribute?.unit].filter(Boolean).join(' ').trim();
+			if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+			return name || valueWithUnit;
+		})
 		.join(' / ')
 		.trim();
 	return label || null;
+};
+
+const resolveDisplayVariantLabel = (
+	snapshotVariantLabel: unknown,
+	attributes: any[] | undefined | null
+): string | null => {
+	const fallbackLabel = buildVariantLabel(attributes);
+	if (typeof snapshotVariantLabel !== 'string') return fallbackLabel;
+
+	const snapshotLabel = snapshotVariantLabel.trim();
+	if (!snapshotLabel) return fallbackLabel;
+	if (snapshotLabel.includes(':')) return snapshotLabel;
+
+	return fallbackLabel ?? snapshotLabel;
 };
 
 export async function normalizeOrder(order: any): Promise<UserOrder> {
@@ -32,7 +51,7 @@ export async function normalizeOrder(order: any): Promise<UserOrder> {
 			productId: item.productId,
 			variantId: item.variant?.id ?? item.variantId ?? null,
 			sku: item.snapshotVariantSku ?? item.variant?.sku ?? null,
-			variantLabel: item.snapshotVariantLabel ?? buildVariantLabel(item.variant?.attributes),
+			variantLabel: resolveDisplayVariantLabel(item.snapshotVariantLabel, item.variant?.attributes),
 			quantity: item.quantity,
 			baseUnitPrice: item.baseUnitPrice != null ? toNumber(item.baseUnitPrice) : null,
 			unitPrice: Number(item.unitPrice ?? 0),

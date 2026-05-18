@@ -39,7 +39,7 @@ export const useReviewStore = createBoundedStore<ReviewStore>((set, get) => ({
 		if (!userId) return { success: false };
 
 		const reviews = get().reviewsByProduct[productId] || [];
-		const existingIndex = reviews.findIndex((r) => r.user.id === userId);
+		const existingIndex = reviews.findIndex((r) => r.isMine);
 		const optimistic: Review = {
 			id: existingIndex !== -1 ? reviews[existingIndex].id : `temp-${Date.now()}`,
 			rating: formData.rating,
@@ -47,8 +47,8 @@ export const useReviewStore = createBoundedStore<ReviewStore>((set, get) => ({
 			advantages: formData.advantages ?? null,
 			disadvantages: formData.disAdvantages ?? null,
 			createdAt: new Date(),
+			isMine: true,
 			user: {
-				id: userId,
 				name: formData.name,
 				lastName: formData.lastName ?? null,
 			},
@@ -92,7 +92,7 @@ export const useReviewStore = createBoundedStore<ReviewStore>((set, get) => ({
 		if (!userId) return { success: false };
 
 		const reviews = get().reviewsByProduct[productId] || [];
-		const remaining = reviews.filter((r) => r.user.id !== userId);
+		const remaining = reviews.filter((r) => !r.isMine);
 
 		set((state) => ({
 			reviewsByProduct: { ...state.reviewsByProduct, [productId]: remaining },

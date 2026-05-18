@@ -8,6 +8,7 @@ import { getPhoneSignInSchema } from 'validationSchemas/phoneSignInSchema';
 import { headers } from 'next/headers';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 import { auth } from '@/lib/auth';
+import { getPhoneOtpCodeForTesting } from '@/lib/phoneOtp';
 import { getActionErrorMessageKey } from './authActionError';
 import { buildUserRestrictionMessage, isRestrictedUserAdminStatus } from '@/lib/userAdminStatus';
 
@@ -18,7 +19,7 @@ const PHONE_SIGN_IN_WINDOW_MS = 10 * 60 * 1000;
 export async function phoneSignInAction(
 	_: unknown,
 	formData: unknown
-): Promise<{ success: boolean; message?: string } | undefined> {
+): Promise<{ success: boolean; message?: string; devOtp?: string } | undefined> {
 	const validationT = await getTranslations('validation');
 	const schema = await getPhoneSignInSchema();
 	const validated = schema.safeParse(formData);
@@ -87,7 +88,10 @@ export async function phoneSignInAction(
 			},
 		});
 
-		return { success: true };
+		return {
+			success: true,
+			devOtp: await getPhoneOtpCodeForTesting(rawPhone),
+		};
 	} catch (error: unknown) {
 		const messageKey = getActionErrorMessageKey(error);
 		const errorMap: Record<string, string> = {

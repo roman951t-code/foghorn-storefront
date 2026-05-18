@@ -44,6 +44,10 @@ const baseConfig: NextConfig = {
 				value: 'same-origin',
 			},
 			{
+				key: 'Cross-Origin-Resource-Policy',
+				value: 'same-origin',
+			},
+			{
 				key: 'X-Frame-Options',
 				value: 'DENY',
 			},
@@ -58,6 +62,14 @@ const baseConfig: NextConfig = {
 			{
 				key: 'Permissions-Policy',
 				value: 'camera=(), microphone=(), geolocation=(), payment=()',
+			},
+			{
+				key: 'Origin-Agent-Cluster',
+				value: '?1',
+			},
+			{
+				key: 'X-Permitted-Cross-Domain-Policies',
+				value: 'none',
 			},
 		];
 

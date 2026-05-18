@@ -56,7 +56,7 @@ export async function getPromoCards(
 	locale: string = DEFAULT_LOCALE
 ): Promise<PromoCard[]> {
 	'use cache';
-	cacheLife('minutes');
+	cacheLife('days');
 	cacheTag(PROMO_CACHE_TAG);
 
 	const now = new Date();

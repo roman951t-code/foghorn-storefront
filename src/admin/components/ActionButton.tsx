@@ -1,11 +1,13 @@
 import React, { type ReactElement } from 'react';
 import { stringify } from 'qs';
 import {
+	ApiClient,
 	type ActionResponse,
 	type ActionJSON,
 	buildActionTestId,
 	useAction,
 	useCurrentAdmin,
+	useNotice,
 	useTranslation,
 } from 'adminjs';
 
@@ -21,6 +23,28 @@ type Props = {
 };
 
 const isImmediateAction = (action: ActionJSON) => action.component === false || action.component == null;
+const api = new ApiClient();
+const POST_IMMEDIATE_ACTIONS = new Set([
+	'archiveProduct',
+	'bulkMarkDelivered',
+	'bulkMarkShipped',
+	'deleteProduct',
+	'duplicateBanner',
+	'duplicateProduct',
+	'markDelivered',
+	'markPaid',
+	'markShipped',
+	'publishProduct',
+]);
+
+const appendForceRefresh = (url: string) => {
+	const searchParamsIdx = url.lastIndexOf('?');
+	const urlSearchParams = searchParamsIdx !== -1 ? url.substring(searchParamsIdx + 1) : null;
+	const params = new URLSearchParams(urlSearchParams ?? '');
+	params.set('refresh', 'true');
+	const baseUrl = searchParamsIdx !== -1 ? url.substring(0, searchParamsIdx) : url;
+	return `${baseUrl}?${params.toString()}`;
+};
 
 export default function ActionButton(props: Props) {
 	const {
@@ -36,8 +60,14 @@ export default function ActionButton(props: Props) {
 
 	const [currentAdmin] = useCurrentAdmin();
 	const { translateMessage } = useTranslation();
+	const addNotice = useNotice();
 	const isReadOnly = (currentAdmin as { role?: string } | null)?.role === 'readonly';
 	const shouldDisable = isReadOnly && action?.hasHandler && isImmediateAction(action);
+	const shouldSubmitImmediatePost =
+		!shouldDisable &&
+		action?.hasHandler &&
+		isImmediateAction(action) &&
+		POST_IMMEDIATE_ACTIONS.has(action.name);
 
 	const { href, handleClick } = useAction(
 		action,
@@ -67,11 +97,54 @@ export default function ActionButton(props: Props) {
 	const baseChild = firstChild as ReactElement<any>;
 	const baseStyle = baseChild.props?.style ?? {};
 
+	const handleImmediatePost = async (event: any) => {
+		event?.preventDefault?.();
+		event?.stopPropagation?.();
+
+		if (action.guard && !window.confirm(translateMessage(action.guard, resourceId))) {
+			return;
+		}
+
+		try {
+			const response = recordIds?.length
+				? await api.bulkAction({
+						resourceId,
+						recordIds,
+						actionName: action.name,
+						method: 'post',
+					})
+				: recordId
+					? await api.recordAction({
+							resourceId,
+							recordId,
+							actionName: action.name,
+							method: 'post',
+						})
+					: await api.resourceAction({
+							resourceId,
+							actionName: action.name,
+							method: 'post',
+						});
+
+			actionPerformed?.(response.data as ActionResponse);
+			if (response.data.notice) {
+				addNotice(response.data.notice);
+			}
+			if (response.data.redirectUrl) {
+				window.location.assign(appendForceRefresh(response.data.redirectUrl));
+			}
+		} catch {
+			addNotice({ message: `${action.name}-failed`, type: 'error' });
+		}
+	};
+
 	const onClick = shouldDisable
 		? (event: any) => {
 				event?.preventDefault?.();
 				event?.stopPropagation?.();
 		  }
+		: shouldSubmitImmediatePost
+			? handleImmediatePost
 		: handleClick;
 
 	return React.cloneElement(baseChild, {

@@ -19,12 +19,12 @@ export default function ShipmentStep() {
 	const setShippingAddress = useCheckoutStore((state) => state.setShippingAddress);
 	const setShippingAddressField = useCheckoutStore((state) => state.setShippingAddressField);
 	const userId = session?.user?.id ?? null;
-	const userShippingCountry = (session?.user as any)?.shippingCountry ?? null;
-	const userShippingRegion = (session?.user as any)?.shippingRegion ?? null;
-	const userShippingCity = (session?.user as any)?.shippingCity ?? null;
-	const userShippingPostalCode = (session?.user as any)?.shippingPostalCode ?? null;
-	const userShippingAddressLine1 = (session?.user as any)?.shippingAddressLine1 ?? null;
-	const userShippingAddressLine2 = (session?.user as any)?.shippingAddressLine2 ?? null;
+	const userShippingCountry = session?.user?.shippingCountry ?? null;
+	const userShippingRegion = session?.user?.shippingRegion ?? null;
+	const userShippingCity = session?.user?.shippingCity ?? null;
+	const userShippingPostalCode = session?.user?.shippingPostalCode ?? null;
+	const userShippingAddressLine1 = session?.user?.shippingAddressLine1 ?? null;
+	const userShippingAddressLine2 = session?.user?.shippingAddressLine2 ?? null;
 	const prefilledKeyRef = useRef<string>('');
 
 	useEffect(() => {

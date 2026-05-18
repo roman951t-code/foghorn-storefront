@@ -18,6 +18,7 @@ import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
 import { getCouponDiscountPreview } from '@/lib/coupons';
+import type { AppSessionUser } from '@/types/session';
 import {
 	getMissingRequiredShippingAddressFields,
 	normalizeShippingAddress,
@@ -87,7 +88,12 @@ const buildVariantLabel = (
 ) => {
 	if (!attributes?.length) return null;
 	const label = attributes
-		.map((a) => [a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' '))
+		.map((a) => {
+			const name = a.attribute.name?.trim?.() ?? '';
+			const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
+			if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+			return name || valueWithUnit;
+		})
 		.join(' / ')
 		.trim();
 	return label || null;
@@ -683,6 +689,7 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 	const userId = session?.user?.id;
 
 	if (!userId) return { success: false, message: 'unauthorized' };
+	const sessionUser = session.user as AppSessionUser;
 
 	return finalizeStripeOrderInternal(sessionId, {
 		mode: 'user',
@@ -690,11 +697,11 @@ export async function finalizeStripeOrder(sessionId?: string | null): Promise<Re
 		requestHeaders,
 		userSnapshotOverride: {
 			id: userId,
-			email: session.user?.email ?? null,
-			name: session.user?.name ?? null,
-			lastName: (session.user as any)?.lastName ?? null,
-			middleName: (session.user as any)?.middleName ?? null,
-			phoneNumber: (session.user as any)?.phoneNumber ?? null,
+			email: sessionUser.email,
+			name: sessionUser.name,
+			lastName: sessionUser.lastName ?? null,
+			middleName: sessionUser.middleName ?? null,
+			phoneNumber: sessionUser.phoneNumber ?? null,
 		},
 	});
 }

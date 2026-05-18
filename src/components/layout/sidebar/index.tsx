@@ -106,7 +106,7 @@ export default function SidePanel() {
 							<CollapsibleLinks
 								onClose={onClose}
 								isAuthorized={!!session?.session}
-								userName={session?.user?.name}
+								userName={session?.user?.name ?? undefined}
 							/>
 
 							{session?.session && (

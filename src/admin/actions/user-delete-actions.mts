@@ -18,9 +18,13 @@ export const deleteUser: ActionHandler<RecordActionResponse> = async (req, _res,
 		throw new Error('Missing record context');
 	}
 
-	// AdminJS immediate custom actions are commonly executed via GET.
-	// Accept GET/POST/DELETE to keep the action functional across UI entry points.
-	if (method !== 'get' && method !== 'post' && method !== 'delete') {
+	if (method === 'get') {
+		return {
+			record: record.toJSON(currentAdmin),
+		};
+	}
+
+	if (method !== 'post' && method !== 'delete') {
 		return {
 			record: record.toJSON(currentAdmin),
 			notice: { message: 'user-delete-method-not-allowed', type: 'error' },

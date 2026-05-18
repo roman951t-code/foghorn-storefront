@@ -94,8 +94,8 @@ export async function getUserReviewedProducts(limit: number, offset = 0) {
 				advantages: r.advantages ?? null,
 				disadvantages: r.disadvantages ?? null,
 				createdAt: r.createdAt,
+				isMine: true,
 				user: {
-					id: r.userId,
 					name: r.user?.name ?? '',
 					lastName: r.user?.lastName ?? null,
 				},

@@ -11,6 +11,8 @@ type CheckoutCardProps = {
 	showSeparator?: boolean;
 };
 
+const XS_MEDIA_QUERY = '@media screen and (min-width: 430px)';
+
 const getImage = (src?: string | null) => resolveProductPrimaryImage(src);
 
 const usePriceParts = (product: CartProduct) => {
@@ -118,27 +120,48 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 			<Flex
 				align='center'
 				justifyContent='space-between'
-				direction={{ base: 'column', xs: 'row' } as any}
+				direction='column'
 				p={3}
-				pl={{ base: '4', xs: 0 } as any}
+				pl='4'
+				css={{
+					[XS_MEDIA_QUERY]: {
+						flexDirection: 'row',
+						paddingLeft: 0,
+					},
+				}}
 			>
 				<Flex
 					align='center'
 					justifyContent='space-between'
-					direction={{ base: 'column', xs: 'row' } as any}
+					direction='column'
 					w='full'
+					css={{
+						[XS_MEDIA_QUERY]: {
+							flexDirection: 'row',
+						},
+					}}
 				>
 					<Flex
-						alignItems={{ base: 'center', xs: 'center' } as any}
-						direction={{ base: 'column', xs: 'row' } as any}
+						alignItems='center'
+						direction='column'
 						w='full'
-						gap={{ base: 2, xs: 2 } as any}
+						gap={2}
+						css={{
+							[XS_MEDIA_QUERY]: {
+								flexDirection: 'row',
+							},
+						}}
 					>
 						<LocaleNavLink
 							href={productHref}
 							display='inline-block'
 							lineHeight='0'
-							mx={{ base: 0, xs: 3 } as any}
+							mx={0}
+							css={{
+								[XS_MEDIA_QUERY]: {
+									marginInline: '3',
+								},
+							}}
 						>
 							<Box
 								position='relative'
@@ -162,17 +185,33 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 								/>
 							</Box>
 						</LocaleNavLink>
-						<Flex direction='column' gap={3} pt={{ base: 2, xs: 0 } as any} w='full' minW={0}>
+						<Flex
+							direction='column'
+							gap={3}
+							pt={2}
+							w='full'
+							minW={0}
+							css={{
+								[XS_MEDIA_QUERY]: {
+									paddingTop: 0,
+								},
+							}}
+						>
 							<Card.Title
 								fontWeight='medium'
 								lineHeight='24px'
-								textAlign={{ base: 'center', xs: 'left' } as any}
+								textAlign='center'
+								css={{
+									[XS_MEDIA_QUERY]: {
+										textAlign: 'left',
+									},
+								}}
 							>
 								<LocaleNavLink
 									href={productHref}
 									textDecorationColor='main'
 									color='main'
-									fontSize={{ base: 'lg', xs: '17px' } as any}
+									fontSize='lg'
 									variant='underline'
 								>
 									{product.name}
@@ -180,11 +219,16 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 							</Card.Title>
 							{product.variantLabel && (
 								<Text
-									textAlign={{ base: 'center', xs: 'left' } as any}
+									textAlign='center'
 									color='main.disabled'
 									borderColor='border'
 									fontSize={{ base: 'md', md: 'sm' }}
 									mt='-1'
+									css={{
+										[XS_MEDIA_QUERY]: {
+											textAlign: 'left',
+										},
+									}}
 								>
 									{product.variantLabel}
 								</Text>
@@ -193,9 +237,16 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 								color='main'
 								fontSize='xl'
 								fontWeight='medium'
-								textAlign={{ base: 'center', xs: 'left' } as any}
-								mb={{ base: 4, xs: 0 } as any}
-								mr={{ base: 0, xs: 2 } as any}
+								textAlign='center'
+								mb={4}
+								mr={0}
+								css={{
+									[XS_MEDIA_QUERY]: {
+										textAlign: 'left',
+										marginBottom: 0,
+										marginRight: '2',
+									},
+								}}
 							>
 								{formatUsdPrice(price)}
 								{hasDiscount && (
@@ -225,8 +276,14 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 					</Flex>
 
 					<Flex
-						alignSelf={{ base: 'center', xs: 'flex-end' } as any}
-						mt={{ base: 2, xs: 0 } as any}
+						alignSelf='center'
+						mt={2}
+						css={{
+							[XS_MEDIA_QUERY]: {
+								alignSelf: 'flex-end',
+								marginTop: 0,
+							},
+						}}
 					>
 						<Stat.Root color='main'>
 							<Stat.ValueText textStyle='md' minW='46px'>

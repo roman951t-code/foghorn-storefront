@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { env } from '@/config/env';
 
+export const maxDuration = 60;
+
 const MAX_TAGS_PER_REQUEST = 64;
 const MAX_ALERT_BODY_LENGTH = 1000;
 const REVALIDATE_SECRET_PATTERN = /^[A-Za-z0-9._~-]{24,256}$/;

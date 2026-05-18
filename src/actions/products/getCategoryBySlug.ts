@@ -4,18 +4,21 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { DEFAULT_LOCALE } from '@/constants/locales';
-import { prisma } from '@/lib/prisma';
 import { PRODUCT_CATEGORY_CACHE_TAG, PRODUCT_LIST_CACHE_TAG } from '@/constants/products';
+import { prisma } from '@/lib/prisma';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 
-export async function getCategoryData(locale: string = DEFAULT_LOCALE) {
+export async function getCategoryBySlug(categorySlug: string, locale: string = DEFAULT_LOCALE) {
 	'use cache';
 	cacheLife('days');
 	cacheTag(PRODUCT_CATEGORY_CACHE_TAG, PRODUCT_LIST_CACHE_TAG);
 
 	const localeFallbacks = getLocaleFallbacks(locale);
-	const categories = await prisma.productCategory.findMany({
-		where: { parentId: null },
+	const category = await prisma.productCategory.findFirst({
+		where: {
+			slug: categorySlug,
+			parentId: null,
+		},
 		select: {
 			id: true,
 			name: true,
@@ -56,48 +59,39 @@ export async function getCategoryData(locale: string = DEFAULT_LOCALE) {
 				},
 			},
 		},
-		orderBy: { name: 'asc' },
 	});
 
-	const categoryData = categories
-		.map((category) => {
-			const categoryTranslation = pickLocalizedTranslation(category.translations, locale);
+	if (!category) return null;
 
-			const children = category.children
-				.map((child) => {
-					const childTranslation = pickLocalizedTranslation(child.translations, locale);
-					const products = child.products.map((product) => {
-						const productTranslation = pickLocalizedTranslation(product.translations, locale);
-						return {
-							id: product.id,
-							name: productTranslation?.name ?? product.name,
-							fullSlug: product.fullSlug,
-							imageUrl: product.imageUrl,
-						};
-					});
-
-					return {
-						id: child.id,
-						name: childTranslation?.name ?? child.name,
-						slug: child.slug,
-						imageUrl: child.imageUrl,
-						products,
-					};
-				})
-				.sort((a, b) => a.name.localeCompare(b.name, locale));
+	const categoryTranslation = pickLocalizedTranslation(category.translations, locale);
+	const children = category.children
+		.map((child) => {
+			const childTranslation = pickLocalizedTranslation(child.translations, locale);
+			const products = child.products.map((product) => {
+				const productTranslation = pickLocalizedTranslation(product.translations, locale);
+				return {
+					id: product.id,
+					name: productTranslation?.name ?? product.name,
+					fullSlug: product.fullSlug,
+					imageUrl: product.imageUrl,
+				};
+			});
 
 			return {
-				id: category.id,
-				name: categoryTranslation?.name ?? category.name,
-				slug: category.slug,
-				imageUrl: category.imageUrl,
-				children,
+				id: child.id,
+				name: childTranslation?.name ?? child.name,
+				slug: child.slug,
+				imageUrl: child.imageUrl,
+				products,
 			};
 		})
 		.sort((a, b) => a.name.localeCompare(b.name, locale));
 
 	return {
-		success: true,
-		categoryData,
+		id: category.id,
+		name: categoryTranslation?.name ?? category.name,
+		slug: category.slug,
+		imageUrl: category.imageUrl,
+		children,
 	};
 }

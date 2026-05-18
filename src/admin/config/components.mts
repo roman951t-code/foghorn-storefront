@@ -48,6 +48,10 @@ const orderCsvExportActionComponent = componentLoader.add(
 	'OrderCsvExportAction',
 	path.join(adminDir, 'components', 'OrderCsvExportAction')
 );
+const recordDeleteActionComponent = componentLoader.add(
+	'RecordDeleteAction',
+	path.join(adminDir, 'components', 'RecordDeleteAction')
+);
 const orderTotalListComponent = componentLoader.add(
 	'OrderTotalList',
 	path.join(adminDir, 'components', 'OrderTotalList')
@@ -161,6 +165,7 @@ export {
 	orderPackingSlipActionComponent,
 	orderReturnActionComponent,
 	orderCsvExportActionComponent,
+	recordDeleteActionComponent,
 	orderBulkPackingSlipActionComponent,
 	orderShippingLabelActionComponent,
 	orderBulkShippingLabelActionComponent,

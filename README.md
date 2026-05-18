@@ -2,6 +2,9 @@
 
 Production-focused Next.js storefront with a separate AdminJS runtime.
 
+The Vercel deployment target in this repo is the storefront. The AdminJS runtime in
+`src/admin/server.mts` is a separate Express server and should be deployed separately.
+
 ## Stack
 
 - `next@16` (App Router)
@@ -56,14 +59,24 @@ Run admin panel in production mode:
 npm run admin:start
 ```
 
+## Vercel Deployment
+
+- Storefront deployment guide: `docs/deployment/vercel-storefront.md`
+- Full production roadmap: `docs/deployment/production-roadmap.md`
+- Use Node.js `20.9+` (`package.json` engines and `.nvmrc` are included)
+- `vercel.json` includes the scheduled cache-boundary cron for published pages, scheduled promos, and product schedule windows
+- AdminJS is not part of the storefront Vercel deployment target in this repo
+
 ## Critical Environment Variables
 
 - `DATABASE_URL`
-- `NEXT_PUBLIC_APP_URL` (required in production, must be `https://` for non-localhost)
+- `NEXT_PUBLIC_APP_URL` (recommended canonical app URL; Vercel preview/prod fallbacks can be derived from Vercel system envs)
 - `RESEND_API_KEY`
 - `EMAIL_FROM` (required in production, must use your verified sender domain)
 - `ENCRYPTION_KEY` (required in production, 64-char hex)
 - `CACHE_REVALIDATE_SECRET` (required in production)
+- `CRON_SECRET` (required in production; used by `vercel.json` cron auth)
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (required in production for distributed rate limiting)
 - Stripe (if enabled): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 
 ### Email Deliverability Note

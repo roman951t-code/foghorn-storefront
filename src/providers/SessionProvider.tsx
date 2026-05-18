@@ -3,27 +3,27 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
+import type { AppSession, AppSessionResponse } from '@/types/session';
 
-type Session = Awaited<ReturnType<typeof authClient.getSession>>;
+type Session = AppSessionResponse;
 
 interface SessionContextValue {
-	session: Session;
+	session: AppSession;
 	refresh: () => Promise<void>;
 }
 
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
 const LOCALE_SEGMENT_PATTERN = /^[a-z]{2}$/i;
 
-const getActiveSession = (value: Session): Session => {
+const getActiveSession = (value: Session): AppSession => {
 	if (!value || typeof value !== 'object') return value;
-	const nested = (value as { data?: Session }).data;
-	return nested ?? value;
+	const nested = (value as { data?: AppSession | null }).data;
+	return nested ?? (value as AppSession);
 };
 
 const hasActiveSession = (value: Session): boolean => {
 	const active = getActiveSession(value);
-	if (!active || typeof active !== 'object') return false;
-	return !!(active as { session?: unknown }).session;
+	return Boolean(active?.session);
 };
 
 const getLocaleRootPath = (pathname: string | null): string => {
@@ -42,7 +42,7 @@ export function SessionProvider({
 }) {
 	const router = useRouter();
 	const pathname = usePathname();
-	const fallbackSession = (initialSession || { session: null }) as Session;
+	const fallbackSession = initialSession ?? null;
 	const [session, setSession] = useState<Session>(fallbackSession);
 	const wasAuthenticatedRef = useRef(hasActiveSession(fallbackSession));
 

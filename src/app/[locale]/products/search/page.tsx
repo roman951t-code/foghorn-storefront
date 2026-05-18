@@ -242,11 +242,11 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 					<CatalogBtn fullText />
 
 					<VStack p='4' justifyContent='flex-start'>
-						<HStack w='full' gapX='4' align='center'>
+						<HStack w='full' gapX='4' mt='2' align='center'>
 							<Text fontSize='md' color='main'>
 								{productsT('totalProducts')}
 							</Text>
-							<CountPill value={totalCount ?? 0} px='2' py='1' labelProps={{ fontSize: 'md' }} />
+							<CountPill value={totalCount ?? 0} labelProps={{ fontSize: 'sm' }} />
 						</HStack>
 
 						<SearchCategories data={subcategories} allCategories={productsT('allCategories')} />

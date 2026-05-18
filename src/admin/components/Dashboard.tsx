@@ -1,8 +1,9 @@
 import { ApiClient, useTranslation } from 'adminjs';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Badge, Box, Button, H4, H5, Label, Text } from '@adminjs/design-system';
 
 const api = new ApiClient();
+const DASHBOARD_METRICS_REFRESH_INTERVAL_MS = 60_000;
 
 type QuickAction = {
 	key: string;
@@ -220,6 +221,7 @@ export default function Dashboard() {
 	const [criticalInput, setCriticalInput] = useState('2');
 	const [lowStockPayload, setLowStockPayload] = useState<LowStockPayload | null>(null);
 	const [lowStockLoading, setLowStockLoading] = useState(false);
+	const isMountedRef = useRef(true);
 
 	const lowThreshold = useMemo(() => Math.max(0, Math.trunc(Number(lowInput))), [lowInput]);
 	const criticalThreshold = useMemo(() => Math.max(0, Math.trunc(Number(criticalInput))), [criticalInput]);
@@ -254,33 +256,63 @@ export default function Dashboard() {
 		return resolvePath(`resources/Product?${params.toString()}`);
 	}, [lowThreshold]);
 
-	const fetchMetrics = () => {
-		let isActive = true;
-		setMetricsLoading(true);
-		setMetricsError(false);
-			api.getDashboard()
-				.then((response) => {
-					if (!isActive) return;
-					setMetrics(((response.data as any)?.payload ?? null) as DashboardMetricsPayload | null);
-				})
-				.catch(() => {
-					if (!isActive) return;
-					setMetrics(null);
+	const fetchMetrics = useCallback(async ({ background = false }: { background?: boolean } = {}) => {
+		if (!background) {
+			setMetricsLoading(true);
+			setMetricsError(false);
+		}
+
+		try {
+			const response = await api.getDashboard();
+			if (!isMountedRef.current) return;
+			setMetrics(((response.data as any)?.payload ?? null) as DashboardMetricsPayload | null);
+		} catch {
+			if (!isMountedRef.current) return;
+			if (!background) {
+				setMetrics(null);
 				setMetricsError(true);
-			})
-			.finally(() => {
-				if (!isActive) return;
+			}
+		} finally {
+			if (!isMountedRef.current) return;
+			if (!background) {
 				setMetricsLoading(false);
-			});
-		return () => {
-			isActive = false;
-		};
-	};
+			}
+		}
+	}, []);
 
 	useEffect(() => {
-		const cleanup = fetchMetrics();
-		return cleanup;
+		return () => {
+			isMountedRef.current = false;
+		};
 	}, []);
+
+	useEffect(() => {
+		void fetchMetrics();
+	}, [fetchMetrics]);
+
+	useEffect(() => {
+		const intervalId = window.setInterval(() => {
+			void fetchMetrics({ background: true });
+		}, DASHBOARD_METRICS_REFRESH_INTERVAL_MS);
+
+		const handleFocus = () => {
+			void fetchMetrics({ background: true });
+		};
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'visible') {
+				void fetchMetrics({ background: true });
+			}
+		};
+
+		window.addEventListener('focus', handleFocus);
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+
+		return () => {
+			window.clearInterval(intervalId);
+			window.removeEventListener('focus', handleFocus);
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		};
+	}, [fetchMetrics]);
 
 	const fetchLowStock = async (override?: { low: number; critical: number }) => {
 		const nextLow = override?.low ?? lowThreshold;

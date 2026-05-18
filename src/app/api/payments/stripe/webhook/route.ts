@@ -5,6 +5,8 @@ import { env } from '@/config/env';
 import { finalizeStripeOrderAsSystem } from '@/actions/payments/finalizeStripeOrder';
 import { recordApi5xxEvent, recordStripeWebhookFailure } from '@/lib/opsMonitoring';
 
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
 	if (!stripe) {
 		recordApi5xxEvent({

@@ -76,9 +76,12 @@ export async function getCartItems(userId: string) {
 				const variantLabel =
 					item.variant?.attributes?.length
 						? item.variant.attributes
-								.map((a) =>
-									[a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' ')
-								)
+								.map((a) => {
+									const name = a.attribute.name?.trim?.() ?? '';
+									const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
+									if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+									return name || valueWithUnit;
+								})
 								.join(' / ')
 						: null;
 

@@ -5,6 +5,7 @@ import session from 'express-session';
 import admin from './admin.mts';
 import { createAdminSessionStore } from './pg-session-store.mts';
 import { prisma } from './prisma.mts';
+import { verifyServerFetchUrl } from './utils/server-fetch-safety.mts';
 
 const adminEmail = process.env.ADMINJS_EMAIL;
 const adminPassword = process.env.ADMINJS_PASSWORD;
@@ -59,6 +60,7 @@ const requireActiveAdminUser = parseBoolean(
 	nodeEnv === 'production'
 );
 const adminPort = Number(process.env.ADMINJS_PORT ?? process.env.PORT ?? 3001);
+const adminCookieName = nodeEnv === 'production' ? '__Host-adminjs' : 'adminjs';
 
 type AdminCspMode = 'off' | 'report-only' | 'enforce';
 
@@ -97,6 +99,40 @@ const adminApiRateLimitWindowMs =
 	parsePositiveInt(process.env.ADMIN_API_RATE_LIMIT_WINDOW_SECONDS, 60) * 1000;
 const safeHttpMethods = new Set(['GET', 'HEAD', 'OPTIONS']);
 const SAFE_READONLY_POST_ACTIONS = new Set(['lowStockAlerts']);
+const MUTATING_ADMIN_ACTIONS = new Set([
+	'archive',
+	'archiveProduct',
+	'bulkAdjustPrice',
+	'bulkAdjustStock',
+	'bulkEditTags',
+	'bulkMarkDelivered',
+	'bulkMarkShipped',
+	'bulkSeoTemplate',
+	'bulkSetBrand',
+	'bulkSetCategory',
+	'bulkToggleInStock',
+	'cancelOrder',
+	'deleteOrder',
+	'deleteProduct',
+	'deleteUser',
+	'duplicate',
+	'duplicateBanner',
+	'duplicateProduct',
+	'edit',
+	'markDelivered',
+	'markPaid',
+	'markShipped',
+	'new',
+	'processReturn',
+	'publish',
+	'publishProduct',
+	'revokeSession',
+	'scheduleDiscount',
+	'schedulePublish',
+	'setFulfillment',
+	'setStatus',
+	'updateUserAdminMeta',
+]);
 const adminAllowedOriginHosts = new Set<string>([
 	`localhost:${adminPort}`,
 	`127.0.0.1:${adminPort}`,
@@ -398,6 +434,19 @@ const getAdminApiContextFromPath = (path: string): AdminApiContext => {
 	return {};
 };
 
+const getAdminApiActionNameFromPath = (path: string) => {
+	const matchResourceAction = path.match(/^\/api\/resources\/[^/]+\/actions\/([^/]+)$/);
+	const matchRecordAction = path.match(/^\/api\/resources\/[^/]+\/records\/[^/]+\/([^/]+)$/);
+	const matchBulkAction = path.match(/^\/api\/resources\/[^/]+\/bulk\/([^/]+)$/);
+	const actionName = matchResourceAction?.[1] ?? matchRecordAction?.[1] ?? matchBulkAction?.[1];
+	return actionName ? safeDecodeURIComponent(actionName) : null;
+};
+
+const isAdminApiMutationIntent = (method: string, actionName: string | null) => {
+	if (!isSafeHttpMethod(method)) return true;
+	return actionName ? MUTATING_ADMIN_ACTIONS.has(actionName) : false;
+};
+
 const replaceNoticeMessage = (
 	notice: Record<string, unknown>,
 	message: string,
@@ -591,19 +640,20 @@ const start = async () => {
 			httpOnly: true,
 			secure: nodeEnv === 'production',
 			sameSite: 'strict' as const,
+			path: '/',
 			maxAge: sessionTtlSeconds * 1000,
 		},
 	};
 	const adminSessionMiddleware = session({
 		...adminSessionOptions,
-		name: 'adminjs',
+		name: adminCookieName,
 	});
 
 	const router = AdminJSExpress.buildAuthenticatedRouter(
 		admin,
 		{
 			authenticate,
-			cookieName: 'adminjs',
+			cookieName: adminCookieName,
 			cookiePassword,
 			maxRetries: {
 				count: loginMaxRetries,
@@ -621,9 +671,18 @@ const start = async () => {
 		(nodeEnv !== 'production'
 			? 'http://localhost:3000'
 			: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
+	const storeAppOriginUrl = new URL(storeAppUrl);
+	if (nodeEnv === 'production') {
+		const storeUrlSafety = await verifyServerFetchUrl(storeAppOriginUrl);
+		if (!storeUrlSafety.ok) {
+			throw new Error(
+				`ADMIN_THUMBNAIL_APP_URL/NEXT_PUBLIC_APP_URL is not safe for server-side fetches: ${storeUrlSafety.reason}`
+			);
+		}
+	}
 	const allowedThumbHosts = new Set(
 		[
-			new URL(storeAppUrl).hostname,
+			storeAppOriginUrl.hostname,
 			'images.unsplash.com',
 			'loremflickr.com',
 			'picsum.photos',
@@ -636,6 +695,24 @@ const start = async () => {
 	);
 	const allowAnyThumbHost =
 		nodeEnv !== 'production' && process.env.ADMIN_THUMBNAIL_ALLOW_ANY_HOST === 'true';
+	const isConfiguredStoreUrl = (url: URL) => url.origin === storeAppOriginUrl.origin;
+	const allowsPrivateThumbnailUrl = (url: URL) =>
+		nodeEnv !== 'production' && isConfiguredStoreUrl(url);
+	const verifyThumbnailUrl = async (url: URL) => {
+		if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+			return false;
+		}
+		if (isConfiguredStoreUrl(url) && (url.pathname === '/_next/image' || url.pathname.startsWith('/api/'))) {
+			return false;
+		}
+		if (!allowAnyThumbHost && !allowedThumbHosts.has(url.hostname)) {
+			return false;
+		}
+		const safety = await verifyServerFetchUrl(url, {
+			allowPrivateAddress: allowsPrivateThumbnailUrl(url),
+		});
+		return safety.ok;
+	};
 
 	app.use('/admin-thumb', adminSessionMiddleware);
 	app.get('/admin-thumb', async (req, res) => {
@@ -678,20 +755,15 @@ const start = async () => {
 			return;
 		}
 
-		if (targetUrl.protocol !== 'http:' && targetUrl.protocol !== 'https:') {
-			res.status(400).send('Invalid protocol');
-			return;
-		}
-
-		if (!allowAnyThumbHost && !allowedThumbHosts.has(targetUrl.hostname)) {
-			res.status(400).send('Host not allowed');
+		if (!(await verifyThumbnailUrl(targetUrl))) {
+			res.status(400).send('URL not allowed');
 			return;
 		}
 
 		const w = Math.max(16, Math.min(1024, Number(widthParam) || 256));
 		const q = Math.max(10, Math.min(90, Number(qualityParam) || 70));
 
-		const optimizerUrl = new URL('/_next/image', storeAppUrl);
+		const optimizerUrl = new URL('/_next/image', storeAppOriginUrl);
 		optimizerUrl.searchParams.set('url', targetUrl.toString());
 		optimizerUrl.searchParams.set('w', String(w));
 		optimizerUrl.searchParams.set('q', String(q));
@@ -714,7 +786,7 @@ const start = async () => {
 						} catch {
 							return null;
 						}
-						if ((next.protocol !== 'http:' && next.protocol !== 'https:') || (!allowAnyThumbHost && !allowedThumbHosts.has(next.hostname))) {
+						if (!(await verifyThumbnailUrl(next))) {
 							return null;
 						}
 						current = next;
@@ -741,7 +813,7 @@ const start = async () => {
 				return { contentType, buf };
 			};
 
-			const optimized = await tryOptimizer();
+			const optimized = isConfiguredStoreUrl(targetUrl) ? await tryOptimizer() : null;
 			if (optimized) {
 				res.setHeader('Content-Type', optimized.contentType);
 				res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
@@ -839,13 +911,11 @@ const start = async () => {
 		const currentAdmin = (req.session as any)?.adminUser as { role?: string } | undefined;
 		const isReadonly = currentAdmin?.role === 'readonly';
 		const path = typeof req.path === 'string' ? req.path : '';
-		const isMutation = !isSafeHttpMethod(req.method);
+		const actionName = path.startsWith('/api/') ? getAdminApiActionNameFromPath(path) : null;
+		const isMutation = path.startsWith('/api/')
+			? isAdminApiMutationIntent(req.method, actionName)
+			: !isSafeHttpMethod(req.method);
 		if (isReadonly && isMutation && path.startsWith('/api/')) {
-			const matchResourceAction = path.match(/^\/api\/resources\/[^/]+\/actions\/([^/]+)$/);
-			const matchRecordAction = path.match(/^\/api\/resources\/[^/]+\/records\/[^/]+\/([^/]+)$/);
-			const matchBulkAction = path.match(/^\/api\/resources\/[^/]+\/bulk\/([^/]+)$/);
-			const actionName = matchResourceAction?.[1] ?? matchRecordAction?.[1] ?? matchBulkAction?.[1] ?? null;
-
 			if (req.method.toUpperCase() === 'POST' && actionName && SAFE_READONLY_POST_ACTIONS.has(actionName)) {
 				next();
 				return;

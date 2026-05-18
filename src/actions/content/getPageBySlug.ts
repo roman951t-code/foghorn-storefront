@@ -21,7 +21,7 @@ const isPrismaDbUnavailableError = (error: unknown) => {
 
 export async function getPageBySlug(slug: string, locale: string = DEFAULT_LOCALE) {
 	'use cache';
-	cacheLife('minutes');
+	cacheLife('days');
 	cacheTag(PAGE_CACHE_TAG, `page:${slug}`);
 
 	const now = new Date();

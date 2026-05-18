@@ -2,6 +2,12 @@ import type { ActionHandler, RecordActionResponse } from 'adminjs';
 import { prisma } from '../prisma.mts';
 import { archiveProductAndZeroStock } from './product-unavailable-utils.mts';
 
+const getMethod = (req: unknown) => String((req as { method?: unknown }).method ?? 'get').toLowerCase();
+const isMutationMethod = (req: unknown) => {
+	const method = getMethod(req);
+	return method === 'post' || method === 'delete';
+};
+
 type ProductStatus = 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
 
 const makeUniqueCopySlug = async (baseSlug: string) => {
@@ -41,10 +47,15 @@ const replaceSlugInFullSlug = (fullSlug: string, nextSlug: string) => {
 	return `${fullSlug.slice(0, idx)}/${nextSlug}`;
 };
 
-export const publishProduct: ActionHandler<RecordActionResponse> = async (_req, _res, context) => {
+export const publishProduct: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
 	const { record, resource, currentAdmin } = context;
 	if (!record || !resource) {
 		throw new Error('Missing record context');
+	}
+	if (!isMutationMethod(req)) {
+		return {
+			record: record.toJSON(currentAdmin),
+		};
 	}
 	const productId = record.param('id') as string;
 	const currentStatus = record.param('status') as ProductStatus | undefined;
@@ -87,10 +98,15 @@ export const publishProduct: ActionHandler<RecordActionResponse> = async (_req, 
 	};
 };
 
-export const archiveProduct: ActionHandler<RecordActionResponse> = async (_req, _res, context) => {
+export const archiveProduct: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
 	const { record, resource, currentAdmin } = context;
 	if (!record || !resource) {
 		throw new Error('Missing record context');
+	}
+	if (!isMutationMethod(req)) {
+		return {
+			record: record.toJSON(currentAdmin),
+		};
 	}
 	const productId = record.param('id') as string;
 	const currentStatus = record.param('status') as ProductStatus | undefined;
@@ -105,10 +121,15 @@ export const archiveProduct: ActionHandler<RecordActionResponse> = async (_req, 
 	};
 };
 
-export const duplicateProduct: ActionHandler<RecordActionResponse> = async (_req, _res, context) => {
+export const duplicateProduct: ActionHandler<RecordActionResponse> = async (req, _res, context) => {
 	const { record, resource, currentAdmin, h } = context;
 	if (!record || !resource) {
 		throw new Error('Missing record context');
+	}
+	if (!isMutationMethod(req)) {
+		return {
+			record: record.toJSON(currentAdmin),
+		};
 	}
 	const resourceId = typeof (resource as any).id === 'function' ? (resource as any).id() : (resource as any).id;
 	const productId = record.param('id') as string;

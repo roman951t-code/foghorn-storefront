@@ -48,6 +48,8 @@ const SubscribeButton = ({
 
 export default function SubscribeSection({ i18nData }: Props) {
 	const { session, refresh } = useSession();
+	const sessionUser = session?.user ?? null;
+	const sessionEmail = sessionUser?.email ?? '';
 
 	const [isTransition, startTransition] = useTransition();
 	const [verifyEmailOpen, setVerifyEmailOpen] = useState(false);
@@ -61,13 +63,13 @@ export default function SubscribeSection({ i18nData }: Props) {
 		handleSubmit,
 		formState: { errors, isSubmitting },
 	} = useForm<EmailSchema>({
-		defaultValues: { email: session?.user?.email ?? '' },
+		defaultValues: { email: sessionEmail },
 		mode: 'onSubmit',
 		resolver: zodResolver(emailSchema),
 	});
 
-	const isEmailVerified = session?.user?.email && session?.user?.emailVerified;
-	const isUserSubscribed = session?.user?.subscribed;
+	const isEmailVerified = Boolean(sessionEmail) && sessionUser?.emailVerified;
+	const isUserSubscribed = sessionUser?.subscribed;
 
 	const onSubmit = async (formData: EmailSchema) => {
 		try {
@@ -85,12 +87,12 @@ export default function SubscribeSection({ i18nData }: Props) {
 	};
 
 	const subscribeNewsletter = () => {
-		if (!session?.user?.email) return;
+		if (!sessionEmail) return;
 
 		startTransition(async () => {
 			const result = await subscribeNewsletterAction(null, {
-				email: session.user.email,
-				name: session.user.name ?? '',
+				email: sessionEmail,
+				name: sessionUser?.name ?? '',
 			});
 			if (result.success) {
 				showToaster('success', toasterMessages.newsletterSubscribeSuccess(i18nData));
@@ -102,11 +104,11 @@ export default function SubscribeSection({ i18nData }: Props) {
 	};
 
 	const unSubscribeNewsletter = () => {
-		if (!session?.user?.email) return;
+		if (!sessionEmail) return;
 
 		startTransition(async () => {
 			const result = await unsubscribeNewsletterAction(null, {
-				email: session.user.email,
+				email: sessionEmail,
 			});
 			if (result.success) {
 				showToaster('success', toasterMessages.newsletterUnsubscribeSuccess(i18nData));

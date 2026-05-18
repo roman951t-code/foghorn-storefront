@@ -25,7 +25,7 @@ export type StorefrontFormPublic = {
 
 export async function getEnabledStorefrontForms(placement: StorefrontFormPlacement) {
 	'use cache';
-	cacheLife('hours');
+	cacheLife('days');
 	cacheTag(STOREFRONT_FORMS_CACHE_TAG, `storefront-forms:${placement}`);
 
 	return prisma.storefrontForm.findMany({

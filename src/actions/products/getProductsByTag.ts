@@ -325,9 +325,12 @@ export async function getProductsByTag<T extends boolean>(
 						discountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,
 						stock: product.variants[0].stock,
 						label: product.variants[0].attributes
-							.map((a) =>
-								[a.attribute.name, a.value, a.attribute.unit].filter(Boolean).join(' ')
-							)
+							.map((a) => {
+								const name = a.attribute.name?.trim?.() ?? '';
+								const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
+								if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+								return name || valueWithUnit;
+							})
 							.join(' / '),
 				  }
 				: undefined,

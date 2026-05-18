@@ -1,16 +1,17 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { routing } from '@/i18n/routing';
-import { APP_URL, env } from './src/config/env';
+import { env } from './src/config/env';
+import { resolveAllowedAppHosts } from './src/config/appUrl';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 const handleI18nRouting = createMiddleware(routing);
 const legacyLocaleMap: Record<string, string> = { ua: 'uk', us: 'en' };
-const allowedHosts = new Set<string>([
-	new URL(APP_URL).host,
-	'localhost:3000',
-	'127.0.0.1:3000',
-]);
+const allowedHosts = new Set<string>(
+	resolveAllowedAppHosts({
+		env: process.env as Record<string, string | undefined>,
+	})
+);
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_DEFAULT_MAX = 80;
 const RATE_LIMIT_STRIPE_SESSION_MAX = 12;
@@ -28,6 +29,7 @@ const ALLOWED_EXTERNAL_MUTATION_PATHS = new Set<string>([
 const REVALIDATE_SECRET_PATTERN = /^[A-Za-z0-9._~-]{24,256}$/;
 const CSP_REPORT_GROUP = 'csp-endpoint';
 const SAFE_API_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+const ALLOWED_CORS_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
 
 const resolveBooleanEnvFlag = (value: string | undefined, fallback: boolean) => {
 	if (typeof value !== 'string') return fallback;
@@ -186,12 +188,52 @@ const resolveExpectedRevalidateSecrets = () =>
 const isAllowedMutationOrigin = (originHeader: string, request: NextRequest) => {
 	try {
 		const origin = new URL(originHeader);
+		if (env.NODE_ENV === 'production' && origin.protocol !== 'https:') {
+			return false;
+		}
+		if (
+			env.NODE_ENV !== 'production' &&
+			origin.protocol !== 'http:' &&
+			origin.protocol !== 'https:'
+		) {
+			return false;
+		}
 		// Always allow same-host mutations to avoid false 403s behind multi-domain deployments.
-		if (origin.host === request.nextUrl.host) return true;
-		return allowedHosts.has(origin.host);
+		if (origin.host.toLowerCase() === request.nextUrl.host.toLowerCase()) return true;
+		return allowedHosts.has(origin.host.toLowerCase());
 	} catch {
 		return false;
 	}
+};
+
+const isAllowedRequestHost = (request: NextRequest) =>
+	allowedHosts.has(request.nextUrl.host.toLowerCase());
+
+const isCorsPreflightRequest = (request: NextRequest) =>
+	request.method.toUpperCase() === 'OPTIONS' &&
+	Boolean(request.headers.get('origin')) &&
+	Boolean(request.headers.get('access-control-request-method'));
+
+const buildCorsPreflightResponse = (request: NextRequest) => {
+	const originHeader = request.headers.get('origin');
+	if (!originHeader || !isAllowedMutationOrigin(originHeader, request)) {
+		return new NextResponse('Forbidden', { status: 403, headers: { 'Cache-Control': 'no-store' } });
+	}
+
+	const origin = new URL(originHeader);
+	const response = new NextResponse(null, { status: 204 });
+	response.headers.set('Access-Control-Allow-Origin', origin.origin);
+	response.headers.set('Access-Control-Allow-Credentials', 'true');
+	response.headers.set('Access-Control-Allow-Methods', ALLOWED_CORS_METHODS.join(', '));
+	response.headers.set(
+		'Access-Control-Allow-Headers',
+		request.headers.get('access-control-request-headers') ??
+			'content-type, authorization, x-revalidate-secret'
+	);
+	response.headers.set('Access-Control-Max-Age', '600');
+	response.headers.set('Vary', 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers');
+	response.headers.set('Cache-Control', 'no-store');
+	return response;
 };
 
 const generateCspNonce = () => {
@@ -278,8 +320,19 @@ export default async function middleware(request: NextRequest) {
 	const { pathname, search } = request.nextUrl;
 	const cspContext = pathname.startsWith('/api') ? null : buildCspContext(request);
 
+	if (env.NODE_ENV === 'production' && !isAllowedRequestHost(request)) {
+		return new NextResponse('Not Found', {
+			status: 404,
+			headers: { 'Cache-Control': 'no-store' },
+		});
+	}
+
 	// CSRF/Origin check for API mutations
 	if (pathname.startsWith('/api')) {
+		if (isCorsPreflightRequest(request)) {
+			return buildCorsPreflightResponse(request);
+		}
+
 		// Shared rate limiting (Upstash when configured, in-memory fallback otherwise).
 		const rateLimitRule = resolveRateLimitRule(request);
 		if (rateLimitRule) {

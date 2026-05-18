@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
 import { jsonNoStore } from '@/lib/response';
+import type { AppSessionUser } from '@/types/session';
 
 export async function GET() {
 	try {
@@ -17,6 +18,7 @@ export async function GET() {
 		}
 
 		const { user, ...rest } = session;
+		const sessionUser = user as AppSessionUser;
 		const sessionEmail = typeof user.email === 'string' ? user.email.trim() : '';
 		const [socialAccount, newsletterSubscription] = await Promise.all([
 			prisma.account.findFirst({
@@ -39,22 +41,22 @@ export async function GET() {
 		return jsonNoStore({
 			...rest,
 			user: {
-				id: user.id,
-				email: user.email,
-				name: user.name,
-				phoneNumber: user.phoneNumber,
-				phoneNumberVerified: user.phoneNumberVerified,
-				lastName: user.lastName,
-				middleName: user.middleName,
-				notificationMethod: user.notificationMethod,
-				emailVerified: user.emailVerified,
+				id: sessionUser.id,
+				email: sessionUser.email,
+				name: sessionUser.name,
+				phoneNumber: sessionUser.phoneNumber ?? null,
+				phoneNumberVerified: sessionUser.phoneNumberVerified ?? false,
+				lastName: sessionUser.lastName ?? null,
+				middleName: sessionUser.middleName ?? null,
+				notificationMethod: sessionUser.notificationMethod ?? null,
+				emailVerified: sessionUser.emailVerified ?? false,
 				subscribed: Boolean(newsletterSubscription),
-				shippingCountry: (user as any).shippingCountry ?? null,
-				shippingRegion: (user as any).shippingRegion ?? null,
-				shippingCity: (user as any).shippingCity ?? null,
-				shippingPostalCode: (user as any).shippingPostalCode ?? null,
-				shippingAddressLine1: (user as any).shippingAddressLine1 ?? null,
-				shippingAddressLine2: (user as any).shippingAddressLine2 ?? null,
+				shippingCountry: sessionUser.shippingCountry ?? null,
+				shippingRegion: sessionUser.shippingRegion ?? null,
+				shippingCity: sessionUser.shippingCity ?? null,
+				shippingPostalCode: sessionUser.shippingPostalCode ?? null,
+				shippingAddressLine1: sessionUser.shippingAddressLine1 ?? null,
+				shippingAddressLine2: sessionUser.shippingAddressLine2 ?? null,
 				isGoogleUser: !!socialAccount,
 			},
 		});
