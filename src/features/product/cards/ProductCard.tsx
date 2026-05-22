@@ -8,9 +8,6 @@ import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { Rating } from '@/components/ui/chakra/rating';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import '@/styles/swiper.css';
 import { useCart } from '@/hooks/useCart';
 import { useWishList } from '@/hooks/useWishList';
 import { SubcategoryProduct } from '@/types/product';
@@ -60,6 +57,14 @@ export default function ProductCard({ product }: Props) {
 
 	const isInCart = productIds.includes(product?.id);
 	const isInWishlist = wishListIds.includes(product?.id);
+	const cartButtonLabel = !isInStock
+		? `${t('productIsOutOfStock')}: ${name}`
+		: isInCart
+			? `${cartT('removeFromCart')}: ${name}`
+			: `${cartT('addToCart')}: ${name}`;
+	const wishlistButtonLabel = isInWishlist
+		? `${wishT('removeFromWishlist')}: ${name}`
+		: `${wishT('addToWishlist')}: ${name}`;
 
 	const addToCart = async () => {
 		setIsLoading(true);
@@ -122,25 +127,33 @@ export default function ProductCard({ product }: Props) {
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			w='full'
 			h='full'
-			maxW='300px'
-			minW='250px'
-			mx='auto'
+			minW='204px'
 			borderWidth='0.5px'
 			borderStyle='solid'
 			borderColor='border'
+			rounded='md'
+			overflow='hidden'
 			bg={isInStock ? 'bg.tertiary' : 'gray.100/10'}
 			opacity={isInStock ? '1' : '.9'}
 			transition='all 0.25s ease-in-out'
 			_hover={{
 				borderColor: { base: 'orange', _dark: 'yellow' },
+				boxShadow: 'md',
 			}}
 		>
-			<Flex direction='column' gap={2} p={3} pt='2' h='full' justifyContent='space-between'>
+			<Flex
+				direction='column'
+				gap={2}
+				p={{ base: 3, md: 2.5 }}
+				h='full'
+				justifyContent='space-between'
+			>
 				<Flex align='center' justifyContent='space-between'>
 					<IconButton
 						loading={isLoading}
 						onClick={isInCart ? removeFromCart : addToCart}
-						aria-label='Cart add and remove'
+						aria-label={cartButtonLabel}
+						aria-pressed={isInCart}
 						variant='ghost'
 						disabled={!isInStock}
 						rounded='md'
@@ -152,14 +165,15 @@ export default function ProductCard({ product }: Props) {
 							color: 'main.lightOnly',
 						}}
 					>
-						<Icon size='md' aria-label='Wish'>
+						<Icon size='md' aria-hidden='true'>
 							{isInCart ? <BsBagCheck /> : <FiShoppingCart />}
 						</Icon>
 					</IconButton>
 
 					<IconButton
 						onClick={isInWishlist ? removeFromWishList : addToWishList}
-						aria-label='Favourite'
+						aria-label={wishlistButtonLabel}
+						aria-pressed={isInWishlist}
 						variant='ghost'
 						rounded='md'
 						colorPalette='red'
@@ -170,7 +184,9 @@ export default function ProductCard({ product }: Props) {
 							color: 'main.lightOnly',
 						}}
 					>
-						{isInWishlist ? <BsBagHeart /> : <FiHeart />}
+						<Icon size='md' aria-hidden='true'>
+							{isInWishlist ? <BsBagHeart /> : <FiHeart />}
+						</Icon>
 					</IconButton>
 				</Flex>
 
@@ -182,13 +198,20 @@ export default function ProductCard({ product }: Props) {
 					/>
 				</LocaleNavLink>
 
-				<LinkBox mt='2' textAlign={{ base: 'center', sm: 'left' }}>
+				<LinkBox mt='1' textAlign='left'>
 					<Card.Title fontWeight='medium' w='100%' as='span'>
 						<LocaleNavLink
 							href={`/products/${fullSlug}`}
 							textDecorationColor='main'
 							color='main'
-							fontSize='17px'
+							fontSize={{ base: 'md', lg: '15px' }}
+							lineHeight='1.35'
+							display='-webkit-box'
+							overflow='hidden'
+							css={{
+								WebkitLineClamp: 2,
+								WebkitBoxOrient: 'vertical',
+							}}
 							variant='underline'
 						>
 							{name}
@@ -203,10 +226,11 @@ export default function ProductCard({ product }: Props) {
 
 					<Text
 						color='main'
-						fontSize='xl'
-						mt='1'
+						fontSize={{ base: 'lg', lg: 'sm' }}
+						fontWeight='semibold'
+						mt='1.5'
 						textWrap='wrap'
-						textAlign={{ base: 'center', sm: 'left' }}
+						textAlign='left'
 					>
 						{formatUsdPrice(displayPrice)}
 						{discount > 0 && (
@@ -232,7 +256,7 @@ export default function ProductCard({ product }: Props) {
 					</Text>
 				</LinkBox>
 
-				<HStack gap='4' mt='1' justifyContent={{ base: 'center', sm: 'flex-start' }}>
+				<HStack gap='2' mt='1' justifyContent='flex-start' flexWrap='wrap'>
 					<Rating
 						id={`product-card-rating-${product.id}-${ratingId}`}
 						readOnly

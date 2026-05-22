@@ -28,6 +28,10 @@ import { ensureParams } from '@/utils/validateParams';
 import { subcategoryParamsSchema } from 'validationSchemas/productParamsSchemas';
 import CountPill from '@/components/ui/CountPill';
 import { headers } from 'next/headers';
+import { getSubcategoryStaticParams } from '@/actions/products/getCatalogStaticParams';
+
+// Route intent: SSR per filter params; product and filter data stay cached in tagged actions.
+export const generateStaticParams = getSubcategoryStaticParams;
 
 type Props = SubcategoryParams & {
 	searchParams: ProductFiltersSearchParams;
@@ -51,15 +55,15 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 		return Boolean(value);
 	});
 	const parsedPage = Number.parseInt(
-		Array.isArray(resolvedSearch?.page) ? resolvedSearch.page[0] : resolvedSearch?.page ?? '1',
-		10
+		Array.isArray(resolvedSearch?.page) ? resolvedSearch.page[0] : (resolvedSearch?.page ?? '1'),
+		10,
 	);
 	const canonicalSearchParams =
 		Number.isFinite(parsedPage) && parsedPage > 1 ? { page: `${parsedPage}` } : undefined;
 	const alternates = buildLanguageAlternates(
 		locale,
 		`/products/${category}/${subcategory}`,
-		canonicalSearchParams
+		canonicalSearchParams,
 	);
 	const ogImage = absoluteUrl('/assets/images/logoBig.webp');
 
@@ -94,10 +98,12 @@ export default async function Subcategory({ params, searchParams }: Props) {
 	const pageSize = resolvePerPageParam(searchData.perPage || `${PRODUCTS_PER_PAGE}`);
 	const offset = resolveOffset(page, pageSize);
 
-	const [productsT, navigationT] = await Promise.all([
+	const [productsT, navigationT, pagesT] = await Promise.all([
 		getTranslations('products'),
 		getTranslations('navigation'),
+		getTranslations({ locale, namespace: 'pages' }),
 	]);
+	const homeLabel = pagesT('main.title');
 
 	const minPrice = searchData?.min ? parseFloat(searchData?.min) : undefined;
 	const maxPrice = searchData?.max ? parseFloat(searchData?.max) : undefined;
@@ -137,7 +143,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 		maxPrice,
 		orderBy,
 		dynamicFilters,
-		locale
+		locale,
 	);
 
 	const [subcategoryFilters, subcategoryData] = await Promise.all([
@@ -154,7 +160,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 			{
 				'@type': 'ListItem',
 				position: 1,
-				name: 'Home',
+				name: homeLabel,
 				item: absoluteUrl(localizePath(locale, '/')),
 			},
 			{
@@ -183,7 +189,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 				categoryName={subcategoryData.categoryName}
 				subcategoryName={subcategoryData.subcategoryName}
 			/>
-			<Heading as='h1' size='3xl' fontWeight='medium'>
+			<Heading as='h1' size='2xl' fontWeight='medium'>
 				{subcategoryData.subcategoryName}
 			</Heading>
 			{!isSimilarSearchMode ? (

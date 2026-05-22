@@ -1,10 +1,49 @@
 'use client';
 
-import { Box, Select, createListCollection } from '@chakra-ui/react';
+import { HStack, Select, createListCollection } from '@chakra-ui/react';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { LANGUAGE_OPTIONS, LOCALE_SWITCHER_LABEL } from '@/constants/locales';
+import {
+	isAppLocale,
+	LANGUAGE_OPTIONS,
+	LOCALE_SWITCHER_LABEL,
+	type AppLocale,
+} from '@/constants/locales';
+
+function FlagIcon({ locale }: { locale: AppLocale }) {
+	const commonProps = {
+		width: 20,
+		height: 14,
+		viewBox: '0 0 640 480',
+		style: { borderRadius: '2px', flexShrink: 0 },
+		'aria-hidden': true,
+		focusable: false,
+	} as const;
+
+	if (locale === 'uk') {
+		return (
+			<svg {...commonProps}>
+				<rect width='640' height='240' fill='#005BBB' />
+				<rect y='240' width='640' height='240' fill='#FFD500' />
+			</svg>
+		);
+	}
+
+	return (
+		<svg {...commonProps}>
+			<rect width='640' height='480' fill='#fff' />
+			<rect width='640' height='37' y='0' fill='#B22234' />
+			<rect width='640' height='37' y='74' fill='#B22234' />
+			<rect width='640' height='37' y='148' fill='#B22234' />
+			<rect width='640' height='37' y='222' fill='#B22234' />
+			<rect width='640' height='37' y='296' fill='#B22234' />
+			<rect width='640' height='37' y='370' fill='#B22234' />
+			<rect width='640' height='37' y='444' fill='#B22234' />
+			<rect width='260' height='258' fill='#3C3B6E' />
+		</svg>
+	);
+}
 
 const languages = createListCollection({
 	items: LANGUAGE_OPTIONS,
@@ -16,12 +55,13 @@ export default function LocaleSwitcher() {
 	const pathname = usePathname();
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const locale = useLocale() as 'uk' | 'en';
+	const locale = useLocale() as AppLocale;
 	const label = LOCALE_SWITCHER_LABEL;
+	const currentLanguage = languages.items.find((item) => item.value === locale);
 
 	const changeLocale = (details: { value: string[] }) => {
 		const newLocale = details.value?.[0]?.toLowerCase();
-		if ((newLocale === 'uk' || newLocale === 'en') && newLocale !== locale) {
+		if (isAppLocale(newLocale) && newLocale !== locale) {
 			const search = searchParams.toString();
 			const destination = search ? `${pathname}?${search}` : pathname;
 			router.replace(destination, { locale: newLocale });
@@ -32,7 +72,6 @@ export default function LocaleSwitcher() {
 		<Select.Root
 			position='relative'
 			aria-label={label}
-			bg={{ base: 'gray.100', _dark: 'gray.800' }}
 			rounded='lg'
 			collection={languages}
 			size='sm'
@@ -43,14 +82,12 @@ export default function LocaleSwitcher() {
 		>
 			<Select.Label srOnly>{label}</Select.Label>
 			<Select.HiddenSelect />
-			<Select.Control>
+			<Select.Control bg={{ base: 'gray.100', _dark: 'gray.800' }} rounded='sm'>
 				<Select.Trigger borderColor='border' cursor='pointer' px='2' aria-label={label}>
-					<Select.ValueText fontSize='md' placeholder='-'>
-						{languages.items.find((item) => item.value === locale)?.flag}
-						<Box as='span' ml='2'>
-							{languages.items.find((item) => item.value === locale)?.label}
-						</Box>
-					</Select.ValueText>
+					<HStack gap='1.5' align='center'>
+						{currentLanguage && <FlagIcon locale={currentLanguage.value} />}
+						<Select.ValueText fontSize='md' placeholder='-' />
+					</HStack>
 				</Select.Trigger>
 				<Select.IndicatorGroup>
 					<Select.Indicator />
@@ -61,7 +98,10 @@ export default function LocaleSwitcher() {
 				<Select.Content fontSize='md' lineHeight='1.75'>
 					{languages.items.map((item) => (
 						<Select.Item cursor='pointer' item={item} key={item.value}>
-							{item.flag} {languages.stringifyItem(item)}
+							<HStack gap='1.5' align='center'>
+								<FlagIcon locale={item.value} />
+								<Select.ItemText>{languages.stringifyItem(item)}</Select.ItemText>
+							</HStack>
 							<Select.ItemIndicator />
 						</Select.Item>
 					))}

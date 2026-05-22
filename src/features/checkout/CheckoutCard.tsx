@@ -64,7 +64,7 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 					</Text>
 				</VStack>
 
-				<VStack alignItems='flex-start' mt='-2'>
+				<VStack alignItems='flex-start' mt='-3'>
 					<Card.Title fontWeight='medium' fontSize='md' lineHeight='1.6'>
 						<LocaleNavLink
 							href={productHref}
@@ -80,7 +80,7 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 							{product.variantLabel}
 						</Text>
 					)}
-					<Text color='main' fontSize='xl'>
+					<Text color='main' fontSize='lg'>
 						{formatUsdPrice(price)}
 					</Text>
 					{hasDiscount && (
@@ -211,7 +211,7 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 									href={productHref}
 									textDecorationColor='main'
 									color='main'
-									fontSize='lg'
+									fontSize='md'
 									variant='underline'
 								>
 									{product.name}

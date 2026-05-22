@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { env } from '@/config/env';
+import { includesTimingSafeSecret } from '@/lib/timingSafeSecret';
 import {
 	PRODUCT_CATALOG_CACHE_TAG,
 	PRODUCT_CATEGORY_CACHE_TAG,
@@ -26,7 +27,7 @@ const parseIntegerInRange = (
 	raw: string | null,
 	defaultValue: number,
 	minValue: number,
-	maxValue: number
+	maxValue: number,
 ) => {
 	if (!raw) return defaultValue;
 	const parsed = Number.parseInt(raw, 10);
@@ -64,14 +65,14 @@ const resolveExpectedRevalidateSecrets = () =>
 		new Set(
 			[env.CACHE_REVALIDATE_SECRET, env.CRON_SECRET]
 				.map((value) => normalizeSecret(value ?? null))
-				.filter((value): value is string => Boolean(value))
-		)
+				.filter((value): value is string => Boolean(value)),
+		),
 	);
 
 const logWindowEvent = (
 	level: 'info' | 'warn' | 'error',
 	event: string,
-	payload: Record<string, unknown>
+	payload: Record<string, unknown>,
 ) => {
 	const entry = {
 		source: 'api-cache-revalidate-windows',
@@ -138,7 +139,7 @@ const handleWindowRevalidation = async (req: Request) => {
 	const providedSecret = resolveProvidedRevalidateSecret(req);
 	const hasValidSecretFormat =
 		typeof providedSecret === 'string' && REVALIDATE_SECRET_PATTERN.test(providedSecret);
-	if (!hasValidSecretFormat || !expectedSecrets.includes(providedSecret)) {
+	if (!hasValidSecretFormat || !includesTimingSafeSecret(expectedSecrets, providedSecret)) {
 		logWindowEvent('warn', 'revalidate-unauthorized', { requestId });
 		return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
 	}
@@ -148,7 +149,7 @@ const handleWindowRevalidation = async (req: Request) => {
 		url.searchParams.get('lookbackSeconds'),
 		DEFAULT_LOOKBACK_SECONDS,
 		30,
-		MAX_LOOKBACK_SECONDS
+		MAX_LOOKBACK_SECONDS,
 	);
 	const limit = parseIntegerInRange(url.searchParams.get('limit'), DEFAULT_LIMIT, 1, MAX_LIMIT);
 	const dryRun = url.searchParams.get('dryRun') === 'true';
@@ -210,20 +211,21 @@ const handleWindowRevalidation = async (req: Request) => {
 		const boundarySummary = {
 			products: {
 				discountStart: products.filter((product) =>
-					isBoundaryWithinWindow(product.discountStartAt, from, now)
+					isBoundaryWithinWindow(product.discountStartAt, from, now),
 				).length,
 				discountEnd: products.filter((product) =>
-					isBoundaryWithinWindow(product.discountEndAt, from, now)
+					isBoundaryWithinWindow(product.discountEndAt, from, now),
 				).length,
 				publishStart: products.filter((product) =>
-					isBoundaryWithinWindow(product.publishStartAt, from, now)
+					isBoundaryWithinWindow(product.publishStartAt, from, now),
 				).length,
 				publishEnd: products.filter((product) =>
-					isBoundaryWithinWindow(product.publishEndAt, from, now)
+					isBoundaryWithinWindow(product.publishEndAt, from, now),
 				).length,
 			},
 			banners: {
-				start: banners.filter((banner) => isBoundaryWithinWindow(banner.startsAt, from, now)).length,
+				start: banners.filter((banner) => isBoundaryWithinWindow(banner.startsAt, from, now))
+					.length,
 				end: banners.filter((banner) => isBoundaryWithinWindow(banner.endsAt, from, now)).length,
 			},
 			pages: {
@@ -243,7 +245,7 @@ const handleWindowRevalidation = async (req: Request) => {
 				...(banners.length > 0 ? [PROMO_CACHE_TAG] : []),
 				...(pages.length > 0 ? [PAGE_CACHE_TAG, ...pageSlugs.map((slug) => `page:${slug}`)] : []),
 				...productIds.map((productId) => productCacheTagById(productId)),
-			])
+			]),
 		);
 
 		const truncation = {

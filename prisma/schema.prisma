@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-   url      = env("DATABASE_URL")
 }
 
 model NewsletterSubscription {
@@ -40,8 +39,6 @@ model CartItem {
 model EmailRegistrationCode {
   id        String   @id @default(uuid())
   email     String
-  name      String
-  password  String
   code      String
   expiresAt DateTime
   createdAt DateTime @default(now())
@@ -81,6 +78,7 @@ model User {
   reviews        Review[]
   cart           Cart?
   recentlyViewed RecentlyViewed[]
+  auditEntries   UserAuditEntry[]
 
   phoneNumber         String?
   phoneNumberVerified Boolean?
@@ -100,6 +98,25 @@ enum UserAdminStatus {
   ACTIVE
   SUSPENDED
   BLOCKED
+}
+
+model UserAuditEntry {
+  id         String        @id @default(uuid())
+  userId     String
+  type       UserAuditType
+  note       String?       @db.Text
+  adminEmail String?
+  metadata   Json?
+  createdAt  DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+enum UserAuditType {
+  SESSION_REVOKED
+  SESSIONS_REVOKED
 }
 
 model Brand {

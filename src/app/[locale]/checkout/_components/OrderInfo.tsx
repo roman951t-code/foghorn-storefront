@@ -1,16 +1,6 @@
 'use client';
 
-import {
-	Heading,
-	Text,
-	VStack,
-	Flex,
-	Stack,
-	Separator,
-	Stat,
-	Box,
-	Badge,
-} from '@chakra-ui/react';
+import { Heading, Text, VStack, Flex, Stack, Separator, Stat, Box, Badge } from '@chakra-ui/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { SidebarCheckoutCard, FullCheckoutCard } from '@/features/checkout/CheckoutCard';
 import AcceptOrderBtn from './AcceptOrderBtn';
@@ -20,7 +10,7 @@ import { useSession } from '@/providers/SessionProvider';
 import { useCheckoutStore } from '@/stores/checkoutStore';
 import { useCartStore } from '@/stores/cartStore';
 import { createOrderAction } from '@/actions/createOrderAction';
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import { showToaster } from '@/utils/toast';
 import { useRouter } from 'next/navigation';
 import CouponField from '@/components/ui/inputs/CouponField';
@@ -46,9 +36,8 @@ export default function OrderInfo({
 	const shippingAddress = useCheckoutStore((state) => state.shippingAddress);
 	const consents = useCheckoutStore((state) => state.consents);
 	const [isSubmitting, startTransition] = useTransition();
-	const [isStripeRedirecting, setIsStripeRedirecting] = useState(false);
 	const router = useRouter();
-	const isLoading = isSubmitting || isStripeRedirecting;
+	const isLoading = isSubmitting;
 
 	const isAuthorized = !!session?.session;
 	const user = session?.user;
@@ -76,9 +65,9 @@ export default function OrderInfo({
 	const totalAmountText = formatMoney(finalTotal);
 	const hasContactData = Boolean(
 		user?.name?.trim() &&
-			user?.lastName?.trim() &&
-			user?.middleName?.trim() &&
-			(user?.phoneNumber?.trim() || user?.email?.trim())
+		user?.lastName?.trim() &&
+		user?.middleName?.trim() &&
+		(user?.phoneNumber?.trim() || user?.email?.trim()),
 	);
 	const hasRequiredShippingAddress = hasRequiredShippingAddressFields(shippingAddress);
 	const handleUnauthorizedSession = async () => {
@@ -92,17 +81,18 @@ export default function OrderInfo({
 	const requiredForms = storefrontForms.filter(isBlockingCheckoutConsent);
 	const missingRequiredConsents = requiredForms.filter((f) => consents[f.key] !== true);
 
-	const disabledReason: 'auth' | 'contacts' | 'address' | 'empty' | 'consents' | null = !isAuthorized
-		? 'auth'
-		: !hasContactData
-		? 'contacts'
-		: !hasRequiredShippingAddress
-		? 'address'
-		: cartItems.length === 0
-		? 'empty'
-		: missingRequiredConsents.length > 0
-		? 'consents'
-		: null;
+	const disabledReason: 'auth' | 'contacts' | 'address' | 'empty' | 'consents' | null =
+		!isAuthorized
+			? 'auth'
+			: !hasContactData
+				? 'contacts'
+				: !hasRequiredShippingAddress
+					? 'address'
+					: cartItems.length === 0
+						? 'empty'
+						: missingRequiredConsents.length > 0
+							? 'consents'
+							: null;
 
 	const handleAcceptOrder = () => {
 		if (disabledReason || !cartItems.length) return;
@@ -115,11 +105,6 @@ export default function OrderInfo({
 
 		const rawCouponCode = useCheckoutStore.getState().appliedCoupon?.code ?? '';
 		const couponCode = rawCouponCode.trim() ? rawCouponCode.trim() : undefined;
-
-		if (paymentMethod === 'card') {
-			startStripeCheckout(orderItems, couponCode);
-			return;
-		}
 
 		startTransition(() => {
 			(async () => {
@@ -154,70 +139,9 @@ export default function OrderInfo({
 		});
 	};
 
-	const startStripeCheckout = async (
-		orderItems: { productId: string; variantId: string | null; quantity: number }[],
-		couponCode?: string
-	) => {
-		try {
-			setIsStripeRedirecting(true);
-
-			const origin = window.location.origin;
-			const response = await fetch('/api/payments/stripe', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					items: orderItems,
-					successUrl: `${origin}/cabinet/orders?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-					cancelUrl: `${origin}/checkout?cancelled=1`,
-					couponCode,
-					shipmentMethod,
-					shippingAddress,
-					locale,
-				}),
-			});
-
-			const data = await response.json();
-			if (!response.ok) {
-				const message = data?.error ?? 'stripe_session_failed';
-				if (response.status === 401 || message === 'unauthorized') {
-					await handleUnauthorizedSession();
-					return;
-				}
-				if (message === 'shipping-address-required') {
-					showToaster('error', checkoutT('shippingAddressRequired'));
-					return;
-				}
-				throw new Error(message);
-			}
-
-			const checkoutUrl =
-				(typeof data.url === 'string' && data.url) ??
-				(data.sessionId ? `https://checkout.stripe.com/c/pay/${data.sessionId}` : null);
-
-			if (!checkoutUrl) {
-				throw new Error('stripe_redirect_failed');
-			}
-
-			window.location.assign(checkoutUrl);
-			return;
-		} catch (error) {
-			console.error('Stripe checkout error', error);
-			const message = error instanceof Error ? error.message : 'stripe_session_failed';
-			if (message === 'unauthorized') {
-				await handleUnauthorizedSession();
-				return;
-			}
-			showToaster('error', checkoutT('orderCreateFail') + ` (${message})`);
-		} finally {
-			setIsStripeRedirecting(false);
-		}
-	};
-
 	return (
 		<Flex direction='column' gapY='3' w='100%' gap={2} p={{ base: 0, lg: 4 }}>
-			<Heading as='h3' mt='4' size='2xl' fontWeight='medium' textAlign='center'>
+			<Heading as='h3' mt='4' size='xl' fontWeight='medium' textAlign='center'>
 				{t('yourOrder')}
 			</Heading>
 			<Separator my='2' color='border' />
@@ -255,18 +179,13 @@ export default function OrderInfo({
 			</Box>
 
 			<VStack mt='4' alignItems='flex-start' hideBelow='lg'>
-				<Text fontWeight='semibold'>{productsLabel}</Text>
-				<Text fontWeight='semibold'>{`${t('orderSum')}: ${orderSumText}`}</Text>
+				<Text fontSize='15px'>{productsLabel}</Text>
+				<Text fontSize='15px'>{`${t('orderSum')}: ${orderSumText}`}</Text>
 
 				{discountTotal > 0 ? (
 					<Text>
 						{`${t('discountSum')}: `}
-						<Badge
-							variant='solid'
-							color='black'
-							bg='main.secondary'
-							fontWeight='semibold'
-						>
+						<Badge variant='solid' color='black' bg='main.secondary' fontSize='15px'>
 							{discountText}
 						</Badge>
 					</Text>
@@ -274,12 +193,7 @@ export default function OrderInfo({
 				{couponDiscount > 0 ? (
 					<Text>
 						{`${checkoutT('couponLine')}: `}
-						<Badge
-							variant='solid'
-							color='black'
-							bg='main.secondary'
-							fontWeight='semibold'
-						>
+						<Badge variant='solid' color='black' bg='main.secondary' fontSize='15px'>
 							{couponText}
 						</Badge>
 					</Text>
@@ -287,12 +201,7 @@ export default function OrderInfo({
 				{couponDiscount > 0 ? (
 					<Text>
 						{`${t('totalDiscount')}: `}
-						<Badge
-							variant='solid'
-							color='black'
-							bg='main.secondary'
-							fontWeight='semibold'
-						>
+						<Badge variant='solid' color='black' bg='main.secondary' fontSize='15px'>
 							{totalDiscountText}
 						</Badge>
 					</Text>
@@ -300,7 +209,7 @@ export default function OrderInfo({
 				<Separator w='full' mt='2' color='border' />
 				<Stat.Root mt='2'>
 					<Stat.Label fontSize={{ base: 'md', md: 'sm' }}>{t('totalAmount')}</Stat.Label>
-					<Stat.ValueText fontSize='3xl'>{totalAmountText}</Stat.ValueText>
+					<Stat.ValueText fontSize='2xl'>{totalAmountText}</Stat.ValueText>
 				</Stat.Root>
 				<Box mt='4' w='full'>
 					<CheckoutConsents forms={storefrontForms} />
@@ -334,7 +243,7 @@ export default function OrderInfo({
 				<VStack alignItems='flex-start' order={{ base: 2, sm: 1 }} gapY='6'>
 					<Stat.Root mt={{ base: 2, sm: 0 }}>
 						<Stat.Label fontSize={{ base: 'md', md: 'sm' }}>{t('totalAmount')}</Stat.Label>
-						<Stat.ValueText fontSize='3xl'>{totalAmountText}</Stat.ValueText>
+						<Stat.ValueText fontSize='2xl'>{totalAmountText}</Stat.ValueText>
 					</Stat.Root>
 
 					<AcceptOrderBtn
@@ -362,12 +271,7 @@ export default function OrderInfo({
 					{discountTotal > 0 ? (
 						<Text>
 							{`${t('discountSum')}: `}
-							<Badge
-								variant='solid'
-								color='black'
-								bg='main.secondary'
-								fontWeight='semibold'
-							>
+							<Badge variant='solid' color='black' bg='main.secondary' fontWeight='semibold'>
 								{discountText}
 							</Badge>
 						</Text>
@@ -375,12 +279,7 @@ export default function OrderInfo({
 					{couponDiscount > 0 ? (
 						<Text>
 							{`${checkoutT('couponLine')}: `}
-							<Badge
-								variant='solid'
-								color='black'
-								bg='main.secondary'
-								fontWeight='semibold'
-							>
+							<Badge variant='solid' color='black' bg='main.secondary' fontWeight='semibold'>
 								{couponText}
 							</Badge>
 						</Text>
@@ -388,12 +287,7 @@ export default function OrderInfo({
 					{couponDiscount > 0 ? (
 						<Text>
 							{`${t('totalDiscount')}: `}
-							<Badge
-								variant='solid'
-								color='black'
-								bg='main.secondary'
-								fontWeight='semibold'
-							>
+							<Badge variant='solid' color='black' bg='main.secondary' fontWeight='semibold'>
 								{totalDiscountText}
 							</Badge>
 						</Text>

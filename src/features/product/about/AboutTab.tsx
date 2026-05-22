@@ -96,10 +96,10 @@ export default function AboutTab({
 		selectedVariant?.discountPrice != null
 			? roundPrice(selectedVariant.discountPrice)
 			: selectedVariant
-			? null
-			: product.discountPrice != null
-			? roundPrice(product.discountPrice)
-			: null;
+				? null
+				: product.discountPrice != null
+					? roundPrice(product.discountPrice)
+					: null;
 	const unitEffectivePrice = unitDiscountPrice ?? unitBasePrice;
 	const discount =
 		unitDiscountPrice != null ? roundPrice(Math.max(0, unitBasePrice - unitDiscountPrice)) : 0;
@@ -205,7 +205,7 @@ export default function AboutTab({
 							</LocaleNavButton>
 						)}
 
-						<Box as='span' fontSize='3xl' fontWeight='semibold'>
+						<Box as='span' fontSize='2xl' fontWeight='semibold'>
 							{formatUsdPrice(unitEffectivePrice)}
 							{discount > 0 && (
 								<Badge colorPalette='gray'>

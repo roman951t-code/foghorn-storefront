@@ -18,7 +18,11 @@ type ProductPreviewSliderProps = {
 	onActiveIndexChange?: (index: number) => void;
 };
 
-function ProductPreviewSwiper({ images, productName, onActiveIndexChange }: ProductPreviewSliderProps) {
+function ProductPreviewSwiper({
+	images,
+	productName,
+	onActiveIndexChange,
+}: ProductPreviewSliderProps) {
 	const normalizedImages = images.filter((src): src is string => src.trim().length > 0);
 	const baseImages = normalizedImages.length
 		? normalizedImages
@@ -51,6 +55,7 @@ function ProductPreviewSwiper({ images, productName, onActiveIndexChange }: Prod
 			loop
 			modules={[Navigation]}
 			className='productPreviewSwiper'
+			style={{ width: '100%', height: '100%' }}
 			onSwiper={(swiper) => onActiveIndexChange?.(swiper.realIndex ?? 0)}
 			onSlideChange={(swiper) => onActiveIndexChange?.(swiper.realIndex ?? 0)}
 		>
@@ -68,23 +73,26 @@ function ProductPreviewSwiper({ images, productName, onActiveIndexChange }: Prod
 							border='none'
 							borderRadius='sm'
 							overflow='hidden'
-							display='inline-block'
+							display='block'
+							w='full'
+							h='full'
+							bg='white'
 						>
 							<Image
 								loading='eager'
 								src={resolvedSrc}
-								width={120}
-								height={120}
+								width={240}
+								height={220}
 								alt={altText}
 								onError={markImageFailed(i)}
 								priority={i === 0}
 								fetchPriority='high'
 								style={{
-									width: '160px',
-									height: '150px',
-									objectFit: 'cover',
+									width: '100%',
+									height: '100%',
+									objectFit: 'contain',
 								}}
-								sizes='(max-width: 768px) 35vw, 120px'
+								sizes='(max-width: 560px) 60vw, (max-width: 800px) 32vw, (max-width: 1080px) 22vw, (max-width: 1360px) 160px, 148px'
 							/>
 						</Box>
 					</SwiperSlide>
@@ -105,7 +113,13 @@ export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 	const altText = props.productName ? `${props.productName} photo` : 'Product photo';
 
 	return (
-		<Box position='relative' w='160px' h='149px' display='block' mx='auto'>
+		<Box
+			position='relative'
+			w={{ base: 'min(60vw, 196px)', sm: '164px', md: '156px', xl: '148px' }}
+			aspectRatio='1 / 1'
+			display='block'
+			mx='auto'
+		>
 			<Box
 				as='div'
 				_focusVisible={{
@@ -119,22 +133,25 @@ export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 				borderRadius='sm'
 				overflow='hidden'
 				display='block'
+				w='full'
+				h='full'
+				bg='white'
 				aria-hidden='true'
 			>
 				<Image
 					src={firstPreview}
-					width={120}
-					height={120}
+					width={240}
+					height={220}
 					alt={altText}
 					priority
 					loading='eager'
 					fetchPriority='high'
 					style={{
-						width: '160px',
-						height: '147px',
-						objectFit: 'cover',
+						width: '100%',
+						height: '100%',
+						objectFit: 'contain',
 					}}
-					sizes='(max-width: 768px) 35vw, 120px'
+					sizes='(max-width: 560px) 60vw, (max-width: 800px) 32vw, (max-width: 1080px) 22vw, (max-width: 1360px) 160px, 148px'
 				/>
 			</Box>
 			<Box position='absolute' inset='0' zIndex={1}>

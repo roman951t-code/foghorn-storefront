@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import type { CatalogCategory, SubcategoryProduct } from '@/types/product';
-import type { CartData } from '@/types/cart';
+import type { CartData, CartProduct } from '@/types/cart';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishListStore } from '@/stores/wishListStore';
@@ -48,6 +48,38 @@ export function AppStoreHydrator({
 	const resolvedIsLoggedIn = sessionContext ? !!currentUserId : isLoggedIn;
 	const prevUserIdRef = useRef<string | null>(currentUserId);
 
+	const fetchServerCart = useCallback(async () => {
+		try {
+			const res = await fetch('/api/cart', { cache: 'no-store' });
+			if (!res.ok) return;
+			const data = (await res.json()) as { success?: boolean; items?: CartProduct[] };
+			if (data?.success && Array.isArray(data.items)) {
+				setCartInitial(
+					{ items: data.items },
+					data.items.map((item) => item.productId),
+				);
+			}
+		} catch {
+			// Keep the last known cart state when private hydration fails.
+		}
+	}, [setCartInitial]);
+
+	const fetchServerWish = useCallback(async () => {
+		try {
+			const res = await fetch('/api/products/wishlist', { cache: 'no-store' });
+			if (!res.ok) return;
+			const data = (await res.json()) as { success?: boolean; items?: SubcategoryProduct[] };
+			if (data?.success && Array.isArray(data.items)) {
+				setWishInitial(
+					data.items,
+					data.items.map((item) => item.id),
+				);
+			}
+		} catch {
+			// Keep the last known wishlist state when private hydration fails.
+		}
+	}, [setWishInitial]);
+
 	// Catalog
 	useEffect(() => {
 		setCategories(categories);
@@ -55,7 +87,7 @@ export function AppStoreHydrator({
 
 	// Cart init + login flag
 	useLayoutEffect(() => {
-		const ids = cartProductIds?.success ? cartProductIds.productIds ?? [] : [];
+		const ids = cartProductIds?.success ? (cartProductIds.productIds ?? []) : [];
 		setCartInitial(cartData, ids);
 	}, [cartData, cartProductIds, setCartInitial]);
 
@@ -65,7 +97,7 @@ export function AppStoreHydrator({
 
 	// Wishlist init + login flag
 	useLayoutEffect(() => {
-		const ids = wishListIds?.success ? wishListIds.productIds ?? [] : [];
+		const ids = wishListIds?.success ? (wishListIds.productIds ?? []) : [];
 		setWishInitial(wishListData, ids);
 	}, [setWishInitial, wishListData, wishListIds]);
 
@@ -82,7 +114,7 @@ export function AppStoreHydrator({
 			window.history.replaceState(
 				{},
 				'',
-				url.pathname + (url.search ? `?${url.searchParams.toString()}` : '')
+				url.pathname + (url.search ? `?${url.searchParams.toString()}` : ''),
 			);
 		}
 	}, [resolvedIsLoggedIn]);
@@ -97,54 +129,42 @@ export function AppStoreHydrator({
 				hydrateGuestCart();
 				hydrateGuestWish();
 			} else {
-				mergeGuestCart();
-				mergeGuestWish();
+				void Promise.all([mergeGuestCart(), mergeGuestWish()]).then(() =>
+					Promise.all([fetchServerCart(), fetchServerWish()]),
+				);
 			}
 			prevLoggedInRef.current = resolvedIsLoggedIn;
 			return;
 		}
 
 		if (!wasLogged && resolvedIsLoggedIn) {
-			mergeGuestCart();
-			mergeGuestWish();
+			void Promise.all([mergeGuestCart(), mergeGuestWish()])
+				.then(() => Promise.all([fetchServerCart(), fetchServerWish()]))
+				.then(() => {
+					router.refresh();
+				});
 		} else if (wasLogged && !resolvedIsLoggedIn) {
 			hydrateGuestCart();
 			hydrateGuestWish();
 		}
 
 		prevLoggedInRef.current = resolvedIsLoggedIn;
-	}, [hydrateGuestCart, hydrateGuestWish, mergeGuestCart, mergeGuestWish, resolvedIsLoggedIn]);
+	}, [
+		hydrateGuestCart,
+		hydrateGuestWish,
+		fetchServerCart,
+		fetchServerWish,
+		mergeGuestCart,
+		mergeGuestWish,
+		resolvedIsLoggedIn,
+		router,
+	]);
 
 	// Handle user switching: fetch fresh cart/wishlist per user
 	useEffect(() => {
 		const prevUserId = prevUserIdRef.current;
 
-		const fetchServerCart = async () => {
-			try {
-				const res = await fetch('/api/cart', { cache: 'no-store' });
-				if (!res.ok) return;
-				const data = await res.json();
-				if (data?.success && Array.isArray(data.items)) {
-					setCartInitial({ items: data.items }, data.items.map((item: any) => item.productId));
-				}
-			} catch {
-				// noop
-			}
-		};
-		const fetchServerWish = async () => {
-			try {
-				const res = await fetch('/api/products/wishlist', { cache: 'no-store' });
-				if (!res.ok) return;
-				const data = await res.json();
-				if (data?.success && Array.isArray(data.items)) {
-					setWishInitial(data.items, data.items.map((item: any) => item.id));
-				}
-			} catch {
-				// noop
-			}
-		};
-
-		if (currentUserId && currentUserId !== prevUserId) {
+		if (currentUserId && currentUserId !== prevUserId && prevUserId !== null) {
 			setCartLoggedIn(true);
 			setWishLoggedIn(true);
 			fetchServerCart();
@@ -162,12 +182,12 @@ export function AppStoreHydrator({
 		prevUserIdRef.current = currentUserId;
 	}, [
 		currentUserId,
+		fetchServerCart,
+		fetchServerWish,
 		hydrateGuestCart,
 		hydrateGuestWish,
 		router,
-		setCartInitial,
 		setCartLoggedIn,
-		setWishInitial,
 		setWishLoggedIn,
 	]);
 

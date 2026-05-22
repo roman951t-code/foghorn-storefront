@@ -112,12 +112,13 @@ export default function UserShow(props: ActionProps) {
 		if (!recordId) return;
 		let isActive = true;
 		setLoading(true);
-		api.recordAction({
-			resourceId: resource.id,
-			recordId,
-			actionName: 'userKpis',
-			method: 'get',
-		})
+		api
+			.recordAction({
+				resourceId: resource.id,
+				recordId,
+				actionName: 'userKpis',
+				method: 'get',
+			})
 			.then((response) => {
 				if (!isActive) return;
 				setPayload((response.data.payload ?? null) as UserKpisPayload | null);
@@ -135,12 +136,13 @@ export default function UserShow(props: ActionProps) {
 		if (!recordId) return;
 		let isActive = true;
 		setRelatedLoading(true);
-		api.recordAction({
-			resourceId: resource.id,
-			recordId,
-			actionName: 'userRelatedData',
-			method: 'get',
-		})
+		api
+			.recordAction({
+				resourceId: resource.id,
+				recordId,
+				actionName: 'userRelatedData',
+				method: 'get',
+			})
 			.then((response) => {
 				if (!isActive) return;
 				setRelated((response.data.payload ?? null) as UserRelatedPayload | null);
@@ -162,12 +164,13 @@ export default function UserShow(props: ActionProps) {
 		if (!recordId) return;
 		let isActive = true;
 		setSessionsLoading(true);
-		api.recordAction({
-			resourceId: resource.id,
-			recordId,
-			actionName: 'userSessions',
-			method: 'get',
-		})
+		api
+			.recordAction({
+				resourceId: resource.id,
+				recordId,
+				actionName: 'userSessions',
+				method: 'get',
+			})
 			.then((response) => {
 				if (!isActive) return;
 				setSessions((response.data.payload?.sessions ?? []) as UserSessionEntry[]);
@@ -192,19 +195,21 @@ export default function UserShow(props: ActionProps) {
 			{ value: 'SUSPENDED', label: translateMessage('user-status-suspended') },
 			{ value: 'BLOCKED', label: translateMessage('user-status-blocked') },
 		],
-		[translateMessage]
+		[translateMessage],
 	);
 	const selectedStatusOption =
 		statusOptions.find((option) => option.value === adminStatus) ?? statusOptions[0] ?? null;
+	const lastOrderDate = payload?.lastOrderDate;
 
 	const lastOrderText = useMemo(() => {
-		if (!payload?.lastOrderDate) return '-';
-		const parsed = Date.parse(payload.lastOrderDate);
-		return Number.isNaN(parsed) ? payload.lastOrderDate : new Date(parsed).toLocaleString();
-	}, [payload?.lastOrderDate]);
+		if (!lastOrderDate) return '-';
+		const parsed = Date.parse(lastOrderDate);
+		return Number.isNaN(parsed) ? lastOrderDate : new Date(parsed).toLocaleString();
+	}, [lastOrderDate]);
 
 	const isDirty = useMemo(() => {
-		const baseStatus = (localRecord?.params?.adminStatus as UserAdminStatus | undefined) ?? 'ACTIVE';
+		const baseStatus =
+			(localRecord?.params?.adminStatus as UserAdminStatus | undefined) ?? 'ACTIVE';
 		const baseNotes = (localRecord?.params?.adminNotes as string | undefined) ?? '';
 		return adminStatus !== baseStatus || adminNotes !== baseNotes;
 	}, [adminStatus, adminNotes, localRecord?.params?.adminNotes, localRecord?.params?.adminStatus]);
@@ -229,7 +234,7 @@ export default function UserShow(props: ActionProps) {
 			if (response.data.record) {
 				setLocalRecord(response.data.record);
 				setAdminStatus(
-					((response.data.record?.params?.adminStatus as UserAdminStatus | undefined) ?? 'ACTIVE')
+					(response.data.record?.params?.adminStatus as UserAdminStatus | undefined) ?? 'ACTIVE',
 				);
 				setAdminNotes((response.data.record?.params?.adminNotes as string | undefined) ?? '');
 			}
@@ -257,7 +262,9 @@ export default function UserShow(props: ActionProps) {
 				addNotice(response.data.notice);
 			}
 			if (response.data.notice?.type === 'success') {
-				setSessions((current) => (current ? current.filter((session) => session.id !== sessionId) : current));
+				setSessions((current) =>
+					current ? current.filter((session) => session.id !== sessionId) : current,
+				);
 			}
 		} catch {
 			addNotice({ message: 'session-revoke-failed', type: 'error' });
@@ -280,7 +287,13 @@ export default function UserShow(props: ActionProps) {
 					{translateMessage('customer-flags')}
 				</Text>
 
-				<Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+				<Box
+					style={{
+						display: 'grid',
+						gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+						gap: 16,
+					}}
+				>
 					<Box style={{ padding: 14, borderRadius: 12, border: '1px solid #E2E8F0' }}>
 						<Text color='grey60' mb='sm'>
 							{translateMessage('customer-status')}
@@ -331,7 +344,9 @@ export default function UserShow(props: ActionProps) {
 						onClick={handleSaveMeta}
 						disabled={isReadOnly || !isDirty || savingMeta}
 					>
-						{savingMeta ? translateMessage('customer-flags-saving') : translateMessage('customer-flags-save')}
+						{savingMeta
+							? translateMessage('customer-flags-saving')
+							: translateMessage('customer-flags-save')}
 					</Button>
 				</Box>
 			</Box>
@@ -418,7 +433,9 @@ export default function UserShow(props: ActionProps) {
 				className='admin-card--kpis'
 				style={{ border: '1px solid #E2E8F0' }}
 			>
-				<Text fontWeight='bold' mb='lg'>{translateMessage('customer-kpis')}</Text>
+				<Text fontWeight='bold' mb='lg'>
+					{translateMessage('customer-kpis')}
+				</Text>
 				{loading || !payload ? (
 					<Text color='grey60'>{translateMessage('customer-kpis-loading')}</Text>
 				) : (
@@ -430,27 +447,19 @@ export default function UserShow(props: ActionProps) {
 						}}
 					>
 						<Box style={{ padding: 14, borderRadius: 12, border: '1px solid #E2E8F0' }}>
-							<Text color='grey60'>
-								{translateMessage('customer-kpis-total-orders')}
-							</Text>
+							<Text color='grey60'>{translateMessage('customer-kpis-total-orders')}</Text>
 							<Text fontWeight='bold'>{payload.totalOrders}</Text>
 						</Box>
 						<Box style={{ padding: 14, borderRadius: 12, border: '1px solid #E2E8F0' }}>
-							<Text color='grey60'>
-								{translateMessage('customer-kpis-ltv')}
-							</Text>
+							<Text color='grey60'>{translateMessage('customer-kpis-ltv')}</Text>
 							<Text fontWeight='bold'>{formatMoney(payload.lifetimeValue)}</Text>
 						</Box>
 						<Box style={{ padding: 14, borderRadius: 12, border: '1px solid #E2E8F0' }}>
-							<Text color='grey60'>
-								{translateMessage('customer-kpis-aov')}
-							</Text>
+							<Text color='grey60'>{translateMessage('customer-kpis-aov')}</Text>
 							<Text fontWeight='bold'>{formatMoney(payload.averageOrderValue)}</Text>
 						</Box>
 						<Box style={{ padding: 14, borderRadius: 12, border: '1px solid #E2E8F0' }}>
-							<Text color='grey60'>
-								{translateMessage('customer-kpis-last-order')}
-							</Text>
+							<Text color='grey60'>{translateMessage('customer-kpis-last-order')}</Text>
 							<Text fontWeight='bold'>{lastOrderText}</Text>
 						</Box>
 					</Box>
@@ -490,7 +499,10 @@ export default function UserShow(props: ActionProps) {
 										{related.orders.map((order) => (
 											<TableRow key={order.id}>
 												<TableCell>
-													<a href={buildRecordShowHref('Order', order.id)} style={{ fontWeight: 600 }}>
+													<a
+														href={buildRecordShowHref('Order', order.id)}
+														style={{ fontWeight: 600 }}
+													>
 														{order.id}
 													</a>
 												</TableCell>
@@ -543,7 +555,12 @@ export default function UserShow(props: ActionProps) {
 																	src={review.productImageUrl}
 																	alt={review.productName}
 																	loading='lazy'
-																	style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+																	style={{
+																		width: '100%',
+																		height: '100%',
+																		objectFit: 'cover',
+																		display: 'block',
+																	}}
 																/>
 															) : (
 																<Text fontWeight='bold' color='grey60'>
@@ -551,7 +568,10 @@ export default function UserShow(props: ActionProps) {
 																</Text>
 															)}
 														</Box>
-														<a href={buildRecordShowHref('Product', review.productId)} style={{ fontWeight: 600 }}>
+														<a
+															href={buildRecordShowHref('Product', review.productId)}
+															style={{ fontWeight: 600 }}
+														>
 															{review.productName}
 														</a>
 													</Box>
@@ -595,7 +615,10 @@ export default function UserShow(props: ActionProps) {
 										{related.wishlist.map((item) => (
 											<TableRow key={`${item.productId}:${item.createdAt}`}>
 												<TableCell>
-													<a href={buildRecordShowHref('Product', item.productId)} style={{ fontWeight: 600 }}>
+													<a
+														href={buildRecordShowHref('Product', item.productId)}
+														style={{ fontWeight: 600 }}
+													>
 														{item.productName}
 													</a>
 												</TableCell>
@@ -625,7 +648,10 @@ export default function UserShow(props: ActionProps) {
 										{related.recentlyViewed.map((item) => (
 											<TableRow key={`${item.productId}:${item.createdAt}`}>
 												<TableCell>
-													<a href={buildRecordShowHref('Product', item.productId)} style={{ fontWeight: 600 }}>
+													<a
+														href={buildRecordShowHref('Product', item.productId)}
+														style={{ fontWeight: 600 }}
+													>
 														{item.productName}
 													</a>
 												</TableCell>

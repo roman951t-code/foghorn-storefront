@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 			{
 				status: 429,
 				headers: { 'Retry-After': String(rate.retryAfterSeconds) },
-			}
+			},
 		);
 	}
 
@@ -94,7 +94,10 @@ export async function GET(req: Request) {
 			category: p.category.parent?.slug || '',
 			subcategory: p.category.slug,
 			categoryName:
-				productTranslation?.categoryName ?? categoryTranslation?.name ?? p.category.parent?.name ?? '',
+				productTranslation?.categoryName ??
+				categoryTranslation?.name ??
+				p.category.parent?.name ??
+				'',
 			subcategoryName:
 				productTranslation?.subcategoryName ?? subcategoryTranslation?.name ?? p.category.name,
 		};

@@ -15,6 +15,7 @@ import { LocaleParams } from '@/types/routing';
 import { getPromoCards } from '@/actions/content/getPromoCards';
 import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
 
+// Route intent: public cache-first storefront; keep per-user data in client/no-store islands.
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
 	const { locale } = await params;
 	return getLocalizedMetadata(locale, 'main', { pathname: '/' });

@@ -5,6 +5,12 @@ import session from 'express-session';
 import admin from './admin.mts';
 import { createAdminSessionStore } from './pg-session-store.mts';
 import { prisma } from './prisma.mts';
+import {
+	getAdminApiActionNameFromPath,
+	getAdminApiContextFromPath,
+	normalizeAdminApiNoticeResponse,
+} from './server/admin-api-routing.mts';
+import { createFixedWindowRateLimiter } from './server/fixed-window-rate-limiter.mts';
 import { verifyServerFetchUrl } from './utils/server-fetch-safety.mts';
 
 const adminEmail = process.env.ADMINJS_EMAIL;
@@ -37,27 +43,27 @@ const parseBoolean = (value: string | undefined, fallback: boolean) => {
 const sessionTtlSeconds = parsePositiveInt(process.env.ADMINJS_SESSION_TTL_SECONDS, 60 * 60 * 24);
 const sessionCleanupIntervalSeconds = parsePositiveInt(
 	process.env.ADMINJS_SESSION_CLEANUP_INTERVAL_SECONDS,
-	60 * 15
+	60 * 15,
 );
 const sessionTable = process.env.ADMINJS_SESSION_TABLE ?? 'admin_session';
 const loginMaxRetries = parsePositiveInt(process.env.ADMINJS_LOGIN_MAX_RETRIES, 8);
 const loginRetryWindowSeconds = parsePositiveInt(
 	process.env.ADMINJS_LOGIN_RETRY_WINDOW_SECONDS,
-	60 * 10
+	60 * 10,
 );
 const adminThumbRateLimitPerMinute = parsePositiveInt(
 	process.env.ADMIN_THUMBNAIL_RATE_LIMIT_PER_MINUTE,
-	90
+	90,
 );
 const allowedAdminIps = new Set(
 	(process.env.ADMINJS_ALLOWED_IPS ?? '')
 		.split(',')
 		.map((value) => value.trim())
-		.filter(Boolean)
+		.filter(Boolean),
 );
 const requireActiveAdminUser = parseBoolean(
 	process.env.ADMINJS_REQUIRE_ACTIVE_USER,
-	nodeEnv === 'production'
+	nodeEnv === 'production',
 );
 const adminPort = Number(process.env.ADMINJS_PORT ?? process.env.PORT ?? 3001);
 const adminCookieName = nodeEnv === 'production' ? '__Host-adminjs' : 'adminjs';
@@ -85,15 +91,15 @@ const normalizeAllowedOriginHost = (value: string): string | null => {
 
 const adminCspMode = parseAdminCspMode(
 	process.env.ADMIN_CSP_MODE,
-	nodeEnv === 'production' ? 'enforce' : 'off'
+	nodeEnv === 'production' ? 'enforce' : 'off',
 );
 const adminApiReadRateLimitPerMinute = parsePositiveInt(
 	process.env.ADMIN_API_READ_RATE_LIMIT_PER_MINUTE,
-	180
+	180,
 );
 const adminApiMutationRateLimitPerMinute = parsePositiveInt(
 	process.env.ADMIN_API_MUTATION_RATE_LIMIT_PER_MINUTE,
-	90
+	90,
 );
 const adminApiRateLimitWindowMs =
 	parsePositiveInt(process.env.ADMIN_API_RATE_LIMIT_WINDOW_SECONDS, 60) * 1000;
@@ -147,50 +153,21 @@ const adminAllowedOriginHosts = new Set<string>([
 		.filter((origin): origin is string => Boolean(origin)),
 ]);
 
-type AdminThumbRateState = {
-	count: number;
-	resetAt: number;
-};
-type AdminApiRateState = {
-	count: number;
-	resetAt: number;
-};
-const adminThumbRateBuckets = new Map<string, AdminThumbRateState>();
-const adminApiRateBuckets = new Map<string, AdminApiRateState>();
 const ADMIN_THUMB_RATE_LIMIT_WINDOW_MS = 60_000;
 const ADMIN_THUMB_BUCKET_CLEANUP_INTERVAL_MS = 60_000;
 const ADMIN_THUMB_MAX_FALLBACK_BUCKETS = 8_000;
 const ADMIN_API_BUCKET_CLEANUP_INTERVAL_MS = 60_000;
 const ADMIN_API_MAX_FALLBACK_BUCKETS = 12_000;
-let adminThumbCleanupTimer: ReturnType<typeof setInterval> | null = null;
-let adminApiCleanupTimer: ReturnType<typeof setInterval> | null = null;
-
-const pruneExpiredAdminThumbBuckets = (now = Date.now()) => {
-	for (const [bucketKey, state] of adminThumbRateBuckets) {
-		if (now >= state.resetAt) {
-			adminThumbRateBuckets.delete(bucketKey);
-		}
-	}
-};
-
-const trimOldestAdminThumbBuckets = (maxEntries: number) => {
-	if (adminThumbRateBuckets.size <= maxEntries) return;
-	const overflow = adminThumbRateBuckets.size - maxEntries;
-	for (let i = 0; i < overflow; i += 1) {
-		const oldestKey = adminThumbRateBuckets.keys().next().value as string | undefined;
-		if (!oldestKey) break;
-		adminThumbRateBuckets.delete(oldestKey);
-	}
-};
-
-const ensureAdminThumbCleanupLoop = () => {
-	if (adminThumbCleanupTimer) return;
-	adminThumbCleanupTimer = setInterval(() => {
-		pruneExpiredAdminThumbBuckets();
-		trimOldestAdminThumbBuckets(ADMIN_THUMB_MAX_FALLBACK_BUCKETS);
-	}, ADMIN_THUMB_BUCKET_CLEANUP_INTERVAL_MS);
-	(adminThumbCleanupTimer as { unref?: () => void }).unref?.();
-};
+const adminThumbRateLimiter = createFixedWindowRateLimiter({
+	windowMs: ADMIN_THUMB_RATE_LIMIT_WINDOW_MS,
+	cleanupIntervalMs: ADMIN_THUMB_BUCKET_CLEANUP_INTERVAL_MS,
+	maxBuckets: ADMIN_THUMB_MAX_FALLBACK_BUCKETS,
+});
+const adminApiRateLimiter = createFixedWindowRateLimiter({
+	windowMs: adminApiRateLimitWindowMs,
+	cleanupIntervalMs: ADMIN_API_BUCKET_CLEANUP_INTERVAL_MS,
+	maxBuckets: ADMIN_API_MAX_FALLBACK_BUCKETS,
+});
 
 const normalizeIp = (value: string) => {
 	const trimmed = value.trim();
@@ -230,83 +207,12 @@ const hasStrongSecret = (value: string, minLength: number) => {
 	return !WEAK_SECRET_VALUES.has(normalized.toLowerCase());
 };
 
-const checkAdminThumbRateLimit = (key: string) => {
-	const now = Date.now();
-	pruneExpiredAdminThumbBuckets(now);
-	trimOldestAdminThumbBuckets(ADMIN_THUMB_MAX_FALLBACK_BUCKETS);
-	const existing = adminThumbRateBuckets.get(key);
-	if (!existing || now >= existing.resetAt) {
-		adminThumbRateBuckets.set(key, {
-			count: 1,
-			resetAt: now + ADMIN_THUMB_RATE_LIMIT_WINDOW_MS,
-		});
-		return { allowed: true as const };
-	}
-	if (existing.count >= adminThumbRateLimitPerMinute) {
-		return {
-			allowed: false as const,
-			retryAfterSeconds: Math.max(1, Math.ceil((existing.resetAt - now) / 1000)),
-		};
-	}
-	existing.count += 1;
-	return { allowed: true as const };
-};
-
-const pruneExpiredAdminApiBuckets = (now = Date.now()) => {
-	for (const [bucketKey, state] of adminApiRateBuckets) {
-		if (now >= state.resetAt) {
-			adminApiRateBuckets.delete(bucketKey);
-		}
-	}
-};
-
-const trimOldestAdminApiBuckets = (maxEntries: number) => {
-	if (adminApiRateBuckets.size <= maxEntries) return;
-	const overflow = adminApiRateBuckets.size - maxEntries;
-	for (let i = 0; i < overflow; i += 1) {
-		const oldestKey = adminApiRateBuckets.keys().next().value as string | undefined;
-		if (!oldestKey) break;
-		adminApiRateBuckets.delete(oldestKey);
-	}
-};
-
-const ensureAdminApiCleanupLoop = () => {
-	if (adminApiCleanupTimer) return;
-	adminApiCleanupTimer = setInterval(() => {
-		pruneExpiredAdminApiBuckets();
-		trimOldestAdminApiBuckets(ADMIN_API_MAX_FALLBACK_BUCKETS);
-	}, ADMIN_API_BUCKET_CLEANUP_INTERVAL_MS);
-	(adminApiCleanupTimer as { unref?: () => void }).unref?.();
-};
-
-const checkAdminApiRateLimit = (key: string, limit: number, windowMs: number) => {
-	const now = Date.now();
-	pruneExpiredAdminApiBuckets(now);
-	trimOldestAdminApiBuckets(ADMIN_API_MAX_FALLBACK_BUCKETS);
-	const existing = adminApiRateBuckets.get(key);
-	if (!existing || now >= existing.resetAt) {
-		adminApiRateBuckets.set(key, {
-			count: 1,
-			resetAt: now + windowMs,
-		});
-		return { allowed: true as const };
-	}
-	if (existing.count >= limit) {
-		return {
-			allowed: false as const,
-			retryAfterSeconds: Math.max(1, Math.ceil((existing.resetAt - now) / 1000)),
-		};
-	}
-	existing.count += 1;
-	return { allowed: true as const };
-};
-
 const resolveAdminMutationOriginHeader = (req: express.Request) =>
 	req.get('origin') ?? req.get('referer') ?? null;
 
 const resolveRequestHosts = (req: express.Request) => {
 	const hosts = new Set<string>();
-	const rawHostHeaders = [req.get('host') ?? '', req.get('x-forwarded-host') ?? ''];
+	const rawHostHeaders = [req.get('host') ?? ''];
 	for (const rawHostHeader of rawHostHeaders) {
 		for (const rawHost of rawHostHeader.split(',')) {
 			const normalizedHost = normalizeAllowedOriginHost(rawHost);
@@ -369,7 +275,7 @@ const createAdminSecurityMiddleware = async (): Promise<express.RequestHandler> 
 	try {
 		const helmetModuleName = 'helmet';
 		const helmet = (await import(helmetModuleName)).default as (
-			options?: Record<string, unknown>
+			options?: Record<string, unknown>,
 		) => express.RequestHandler;
 
 		return helmet({
@@ -387,165 +293,9 @@ const createAdminSecurityMiddleware = async (): Promise<express.RequestHandler> 
 	}
 };
 
-type AdminApiContext = {
-	resourceId?: string;
-	recordId?: string;
-};
-
-const NOTICE_RECORD_NOT_FOUND_IN_RESOURCE =
-	/^Record with given id: "([^"]+)" cannot be found in resource "([^"]+)"$/;
-const NOTICE_BULK_RECORD_NOT_FOUND_IN_RESOURCE =
-	/^record with given id: "([^"]+)" cannot be found in resource "([^"]+)"$/;
-const NOTICE_RESOURCE_NOT_FOUND = /^Resource of given id: "([^"]+)" cannot be found$/;
-const NOTICE_RESOURCE_ACTION_NOT_FOUND =
-	/^Resource of given id: "([^"]+)" does not have an action with name: "([^"]+)" or you are not authorized to use it!?$/;
-const NOTICE_RESOURCE_RECORD_NOT_FOUND =
-	/^Resource of given id: "([^"]+)" does not have a record with id: "([^"]+)" or you are not authorized to use it!?$/;
-const NOTICE_RECORD_NOT_FOUND_BY_ID_ONLY = /^Record of given id \("([^"]+)"\) could not be found$/;
-
-const safeDecodeURIComponent = (value: string) => {
-	try {
-		return decodeURIComponent(value);
-	} catch {
-		return value;
-	}
-};
-
-const getAdminApiContextFromPath = (path: string): AdminApiContext => {
-	const recordActionMatch = path.match(/^\/api\/resources\/([^/]+)\/records\/([^/]+)\/[^/]+$/);
-	if (recordActionMatch) {
-		return {
-			resourceId: safeDecodeURIComponent(recordActionMatch[1]),
-			recordId: safeDecodeURIComponent(recordActionMatch[2]),
-		};
-	}
-	const bulkActionMatch = path.match(/^\/api\/resources\/([^/]+)\/bulk\/[^/]+$/);
-	if (bulkActionMatch) {
-		return {
-			resourceId: safeDecodeURIComponent(bulkActionMatch[1]),
-		};
-	}
-	const resourceActionMatch = path.match(/^\/api\/resources\/([^/]+)\/actions\/[^/]+$/);
-	if (resourceActionMatch) {
-		return {
-			resourceId: safeDecodeURIComponent(resourceActionMatch[1]),
-		};
-	}
-	return {};
-};
-
-const getAdminApiActionNameFromPath = (path: string) => {
-	const matchResourceAction = path.match(/^\/api\/resources\/[^/]+\/actions\/([^/]+)$/);
-	const matchRecordAction = path.match(/^\/api\/resources\/[^/]+\/records\/[^/]+\/([^/]+)$/);
-	const matchBulkAction = path.match(/^\/api\/resources\/[^/]+\/bulk\/([^/]+)$/);
-	const actionName = matchResourceAction?.[1] ?? matchRecordAction?.[1] ?? matchBulkAction?.[1];
-	return actionName ? safeDecodeURIComponent(actionName) : null;
-};
-
 const isAdminApiMutationIntent = (method: string, actionName: string | null) => {
 	if (!isSafeHttpMethod(method)) return true;
 	return actionName ? MUTATING_ADMIN_ACTIONS.has(actionName) : false;
-};
-
-const replaceNoticeMessage = (
-	notice: Record<string, unknown>,
-	message: string,
-	options: Record<string, unknown> = {}
-): Record<string, unknown> => {
-	const existingOptions =
-		typeof notice.options === 'object' && notice.options !== null
-			? (notice.options as Record<string, unknown>)
-			: {};
-	const mergedOptions = { ...existingOptions, ...options };
-	return {
-		...notice,
-		message,
-		...(Object.keys(mergedOptions).length > 0 ? { options: mergedOptions } : {}),
-	};
-};
-
-const normalizeAdminNotice = (noticeValue: unknown, context: AdminApiContext): unknown => {
-	if (!noticeValue || typeof noticeValue !== 'object') return noticeValue;
-	const notice = noticeValue as Record<string, unknown>;
-	const message = typeof notice.message === 'string' ? notice.message.trim() : '';
-	if (!message) return noticeValue;
-
-	if (
-		message === 'You have to pass recordId to the recordAction' ||
-		message === 'You have to pass "recordId" to Delete Action'
-	) {
-		return replaceNoticeMessage(notice, 'admin-record-id-required');
-	}
-
-	if (message === 'You have to pass a valid recordId to the recordAction') {
-		return replaceNoticeMessage(notice, 'admin-record-id-invalid');
-	}
-
-	if (message === 'You have to pass "recordIds" to the bulkAction via search params: ?recordIds=...') {
-		return replaceNoticeMessage(notice, 'admin-record-ids-required');
-	}
-
-	if (message === 'no records were selected.') {
-		return replaceNoticeMessage(notice, 'noRecordsSelected');
-	}
-
-	let match = message.match(NOTICE_RECORD_NOT_FOUND_IN_RESOURCE);
-	if (match) {
-		return replaceNoticeMessage(notice, 'error404Record', {
-			recordId: match[1],
-			resourceId: match[2],
-		});
-	}
-
-	match = message.match(NOTICE_BULK_RECORD_NOT_FOUND_IN_RESOURCE);
-	if (match) {
-		return replaceNoticeMessage(notice, 'error404Record', {
-			recordId: match[1],
-			resourceId: match[2],
-		});
-	}
-
-	match = message.match(NOTICE_RESOURCE_NOT_FOUND);
-	if (match) {
-		return replaceNoticeMessage(notice, 'error404Resource', { resourceId: match[1] });
-	}
-
-	match = message.match(NOTICE_RESOURCE_ACTION_NOT_FOUND);
-	if (match) {
-		return replaceNoticeMessage(notice, 'error404Action', {
-			resourceId: match[1],
-			actionName: match[2],
-		});
-	}
-
-	match = message.match(NOTICE_RESOURCE_RECORD_NOT_FOUND);
-	if (match) {
-		return replaceNoticeMessage(notice, 'error404Record', {
-			resourceId: match[1],
-			recordId: match[2],
-		});
-	}
-
-	match = message.match(NOTICE_RECORD_NOT_FOUND_BY_ID_ONLY);
-	if (match) {
-		return replaceNoticeMessage(notice, 'error404Record', {
-			resourceId: context.resourceId ?? '',
-			recordId: match[1],
-		});
-	}
-
-	return noticeValue;
-};
-
-const normalizeAdminApiNoticeResponse = (payload: unknown, context: AdminApiContext): unknown => {
-	if (!payload || typeof payload !== 'object') return payload;
-	const responseBody = payload as Record<string, unknown>;
-	const normalizedNotice = normalizeAdminNotice(responseBody.notice, context);
-	if (normalizedNotice === responseBody.notice) return payload;
-	return {
-		...responseBody,
-		notice: normalizedNotice,
-	};
 };
 
 if (!adminEmail || !adminPassword || !sessionSecret || !cookiePassword || !databaseUrl) {
@@ -557,22 +307,22 @@ if (!adminEmail || !adminPassword || !sessionSecret || !cookiePassword || !datab
 if (nodeEnv === 'production') {
 	if (!hasStrongSecret(adminPassword, 12)) {
 		throw new Error(
-			'ADMINJS_PASSWORD must be a strong secret (minimum 12 characters and not a common default).'
+			'ADMINJS_PASSWORD must be a strong secret (minimum 12 characters and not a common default).',
 		);
 	}
 	if (!hasStrongSecret(sessionSecret, 24)) {
 		throw new Error(
-			'ADMINJS_SESSION_SECRET must be a strong secret (minimum 24 characters and not a common default).'
+			'ADMINJS_SESSION_SECRET must be a strong secret (minimum 24 characters and not a common default).',
 		);
 	}
 	if (explicitCookiePassword && !hasStrongSecret(explicitCookiePassword, 24)) {
 		throw new Error(
-			'ADMINJS_COOKIE_PASSWORD must be a strong secret (minimum 24 characters and not a common default).'
+			'ADMINJS_COOKIE_PASSWORD must be a strong secret (minimum 24 characters and not a common default).',
 		);
 	}
 	if (allowedAdminIps.size === 0) {
 		console.warn(
-			'[admin-security] ADMINJS_ALLOWED_IPS is not set. Consider IP allowlisting the admin panel in production.'
+			'[admin-security] ADMINJS_ALLOWED_IPS is not set. Consider IP allowlisting the admin panel in production.',
 		);
 	}
 }
@@ -622,8 +372,8 @@ const start = async () => {
 		// Required when secure cookies are used behind TLS-terminating proxies.
 		app.set('trust proxy', 1);
 	}
-	ensureAdminThumbCleanupLoop();
-	ensureAdminApiCleanupLoop();
+	adminThumbRateLimiter.ensureCleanupLoop();
+	adminApiRateLimiter.ensureCleanupLoop();
 	const sessionStore = createAdminSessionStore({
 		connectionString: databaseUrl,
 		tableName: sessionTable,
@@ -670,19 +420,20 @@ const start = async () => {
 		process.env.ADMIN_THUMBNAIL_APP_URL ??
 		(nodeEnv !== 'production'
 			? 'http://localhost:3000'
-			: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
+			: (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'));
 	const storeAppOriginUrl = new URL(storeAppUrl);
 	if (nodeEnv === 'production') {
 		const storeUrlSafety = await verifyServerFetchUrl(storeAppOriginUrl);
 		if (!storeUrlSafety.ok) {
 			throw new Error(
-				`ADMIN_THUMBNAIL_APP_URL/NEXT_PUBLIC_APP_URL is not safe for server-side fetches: ${storeUrlSafety.reason}`
+				`ADMIN_THUMBNAIL_APP_URL/NEXT_PUBLIC_APP_URL is not safe for server-side fetches: ${storeUrlSafety.reason}`,
 			);
 		}
 	}
 	const allowedThumbHosts = new Set(
 		[
 			storeAppOriginUrl.hostname,
+			'res.cloudinary.com',
 			'images.unsplash.com',
 			'loremflickr.com',
 			'picsum.photos',
@@ -691,7 +442,7 @@ const start = async () => {
 				.split(',')
 				.map((v) => v.trim())
 				.filter(Boolean),
-		].filter(Boolean)
+		].filter(Boolean),
 	);
 	const allowAnyThumbHost =
 		nodeEnv !== 'production' && process.env.ADMIN_THUMBNAIL_ALLOW_ANY_HOST === 'true';
@@ -702,7 +453,10 @@ const start = async () => {
 		if (url.protocol !== 'http:' && url.protocol !== 'https:') {
 			return false;
 		}
-		if (isConfiguredStoreUrl(url) && (url.pathname === '/_next/image' || url.pathname.startsWith('/api/'))) {
+		if (
+			isConfiguredStoreUrl(url) &&
+			(url.pathname === '/_next/image' || url.pathname.startsWith('/api/'))
+		) {
 			return false;
 		}
 		if (!allowAnyThumbHost && !allowedThumbHosts.has(url.hostname)) {
@@ -729,7 +483,7 @@ const start = async () => {
 		}
 
 		const rateKey = normalizeIp(requesterIp || 'unknown');
-		const thumbRate = checkAdminThumbRateLimit(rateKey);
+		const thumbRate = adminThumbRateLimiter.check(rateKey, adminThumbRateLimitPerMinute);
 		if (!thumbRate.allowed) {
 			res.setHeader('Retry-After', String(thumbRate.retryAfterSeconds));
 			res.status(429).send('Too Many Requests');
@@ -747,9 +501,7 @@ const start = async () => {
 
 		let targetUrl: URL;
 		try {
-			targetUrl = urlParam.startsWith('/')
-				? new URL(urlParam, storeAppUrl)
-				: new URL(urlParam);
+			targetUrl = urlParam.startsWith('/') ? new URL(urlParam, storeAppUrl) : new URL(urlParam);
 		} catch {
 			res.status(400).send('Invalid url');
 			return;
@@ -890,9 +642,11 @@ const start = async () => {
 		const requesterIp = typeof req.ip === 'string' ? req.ip : 'unknown';
 		const normalizedIp = normalizeIp(requesterIp || 'unknown');
 		const isMutation = !isSafeHttpMethod(req.method);
-		const rateLimit = isMutation ? adminApiMutationRateLimitPerMinute : adminApiReadRateLimitPerMinute;
+		const rateLimit = isMutation
+			? adminApiMutationRateLimitPerMinute
+			: adminApiReadRateLimitPerMinute;
 		const bucketKey = `admin-api:${isMutation ? 'mutation' : 'read'}:${normalizedIp}`;
-		const rate = checkAdminApiRateLimit(bucketKey, rateLimit, adminApiRateLimitWindowMs);
+		const rate = adminApiRateLimiter.check(bucketKey, rateLimit, adminApiRateLimitWindowMs);
 		if (rate.allowed) {
 			next();
 			return;
@@ -916,7 +670,11 @@ const start = async () => {
 			? isAdminApiMutationIntent(req.method, actionName)
 			: !isSafeHttpMethod(req.method);
 		if (isReadonly && isMutation && path.startsWith('/api/')) {
-			if (req.method.toUpperCase() === 'POST' && actionName && SAFE_READONLY_POST_ACTIONS.has(actionName)) {
+			if (
+				req.method.toUpperCase() === 'POST' &&
+				actionName &&
+				SAFE_READONLY_POST_ACTIONS.has(actionName)
+			) {
 				next();
 				return;
 			}

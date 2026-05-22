@@ -11,7 +11,7 @@ type CspReportEnvelope = {
 		'effective-directive'?: string;
 		'violated-directive'?: string;
 		'original-policy'?: string;
-		'referrer'?: string;
+		referrer?: string;
 		'status-code'?: number;
 		[source: string]: unknown;
 	};
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 					'Retry-After': String(rate.retryAfterSeconds),
 					'Cache-Control': 'no-store',
 				},
-			}
+			},
 		);
 	}
 

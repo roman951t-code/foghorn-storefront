@@ -36,7 +36,7 @@ export default function Filters({ filters }: Props) {
 
 			router.push(`?${params.toString()}`, { scroll: false });
 		},
-		[router, searchParams]
+		[router, searchParams],
 	);
 
 	if (!filters || filters.length === 0) {
@@ -78,18 +78,18 @@ export default function Filters({ filters }: Props) {
 								py={3}
 								bg='bg.tertiary'
 								fontWeight='semibold'
-								fontSize={{ base: 'md', md: '15px' }}
+								fontSize={{ base: 'md', md: 'sm' }}
 								transition='all 0.15s ease-in-out'
 								_hover={{ bg: 'bgHover.promoCard' }}
 							>
 								<HStack justify='space-between' w='full' minW={0}>
-									<Text lineClamp={1} fontSize={{ base: 'md', md: '15px' }}>
+									<Text lineClamp={1} fontSize={{ base: 'md', md: 'sm' }}>
 										{filterLabelWithUnit}
 									</Text>
 									{selectedCount > 0 ? (
 										<CountPill
 											value={selectedCount}
-											labelProps={{ fontSize: { base: 'md', md: '15px' } }}
+											labelProps={{ fontSize: { base: 'md', md: 'sm' } }}
 										/>
 									) : null}
 								</HStack>
@@ -116,7 +116,7 @@ export default function Filters({ filters }: Props) {
 													borderColor='border'
 													transition='all 0.15s ease-in-out'
 													_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-													fontSize={{ base: 'md', md: '15px' }}
+													fontSize={{ base: 'md', md: 'sm' }}
 													whiteSpace='normal'
 													wordBreak='break-word'
 												>
@@ -127,8 +127,8 @@ export default function Filters({ filters }: Props) {
 									</CheckboxGroup>
 								</Fieldset.Root>
 							</AccordionItemContent>
-							</AccordionItem>
-						);
+						</AccordionItem>
+					);
 				})}
 			</AccordionRoot>
 		</Box>

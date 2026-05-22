@@ -3,8 +3,6 @@
 import 'server-only';
 
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/lib/auth';
-import { decryptPassword } from '@/lib/crypto';
 import { getTranslations } from 'next-intl/server';
 import { checkRateLimit } from '@/lib/rateLimit';
 import {
@@ -60,18 +58,17 @@ export async function verifyEmailRegisterOtpAction(email: string, code: string) 
 	}
 
 	try {
-		const decryptedPassword = decryptPassword(record.password);
-
-		const user = await auth.api.signUpEmail({
-			body: {
-				email: record.email,
-				password: decryptedPassword,
-				name: record.name,
-			},
+		const user = await prisma.user.findUnique({
+			where: { email: record.email },
+			select: { id: true },
 		});
 
+		if (!user) {
+			return { success: false, message: validationT('userRegisterFail') };
+		}
+
 		await prisma.user.update({
-			where: { id: user.user.id },
+			where: { id: user.id },
 			data: {
 				emailVerified: true,
 				notificationMethod: 'email',

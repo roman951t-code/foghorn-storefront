@@ -138,7 +138,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 			alignItems='center'
 			justifyContent={{ base: 'center', '2xl': 'space-between' }}
 		>
-			<Heading color='main' fontWeight='medium' size='lg' minW='260px'>
+			<Heading color='main' fontWeight='medium' size='md' minW='260px'>
 				{isUserSubscribed ? i18nData.subscribed : i18nData.subscribeInfo}
 			</Heading>
 
@@ -153,21 +153,21 @@ export default function SubscribeSection({ i18nData }: Props) {
 					>
 						<Fieldset.Root invalid w={{ base: 'full', md: 'auto' }} maxW='340px'>
 							<Field.Root required invalid={!!errors?.email || !!verifyError}>
-									<Input
-										{...register('email')}
-										maxLength={MAX_CHARACTERS}
-										rounded='lg'
-										type='email'
-										placeholder={i18nData.email}
-										size='md'
-										minH='44px'
-										fontSize='md'
-										minWidth='280px'
-										maxWidth='340px'
-										flex='1 1 0'
-										disabled={session?.user?.isGoogleUser}
-										readOnly={session?.user?.isGoogleUser}
-									/>
+								<Input
+									{...register('email')}
+									maxLength={MAX_CHARACTERS}
+									rounded='lg'
+									type='email'
+									placeholder={i18nData.email}
+									size='md'
+									minH='44px'
+									fontSize='md'
+									minWidth='280px'
+									maxWidth='340px'
+									flex='1 1 0'
+									disabled={session?.user?.isGoogleUser}
+									readOnly={session?.user?.isGoogleUser}
+								/>
 
 								<Field.ErrorText minH='22px'>
 									{errors.email?.message || verifyError || i18nData.emailNotVerifiedError}

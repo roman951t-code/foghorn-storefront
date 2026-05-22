@@ -37,22 +37,22 @@ function PromoCardSlide({
 	isDraggingRef: { current: boolean };
 }) {
 	const overlayContent = (
-			<VStack
-				gapY='3'
-				bg='rgba(18,18,18,0.72)'
-				alignItems='flex-start'
-				backdropFilter='blur(10px)'
-				borderWidth='0.5px'
-				borderStyle='solid'
-				borderColor='rgba(255,255,255,0.2)'
-				borderRadius='lg'
-				p={{ base: 3.5, md: 4 }}
-				maxW={{ base: '100%', md: '84%' }}
-				minW='300px'
-				transition='all 0.2s ease'
-				_hover={{ bg: 'rgba(18,18,18,0.8)', borderColor: 'rgba(255,255,255,0.2)' }}
-			>
-			<Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight='semibold' lineClamp={2}>
+		<VStack
+			gapY='3'
+			bg='rgba(18,18,18,0.72)'
+			alignItems='flex-start'
+			backdropFilter='blur(10px)'
+			borderWidth='0.5px'
+			borderStyle='solid'
+			borderColor='rgba(255,255,255,0.2)'
+			borderRadius='lg'
+			p={{ base: 3.5, md: 4 }}
+			maxW={{ base: '100%', md: '84%' }}
+			minW='300px'
+			transition='all 0.2s ease'
+			_hover={{ bg: 'rgba(18,18,18,0.8)', borderColor: 'rgba(255,255,255,0.2)' }}
+		>
+			<Text fontSize={{ base: 'md', md: 'xl' }} fontWeight='semibold' lineClamp={2}>
 				{promo.text}
 			</Text>
 

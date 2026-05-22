@@ -1,35 +1,35 @@
 import { useTranslations } from 'next-intl';
 import { type Metadata } from 'next';
 import { getMessages, getTranslations } from 'next-intl/server';
-import pick from 'lodash.pick';
-import { routing } from '@/i18n/routing';
-import type { AppLocale } from '@/constants/locales';
+import { resolveAppLocale } from '@/constants/locales';
+import { CLIENT_MESSAGE_NAMESPACES } from '@/i18n/messages';
 import { buildLanguageAlternates, type AlternateSearchParams, absoluteUrl } from './seo';
 
 export const extractI18nData = (
 	t: ReturnType<typeof useTranslations>,
-	keys: string[]
+	keys: string[],
 ): { [key: string]: string } => Object.fromEntries(keys.map((key) => [key, t(key)]));
 
-export async function loadClientMessages(namespaces: string[]) {
+export async function loadClientMessages(
+	namespaces: readonly string[] = CLIENT_MESSAGE_NAMESPACES,
+) {
 	const allMessages = await getMessages();
+	const messages = allMessages as Record<string, unknown>;
 
-	// Ensure we always include requested namespaces, even if some are missing,
-	// to avoid runtime "missing namespace" errors in client components.
-	const picked = pick(allMessages, namespaces);
 	return namespaces.reduce<Record<string, unknown>>((acc, ns) => {
-		acc[ns] = picked?.[ns] ?? {};
+		acc[ns] = messages[ns] ?? {};
 		return acc;
 	}, {});
 }
 
-const getSupportedLocale = (locale: string): AppLocale =>
-	(routing.locales.includes(locale as AppLocale) ? locale : routing.defaultLocale) as AppLocale;
-
 export async function getLocalizedMetadata(
 	locale: string,
 	pageKey: string,
-	options?: { pathname?: string; searchParams?: AlternateSearchParams; robots?: Metadata['robots'] }
+	options?: {
+		pathname?: string;
+		searchParams?: AlternateSearchParams;
+		robots?: Metadata['robots'];
+	},
 ): Promise<Metadata> {
 	const pagesT = await getTranslations({ locale, namespace: 'pages' });
 
@@ -40,10 +40,10 @@ export async function getLocalizedMetadata(
 	const alternates =
 		options?.pathname && locale
 			? buildLanguageAlternates(
-					getSupportedLocale(locale),
+					resolveAppLocale(locale),
 					options.pathname,
-					options?.searchParams ?? undefined
-			  )
+					options?.searchParams ?? undefined,
+				)
 			: undefined;
 
 	return {

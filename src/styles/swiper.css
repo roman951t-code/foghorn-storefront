@@ -48,12 +48,12 @@
 }
 .productsSlider .swiper-button-prev svg,
 .productsSlider .swiper-button-next svg {
-	height: 34;
+	height: 28;
+	width: 28;
 }
 
 .productsSlider .productPreviewSwiper {
-	/* Keep preview arrows centered as a pair, with ~2x larger horizontal gap. */
-	--product-preview-arrow-side-offset: 12%;
+	--product-preview-arrow-side-offset: 18%;
 }
 .productsSlider .productPreviewSwiper .swiper-button-prev {
 	right: initial;
@@ -65,10 +65,12 @@
 }
 
 .productsSlider .productPreviewSwiper .swiper-button-prev svg {
-	height: 24;
+	height: 22;
+	width: 22;
 }
 .productsSlider .productPreviewSwiper .swiper-button-next svg {
-	height: 24;
+	height: 22;
+	width: 22;
 }
 
 /* THUMBS SLIDER SWIPER */

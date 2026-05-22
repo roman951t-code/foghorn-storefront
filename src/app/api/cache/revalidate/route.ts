@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { env } from '@/config/env';
+import { includesTimingSafeSecret } from '@/lib/timingSafeSecret';
 
 export const maxDuration = 60;
 
@@ -44,14 +45,14 @@ const resolveExpectedRevalidateSecrets = () =>
 		new Set(
 			[env.CACHE_REVALIDATE_SECRET, env.CRON_SECRET]
 				.map((value) => normalizeSecret(value ?? null))
-				.filter((value): value is string => Boolean(value))
-		)
+				.filter((value): value is string => Boolean(value)),
+		),
 	);
 
 const logApiRevalidateEvent = (
 	level: 'info' | 'warn' | 'error',
 	event: string,
-	payload: Record<string, unknown>
+	payload: Record<string, unknown>,
 ) => {
 	const entry = {
 		source: 'api-cache-revalidate',
@@ -112,7 +113,7 @@ export async function POST(req: Request) {
 	const providedSecret = resolveProvidedRevalidateSecret(req);
 	const hasValidSecretFormat =
 		typeof providedSecret === 'string' && REVALIDATE_SECRET_PATTERN.test(providedSecret);
-	if (!hasValidSecretFormat || !expectedSecrets.includes(providedSecret)) {
+	if (!hasValidSecretFormat || !includesTimingSafeSecret(expectedSecrets, providedSecret)) {
 		logApiRevalidateEvent('warn', 'revalidate-unauthorized', { requestId });
 		return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
 	}
@@ -129,7 +130,9 @@ export async function POST(req: Request) {
 		return NextResponse.json({ error: 'invalid-tags' }, { status: 400 });
 	}
 
-	const tags = Array.from(new Set(rawTags.map(normalizeTag).filter((tag): tag is string => Boolean(tag))));
+	const tags = Array.from(
+		new Set(rawTags.map(normalizeTag).filter((tag): tag is string => Boolean(tag))),
+	);
 	if (tags.length === 0) {
 		return NextResponse.json({ error: 'empty-tags' }, { status: 400 });
 	}

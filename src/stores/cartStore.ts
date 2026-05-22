@@ -3,6 +3,7 @@
 import { createBoundedStore } from './createBoundedStore';
 import { addToCart } from '@/actions/cart/addToCart';
 import { clearCart } from '@/actions/cart/clearCart';
+import { hydrateGuestCartItems } from '@/actions/cart/hydrateGuestCartItems';
 import { mergeCartData } from '@/actions/cart/mergeCartData';
 import { removeFromCart } from '@/actions/cart/removeFromCart';
 import { updateCartItemQuantity } from '@/actions/cart/updateCartItemQuantity';
@@ -13,21 +14,63 @@ import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
 const LOCAL_STORAGE_KEY = 'guest_cart';
 const MAX_ITEM_QUANTITY = 99;
 
+type GuestCartStorageItem = {
+	productId: string;
+	variantId: string | null;
+	quantity: number;
+};
+
 const guestLineId = (productId: string, variantId: string | null) =>
 	`${productId}:${variantId ?? ''}`;
 
 function saveGuestCart(items: CartProduct[]) {
 	if (typeof window !== 'undefined') {
-		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
+		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(toGuestCartStorage(items)));
 	}
 }
 
-function loadGuestCart(): CartProduct[] {
+function toGuestCartStorage(items: CartProduct[]): GuestCartStorageItem[] {
+	const merged = new Map<string, GuestCartStorageItem>();
+	for (const item of items) {
+		const productId = typeof item.productId === 'string' ? item.productId.trim() : '';
+		if (!productId) continue;
+		const variantId =
+			typeof item.variantId === 'string' && item.variantId.trim() ? item.variantId.trim() : null;
+		const quantity = Math.max(
+			1,
+			Math.min(MAX_ITEM_QUANTITY, Math.floor(Number(item.quantity) || 1)),
+		);
+		const key = guestLineId(productId, variantId);
+		const existing = merged.get(key);
+		merged.set(key, {
+			productId,
+			variantId,
+			quantity: existing ? Math.min(MAX_ITEM_QUANTITY, existing.quantity + quantity) : quantity,
+		});
+	}
+	return Array.from(merged.values());
+}
+
+function loadGuestCart(): GuestCartStorageItem[] {
 	if (typeof window === 'undefined') return [];
 	const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
 	if (!stored) return [];
 	try {
-		return JSON.parse(stored) as CartProduct[];
+		const parsed = JSON.parse(stored) as Partial<CartProduct & GuestCartStorageItem>[];
+		if (!Array.isArray(parsed)) return [];
+		return toGuestCartStorage(
+			parsed.map((item) => ({
+				lineId: guestLineId(String(item.productId ?? ''), item.variantId ?? null),
+				productId: String(item.productId ?? ''),
+				variantId: item.variantId ?? null,
+				quantity: Number(item.quantity ?? 1),
+				basePrice: 0,
+				discountPrice: null,
+				name: '',
+				imageUrl: null,
+				fullSlug: '',
+			})),
+		);
 	} catch {
 		return [];
 	}
@@ -63,12 +106,12 @@ type CartStore = {
 	setCartData: (data: CartData) => void;
 	setCartItems: (items: CartProduct[]) => void;
 	setProductIds: (ids: string[]) => void;
-	hydrateGuestCart: () => void;
+	hydrateGuestCart: () => Promise<void>;
 	setInitialData: (data: CartData, ids: string[]) => void;
 	mergeGuestIntoServer: () => Promise<void>;
 	handleAddItem: (
 		product: SubcategoryProduct | Product,
-		opts?: { variantId?: string | null }
+		opts?: { variantId?: string | null },
 	) => Promise<{ success: boolean }>;
 	handleRemoveItem: (productId: string) => Promise<{ success: boolean }>;
 	handleRemoveLine: (lineId: string) => Promise<{ success: boolean }>;
@@ -82,11 +125,25 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 	isLoggedIn: false,
 	setIsLoggedIn: (loggedIn) => set({ isLoggedIn: loggedIn }),
 	setCartData: (data) => set({ cartData: data, productIds: uniqueProductIds(data.items) }),
-	setCartItems: (items) => set({ cartData: { ...get().cartData, items }, productIds: uniqueProductIds(items) }),
+	setCartItems: (items) =>
+		set({ cartData: { ...get().cartData, items }, productIds: uniqueProductIds(items) }),
 	setProductIds: (ids) => set({ productIds: ids }),
-	hydrateGuestCart: () => {
+	hydrateGuestCart: async () => {
 		const guest = loadGuestCart();
-		set({ cartData: { ...get().cartData, items: guest }, productIds: uniqueProductIds(guest) });
+		if (guest.length === 0) {
+			set({ cartData: { ...get().cartData, items: [] }, productIds: [] });
+			return;
+		}
+		try {
+			const hydrated = await hydrateGuestCartItems(guest);
+			set({
+				cartData: { ...get().cartData, items: hydrated },
+				productIds: uniqueProductIds(hydrated),
+			});
+			saveGuestCart(hydrated);
+		} catch {
+			set({ cartData: { ...get().cartData, items: [] }, productIds: [] });
+		}
 	},
 	setInitialData: (data, ids) => {
 		const productIds = ids?.length ? ids : uniqueProductIds(data.items);
@@ -96,11 +153,9 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 		const local = loadGuestCart();
 		if (local.length === 0) return;
 
-		set({ cartData: { ...get().cartData, items: local }, productIds: uniqueProductIds(local) });
-
 		try {
 			const merged = await mergeCartData(
-				local.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity }))
+				local.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity })),
 			);
 			if (!merged?.success) return;
 
@@ -120,7 +175,7 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 		const productId = product.id;
 		const chosenVariantId =
 			opts?.variantId ??
-			('defaultVariant' in product ? product.defaultVariant?.id ?? null : null);
+			('defaultVariant' in product ? (product.defaultVariant?.id ?? null) : null);
 
 		const selectedVariant =
 			('variants' in product && Array.isArray(product.variants) && chosenVariantId
@@ -133,15 +188,20 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 				: null;
 
 		const effectiveVariantId =
-			chosenVariantId ?? ('defaultVariant' in product ? product.defaultVariant?.id ?? null : null) ?? fallbackVariant?.id ?? null;
+			chosenVariantId ??
+			('defaultVariant' in product ? (product.defaultVariant?.id ?? null) : null) ??
+			fallbackVariant?.id ??
+			null;
 
-		const defaultVariant =
-			'defaultVariant' in product ? product.defaultVariant ?? null : null;
+		const defaultVariant = 'defaultVariant' in product ? (product.defaultVariant ?? null) : null;
 
 		const unitBasePrice = (() => {
-			if (defaultVariant?.id && defaultVariant.id === effectiveVariantId) return defaultVariant.price;
-			if (selectedVariant?.id && selectedVariant.id === effectiveVariantId) return selectedVariant.price;
-			if (fallbackVariant?.id && fallbackVariant.id === effectiveVariantId) return fallbackVariant.price;
+			if (defaultVariant?.id && defaultVariant.id === effectiveVariantId)
+				return defaultVariant.price;
+			if (selectedVariant?.id && selectedVariant.id === effectiveVariantId)
+				return selectedVariant.price;
+			if (fallbackVariant?.id && fallbackVariant.id === effectiveVariantId)
+				return fallbackVariant.price;
 			return product.basePrice ?? 0;
 		})();
 
@@ -183,32 +243,24 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 			(fallbackVariant?.id === effectiveVariantId
 				? ((fallbackVariant as { discountPrice?: number | null }).discountPrice ?? null)
 				: null) ??
-			(product.discountPrice ?? null);
+			product.discountPrice ??
+			null;
 
 		const availableStock = (() => {
-			if (
-				defaultVariant?.id === effectiveVariantId &&
-				typeof defaultVariant.stock === 'number'
-			) {
+			if (defaultVariant?.id === effectiveVariantId && typeof defaultVariant.stock === 'number') {
 				return defaultVariant.stock;
 			}
-			if (
-				selectedVariant?.id === effectiveVariantId &&
-				typeof selectedVariant.stock === 'number'
-			) {
+			if (selectedVariant?.id === effectiveVariantId && typeof selectedVariant.stock === 'number') {
 				return selectedVariant.stock;
 			}
-			if (
-				fallbackVariant?.id === effectiveVariantId &&
-				typeof fallbackVariant.stock === 'number'
-			) {
+			if (fallbackVariant?.id === effectiveVariantId && typeof fallbackVariant.stock === 'number') {
 				return fallbackVariant.stock;
 			}
 			return null;
 		})();
 		const stockCap = normalizeStockCap(availableStock);
 		const existingLine = get().cartData.items.find(
-			(i) => i.productId === productId && i.variantId === effectiveVariantId
+			(i) => i.productId === productId && i.variantId === effectiveVariantId,
 		);
 		const currentQty = existingLine?.quantity ?? 0;
 		if (stockCap != null && currentQty >= stockCap) {
@@ -226,7 +278,7 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 			discountPrice: unitDiscountPrice,
 			imageUrl: resolveProductPrimaryImageFromGallery(
 				product.imageUrl,
-				'images' in product && Array.isArray(product.images) ? product.images : undefined
+				'images' in product && Array.isArray(product.images) ? product.images : undefined,
 			),
 			name: product.name!,
 			quantity: 1,
@@ -239,7 +291,7 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 
 			set((state) => {
 				const existing = state.cartData.items.find(
-					(i) => i.productId === cartProduct.productId && i.variantId === cartProduct.variantId
+					(i) => i.productId === cartProduct.productId && i.variantId === cartProduct.variantId,
 				);
 				const items = existing
 					? state.cartData.items.map((i) =>
@@ -249,7 +301,7 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 										availableStock: stockCap ?? i.availableStock ?? null,
 										quantity: Math.min(resolveQuantityCap(stockCap), i.quantity + 1),
 									}
-								: i
+								: i,
 						)
 					: [...state.cartData.items, cartProduct];
 
@@ -273,7 +325,7 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 		} else {
 			set((state) => {
 				const existing = state.cartData.items.find(
-					(i) => i.productId === cartProduct.productId && i.variantId === cartProduct.variantId
+					(i) => i.productId === cartProduct.productId && i.variantId === cartProduct.variantId,
 				);
 				const updated = existing
 					? state.cartData.items.map((i) =>
@@ -283,11 +335,14 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 										availableStock: stockCap ?? i.availableStock ?? null,
 										quantity: Math.min(resolveQuantityCap(stockCap), i.quantity + 1),
 									}
-								: i
+								: i,
 						)
 					: [...state.cartData.items, cartProduct];
 				saveGuestCart(updated);
-				return { cartData: { ...state.cartData, items: updated }, productIds: uniqueProductIds(updated) };
+				return {
+					cartData: { ...state.cartData, items: updated },
+					productIds: uniqueProductIds(updated),
+				};
 			});
 			return { success: true };
 		}
@@ -333,7 +388,10 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 
 			set((state) => {
 				const updated = state.cartData.items.filter((item) => item.lineId !== lineId);
-				return { cartData: { ...state.cartData, items: updated }, productIds: uniqueProductIds(updated) };
+				return {
+					cartData: { ...state.cartData, items: updated },
+					productIds: uniqueProductIds(updated),
+				};
 			});
 
 			const res = await removeFromCart({ cartItemId: lineId });
@@ -348,7 +406,10 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 		set((state) => {
 			const updated = state.cartData.items.filter((item) => item.lineId !== lineId);
 			saveGuestCart(updated);
-			return { cartData: { ...state.cartData, items: updated }, productIds: uniqueProductIds(updated) };
+			return {
+				cartData: { ...state.cartData, items: updated },
+				productIds: uniqueProductIds(updated),
+			};
 		});
 		return { success: true };
 	},
@@ -379,17 +440,14 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 
 		const stockCap = normalizeStockCap(lineItem.availableStock);
 		const quantityCap = resolveQuantityCap(stockCap);
-		const optimisticQty = Math.min(
-			quantityCap,
-			Math.max(1, Math.floor(Number(quantity)))
-		);
+		const optimisticQty = Math.min(quantityCap, Math.max(1, Math.floor(Number(quantity))));
 
 		if (get().isLoggedIn) {
 			set((state) => ({
 				cartData: {
 					...state.cartData,
 					items: state.cartData.items.map((item) =>
-						item.lineId === lineId ? { ...item, quantity: optimisticQty } : item
+						item.lineId === lineId ? { ...item, quantity: optimisticQty } : item,
 					),
 				},
 			}));
@@ -414,7 +472,7 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 					cartData: {
 						...state.cartData,
 						items: state.cartData.items.map((item) =>
-							item.lineId === lineId ? { ...item, quantity: appliedQty } : item
+							item.lineId === lineId ? { ...item, quantity: appliedQty } : item,
 						),
 					},
 				}));
@@ -429,10 +487,7 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 				const currentQuantityCap = resolveQuantityCap(currentStockCap);
 				return {
 					...item,
-					quantity: Math.min(
-						currentQuantityCap,
-						Math.max(1, Math.floor(Number(quantity)))
-					),
+					quantity: Math.min(currentQuantityCap, Math.max(1, Math.floor(Number(quantity)))),
 				};
 			});
 			saveGuestCart(updated);

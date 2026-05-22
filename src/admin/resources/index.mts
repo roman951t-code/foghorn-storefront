@@ -122,11 +122,10 @@ const ADMIN_TRANSLATION_LOCALES =
 	localizationRuntime.ADMIN_TRANSLATION_LOCALES as readonly AdminTranslationLocale[];
 const ADMIN_DEFAULT_TRANSLATION_LOCALE =
 	localizationRuntime.ADMIN_DEFAULT_TRANSLATION_LOCALE as AdminTranslationLocale;
-const LOCALIZED_RESOURCE_DEFINITIONS =
-	localizationRuntime.LOCALIZED_RESOURCE_DEFINITIONS as Record<
-		LocalizedResourceId,
-		LocalizedResourceDefinition
-	>;
+const LOCALIZED_RESOURCE_DEFINITIONS = localizationRuntime.LOCALIZED_RESOURCE_DEFINITIONS as Record<
+	LocalizedResourceId,
+	LocalizedResourceDefinition
+>;
 const buildTranslationInputPath = (locale: AdminTranslationLocale, fieldKey: string) =>
 	localizationRuntime.buildTranslationInputPath(locale, fieldKey);
 
@@ -361,7 +360,7 @@ const normalizeGalleryUrls = (value: unknown): string[] | null => {
 
 const resolveProductIdForGallerySync = (
 	response: AdminResponseLike,
-	context: AdminContextLike
+	context: AdminContextLike,
 ): string | null => {
 	const fromResponse = response?.record?.params?.id;
 	if (typeof fromResponse === 'string' && fromResponse.trim()) return fromResponse;
@@ -373,7 +372,7 @@ const resolveProductIdForGallerySync = (
 const hydrateProductGalleryField = async (
 	response: AdminResponseLike,
 	request: AdminRequestLike,
-	context: AdminContextLike
+	context: AdminContextLike,
 ) => {
 	const method = String(request?.method ?? 'get').toLowerCase();
 	if (method !== 'get') return response;
@@ -396,7 +395,7 @@ const hydrateProductGalleryField = async (
 		const primaryGalleryUrl =
 			persistedPrimaryImageUrl && galleryUrlList.includes(persistedPrimaryImageUrl)
 				? persistedPrimaryImageUrl
-				: galleryUrlList[0] ?? null;
+				: (galleryUrlList[0] ?? null);
 		if (response?.record && typeof response.record === 'object') {
 			response.record.params = {
 				...(response.record.params ?? {}),
@@ -414,7 +413,7 @@ const hydrateProductGalleryField = async (
 const syncProductGalleryAfterHook = async (
 	response: AdminResponseLike,
 	request: AdminRequestLike,
-	context: AdminContextLike
+	context: AdminContextLike,
 ) => {
 	const method = String(request?.method ?? 'get').toLowerCase();
 	if (method !== 'post') return response;
@@ -445,7 +444,7 @@ const syncProductGalleryAfterHook = async (
 		const primaryImageUrl =
 			nextPrimaryCandidate && baseGalleryUrls.includes(nextPrimaryCandidate)
 				? nextPrimaryCandidate
-				: baseGalleryUrls[0] ?? null;
+				: (baseGalleryUrls[0] ?? null);
 		const orderedGalleryUrls = primaryImageUrl
 			? [primaryImageUrl, ...baseGalleryUrls.filter((url) => url !== primaryImageUrl)]
 			: baseGalleryUrls;
@@ -475,14 +474,14 @@ const syncProductGalleryAfterHook = async (
 const productEditAfterHook = async (
 	response: AdminResponseLike,
 	request: AdminRequestLike,
-	context: AdminContextLike
+	context: AdminContextLike,
 ) => {
 	const withAudit = (await productAuditAfterHook(response, request, context)) as ActionResponse;
 	const withHydratedGalleryField = await hydrateProductGalleryField(withAudit, request, context);
 	const withGallerySynced = await syncProductGalleryAfterHook(
 		withHydratedGalleryField,
 		request,
-		context
+		context,
 	);
 	return localizedAfterHook(withGallerySynced, request, context);
 };
@@ -505,7 +504,8 @@ const isOrderStatus = (record: { param: (key: string) => unknown } | undefined, 
 
 const LOCALIZED_TRANSLATIONS_CONTEXT_KEY = '__localizedTranslationsPayload';
 
-const getRequestMethod = (request: AdminRequestLike) => String(request?.method ?? 'get').toLowerCase();
+const getRequestMethod = (request: AdminRequestLike) =>
+	String(request?.method ?? 'get').toLowerCase();
 
 const normalizeLocalizedValue = (value: unknown): string | null | undefined => {
 	if (value === undefined) return undefined;
@@ -515,9 +515,7 @@ const normalizeLocalizedValue = (value: unknown): string | null | undefined => {
 	return trimmed.length > 0 ? trimmed : null;
 };
 
-const getLocalizedResourceDefinition = (
-	resourceId: string
-): LocalizedResourceDefinition | null => {
+const getLocalizedResourceDefinition = (resourceId: string): LocalizedResourceDefinition | null => {
 	if (resourceId === 'Product') return LOCALIZED_RESOURCE_DEFINITIONS.Product;
 	if (resourceId === 'ProductCategory') return LOCALIZED_RESOURCE_DEFINITIONS.ProductCategory;
 	if (resourceId === 'Banner') return LOCALIZED_RESOURCE_DEFINITIONS.Banner;
@@ -531,7 +529,7 @@ type LocalizedPayloadByLocale = Partial<Record<AdminTranslationLocale, LocaleFie
 const collectLocalizedPayload = (
 	payload: Record<string, unknown>,
 	baseParams: Record<string, unknown>,
-	definition: LocalizedResourceDefinition
+	definition: LocalizedResourceDefinition,
 ) => {
 	const nextPayload: Record<string, unknown> = { ...payload };
 	const localizedByLocale: LocalizedPayloadByLocale = {};
@@ -567,9 +565,7 @@ const collectLocalizedPayload = (
 				}
 			} else {
 				localePatch[field.key] =
-					payloadValue !== undefined || existingVirtual !== undefined
-						? resolvedValue
-						: undefined;
+					payloadValue !== undefined || existingVirtual !== undefined ? resolvedValue : undefined;
 			}
 
 			delete nextPayload[path];
@@ -582,7 +578,10 @@ const collectLocalizedPayload = (
 	return { nextPayload, localizedByLocale, propertyErrors };
 };
 
-const getResponseRecordId = (response: AdminResponseLike, context: AdminContextLike): string | null => {
+const getResponseRecordId = (
+	response: AdminResponseLike,
+	context: AdminContextLike,
+): string | null => {
 	const fromResponse = response?.record?.params?.id;
 	if (typeof fromResponse === 'string' && fromResponse.trim()) return fromResponse;
 	const fromContext = context?.record?.param?.('id');
@@ -602,7 +601,7 @@ type CacheRevalidationArgs = {
 };
 
 type CacheTagsResolver = (
-	args: CacheRevalidationArgs
+	args: CacheRevalidationArgs,
 ) => Array<string | null | undefined> | Promise<Array<string | null | undefined>>;
 
 type CacheRevalidationGuard = (args: CacheRevalidationArgs) => boolean;
@@ -641,7 +640,11 @@ const addNormalizedValue = (set: Set<string>, value: unknown) => {
 	}
 };
 
-const addRecordValueByKey = (set: Set<string>, record: AdminRecordLike | undefined, key: string) => {
+const addRecordValueByKey = (
+	set: Set<string>,
+	record: AdminRecordLike | undefined,
+	key: string,
+) => {
 	if (!record) return;
 	if (typeof record?.param === 'function') {
 		addNormalizedValue(set, record.param(key));
@@ -653,19 +656,19 @@ const addRecordValueByKey = (set: Set<string>, record: AdminRecordLike | undefin
 const collectMutationFieldValues = (
 	key: string,
 	args: CacheRevalidationArgs,
-	options: { includeRequestPayload?: boolean } = {}
+	options: { includeRequestPayload?: boolean } = {},
 ) => {
 	const values = new Set<string>();
 	addRecordValueByKey(values, args.response?.record as unknown as AdminRecordLike, key);
 	if (Array.isArray(args.response?.records)) {
 		args.response.records.forEach((record) =>
-			addRecordValueByKey(values, record as unknown as AdminRecordLike, key)
+			addRecordValueByKey(values, record as unknown as AdminRecordLike, key),
 		);
 	}
 	addRecordValueByKey(values, args.context?.record as unknown as AdminRecordLike, key);
 	if (Array.isArray(args.context?.records)) {
 		args.context.records.forEach((record) =>
-			addRecordValueByKey(values, record as unknown as AdminRecordLike, key)
+			addRecordValueByKey(values, record as unknown as AdminRecordLike, key),
 		);
 	}
 	if (options.includeRequestPayload) {
@@ -710,11 +713,11 @@ const normalizeRelationId = (value: unknown): string | null => {
 const collectRelationIds = (
 	args: CacheRevalidationArgs,
 	directKey: string,
-	relationKey: string
+	relationKey: string,
 ) => {
 	const relationIds = new Set<string>();
 	collectMutationFieldValues(directKey, args, { includeRequestPayload: true }).forEach((id) =>
-		relationIds.add(id)
+		relationIds.add(id),
 	);
 	const relationValues = collectMutationFieldValues(relationKey, args, {
 		includeRequestPayload: true,
@@ -764,7 +767,7 @@ const shouldRevalidateForSuccessfulPost = ({ request, response }: CacheRevalidat
 
 const runStorefrontTagRevalidation = async (
 	resolveTags: CacheTagsResolver,
-	args: CacheRevalidationArgs
+	args: CacheRevalidationArgs,
 ) => {
 	try {
 		const tags = await resolveTags(args);
@@ -777,7 +780,7 @@ const runStorefrontTagRevalidation = async (
 const withCacheRevalidationAfter = <T extends ActionResponse>(
 	afterHook: After<T>,
 	resolveTags: CacheTagsResolver,
-	shouldRevalidate?: CacheRevalidationGuard
+	shouldRevalidate?: CacheRevalidationGuard,
 ) => {
 	return async (response: T, request: ActionRequest, context: ActionContext): Promise<T> => {
 		const nextResponse = await afterHook(response, request, context);
@@ -796,7 +799,7 @@ const withCacheRevalidationAfter = <T extends ActionResponse>(
 const syncReviewAggregatesAfter = async (
 	response: AdminResponseLike,
 	request: AdminRequestLike,
-	context: AdminContextLike
+	context: AdminContextLike,
 ) => {
 	const args: CacheRevalidationArgs = { response, request, context };
 	if (!shouldRevalidateForSuccessfulPost(args)) return response;
@@ -817,7 +820,7 @@ const syncReviewAggregatesAfter = async (
 
 const reviewMutationAfterHook = withCacheRevalidationAfter(
 	syncReviewAggregatesAfter,
-	getReviewMutationTags
+	getReviewMutationTags,
 );
 
 const NEWSLETTER_MUTATION_EMAILS_CONTEXT_KEY = '__newsletterMutationEmails';
@@ -864,7 +867,7 @@ const buildEmailOrFilters = (emails: string[]) =>
 
 const captureNewsletterMutationEmailsBefore = async (
 	request: AdminRequestLike,
-	context: AdminContextLike
+	context: AdminContextLike,
 ) => {
 	const contextEmails = normalizeUniqueEmails(collectContextRecordFieldValues(context, 'email'));
 	const payloadEmail = normalizeEmailValue(request?.payload?.email);
@@ -877,7 +880,7 @@ const captureNewsletterMutationEmailsBefore = async (
 const syncNewsletterUserSubscriptionStateAfter = async (
 	response: AdminResponseLike,
 	request: AdminRequestLike,
-	context: AdminContextLike
+	context: AdminContextLike,
 ) => {
 	if (response?.notice?.type === 'error') return response;
 
@@ -922,7 +925,7 @@ const syncNewsletterUserSubscriptionStateAfter = async (
 const withCacheRevalidationHandler = <T extends ActionResponse>(
 	handler: ActionHandler<T>,
 	resolveTags: CacheTagsResolver,
-	shouldRevalidate?: CacheRevalidationGuard
+	shouldRevalidate?: CacheRevalidationGuard,
 ) => {
 	return async (request: ActionRequest, response: unknown, context: ActionContext): Promise<T> => {
 		const nextResponse = await handler(request, response, context);
@@ -941,7 +944,7 @@ const withCacheRevalidationHandler = <T extends ActionResponse>(
 const syncPrimaryProductImagesAfterMutation = async (
 	response: AdminResponseLike,
 	request: AdminRequestLike,
-	context: AdminContextLike
+	context: AdminContextLike,
 ) => {
 	const args: CacheRevalidationArgs = { response, request, context };
 	const productIds = collectRelationIds(args, 'productId', 'product');
@@ -966,8 +969,8 @@ const syncPrimaryProductImagesAfterMutation = async (
 				prisma.product.update({
 					where: { id: productId },
 					data: { imageUrl: primaryImageUrlByProductId.get(productId) ?? null },
-				})
-			)
+				}),
+			),
 		);
 	} catch (error) {
 		console.error('[admin-product-image] Failed to sync primary image', error);
@@ -982,10 +985,7 @@ const shouldRevalidateSeoTemplateApply = ({ request }: CacheRevalidationArgs) =>
 const shouldRevalidateImportCsvApply = ({ request }: CacheRevalidationArgs) =>
 	String(request?.payload?.dryRun ?? 'false').toLowerCase() !== 'true';
 
-const readLocalizedRows = async (
-	resourceId: LocalizedResourceId,
-	recordIds: string[]
-) => {
+const readLocalizedRows = async (resourceId: LocalizedResourceId, recordIds: string[]) => {
 	if (recordIds.length === 0) {
 		return [] as Array<Record<string, string | null>>;
 	}
@@ -1050,14 +1050,16 @@ const mapRowEntityId = (resourceId: LocalizedResourceId, row: Record<string, unk
 const formatTranslationCompleteness = (
 	definition: LocalizedResourceDefinition,
 	recordParams: Record<string, unknown>,
-	rowsByLocale: Map<string, Record<string, unknown>>
+	rowsByLocale: Map<string, Record<string, unknown>>,
 ) => {
 	const states = ADMIN_TRANSLATION_LOCALES.map((locale) => {
 		const row = rowsByLocale.get(locale);
 		const primaryField = definition.primaryFieldKey;
 		const primaryFromTranslation = normalizeLocalizedValue(row?.[primaryField]);
 		const primaryFromBase = normalizeLocalizedValue(
-			recordParams[definition.fields.find((field) => field.key === primaryField)?.baseField ?? primaryField]
+			recordParams[
+				definition.fields.find((field) => field.key === primaryField)?.baseField ?? primaryField
+			],
 		);
 		const isComplete =
 			locale === ADMIN_DEFAULT_TRANSLATION_LOCALE
@@ -1073,13 +1075,13 @@ const applyLocalizationToRecord = (
 	resourceId: LocalizedResourceId,
 	record: AdminRecordLike,
 	definition: LocalizedResourceDefinition,
-	rows: Array<Record<string, unknown>>
+	rows: Array<Record<string, unknown>>,
 ) => {
 	const recordId = getRecordId(record);
 	if (!recordId) return;
 	const recordRows = rows.filter((row) => mapRowEntityId(resourceId, row) === recordId);
 	const rowsByLocale = new Map(
-		recordRows.map((row) => [String(row.locale), row] as [string, Record<string, unknown>])
+		recordRows.map((row) => [String(row.locale), row] as [string, Record<string, unknown>]),
 	);
 	const nextParams = { ...(record.params ?? {}) } as Record<string, unknown>;
 
@@ -1089,7 +1091,7 @@ const applyLocalizationToRecord = (
 			const path = buildTranslationInputPath(locale, field.key);
 			const fallbackBaseValue =
 				locale === ADMIN_DEFAULT_TRANSLATION_LOCALE
-					? normalizeLocalizedValue(nextParams[field.baseField]) ?? ''
+					? (normalizeLocalizedValue(nextParams[field.baseField]) ?? '')
 					: '';
 			const value = normalizeLocalizedValue(row?.[field.key]);
 			nextParams[path] = value ?? fallbackBaseValue;
@@ -1099,7 +1101,7 @@ const applyLocalizationToRecord = (
 	nextParams[definition.completenessProperty] = formatTranslationCompleteness(
 		definition,
 		nextParams,
-		rowsByLocale
+		rowsByLocale,
 	);
 	record.params = nextParams;
 };
@@ -1108,7 +1110,7 @@ const syncLocalizedTranslationsAfterSave = async (
 	resourceId: LocalizedResourceId,
 	recordId: string,
 	definition: LocalizedResourceDefinition,
-	patchByLocale: LocalizedPayloadByLocale
+	patchByLocale: LocalizedPayloadByLocale,
 ) => {
 	const primaryField = definition.primaryFieldKey;
 
@@ -1239,28 +1241,28 @@ const syncLocalizedTranslationsAfterSave = async (
 const localizedBeforeHook = async (
 	request: AdminRequestLike,
 	context: AdminContextLike,
-	resourceId: LocalizedResourceId
+	resourceId: LocalizedResourceId,
 ) => {
 	const method = getRequestMethod(request);
 	if (method !== 'post') return request;
 
 	const payload = (request?.payload ?? {}) as Record<string, unknown>;
-		const baseParams = (context.record?.params ?? {}) as Record<string, unknown>;
+	const baseParams = (context.record?.params ?? {}) as Record<string, unknown>;
 	const definition = getLocalizedResourceDefinition(resourceId);
 	if (!definition) return request;
 
 	const { nextPayload, localizedByLocale, propertyErrors } = collectLocalizedPayload(
 		payload,
 		baseParams,
-		definition
+		definition,
 	);
 
-		if (Object.keys(propertyErrors).length > 0) {
-			throw new ValidationError(propertyErrors, {
-				message: 'translation-validation-error',
-				type: 'validationError',
-			});
-		}
+	if (Object.keys(propertyErrors).length > 0) {
+		throw new ValidationError(propertyErrors, {
+			message: 'translation-validation-error',
+			type: 'validationError',
+		});
+	}
 
 	(context as Record<string, unknown>)[LOCALIZED_TRANSLATIONS_CONTEXT_KEY] = {
 		resourceId,
@@ -1276,7 +1278,7 @@ const localizedBeforeHook = async (
 const localizedAfterHook = async (
 	response: AdminResponseLike,
 	request: AdminRequestLike,
-	context: AdminContextLike
+	context: AdminContextLike,
 ) => {
 	const resourceId = String(context?.resource?._decorated?.id?.() ?? context?.resource?.id ?? '');
 	const definition = getLocalizedResourceDefinition(resourceId);
@@ -1297,7 +1299,7 @@ const localizedAfterHook = async (
 				typedResourceId,
 				recordId,
 				definition,
-				localizedPayload
+				localizedPayload,
 			);
 		}
 
@@ -1321,7 +1323,7 @@ const localizedAfterHook = async (
 				typedResourceId,
 				response.record as unknown as AdminRecordLike,
 				definition,
-				rows
+				rows,
 			);
 		}
 	}
@@ -1337,7 +1339,7 @@ const localizedAfterHook = async (
 					typedResourceId,
 					record as unknown as AdminRecordLike,
 					definition,
-					rows
+					rows,
 				);
 			});
 		}
@@ -1352,8 +1354,8 @@ const buildLocalizedHiddenProperties = (definition: LocalizedResourceDefinition)
 			definition.fields.map((field) => [
 				buildTranslationInputPath(locale, field.key),
 				{ isVisible: false },
-			])
-		)
+			]),
+		),
 	);
 
 const buildLocalizedEditorProperty = (definition: LocalizedResourceDefinition) => ({
@@ -1381,20 +1383,20 @@ export const resources = [
 				sortBy: 'updatedAt',
 				direction: 'desc',
 			},
-				listProperties: [
-					'name',
-					'productCode',
-					'status',
-					'basePrice',
-					'discountPrice',
-					'currency',
-					'stock',
-					'inStock',
-					'brand',
-					'category',
-					'translationCompleteness',
-					'updatedAt',
-				],
+			listProperties: [
+				'name',
+				'productCode',
+				'status',
+				'basePrice',
+				'discountPrice',
+				'currency',
+				'stock',
+				'inStock',
+				'brand',
+				'category',
+				'translationCompleteness',
+				'updatedAt',
+			],
 			filterProperties: [
 				'name',
 				'productCode',
@@ -1413,27 +1415,29 @@ export const resources = [
 				'tags',
 				'updatedAt',
 			],
-				properties: {
-					id: hidden,
-					name: {
-						components: { list: productNameListComponent },
-						isTitle: true,
-						isVisible: { list: true, filter: true, show: true, edit: false },
-					},
-					description: { isVisible: { list: false, filter: false, show: true, edit: false } },
-					guarantee: { isVisible: { list: false, filter: false, show: true, edit: false } },
-					metaTitle: { isVisible: { list: false, filter: false, show: true, edit: false } },
-					metaDescription: { isVisible: { list: false, filter: false, show: true, edit: false } },
-					canonicalUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
-					openGraphImage: { isVisible: { list: false, filter: false, show: true, edit: true } },
-					categoryName: { isVisible: { list: false, filter: false, show: true, edit: false } },
-					subcategoryName: { isVisible: { list: false, filter: false, show: true, edit: false } },
-					translationCompleteness: { isVisible: { list: true, filter: false, show: true, edit: false } },
-					localizedContentEditor: buildLocalizedEditorProperty(
-						LOCALIZED_RESOURCE_DEFINITIONS.Product
-					),
-					basePrice: { type: 'currency' },
-					discountPrice: { type: 'currency' },
+			properties: {
+				id: hidden,
+				name: {
+					components: { list: productNameListComponent },
+					isTitle: true,
+					isVisible: { list: true, filter: true, show: true, edit: false },
+				},
+				description: { isVisible: { list: false, filter: false, show: true, edit: false } },
+				guarantee: { isVisible: { list: false, filter: false, show: true, edit: false } },
+				metaTitle: { isVisible: { list: false, filter: false, show: true, edit: false } },
+				metaDescription: { isVisible: { list: false, filter: false, show: true, edit: false } },
+				canonicalUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
+				openGraphImage: { isVisible: { list: false, filter: false, show: true, edit: true } },
+				categoryName: { isVisible: { list: false, filter: false, show: true, edit: false } },
+				subcategoryName: { isVisible: { list: false, filter: false, show: true, edit: false } },
+				translationCompleteness: {
+					isVisible: { list: true, filter: false, show: true, edit: false },
+				},
+				localizedContentEditor: buildLocalizedEditorProperty(
+					LOCALIZED_RESOURCE_DEFINITIONS.Product,
+				),
+				basePrice: { type: 'currency' },
+				discountPrice: { type: 'currency' },
 				currency: {
 					isRequired: true,
 					availableValues: [{ value: 'USD', label: 'USD' }],
@@ -1464,18 +1468,18 @@ export const resources = [
 					],
 					components: { filter: selectFilterWithPlaceholderComponent },
 				},
-					createdAt: readOnly,
-					updatedAt: readOnly,
-					...buildLocalizedHiddenProperties(LOCALIZED_RESOURCE_DEFINITIONS.Product),
+				createdAt: readOnly,
+				updatedAt: readOnly,
+				...buildLocalizedHiddenProperties(LOCALIZED_RESOURCE_DEFINITIONS.Product),
+			},
+			actions: {
+				delete: { isAccessible: false, isVisible: false },
+				bulkDelete: { isAccessible: false, isVisible: false },
+				list: {
+					actionType: 'resource',
+					component: productListComponent,
+					after: localizedAfterHook,
 				},
-				actions: {
-					delete: { isAccessible: false, isVisible: false },
-					bulkDelete: { isAccessible: false, isVisible: false },
-					list: {
-						actionType: 'resource',
-						component: productListComponent,
-						after: localizedAfterHook,
-					},
 				bulkSetCategory: {
 					actionType: 'bulk',
 					icon: 'Tag',
@@ -1525,37 +1529,37 @@ export const resources = [
 					handler: withCacheRevalidationHandler(
 						bulkSeoTemplateHandler,
 						getProductMutationTags,
-						shouldRevalidateSeoTemplateApply
+						shouldRevalidateSeoTemplateApply,
 					),
 				},
-					new: {
-						before: async (request: any, context: any) => {
-							const withLocalization = await localizedBeforeHook(request, context, 'Product');
-							return validateProductNewEdit(withLocalization, context);
-						},
-						after: async (response: any, request: any, context: any) => {
-							const withGallery = await syncProductGalleryAfterHook(response, request, context);
-							return localizedAfterHook(withGallery, request, context);
-						},
-						component: productNewComponent,
+				new: {
+					before: async (request: any, context: any) => {
+						const withLocalization = await localizedBeforeHook(request, context, 'Product');
+						return validateProductNewEdit(withLocalization, context);
 					},
-					edit: {
-						before: async (request: any, context: any) => {
-							await captureProductAuditBeforeHook(request, context);
-							const withLocalization = await localizedBeforeHook(request, context, 'Product');
-							return validateProductNewEdit(withLocalization, context);
-						},
-						after: productEditAfterHook,
-						component: productEditComponent,
+					after: async (response: any, request: any, context: any) => {
+						const withGallery = await syncProductGalleryAfterHook(response, request, context);
+						return localizedAfterHook(withGallery, request, context);
+					},
+					component: productNewComponent,
+				},
+				edit: {
+					before: async (request: any, context: any) => {
+						await captureProductAuditBeforeHook(request, context);
+						const withLocalization = await localizedBeforeHook(request, context, 'Product');
+						return validateProductNewEdit(withLocalization, context);
+					},
+					after: productEditAfterHook,
+					component: productEditComponent,
 				},
 				show: {
 					actionType: 'record',
 					component: productShowComponent,
-						custom: {
-							previewBaseUrl: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
-						},
-						after: localizedAfterHook,
+					custom: {
+						previewBaseUrl: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
 					},
+					after: localizedAfterHook,
+				},
 				activityTimeline: {
 					actionType: 'record',
 					icon: 'Activity',
@@ -1575,7 +1579,7 @@ export const resources = [
 					handler: withCacheRevalidationHandler(
 						importProductsCsv,
 						getProductMutationTags,
-						shouldRevalidateImportCsvApply
+						shouldRevalidateImportCsvApply,
 					),
 				},
 				exportProductsCsv: {
@@ -1666,9 +1670,11 @@ export const resources = [
 			properties: {
 				id: hidden,
 				name: { isVisible: { list: true, filter: true, show: true, edit: false } },
-				translationCompleteness: { isVisible: { list: true, filter: false, show: true, edit: false } },
+				translationCompleteness: {
+					isVisible: { list: true, filter: false, show: true, edit: false },
+				},
 				localizedContentEditor: buildLocalizedEditorProperty(
-					LOCALIZED_RESOURCE_DEFINITIONS.ProductCategory
+					LOCALIZED_RESOURCE_DEFINITIONS.ProductCategory,
 				),
 				...buildLocalizedHiddenProperties(LOCALIZED_RESOURCE_DEFINITIONS.ProductCategory),
 			},
@@ -1692,13 +1698,13 @@ export const resources = [
 				delete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductCategoryMutationTags
+						getProductCategoryMutationTags,
 					),
 				},
 				bulkDelete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductCategoryMutationTags
+						getProductCategoryMutationTags,
 					),
 				},
 			},
@@ -1721,26 +1727,26 @@ export const resources = [
 				before: mapProductImagePayload,
 				after: withCacheRevalidationAfter(
 					syncPrimaryProductImagesAfterMutation,
-					getProductImageMutationTags
+					getProductImageMutationTags,
 				),
 			},
 			edit: {
 				before: mapProductImagePayload,
 				after: withCacheRevalidationAfter(
 					syncPrimaryProductImagesAfterMutation,
-					getProductImageMutationTags
+					getProductImageMutationTags,
 				),
 			},
 			delete: {
 				after: withCacheRevalidationAfter(
 					syncPrimaryProductImagesAfterMutation,
-					getProductImageMutationTags
+					getProductImageMutationTags,
 				),
 			},
 			bulkDelete: {
 				after: withCacheRevalidationAfter(
 					syncPrimaryProductImagesAfterMutation,
-					getProductImageMutationTags
+					getProductImageMutationTags,
 				),
 			},
 		},
@@ -1756,25 +1762,25 @@ export const resources = [
 				new: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				edit: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				delete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				bulkDelete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 			},
@@ -1791,25 +1797,25 @@ export const resources = [
 				new: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				edit: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				delete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				bulkDelete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 			},
@@ -1826,25 +1832,25 @@ export const resources = [
 				new: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				edit: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				delete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				bulkDelete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 			},
@@ -1864,26 +1870,26 @@ export const resources = [
 					before: mapAttributeSetItemPayload,
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				edit: {
 					before: mapAttributeSetItemPayload,
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				delete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 				bulkDelete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductMetadataMutationTags
+						getProductMetadataMutationTags,
 					),
 				},
 			},
@@ -1907,25 +1913,25 @@ export const resources = [
 				new: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductAttributeValueMutationTags
+						getProductAttributeValueMutationTags,
 					),
 				},
 				edit: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductAttributeValueMutationTags
+						getProductAttributeValueMutationTags,
 					),
 				},
 				delete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductAttributeValueMutationTags
+						getProductAttributeValueMutationTags,
 					),
 				},
 				bulkDelete: {
 					after: withCacheRevalidationAfter(
 						async (response: any) => response,
-						getProductAttributeValueMutationTags
+						getProductAttributeValueMutationTags,
 					),
 				},
 			},
@@ -2281,10 +2287,10 @@ export const resources = [
 			subtitle: { isVisible: { list: false, filter: false, show: true, edit: false } },
 			linkLabel: { isVisible: { list: false, filter: false, show: true, edit: false } },
 			imageUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
-			translationCompleteness: { isVisible: { list: true, filter: false, show: true, edit: false } },
-			localizedContentEditor: buildLocalizedEditorProperty(
-				LOCALIZED_RESOURCE_DEFINITIONS.Banner
-			),
+			translationCompleteness: {
+				isVisible: { list: true, filter: false, show: true, edit: false },
+			},
+			localizedContentEditor: buildLocalizedEditorProperty(LOCALIZED_RESOURCE_DEFINITIONS.Banner),
 			createdAt: readOnly,
 			updatedAt: readOnly,
 			...buildLocalizedHiddenProperties(LOCALIZED_RESOURCE_DEFINITIONS.Banner),
@@ -2314,16 +2320,10 @@ export const resources = [
 				after: localizedAfterHook,
 			},
 			delete: {
-				after: withCacheRevalidationAfter(
-					async (response: any) => response,
-					getBannerMutationTags
-				),
+				after: withCacheRevalidationAfter(async (response: any) => response, getBannerMutationTags),
 			},
 			bulkDelete: {
-				after: withCacheRevalidationAfter(
-					async (response: any) => response,
-					getBannerMutationTags
-				),
+				after: withCacheRevalidationAfter(async (response: any) => response, getBannerMutationTags),
 			},
 		},
 	}),
@@ -2347,23 +2347,21 @@ export const resources = [
 			metaTitle: { isVisible: { list: false, filter: false, show: true, edit: false } },
 			metaDescription: { isVisible: { list: false, filter: false, show: true, edit: false } },
 			canonicalUrl: { isVisible: { list: false, filter: false, show: true, edit: true } },
-			translationCompleteness: { isVisible: { list: true, filter: false, show: true, edit: false } },
-			localizedContentEditor: buildLocalizedEditorProperty(
-				LOCALIZED_RESOURCE_DEFINITIONS.Page
-			),
+			translationCompleteness: {
+				isVisible: { list: true, filter: false, show: true, edit: false },
+			},
+			localizedContentEditor: buildLocalizedEditorProperty(LOCALIZED_RESOURCE_DEFINITIONS.Page),
 			createdAt: readOnly,
 			updatedAt: readOnly,
 			...buildLocalizedHiddenProperties(LOCALIZED_RESOURCE_DEFINITIONS.Page),
 		},
 		actions: {
 			new: {
-				before: async (request: any, context: any) =>
-					localizedBeforeHook(request, context, 'Page'),
+				before: async (request: any, context: any) => localizedBeforeHook(request, context, 'Page'),
 				after: localizedAfterHook,
 			},
 			edit: {
-				before: async (request: any, context: any) =>
-					localizedBeforeHook(request, context, 'Page'),
+				before: async (request: any, context: any) => localizedBeforeHook(request, context, 'Page'),
 				after: localizedAfterHook,
 			},
 			show: {
@@ -2373,16 +2371,10 @@ export const resources = [
 				after: localizedAfterHook,
 			},
 			delete: {
-				after: withCacheRevalidationAfter(
-					async (response: any) => response,
-					getPageMutationTags
-				),
+				after: withCacheRevalidationAfter(async (response: any) => response, getPageMutationTags),
 			},
 			bulkDelete: {
-				after: withCacheRevalidationAfter(
-					async (response: any) => response,
-					getPageMutationTags
-				),
+				after: withCacheRevalidationAfter(async (response: any) => response, getPageMutationTags),
 			},
 		},
 	}),
@@ -2402,25 +2394,25 @@ export const resources = [
 			new: {
 				after: withCacheRevalidationAfter(
 					async (response: any) => response,
-					getStorefrontFormMutationTags
+					getStorefrontFormMutationTags,
 				),
 			},
 			edit: {
 				after: withCacheRevalidationAfter(
 					async (response: any) => response,
-					getStorefrontFormMutationTags
+					getStorefrontFormMutationTags,
 				),
 			},
 			delete: {
 				after: withCacheRevalidationAfter(
 					async (response: any) => response,
-					getStorefrontFormMutationTags
+					getStorefrontFormMutationTags,
 				),
 			},
 			bulkDelete: {
 				after: withCacheRevalidationAfter(
 					async (response: any) => response,
-					getStorefrontFormMutationTags
+					getStorefrontFormMutationTags,
 				),
 			},
 		},
@@ -2658,12 +2650,14 @@ export const resources = [
 				revokeSession: {
 					actionType: 'record',
 					isVisible: false,
+					isAccessible: isFullAdmin,
 					component: false,
 					handler: revokeSession,
 				},
 				updateUserAdminMeta: {
 					actionType: 'record',
 					isVisible: false,
+					isAccessible: isFullAdmin,
 					component: false,
 					handler: updateUserAdminMeta,
 				},

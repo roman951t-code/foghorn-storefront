@@ -2,18 +2,12 @@
 
 import Link from 'next/link';
 import { GLOBAL_NOT_FOUND_MESSAGES } from '@/constants/errors';
-import {
-	DEFAULT_LOCALE,
-	LANGUAGE_OPTIONS,
-	LOCALE_TO_HTML_LANG,
-	type AppLocale,
-} from '@/constants/locales';
+import { DEFAULT_LOCALE, getHtmlLang, isAppLocale, type AppLocale } from '@/constants/locales';
 
 const getLocaleFromPath = (): AppLocale => {
 	if (typeof window === 'undefined') return DEFAULT_LOCALE;
 	const [, maybeLocale] = window.location.pathname.split('/');
-	const isSupportedLocale = LANGUAGE_OPTIONS.some(({ value }) => value === maybeLocale);
-	return isSupportedLocale ? (maybeLocale as AppLocale) : DEFAULT_LOCALE;
+	return isAppLocale(maybeLocale) ? maybeLocale : DEFAULT_LOCALE;
 };
 
 const styles = {
@@ -80,7 +74,7 @@ const styles = {
 
 export default function GlobalNotFound() {
 	const locale = getLocaleFromPath();
-	const htmlLang = LOCALE_TO_HTML_LANG[locale] ?? LOCALE_TO_HTML_LANG[DEFAULT_LOCALE];
+	const htmlLang = getHtmlLang(locale);
 	const copy = GLOBAL_NOT_FOUND_MESSAGES[locale] ?? GLOBAL_NOT_FOUND_MESSAGES[DEFAULT_LOCALE];
 
 	return (

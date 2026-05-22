@@ -1,6 +1,8 @@
+import { APP_LOCALES, DEFAULT_LOCALE } from './src/constants/locales';
+
 export default {
-	locales: ['uk', 'en'],
-	defaultLocale: 'uk',
+	locales: APP_LOCALES,
+	defaultLocale: DEFAULT_LOCALE,
 	localePrefix: 'as-needed',
 	messages: {
 		uk: () => import('./locales/uk.json'),

@@ -19,7 +19,9 @@ interface Props {
 export default function CatalogPanel({ i18nData, promoCards }: Props) {
 	const { categories } = useCatalog();
 	const TARGET_CATEGORIES = 9;
-	const categoriesWithChildren = categories.filter((category) => (category.children?.length ?? 0) > 0);
+	const categoriesWithChildren = categories.filter(
+		(category) => (category.children?.length ?? 0) > 0,
+	);
 	const panelCategories = categoriesWithChildren.slice(0, TARGET_CATEGORIES);
 	const uiCategories =
 		categories.length === 0
@@ -113,8 +115,8 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 									isHighlighted
 										? 'bgHover.promoCard'
 										: index % 2 === 0
-										? 'catalog.bgEven'
-										: 'catalog.bgOdd'
+											? 'catalog.bgEven'
+											: 'catalog.bgOdd'
 								}
 								borderWidth='0.5px'
 								borderStyle='solid'
@@ -145,7 +147,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 								</HStack>
 
 								<Icon
-									fontSize='18px'
+									fontSize='16px'
 									color={isHighlighted ? 'main' : 'gray.500'}
 									transition='transform 0.15s ease-in-out'
 									transform={isHighlighted ? 'translateX(2px)' : 'none'}

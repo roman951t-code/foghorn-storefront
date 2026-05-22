@@ -44,7 +44,7 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 	};
 
 	return (
-		<Stack gap='6' colorPalette='gray'>
+		<Stack gap='4' colorPalette='gray'>
 			<Card.Root
 				size='sm'
 				minWidth='200px'
@@ -55,9 +55,9 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 				bg='bg.tertiary'
 				overflow='hidden'
 			>
-				<Card.Body p={{ base: '4', sm: '5' }}>
-					<Flex justifyContent='space-between' alignItems='flex-start' gap='4' flexWrap='wrap'>
-						<Stack gap='3' minW={{ base: '100%', sm: '320px' }}>
+				<Card.Body p={{ base: '3', sm: '4' }}>
+					<Flex justifyContent='space-between' alignItems='center' gap='3' flexWrap='wrap'>
+						<Stack gap='2' minW={{ base: '100%', sm: '280px' }}>
 							<HStack gap='2' flexWrap='wrap'>
 								<Text fontWeight='semibold' color='main'>
 									{prodT('feedback')}
@@ -66,7 +66,7 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 							</HStack>
 
 							{reviewCount > 0 ? (
-								<HStack gap='3' alignItems='center' flexWrap='wrap'>
+								<HStack gap='2.5' alignItems='center' flexWrap='wrap'>
 									<Tooltip
 										content={`${effectiveAverageRating.toFixed(2)}`}
 										contentProps={{ color: 'black', bg: 'bg.accent' }}
@@ -74,8 +74,8 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 										openDelay={100}
 										closeDelay={100}
 									>
-										<HStack gap='3' cursor='pointer'>
-											<Text fontSize='3xl' fontWeight='bold' color='main'>
+										<HStack gap='2.5' cursor='pointer'>
+											<Text fontSize='2xl' fontWeight='bold' color='main' lineHeight='1'>
 												{effectiveAverageRating.toFixed(1)}
 											</Text>
 											<Rating
@@ -111,9 +111,9 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 					borderColor='border'
 					bg='bg.tertiary'
 				>
-					<Card.Header>
-						<Flex justifyContent='space-between'>
-							<Stack gap='1.5'>
+					<Card.Header p='4' pb='2'>
+						<Flex justifyContent='space-between' alignItems='flex-start' gap='3'>
+							<Stack gap='1'>
 								<Text fontWeight='semibold' fontSize='md' color='main'>
 									{`${review.user.name} ${review.user.lastName ?? ''}`}
 								</Text>
@@ -122,53 +122,41 @@ export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Pr
 									readOnly
 									allowHalf
 									size='sm'
-									defaultValue={review.rating}
+									value={review.rating}
 								/>
 							</Stack>
 
 							<DateWithLocale date={review.createdAt} />
 						</Flex>
 					</Card.Header>
-					<Separator mt='4' color='border' />
-					<Card.Body color='main' flexDirection='row'>
+					<Separator color='border' />
+					<Card.Body color='main' flexDirection='row' p='4' pt='3' gap='3'>
 						<DataList.Root flex='1'>
 							{review.advantages && (
-								<DataList.Item gap='2.5'>
-									<DataList.ItemLabel
-										fontSize={{ base: 'md', md: '15px' }}
-										fontWeight='semibold'
-										color='main'
-									>
+								<DataList.Item gap='1.5'>
+									<DataList.ItemLabel fontSize='sm' fontWeight='semibold' color='main'>
 										{prodT('advantages')}
 									</DataList.ItemLabel>
-									<DataList.ItemValue fontSize={{ base: 'md', md: '15px' }} wordBreak='break-word'>
+									<DataList.ItemValue fontSize='sm' wordBreak='break-word'>
 										{review.advantages}
 									</DataList.ItemValue>
 								</DataList.Item>
 							)}
 							{review.disadvantages && (
-								<DataList.Item gap='2.5'>
-									<DataList.ItemLabel
-										fontSize={{ base: 'md', md: '15px' }}
-										fontWeight='semibold'
-										color='main'
-									>
+								<DataList.Item gap='1.5'>
+									<DataList.ItemLabel fontSize='sm' fontWeight='semibold' color='main'>
 										{prodT('disAdvantages')}
 									</DataList.ItemLabel>
-									<DataList.ItemValue fontSize={{ base: 'md', md: '15px' }} wordBreak='break-word'>
+									<DataList.ItemValue fontSize='sm' wordBreak='break-word'>
 										{review.disadvantages}
 									</DataList.ItemValue>
 								</DataList.Item>
 							)}
-							<DataList.Item gap='2.5'>
-								<DataList.ItemLabel
-									fontSize={{ base: 'md', md: '15px' }}
-									fontWeight='semibold'
-									color='main'
-								>
+							<DataList.Item gap='1.5'>
+								<DataList.ItemLabel fontSize='sm' fontWeight='semibold' color='main'>
 									{prodT('comment')}
 								</DataList.ItemLabel>
-								<DataList.ItemValue fontSize={{ base: 'md', md: '15px' }} wordBreak='break-word'>
+								<DataList.ItemValue fontSize='sm' wordBreak='break-word'>
 									{review.comment}
 								</DataList.ItemValue>
 							</DataList.Item>

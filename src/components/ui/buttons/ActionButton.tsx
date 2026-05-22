@@ -1,11 +1,15 @@
 import { Button, type ButtonProps } from '@chakra-ui/react';
-import { ReactNode } from 'react';
+import { forwardRef, type ReactNode } from 'react';
 
 type Props = ButtonProps & { children?: ReactNode };
 
-export function PrimaryButton({ children, ...props }: Props) {
+export const PrimaryButton = forwardRef<HTMLButtonElement, Props>(function PrimaryButton(
+	{ children, ...props },
+	ref,
+) {
 	return (
 		<Button
+			ref={ref}
 			color='black'
 			colorPalette='gray'
 			bg={{ base: 'bg.accent', _hover: 'bgHover.accent' }}
@@ -16,11 +20,15 @@ export function PrimaryButton({ children, ...props }: Props) {
 			{children}
 		</Button>
 	);
-}
+});
 
-export function SecondaryButton({ children, ...props }: Props) {
+export const SecondaryButton = forwardRef<HTMLButtonElement, Props>(function SecondaryButton(
+	{ children, ...props },
+	ref,
+) {
 	return (
 		<Button
+			ref={ref}
 			colorPalette='gray'
 			color='main'
 			bgColor={{ base: 'main' }}
@@ -36,11 +44,15 @@ export function SecondaryButton({ children, ...props }: Props) {
 			{children}
 		</Button>
 	);
-}
+});
 
-export function TertiaryButton({ children, ...props }: Props) {
+export const TertiaryButton = forwardRef<HTMLButtonElement, Props>(function TertiaryButton(
+	{ children, ...props },
+	ref,
+) {
 	return (
 		<Button
+			ref={ref}
 			colorPalette='gray'
 			color='main'
 			variant='outline'
@@ -53,11 +65,15 @@ export function TertiaryButton({ children, ...props }: Props) {
 			{children}
 		</Button>
 	);
-}
+});
 
-export function AlertButton({ children, ...props }: Props) {
+export const AlertButton = forwardRef<HTMLButtonElement, Props>(function AlertButton(
+	{ children, ...props },
+	ref,
+) {
 	return (
 		<Button
+			ref={ref}
 			colorPalette='red'
 			variant={{
 				base: 'subtle',
@@ -69,4 +85,4 @@ export function AlertButton({ children, ...props }: Props) {
 			{children}
 		</Button>
 	);
-}
+});

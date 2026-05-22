@@ -1,6 +1,5 @@
 import { ReactNode, Suspense } from 'react';
 import { Box, Link } from '@chakra-ui/react';
-import { hasLocale } from 'next-intl';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
@@ -14,35 +13,83 @@ import 'swiper/css/navigation';
 import '@/styles/swiper.css';
 import { routing } from '@/i18n/routing';
 import { loadClientMessages } from '@/utils/i18nUtils';
-import { auth } from '@/lib/auth';
+import { CLIENT_MESSAGE_NAMESPACES } from '@/i18n/messages';
 import { SessionProvider } from '@/providers/SessionProvider';
 import { ColorModeProvider } from '@/components/ui/chakra/color-mode';
-import { getCartItems } from '@/actions/cart/getCartItems';
 import { getCatalog } from '@/actions/products/getCatalog';
-import { getWishListProducts } from '@/actions/wishlist/getWishListProducts';
 import { fontVariableClassName } from '@/lib/fonts';
 import { AppStoreHydrator } from '@/providers/AppStoreHydrator';
-import { LOCALE_TO_HTML_LANG, DEFAULT_LOCALE } from '@/constants/locales';
-import { EMPTY_CART_DATA } from '@/constants/cart';
+import { getHtmlLang, isAppLocale } from '@/constants/locales';
 import type { AppLocale } from '@/constants/locales';
 import type { Metadata } from 'next';
-import { APP_URL } from '@/utils/seo';
+import { APP_URL, localizePath } from '@/utils/seo';
 import CookieConsentBanner from '@/components/layout/CookieConsentBanner';
 import { getEnabledStorefrontForms } from '@/actions/storefront/getEnabledStorefrontForms';
 import { StorefrontFormPlacement } from '@prisma/client';
 
 export const metadata: Metadata = {
 	metadataBase: new URL(APP_URL),
+	applicationName: 'Online Store',
 	title: {
-		default: 'Online Store',
+		default: 'Online Store | Electronics, Home Goods and Everyday Essentials',
 		template: '%s | Online Store',
 	},
-	description: 'Online Store catalog with secure checkout, fast delivery, and trusted product guarantees.',
+	description:
+		'Shop electronics, home goods, and everyday essentials online with secure checkout, fast delivery across Ukraine, warranty support, and fresh product deals.',
+	keywords: [
+		'online store',
+		'product catalog',
+		'electronics',
+		'home goods',
+		'Ukraine delivery',
+		'secure checkout',
+	],
+	creator: 'Online Store',
+	publisher: 'Online Store',
+	category: 'ecommerce',
+	referrer: 'origin-when-cross-origin',
+	formatDetection: {
+		telephone: false,
+		address: false,
+		email: false,
+	},
+	robots: {
+		index: true,
+		follow: true,
+		googleBot: {
+			index: true,
+			follow: true,
+			'max-image-preview': 'large',
+			'max-snippet': -1,
+			'max-video-preview': -1,
+		},
+	},
+	icons: {
+		icon: [{ url: '/assets/images/logoSmall.webp', type: 'image/webp' }],
+		apple: [{ url: '/assets/images/logoSmall.webp', type: 'image/webp' }],
+	},
 	openGraph: {
 		siteName: 'Online Store',
+		type: 'website',
+		url: APP_URL,
+		title: 'Online Store | Electronics, Home Goods and Everyday Essentials',
+		description:
+			'Shop electronics, home goods, and everyday essentials online with secure checkout, fast delivery across Ukraine, warranty support, and fresh product deals.',
+		images: [
+			{
+				url: '/assets/images/logoBig.webp',
+				width: 1200,
+				height: 630,
+				alt: 'Online Store',
+			},
+		],
 	},
 	twitter: {
 		card: 'summary_large_image',
+		title: 'Online Store | Electronics, Home Goods and Everyday Essentials',
+		description:
+			'Shop electronics, home goods, and everyday essentials online with secure checkout, fast delivery across Ukraine, warranty support, and fresh product deals.',
+		images: ['/assets/images/logoBig.webp'],
 	},
 };
 
@@ -52,85 +99,69 @@ export function generateStaticParams() {
 
 interface Props {
 	children: ReactNode;
-	params: { locale: AppLocale };
+	params: { locale: string };
 }
 
 function LayoutFallback() {
 	return <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }} />;
 }
 
-async function LayoutProviders({
-	children,
-	locale,
-}: {
-	children: ReactNode;
-	locale: AppLocale;
-}) {
-	const skipToMainLabel =
-		locale === 'uk' ? 'Перейти до основного вмісту' : 'Skip to main content';
+async function LayoutProviders({ children, locale }: { children: ReactNode; locale: AppLocale }) {
+	const skipToMainLabel = locale === 'uk' ? 'Перейти до основного вмісту' : 'Skip to main content';
+	const htmlLang = getHtmlLang(locale);
 	const headersList = await headers();
 	const cspNonce = headersList.get('x-csp-nonce') ?? undefined;
 
-	const messagesPromise = loadClientMessages([
-		'common',
-		'auth',
-		'validation',
-		'products',
-		'cart',
-		'navigation',
-		'wishlist',
-		'pages',
-		'errors',
-		'checkout',
-		'orders',
-		'pagination',
-	]);
+	const messagesPromise = loadClientMessages(CLIENT_MESSAGE_NAMESPACES);
 
-	const sessionPromise = auth.api.getSession({ headers: headersList });
 	const catalogPromise = getCatalog(locale);
 	const cookieBannerPromise = getEnabledStorefrontForms(StorefrontFormPlacement.COOKIE_BANNER);
 
-	const [messages, session, catalogResponse, cookieBanners] = await Promise.all([
+	const [messages, catalogResponse, cookieBanners] = await Promise.all([
 		messagesPromise,
-		sessionPromise,
 		catalogPromise,
 		cookieBannerPromise,
 	]);
 
-	const userId = session?.user?.id ?? null;
-
-	const cartPromise = userId ? getCartItems(userId) : Promise.resolve({ success: true, items: [] });
-	const wishListPromise = userId ? getWishListProducts(userId) : Promise.resolve({ products: [] });
-
-	const [cartResponse, wishListData] = await Promise.all([cartPromise, wishListPromise]);
-
-	const { success, ...restCartData } = cartResponse;
-	const cartProductIds = success
-		? { success: true, productIds: restCartData.items?.map((item) => item.productId) ?? [] }
-		: { success: false, productIds: [] };
-	const wishListIds = { success: true, productIds: wishListData?.products?.map((p) => p.id) ?? [] };
-
 	const orgJsonLd = {
 		'@context': 'https://schema.org',
-		'@type': 'Organization',
-		name: 'Online Store',
-		url: APP_URL,
-		logo: `${APP_URL}/assets/images/logoBig.webp`,
-		sameAs: [] as string[],
+		'@graph': [
+			{
+				'@type': 'Organization',
+				'@id': `${APP_URL}/#organization`,
+				name: 'Online Store',
+				url: APP_URL,
+				logo: `${APP_URL}/assets/images/logoBig.webp`,
+				sameAs: [] as string[],
+			},
+			{
+				'@type': 'WebSite',
+				'@id': `${APP_URL}/#website`,
+				name: 'Online Store',
+				url: APP_URL,
+				publisher: { '@id': `${APP_URL}/#organization` },
+				inLanguage: htmlLang,
+				potentialAction: {
+					'@type': 'SearchAction',
+					target: `${APP_URL}${localizePath(locale, '/products/search')}?searchQuery={search_term_string}`,
+					'query-input': 'required name=search_term_string',
+				},
+			},
+		],
 	};
 
 	return (
 		<ChakraUIProvider nonce={cspNonce}>
 			<Box display='flex' flexDirection='column' minHeight='100vh' gap='6' bg='bg.primary'>
-				<SessionProvider initialSession={session}>
+				<SessionProvider initialSession={null}>
 					<NextIntlClientProvider messages={messages}>
 						<AppStoreHydrator
 							categories={catalogResponse.catalog}
-							cartData={success ? restCartData : EMPTY_CART_DATA}
-							cartProductIds={cartProductIds}
-							wishListData={wishListData?.products ?? []}
-							wishListIds={wishListIds}
-							isLoggedIn={!!userId}
+							cartData={{ items: [] }}
+							cartProductIds={{ success: true, productIds: [] }}
+							wishListData={[]}
+							wishListIds={{ success: true, productIds: [] }}
+							isLoggedIn={false}
 						>
 							<Script id='org-schema' nonce={cspNonce} type='application/ld+json'>
 								{JSON.stringify(orgJsonLd)}
@@ -175,15 +206,15 @@ async function LayoutProviders({
 
 export default async function Layout({ children, params }: Props) {
 	const { locale } = await params;
-	if (!hasLocale(routing.locales, locale)) {
+	if (!isAppLocale(locale)) {
 		notFound();
 	}
 
-	const htmlLang = LOCALE_TO_HTML_LANG[locale] ?? LOCALE_TO_HTML_LANG[DEFAULT_LOCALE];
+	const htmlLang = getHtmlLang(locale);
 
 	return (
 		<html lang={htmlLang} suppressHydrationWarning>
-			<body className={fontVariableClassName}>
+			<body className={fontVariableClassName} suppressHydrationWarning>
 				<ColorModeProvider>
 					<Suspense fallback={<LayoutFallback />}>
 						<LayoutProviders locale={locale}>{children}</LayoutProviders>

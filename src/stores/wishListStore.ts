@@ -5,6 +5,7 @@ import { mergeWishListData } from '@/actions/wishlist/mergeWishListData';
 import { addToWishList } from '@/actions/wishlist/addToWishList';
 import { removeFromWishList } from '@/actions/wishlist/removeFromWishList';
 import { clearWishlist } from '@/actions/wishlist/clearWishList';
+import { hydrateGuestWishlistItems } from '@/actions/wishlist/hydrateGuestWishlistItems';
 import type { SubcategoryProduct } from '@/types/product';
 
 const LOCAL_STORAGE_KEY = 'guest_wishlist';
@@ -27,17 +28,25 @@ function uniqueWishlistIds(ids: string[]) {
 
 function saveGuestWishlist(items: SubcategoryProduct[]) {
 	if (typeof window !== 'undefined') {
-		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(uniqueWishlistItems(items)));
+		localStorage.setItem(
+			LOCAL_STORAGE_KEY,
+			JSON.stringify(uniqueWishlistItems(items).map((item) => item.id)),
+		);
 	}
 }
 
-function loadGuestWishlist(): SubcategoryProduct[] {
+function loadGuestWishlistIds(): string[] {
 	if (typeof window === 'undefined') return [];
 	const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
 	if (!stored) return [];
 	try {
-		const parsed = JSON.parse(stored) as (SubcategoryProduct | null)[];
-		return uniqueWishlistItems(parsed.filter((p): p is SubcategoryProduct => p !== null));
+		const parsed = JSON.parse(stored) as (string | SubcategoryProduct | null)[];
+		if (!Array.isArray(parsed)) return [];
+		return uniqueWishlistIds(
+			parsed
+				.map((item) => (typeof item === 'string' ? item : item?.id))
+				.filter((id): id is string => Boolean(id)),
+		);
 	} catch {
 		return [];
 	}
@@ -59,7 +68,7 @@ type WishListStore = {
 	setItems: (items: SubcategoryProduct[]) => void;
 	setIds: (ids: string[]) => void;
 	setInitialData: (items: SubcategoryProduct[], ids: string[]) => void;
-	hydrateGuestWishlist: () => void;
+	hydrateGuestWishlist: () => Promise<void>;
 	mergeGuestWishlistIntoServer: () => Promise<void>;
 	handleWishAdd: (product: SubcategoryProduct) => Promise<{ success: boolean }>;
 	handleWishRemove: (productId: string) => Promise<{ success: boolean }>;
@@ -83,18 +92,26 @@ export const useWishListStore = createBoundedStore<WishListStore>((set, get) => 
 		const nextIds = uniqueWishlistIds(ids?.length ? ids : nextItems.map((p) => p.id));
 		set({ items: nextItems, ids: nextIds, isHydrated: true });
 	},
-	hydrateGuestWishlist: () => {
-		const guest = loadGuestWishlist();
-		set({ items: guest, ids: guest.map((p) => p.id), isHydrated: true });
+	hydrateGuestWishlist: async () => {
+		const guestIds = loadGuestWishlistIds();
+		if (guestIds.length === 0) {
+			set({ items: [], ids: [], isHydrated: true });
+			return;
+		}
+		try {
+			const guest = uniqueWishlistItems(await hydrateGuestWishlistItems(guestIds));
+			set({ items: guest, ids: guest.map((p) => p.id), isHydrated: true });
+			saveGuestWishlist(guest);
+		} catch {
+			set({ items: [], ids: [], isHydrated: true });
+		}
 	},
 	mergeGuestWishlistIntoServer: async () => {
-		const local = loadGuestWishlist();
-		if (local.length === 0) return;
-
-		set({ items: local, ids: local.map((p) => p.id), isHydrated: true });
+		const localIds = loadGuestWishlistIds();
+		if (localIds.length === 0) return;
 
 		try {
-			const merged = await mergeWishListData(local.map(({ id }) => ({ id })));
+			const merged = await mergeWishListData(localIds.map((id) => ({ id })));
 			if (!merged?.success) return;
 
 			localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -170,7 +187,11 @@ export const useWishListStore = createBoundedStore<WishListStore>((set, get) => 
 			set((state) => {
 				const updated = state.items.filter((p) => p.id !== productId);
 				saveGuestWishlist(updated);
-				return { items: updated, ids: state.ids.filter((id) => id !== productId), isHydrated: true };
+				return {
+					items: updated,
+					ids: state.ids.filter((id) => id !== productId),
+					isHydrated: true,
+				};
 			});
 			return { success: true };
 		}

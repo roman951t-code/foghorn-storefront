@@ -24,14 +24,7 @@ export default function Logo() {
 
 	return (
 		<Link href='/' aria-label='Go to homepage'>
-			<Image
-				src={logoSrc}
-				alt='logo'
-				width={logoWidth}
-				height={logoHeight}
-				style={{ width: 'auto' }}
-				priority
-			/>
+			<Image src={logoSrc} alt='logo' width={logoWidth} height={logoHeight} priority />
 		</Link>
 	);
 }

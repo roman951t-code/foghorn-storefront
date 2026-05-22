@@ -9,7 +9,7 @@ import { buildUserRestrictionMessage, isRestrictedUserAdminStatus } from '@/lib/
 
 export async function loginEmailAction(
 	_: unknown,
-	formData: unknown
+	formData: unknown,
 ): Promise<{ success: boolean; message?: string } | undefined> {
 	const validationT = await getTranslations('validation');
 

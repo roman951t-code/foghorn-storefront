@@ -1,5 +1,7 @@
+'use client';
+
 import { Button, HStack } from '@chakra-ui/react';
-import { JSX } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslations } from 'next-intl';
 import {
 	DrawerActionTrigger,
@@ -19,27 +21,26 @@ interface Props {
 	fullText: boolean;
 	hideBelow?: string;
 	hideFrom?: string;
-	trigger?: JSX.Element;
+	trigger?: ReactElement;
 }
 
 export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: Props) {
 	const t = useTranslations('common');
 	const authT = useTranslations('auth');
 	const catalogFull = t('catalogFull');
-	const text = fullText ? catalogFull : 'Каталог';
+	const text = fullText ? catalogFull : t('catalog');
+	const triggerElement = trigger ?? (
+		<PrimaryButton width={fullText ? '100%' : undefined} hideBelow={hideBelow} hideFrom={hideFrom}>
+			<TbCategory2 />
+			{text}
+		</PrimaryButton>
+	);
 
 	return (
 		<HStack wrap='wrap'>
 			<DrawerRoot size='full' placement='top'>
 				<DrawerBackdrop />
-				<DrawerTrigger asChild>
-					{trigger || (
-						<PrimaryButton width={fullText ? '100%' : ''} hideBelow={hideBelow} hideFrom={hideFrom}>
-							<TbCategory2 />
-							{text}
-						</PrimaryButton>
-					)}
-				</DrawerTrigger>
+				<DrawerTrigger asChild>{triggerElement}</DrawerTrigger>
 				<DrawerContent
 					w={{ base: '96%', xl: '77%' }}
 					maxW='1460px'
