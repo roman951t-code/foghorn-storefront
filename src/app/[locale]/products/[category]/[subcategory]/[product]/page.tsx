@@ -4,10 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
 import { getProductBySlugCached } from '@/actions/products/getProductBySlug';
 import { notFound } from 'next/navigation';
-import { auth } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
-import { trackProductView } from '@/actions/products/trackProductView';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
 import Script from 'next/script';
 import { ProductParams } from '@/types/routing';
@@ -24,6 +21,11 @@ import ProductsSection, {
 } from '@/features/catalog/ProductsSection';
 import { getProductsBySubcategorySlug } from '@/actions/products/getProductsBySubcategorySlug';
 import { isProductTabValue } from '@/constants/products';
+import ProductPersonalization from '@/features/product/ProductPersonalization';
+import { getProductStaticParams } from '@/actions/products/getCatalogStaticParams';
+
+// Route intent: public product data stays cache-first; user review/view tracking is client no-store.
+export const generateStaticParams = getProductStaticParams;
 
 type Props = ProductParams & { searchParams: { tab?: string; image?: string } };
 
@@ -57,7 +59,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 		`/products/${category}/${subcategory}/${productSlug}`,
 		{
 			...(resolvedSearch?.tab ? { tab: resolvedSearch.tab } : {}),
-		}
+		},
 	);
 	const canonical = toAbsolute(productData.canonicalUrl) ?? alternates?.canonical;
 	const image = absoluteUrl(resolveProductPrimaryImage(productData.imageUrl));
@@ -89,7 +91,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 export default async function ProductDetail({ params, searchParams }: Props) {
 	const { category, subcategory, product, locale } = ensureParams(
 		productParamsSchema,
-		await params
+		await params,
 	);
 	const { tab, image } = ensureParams(productSearchParamsSchema, await searchParams);
 	const selectedTab = tab && isProductTabValue(tab) ? tab : 'about';
@@ -99,10 +101,10 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 
 	const headersList = await headers();
 	const cspNonce = headersList.get('x-csp-nonce') ?? undefined;
-	const [productData, session, productsT, subcategoryProductsData] = await Promise.all([
+	const [productData, productsT, pagesT, subcategoryProductsData] = await Promise.all([
 		getProductBySlugCached(product, locale),
-		auth.api.getSession({ headers: headersList }),
 		getTranslations('products'),
+		getTranslations({ locale, namespace: 'pages' }),
 		getProductsBySubcategorySlug(
 			subcategory,
 			DEFAULT_PRODUCTS_SECTION_LIMIT + 1,
@@ -113,41 +115,16 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 			undefined,
 			undefined,
 			undefined,
-			locale
+			locale,
 		),
 	]);
-	const userId = session?.user?.id;
+	const homeLabel = pagesT('main.title');
 
 	if (!productData) notFound();
-	const ownReviewId =
-		userId && productData.reviews.length > 0
-			? (
-					await prisma.review.findUnique({
-						where: {
-							userId_productId: {
-								userId,
-								productId: productData.id,
-							},
-						},
-						select: { id: true },
-					})
-			  )?.id ?? null
-			: null;
-	const productWithReviewOwnership = {
-		...productData,
-		reviews: productData.reviews.map((review) => ({
-			...review,
-			isMine: !!ownReviewId && review.id === ownReviewId,
-		})),
-	};
 
 	const sameSubcategoryProducts = (subcategoryProductsData?.products ?? [])
 		.filter((sameSubcategoryProduct) => sameSubcategoryProduct.id !== productData.id)
 		.slice(0, DEFAULT_PRODUCTS_SECTION_LIMIT);
-
-	if (userId) {
-		await trackProductView(userId, productData.id);
-	}
 
 	const canonicalPath = localizePath(locale, `/products/${category}/${subcategory}/${product}`);
 	const toAbsolute = (url?: string | null) => {
@@ -196,7 +173,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 						bestRating: 5,
 						worstRating: 1,
 					},
-			  }))
+				}))
 			: [];
 
 	const breadcrumbsJsonLd = {
@@ -206,7 +183,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 			{
 				'@type': 'ListItem',
 				position: 1,
-				name: 'Home',
+				name: homeLabel,
 				item: absoluteUrl(localizePath(locale, '/')),
 			},
 			{
@@ -272,6 +249,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 			<Script id='breadcrumbs-schema' nonce={cspNonce} type='application/ld+json'>
 				{JSON.stringify(breadcrumbsJsonLd)}
 			</Script>
+			<ProductPersonalization productId={productData.id} reviews={productData.reviews} />
 
 			<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>
 				<Breadcrumbs
@@ -285,7 +263,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 
 				<ProductTabs
 					tab={tab}
-					product={productWithReviewOwnership}
+					product={productData}
 					category={category}
 					subcategory={subcategory}
 					initialImageIndex={initialImageIndex}

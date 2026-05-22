@@ -26,7 +26,7 @@ function WishListButton({ count, onClick }: { count: number; onClick?: () => voi
 		>
 			{count > 0 && (
 				<Float offset='0.5'>
-					<Circle size='5' bg='bg.accent' color='black' fontSize='14px' fontWeight='semibold'>
+					<Circle size='4.5' bg='bg.accent' color='black' fontSize='13px' fontWeight='semibold'>
 						{count}
 					</Circle>
 				</Float>

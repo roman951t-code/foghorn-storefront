@@ -52,26 +52,26 @@ export async function POST(req: Request) {
 
 	try {
 		switch (event.type) {
-				case 'checkout.session.completed':
-				case 'checkout.session.async_payment_succeeded': {
-					const session = event.data.object as Stripe.Checkout.Session;
-					const result = await finalizeStripeOrderAsSystem(session.id);
-					if (!result.success) {
-						recordApi5xxEvent({
-							route: '/api/payments/stripe/webhook',
-							statusCode: 500,
-							error: result.message,
-						});
-						recordStripeWebhookFailure({
-							stage: 'finalize-failed',
-							error: result.message,
-							eventType: event.type,
-							sessionId: session.id,
-						});
-						return NextResponse.json({ error: result.message }, { status: 500 });
-					}
-					break;
+			case 'checkout.session.completed':
+			case 'checkout.session.async_payment_succeeded': {
+				const session = event.data.object as Stripe.Checkout.Session;
+				const result = await finalizeStripeOrderAsSystem(session.id);
+				if (!result.success) {
+					recordApi5xxEvent({
+						route: '/api/payments/stripe/webhook',
+						statusCode: 500,
+						error: result.message,
+					});
+					recordStripeWebhookFailure({
+						stage: 'finalize-failed',
+						error: result.message,
+						eventType: event.type,
+						sessionId: session.id,
+					});
+					return NextResponse.json({ error: result.message }, { status: 500 });
 				}
+				break;
+			}
 			default:
 				break;
 		}

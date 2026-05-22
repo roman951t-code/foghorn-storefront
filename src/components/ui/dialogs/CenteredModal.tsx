@@ -43,7 +43,7 @@ export default function CenteredModal({
 				.toLowerCase()
 				.replace(/[^a-z0-9]+/g, '-')
 				.replace(/^-+|-+$/g, '')}`,
-		[dialogId, title]
+		[dialogId, title],
 	);
 
 	const idBase = baseId || 'dialog';
@@ -55,7 +55,7 @@ export default function CenteredModal({
 			title: `${idBase}-title`,
 			description: `${idBase}-description`,
 		}),
-		[idBase]
+		[idBase],
 	);
 
 	return (
@@ -76,7 +76,7 @@ export default function CenteredModal({
 			<DialogContent bg='bg.tertiary' minWidth='350px'>
 				<DialogHeader>
 					<DialogTitle
-						fontSize='2xl'
+						fontSize='xl'
 						w='100%'
 						fontWeight='medium'
 						whiteSpace='pre-line'
@@ -89,7 +89,14 @@ export default function CenteredModal({
 					</DialogTitle>
 				</DialogHeader>
 				<DialogBody>{children}</DialogBody>
-				<DialogCloseTrigger _focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }} borderColor={{ _hover: 'border' }} />
+				<DialogCloseTrigger
+					_focusVisible={{
+						outline: '2px solid',
+						outlineColor: 'main.secondary',
+						outlineOffset: '2px',
+					}}
+					borderColor={{ _hover: 'border' }}
+				/>
 			</DialogContent>
 		</DialogRoot>
 	);

@@ -28,32 +28,43 @@ const config = defineConfig({
 	strictTokens: false,
 	theme: {
 		tokens: {
-				fonts: {
-					body: {
-						value: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-					},
-					heading: {
-						value:
-							'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-					},
-					link: {
-						value:
-							'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-					},
-					ui: {
-						value: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-					},
+			fonts: {
+				body: {
+					value: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
 				},
+				heading: {
+					value:
+						'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				},
+				link: {
+					value:
+						'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				},
+				ui: {
+					value: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+				},
+			},
 			fontWeights: {
-				thin: { value: '500' },
-				extralight: { value: '500' },
-				light: { value: '500' },
-				normal: { value: '500' },
+				thin: { value: '300' },
+				extralight: { value: '200' },
+				light: { value: '400' },
+				normal: { value: '400' },
 			},
 			fontSizes: {
-				'2xs': { value: '15px' },
-				xs: { value: '15px' },
-				sm: { value: '15px' },
+				'2xs': { value: '14px' },
+				xs: { value: '14px' },
+				sm: { value: '14px' },
+				md: { value: '16px' },
+				lg: { value: '18px' },
+				xl: { value: '20px' },
+				'2xl': { value: '24px' },
+				'3xl': { value: '30px' },
+				'4xl': { value: '36px' },
+				'5xl': { value: '48px' },
+				'6xl': { value: '60px' },
+				'7xl': { value: '72px' },
+				'8xl': { value: '96px' },
+				'9xl': { value: '128px' },
 			},
 		},
 		breakpoints: {
@@ -194,64 +205,64 @@ const config = defineConfig({
 			},
 		},
 		recipes: {
-				input: defineRecipe({
-					...chakraDefaultRecipes.input,
-					defaultVariants: {
-						...chakraDefaultRecipes.input.defaultVariants,
-						variant: 'flushed',
-					},
+			input: defineRecipe({
+				...chakraDefaultRecipes.input,
+				defaultVariants: {
+					...chakraDefaultRecipes.input.defaultVariants,
+					variant: 'flushed',
+				},
 				variants: {
 					...chakraDefaultRecipes.input.variants,
-						variant: {
-							...chakraDefaultRecipes.input.variants!.variant,
-							subtle: {
-								...chakraDefaultRecipes.input.variants!.variant.subtle,
+					variant: {
+						...chakraDefaultRecipes.input.variants!.variant,
+						subtle: {
+							...chakraDefaultRecipes.input.variants!.variant.subtle,
 							bg: { base: 'transparent', _dark: 'bg.muted' },
 							borderWidth: '0.5px',
 							borderStyle: 'solid',
 							borderColor: 'border.button',
 							focusVisibleRing: 'none',
-								_focus: storefrontInputFocusStyles,
-								_focusVisible: storefrontInputFocusStyles,
-							},
-							flushed: {
-								...chakraDefaultRecipes.input.variants!.variant.flushed,
-								focusVisibleRing: 'none',
-								_focus: storefrontFlushedInputFocusStyles,
-								_focusVisible: storefrontFlushedInputFocusStyles,
-							},
+							_focus: storefrontInputFocusStyles,
+							_focusVisible: storefrontInputFocusStyles,
+						},
+						flushed: {
+							...chakraDefaultRecipes.input.variants!.variant.flushed,
+							focusVisibleRing: 'none',
+							_focus: storefrontFlushedInputFocusStyles,
+							_focusVisible: storefrontFlushedInputFocusStyles,
 						},
 					},
-				}),
-				textarea: defineRecipe({
-					...chakraDefaultRecipes.textarea,
-					defaultVariants: {
-						...chakraDefaultRecipes.textarea.defaultVariants,
-						variant: 'subtle',
-					},
+				},
+			}),
+			textarea: defineRecipe({
+				...chakraDefaultRecipes.textarea,
+				defaultVariants: {
+					...chakraDefaultRecipes.textarea.defaultVariants,
+					variant: 'subtle',
+				},
 				variants: {
 					...chakraDefaultRecipes.textarea.variants,
-						variant: {
-							...chakraDefaultRecipes.textarea.variants!.variant,
-							subtle: {
-								...chakraDefaultRecipes.textarea.variants!.variant.subtle,
+					variant: {
+						...chakraDefaultRecipes.textarea.variants!.variant,
+						subtle: {
+							...chakraDefaultRecipes.textarea.variants!.variant.subtle,
 							bg: { base: 'transparent', _dark: 'bg.muted' },
 							borderWidth: '0.5px',
 							borderStyle: 'solid',
 							borderColor: 'border.button',
 							focusVisibleRing: 'none',
-								_focus: storefrontInputFocusStyles,
-								_focusVisible: storefrontInputFocusStyles,
-							},
-							flushed: {
-								...chakraDefaultRecipes.textarea.variants!.variant.flushed,
-								focusVisibleRing: 'none',
-								_focus: storefrontFlushedInputFocusStyles,
-								_focusVisible: storefrontFlushedInputFocusStyles,
-							},
+							_focus: storefrontInputFocusStyles,
+							_focusVisible: storefrontInputFocusStyles,
+						},
+						flushed: {
+							...chakraDefaultRecipes.textarea.variants!.variant.flushed,
+							focusVisibleRing: 'none',
+							_focus: storefrontFlushedInputFocusStyles,
+							_focusVisible: storefrontFlushedInputFocusStyles,
 						},
 					},
-				}),
+				},
+			}),
 		},
 		slotRecipes: {
 			checkbox: defineSlotRecipe({
@@ -322,18 +333,18 @@ const config = defineConfig({
 					},
 				},
 			}),
-				combobox: defineSlotRecipe({
-					...chakraDefaultSlotRecipes.combobox,
-					defaultVariants: {
-						...chakraDefaultSlotRecipes.combobox.defaultVariants,
-						variant: 'flushed',
-					},
-					variants: {
+			combobox: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.combobox,
+				defaultVariants: {
+					...chakraDefaultSlotRecipes.combobox.defaultVariants,
+					variant: 'flushed',
+				},
+				variants: {
 					...chakraDefaultSlotRecipes.combobox.variants,
-						variant: {
-							...chakraDefaultSlotRecipes.combobox.variants!.variant,
-							subtle: {
-								...chakraDefaultSlotRecipes.combobox.variants!.variant.subtle,
+					variant: {
+						...chakraDefaultSlotRecipes.combobox.variants!.variant,
+						subtle: {
+							...chakraDefaultSlotRecipes.combobox.variants!.variant.subtle,
 							input: {
 								...chakraDefaultSlotRecipes.combobox.variants!.variant.subtle.input,
 								bg: { base: 'transparent', _dark: 'bg.muted' },
@@ -341,68 +352,68 @@ const config = defineConfig({
 								borderStyle: 'solid',
 								borderColor: 'border.button',
 								focusVisibleRing: 'none',
-									_focus: storefrontInputFocusStyles,
-									_focusVisible: storefrontInputFocusStyles,
-								},
+								_focus: storefrontInputFocusStyles,
+								_focusVisible: storefrontInputFocusStyles,
 							},
-							flushed: {
-								...chakraDefaultSlotRecipes.combobox.variants!.variant.flushed,
-								input: {
-									...chakraDefaultSlotRecipes.combobox.variants!.variant.flushed.input,
-									focusVisibleRing: 'none',
-									_focus: storefrontFlushedInputFocusStyles,
-									_focusVisible: storefrontFlushedInputFocusStyles,
-								},
+						},
+						flushed: {
+							...chakraDefaultSlotRecipes.combobox.variants!.variant.flushed,
+							input: {
+								...chakraDefaultSlotRecipes.combobox.variants!.variant.flushed.input,
+								focusVisibleRing: 'none',
+								_focus: storefrontFlushedInputFocusStyles,
+								_focusVisible: storefrontFlushedInputFocusStyles,
 							},
 						},
 					},
-				}),
-				numberInput: defineSlotRecipe({
-					...chakraDefaultSlotRecipes.numberInput,
-					defaultVariants: {
-						...chakraDefaultSlotRecipes.numberInput.defaultVariants,
-						variant: 'flushed',
-					},
+				},
+			}),
+			numberInput: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.numberInput,
+				defaultVariants: {
+					...chakraDefaultSlotRecipes.numberInput.defaultVariants,
+					variant: 'flushed',
+				},
 				variants: {
 					...chakraDefaultSlotRecipes.numberInput.variants,
-						variant: {
-							...chakraDefaultSlotRecipes.numberInput.variants!.variant,
-							subtle: {
-								...chakraDefaultSlotRecipes.numberInput.variants!.variant.subtle,
+					variant: {
+						...chakraDefaultSlotRecipes.numberInput.variants!.variant,
+						subtle: {
+							...chakraDefaultSlotRecipes.numberInput.variants!.variant.subtle,
 							input: {
 								...chakraDefaultSlotRecipes.numberInput.variants!.variant.subtle.input,
 								borderWidth: '0.5px',
 								borderStyle: 'solid',
 								borderColor: 'border.button',
 								focusVisibleRing: 'none',
-									_focus: storefrontInputFocusStyles,
-									_focusVisible: storefrontInputFocusStyles,
-								},
+								_focus: storefrontInputFocusStyles,
+								_focusVisible: storefrontInputFocusStyles,
 							},
-							flushed: {
-								...chakraDefaultSlotRecipes.numberInput.variants!.variant.flushed,
-								input: {
-									...chakraDefaultSlotRecipes.numberInput.variants!.variant.flushed.input,
-									focusVisibleRing: 'none',
-									_focus: storefrontFlushedInputFocusStyles,
-									_focusVisible: storefrontFlushedInputFocusStyles,
-								},
+						},
+						flushed: {
+							...chakraDefaultSlotRecipes.numberInput.variants!.variant.flushed,
+							input: {
+								...chakraDefaultSlotRecipes.numberInput.variants!.variant.flushed.input,
+								focusVisibleRing: 'none',
+								_focus: storefrontFlushedInputFocusStyles,
+								_focusVisible: storefrontFlushedInputFocusStyles,
 							},
 						},
 					},
-				}),
-				pinInput: defineSlotRecipe({
-					...chakraDefaultSlotRecipes.pinInput,
-					defaultVariants: {
-						...chakraDefaultSlotRecipes.pinInput.defaultVariants,
-						variant: 'flushed',
-					},
+				},
+			}),
+			pinInput: defineSlotRecipe({
+				...chakraDefaultSlotRecipes.pinInput,
+				defaultVariants: {
+					...chakraDefaultSlotRecipes.pinInput.defaultVariants,
+					variant: 'flushed',
+				},
 				variants: {
 					...chakraDefaultSlotRecipes.pinInput.variants,
-						variant: {
-							...chakraDefaultSlotRecipes.pinInput.variants!.variant,
-							subtle: {
-								...chakraDefaultSlotRecipes.pinInput.variants!.variant.subtle,
+					variant: {
+						...chakraDefaultSlotRecipes.pinInput.variants!.variant,
+						subtle: {
+							...chakraDefaultSlotRecipes.pinInput.variants!.variant.subtle,
 							input: {
 								...chakraDefaultSlotRecipes.pinInput.variants!.variant.subtle.input,
 								bg: { base: 'transparent', _dark: 'bg.muted' },
@@ -410,22 +421,22 @@ const config = defineConfig({
 								borderStyle: 'solid',
 								borderColor: 'border.button',
 								focusVisibleRing: 'none',
-									_focus: storefrontInputFocusStyles,
-									_focusVisible: storefrontInputFocusStyles,
-								},
+								_focus: storefrontInputFocusStyles,
+								_focusVisible: storefrontInputFocusStyles,
 							},
-							flushed: {
-								...chakraDefaultSlotRecipes.pinInput.variants!.variant.flushed,
-								input: {
-									...chakraDefaultSlotRecipes.pinInput.variants!.variant.flushed.input,
-									focusVisibleRing: 'none',
-									_focus: storefrontFlushedInputFocusStyles,
-									_focusVisible: storefrontFlushedInputFocusStyles,
-								},
+						},
+						flushed: {
+							...chakraDefaultSlotRecipes.pinInput.variants!.variant.flushed,
+							input: {
+								...chakraDefaultSlotRecipes.pinInput.variants!.variant.flushed.input,
+								focusVisibleRing: 'none',
+								_focus: storefrontFlushedInputFocusStyles,
+								_focusVisible: storefrontFlushedInputFocusStyles,
 							},
 						},
 					},
-				}),
+				},
+			}),
 			select: defineSlotRecipe({
 				...chakraDefaultSlotRecipes.select,
 				defaultVariants: {
@@ -459,6 +470,10 @@ const config = defineConfig({
 			margin: 0,
 			padding: 0,
 		},
+		html: {
+			fontSize: '16px',
+			textSizeAdjust: '100%',
+		},
 		body: {
 			display: 'flex',
 			flexDirection: 'column',
@@ -475,18 +490,18 @@ const config = defineConfig({
 		svg: {
 			display: 'inline',
 		},
-			'a, a > span, button.chakra-tabs__trigger': {
-				fontFamily:
-					'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif !important',
-				fontWeight: 500,
-				fontSize: 16,
-			},
-			'h1,h2,h3,h4,h5,h6, .chakra-heading': {
-				fontFamily:
-					'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif !important',
-				fontWeight: 500,
-				userSelect: 'none',
-			},
+		'a, a > span, button.chakra-tabs__trigger': {
+			fontFamily:
+				'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif !important',
+			fontWeight: 500,
+			fontSize: 16,
+		},
+		'h1,h2,h3,h4,h5,h6, .chakra-heading': {
+			fontFamily:
+				'"Open Sans", "Open Sans Fallback", "Segoe UI", "Helvetica Neue", Arial, sans-serif !important',
+			fontWeight: 500,
+			userSelect: 'none',
+		},
 		'p, span, li': {
 			fontFamily: 'var(--font-open-sans), "Segoe UI", "Helvetica Neue", Arial, sans-serif',
 			fontWeight: 500,
@@ -508,21 +523,21 @@ const config = defineConfig({
 		},
 		'.thumbsSlider .swiper-button-prev:after, .thumbsSlider .swiper-button-next:after, .imageModalSwiper .swiper-button-prev:after, .imageModalSwiper .swiper-button-next:after':
 			{
-			color: 'var(--chakra-colors-bg-inverted) !important',
-			fontSize: '24px !important',
-			backgroundColor: 'transparent',
-			padding: '8px',
-			borderRadius: '60%',
-		},
+				color: 'var(--chakra-colors-bg-inverted) !important',
+				fontSize: '22px !important',
+				backgroundColor: 'transparent',
+				padding: '8px',
+				borderRadius: '60%',
+			},
 		'.thumbsSlider .swiper-button-prev, .thumbsSlider .swiper-button-next, .imageModalSwiper .swiper-button-prev, .imageModalSwiper .swiper-button-next':
 			{
-			backgroundColor: 'bg.tertiary',
-			borderWidth: '0.5px',
-			borderRadius: 'sm',
-			borderColor: 'var(--chakra-colors-border)',
-			height: '78px !important',
-			width: '24px !important',
-		},
+				backgroundColor: 'bg.tertiary',
+				borderWidth: '0.5px',
+				borderRadius: 'sm',
+				borderColor: 'var(--chakra-colors-border)',
+				height: '78px !important',
+				width: '24px !important',
+			},
 		'.thumbsSlider .swiper-button-prev .swiper-navigation-icon, .thumbsSlider .swiper-button-next .swiper-navigation-icon, .imageModalSwiper .swiper-button-prev .swiper-navigation-icon, .imageModalSwiper .swiper-button-next .swiper-navigation-icon':
 			{
 				height: '52px !important',

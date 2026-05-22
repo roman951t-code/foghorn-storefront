@@ -8,6 +8,23 @@ import { useReviewStore } from '@/stores/reviewStore';
 
 const emptyReviews: Review[] = [];
 
+const mergeInitialReviews = (initialReviews: Review[], existingReviews?: Review[]) => {
+	if (!existingReviews?.length) return initialReviews;
+
+	const existingMineById = new Map(
+		existingReviews.filter((review) => review.isMine).map((review) => [review.id, review]),
+	);
+	const mergedReviews = initialReviews.map((review) => ({
+		...review,
+		isMine: existingMineById.has(review.id) || review.isMine,
+	}));
+	const missingMineReviews = Array.from(existingMineById.values()).filter(
+		(review) => !mergedReviews.some((mergedReview) => mergedReview.id === review.id),
+	);
+
+	return [...missingMineReviews, ...mergedReviews];
+};
+
 export function useInitReviews(productId: string, initialReviews: Review[]) {
 	const setActiveProduct = useReviewStore((state) => state.setActiveProduct);
 	const setReviews = useReviewStore((state) => state.setReviews);
@@ -15,7 +32,8 @@ export function useInitReviews(productId: string, initialReviews: Review[]) {
 
 	useEffect(() => {
 		setActiveProduct(productId);
-		setReviews(productId, initialReviews);
+		const existingReviews = useReviewStore.getState().reviewsByProduct[productId];
+		setReviews(productId, mergeInitialReviews(initialReviews, existingReviews));
 		return () => clearActiveProduct(productId);
 	}, [clearActiveProduct, initialReviews, productId, setActiveProduct, setReviews]);
 }
@@ -25,7 +43,7 @@ export function useReviews() {
 	const userId = session?.user?.id;
 	const activeProductId = useReviewStore((state) => state.activeProductId);
 	const reviews = useReviewStore((state) =>
-		activeProductId ? state.reviewsByProduct[activeProductId] || emptyReviews : emptyReviews
+		activeProductId ? state.reviewsByProduct[activeProductId] || emptyReviews : emptyReviews,
 	);
 	const handleReviewAction = useReviewStore((state) => state.handleReviewAction);
 	const handleRemoveAction = useReviewStore((state) => state.handleRemoveAction);
@@ -42,6 +60,6 @@ export function useReviews() {
 					? handleRemoveAction(activeProductId, userId)
 					: Promise.resolve({ success: false }),
 		}),
-		[activeProductId, handleRemoveAction, handleReviewAction, reviews, userId]
+		[activeProductId, handleRemoveAction, handleReviewAction, reviews, userId],
 	);
 }

@@ -23,13 +23,15 @@ export default async function Checkout() {
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<Heading as='h1' size='4xl' fontWeight='medium'>
+			<Heading as='h1' size='2xl' fontWeight='medium'>
 				{productsT('orderProcessing')}
 			</Heading>
 			<Group justifyContent='space-between' align='flex-start' gapX='4'>
 				<Box as='section' flex='1'>
 					<CheckoutSteps />
-					<Box hideFrom='lg'>{<OrderInfo storefrontForms={checkoutForms} currencyCode={STORE_CURRENCY_CODE} />}</Box>
+					<Box hideFrom='lg'>
+						{<OrderInfo storefrontForms={checkoutForms} currencyCode={STORE_CURRENCY_CODE} />}
+					</Box>
 				</Box>
 				<Box
 					as='aside'

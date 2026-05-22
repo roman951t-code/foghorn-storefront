@@ -6,7 +6,7 @@ import { prisma } from '../prisma.mts';
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe =
 	stripeSecretKey && stripeSecretKey !== ''
-		? new Stripe(stripeSecretKey, { apiVersion: '2025-12-15.clover' })
+		? new Stripe(stripeSecretKey, { apiVersion: '2026-04-22.dahlia' })
 		: null;
 
 const INVENTORY_RESTOCKED_NOTE = 'Inventory restocked';
@@ -38,7 +38,7 @@ const resolveAdminEmail = (currentAdmin: unknown): string | null => {
 const canTransitionOrderStatus = (
 	currentStatus: OrderStatus,
 	nextStatus: OrderStatus,
-	allowedCurrent?: readonly OrderStatus[]
+	allowedCurrent?: readonly OrderStatus[],
 ) => {
 	if (currentStatus === nextStatus) {
 		return true;
@@ -84,7 +84,7 @@ const updateOrderStatusWithAudit = async (
 	next: OrderStatus,
 	currentStatus: OrderStatus | undefined,
 	adminEmail: string | null,
-	allowedCurrent?: readonly OrderStatus[]
+	allowedCurrent?: readonly OrderStatus[],
 ) => {
 	const fallbackCurrentStatus = currentStatus;
 	return prisma.$transaction(async (tx): Promise<OrderStatusUpdateResult> => {
@@ -122,7 +122,7 @@ const updateOrderStatusWithAudit = async (
 
 const makeStatusAction = (
 	next: OrderStatus,
-	allowedCurrent?: OrderStatus[]
+	allowedCurrent?: OrderStatus[],
 ): ActionHandler<RecordActionResponse> => {
 	return async (req, _res, context) => {
 		const { record, resource, currentAdmin } = context;
@@ -144,7 +144,13 @@ const makeStatusAction = (
 		}
 		const orderId = record.param('id') as string;
 		const adminEmail = resolveAdminEmail(currentAdmin);
-		const result = await updateOrderStatusWithAudit(orderId, next, currentStatus, adminEmail, allowedCurrent);
+		const result = await updateOrderStatusWithAudit(
+			orderId,
+			next,
+			currentStatus,
+			adminEmail,
+			allowedCurrent,
+		);
 		if (!result.success) {
 			return {
 				record: record.toJSON(currentAdmin),
@@ -199,9 +205,7 @@ const makeBulkStatusAction = (next: OrderStatus): ActionHandler<BulkActionRespon
 				}
 			}
 			const refreshed = await Promise.all(ids.map((id) => resource.findOne(id)));
-			const jsonRecords = refreshed
-				.filter(Boolean)
-				.map((record) => record!.toJSON(currentAdmin));
+			const jsonRecords = refreshed.filter(Boolean).map((record) => record!.toJSON(currentAdmin));
 			if (updatedCount === 0 && blockedCount > 0) {
 				return {
 					records: jsonRecords,
@@ -236,8 +240,7 @@ const refundStripeSession = async (stripeSessionId: string) => {
 		throw new Error('refund-unavailable');
 	}
 	const paymentIntent = session.payment_intent;
-	const paymentIntentId =
-		typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id;
+	const paymentIntentId = typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id;
 	if (!paymentIntentId) {
 		throw new Error('refund-unavailable');
 	}
@@ -250,7 +253,7 @@ const refundStripeSession = async (stripeSessionId: string) => {
 const refundStripeSessionAmount = async (
 	stripeSessionId: string,
 	amount: number,
-	idempotencyKey?: string
+	idempotencyKey?: string,
 ) => {
 	if (!stripe) {
 		throw new Error('refund-unavailable');
@@ -262,8 +265,7 @@ const refundStripeSessionAmount = async (
 		throw new Error('refund-unavailable');
 	}
 	const paymentIntent = session.payment_intent;
-	const paymentIntentId =
-		typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id;
+	const paymentIntentId = typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id;
 	if (!paymentIntentId) {
 		throw new Error('refund-unavailable');
 	}
@@ -277,7 +279,7 @@ const refundStripeSessionAmount = async (
 			amount: amountCents,
 			reason: 'requested_by_customer',
 		},
-		idempotencyKey ? { idempotencyKey } : {}
+		idempotencyKey ? { idempotencyKey } : {},
 	);
 };
 
@@ -306,7 +308,14 @@ export const setStatus: ActionHandler<RecordActionResponse> = async (req, _res, 
 			record: record.toJSON(currentAdmin),
 		};
 	}
-	const validStatuses: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED'];
+	const validStatuses: OrderStatus[] = [
+		'PENDING',
+		'PAID',
+		'SHIPPED',
+		'DELIVERED',
+		'CANCELLED',
+		'RETURNED',
+	];
 	if (!validStatuses.includes(requested)) {
 		return {
 			record: record.toJSON(currentAdmin),
@@ -395,7 +404,8 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 	}
 
 	const orderId = record.param('id') as string;
-	const resourceId = typeof (resource as any).id === 'function' ? (resource as any).id() : (resource as any).id;
+	const resourceId =
+		typeof (resource as any).id === 'function' ? (resource as any).id() : (resource as any).id;
 	const orderSnapshot = await prisma.order.findUnique({
 		where: { id: orderId },
 		select: { status: true, stripeSessionId: true },
@@ -457,7 +467,11 @@ export const cancelOrder: ActionHandler<RecordActionResponse> = async (req, _res
 		if (!order) {
 			return { success: false as const, reason: 'not-found' as const };
 		}
-		if (order.status === 'CANCELLED' || order.status === 'DELIVERED' || order.status === 'RETURNED') {
+		if (
+			order.status === 'CANCELLED' ||
+			order.status === 'DELIVERED' ||
+			order.status === 'RETURNED'
+		) {
 			return { success: false as const, reason: 'blocked' as const, status: order.status };
 		}
 
@@ -536,7 +550,8 @@ export const deleteOrder: ActionHandler<RecordActionResponse> = async (req, _res
 		};
 	}
 	const orderId = record.param('id') as string;
-	const resourceId = typeof (resource as any).id === 'function' ? (resource as any).id() : (resource as any).id;
+	const resourceId =
+		typeof (resource as any).id === 'function' ? (resource as any).id() : (resource as any).id;
 	try {
 		await prisma.$transaction(async (tx) => {
 			const order = await tx.order.findUnique({
@@ -642,7 +657,11 @@ export const processReturn: ActionHandler<RecordActionResponse> = async (req, _r
 			};
 		}
 		try {
-			await refundStripeSessionAmount(order.stripeSessionId, refundAmount, `order-return:${orderId}`);
+			await refundStripeSessionAmount(
+				order.stripeSessionId,
+				refundAmount,
+				`order-return:${orderId}`,
+			);
 		} catch (error) {
 			const message =
 				error instanceof Error && error.message === 'refund-unavailable'

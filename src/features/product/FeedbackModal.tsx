@@ -61,7 +61,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 			feedbackMinLength: validT('feedbackMinLength'),
 			feedbackMaxLength: validT('feedbackMaxLength'),
 		}),
-		[authT, genT, prodT, validT]
+		[authT, genT, prodT, validT],
 	);
 
 	const schema = useMemo(() => createFeedbackSchema(i18nData), [i18nData]);
@@ -97,8 +97,13 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 	};
 
 	const handleOpen = () => {
+		let currentReview = initialReviews?.[0];
+
 		if (productId) {
 			const state = useReviewStore.getState();
+			currentReview =
+				state.reviewsByProduct[productId]?.find((review) => review.isMine) ?? currentReview;
+
 			if (state.activeProductId !== productId) {
 				setActiveProduct(productId);
 				didSetActiveProductRef.current = true;
@@ -110,6 +115,15 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 				setReviews(productId, initialReviews ?? []);
 			}
 		}
+
+		reset({
+			name: session?.user?.name || '',
+			lastName: session?.user?.lastName || '',
+			feedback: currentReview?.comment ?? '',
+			advantages: currentReview?.advantages ?? '',
+			disAdvantages: currentReview?.disadvantages ?? '',
+			rating: currentReview?.rating ?? 4.5,
+		});
 		setIsOpen(true);
 	};
 
@@ -157,7 +171,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 			}
 			size='md'
 		>
-			<Box px={4} pt='0' borderRadius='lg'>
+			<Box px={{ base: 2, sm: 3 }} pt='0' borderRadius='md'>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<Card.Root
 						borderWidth='0.5px'
@@ -166,13 +180,13 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 						bg='bg.tertiary'
 						boxShadow='none'
 					>
-						<Card.Body p='4'>
-							<Flex justifyContent='space-between' alignItems='center' gap='4' flexWrap='wrap'>
-								<Stack fontSize='md' gapY='2.5'>
-									<Text fontWeight='semibold' color='main'>
+						<Card.Body p='3'>
+							<Flex justifyContent='space-between' alignItems='center' gap='3' flexWrap='wrap'>
+								<Stack fontSize='sm' gapY='1'>
+									<Text fontWeight='semibold' color='main' lineHeight='1.2'>
 										{prodT('rate')}
 									</Text>
-									<Text color='fg.muted'>
+									<Text color='fg.muted' lineHeight='1.2'>
 										{Number.isFinite(ratingValue) ? ratingValue : '0.0'} / 5
 									</Text>
 								</Stack>
@@ -182,7 +196,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 									render={({ field }) => (
 										<Rating
 											cursor='pointer'
-											size='lg'
+											size='md'
 											allowHalf
 											count={5}
 											name={field.name}
@@ -196,37 +210,40 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 						</Card.Body>
 					</Card.Root>
 
-					<Fieldset.Root size='lg' maxW='md' mt='6'>
-						<Fieldset.Content gap='6' maxH='580px' overflowY='auto'>
+					<Fieldset.Root size='md' maxW='md' mt='4'>
+						<Fieldset.Content gap='4' maxH='min(62vh, 520px)' overflowY='auto' pr='1'>
 							<Field.Root invalid={!!errors.name} gap='2' justifyContent='center' required>
-								<Field.Label maxH='20px'>
+								<Field.Label maxH='20px' fontSize='sm'>
 									{i18nData.name} <Field.RequiredIndicator />
 								</Field.Label>
 
-								<Input {...register('name')} size='md' />
+								<Input {...register('name')} size='sm' />
 								<Field.ErrorText alignSelf='flex-start'>
 									{errors.name?.message?.toString()}
 								</Field.ErrorText>
 							</Field.Root>
 
 							<Field.Root invalid={!!errors.lastName} gap='2' justifyContent='center' required>
-								<Field.Label maxH='20px'>
+								<Field.Label maxH='20px' fontSize='sm'>
 									{i18nData.lastName} <Field.RequiredIndicator />
 								</Field.Label>
 
-								<Input {...register('lastName')} size='md' />
+								<Input {...register('lastName')} size='sm' />
 								<Field.ErrorText alignSelf='flex-start'>
 									{errors.lastName?.message?.toString()}
 								</Field.ErrorText>
 							</Field.Root>
 
 							<Field.Root invalid={!!errors.advantages} gap='2' justifyContent='center'>
-								<Field.Label maxH='20px'>{i18nData.advantages}</Field.Label>
+								<Field.Label maxH='20px' fontSize='sm'>
+									{i18nData.advantages}
+								</Field.Label>
 
 								<Textarea
 									variant='outline'
-									minH='80px'
-									maxH='300px'
+									minH='68px'
+									maxH='180px'
+									size='sm'
 									focusVisibleRing='none'
 									_focus={inputLikeFocusStyles}
 									_focusVisible={inputLikeFocusStyles}
@@ -238,12 +255,15 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 							</Field.Root>
 
 							<Field.Root invalid={!!errors.disAdvantages} gap='2' justifyContent='center'>
-								<Field.Label maxH='20px'>{i18nData.disAdvantages}</Field.Label>
+								<Field.Label maxH='20px' fontSize='sm'>
+									{i18nData.disAdvantages}
+								</Field.Label>
 
 								<Textarea
 									variant='outline'
-									minH='80px'
-									maxH='300px'
+									minH='68px'
+									maxH='180px'
+									size='sm'
 									focusVisibleRing='none'
 									_focus={inputLikeFocusStyles}
 									_focusVisible={inputLikeFocusStyles}
@@ -255,14 +275,15 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 							</Field.Root>
 
 							<Field.Root invalid={!!errors.feedback} gap='2' justifyContent='center' required>
-								<Field.Label maxH='20px'>
+								<Field.Label maxH='20px' fontSize='sm'>
 									{i18nData.myRate} <Field.RequiredIndicator />
 								</Field.Label>
 
 								<Textarea
 									variant='outline'
-									minH='80px'
-									maxH='300px'
+									minH='76px'
+									maxH='200px'
+									size='sm'
 									focusVisibleRing='none'
 									_focus={inputLikeFocusStyles}
 									_focusVisible={inputLikeFocusStyles}
@@ -276,7 +297,7 @@ export default function FeedbackModal({ productId, initialReviews, onSuccessActi
 
 						<PrimaryButton
 							w='100%'
-							mt='8'
+							mt='5'
 							type='submit'
 							loading={isSubmitting}
 							disabled={isSubmitting}

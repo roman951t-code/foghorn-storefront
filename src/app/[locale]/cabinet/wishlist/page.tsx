@@ -1,4 +1,3 @@
-import { VStack } from '@chakra-ui/react';
 import WishList from '../_components/wishlist/WishList';
 import WishlistPagination from '../_components/wishlist/WishlistPagination';
 import { PRODUCTS_PER_PAGE, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
@@ -30,7 +29,15 @@ export default async function Wishlist({ searchParams }: Props) {
 	const shareCopiedText = wishT('shareCopied');
 
 	return (
-		<VStack w='100%' mt='4'>
+		<div
+			style={{
+				display: 'flex',
+				flexDirection: 'column',
+				alignItems: 'center',
+				width: '100%',
+				marginTop: '16px',
+			}}
+		>
 			<WishList
 				emptyText={wishT('wishListEmpty')}
 				currentPage={currentPage}
@@ -41,6 +48,6 @@ export default async function Wishlist({ searchParams }: Props) {
 				sortI18n={sortI18n}
 			/>
 			<WishlistPagination currentPage={currentPage} pageSize={pageSize} />
-		</VStack>
+		</div>
 	);
 }

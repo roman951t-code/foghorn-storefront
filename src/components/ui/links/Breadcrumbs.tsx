@@ -1,7 +1,10 @@
+'use client';
+
 import { BreadcrumbLink, BreadcrumbRoot } from '@/components/ui/chakra/breadcrumb';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import { LocaleNavLink } from './LocaleNavLink';
 import { Button } from '@chakra-ui/react';
+import { useTranslations } from 'next-intl';
 
 function CustomBreadcrumbLink({ href, children }: { href: string; children: React.ReactNode }) {
 	return (
@@ -9,7 +12,6 @@ function CustomBreadcrumbLink({ href, children }: { href: string; children: Reac
 			href={href}
 			wordBreak='break-word'
 			fontSize={{ base: 'md', md: '15px' }}
-			color='main.breadcrumb'
 			textDecoration='none'
 			display='inline-flex'
 			alignItems='center'
@@ -67,6 +69,8 @@ export default function Breadcrumbs({
 	productSlug,
 	productName,
 }: Props) {
+	const t = useTranslations('common');
+
 	return (
 		<BreadcrumbRoot
 			variant='underline'
@@ -93,7 +97,6 @@ export default function Breadcrumbs({
 						rounded='md'
 						fontSize={{ base: 'md', md: '15px' }}
 						fontWeight='medium'
-						color='main.breadcrumb'
 						_hover={{
 							color: 'link',
 							bg: 'bgHover.promoCard',
@@ -105,7 +108,7 @@ export default function Breadcrumbs({
 							outlineOffset: '2px',
 						}}
 					>
-						Каталог
+						{t('catalog')}
 					</Button>
 				}
 			/>

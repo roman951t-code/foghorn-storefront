@@ -1,6 +1,6 @@
 import { BaseRecord, type Filter } from 'adminjs';
 import { Resource as PrismaResource } from '@adminjs/prisma';
-import type { DMMF } from '@prisma/client/runtime/library.js';
+import type { DMMF } from '@prisma/client/runtime/client.js';
 
 type FindParams = {
 	limit?: number;
@@ -45,7 +45,7 @@ const convertParam = (
 		foreignColumnName: () => string | null;
 	},
 	fields: DMMF.Model['fields'],
-	value: unknown
+	value: unknown,
 ) => {
 	const type = property.type();
 	if (type === 'mixed') return value;
@@ -53,7 +53,9 @@ const convertParam = (
 	if (type === 'reference') {
 		const foreignColumnName = property.foreignColumnName();
 		if (!foreignColumnName) return value;
-		const foreignColumn = fields.find((field) => field.name === foreignColumnName);
+		const foreignColumn = fields.find(
+			(field: { name: string }) => field.name === foreignColumnName,
+		);
 		if (!foreignColumn || value === undefined || value === null) return value;
 		if (foreignColumn.type === 'String') return String(value);
 		return safeParseNumber(value);
@@ -63,7 +65,8 @@ const convertParam = (
 
 const convertFilterLocal = (modelFields: DMMF.Model['fields'], filterObject?: Filter) => {
 	if (!filterObject) return {} as Record<string, unknown>;
-	const uuidRegex = /^[0-9A-F]{8}-[0-9A-F]{4}-[5|4|3|2|1][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
+	const uuidRegex =
+		/^[0-9A-F]{8}-[0-9A-F]{4}-[5|4|3|2|1][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 	const filters = (filterObject as { filters?: Record<string, any> }).filters ?? {};
 	return Object.entries(filters).reduce<Record<string, unknown>>((where, [name, filter]) => {
 		const propertyType = filter?.property?.type?.();
@@ -132,8 +135,8 @@ export class CaseInsensitiveProductPrismaResource extends PrismaResource {
 			take: limit,
 			orderBy,
 		});
-		return results.map((result: Record<string, unknown>) =>
-			new BaseRecord(this.prepareReturnValues(result), this)
+		return results.map(
+			(result: Record<string, unknown>) => new BaseRecord(this.prepareReturnValues(result), this),
 		);
 	}
 }

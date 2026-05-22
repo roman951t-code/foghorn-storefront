@@ -25,7 +25,11 @@ export function LocaleSearchLink({ href, children, ...props }: LocaleLinkProps) 
 				transition='all .15s ease-in-out'
 				textDecorationColor='main'
 				_hover={{ color: 'link' }}
-				_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
+				_focusVisible={{
+					outline: '2px solid',
+					outlineColor: 'main.secondary',
+					outlineOffset: '2px',
+				}}
 				{...props}
 			>
 				{children}
@@ -39,11 +43,15 @@ export function LocaleNavLink({ href, children, ...props }: LocaleLinkProps) {
 		<Link href={href}>
 			<ChakraLink
 				as='span'
-				fontSize={{ base: 'md', md: '15px' }}
+				fontSize={{ base: 'md', md: '14px' }}
 				transition='all .15s ease-in-out'
 				textDecorationColor='main'
 				_hover={{ color: 'link' }}
-				_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
+				_focusVisible={{
+					outline: '2px solid',
+					outlineColor: 'main.secondary',
+					outlineOffset: '2px',
+				}}
 				{...props}
 			>
 				{children}

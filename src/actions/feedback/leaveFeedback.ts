@@ -9,12 +9,13 @@ import { headers } from 'next/headers';
 import { updateTag } from 'next/cache';
 import { productCacheTagById } from '@/constants/products';
 import { syncProductReviewAggregate } from '@/lib/reviewAggregates';
+import type { Review } from '@/types/product';
 
 export async function leaveFeedback(
 	_: unknown,
 	formData: FeedbackSchema,
-	productId: string
-): Promise<{ success: boolean; message?: string }> {
+	productId: string,
+): Promise<{ success: boolean; message?: string; review?: Review }> {
 	const validationT = await getTranslations('validation');
 
 	const schema = await getFeedbackSchema();
@@ -52,8 +53,8 @@ export async function leaveFeedback(
 			});
 		}
 
-		await prisma.$transaction(async (tx) => {
-			await tx.review.upsert({
+		const savedReview = await prisma.$transaction(async (tx) => {
+			const review = await tx.review.upsert({
 				where: {
 					userId_productId: {
 						userId,
@@ -77,11 +78,28 @@ export async function leaveFeedback(
 			});
 
 			await syncProductReviewAggregate(tx, productId);
+
+			return review;
 		});
 
 		await updateTag(productCacheTagById(productId));
 
-		return { success: true };
+		return {
+			success: true,
+			review: {
+				id: savedReview.id,
+				rating: savedReview.rating,
+				comment: savedReview.comment,
+				advantages: savedReview.advantages,
+				disadvantages: savedReview.disadvantages,
+				createdAt: savedReview.createdAt,
+				isMine: true,
+				user: {
+					name,
+					lastName: lastName ?? null,
+				},
+			},
+		};
 	} catch (error: any) {
 		return { success: false };
 	}

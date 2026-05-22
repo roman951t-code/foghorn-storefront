@@ -92,7 +92,7 @@ export default function SearchInput({
 				const cached = cache.current.get(cacheKey)!;
 
 				const isRelevant = cached.products.some((p) =>
-					p.name.toLowerCase().includes(inputValue.toLowerCase())
+					p.name.toLowerCase().includes(inputValue.toLowerCase()),
 				);
 
 				if (isRelevant) {
@@ -105,7 +105,7 @@ export default function SearchInput({
 
 			try {
 				const res = await fetch(
-					`/api/products/search?q=${encodeURIComponent(inputValue)}&locale=${encodeURIComponent(locale)}`
+					`/api/products/search?q=${encodeURIComponent(inputValue)}&locale=${encodeURIComponent(locale)}`,
 				);
 				const data: SearchResponse = await res.json();
 				cache.current.set(cacheKey, data);
@@ -119,7 +119,7 @@ export default function SearchInput({
 			}
 		},
 		400,
-		[inputValue, locale]
+		[inputValue, locale],
 	);
 
 	return (
@@ -156,7 +156,7 @@ export default function SearchInput({
 						_focus={{ borderColor: 'main.secondary' }}
 						placeholder={placeholder}
 						aria-label={placeholder}
-						fontSize='md'
+						fontSize='15px'
 						bg='bg.muted'
 						roundedRight='0'
 						onPaste={(event) => {
@@ -219,10 +219,7 @@ export default function SearchInput({
 									/>
 								))}
 
-								<SeeAllLink
-									linkTo={searchResultsLink}
-									seeAll={seeAll}
-								/>
+								<SeeAllLink linkTo={searchResultsLink} seeAll={seeAll} />
 
 								{subcategories.length > 0 && (
 									<>

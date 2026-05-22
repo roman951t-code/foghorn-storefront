@@ -1,8 +1,11 @@
+import { PRODUCT_CARD_HORIZONTAL_GAP_PX } from '@/constants/grids';
+
 export const productsBreakpoints = {
-	582: { slidesPerView: 2 },
-	816: { slidesPerView: 3 },
-	1064: { slidesPerView: 4 },
-	1316: { slidesPerView: 5 },
+	620: { slidesPerView: 2, spaceBetween: PRODUCT_CARD_HORIZONTAL_GAP_PX },
+	856: { slidesPerView: 3, spaceBetween: PRODUCT_CARD_HORIZONTAL_GAP_PX },
+	1084: { slidesPerView: 4, spaceBetween: PRODUCT_CARD_HORIZONTAL_GAP_PX },
+	1312: { slidesPerView: 5, spaceBetween: PRODUCT_CARD_HORIZONTAL_GAP_PX },
+	1480: { slidesPerView: 6, spaceBetween: PRODUCT_CARD_HORIZONTAL_GAP_PX },
 };
 
 export const promoBreakpoints = {

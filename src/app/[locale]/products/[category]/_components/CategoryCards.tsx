@@ -1,17 +1,13 @@
-'use client';
-
-import dynamic from 'next/dynamic';
 import CategoryCard from '@/features/product/cards/CategoryCard';
-import { Loading } from '@/components/ui/Skeleton';
 import type { CatalogCategory } from '@/types/product';
 import { Wrap } from '@chakra-ui/react';
 import { resolveSubcategoryImage } from '@/utils/categoryImages';
+import { getTranslations } from 'next-intl/server';
 
-import 'swiper/css';
-import 'swiper/css/navigation';
-import '@/styles/swiper.css';
+export default async function CategoryCards({ category }: { category: CatalogCategory }) {
+	const productsT = await getTranslations('products');
+	const seeProductsLabel = productsT('seeProducts');
 
-function CategoryCardsInner({ category }: { category?: CatalogCategory }) {
 	return (
 		<Wrap gapX='4' gapY='8'>
 			{category?.children.map((sub) => (
@@ -24,17 +20,9 @@ function CategoryCardsInner({ category }: { category?: CatalogCategory }) {
 						href: `/products/${product.fullSlug}`,
 					}))}
 					viewAllHref={`/products/${category.slug}/${sub.slug}`}
+					seeProductsLabel={seeProductsLabel}
 				/>
 			))}
 		</Wrap>
 	);
-}
-
-const DynamicCategoryCards = dynamic(() => Promise.resolve(CategoryCardsInner), {
-	ssr: false,
-	loading: () => <Loading />,
-});
-
-export default function CategoryCards({ category }: { category: CatalogCategory }) {
-	return <DynamicCategoryCards category={category} />;
 }

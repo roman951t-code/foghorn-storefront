@@ -17,9 +17,6 @@ export default function PaymentStep() {
 		useBreakpointValue<'vertical' | 'horizontal'>({ base: 'vertical', sm: 'horizontal' }) ??
 		'vertical';
 	const isCardSelected = selectedPayment === 'card';
-	const isStripeTestMode =
-		typeof process !== 'undefined' &&
-		Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.startsWith('pk_test_'));
 
 	return (
 		<VStack align='stretch' gap='6'>
@@ -75,31 +72,6 @@ export default function PaymentStep() {
 						<Text fontSize={{ base: 'md', md: 'sm' }} color='fg.muted'>
 							{t('payment.cardForm.description')}
 						</Text>
-						{isStripeTestMode ? (
-							<Box
-								borderWidth='0.5px'
-								borderStyle='solid'
-								borderColor='border'
-								borderRadius='md'
-								p='3'
-							>
-								<Text fontSize={{ base: 'md', md: 'sm' }} fontWeight='semibold'>
-									{t('payment.cardForm.testModeTitle')}
-								</Text>
-								<Text fontSize={{ base: 'md', md: 'sm' }} mt='1'>
-									{t('payment.cardForm.testCard')}: 4242 4242 4242 4242
-								</Text>
-								<Text fontSize={{ base: 'md', md: 'sm' }}>
-									{t('payment.cardForm.testExpiry')}: 12/34
-								</Text>
-								<Text fontSize={{ base: 'md', md: 'sm' }}>
-									{t('payment.cardForm.testCvc')}: 123
-								</Text>
-								<Text fontSize={{ base: 'md', md: 'sm' }} mt='1'>
-									{t('payment.cardForm.testDeclineCard')}: 4000 0000 0000 0002
-								</Text>
-							</Box>
-						) : null}
 					</VStack>
 				</Box>
 			) : null}

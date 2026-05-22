@@ -12,6 +12,10 @@ import { ensureParams } from '@/utils/validateParams';
 import { categoryParamsSchema } from 'validationSchemas/productParamsSchemas';
 import { headers } from 'next/headers';
 import { CATEGORY_PLACEHOLDER_IMAGE } from '@/utils/categoryImages';
+import { getCategoryStaticParams } from '@/actions/products/getCatalogStaticParams';
+
+// Route intent: public cache-first category content; category data is served by tagged cached actions.
+export const generateStaticParams = getCategoryStaticParams;
 
 export async function generateMetadata({ params }: CategoryParams): Promise<Metadata> {
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
@@ -55,9 +59,13 @@ export default async function CategoryPage({ params }: CategoryParams) {
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
 	const headersList = await headers();
 	const cspNonce = headersList.get('x-csp-nonce') ?? undefined;
-	const category = await getCategoryBySlug(categorySlug, locale);
+	const [category, pagesT] = await Promise.all([
+		getCategoryBySlug(categorySlug, locale),
+		getTranslations({ locale, namespace: 'pages' }),
+	]);
 
 	if (!category) notFound();
+	const homeLabel = pagesT('main.title');
 
 	const breadcrumbsJsonLd = {
 		'@context': 'https://schema.org',
@@ -66,7 +74,7 @@ export default async function CategoryPage({ params }: CategoryParams) {
 			{
 				'@type': 'ListItem',
 				position: 1,
-				name: 'Home',
+				name: homeLabel,
 				item: absoluteUrl(localizePath(locale, '/')),
 			},
 			{

@@ -33,19 +33,19 @@ export default function ProductDetails({
 				boxShadow='none'
 				bg='bg.tertiary'
 				borderColor='border'
-				size='lg'
+				size='md'
 				color='main'
 				py='1.5'
 				mt={{ base: 4, sm: 0 }}
 			>
-				<Tag.Label fontSize={{ base: 'md', md: 'sm' }}>
+				<Tag.Label>
 					<HStack gapX='2.5' alignItems='center'>
 						{item.icon ? (
 							<Box fontSize='lg' color='fg.muted' display='inline-flex'>
 								{item.icon}
 							</Box>
 						) : null}
-						<Text as='span' fontWeight='semibold'>
+						<Text as='span' fontSize={'14px'} fontWeight='semibold'>
 							{item.label}
 						</Text>
 					</HStack>

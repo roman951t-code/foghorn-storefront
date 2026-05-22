@@ -1,6 +1,7 @@
 {
 	"common": {
 		"design": "Design and planning",
+		"catalog": "Catalog",
 		"catalogFull": "Product catalog",
 		"seeAll": "See all",
 		"seeCategory": "See category",
@@ -58,7 +59,7 @@
 			"card": "Card",
 			"cardForm": {
 				"title": "Card details",
-				"description": "You will be redirected to secure Stripe Checkout to enter your card details.",
+				"description": "Card is available as a predefined demo payment method. No real charge is made.",
 				"cardholder": "Cardholder name",
 				"cardholderPlaceholder": "Name as shown on card",
 				"number": "Card number",
@@ -302,6 +303,8 @@
 		"cartUpdateFailed": "We could not update your cart. Please try again.",
 		"cartRemoveFailed": "We could not remove the item from your cart.",
 		"cartFetchFailed": "We could not load your cart items.",
+		"addToCart": "Add to cart",
+		"removeFromCart": "Remove from cart",
 		"productIsInCart": "In cart",
 		"buy": "Buy",
 		"cart": "Cart",
@@ -310,6 +313,8 @@
 	},
 	"wishlist": {
 		"wishlistUpdateFailed": "We could not update your wishlist.",
+		"addToWishlist": "Add to wishlist",
+		"removeFromWishlist": "Remove from wishlist",
 		"wishListEmpty": "Your wishlist is empty.",
 		"shareCopied": "Your wishlist link has been copied. You can now share it with friends."
 	},

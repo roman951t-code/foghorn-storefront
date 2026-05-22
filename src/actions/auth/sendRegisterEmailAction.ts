@@ -5,7 +5,7 @@ import 'server-only';
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import { getEmailSignUpSchema } from 'validationSchemas/emailSignUpSchema';
-import { encryptPassword } from '@/lib/crypto';
+import { auth } from '@/lib/auth';
 import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
 import { headers } from 'next/headers';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
@@ -17,7 +17,7 @@ const OTP_SEND_WINDOW_MS = 10 * 60 * 1000;
 
 export async function sendRegisterEmailAction(
 	_: unknown,
-	formData: unknown
+	formData: unknown,
 ): Promise<{ success: boolean; message?: string }> {
 	const [validationT, authT, emailsT] = await Promise.all([
 		getTranslations('validation'),
@@ -54,15 +54,35 @@ export async function sendRegisterEmailAction(
 			return { success: false, message: validationT('tooManyRequests') };
 		}
 
-		const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+		const existingUser = await prisma.user.findUnique({
+			where: { email: normalizedEmail },
+			select: { id: true, emailVerified: true },
+		});
+
+		if (existingUser?.emailVerified) {
+			return { success: false, message: validationT('userRegisterFail') };
+		}
 
 		if (existingUser) {
-			return { success: false, message: validationT('userRegisterFail') };
+			await prisma.$transaction([
+				prisma.emailRegistrationCode.deleteMany({ where: { email: normalizedEmail } }),
+				prisma.emailVerificationCode.deleteMany({ where: { userId: existingUser.id } }),
+				prisma.session.deleteMany({ where: { userId: existingUser.id } }),
+				prisma.account.deleteMany({ where: { userId: existingUser.id } }),
+				prisma.user.delete({ where: { id: existingUser.id } }),
+			]);
 		}
 
 		await prisma.emailRegistrationCode.deleteMany({ where: { email: normalizedEmail } });
 
-		const encryptedPassword = encryptPassword(password);
+		await auth.api.signUpEmail({
+			body: {
+				email: normalizedEmail,
+				password,
+				name,
+			},
+		});
+
 		const otp = generateOtpCode();
 		const otpHash = hashOtpCode({
 			otp,
@@ -73,8 +93,6 @@ export async function sendRegisterEmailAction(
 		await prisma.emailRegistrationCode.create({
 			data: {
 				email: normalizedEmail,
-				name,
-				password: encryptedPassword,
 				code: otpHash,
 				expiresAt: new Date(Date.now() + 10 * 60 * 1000),
 			},

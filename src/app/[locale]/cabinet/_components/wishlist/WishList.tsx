@@ -8,7 +8,7 @@ import { LoadingSkeleton } from '@/components/ui/Skeleton';
 import { FiHeart } from 'react-icons/fi';
 import WishlistActions from './WishlistActions';
 import WishListCount from './WishlistCount';
-import { CABINET_PRODUCTS_GRID_CSS } from '@/constants/grids';
+import { CABINET_PRODUCTS_GRID_CSS, PRODUCT_CARD_HORIZONTAL_GAP } from '@/constants/grids';
 
 type Props = {
 	emptyText: string;
@@ -77,8 +77,8 @@ export default function WishList({
 				mt='8'
 				mb='4'
 				className='productsSlider'
-				columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
-				gapX='2'
+				css={CABINET_PRODUCTS_GRID_CSS}
+				columnGap={PRODUCT_CARD_HORIZONTAL_GAP}
 				gapY='4'
 				w='100%'
 			>
@@ -123,7 +123,7 @@ export default function WishList({
 				mb='4'
 				className='productsSlider'
 				css={CABINET_PRODUCTS_GRID_CSS}
-				gapX='2'
+				columnGap={PRODUCT_CARD_HORIZONTAL_GAP}
 				gapY='4'
 				w='100%'
 			>

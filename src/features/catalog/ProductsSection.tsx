@@ -38,8 +38,8 @@ export default async function ProductsSection({
 				true,
 				undefined,
 				undefined,
-				locale
-		  );
+				locale,
+			);
 	const visibleProducts = products.slice(0, limit);
 
 	if (!visibleProducts.length) return null;
@@ -49,7 +49,7 @@ export default async function ProductsSection({
 			<Heading fontWeight='medium'>
 				<LocaleNavLink
 					href={href ?? `/products/search/?tag=${tag}`}
-					fontSize='28px'
+					fontSize='24px'
 					variant='underline'
 					textUnderlineOffset='12px'
 					textWrap='wrap'

@@ -3,7 +3,7 @@ import { Grid, Box, VStack, EmptyState } from '@chakra-ui/react';
 import { HiColorSwatch } from 'react-icons/hi';
 import ProductCard from '@/features/product/cards/ProductCard';
 import { SubcategoryProduct } from '@/types/product';
-import { PRODUCTS_GRID_CSS } from '@/constants/grids';
+import { PRODUCT_CARD_HORIZONTAL_GAP, PRODUCTS_GRID_CSS } from '@/constants/grids';
 
 interface Props {
 	products: SubcategoryProduct[];
@@ -32,9 +32,8 @@ export default function ProductsGrid({ products, notFound, limit }: Props) {
 	return (
 		<Grid
 			className='productsSlider'
-			columnGap={4}
-			rowGap={6}
-			px={{ base: 1, sm: 0 }}
+			columnGap={PRODUCT_CARD_HORIZONTAL_GAP}
+			rowGap={4}
 			css={PRODUCTS_GRID_CSS}
 		>
 			{visibleProducts.map((product) => (

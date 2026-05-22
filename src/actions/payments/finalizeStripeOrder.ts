@@ -30,9 +30,7 @@ import {
 	parseStripeCheckoutLineItemMetadata,
 } from '@/utils/stripeCheckoutItems';
 
-type Result =
-	| { success: true; order?: UserOrder }
-	| { success: false; message: string };
+type Result = { success: true; order?: UserOrder } | { success: false; message: string };
 
 const MAX_ITEM_QUANTITY = 99;
 
@@ -84,7 +82,7 @@ const buildVariantLabel = (
 				value: string;
 		  }[]
 		| undefined
-		| null
+		| null,
 ) => {
 	if (!attributes?.length) return null;
 	const label = attributes
@@ -107,7 +105,7 @@ const incrementCouponRedemptionWithGuard = async (
 	}: {
 		couponId: string;
 		maxRedemptions: number | null;
-	}
+	},
 ) => {
 	const updated = await tx.coupon.updateMany({
 		where:
@@ -140,7 +138,7 @@ const revalidateProductCacheTags = async (productIds: string[]) => {
 				'[payments] Skipped product cache revalidation during render-phase finalization',
 				{
 					productTags,
-				}
+				},
 			);
 			return;
 		}
@@ -160,7 +158,7 @@ async function finalizeStripeOrderInternal(
 		requestUserId?: string | null;
 		requestHeaders?: Headers;
 		userSnapshotOverride?: UserSnapshot | null;
-	}
+	},
 ): Promise<Result> {
 	if (!stripe) return { success: false, message: 'stripe_not_configured' };
 
@@ -170,6 +168,11 @@ async function finalizeStripeOrderInternal(
 	});
 
 	if (existing) {
+		if (mode === 'user') {
+			if (!requestUserId) return { success: false, message: 'unauthorized' };
+			if (existing.userId !== requestUserId) return { success: false, message: 'forbidden' };
+		}
+
 		if (existing.status === 'PENDING') {
 			const existingSession = await stripe.checkout.sessions.retrieve(sessionId);
 			if (existingSession.payment_status === 'paid') {
@@ -215,7 +218,8 @@ async function finalizeStripeOrderInternal(
 	const metadataUserId = normalizeMetadataString(checkoutSession.metadata?.userId, 128);
 	if (mode === 'user') {
 		if (!requestUserId) return { success: false, message: 'unauthorized' };
-		if (metadataUserId && metadataUserId !== requestUserId) return { success: false, message: 'forbidden' };
+		if (metadataUserId && metadataUserId !== requestUserId)
+			return { success: false, message: 'forbidden' };
 	} else {
 		if (!metadataUserId) return { success: false, message: 'missing_userId' };
 	}
@@ -242,32 +246,32 @@ async function finalizeStripeOrderInternal(
 	const shipmentMethod = normalizeMetadataString(checkoutSession.metadata?.shipmentMethod, 64);
 	const legacyShippingAddress = normalizeMetadataString(
 		checkoutSession.metadata?.shippingAddress,
-		SHIPPING_ADDRESS_FIELD_LIMITS.fullAddress
+		SHIPPING_ADDRESS_FIELD_LIMITS.fullAddress,
 	);
 	let shippingAddress = normalizeShippingAddress({
 		country: normalizeMetadataString(
 			checkoutSession.metadata?.shippingCountry,
-			SHIPPING_ADDRESS_FIELD_LIMITS.country
+			SHIPPING_ADDRESS_FIELD_LIMITS.country,
 		),
 		region: normalizeMetadataString(
 			checkoutSession.metadata?.shippingRegion,
-			SHIPPING_ADDRESS_FIELD_LIMITS.region
+			SHIPPING_ADDRESS_FIELD_LIMITS.region,
 		),
 		city: normalizeMetadataString(
 			checkoutSession.metadata?.shippingCity,
-			SHIPPING_ADDRESS_FIELD_LIMITS.city
+			SHIPPING_ADDRESS_FIELD_LIMITS.city,
 		),
 		postalCode: normalizeMetadataString(
 			checkoutSession.metadata?.shippingPostalCode,
-			SHIPPING_ADDRESS_FIELD_LIMITS.postalCode
+			SHIPPING_ADDRESS_FIELD_LIMITS.postalCode,
 		),
 		addressLine1: normalizeMetadataString(
 			checkoutSession.metadata?.shippingAddressLine1,
-			SHIPPING_ADDRESS_FIELD_LIMITS.addressLine1
+			SHIPPING_ADDRESS_FIELD_LIMITS.addressLine1,
 		),
 		addressLine2: normalizeMetadataString(
 			checkoutSession.metadata?.shippingAddressLine2,
-			SHIPPING_ADDRESS_FIELD_LIMITS.addressLine2
+			SHIPPING_ADDRESS_FIELD_LIMITS.addressLine2,
 		),
 	});
 	if (!shippingAddress.fullAddress && legacyShippingAddress) {
@@ -321,7 +325,7 @@ async function finalizeStripeOrderInternal(
 	const productMap = new Map(products.map((p) => [p.id, p]));
 
 	const uniqueVariantIds = Array.from(
-		new Set(itemsPayload.map((i) => i.variantId).filter((v): v is string => !!v))
+		new Set(itemsPayload.map((i) => i.variantId).filter((v): v is string => !!v)),
 	);
 	const variants = uniqueVariantIds.length
 		? await prisma.productVariant.findMany({
@@ -393,8 +397,9 @@ async function finalizeStripeOrderInternal(
 			}
 
 			const variant =
-				(item.variantId ? variantById.get(item.variantId) ?? null : null) ??
-				(defaultVariantByProduct.get(item.productId) ?? null);
+				(item.variantId ? (variantById.get(item.variantId) ?? null) : null) ??
+				defaultVariantByProduct.get(item.productId) ??
+				null;
 			if (!variant || variant.productId !== item.productId) {
 				unavailable.push(item.productId);
 				return null;
@@ -459,7 +464,9 @@ async function finalizeStripeOrderInternal(
 	}
 
 	const calculatedTotal = toCurrency(orderItems.reduce((acc, item) => acc + item.price, 0));
-	const amountSubtotal = checkoutSession.amount_subtotal ? checkoutSession.amount_subtotal / 100 : null;
+	const amountSubtotal = checkoutSession.amount_subtotal
+		? checkoutSession.amount_subtotal / 100
+		: null;
 	const amountDiscount = checkoutSession.total_details?.amount_discount
 		? checkoutSession.total_details.amount_discount / 100
 		: 0;
@@ -476,13 +483,19 @@ async function finalizeStripeOrderInternal(
 
 	const decimalTotal = new Prisma.Decimal(amountTotal.toFixed(2));
 
-	const couponCode = typeof checkoutSession.metadata?.couponCode === 'string'
-		? checkoutSession.metadata.couponCode.trim()
-		: '';
+	const couponCode =
+		typeof checkoutSession.metadata?.couponCode === 'string'
+			? checkoutSession.metadata.couponCode.trim()
+			: '';
 	const couponIdFromMetadata = normalizeMetadataString(checkoutSession.metadata?.couponId, 64);
-	const promotionIdFromMetadata = normalizeMetadataString(checkoutSession.metadata?.promotionId, 64);
+	const promotionIdFromMetadata = normalizeMetadataString(
+		checkoutSession.metadata?.promotionId,
+		64,
+	);
 	const couponPreview =
-		couponCode && amountDiscount > 0 ? await getCouponDiscountPreview(couponCode, calculatedTotal).catch(() => null) : null;
+		couponCode && amountDiscount > 0
+			? await getCouponDiscountPreview(couponCode, calculatedTotal).catch(() => null)
+			: null;
 
 	const buildCustomerName = (first: string | null | undefined, last: string | null | undefined) => {
 		const firstTrimmed = (first ?? '').trim();
@@ -499,9 +512,7 @@ async function finalizeStripeOrderInternal(
 	const contactLastName = userSnapshot.lastName ?? null;
 	const customerName = buildCustomerName(contactName, contactLastName);
 
-	let order:
-		| Awaited<ReturnType<(typeof prisma)['order']['create']>>
-		| undefined;
+	let order: Awaited<ReturnType<(typeof prisma)['order']['create']>> | undefined;
 	try {
 		order = await prisma.$transaction(async (tx) => {
 			for (const item of orderItems) {
@@ -604,13 +615,12 @@ async function finalizeStripeOrderInternal(
 						maxRedemptions: true,
 						promotion: { select: { id: true, name: true } },
 					} as const;
-					let existingCoupon =
-						couponIdFromMetadata
-							? await tx.coupon.findUnique({
-									where: { id: couponIdFromMetadata },
-									select: selectCouponFields,
-								})
-							: null;
+					let existingCoupon = couponIdFromMetadata
+						? await tx.coupon.findUnique({
+								where: { id: couponIdFromMetadata },
+								select: selectCouponFields,
+							})
+						: null;
 					if (!existingCoupon) {
 						existingCoupon = await tx.coupon.findFirst({
 							where: { code: { equals: couponCode, mode: 'insensitive' } },

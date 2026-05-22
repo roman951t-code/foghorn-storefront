@@ -54,7 +54,7 @@ export default function CheckoutSteps() {
 			>
 				<AccordionItem mb='6' value='contacts' borderBottomColor='border'>
 					<AccordionItemTrigger>
-						<Heading as='h2' size='2xl' fontWeight='medium'>
+						<Heading as='h2' size='xl' fontWeight='medium'>
 							{authT('contacts')}
 						</Heading>
 					</AccordionItemTrigger>
@@ -64,7 +64,7 @@ export default function CheckoutSteps() {
 				</AccordionItem>
 				<AccordionItem mb='6' value='shipment' borderBottomColor='border'>
 					<AccordionItemTrigger>
-						<Heading as='h2' size='2xl' fontWeight='medium'>
+						<Heading as='h2' size='xl' fontWeight='medium'>
 							{t('shipment')}
 						</Heading>
 					</AccordionItemTrigger>
@@ -76,7 +76,7 @@ export default function CheckoutSteps() {
 				</AccordionItem>
 				<AccordionItem mb='6' value='payment' borderBottomColor='border'>
 					<AccordionItemTrigger>
-						<Heading as='h2' size='2xl' fontWeight='medium'>
+						<Heading as='h2' size='xl' fontWeight='medium'>
 							{t('payment')}
 						</Heading>
 					</AccordionItemTrigger>

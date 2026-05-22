@@ -74,8 +74,9 @@ const isStripeResourceAlreadyExists = (error: unknown) =>
 	((error as { code?: unknown }).code === 'resource_already_exists' ||
 		(error as { code?: unknown }).code === 'id_already_exists');
 
-const isDeletedStripeCoupon = (coupon: Stripe.Coupon | Stripe.DeletedCoupon): coupon is Stripe.DeletedCoupon =>
-	'deleted' in coupon && coupon.deleted === true;
+const isDeletedStripeCoupon = (
+	coupon: Stripe.Coupon | Stripe.DeletedCoupon,
+): coupon is Stripe.DeletedCoupon => 'deleted' in coupon && coupon.deleted === true;
 
 const buildReusableStripeCouponCreateParams = ({
 	stripeCouponId,
@@ -160,7 +161,7 @@ async function getOrCreateReusableStripeCouponId({
 					couponCode: preview.code,
 					couponId: preview.couponId,
 					promotionId: preview.promotionId,
-				})
+				}),
 			);
 			return created.id;
 		} catch (error) {
@@ -181,7 +182,7 @@ export async function POST(req: NextRequest) {
 					productId: z.string().min(1, 'productId_required'),
 					variantId: z.string().nullable(),
 					quantity: z.number().int().positive().max(99, 'quantity_too_high'),
-				})
+				}),
 			)
 			.min(1, 'items_required')
 			.max(MAX_CHECKOUT_ITEMS, 'items_too_many'),
@@ -194,9 +195,21 @@ export async function POST(req: NextRequest) {
 					country: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.country).optional().nullable(),
 					region: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.region).optional().nullable(),
 					city: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.city).optional().nullable(),
-					postalCode: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.postalCode).optional().nullable(),
-					addressLine1: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine1).optional().nullable(),
-					addressLine2: z.string().max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine2).optional().nullable(),
+					postalCode: z
+						.string()
+						.max(SHIPPING_ADDRESS_FIELD_LIMITS.postalCode)
+						.optional()
+						.nullable(),
+					addressLine1: z
+						.string()
+						.max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine1)
+						.optional()
+						.nullable(),
+					addressLine2: z
+						.string()
+						.max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine2)
+						.optional()
+						.nullable(),
 				}),
 			])
 			.optional(),
@@ -275,7 +288,7 @@ export async function POST(req: NextRequest) {
 		const productMap = new Map(products.map((p) => [p.id, p]));
 
 		const uniqueVariantIds = Array.from(
-			new Set(items.map((i) => i.variantId).filter((v): v is string => !!v))
+			new Set(items.map((i) => i.variantId).filter((v): v is string => !!v)),
 		);
 		const variants = uniqueVariantIds.length
 			? await prisma.productVariant.findMany({
@@ -301,9 +314,7 @@ export async function POST(req: NextRequest) {
 			: [];
 		const variantById = new Map(variants.map((v) => [v.id, v]));
 
-		const productsNeedingDefaultVariant = items
-			.filter((i) => !i.variantId)
-			.map((i) => i.productId);
+		const productsNeedingDefaultVariant = items.filter((i) => !i.variantId).map((i) => i.productId);
 		const defaultVariants = productsNeedingDefaultVariant.length
 			? await prisma.productVariant.findMany({
 					where: { productId: { in: productsNeedingDefaultVariant }, stock: { gt: 0 } },
@@ -344,8 +355,9 @@ export async function POST(req: NextRequest) {
 				}
 
 				const variant =
-					(item.variantId ? variantById.get(item.variantId) ?? null : null) ??
-					(defaultVariantByProduct.get(item.productId) ?? null);
+					(item.variantId ? (variantById.get(item.variantId) ?? null) : null) ??
+					defaultVariantByProduct.get(item.productId) ??
+					null;
 				if (!variant || variant.productId !== item.productId) return null;
 
 				const availableStock = variant.stock ?? 0;
@@ -368,17 +380,16 @@ export async function POST(req: NextRequest) {
 				const translation = pickLocalizedTranslation(product.translations, locale);
 				const displayProductName = translation?.name ?? product.name;
 
-				const variantLabel =
-					variant.attributes?.length
-						? variant.attributes
-								.map((a) => {
-									const name = a.attribute.name?.trim?.() ?? '';
-									const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
-									if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-									return name || valueWithUnit;
-								})
-								.join(' / ')
-						: null;
+				const variantLabel = variant.attributes?.length
+					? variant.attributes
+							.map((a) => {
+								const name = a.attribute.name?.trim?.() ?? '';
+								const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
+								if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+								return name || valueWithUnit;
+							})
+							.join(' / ')
+					: null;
 
 				return {
 					metadata: {
@@ -395,7 +406,11 @@ export async function POST(req: NextRequest) {
 					},
 				};
 			})
-			.filter(Boolean) as Stripe.Checkout.SessionCreateParams.LineItem[];
+			.filter(Boolean) as Array<{
+			metadata?: Record<string, string>;
+			quantity: number;
+			price_data: { currency: string; product_data: { name: string }; unit_amount: number };
+		}>;
 
 		if (!lineItems.length) {
 			return NextResponse.json({ error: 'invalid_items' }, { status: 400 });
@@ -404,7 +419,9 @@ export async function POST(req: NextRequest) {
 		const rawCouponCode = parsed.data.couponCode?.trim() ?? '';
 		const shipmentMethod = parsed.data.shipmentMethod?.trim() || null;
 		const shippingAddress = normalizeShippingAddress(parsed.data.shippingAddress);
-		const missingShippingFields = getMissingRequiredShippingAddressFields(parsed.data.shippingAddress);
+		const missingShippingFields = getMissingRequiredShippingAddressFields(
+			parsed.data.shippingAddress,
+		);
 		if (missingShippingFields.length > 0) {
 			return NextResponse.json({ error: 'shipping-address-required' }, { status: 400 });
 		}
@@ -488,15 +505,15 @@ export async function POST(req: NextRequest) {
 		});
 
 		return NextResponse.json({ sessionId: checkoutSession.id, url: checkoutSession.url });
-		} catch (error) {
-			console.error('Stripe session failed', error);
-			const errorDetails = asErrorDetails(error);
+	} catch (error) {
+		console.error('Stripe session failed', error);
+		const errorDetails = asErrorDetails(error);
 
-			const status = errorDetails.statusCode ?? 500;
-			const errorCode = errorDetails.code ?? 'stripe_session_failed';
-			const message = errorDetails.message;
-			const finalStatus = status >= 400 && status < 600 ? status : 500;
-			if (finalStatus >= 500) {
+		const status = errorDetails.statusCode ?? 500;
+		const errorCode = errorDetails.code ?? 'stripe_session_failed';
+		const message = errorDetails.message;
+		const finalStatus = status >= 400 && status < 600 ? status : 500;
+		if (finalStatus >= 500) {
 			recordApi5xxEvent({
 				route: '/api/payments/stripe',
 				statusCode: finalStatus,
@@ -505,10 +522,8 @@ export async function POST(req: NextRequest) {
 		}
 
 		return NextResponse.json(
-			env.NODE_ENV === 'development'
-				? { error: errorCode, message }
-				: { error: errorCode },
-			{ status: finalStatus }
+			env.NODE_ENV === 'development' ? { error: errorCode, message } : { error: errorCode },
+			{ status: finalStatus },
 		);
 	}
 }

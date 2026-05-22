@@ -1,15 +1,13 @@
-import { useEffect, useState } from 'react';
 import { Card, Badge, VStack, Flex, Box } from '@chakra-ui/react';
-import Image from 'next/image';
 import { LocaleNavButton, LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
-import { useTranslations } from 'next-intl';
-import { SUBCATEGORY_PLACEHOLDER_IMAGE } from '@/utils/categoryImages';
+import CategoryCardImage from './CategoryCardImage';
 
 type CategoryCardProps = {
 	title: string;
 	imageUrl: string;
 	products: { name: string; href: string }[];
 	viewAllHref: string;
+	seeProductsLabel: string;
 };
 
 export default function CategoryCard({
@@ -17,13 +15,8 @@ export default function CategoryCard({
 	imageUrl,
 	products,
 	viewAllHref,
+	seeProductsLabel,
 }: CategoryCardProps) {
-	const t = useTranslations('products');
-	const [resolvedImageUrl, setResolvedImageUrl] = useState(imageUrl);
-	useEffect(() => {
-		setResolvedImageUrl(imageUrl);
-	}, [imageUrl]);
-
 	return (
 		<Card.Root
 			variant='outline'
@@ -69,7 +62,11 @@ export default function CategoryCard({
 								color='main'
 								variant='underline'
 								_hover={{ color: 'link' }}
-								_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
+								_focusVisible={{
+									outline: '2px solid',
+									outlineColor: 'main.secondary',
+									outlineOffset: '2px',
+								}}
 							>
 								{product.name}
 							</LocaleNavLink>
@@ -82,9 +79,9 @@ export default function CategoryCard({
 				<LocaleNavButton
 					href={viewAllHref}
 					minW='200px'
-					aria-label={`${t('seeProducts')} ${title}`}
+					aria-label={`${seeProductsLabel} ${title}`}
 				>
-					{t('seeProducts')}
+					{seeProductsLabel}
 				</LocaleNavButton>
 			</Flex>
 
@@ -98,19 +95,7 @@ export default function CategoryCard({
 				borderStyle='solid'
 				borderColor='border'
 			>
-				<Image
-					src={resolvedImageUrl}
-					alt={title}
-					fill
-					sizes='(min-width: 30em) 316px, 100vw'
-					loading='lazy'
-					style={{ objectFit: 'cover' }}
-					onError={() => {
-						if (resolvedImageUrl !== SUBCATEGORY_PLACEHOLDER_IMAGE) {
-							setResolvedImageUrl(SUBCATEGORY_PLACEHOLDER_IMAGE);
-						}
-					}}
-				/>
+				<CategoryCardImage src={imageUrl} alt={title} />
 			</Box>
 		</Card.Root>
 	);

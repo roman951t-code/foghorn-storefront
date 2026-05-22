@@ -26,6 +26,7 @@ import { absoluteUrl, buildLanguageAlternates } from '@/utils/seo';
 import { LocaleParams, ProductFiltersSearchParams } from '@/types/routing';
 import CountPill from '@/components/ui/CountPill';
 
+// Route intent: SSR per query/filter params; product and filter data stay cached in tagged actions.
 type Props = LocaleParams & {
 	searchParams: ProductFiltersSearchParams;
 };
@@ -64,7 +65,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 		viewed: '/assets/images/logoSmall.webp',
 	};
 	const ogImagePath = tag
-		? tagImageMap[tag] ?? '/assets/images/logoBig.webp'
+		? (tagImageMap[tag] ?? '/assets/images/logoBig.webp')
 		: '/assets/images/logoBig.webp';
 	const ogImage = absoluteUrl(ogImagePath);
 
@@ -126,7 +127,7 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 			});
 			return acc;
 		},
-		{}
+		{},
 	);
 
 	const buildViewedResponse = async () => {
@@ -139,7 +140,7 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 
 		const highestPrice = viewedProducts.reduce(
 			(max, p) => Math.max(max, p.discountPrice ?? p.basePrice ?? 0),
-			0
+			0,
 		);
 
 		return {
@@ -163,7 +164,7 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 				inStock,
 				orderBy,
 				dynamicFilters,
-				locale
+				locale,
 			),
 			getTagFilters(tagValue),
 		]);
@@ -188,7 +189,7 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 				inStock,
 				orderBy,
 				dynamicFilters,
-				locale
+				locale,
 			),
 			getSearchFilters(searchQuery, locale),
 		]);
@@ -206,12 +207,12 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 		tag === 'viewed'
 			? await buildViewedResponse()
 			: tag
-			? await buildTagResponse(tag)
-			: await buildSearchResponse();
+				? await buildTagResponse(tag)
+				: await buildSearchResponse();
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<Heading as='h1' size='3xl' fontWeight='medium'>
+			<Heading as='h1' size='2xl' fontWeight='medium'>
 				{productsT('searchQueryResults', {
 					searchQuery: tag ? productsT(tag) : searchQuery || '',
 				})}

@@ -4,8 +4,9 @@ import ProductCard from '@/features/product/cards/ProductCard';
 import dynamic from 'next/dynamic';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-import { productsBreakpoints } from '@/data/breakpoints';
 import { SubcategoryProduct } from '@/types/product';
+import { productsBreakpoints } from '@/data/breakpoints';
+import { PRODUCT_CARD_HORIZONTAL_GAP_PX } from '@/constants/grids';
 import ProductCardsSkeletonGrid from '@/components/ui/ProductCardsSkeletonGrid';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -26,7 +27,7 @@ function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
 			breakpoints={productsBreakpoints}
 			slidesPerView={1}
 			slidesPerGroup={hasMultipleProducts ? 2 : 1}
-			spaceBetween={8}
+			spaceBetween={PRODUCT_CARD_HORIZONTAL_GAP_PX}
 			modules={[Navigation]}
 			className='productsSlider'
 		>

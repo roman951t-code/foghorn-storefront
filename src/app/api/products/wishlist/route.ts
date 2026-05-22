@@ -75,7 +75,7 @@ export async function GET() {
 				const productBasePrice = Number(product.basePrice ?? 0);
 				const defaultVariant = product.variants?.[0];
 				const basePrice = defaultVariant
-					? defaultVariant.price?.toNumber?.() ?? Number(defaultVariant.price ?? 0)
+					? (defaultVariant.price?.toNumber?.() ?? Number(defaultVariant.price ?? 0))
 					: productBasePrice;
 				const discountPrice = defaultVariant
 					? getEffectiveVariantDiscountPrice({
@@ -87,24 +87,23 @@ export async function GET() {
 							productDiscountPrice: product.discountPrice ? Number(product.discountPrice) : null,
 							productDiscountStartAt: product.discountStartAt ?? null,
 							productDiscountEndAt: product.discountEndAt ?? null,
-					  })
+						})
 					: getEffectiveDiscountPrice(
 							productBasePrice,
 							product.discountPrice ? Number(product.discountPrice) : null,
 							product.discountStartAt ?? null,
-							product.discountEndAt ?? null
-					  );
-				const variantLabel =
-					defaultVariant?.attributes?.length
-						? defaultVariant.attributes
-								.map((a) => {
-									const name = a.attribute.name?.trim?.() ?? '';
-									const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
-									if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-									return name || valueWithUnit;
-								})
-								.join(' / ')
-						: '';
+							product.discountEndAt ?? null,
+						);
+				const variantLabel = defaultVariant?.attributes?.length
+					? defaultVariant.attributes
+							.map((a) => {
+								const name = a.attribute.name?.trim?.() ?? '';
+								const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
+								if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
+								return name || valueWithUnit;
+							})
+							.join(' / ')
+					: '';
 
 				return {
 					...product,
@@ -118,7 +117,7 @@ export async function GET() {
 								discountPrice,
 								stock: defaultVariant.stock,
 								label: variantLabel,
-						  }
+							}
 						: undefined,
 					averageRating,
 					reviewCount: product.reviews.length,
@@ -129,13 +128,13 @@ export async function GET() {
 			products?.sort((a, b) => {
 				const aScore = Math.min(
 					...WISHLIST_TAG_PRIORITY.map((tag, i) =>
-						a.tags?.includes(tag) ? i : WISHLIST_TAG_PRIORITY.length
-					)
+						a.tags?.includes(tag) ? i : WISHLIST_TAG_PRIORITY.length,
+					),
 				);
 				const bScore = Math.min(
 					...WISHLIST_TAG_PRIORITY.map((tag, i) =>
-						b.tags?.includes(tag) ? i : WISHLIST_TAG_PRIORITY.length
-					)
+						b.tags?.includes(tag) ? i : WISHLIST_TAG_PRIORITY.length,
+					),
 				);
 				return aScore - bScore;
 			}) ?? [];
