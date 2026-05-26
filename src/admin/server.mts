@@ -1,5 +1,11 @@
 import 'dotenv/config';
 import crypto from 'node:crypto';
+import {
+	adminHttpLogger,
+	adminLogger,
+	captureAdminException,
+	setupAdminErrorTracking,
+} from './observability.mts';
 import express from 'express';
 import session from 'express-session';
 import admin from './admin.mts';
@@ -273,8 +279,7 @@ const fallbackAdminSecurityHeaders: express.RequestHandler = (_req, res, next) =
 
 const createAdminSecurityMiddleware = async (): Promise<express.RequestHandler> => {
 	try {
-		const helmetModuleName = 'helmet';
-		const helmet = (await import(helmetModuleName)).default as (
+		const helmet = (await import('helmet')).default as (
 			options?: Record<string, unknown>,
 		) => express.RequestHandler;
 
@@ -288,7 +293,7 @@ const createAdminSecurityMiddleware = async (): Promise<express.RequestHandler> 
 					: false,
 		});
 	} catch {
-		console.warn('Helmet package not found; using fallback admin security headers middleware.');
+		adminLogger.warn('Helmet package not found; using fallback admin security headers middleware.');
 		return fallbackAdminSecurityHeaders;
 	}
 };
@@ -320,8 +325,16 @@ if (nodeEnv === 'production') {
 			'ADMINJS_COOKIE_PASSWORD must be a strong secret (minimum 24 characters and not a common default).',
 		);
 	}
+	if (!explicitCookiePassword || cookiePassword === sessionSecret) {
+		throw new Error('ADMINJS_COOKIE_PASSWORD must be set and differ from ADMINJS_SESSION_SECRET.');
+	}
+	if (readonlyPassword && !hasStrongSecret(readonlyPassword, 12)) {
+		throw new Error(
+			'ADMINJS_READONLY_PASSWORD must be a strong secret (minimum 12 characters and not a common default).',
+		);
+	}
 	if (allowedAdminIps.size === 0) {
-		console.warn(
+		adminLogger.warn(
 			'[admin-security] ADMINJS_ALLOWED_IPS is not set. Consider IP allowlisting the admin panel in production.',
 		);
 	}
@@ -335,7 +348,8 @@ const hasActiveAdminProfile = async (email: string) => {
 		});
 		return user?.adminStatus === 'ACTIVE';
 	} catch (error) {
-		console.error('[admin-auth] Failed to verify admin profile', error);
+		adminLogger.error({ err: error, email }, '[admin-auth] Failed to verify admin profile');
+		captureAdminException(error, { area: 'admin-auth' });
 		return false;
 	}
 };
@@ -366,7 +380,16 @@ const start = async () => {
 	const { default: AdminJSExpress } = await import('@adminjs/express');
 	const app = express();
 	app.disable('x-powered-by');
+	app.use(adminHttpLogger);
 	app.use(await createAdminSecurityMiddleware());
+	app.get('/healthz', (_req, res) => {
+		res.setHeader('Cache-Control', 'no-store');
+		res.status(200).json({
+			status: 'ok',
+			service: 'admin',
+			timestamp: new Date().toISOString(),
+		});
+	});
 	app.use(admin.options.rootPath, createAdminCspMiddleware(adminCspMode));
 	if (nodeEnv === 'production') {
 		// Required when secure cookies are used behind TLS-terminating proxies.
@@ -692,13 +715,18 @@ const start = async () => {
 	gatedRouter.use(router);
 
 	app.use(admin.options.rootPath, gatedRouter);
+	setupAdminErrorTracking(app);
 
 	app.listen(adminPort, () => {
-		console.log(`AdminJS available at http://localhost:${adminPort}${admin.options.rootPath}`);
+		adminLogger.info(
+			{ port: adminPort, rootPath: admin.options.rootPath },
+			`AdminJS available at http://localhost:${adminPort}${admin.options.rootPath}`,
+		);
 	});
 };
 
 start().catch((error) => {
-	console.error('Failed to start AdminJS server', error);
+	adminLogger.fatal({ err: error }, 'Failed to start AdminJS server');
+	captureAdminException(error, { area: 'admin-startup' });
 	process.exit(1);
 });

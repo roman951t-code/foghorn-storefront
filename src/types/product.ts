@@ -3,11 +3,9 @@ import { getProductBySlug } from '@/actions/products/getProductBySlug';
 
 export type Product = Awaited<ReturnType<typeof getProductBySlug>>;
 
-export type CategoryWithSubcategories = Awaited<ReturnType<typeof getCatalog>>;
+type CategoryWithSubcategories = Awaited<ReturnType<typeof getCatalog>>;
 
 export type CatalogCategory = CategoryWithSubcategories['catalog'][number];
-
-export type ProductPick<K extends keyof Product> = Pick<Product, K>;
 
 export type SubcategoryProduct = {
 	id: string;
@@ -82,7 +80,7 @@ export type Review = {
 	user: { name: string; lastName: string | null };
 };
 
-export type FilterValue = {
+type FilterValue = {
 	value: string;
 	label: string;
 };

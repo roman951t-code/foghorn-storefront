@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { Box, Flex, HStack, Text, VStack, useBreakpointValue } from '@chakra-ui/react';
 import { LoadingPromoSkeleton } from '@/components/ui/Skeleton';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -9,8 +10,6 @@ import { Link } from '@/i18n/routing';
 import { PROMO_CARDS, type PromoCard } from '@/data/navigation/promoCards';
 import { promoBreakpoints } from '@/data/breakpoints';
 import { useRef } from 'react';
-
-import 'swiper/css';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 
 function PromoSkeletonFallback() {
@@ -31,9 +30,11 @@ type PromoProps = {
 
 function PromoCardSlide({
 	promo,
+	imagePriority,
 	isDraggingRef,
 }: {
 	promo: PromoCard;
+	imagePriority?: boolean;
 	isDraggingRef: { current: boolean };
 }) {
 	const overlayContent = (
@@ -107,14 +108,24 @@ function PromoCardSlide({
 			<Box
 				position='absolute'
 				inset='0'
-				bgImage={promo.imageUrl ? `url(${promo.imageUrl})` : undefined}
-				bgSize='cover'
-				bgPos='center'
-				bgRepeat='no-repeat'
 				transform='scale(1.01)'
 				transition='transform 0.35s ease'
 				_groupHover={{ transform: 'scale(1.06)' }}
-			/>
+			>
+				{promo.imageUrl ? (
+					<Image
+						src={promo.imageUrl}
+						alt=''
+						fill
+						priority={imagePriority}
+						loading={imagePriority ? 'eager' : 'lazy'}
+						fetchPriority={imagePriority ? 'high' : 'auto'}
+						quality={68}
+						sizes='(max-width: 689px) 100vw, (max-width: 767px) 50vw, (max-width: 1099px) 100vw, (max-width: 1563px) 50vw, 33vw'
+						style={{ objectFit: 'cover' }}
+					/>
+				) : null}
+			</Box>
 			<Box
 				position='absolute'
 				inset='0'
@@ -172,9 +183,9 @@ function PromoSlider({ promos }: PromoProps) {
 			touchStartPreventDefault={false}
 			touchRatio={1}
 		>
-			{cards.map((promo) => (
+			{cards.map((promo, index) => (
 				<SwiperSlide key={promo.id}>
-					<PromoCardSlide promo={promo} isDraggingRef={isDraggingRef} />
+					<PromoCardSlide promo={promo} imagePriority={index === 0} isDraggingRef={isDraggingRef} />
 				</SwiperSlide>
 			))}
 		</Swiper>

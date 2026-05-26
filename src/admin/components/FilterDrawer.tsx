@@ -1,12 +1,13 @@
 import { Box, Button, Drawer, DrawerContent, DrawerFooter, H3, Icon } from '@adminjs/design-system';
-import isNil from 'lodash/isNil.js';
-import pickBy from 'lodash/pickBy.js';
 import { type FormEventHandler, useEffect, useRef, useState } from 'react';
 import { BasePropertyComponent, useFilterDrawer, useQueryParams, useTranslation } from 'adminjs';
 
 type FilterProps = {
 	resource: { id: string; filterProperties: Array<{ propertyPath: string }> };
 };
+
+const compactFilters = (filter: Record<string, unknown>) =>
+	Object.fromEntries(Object.entries(filter).filter(([, value]) => value != null));
 
 export default function FilterDrawer(props: FilterProps) {
 	const { resource } = props;
@@ -28,7 +29,7 @@ export default function FilterDrawer(props: FilterProps) {
 
 	const handleSubmit: FormEventHandler<HTMLElement> = (event) => {
 		event.preventDefault();
-		storeParams({ filters: pickBy(filter, (v) => !isNil(v)), page: '1' });
+		storeParams({ filters: compactFilters(filter), page: '1' });
 	};
 
 	const handleReset: FormEventHandler<HTMLElement> = (event) => {

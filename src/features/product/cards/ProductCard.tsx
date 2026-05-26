@@ -27,9 +27,10 @@ export type CardProduct = SubcategoryProduct & {
 
 type Props = {
 	product: CardProduct;
+	imagePriority?: boolean;
 };
 
-export default function ProductCard({ product }: Props) {
+export default function ProductCard({ product, imagePriority = false }: Props) {
 	const t = useTranslations('products');
 	const cartT = useTranslations('cart');
 	const wishT = useTranslations('wishlist');
@@ -194,6 +195,7 @@ export default function ProductCard({ product }: Props) {
 					<ProductPreviewSlider
 						images={previewImages}
 						productName={name}
+						imagePriority={imagePriority}
 						onActiveIndexChange={setActivePreviewIndex}
 					/>
 				</LocaleNavLink>

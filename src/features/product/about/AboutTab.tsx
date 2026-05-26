@@ -276,7 +276,7 @@ export default function AboutTab({
 					<Heading size='md'>{prodT('description')}</Heading>
 				</Card.Header>
 				<Card.Body>
-					<Text whiteSpace='pre-line'>
+					<Text fontSize='sm' whiteSpace='pre-line'>
 						{product.description?.trim() || prodT('descriptionText')}
 					</Text>
 				</Card.Body>

@@ -65,12 +65,13 @@ export default function OrderShow(props: ActionProps) {
 		if (!recordId) return;
 		let isActive = true;
 		setLoading(true);
-		api.recordAction({
-			resourceId: resource.id,
-			recordId,
-			actionName: 'financialBreakdown',
-			method: 'get',
-		})
+		api
+			.recordAction({
+				resourceId: resource.id,
+				recordId,
+				actionName: 'financialBreakdown',
+				method: 'get',
+			})
 			.then((response) => {
 				if (!isActive) return;
 				setPayload((response.data.payload ?? null) as FinancialBreakdownPayload | null);
@@ -88,12 +89,13 @@ export default function OrderShow(props: ActionProps) {
 		if (!recordId) return;
 		let isActive = true;
 		setItemsLoading(true);
-		api.recordAction({
-			resourceId: resource.id,
-			recordId,
-			actionName: 'orderItems',
-			method: 'get',
-		})
+		api
+			.recordAction({
+				resourceId: resource.id,
+				recordId,
+				actionName: 'orderItems',
+				method: 'get',
+			})
 			.then((response) => {
 				if (!isActive) return;
 				setItemsPayload((response.data.payload ?? null) as OrderItemsPayload | null);
@@ -218,9 +220,9 @@ export default function OrderShow(props: ActionProps) {
 													{discount.label ?? translateMessage('order-discount-generic')}
 												</Text>
 												{discount.code ? (
-														<Text color='grey60' style={{ fontSize: 15 }}>
-															{translateMessage('order-discount-code', { code: discount.code })}
-														</Text>
+													<Text color='grey60' style={{ fontSize: 15 }}>
+														{translateMessage('order-discount-code', { code: discount.code })}
+													</Text>
 												) : null}
 											</Box>
 											<Text fontWeight='bold'>-{formatMoney(discount.amount)}</Text>
@@ -280,9 +282,14 @@ export default function OrderShow(props: ActionProps) {
 										{item.productImageUrl ? (
 											<img
 												src={item.productImageUrl}
-												alt={item.productName}
+												alt={item.productName || 'Product thumbnail'}
 												loading='lazy'
-												style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+												style={{
+													width: '100%',
+													height: '100%',
+													objectFit: 'cover',
+													display: 'block',
+												}}
 											/>
 										) : (
 											<Text fontWeight='bold' color='grey60'>

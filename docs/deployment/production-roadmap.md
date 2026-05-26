@@ -429,8 +429,8 @@ These are not required for day one, but they are good next steps:
 
 1. Add staging storefront and staging admin
 2. Move migrations into CI
-3. Add uptime monitoring
-4. Add error tracking such as Sentry
+3. Add external uptime monitoring against `/api/health` and `/healthz`
+4. Tune Sentry alert rules after real production traffic starts
 5. Add database connection pooling if traffic grows
 6. Consider Twilio Verify for stronger OTP handling
 7. Add disaster recovery runbooks and restore drills

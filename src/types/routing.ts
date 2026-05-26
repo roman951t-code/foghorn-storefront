@@ -5,18 +5,18 @@ type BaseParams<T extends Record<string, string>> = {
 };
 
 export type LocaleParam = { locale: AppLocale };
-export type CategoryParam = LocaleParam & { category: string };
-export type SubcategoryParam = CategoryParam & { subcategory: string };
-export type ProductParam = SubcategoryParam & { product: string };
+type CategoryParam = LocaleParam & { category: string };
+type SubcategoryParam = CategoryParam & { subcategory: string };
+type ProductParam = SubcategoryParam & { product: string };
 
 export type LocaleParams = BaseParams<LocaleParam>;
 export type CategoryParams = BaseParams<CategoryParam>;
 export type SubcategoryParams = BaseParams<SubcategoryParam>;
 export type ProductParams = BaseParams<ProductParam>;
 
-export type BaseSearchParams = Record<string, string | undefined>;
+type BaseSearchParams = Record<string, string | undefined>;
 
-export type PaginatedSearchParams = BaseSearchParams & {
+type PaginatedSearchParams = BaseSearchParams & {
 	page?: string;
 	perPage?: string;
 };

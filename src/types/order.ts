@@ -1,6 +1,6 @@
 import type { IconType } from 'react-icons';
 
-export type OrderProduct = {
+type OrderProduct = {
 	id: string;
 	name: string;
 	fullSlug: string;
@@ -20,7 +20,7 @@ export type OrderItem = {
 	product: OrderProduct;
 };
 
-export type OrderShippingAddress = {
+type OrderShippingAddress = {
 	country: string | null;
 	region: string | null;
 	city: string | null;

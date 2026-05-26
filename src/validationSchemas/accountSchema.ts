@@ -43,7 +43,7 @@ const accountSchemaShape = (t: {
 	shipmentAddress: z.string().max(200, { message: t.addressMax }),
 });
 
-export const createAccountSchema = (t: I18nData) =>
+const createAccountSchema = (t: I18nData) =>
 	accountSchemaShape(t as Parameters<typeof accountSchemaShape>[0]);
 
 const createNameSchemaFromShape = (shape: ReturnType<typeof accountSchemaShape>) =>
@@ -56,8 +56,7 @@ const createNameSchemaFromShape = (shape: ReturnType<typeof accountSchemaShape>)
 const createPhoneSchemaFromShape = (shape: ReturnType<typeof accountSchemaShape>) =>
 	z.object({ phone: shape.phone });
 
-export const createNameSchema = (t: I18nData) =>
-	createNameSchemaFromShape(createAccountSchema(t));
+export const createNameSchema = (t: I18nData) => createNameSchemaFromShape(createAccountSchema(t));
 
 export const createPhoneSchema = (t: I18nData) =>
 	createPhoneSchemaFromShape(createAccountSchema(t));

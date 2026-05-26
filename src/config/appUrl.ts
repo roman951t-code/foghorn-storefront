@@ -18,11 +18,13 @@ export const normalizeAppUrl = (raw: string | undefined | null): string | null =
 	}
 };
 
-export const normalizeHost = (raw: string | undefined | null): string | null => {
+const normalizeHost = (raw: string | undefined | null): string | null => {
 	const normalized = normalizeOptionalString(raw);
 	if (!normalized) return null;
 	try {
-		const parsed = normalized.includes('://') ? new URL(normalized) : new URL(`https://${normalized}`);
+		const parsed = normalized.includes('://')
+			? new URL(normalized)
+			: new URL(`https://${normalized}`);
 		return parsed.host.toLowerCase();
 	} catch {
 		return null;
@@ -79,11 +81,7 @@ export const resolveAppUrlFromEnv = ({
 		: resolveServerVercelDeploymentOrigin(env)) ??
 	LOCAL_APP_URL;
 
-export const resolveAllowedAppHosts = ({
-	env,
-}: {
-	env: Record<string, string | undefined>;
-}) => {
+export const resolveAllowedAppHosts = ({ env }: { env: Record<string, string | undefined> }) => {
 	const hosts = new Set<string>();
 	const addHost = (value: string | undefined | null) => {
 		const host = normalizeHost(value);

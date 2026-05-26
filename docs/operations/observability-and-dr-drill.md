@@ -17,6 +17,25 @@ Alert webhook target resolution:
 
 If no webhook URL is set, events are still logged locally/centrally via stdout.
 
+## Error tracking and request logs
+
+Sentry is configured for the storefront and the standalone admin runtime:
+
+- Storefront browser/client: `src/instrumentation-client.ts`
+- Storefront server/edge: `src/instrumentation.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`
+- AdminJS Express runtime: `src/admin/observability.mts`
+
+Sentry is inactive unless a DSN is configured. Use `NEXT_PUBLIC_SENTRY_DSN` for browser events, `SENTRY_DSN` for storefront server/edge events, and `ADMIN_SENTRY_DSN` for the admin runtime if you want a separate Sentry project.
+
+Set `SENTRY_ORG`, `SENTRY_PROJECT`, and `SENTRY_AUTH_TOKEN` in CI/Vercel when you want production source maps uploaded. Without `SENTRY_AUTH_TOKEN`, builds still work but source map upload is disabled.
+
+The admin server uses Pino/Pino HTTP for structured JSON request logs. Set `ADMIN_LOG_LEVEL=info` in production and use the hosting provider's log drain or log explorer to retain and query those logs.
+
+Health endpoints for uptime checks:
+
+- Storefront: `GET /api/health`
+- Admin: `GET /healthz`
+
 ## What is monitored right now
 
 - 5xx spikes:
@@ -28,6 +47,8 @@ If no webhook URL is set, events are still logged locally/centrally via stdout.
   - not configured
   - order finalize failure
   - handler exceptions
+- Unhandled storefront and admin exceptions via Sentry when DSNs are configured
+- Admin HTTP status codes, response times, and request IDs via Pino logs
 
 ## Backup + restore drill
 

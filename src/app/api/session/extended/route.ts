@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
-import { jsonNoStore } from '@/lib/response';
+import { jsonNoStore, jsonPrivateNoCache } from '@/lib/response';
 import type { AppSessionUser } from '@/types/session';
 
 export async function GET() {
@@ -14,7 +14,7 @@ export async function GET() {
 		});
 
 		if (!session?.user?.id) {
-			return jsonNoStore(null, { status: 200 });
+			return jsonPrivateNoCache(null, { status: 200 });
 		}
 
 		const { user, ...rest } = session;

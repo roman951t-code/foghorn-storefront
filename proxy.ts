@@ -10,7 +10,7 @@ const legacyLocaleMap: Record<string, string> = { ua: 'uk', us: 'en' };
 const allowedHosts = new Set<string>(
 	resolveAllowedAppHosts({
 		env: process.env as Record<string, string | undefined>,
-	})
+	}),
 );
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_DEFAULT_MAX = 80;
@@ -54,9 +54,17 @@ const LOCAL_HARDENED_PROFILE_ENABLED =
 const BROAD_API_RATE_LIMITS_ENABLED =
 	env.NODE_ENV === 'production' || LOCAL_HARDENED_PROFILE_ENABLED;
 const DEV_CSP_MODE = resolveDevCspMode();
-const CSP_ENFORCEMENT_ENABLED = env.NODE_ENV === 'production' || DEV_CSP_MODE === 'enforce';
+const LOCAL_PRODUCTION_PREVIEW_ENABLED =
+	env.NODE_ENV === 'production' &&
+	(env.NEXT_PUBLIC_APP_URL === 'http://localhost:3000' ||
+		env.NEXT_PUBLIC_APP_URL === 'http://127.0.0.1:3000');
+const CSP_ENFORCEMENT_ENABLED =
+	(env.NODE_ENV === 'production' && !LOCAL_PRODUCTION_PREVIEW_ENABLED) ||
+	DEV_CSP_MODE === 'enforce';
 const CSP_REPORT_ONLY_ENABLED =
-	(env.NODE_ENV === 'production' && process.env.CSP_REPORT_ONLY !== 'false') ||
+	(env.NODE_ENV === 'production' &&
+		!LOCAL_PRODUCTION_PREVIEW_ENABLED &&
+		process.env.CSP_REPORT_ONLY !== 'false') ||
 	DEV_CSP_MODE === 'report-only';
 const CSP_ENABLED = CSP_ENFORCEMENT_ENABLED || CSP_REPORT_ONLY_ENABLED;
 
@@ -181,9 +189,9 @@ const resolveExpectedRevalidateSecrets = () =>
 		new Set(
 			[env.CACHE_REVALIDATE_SECRET, env.CRON_SECRET]
 				.map((value) => normalizeSecret(value ?? null))
-				.filter((value): value is string => Boolean(value))
-			)
-		);
+				.filter((value): value is string => Boolean(value)),
+		),
+	);
 
 const isAllowedMutationOrigin = (originHeader: string, request: NextRequest) => {
 	try {
@@ -228,10 +236,13 @@ const buildCorsPreflightResponse = (request: NextRequest) => {
 	response.headers.set(
 		'Access-Control-Allow-Headers',
 		request.headers.get('access-control-request-headers') ??
-			'content-type, authorization, x-revalidate-secret'
+			'content-type, authorization, x-revalidate-secret',
 	);
 	response.headers.set('Access-Control-Max-Age', '600');
-	response.headers.set('Vary', 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers');
+	response.headers.set(
+		'Vary',
+		'Origin, Access-Control-Request-Method, Access-Control-Request-Headers',
+	);
 	response.headers.set('Cache-Control', 'no-store');
 	return response;
 };
@@ -242,23 +253,22 @@ const generateCspNonce = () => {
 	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 };
 
-const buildBaseCspDirectives = (nonce: string) =>
-	[
-		"default-src 'self'",
-		`script-src 'self' 'nonce-${nonce}' https://js.stripe.com`,
-		"script-src-attr 'none'",
-		`style-src 'self' 'nonce-${nonce}' https:`,
-		"style-src-attr 'unsafe-inline'",
-		"img-src 'self' data: blob: https:",
-		"font-src 'self' data:",
-		"connect-src 'self' https://api.stripe.com",
-		"frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
-		"object-src 'none'",
-		"base-uri 'self'",
-		"form-action 'self'",
-		"frame-ancestors 'none'",
-		'upgrade-insecure-requests',
-	];
+const buildBaseCspDirectives = (nonce: string) => [
+	"default-src 'self'",
+	`script-src 'self' 'nonce-${nonce}' https://js.stripe.com`,
+	"script-src-attr 'none'",
+	`style-src 'self' 'nonce-${nonce}' https:`,
+	"style-src-attr 'unsafe-inline'",
+	"img-src 'self' data: blob: https:",
+	"font-src 'self' data:",
+	"connect-src 'self' https://api.stripe.com",
+	"frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+	"object-src 'none'",
+	"base-uri 'self'",
+	"form-action 'self'",
+	"frame-ancestors 'none'",
+	'upgrade-insecure-requests',
+];
 
 const buildCspPolicy = (nonce: string) => buildBaseCspDirectives(nonce).join('; ');
 
@@ -309,7 +319,7 @@ const applyCspHeaders = (response: NextResponse, cspContext: CspContext | null) 
 				group: CSP_REPORT_GROUP,
 				max_age: 60 * 60 * 24 * 7,
 				endpoints: [{ url: cspContext.reportEndpointUrl }],
-			})
+			}),
 		);
 	}
 	return response;

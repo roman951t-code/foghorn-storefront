@@ -8,9 +8,8 @@ import { SubcategoryProduct } from '@/types/product';
 import { productsBreakpoints } from '@/data/breakpoints';
 import { PRODUCT_CARD_HORIZONTAL_GAP_PX } from '@/constants/grids';
 import ProductCardsSkeletonGrid from '@/components/ui/ProductCardsSkeletonGrid';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import '@/styles/swiper.css';
+
+const MAX_VISIBLE_PRODUCT_SLIDES = 6;
 
 type Props = {
 	products?: SubcategoryProduct[] | null;
@@ -31,9 +30,9 @@ function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
 			modules={[Navigation]}
 			className='productsSlider'
 		>
-			{products.map((p) => (
+			{products.map((p, index) => (
 				<SwiperSlide key={p?.id}>
-					<ProductCard product={p} />
+					<ProductCard product={p} imagePriority={index < MAX_VISIBLE_PRODUCT_SLIDES} />
 				</SwiperSlide>
 			))}
 		</Swiper>

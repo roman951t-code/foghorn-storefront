@@ -1,7 +1,7 @@
 export const ADMIN_TRANSLATION_LOCALES = ['uk', 'en'];
 export const ADMIN_DEFAULT_TRANSLATION_LOCALE = 'uk';
 
-export const PRODUCT_LOCALIZED_FIELDS = [
+const PRODUCT_LOCALIZED_FIELDS = [
 	{
 		key: 'name',
 		label: 'Name',
@@ -35,7 +35,7 @@ export const PRODUCT_LOCALIZED_FIELDS = [
 	},
 ];
 
-export const PRODUCT_CATEGORY_LOCALIZED_FIELDS = [
+const PRODUCT_CATEGORY_LOCALIZED_FIELDS = [
 	{
 		key: 'name',
 		label: 'Name',
@@ -45,7 +45,7 @@ export const PRODUCT_CATEGORY_LOCALIZED_FIELDS = [
 	},
 ];
 
-export const PAGE_LOCALIZED_FIELDS = [
+const PAGE_LOCALIZED_FIELDS = [
 	{
 		key: 'title',
 		label: 'Title',
@@ -79,7 +79,7 @@ export const PAGE_LOCALIZED_FIELDS = [
 	},
 ];
 
-export const BANNER_LOCALIZED_FIELDS = [
+const BANNER_LOCALIZED_FIELDS = [
 	{
 		key: 'title',
 		label: 'Title',

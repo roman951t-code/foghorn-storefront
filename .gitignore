@@ -43,5 +43,8 @@ next-env.d.ts
 
 /src/generated/prisma
 
+# AdminJS generated component bundle
+/.adminjs/
+
 # local dev postgres data dir
 .pgdata

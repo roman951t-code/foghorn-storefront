@@ -553,7 +553,7 @@ export default function UserShow(props: ActionProps) {
 															{review.productImageUrl ? (
 																<img
 																	src={review.productImageUrl}
-																	alt={review.productName}
+																	alt={review.productName || 'Product thumbnail'}
 																	loading='lazy'
 																	style={{
 																		width: '100%',

@@ -7,20 +7,19 @@ import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 
-import 'swiper/css';
-import 'swiper/css/navigation';
-
 import { PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
 
 type ProductPreviewSliderProps = {
 	images: string[];
 	productName?: string;
+	imagePriority?: boolean;
 	onActiveIndexChange?: (index: number) => void;
 };
 
 function ProductPreviewSwiper({
 	images,
 	productName,
+	imagePriority = true,
 	onActiveIndexChange,
 }: ProductPreviewSliderProps) {
 	const normalizedImages = images.filter((src): src is string => src.trim().length > 0);
@@ -61,6 +60,7 @@ function ProductPreviewSwiper({
 		>
 			{previewImages.map((src, i) => {
 				const resolvedSrc = failedIndexes.has(i) ? PRODUCT_PLACEHOLDER_IMAGE : src;
+				const shouldPrioritize = imagePriority && i === 0;
 				return (
 					<SwiperSlide key={i}>
 						<Box
@@ -79,14 +79,14 @@ function ProductPreviewSwiper({
 							bg='white'
 						>
 							<Image
-								loading='eager'
+								loading={shouldPrioritize ? 'eager' : 'lazy'}
 								src={resolvedSrc}
 								width={240}
 								height={220}
 								alt={altText}
 								onError={markImageFailed(i)}
-								priority={i === 0}
-								fetchPriority='high'
+								priority={shouldPrioritize}
+								fetchPriority={shouldPrioritize ? 'high' : 'auto'}
 								style={{
 									width: '100%',
 									height: '100%',
@@ -111,6 +111,7 @@ export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 	const normalizedImages = props.images.filter((src): src is string => src.trim().length > 0);
 	const firstPreview = toPreviewImage(normalizedImages[0] ?? PRODUCT_PLACEHOLDER_IMAGE);
 	const altText = props.productName ? `${props.productName} photo` : 'Product photo';
+	const shouldPrioritize = props.imagePriority ?? false;
 
 	return (
 		<Box
@@ -143,9 +144,9 @@ export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 					width={240}
 					height={220}
 					alt={altText}
-					priority
-					loading='eager'
-					fetchPriority='high'
+					priority={shouldPrioritize}
+					loading={shouldPrioritize ? 'eager' : 'lazy'}
+					fetchPriority={shouldPrioritize ? 'high' : 'auto'}
 					style={{
 						width: '100%',
 						height: '100%',

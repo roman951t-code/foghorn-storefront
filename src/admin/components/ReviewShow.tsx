@@ -40,12 +40,13 @@ export default function ReviewShow(props: ActionProps) {
 		if (!recordId) return;
 		let isActive = true;
 		setLoading(true);
-		api.recordAction({
-			resourceId: resource.id,
-			recordId,
-			actionName: 'reviewProduct',
-			method: 'get',
-		})
+		api
+			.recordAction({
+				resourceId: resource.id,
+				recordId,
+				actionName: 'reviewProduct',
+				method: 'get',
+			})
 			.then((response) => {
 				if (!isActive) return;
 				setProductPayload((response.data.payload ?? null) as ReviewProductPayload | null);
@@ -103,7 +104,7 @@ export default function ReviewShow(props: ActionProps) {
 								{productPayload.productImageUrl ? (
 									<img
 										src={productPayload.productImageUrl}
-										alt={productPayload.productName}
+										alt={productPayload.productName || 'Product thumbnail'}
 										loading='lazy'
 										style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
 									/>

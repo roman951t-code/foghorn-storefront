@@ -8,9 +8,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode, Navigation, Thumbs, Pagination, A11y, Keyboard } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import { PRODUCT_PLACEHOLDER_IMAGE } from '@/utils/productImages';
-import 'swiper/css';
 import 'swiper/css/free-mode';
-import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
 import 'swiper/css/pagination';
 
@@ -80,10 +78,15 @@ function ThumbsSliderInternal({ images, productName, initialIndex = 0 }: Product
 	};
 
 	const resolvedGalleryImages = galleryImages.map((src, index) =>
-		failedIndexes.has(index) ? PRODUCT_PLACEHOLDER_IMAGE : src
+		failedIndexes.has(index) ? PRODUCT_PLACEHOLDER_IMAGE : src,
 	);
-	const normalizedInitialIndex = Number.isFinite(initialIndex) ? Math.max(0, Math.floor(initialIndex)) : 0;
-	const safeInitialIndex = Math.min(normalizedInitialIndex, Math.max(0, resolvedGalleryImages.length - 1));
+	const normalizedInitialIndex = Number.isFinite(initialIndex)
+		? Math.max(0, Math.floor(initialIndex))
+		: 0;
+	const safeInitialIndex = Math.min(
+		normalizedInitialIndex,
+		Math.max(0, resolvedGalleryImages.length - 1),
+	);
 
 	useEffect(() => {
 		if (!mainSwiper || mainSwiper.destroyed) return;
@@ -101,7 +104,7 @@ function ThumbsSliderInternal({ images, productName, initialIndex = 0 }: Product
 				renderBullet: function (index: number, className: string) {
 					return `<span class="${className}" style="margin: 0 6px;">${index + 1}</span>`;
 				},
-		  }
+			}
 		: false;
 
 	const resetImage = () => setSelectedImageIndex(null);
@@ -109,7 +112,7 @@ function ThumbsSliderInternal({ images, productName, initialIndex = 0 }: Product
 		const currentIndex = mainSwiper?.realIndex ?? fallbackIndex ?? 0;
 		const boundedIndex = Math.min(
 			Math.max(currentIndex, 0),
-			Math.max(0, resolvedGalleryImages.length - 1)
+			Math.max(0, resolvedGalleryImages.length - 1),
 		);
 		setSelectedImageIndex(boundedIndex);
 	};
@@ -174,7 +177,7 @@ function ThumbsSliderInternal({ images, productName, initialIndex = 0 }: Product
 									fetchPriority={isFirst ? 'high' : undefined}
 									quality={68}
 									style={{ objectFit: 'cover' }}
-									sizes='(max-width: 768px) 100vw, 50vw'
+									sizes='(max-width: 900px) 100vw, (max-width: 1199px) 828px, 690px'
 									draggable={false}
 								/>
 							</Box>

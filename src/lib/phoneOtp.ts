@@ -36,7 +36,7 @@ const resolveTwilioConfig = () => {
 	};
 };
 
-export const isPhoneOtpTestAutofillEnabled = () =>
+const isPhoneOtpTestAutofillEnabled = () =>
 	env.NODE_ENV !== 'production' && !resolveTwilioConfig().isConfigured;
 
 const extractStoredPhoneOtpCode = (storedValue: string | null | undefined) => {
@@ -81,27 +81,24 @@ export async function sendPhoneOtpCode({
 			Body: TWILIO_OTP_TEMPLATE.replace('{{code}}', code),
 		});
 
-		const response = await fetch(
-			`${TWILIO_API_BASE}/${twilioConfig.accountSid}/Messages.json`,
-			{
-				method: 'POST',
-				headers: {
-					Authorization: buildTwilioBasicAuthHeader(
-						twilioConfig.accountSid!,
-						twilioConfig.authToken!
-					),
-					'Content-Type': 'application/x-www-form-urlencoded',
-				},
-				body,
-				cache: 'no-store',
-			}
-		);
+		const response = await fetch(`${TWILIO_API_BASE}/${twilioConfig.accountSid}/Messages.json`, {
+			method: 'POST',
+			headers: {
+				Authorization: buildTwilioBasicAuthHeader(
+					twilioConfig.accountSid!,
+					twilioConfig.authToken!,
+				),
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+			body,
+			cache: 'no-store',
+		});
 
 		if (!response.ok) {
 			const details = await response.text().catch(() => '');
 			const truncatedDetails = details.slice(0, 240);
 			throw new Error(
-				`sms_provider_send_failed:${response.status}${truncatedDetails ? `:${truncatedDetails}` : ''}`
+				`sms_provider_send_failed:${response.status}${truncatedDetails ? `:${truncatedDetails}` : ''}`,
 			);
 		}
 		return;

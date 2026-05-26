@@ -1,9 +1,11 @@
 import type { NextConfig } from 'next';
 import bundleAnalyzer from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { env } from './src/config/env';
 const isProd = env.NODE_ENV === 'production';
 const enableProdBrowserSourceMaps = process.env.ENABLE_PROD_BROWSER_SOURCEMAPS === 'true';
+const enableSentryDebug = process.env.SENTRY_DEBUG === 'true';
 
 const baseConfig: NextConfig = {
 	experimental: {
@@ -13,6 +15,7 @@ const baseConfig: NextConfig = {
 	productionBrowserSourceMaps: enableProdBrowserSourceMaps,
 	cacheComponents: true,
 	images: {
+		deviceSizes: [640, 750, 828, 864, 1080, 1200, 1920, 2048, 3840],
 		remotePatterns: [
 			{
 				protocol: 'https',
@@ -102,4 +105,21 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig = withNextIntl(withBundleAnalyzer(baseConfig));
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+	org: process.env.SENTRY_ORG,
+	project: process.env.SENTRY_PROJECT,
+	authToken: process.env.SENTRY_AUTH_TOKEN,
+	silent: !enableSentryDebug,
+	debug: enableSentryDebug,
+	telemetry: false,
+	webpack: {
+		treeshake: {
+			removeDebugLogging: true,
+		},
+		automaticVercelMonitors: true,
+	},
+	sourcemaps: {
+		disable: !process.env.SENTRY_AUTH_TOKEN,
+		deleteSourcemapsAfterUpload: true,
+	},
+});

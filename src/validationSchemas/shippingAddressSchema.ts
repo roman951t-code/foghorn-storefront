@@ -30,7 +30,3 @@ export const createShippingAddressSchema = (requiredMessage: string) =>
 			.max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine1),
 		addressLine2: z.string().trim().max(SHIPPING_ADDRESS_FIELD_LIMITS.addressLine2),
 	});
-
-export type ShippingAddressSchema = z.infer<
-	ReturnType<typeof createShippingAddressSchema>
->;

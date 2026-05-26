@@ -4,6 +4,7 @@ import { Fieldset, Highlight, Text } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
+import { useSession } from '@/providers/SessionProvider';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
 import { useTranslations } from 'next-intl';
@@ -14,7 +15,7 @@ export default function UpdateEmailModal() {
 	const authT = useTranslations('auth');
 	const validT = useTranslations('validation');
 	const searchParams = useSearchParams();
-	const { data: session } = authClient.useSession();
+	const { session } = useSession();
 
 	const emailChange = searchParams?.get('email-change') === 'true';
 	const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +26,7 @@ export default function UpdateEmailModal() {
 				userNotFound: validT('userNotFound'),
 				tooManyAttempts: validT('tooManyAttempts'),
 			}),
-		[validT]
+		[validT],
 	);
 
 	useEffect(() => {
@@ -69,7 +70,12 @@ export default function UpdateEmailModal() {
 			<Fieldset.Root size='lg' invalid>
 				<Fieldset.Content>
 					{session?.user.email && (
-						<Fieldset.HelperText fontSize={{ base: 'md', md: '15px' }} lineHeight='1.6' mb='2' mt='0'>
+						<Fieldset.HelperText
+							fontSize={{ base: 'md', md: '15px' }}
+							lineHeight='1.6'
+							mb='2'
+							mt='0'
+						>
 							{authT('toNewPost')}
 
 							<Highlight query={session?.user.email} styles={{ fontWeight: 'semibold', mx: 1.5 }}>
