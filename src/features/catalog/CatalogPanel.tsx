@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Box, Flex, Text, VStack, HStack, Icon, Skeleton } from '@chakra-ui/react';
+import { useEffect, useState, useRef } from 'react';
+import { Box, Button, Flex, Text, VStack, HStack, Icon, Skeleton } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import CategoryDetails from './CategoryDetails';
@@ -51,6 +51,23 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 		setActiveCategory(null);
 	};
 
+	const activateCategory = (category: CatalogCategory) => {
+		if (hoverTimeout.current) {
+			clearTimeout(hoverTimeout.current);
+			hoverTimeout.current = null;
+		}
+		setHoveredCategoryId(category.id);
+		setActiveCategory(category);
+	};
+
+	useEffect(() => {
+		return () => {
+			if (hoverTimeout.current) {
+				clearTimeout(hoverTimeout.current);
+			}
+		};
+	}, []);
+
 	return (
 		<Flex
 			position='relative'
@@ -79,7 +96,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 					<CatalogBtn fullText />
 				</Box>
 
-				<VStack align='stretch' gap={1} overflowY='auto' pb={2} px={2} flex='1' minH={0}>
+				<VStack align='stretch' gap={1} pb={2} px={2} flex='1' minH={0}>
 					{uiCategories.map((category, index) => {
 						if (!category) {
 							return (
@@ -103,13 +120,18 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 							hoveredCategoryId === category.id || activeCategory?.id === category.id;
 
 						return (
-							<HStack
+							<Button
+								type='button'
 								key={category.id}
-								justify='space-between'
-								align='center'
+								variant='plain'
+								display='flex'
+								justifyContent='space-between'
+								alignItems='center'
+								textAlign='left'
 								px={3}
 								py={2.5}
 								h='52px'
+								w='full'
 								rounded='lg'
 								bg={
 									isHighlighted
@@ -122,12 +144,21 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 								borderStyle='solid'
 								borderColor={isHighlighted ? 'border' : 'transparent'}
 								transition='all 0.15s ease-in-out'
+								aria-pressed={activeCategory?.id === category.id}
 								_hover={{
 									cursor: 'pointer',
 									bg: 'bgHover.promoCard',
 									transform: 'translateX(2px)',
 								}}
+								_active={{ bg: 'bgHover.promoCard' }}
+								_focusVisible={{
+									outline: '2px solid',
+									outlineColor: 'main.secondary',
+									outlineOffset: '2px',
+								}}
 								onMouseEnter={() => handleMouseEnter(category)}
+								onClick={() => activateCategory(category)}
+								onFocus={() => activateCategory(category)}
 							>
 								<HStack gap={3} minW={0}>
 									<Box
@@ -154,7 +185,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 								>
 									<BsChevronRight />
 								</Icon>
-							</HStack>
+							</Button>
 						);
 					})}
 				</VStack>

@@ -31,12 +31,10 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 				<Flex justifyContent='space-between' alignItems='stretch' gap='4'>
 					<VStack alignItems='flex-start' gap='3' flex='1'>
 						<Stat.Root>
-							<Stat.Label fontSize={{ base: 'md', md: 'sm' }} color='main.disabled'>
+							<Stat.Label fontSize='md' color='main.disabled'>
 								{i18nData.totalAmount}
 							</Stat.Label>
-							<Stat.ValueText fontSize={{ base: '3xl', sm: '4xl' }}>
-								{formatUsdPrice(finalTotal)}
-							</Stat.ValueText>
+							<Stat.ValueText fontSize='2xl'>{formatUsdPrice(finalTotal)}</Stat.ValueText>
 						</Stat.Root>
 						{couponDiscount > 0 ? (
 							<Badge
@@ -48,8 +46,8 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 							>{`-${formatUsdPrice(couponDiscount)} ${appliedCoupon?.code ?? ''}`}</Badge>
 						) : null}
 
-						<Flex align='center' gapX='4' mt='1'>
-							<Text fontSize={{ base: 'md', md: '15px' }} color='main'>
+						<Flex align='center' gapX='2' mt='1'>
+							<Text fontSize={{ base: 'md', md: 'sm' }} color='main'>
 								{i18nData.numOfProducts}
 							</Text>
 							<CountPill value={totalCount} px='2' labelProps={{ fontWeight: 'bold' }} />
@@ -96,13 +94,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 				</Stack>
 			</Card.Root>
 
-			<Stack
-				direction='column'
-				overflowY='auto'
-				gap={3}
-				maxHeight={{ base: '42vh', sm: '584px' }}
-				pr='1'
-			>
+			<Stack direction='column' overflowY='auto' gap={3} pr='1'>
 				{cartItems.map((item) => (
 					<CartOrderCard
 						key={item?.lineId}

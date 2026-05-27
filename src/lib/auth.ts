@@ -24,6 +24,11 @@ const sanitizeSessionEmail = (email: string | null | undefined): string | null =
 const resolveDefaultNotificationMethod = (path: string | undefined) =>
 	path?.includes('/phone-number/verify') ? 'phone' : 'email';
 
+const isLocalNetworkPreview = ['1', 'true', 'yes', 'on'].includes(
+	env.LOCAL_NETWORK_PREVIEW?.trim().toLowerCase() ?? '',
+);
+const useSecureAuthCookies = env.NODE_ENV === 'production' && !isLocalNetworkPreview;
+
 export const auth = betterAuth({
 	baseURL: APP_URL,
 	emailVerification: {
@@ -82,44 +87,44 @@ export const auth = betterAuth({
 		},
 	},
 	advanced: {
-		useSecureCookies: env.NODE_ENV === 'production',
+		useSecureCookies: useSecureAuthCookies,
 		defaultCookieAttributes: {
 			sameSite: 'lax',
-			secure: env.NODE_ENV === 'production',
+			secure: useSecureAuthCookies,
 			httpOnly: true,
 			path: '/',
 		},
 	},
-		emailAndPassword: {
-			enabled: true,
-			requireEmailVerification: true,
-			sendResetPassword: async ({ user, url }) => {
-				const [authT, emailsT] = await Promise.all([
-					getTranslations('auth'),
-					getTranslations('emails'),
-				]);
+	emailAndPassword: {
+		enabled: true,
+		requireEmailVerification: true,
+		sendResetPassword: async ({ user, url }) => {
+			const [authT, emailsT] = await Promise.all([
+				getTranslations('auth'),
+				getTranslations('emails'),
+			]);
 
-				const recipientName = user?.name || user.email || emailsT('defaultRecipient');
-				const emailContent = renderEmailTemplate({
-					subject: authT('resetPass'),
-					title: authT('resetPass'),
-					salutation: `${emailsT('greeting')} ${recipientName},`,
-					intro: [emailsT('resetPassIntro')],
-					cta: { label: authT('resetPassAction'), url },
-					outro: [emailsT('ignoreIfNotYou'), emailsT('help')],
-					footer: emailsT('signature'),
-					brandName: emailsT('brandName'),
-				});
+			const recipientName = user?.name || user.email || emailsT('defaultRecipient');
+			const emailContent = renderEmailTemplate({
+				subject: authT('resetPass'),
+				title: authT('resetPass'),
+				salutation: `${emailsT('greeting')} ${recipientName},`,
+				intro: [emailsT('resetPassIntro')],
+				cta: { label: authT('resetPassAction'), url },
+				outro: [emailsT('ignoreIfNotYou'), emailsT('help')],
+				footer: emailsT('signature'),
+				brandName: emailsT('brandName'),
+			});
 
-				await resendClient.emails.send({
-					from: DEFAULT_FROM,
-					to: [user.email],
-					subject: emailContent.subject,
-					html: emailContent.html,
-					text: emailContent.text,
-				});
-			},
+			await resendClient.emails.send({
+				from: DEFAULT_FROM,
+				to: [user.email],
+				subject: emailContent.subject,
+				html: emailContent.html,
+				text: emailContent.text,
+			});
 		},
+	},
 	socialProviders: {
 		google: {
 			prompt: 'select_account',
@@ -127,27 +132,27 @@ export const auth = betterAuth({
 			clientSecret: env.GOOGLE_CLIENT_SECRET as string,
 		},
 	},
-		plugins: [
-			phoneNumber({
-				sendOTP: async ({ phoneNumber, code }) => {
-					await sendPhoneOtpCode({ phoneNumber, code });
-				},
-				requireVerification: true,
-				callbackOnVerification: async ({ user, phoneNumber }) => {
-					const expectedTempEmail = `${phoneNumber.replace(/\D/g, '')}@mail`;
-					if (user.email?.trim().toLowerCase() !== expectedTempEmail) return;
-					await prisma.user.update({
-						where: { id: user.id },
-						data: {
-							email: null,
-							emailVerified: false,
-						},
-					});
-				},
-				signUpOnVerification: {
-					getTempEmail: (phoneNumber) => {
-						return `${phoneNumber.replace(/\D/g, '')}@mail`;
+	plugins: [
+		phoneNumber({
+			sendOTP: async ({ phoneNumber, code }) => {
+				await sendPhoneOtpCode({ phoneNumber, code });
+			},
+			requireVerification: true,
+			callbackOnVerification: async ({ user, phoneNumber }) => {
+				const expectedTempEmail = `${phoneNumber.replace(/\D/g, '')}@mail`;
+				if (user.email?.trim().toLowerCase() !== expectedTempEmail) return;
+				await prisma.user.update({
+					where: { id: user.id },
+					data: {
+						email: null,
+						emailVerified: false,
 					},
+				});
+			},
+			signUpOnVerification: {
+				getTempEmail: (phoneNumber) => {
+					return `${phoneNumber.replace(/\D/g, '')}@mail`;
+				},
 				getTempName: (phoneNumber) => {
 					return phoneNumber;
 				},

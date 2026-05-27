@@ -32,15 +32,11 @@ function FlagIcon({ locale }: { locale: AppLocale }) {
 
 	return (
 		<svg {...commonProps}>
-			<rect width='640' height='480' fill='#fff' />
-			<rect width='640' height='37' y='0' fill='#B22234' />
-			<rect width='640' height='37' y='74' fill='#B22234' />
-			<rect width='640' height='37' y='148' fill='#B22234' />
-			<rect width='640' height='37' y='222' fill='#B22234' />
-			<rect width='640' height='37' y='296' fill='#B22234' />
-			<rect width='640' height='37' y='370' fill='#B22234' />
-			<rect width='640' height='37' y='444' fill='#B22234' />
-			<rect width='260' height='258' fill='#3C3B6E' />
+			<rect width='640' height='480' fill='#012169' />
+			<path d='M0 0l640 480m0-480L0 480' stroke='#fff' strokeWidth='96' />
+			<path d='M0 0l640 480m0-480L0 480' stroke='#C8102E' strokeWidth='58' />
+			<path d='M320 0v480M0 240h640' stroke='#fff' strokeWidth='160' />
+			<path d='M320 0v480M0 240h640' stroke='#C8102E' strokeWidth='96' />
 		</svg>
 	);
 }

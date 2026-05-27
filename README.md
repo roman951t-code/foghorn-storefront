@@ -24,6 +24,12 @@ npm install
 
 2. Configure environment variables in `.env` / `.env.local`.
 
+On a new development machine, you can install packages, apply local Prisma migrations, generate Prisma Client, and seed the database with one command after the environment file is ready:
+
+```bash
+npm run setup:local
+```
+
 3. Run database migrations and generate Prisma client:
 
 ```bash
@@ -81,7 +87,7 @@ npm run admin:start
 
 ### Email Deliverability Note
 
-`EMAIL_FROM` must not use `@resend.dev` in production.  
+`EMAIL_FROM` must not use `@resend.dev` in production.
 Use a verified sending domain in Resend and ensure SPF/DKIM/DMARC are configured.
 
 ## Local Hardened Profile

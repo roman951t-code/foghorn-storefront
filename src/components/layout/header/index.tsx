@@ -27,7 +27,7 @@ export default function Header() {
 			borderBottomStyle='solid'
 			borderBottomColor={{ base: 'gray.100', _dark: 'gray.600' }}
 		>
-			<Stack>
+			<Stack gap='0'>
 				<Flex
 					justify='space-between'
 					align='center'

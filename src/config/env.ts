@@ -39,6 +39,23 @@ const isLocalhostOrigin = (origin: string) => {
 	}
 };
 
+const isPrivateLanHostname = (hostname: string) =>
+	/^192\.168\./.test(hostname) ||
+	/^10\./.test(hostname) ||
+	/^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname);
+
+const isLocalNetworkPreview = (value: string | undefined) =>
+	['1', 'true', 'yes', 'on'].includes(value?.trim().toLowerCase() ?? '');
+
+const isLocalPreviewOrigin = (origin: string) => {
+	try {
+		const url = new URL(origin);
+		return isLocalhostOrigin(origin) || isPrivateLanHostname(url.hostname);
+	} catch {
+		return false;
+	}
+};
+
 const isLocalDatabaseUrl = (databaseUrl: string) => {
 	try {
 		const url = new URL(databaseUrl);
@@ -66,6 +83,7 @@ const envSchema = z.object({
 	GOOGLE_CLIENT_ID: z.string().optional(),
 	GOOGLE_CLIENT_SECRET: z.string().optional(),
 	NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+	LOCAL_NETWORK_PREVIEW: z.string().optional().transform(normalizeOptionalEnvValue),
 	NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
 	ENCRYPTION_KEY: z.string().optional().transform(normalizeOptionalEnvValue),
 	EMAIL_FROM: z.string().optional().transform(normalizeOptionalEnvValue),
@@ -144,7 +162,7 @@ if (parsedData.NODE_ENV === 'production' && !parsedData.BETTER_AUTH_SECRET) {
 if (
 	parsedData.NODE_ENV === 'production' &&
 	isLocalDatabaseUrl(parsedData.DATABASE_URL) &&
-	!isLocalhostOrigin(normalizedAppUrl)
+	!isLocalPreviewOrigin(normalizedAppUrl)
 ) {
 	additionalFieldErrors.DATABASE_URL = ['DATABASE_URL must not point to localhost in production'];
 }
@@ -219,6 +237,10 @@ if (
 	parsedData.NODE_ENV === 'production' &&
 	normalizeAppUrl(parsedData.NEXT_PUBLIC_APP_URL) &&
 	normalizedAppUrl.startsWith('http://') &&
+	!(
+		isLocalNetworkPreview(parsedData.LOCAL_NETWORK_PREVIEW) &&
+		isLocalPreviewOrigin(normalizedAppUrl)
+	) &&
 	!isLocalhostOrigin(normalizedAppUrl)
 ) {
 	additionalFieldErrors.NEXT_PUBLIC_APP_URL = [

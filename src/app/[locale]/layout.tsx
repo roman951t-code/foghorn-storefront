@@ -17,6 +17,7 @@ import { CLIENT_MESSAGE_NAMESPACES } from '@/i18n/messages';
 import { SessionProvider } from '@/providers/SessionProvider';
 import { ColorModeProvider } from '@/components/ui/chakra/color-mode';
 import { getCatalog } from '@/actions/products/getCatalog';
+import { getCartItems } from '@/actions/cart/getCartItems';
 import { fontVariableClassName } from '@/lib/fonts';
 import { AppStoreHydrator } from '@/providers/AppStoreHydrator';
 import { getHtmlLang, isAppLocale } from '@/constants/locales';
@@ -26,6 +27,7 @@ import { APP_URL, localizePath } from '@/utils/seo';
 import CookieConsentBanner from '@/components/layout/CookieConsentBanner';
 import { getEnabledStorefrontForms } from '@/actions/storefront/getEnabledStorefrontForms';
 import { StorefrontFormPlacement } from '@prisma/client';
+import { auth } from '@/lib/auth';
 
 export const metadata: Metadata = {
 	metadataBase: new URL(APP_URL),
@@ -114,14 +116,23 @@ async function LayoutProviders({ children, locale }: { children: ReactNode; loca
 
 	const messagesPromise = loadClientMessages(CLIENT_MESSAGE_NAMESPACES);
 
+	const session = await auth.api.getSession({
+		headers: headersList,
+		query: { disableCookieCache: true },
+	});
+	const userId = session?.user?.id ?? null;
+
 	const catalogPromise = getCatalog(locale);
 	const cookieBannerPromise = getEnabledStorefrontForms(StorefrontFormPlacement.COOKIE_BANNER);
+	const cartPromise = userId ? getCartItems(userId) : Promise.resolve({ success: true, items: [] });
 
-	const [messages, catalogResponse, cookieBanners] = await Promise.all([
+	const [messages, catalogResponse, cookieBanners, cartResponse] = await Promise.all([
 		messagesPromise,
 		catalogPromise,
 		cookieBannerPromise,
+		cartPromise,
 	]);
+	const cartItems = cartResponse.success ? cartResponse.items : [];
 
 	const orgJsonLd = {
 		'@context': 'https://schema.org',
@@ -153,15 +164,18 @@ async function LayoutProviders({ children, locale }: { children: ReactNode; loca
 	return (
 		<ChakraUIProvider nonce={cspNonce}>
 			<Box display='flex' flexDirection='column' minHeight='100vh' gap='6' bg='bg.primary'>
-				<SessionProvider initialSession={null}>
+				<SessionProvider initialSession={session ?? null}>
 					<NextIntlClientProvider messages={messages}>
 						<AppStoreHydrator
 							categories={catalogResponse.catalog}
-							cartData={{ items: [] }}
-							cartProductIds={{ success: true, productIds: [] }}
+							cartData={{ items: cartItems }}
+							cartProductIds={{
+								success: true,
+								productIds: cartItems.map((item) => item.productId),
+							}}
 							wishListData={[]}
 							wishListIds={{ success: true, productIds: [] }}
-							isLoggedIn={false}
+							isLoggedIn={Boolean(userId)}
 						>
 							<Script id='org-schema' nonce={cspNonce} type='application/ld+json'>
 								{JSON.stringify(orgJsonLd)}

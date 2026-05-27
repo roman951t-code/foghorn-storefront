@@ -2,13 +2,24 @@
 
 import dynamic from 'next/dynamic';
 import { type ComponentProps } from 'react';
-import { Spinner, Flex } from '@chakra-ui/react';
+import { IconButton, Spinner } from '@chakra-ui/react';
 
 const CartModal = dynamic(() => import('./CartModal'), {
 	loading: () => (
-		<Flex align='center' justify='center' minW='48px' minH='48px' role='status' aria-live='polite'>
+		<IconButton
+			aria-label='Cart loading'
+			size='md'
+			variant='ghost'
+			color='main.lightOnly'
+			rounded='md'
+			colorPalette='green'
+			bg={{ _hover: 'colorPalette.600' }}
+			disabled
+			role='status'
+			aria-live='polite'
+		>
 			<Spinner color='white' size='sm' />
-		</Flex>
+		</IconButton>
 	),
 	ssr: false,
 });

@@ -27,7 +27,8 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 			: undefined;
 	const basePrice = roundPrice(product.basePrice ?? 0);
 	const discountPrice = product.discountPrice != null ? roundPrice(product.discountPrice) : null;
-	const discountAmount = discountPrice != null ? roundPrice(Math.max(0, basePrice - discountPrice)) : 0;
+	const discountAmount =
+		discountPrice != null ? roundPrice(Math.max(0, basePrice - discountPrice)) : 0;
 	const hasDiscount = discountAmount > 0;
 	const unitPrice = hasDiscount && discountPrice != null ? discountPrice : basePrice;
 	const lineTotal = unitPrice * quantity;
@@ -182,7 +183,7 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 												variant='solid'
 												bg='bg.accent'
 												color='black'
-												fontWeight='bold'
+												fontWeight='medium'
 												rounded='lg'
 												px='2'
 												ml='4'

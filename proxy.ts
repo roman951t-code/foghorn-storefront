@@ -57,7 +57,8 @@ const DEV_CSP_MODE = resolveDevCspMode();
 const LOCAL_PRODUCTION_PREVIEW_ENABLED =
 	env.NODE_ENV === 'production' &&
 	(env.NEXT_PUBLIC_APP_URL === 'http://localhost:3000' ||
-		env.NEXT_PUBLIC_APP_URL === 'http://127.0.0.1:3000');
+		env.NEXT_PUBLIC_APP_URL === 'http://127.0.0.1:3000' ||
+		resolveBooleanEnvFlag(env.LOCAL_NETWORK_PREVIEW, false));
 const CSP_ENFORCEMENT_ENABLED =
 	(env.NODE_ENV === 'production' && !LOCAL_PRODUCTION_PREVIEW_ENABLED) ||
 	DEV_CSP_MODE === 'enforce';
@@ -196,7 +197,11 @@ const resolveExpectedRevalidateSecrets = () =>
 const isAllowedMutationOrigin = (originHeader: string, request: NextRequest) => {
 	try {
 		const origin = new URL(originHeader);
-		if (env.NODE_ENV === 'production' && origin.protocol !== 'https:') {
+		if (
+			env.NODE_ENV === 'production' &&
+			!LOCAL_PRODUCTION_PREVIEW_ENABLED &&
+			origin.protocol !== 'https:'
+		) {
 			return false;
 		}
 		if (
@@ -330,7 +335,11 @@ export default async function middleware(request: NextRequest) {
 	const { pathname, search } = request.nextUrl;
 	const cspContext = pathname.startsWith('/api') ? null : buildCspContext(request);
 
-	if (env.NODE_ENV === 'production' && !isAllowedRequestHost(request)) {
+	if (
+		env.NODE_ENV === 'production' &&
+		!LOCAL_PRODUCTION_PREVIEW_ENABLED &&
+		!isAllowedRequestHost(request)
+	) {
 		return new NextResponse('Not Found', {
 			status: 404,
 			headers: { 'Cache-Control': 'no-store' },

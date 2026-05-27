@@ -5,7 +5,7 @@ export const DEFAULT_LOCALE: AppLocale = 'uk';
 
 export const LANGUAGE_OPTIONS = [
 	{ value: 'uk', label: 'Укр', flag: '🇺🇦' },
-	{ value: 'en', label: 'Eng', flag: '🇺🇸' },
+	{ value: 'en', label: 'Eng', flag: '🇬🇧' },
 ] as const satisfies readonly { value: AppLocale; label: string; flag: string }[];
 
 export const LOCALE_SWITCHER_LABEL = 'Change language';

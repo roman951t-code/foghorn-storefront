@@ -87,9 +87,11 @@ export function AppStoreHydrator({
 
 	// Cart init + login flag
 	useLayoutEffect(() => {
+		if (!resolvedIsLoggedIn) return;
+
 		const ids = cartProductIds?.success ? (cartProductIds.productIds ?? []) : [];
 		setCartInitial(cartData, ids);
-	}, [cartData, cartProductIds, setCartInitial]);
+	}, [cartData, cartProductIds, resolvedIsLoggedIn, setCartInitial]);
 
 	useLayoutEffect(() => {
 		setCartLoggedIn(resolvedIsLoggedIn);
@@ -97,9 +99,11 @@ export function AppStoreHydrator({
 
 	// Wishlist init + login flag
 	useLayoutEffect(() => {
+		if (!resolvedIsLoggedIn) return;
+
 		const ids = wishListIds?.success ? (wishListIds.productIds ?? []) : [];
 		setWishInitial(wishListData, ids);
-	}, [setWishInitial, wishListData, wishListIds]);
+	}, [resolvedIsLoggedIn, setWishInitial, wishListData, wishListIds]);
 
 	useLayoutEffect(() => {
 		setWishLoggedIn(resolvedIsLoggedIn);

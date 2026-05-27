@@ -102,6 +102,8 @@ type CartStore = {
 	cartData: CartData;
 	productIds: string[];
 	isLoggedIn: boolean;
+	isHydrated: boolean;
+	isHydrating: boolean;
 	setIsLoggedIn: (loggedIn: boolean) => void;
 	setCartData: (data: CartData) => void;
 	setCartItems: (items: CartProduct[]) => void;
@@ -123,15 +125,30 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 	cartData: { items: [] },
 	productIds: [],
 	isLoggedIn: false,
+	isHydrated: false,
+	isHydrating: false,
 	setIsLoggedIn: (loggedIn) => set({ isLoggedIn: loggedIn }),
-	setCartData: (data) => set({ cartData: data, productIds: uniqueProductIds(data.items) }),
+	setCartData: (data) =>
+		set({ cartData: data, productIds: uniqueProductIds(data.items), isHydrated: true }),
 	setCartItems: (items) =>
-		set({ cartData: { ...get().cartData, items }, productIds: uniqueProductIds(items) }),
+		set({
+			cartData: { ...get().cartData, items },
+			productIds: uniqueProductIds(items),
+			isHydrated: true,
+		}),
 	setProductIds: (ids) => set({ productIds: ids }),
 	hydrateGuestCart: async () => {
+		if (get().isHydrating) return;
+
+		set({ isHydrating: true });
 		const guest = loadGuestCart();
 		if (guest.length === 0) {
-			set({ cartData: { ...get().cartData, items: [] }, productIds: [] });
+			set({
+				cartData: { ...get().cartData, items: [] },
+				productIds: [],
+				isHydrated: true,
+				isHydrating: false,
+			});
 			return;
 		}
 		try {
@@ -139,15 +156,22 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 			set({
 				cartData: { ...get().cartData, items: hydrated },
 				productIds: uniqueProductIds(hydrated),
+				isHydrated: true,
+				isHydrating: false,
 			});
 			saveGuestCart(hydrated);
 		} catch {
-			set({ cartData: { ...get().cartData, items: [] }, productIds: [] });
+			set({
+				cartData: { ...get().cartData, items: [] },
+				productIds: [],
+				isHydrated: true,
+				isHydrating: false,
+			});
 		}
 	},
 	setInitialData: (data, ids) => {
 		const productIds = ids?.length ? ids : uniqueProductIds(data.items);
-		set({ cartData: data, productIds });
+		set({ cartData: data, productIds, isHydrated: true });
 	},
 	mergeGuestIntoServer: async () => {
 		const local = loadGuestCart();
@@ -163,7 +187,11 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 
 			const fresh = await fetchCartFromApi();
 			if (fresh?.success) {
-				set({ cartData: { items: fresh.items }, productIds: uniqueProductIds(fresh.items) });
+				set({
+					cartData: { items: fresh.items },
+					productIds: uniqueProductIds(fresh.items),
+					isHydrated: true,
+				});
 			}
 		} catch {
 			// Keep local cache when merge fails unexpectedly.
@@ -187,11 +215,7 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 				? (product.variants.find((v) => v.stock > 0) ?? product.variants[0] ?? null)
 				: null;
 
-		const effectiveVariantId =
-			chosenVariantId ??
-			('defaultVariant' in product ? (product.defaultVariant?.id ?? null) : null) ??
-			fallbackVariant?.id ??
-			null;
+		const effectiveVariantId = chosenVariantId ?? fallbackVariant?.id ?? null;
 
 		const defaultVariant = 'defaultVariant' in product ? (product.defaultVariant ?? null) : null;
 
@@ -235,16 +259,16 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 				: null) ??
 			null;
 
-		const unitDiscountPrice =
-			(defaultVariant?.id === effectiveVariantId ? defaultVariant?.discountPrice : null) ??
-			(selectedVariant?.id === effectiveVariantId
-				? ((selectedVariant as { discountPrice?: number | null }).discountPrice ?? null)
-				: null) ??
-			(fallbackVariant?.id === effectiveVariantId
-				? ((fallbackVariant as { discountPrice?: number | null }).discountPrice ?? null)
-				: null) ??
-			product.discountPrice ??
-			null;
+		const unitDiscountPrice = (() => {
+			if (defaultVariant?.id === effectiveVariantId) return defaultVariant.discountPrice ?? null;
+			if (selectedVariant?.id === effectiveVariantId) {
+				return (selectedVariant as { discountPrice?: number | null }).discountPrice ?? null;
+			}
+			if (fallbackVariant?.id === effectiveVariantId) {
+				return (fallbackVariant as { discountPrice?: number | null }).discountPrice ?? null;
+			}
+			return product.discountPrice ?? null;
+		})();
 
 		const availableStock = (() => {
 			if (defaultVariant?.id === effectiveVariantId && typeof defaultVariant.stock === 'number') {
@@ -318,7 +342,11 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 			// If server created/updated a different cartItem.id, fetch fresh lines.
 			const fresh = await fetchCartFromApi();
 			if (fresh?.success) {
-				set({ cartData: { items: fresh.items }, productIds: uniqueProductIds(fresh.items) });
+				set({
+					cartData: { items: fresh.items },
+					productIds: uniqueProductIds(fresh.items),
+					isHydrated: true,
+				});
 			}
 
 			return { success: true };
