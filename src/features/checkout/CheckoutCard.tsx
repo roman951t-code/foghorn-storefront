@@ -34,8 +34,8 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 
 	return (
 		<Card.Root p='4' gap={4} py={1} border='none' bg='none'>
-			<Group p='0'>
-				<VStack mr='1'>
+			<Group p='0' alignItems='flex-start'>
+				<VStack mr='1' gap='0'>
 					<LocaleNavLink href={productHref} display='inline-block' lineHeight='0'>
 						<Box
 							position='relative'
@@ -59,24 +59,25 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 							/>
 						</Box>
 					</LocaleNavLink>
-					<Text as='span' textStyle='md' minW='56px' fontWeight='semibold'>
+					<Text as='span' textStyle='md' minW='56px' fontWeight='medium' w='full'>
 						{`x ${quantity}${t('units')}`}
 					</Text>
 				</VStack>
 
-				<VStack alignItems='flex-start' mt='-3'>
-					<Card.Title fontWeight='medium' fontSize='md' lineHeight='1.6'>
+				<VStack alignItems='flex-start'>
+					<Card.Title fontWeight='medium' fontSize='md' lineHeight='1.45'>
 						<LocaleNavLink
 							href={productHref}
 							textDecorationColor='main'
 							color='main'
+							fontSize={{ base: 'md', md: 'md' }}
 							variant='underline'
 						>
 							{product.name}
 						</LocaleNavLink>
 					</Card.Title>
 					{product.variantLabel && (
-						<Text color='main.disabled' fontSize={{ base: 'md', md: 'sm' }} mt='-2'>
+						<Text color='main.disabled' fontSize={{ base: 'md', md: 'sm' }} mt='-1'>
 							{product.variantLabel}
 						</Text>
 					)}
@@ -94,7 +95,7 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 								variant='solid'
 								color='black'
 								bg='main.secondary'
-								fontWeight='semibold'
+								fontWeight='medium'
 								marginLeft='10px'
 							>
 								-{formatUsdPrice(discountAmount)}

@@ -50,7 +50,7 @@ export default function CartWithProducts({ i18nData, setIsOpen }: Props) {
 							<Text fontSize={{ base: 'md', md: 'sm' }} color='main'>
 								{i18nData.numOfProducts}
 							</Text>
-							<CountPill value={totalCount} px='2' labelProps={{ fontWeight: 'bold' }} />
+							<CountPill value={totalCount} px='2' labelProps={{ fontWeight: 'semibold' }} />
 						</Flex>
 
 						<LocaleNavButton

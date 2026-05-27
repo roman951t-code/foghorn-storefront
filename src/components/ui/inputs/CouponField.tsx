@@ -102,7 +102,7 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 		>
 			<Stack gap='3'>
 				<Flex justifyContent='space-between' alignItems='center' gap='3' flexWrap='wrap'>
-					<Text fontWeight='semibold' color='main'>
+					<Text fontWeight='semibold' fontSize={{ base: 'md', md: '15px' }} color='main'>
 						{t('couponTitle')}
 					</Text>
 					{appliedCoupon ? (
@@ -157,12 +157,7 @@ export default function CouponField({ subtotal, layout = 'row' }: Props) {
 				{appliedCoupon ? (
 					<Text>
 						{`${t('couponSavings')}: `}
-						<Badge
-							variant='solid'
-							color='black'
-							bg='main.secondary'
-							fontWeight='semibold'
-						>
+						<Badge variant='solid' color='black' bg='main.secondary' fontWeight='semibold'>
 							{`-${formatUsdPrice(appliedCoupon.amount)}`}
 						</Badge>
 					</Text>

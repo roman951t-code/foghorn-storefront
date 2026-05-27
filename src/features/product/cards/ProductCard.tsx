@@ -61,8 +61,8 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 	const cartButtonLabel = !isInStock
 		? `${t('productIsOutOfStock')}: ${name}`
 		: isInCart
-			? `${cartT('removeFromCart')}: ${name}`
-			: `${cartT('addToCart')}: ${name}`;
+		? `${cartT('removeFromCart')}: ${name}`
+		: `${cartT('addToCart')}: ${name}`;
 	const wishlistButtonLabel = isInWishlist
 		? `${wishT('removeFromWishlist')}: ${name}`
 		: `${wishT('addToWishlist')}: ${name}`;
@@ -229,7 +229,7 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 					<Text
 						color='main'
 						fontSize={{ base: 'lg', lg: 'sm' }}
-						fontWeight='semibold'
+						fontWeight='medium'
 						mt='1.5'
 						textWrap='wrap'
 						textAlign='left'
@@ -248,7 +248,7 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 									variant='solid'
 									color='black'
 									bg='main.secondary'
-									fontWeight='semibold'
+									fontWeight='medium'
 									ml='8px'
 								>
 									-{formatUsdPrice(discount)}

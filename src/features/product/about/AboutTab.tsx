@@ -96,10 +96,10 @@ export default function AboutTab({
 		selectedVariant?.discountPrice != null
 			? roundPrice(selectedVariant.discountPrice)
 			: selectedVariant
-				? null
-				: product.discountPrice != null
-					? roundPrice(product.discountPrice)
-					: null;
+			? null
+			: product.discountPrice != null
+			? roundPrice(product.discountPrice)
+			: null;
 	const unitEffectivePrice = unitDiscountPrice ?? unitBasePrice;
 	const discount =
 		unitDiscountPrice != null ? roundPrice(Math.max(0, unitBasePrice - unitDiscountPrice)) : 0;
@@ -218,7 +218,7 @@ export default function AboutTab({
 										{formatUsdPrice(unitBasePrice)}
 										<Badge
 											variant='solid'
-											fontWeight='semibold'
+											fontWeight='medium'
 											color='black'
 											bg='main.secondary'
 											marginLeft='12px'

@@ -118,7 +118,12 @@ export default function ProductTabs({
 		>
 			<Tabs.List mb='4'>
 				{items.map((item, index) => (
-					<Tabs.Trigger key={index} value={item.value} fontSize='md'>
+					<Tabs.Trigger
+						key={index}
+						value={item.value}
+						fontSize={{ base: 'lg', md: 'md' }}
+						fontWeight='medium'
+					>
 						{item.title}
 					</Tabs.Trigger>
 				))}
