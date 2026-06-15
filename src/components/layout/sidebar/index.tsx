@@ -26,17 +26,13 @@ import { ASSET_IMAGES } from '@/constants/assets';
 const logoHeight = 36;
 const logoWidth = 170;
 
-const Logo = () => (
-	<Link href='/'>
-		<Image
-			src={ASSET_IMAGES.logoBig}
-			width={logoWidth}
-			height={logoHeight}
-			style={{ width: 'auto', height: 'auto' }}
-			alt='logo'
-		/>
-	</Link>
-);
+function Logo({ onClick }: { onClick?: () => void }) {
+	return (
+		<Link href='/' onClick={onClick}>
+			<Image src={ASSET_IMAGES.logoBig} width={logoWidth} height={logoHeight} alt='logo' />
+		</Link>
+	);
+}
 
 export default function SidePanel() {
 	const [open, setOpen] = useState(false);
@@ -76,9 +72,10 @@ export default function SidePanel() {
 						<FiMenu />
 					</IconButton>
 				</DrawerTrigger>
+
 				<DrawerContent bg='bg.tertiary' minWidth='320px' display='flex' flexDirection='column'>
 					<DrawerHeader bg='bg.secondary'>
-						<Logo />
+						<Logo onClick={onClose} />
 					</DrawerHeader>
 
 					<Box flex='1' overflowY='auto' display='flex' flexDirection='column' height='100dvh'>
@@ -94,13 +91,9 @@ export default function SidePanel() {
 							<CatalogBtn fullText />
 
 							{session?.session ? (
-								<>
-									<LogoutSection onClose={onClose} />
-								</>
+								<LogoutSection onClose={onClose} />
 							) : (
-								<>
-									<AuthorizeSection onAuthOpen={onAuthOpen} />
-								</>
+								<AuthorizeSection onAuthOpen={onAuthOpen} />
 							)}
 
 							<CollapsibleLinks
@@ -132,6 +125,7 @@ export default function SidePanel() {
 					/>
 				</DrawerContent>
 			</DrawerRoot>
+
 			<Auth isOpen={authOpen} setIsOpen={setAuthOpen} />
 		</>
 	);
