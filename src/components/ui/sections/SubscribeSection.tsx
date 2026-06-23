@@ -138,7 +138,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 			alignItems='center'
 			justifyContent={{ base: 'center', '2xl': 'space-between' }}
 		>
-			<Heading color='main' fontWeight='medium' size='md' minW='260px'>
+			<Heading color='main' fontWeight='medium' size='lg' minW='260px'>
 				{isUserSubscribed ? i18nData.subscribed : i18nData.subscribeInfo}
 			</Heading>
 
@@ -157,11 +157,15 @@ export default function SubscribeSection({ i18nData }: Props) {
 									{...register('email')}
 									maxLength={MAX_CHARACTERS}
 									rounded='lg'
+									variant='outline'
+									borderColor='border'
+									_focus={{ borderColor: 'main.secondary' }}
 									type='email'
+									fontSize='15px'
+									bg='bg.muted'
 									placeholder={i18nData.email}
 									size='md'
 									minH='44px'
-									fontSize='md'
 									minWidth='280px'
 									maxWidth='340px'
 									flex='1 1 0'

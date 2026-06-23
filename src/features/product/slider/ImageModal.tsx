@@ -40,8 +40,12 @@ export default function ImageModal({ images, initialIndex, productName, resetMod
 			onInteractOutside={resetModal}
 			onEscapeKeyDown={resetModal}
 		>
-			<DialogContent maxW='1100px' maxH='96vh' w='100%'>
-				<DialogBody p={{ base: 2, md: 4 }}>
+			<DialogContent
+				maxW={{ base: '100vw', md: '100vw', lg: '1100px' }}
+				maxH='96vh'
+				w={{ base: '100vw', md: '100vw', lg: '100%' }}
+			>
+				<DialogBody px='0' py={{ base: 2, md: 4 }}>
 					{isOpen && (
 						<Swiper
 							key={modalGalleryKey}

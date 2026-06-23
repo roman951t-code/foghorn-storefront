@@ -36,10 +36,8 @@ export default function Header() {
 					maxWidth='1444px'
 					pt='4px'
 					pb='8px'
-					minH='52px'
-					borderBottomWidth={{ smToMd: '0.5px' }}
-					borderBottomColor={{ smToMd: 'border' }}
-					borderBottomStyle={{ smToMd: 'dotted' }}
+					minH={{ base: 'auto', lg: '52px' }}
+					maxH={{ base: 'initial', lg: '52px' }}
 				>
 					<Flex align='center' gap={4}>
 						<Sidebar />

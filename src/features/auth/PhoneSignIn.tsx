@@ -37,6 +37,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 	const [verifyError, setVerifyError] = useState('');
 	const [pendingPhone, setPendingPhone] = useState<string | null>(null);
 	const [hasTestOtpAutofill, setHasTestOtpAutofill] = useState(false);
+	const [testOtp, setTestOtp] = useState<string | null>(null);
 	const [timer, setTimer] = useState(0);
 
 	const {
@@ -92,6 +93,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 
 		setPendingPhone(phone);
 		setHasTestOtpAutofill(Boolean(result.devOtp));
+		setTestOtp(result.devOtp ?? null);
 		setTimer(120);
 		resetVerifyForm({ otp: result.devOtp ? result.devOtp.split('') : createEmptyOtp() });
 		return true;
@@ -154,6 +156,23 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 									<Text fontSize={{ base: 'sm', md: 'sm' }} lineHeight='1.5'>
 										{i18nData.phoneCodeInfoDescription}
 									</Text>
+
+									{testOtp ? (
+										<Text fontSize={{ base: 'sm', md: 'sm' }} lineHeight='1.5' color='fg.muted'>
+											Demo SMS code:{' '}
+											<Highlight
+												query={testOtp}
+												styles={{
+													fontWeight: 'semibold',
+													mx: 1.5,
+													color: 'var(--chakra-colors-main)',
+												}}
+											>
+												{testOtp}
+											</Highlight>
+										</Text>
+									) : null}
+
 									{hasTestOtpAutofill ? (
 										<Text fontSize={{ base: 'sm', md: 'sm' }} lineHeight='1.5' color='fg.muted'>
 											{i18nData.phoneOtpAutofillNote}
@@ -232,6 +251,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 						onClick={() => {
 							setPendingPhone(null);
 							setHasTestOtpAutofill(false);
+							setTestOtp(null);
 							setTimer(0);
 							setVerifyError('');
 						}}
@@ -260,7 +280,11 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 									required: i18nData.phoneRequired,
 								})}
 								type='text'
-								_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
+								_focusVisible={{
+									outline: '2px solid',
+									outlineColor: 'main.secondary',
+									outlineOffset: '2px',
+								}}
 								fontSize='md'
 								maxLength={17}
 							/>

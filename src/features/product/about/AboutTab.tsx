@@ -96,10 +96,10 @@ export default function AboutTab({
 		selectedVariant?.discountPrice != null
 			? roundPrice(selectedVariant.discountPrice)
 			: selectedVariant
-			? null
-			: product.discountPrice != null
-			? roundPrice(product.discountPrice)
-			: null;
+				? null
+				: product.discountPrice != null
+					? roundPrice(product.discountPrice)
+					: null;
 	const unitEffectivePrice = unitDiscountPrice ?? unitBasePrice;
 	const discount =
 		unitDiscountPrice != null ? roundPrice(Math.max(0, unitBasePrice - unitDiscountPrice)) : 0;
@@ -127,8 +127,8 @@ export default function AboutTab({
 				w='100%'
 			>
 				<Box
-					maxW={{ base: '100vw', md: '100vw', lg: '828px', xl: '690px' }}
-					minW={{ base: 'min(490px, 100vw)', md: '634px', lg: '828px', xl: '690px' }}
+					maxW={{ base: '100%', md: '100%', lg: '828px', xl: '690px' }}
+					minW={{ base: '0', md: '634px', lg: '828px', xl: '690px' }}
 					w='full'
 					bg='bg.tertiary'
 					mb='4'

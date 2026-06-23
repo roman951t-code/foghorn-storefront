@@ -1,0 +1,160 @@
+# GitLab CI/CD — online-store
+# Stages run in order; jobs within a stage run in parallel.
+# Protected CI/CD variables (Settings → CI/CD → Variables) supply production secrets.
+
+stages:
+  - validate
+  - security
+  - migrate
+  - deploy
+
+# ─── Shared defaults ──────────────────────────────────────────────────────────
+default:
+  image: node:22-alpine
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+  before_script:
+    - npm ci --cache .npm --prefer-offline --legacy-peer-deps
+
+# ─── Stage: validate (every push + MR) ───────────────────────────────────────
+
+lint-and-test:
+  stage: validate
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+  variables:
+    POSTGRES_DB: ci_db
+    POSTGRES_USER: ci
+    POSTGRES_PASSWORD: ci
+    DATABASE_URL: postgresql://ci:ci@postgres:5432/ci_db
+    NODE_ENV: test
+    RESEND_API_KEY: ci_placeholder
+    EMAIL_FROM: "Online Store <no-reply@example.com>"
+    NEXT_PUBLIC_APP_URL: http://localhost:3000
+    CACHE_REVALIDATE_SECRET: ci_cache_secret_1234567890abcdef
+    CRON_SECRET: ci_cron_secret_1234567890abcdef
+    BETTER_AUTH_SECRET: ci_auth_secret_placeholder_32chars_abc
+    STRIPE_SECRET_KEY: sk_test_ci_placeholder
+    ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
+    CSP_REPORT_ONLY: "true"
+  script:
+    - npm run db:migrate:deploy
+    - npm run lint
+    - npm test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH =~ /^release\//'
+
+build-check:
+  stage: validate
+  variables:
+    NODE_ENV: production
+    DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+    NEXT_PUBLIC_APP_URL: https://store.example.com
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+    NEXT_PUBLIC_SENTRY_DSN: ""
+    NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE: "0"
+    NEXT_PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE: "0"
+    NEXT_PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE: "0"
+    NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    BETTER_AUTH_SECRET: ci_auth_secret_placeholder_32chars_abc
+    ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
+    STRIPE_SECRET_KEY: sk_test_ci_placeholder
+    STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+    RESEND_API_KEY: ci_placeholder
+    EMAIL_FROM: "Online Store <no-reply@example.com>"
+    CACHE_REVALIDATE_SECRET: ci_cache_secret_1234567890abcdef
+    CRON_SECRET: ci_cron_secret_1234567890abcdef
+    UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
+    UPSTASH_REDIS_REST_TOKEN: ci_placeholder
+  script:
+    - npm run build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH =~ /^release\//'
+
+# ─── Stage: security (MR only) ────────────────────────────────────────────────
+
+npm-audit:
+  stage: security
+  script:
+    - npm audit --audit-level=high
+  allow_failure: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# ─── Stage: migrate (main only, manual gate) ──────────────────────────────────
+# Click this job to apply pending Prisma migrations to the production database.
+# DATABASE_URL must be set as a Protected CI/CD variable in GitLab settings.
+# Safe to run when there are no pending migrations — it will be a no-op.
+
+migrate:production:
+  stage: migrate
+  environment:
+    name: production
+  variables:
+    NODE_ENV: production
+    # DATABASE_URL → Protected CI/CD variable (Settings → CI/CD → Variables)
+  script:
+    - npm run db:migrate:deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+  allow_failure: false
+
+# ─── Stage: deploy (main only, runs after migrate completes) ──────────────────
+# VERCEL_DEPLOY_HOOK_URL and RENDER_DEPLOY_HOOK_URL must be set as
+# Protected CI/CD variables. Both jobs trigger async deploys; smoke-test
+# polls the live endpoints after they finish.
+
+deploy:storefront:
+  stage: deploy
+  environment:
+    name: production
+    url: $NEXT_PUBLIC_APP_URL
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - bash scripts/deploy-vercel.sh
+  needs:
+    - migrate:production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+
+deploy:admin:
+  stage: deploy
+  environment:
+    name: production/admin
+    url: $ADMINJS_PUBLIC_URL
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - bash scripts/deploy-render.sh
+  needs:
+    - migrate:production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+
+smoke:production:
+  stage: deploy
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - bash scripts/smoke-test.sh
+  needs:
+    - deploy:storefront
+    - deploy:admin
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+  allow_failure: true

@@ -1,9 +1,9 @@
-import { Prisma, PrismaClient, OrderStatus, StorefrontFormPlacement } from '@prisma/client';
+import { Prisma, OrderStatus, StorefrontFormPlacement } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { faker } from '@faker-js/faker';
 import slugify from 'slugify';
 import { customAlphabet } from 'nanoid';
 
-const prisma = new PrismaClient();
 const DEFAULT_LOCALE = 'uk';
 const SECONDARY_LOCALE = 'en';
 const TRANSLATION_LOCALES = [DEFAULT_LOCALE, SECONDARY_LOCALE] as const;
@@ -23,7 +23,10 @@ const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6);
 const usedProductCodes = new Set<string>();
 const isSeedToggleEnabled = (rawValue: string | undefined, defaultValue: string) =>
 	!['0', 'false', 'no', 'off'].includes((rawValue ?? defaultValue).trim().toLowerCase());
-const SHOULD_GENERATE_CATEGORIES = isSeedToggleEnabled(process.env.SEED_GENERATE_CATEGORIES, 'true');
+const SHOULD_GENERATE_CATEGORIES = isSeedToggleEnabled(
+	process.env.SEED_GENERATE_CATEGORIES,
+	'true',
+);
 const SHOULD_GENERATE_PRODUCTS = isSeedToggleEnabled(process.env.SEED_GENERATE_PRODUCTS, 'true');
 const SHOULD_GENERATE_SEED_PRODUCTS = SHOULD_GENERATE_CATEGORIES && SHOULD_GENERATE_PRODUCTS;
 const SEED_MAIN_CATEGORY_COUNT = 9;
@@ -84,7 +87,11 @@ const subcategoriesMap: Record<string, string[]> = {
 };
 const SEEDED_MAIN_CATEGORY_SLUGS = mainCategories.map((name) => createSlug(name));
 const SEEDED_SUBCATEGORY_SLUGS = Array.from(
-	new Set(Object.values(subcategoriesMap).flat().map((name) => createSlug(name)))
+	new Set(
+		Object.values(subcategoriesMap)
+			.flat()
+			.map((name) => createSlug(name)),
+	),
 );
 
 const mainCategoryUkMap: Record<string, string> = {
@@ -482,24 +489,24 @@ function buildLocalizedProductCopy(
 			name: string;
 		};
 	},
-	locale: SupportedLocale
+	locale: SupportedLocale,
 ): LocalizedProductCopy {
 	const isUkrainian = locale === 'uk';
 	const categoryName = getLocalizedCategoryName(product.categoryName, locale);
 	const subcategoryName = getLocalizedCategoryName(product.subcategoryName, locale);
 	const highlight = stablePick(
 		isUkrainian ? productHighlightsUk : productHighlightsEn,
-		product.fullSlug
+		product.fullSlug,
 	);
 	const useCase = stablePick(isUkrainian ? productUseCasesUk : productUseCasesEn, product.id);
 	const name = product.name.trim();
 	const description = isUkrainian
 		? `${name} — ${subcategoryName.toLowerCase()} від ${
 				product.brand.name
-		  }, що пропонує ${highlight}. Модель ${useCase}.`
+			}, що пропонує ${highlight}. Модель ${useCase}.`
 		: `${name} is a ${product.subcategoryName.toLowerCase()} by ${
 				product.brand.name
-		  } that delivers ${highlight}. It is ${useCase}.`;
+			} that delivers ${highlight}. It is ${useCase}.`;
 	const metaTitle = `${name} | ${categoryName} | Online Store`;
 	const metaDescription = isUkrainian
 		? `${name} від ${product.brand.name}: ${highlight}. Швидка доставка по Україні.`
@@ -600,7 +607,7 @@ const pageLocalizationBySlug: Record<string, Record<SupportedLocale, LocalizedPa
 					},
 				],
 				null,
-				2
+				2,
 			),
 			metaTitle: 'FAQ | Online Store',
 			metaDescription:
@@ -621,7 +628,7 @@ const pageLocalizationBySlug: Record<string, Record<SupportedLocale, LocalizedPa
 					},
 				],
 				null,
-				2
+				2,
 			),
 			metaTitle: 'Часті питання | Online Store',
 			metaDescription:
@@ -737,7 +744,7 @@ function buildLocalizedPageCopy(
 		metaDescription: string | null;
 		slug: string;
 	},
-	locale: SupportedLocale
+	locale: SupportedLocale,
 ): LocalizedPageCopy {
 	const localizedOverride = pageLocalizationBySlug[page.slug]?.[locale];
 	if (localizedOverride) return localizedOverride;
@@ -802,8 +809,8 @@ async function syncProductTranslations(locales: readonly SupportedLocale[]) {
 						fullSlug: product.fullSlug,
 					},
 				});
-			})
-		)
+			}),
+		),
 	);
 
 	return products.length * locales.length;
@@ -838,9 +845,9 @@ async function syncCategoryTranslations(locales: readonly SupportedLocale[]) {
 						name: getLocalizedCategoryName(category.name, locale),
 						slug: category.slug,
 					},
-				})
-			)
-		)
+				}),
+			),
+		),
 	);
 
 	return categories.length * locales.length;
@@ -889,8 +896,8 @@ async function syncPageTranslations(locales: readonly SupportedLocale[]) {
 						metaDescription: localized.metaDescription,
 					},
 				});
-			})
-		)
+			}),
+		),
 	);
 
 	return pages.length * locales.length;
@@ -927,7 +934,7 @@ async function syncBannerTranslations(locales: readonly SupportedLocale[]) {
 				title: banner.title,
 				subtitle: banner.subtitle,
 				linkLabel: banner.linkLabel,
-			}))
+			})),
 	);
 	if (!rowsToCreate.length) return 0;
 
@@ -953,19 +960,19 @@ async function syncLocalizedSeedTranslations(locales: readonly SupportedLocale[]
 			`ProductCategoryTranslation rows synced: ${categoryRows}`,
 			`PageTranslation rows synced: ${pageRows}`,
 			`BannerTranslation rows synced: ${bannerRows}`,
-		].join('\n')
+		].join('\n'),
 	);
 }
 
 async function main() {
 	console.log('🌱 Seeding started...');
 	console.log(
-		`🧭 Category/subcategory generation: ${SHOULD_GENERATE_CATEGORIES ? 'enabled' : 'disabled'}.`
+		`🧭 Category/subcategory generation: ${SHOULD_GENERATE_CATEGORIES ? 'enabled' : 'disabled'}.`,
 	);
 	console.log(`🛍️ Product generation: ${SHOULD_GENERATE_SEED_PRODUCTS ? 'enabled' : 'disabled'}.`);
 	if (SHOULD_GENERATE_PRODUCTS && !SHOULD_GENERATE_CATEGORIES) {
 		console.log(
-			'ℹ️ Product generation requested, but category generation is disabled. Skipping seed product creation.'
+			'ℹ️ Product generation requested, but category generation is disabled. Skipping seed product creation.',
 		);
 	}
 
@@ -980,7 +987,7 @@ async function main() {
 				[
 					'Database schema is not up to date (missing table for StorefrontForm).',
 					'Run `npx prisma migrate deploy` (or `npm run db:migrate:deploy`) and then rerun the seed.',
-				].join(' ')
+				].join(' '),
 			);
 		}
 		throw e;
@@ -1018,25 +1025,25 @@ async function main() {
 		});
 		if (deletedSeedMainCategories.count > 0 || deletedSeedSubcategories.count > 0) {
 			console.log(
-				`🧹 Removed seeded categories/subcategories: ${deletedSeedMainCategories.count} main, ${deletedSeedSubcategories.count} subcategories.`
+				`🧹 Removed seeded categories/subcategories: ${deletedSeedMainCategories.count} main, ${deletedSeedSubcategories.count} subcategories.`,
 			);
 		}
 	}
 
 	if (mainCategories.length !== SEED_MAIN_CATEGORY_COUNT) {
 		throw new Error(
-			`Seed expects exactly ${SEED_MAIN_CATEGORY_COUNT} main categories, got ${mainCategories.length}`
+			`Seed expects exactly ${SEED_MAIN_CATEGORY_COUNT} main categories, got ${mainCategories.length}`,
 		);
 	}
 
 	const categoriesWithoutSubcategories = mainCategories.filter(
-		(category) => (subcategoriesMap[category] ?? []).length === 0
+		(category) => (subcategoriesMap[category] ?? []).length === 0,
 	);
 	if (categoriesWithoutSubcategories.length > 0) {
 		throw new Error(
 			`Each main category must have at least one subcategory. Missing: ${categoriesWithoutSubcategories.join(
-				', '
-			)}`
+				', ',
+			)}`,
 		);
 	}
 
@@ -1060,7 +1067,7 @@ async function main() {
 				update: { name, logoUrl },
 				create: { name, slug, logoUrl },
 			});
-		})
+		}),
 	);
 
 	// Attributes
@@ -1206,8 +1213,8 @@ async function main() {
 					where: { attributeSetId_attributeId: { attributeSetId: attributeSet.id, attributeId } },
 					update: { sortOrder },
 					create: { attributeSetId: attributeSet.id, attributeId, sortOrder },
-				})
-			)
+				}),
+			),
 		);
 	};
 
@@ -1255,7 +1262,7 @@ async function main() {
 					const pickedBrand = stablePick(brands, productSeed);
 					const name = buildSemanticProductName(pickedBrand.name, sub, productSeed);
 					const price = new Prisma.Decimal(
-						faker.number.float({ min: 100, max: 1500, fractionDigits: 2 })
+						faker.number.float({ min: 100, max: 1500, fractionDigits: 2 }),
 					);
 					const stock = faker.number.int({ min: 5, max: 50 });
 
@@ -1274,7 +1281,7 @@ async function main() {
 					const imageUrl = getSubcategoryImage(sub, productSlug);
 					const description = `${name} delivers ${stablePick(
 						productHighlightsEn,
-						productSlug
+						productSlug,
 					)}. This model is ${stablePick(productUseCasesEn, productSeed)}.`;
 					const galleryImageUrls = buildSeedProductGallery(imageUrl, 3);
 					const product = await prisma.product.create({
@@ -1353,7 +1360,7 @@ async function main() {
 		});
 		if (seededMainCategoryRows.length !== mainCategories.length) {
 			throw new Error(
-				`Expected ${mainCategories.length} main categories, created ${seededMainCategoryRows.length}`
+				`Expected ${mainCategories.length} main categories, created ${seededMainCategoryRows.length}`,
 			);
 		}
 		const mainWithoutSubcategories = seededMainCategoryRows
@@ -1362,8 +1369,8 @@ async function main() {
 		if (mainWithoutSubcategories.length > 0) {
 			throw new Error(
 				`Each main category must have at least one subcategory. Missing subcategories for: ${mainWithoutSubcategories.join(
-					', '
-				)}`
+					', ',
+				)}`,
 			);
 		}
 		const mainWithTooManySubcategories = seededMainCategoryRows
@@ -1372,13 +1379,13 @@ async function main() {
 		if (mainWithTooManySubcategories.length > 0) {
 			throw new Error(
 				`Each main category must have at most ${SEED_SUBCATEGORY_MAX} subcategories. Too many for: ${mainWithTooManySubcategories.join(
-					', '
-				)}`
+					', ',
+				)}`,
 			);
 		}
 
 		const expectedSubcategoryNames = Array.from(
-			new Set(Array.from(generatedSubcategoriesByMain.values()).flat())
+			new Set(Array.from(generatedSubcategoriesByMain.values()).flat()),
 		);
 		const seededSubcategoryRows = await prisma.productCategory.findMany({
 			where: { parentId: { not: null }, name: { in: expectedSubcategoryNames } },
@@ -1393,7 +1400,7 @@ async function main() {
 		});
 		if (seededSubcategoryRows.length !== expectedSubcategoryNames.length) {
 			throw new Error(
-				`Expected ${expectedSubcategoryNames.length} seeded subcategories, created ${seededSubcategoryRows.length}`
+				`Expected ${expectedSubcategoryNames.length} seeded subcategories, created ${seededSubcategoryRows.length}`,
 			);
 		}
 		if (SHOULD_GENERATE_SEED_PRODUCTS) {
@@ -1403,8 +1410,8 @@ async function main() {
 			if (subcategoriesWithoutProducts.length > 0) {
 				throw new Error(
 					`Each subcategory must have at least one product. Missing products for: ${subcategoriesWithoutProducts.join(
-						', '
-					)}`
+						', ',
+					)}`,
 				);
 			}
 			const subcategoriesWithTooManyProducts = seededSubcategoryRows
@@ -1413,8 +1420,8 @@ async function main() {
 			if (subcategoriesWithTooManyProducts.length > 0) {
 				throw new Error(
 					`Each subcategory must have at most ${SEED_PRODUCTS_PER_SUBCATEGORY_MAX} products. Too many for: ${subcategoriesWithTooManyProducts.join(
-						', '
-					)}`
+						', ',
+					)}`,
 				);
 			}
 		} else {
@@ -1422,7 +1429,7 @@ async function main() {
 		}
 	} else {
 		console.log(
-			'ℹ️ Skipping category/subcategory generation and related validation (category generation disabled).'
+			'ℹ️ Skipping category/subcategory generation and related validation (category generation disabled).',
 		);
 	}
 
@@ -1614,8 +1621,8 @@ async function main() {
 				banner.legacyTitle,
 				banner.locales.uk.title,
 				banner.locales.en.title,
-			])
-		)
+			]),
+		),
 	);
 
 	await prisma.banner.deleteMany({
@@ -1644,7 +1651,7 @@ async function main() {
 					endsAt: null,
 				},
 			});
-		})
+		}),
 	);
 
 	await Promise.all(
@@ -1670,9 +1677,9 @@ async function main() {
 						subtitle: source.locales[locale].subtitle,
 						linkLabel: source.locales[locale].linkLabel,
 					},
-				})
+				}),
 			);
-		})
+		}),
 	);
 
 	const seedUserId = 'user-roman-951';
@@ -1738,7 +1745,7 @@ async function main() {
 		const orderedProducts = faker.helpers.arrayElements(allProducts, 2);
 		const total = orderedProducts.reduce<Prisma.Decimal>(
 			(sum, p) => sum.add(p.basePrice),
-			new Prisma.Decimal(0)
+			new Prisma.Decimal(0),
 		);
 
 		await prisma.order.create({
