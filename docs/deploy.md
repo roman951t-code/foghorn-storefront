@@ -28,7 +28,7 @@ Set in **GitLab → Settings → CI/CD → Variables**. Mark production secrets 
 |----------|-----|-----------------|
 | `VERCEL_DEPLOY_HOOK_URL` | `deploy:storefront` | Vercel → Project → Settings → Git → Deploy Hooks |
 | `RENDER_DEPLOY_HOOK_URL` | `deploy:admin` | Render → Service → Settings → Deploy Hook |
-| `NEXT_PUBLIC_APP_URL` | `smoke:production` | e.g. `https://store.example.com` |
+| `NEXT_PUBLIC_APP_URL` | `smoke:production` | e.g. `https://shop.example.com` |
 | `ADMINJS_PUBLIC_URL` | `smoke:production` | e.g. `https://admin.example.com/admin` |
 
 ## First-time Setup
@@ -100,7 +100,7 @@ The `smoke:production` job hits these endpoints and expects the listed status co
 
 Run the smoke test manually at any time:
 ```bash
-NEXT_PUBLIC_APP_URL=https://store.example.com \
+NEXT_PUBLIC_APP_URL=https://shop.example.com \
 ADMINJS_PUBLIC_URL=https://admin.example.com/admin \
 SMOKE_WAIT_SECONDS=0 \
 bash scripts/smoke-test.sh
