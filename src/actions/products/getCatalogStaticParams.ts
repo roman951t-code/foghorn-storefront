@@ -27,7 +27,10 @@ export async function getCategoryStaticParams() {
 		take: STATIC_CATEGORY_LIMIT,
 	});
 
-	return withLocales(categories.map(({ slug }) => ({ category: slug })));
+	const params = withLocales(categories.map(({ slug }) => ({ category: slug })));
+	// cacheComponents requires ≥1 entry; placeholder 404s at runtime via notFound()
+	if (params.length === 0) return routing.locales.map((locale) => ({ locale, category: '_' }));
+	return params;
 }
 
 export async function getSubcategoryStaticParams() {
@@ -45,7 +48,7 @@ export async function getSubcategoryStaticParams() {
 		take: STATIC_SUBCATEGORY_LIMIT,
 	});
 
-	return withLocales(
+	const params = withLocales(
 		subcategories
 			.filter((subcategory) => subcategory.parent?.slug)
 			.map((subcategory) => ({
@@ -53,6 +56,9 @@ export async function getSubcategoryStaticParams() {
 				subcategory: subcategory.slug,
 			})),
 	);
+	if (params.length === 0)
+		return routing.locales.map((locale) => ({ locale, category: '_', subcategory: '_' }));
+	return params;
 }
 
 export async function getProductStaticParams() {
@@ -74,7 +80,7 @@ export async function getProductStaticParams() {
 		take: STATIC_PRODUCT_LIMIT,
 	});
 
-	return withLocales(
+	const params = withLocales(
 		products
 			.filter((product) => product.category.parent?.slug)
 			.map((product) => ({
@@ -83,4 +89,12 @@ export async function getProductStaticParams() {
 				product: product.slug,
 			})),
 	);
+	if (params.length === 0)
+		return routing.locales.map((locale) => ({
+			locale,
+			category: '_',
+			subcategory: '_',
+			product: '_',
+		}));
+	return params;
 }
