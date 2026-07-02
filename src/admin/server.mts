@@ -382,6 +382,9 @@ const start = async () => {
 	app.disable('x-powered-by');
 	app.use(adminHttpLogger);
 	app.use(await createAdminSecurityMiddleware());
+	app.get('/', (_req, res) => {
+		res.redirect(301, admin.options.rootPath);
+	});
 	app.get('/healthz', (_req, res) => {
 		res.setHeader('Cache-Control', 'no-store');
 		res.status(200).json({
