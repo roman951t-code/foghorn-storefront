@@ -30,7 +30,21 @@ const getOrCreatePool = (connectionString: string) => {
 		return globalForSessionStore.adminSessionStorePool;
 	}
 
-	const pool = new Pool({ connectionString });
+	// Strip sslmode from URL before passing to pg — pg v8 parses sslmode=require as a
+	// separate property that enforces verify-full during TLS handshake independently of
+	// the Pool ssl option, causing certificate chain rejection on Supabase pooler endpoints.
+	const urlWithoutSslMode = connectionString
+		.replace(/\?sslmode=[^&]*&/, '?')
+		.replace(/\?sslmode=[^&]*$/, '')
+		.replace(/&sslmode=[^&]*/g, '');
+
+	const dbHost = new URL(connectionString.replace(/^postgres(ql)?:\/\//, 'https://')).hostname;
+	const isLocalDb = ['localhost', '127.0.0.1', '::1', 'postgres'].includes(dbHost);
+
+	const pool = new Pool({
+		connectionString: urlWithoutSslMode,
+		ssl: isLocalDb ? false : { rejectUnauthorized: false },
+	});
 	if (process.env.NODE_ENV !== 'production') {
 		globalForSessionStore.adminSessionStorePool = pool;
 	}
