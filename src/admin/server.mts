@@ -441,21 +441,25 @@ const start = async () => {
 
 	const storeAppUrl =
 		process.env.ADMIN_THUMBNAIL_APP_URL ??
-		(nodeEnv !== 'production'
-			? 'http://localhost:3000'
-			: (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'));
-	const storeAppOriginUrl = new URL(storeAppUrl);
+		(nodeEnv !== 'production' ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_APP_URL);
+	const storeAppOriginUrl = storeAppUrl ? new URL(storeAppUrl) : null;
 	if (nodeEnv === 'production') {
-		const storeUrlSafety = await verifyServerFetchUrl(storeAppOriginUrl);
-		if (!storeUrlSafety.ok) {
-			throw new Error(
-				`ADMIN_THUMBNAIL_APP_URL/NEXT_PUBLIC_APP_URL is not safe for server-side fetches: ${storeUrlSafety.reason}`,
+		if (storeAppOriginUrl) {
+			const storeUrlSafety = await verifyServerFetchUrl(storeAppOriginUrl);
+			if (!storeUrlSafety.ok) {
+				throw new Error(
+					`ADMIN_THUMBNAIL_APP_URL/NEXT_PUBLIC_APP_URL is not safe for server-side fetches: ${storeUrlSafety.reason}`,
+				);
+			}
+		} else {
+			adminLogger.warn(
+				'NEXT_PUBLIC_APP_URL is not set — store product thumbnails will not render in the admin panel.',
 			);
 		}
 	}
 	const allowedThumbHosts = new Set(
 		[
-			storeAppOriginUrl.hostname,
+			storeAppOriginUrl?.hostname,
 			'res.cloudinary.com',
 			'images.unsplash.com',
 			'loremflickr.com',
@@ -469,7 +473,8 @@ const start = async () => {
 	);
 	const allowAnyThumbHost =
 		nodeEnv !== 'production' && process.env.ADMIN_THUMBNAIL_ALLOW_ANY_HOST === 'true';
-	const isConfiguredStoreUrl = (url: URL) => url.origin === storeAppOriginUrl.origin;
+	const isConfiguredStoreUrl = (url: URL) =>
+		storeAppOriginUrl !== null && url.origin === storeAppOriginUrl.origin;
 	const allowsPrivateThumbnailUrl = (url: URL) =>
 		nodeEnv !== 'production' && isConfiguredStoreUrl(url);
 	const verifyThumbnailUrl = async (url: URL) => {
@@ -524,7 +529,15 @@ const start = async () => {
 
 		let targetUrl: URL;
 		try {
-			targetUrl = urlParam.startsWith('/') ? new URL(urlParam, storeAppUrl) : new URL(urlParam);
+			if (urlParam.startsWith('/')) {
+				if (!storeAppUrl) {
+					res.status(400).send('Relative URLs require NEXT_PUBLIC_APP_URL to be configured');
+					return;
+				}
+				targetUrl = new URL(urlParam, storeAppUrl);
+			} else {
+				targetUrl = new URL(urlParam);
+			}
 		} catch {
 			res.status(400).send('Invalid url');
 			return;
@@ -538,6 +551,10 @@ const start = async () => {
 		const w = Math.max(16, Math.min(1024, Number(widthParam) || 256));
 		const q = Math.max(10, Math.min(90, Number(qualityParam) || 70));
 
+		if (!storeAppOriginUrl) {
+			res.status(503).send('Store URL not configured');
+			return;
+		}
 		const optimizerUrl = new URL('/_next/image', storeAppOriginUrl);
 		optimizerUrl.searchParams.set('url', targetUrl.toString());
 		optimizerUrl.searchParams.set('w', String(w));
