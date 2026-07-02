@@ -403,21 +403,25 @@ const logBundleStatus = () => {
 	const bundleDir = process.env.ADMIN_JS_TMP_DIR ?? '.adminjs';
 	const bundlePath = resolvePath(bundleDir, 'bundle.js');
 	const cwd = process.cwd();
+	bootLog('logBundleStatus', { bundleDir, bundlePath, cwd });
 	if (!existsSync(bundlePath)) {
+		bootLog('[admin-bundle] MISSING at runtime', { bundlePath, cwd });
 		adminLogger.error(
 			{ bundlePath, cwd, adminJsSkipBundle: process.env.ADMIN_JS_SKIP_BUNDLE ?? null },
-			'[admin-bundle] components.bundle.js is MISSING at runtime. Custom components (Dashboard, TopBar, filters, actions) will fall back to defaults. Fix: set the Render Build Command to `npm run render:build` so the bundle is generated before the service starts.',
+			'[admin-bundle] components.bundle.js is MISSING at runtime. Custom components (Dashboard, TopBar, filters, actions) will fall back to defaults.',
 		);
 		return;
 	}
 	const stats = statSync(bundlePath);
 	if (stats.size < 100_000) {
+		bootLog('[admin-bundle] too small', { bundlePath, size: stats.size });
 		adminLogger.error(
 			{ bundlePath, sizeBytes: stats.size, cwd },
 			'[admin-bundle] components.bundle.js exists but is suspiciously small; the bundler likely aborted. Custom components will not render.',
 		);
 		return;
 	}
+	bootLog('[admin-bundle] OK', { bundlePath, size: stats.size });
 	adminLogger.info(
 		{ bundlePath, sizeBytes: stats.size, adminJsSkipBundle: process.env.ADMIN_JS_SKIP_BUNDLE ?? null },
 		'[admin-bundle] components.bundle.js OK',
