@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import crypto from 'node:crypto';
+import { existsSync, statSync } from 'node:fs';
+import { resolve as resolvePath } from 'node:path';
 import {
 	adminHttpLogger,
 	adminLogger,
@@ -373,10 +375,37 @@ const authenticate = async (email: string, password: string) => {
 	return { email, role: isAdminCredential ? 'admin' : 'readonly' };
 };
 
+const logBundleStatus = () => {
+	if (nodeEnv !== 'production') return;
+	const bundleDir = process.env.ADMIN_JS_TMP_DIR ?? '.adminjs';
+	const bundlePath = resolvePath(bundleDir, 'bundle.js');
+	const cwd = process.cwd();
+	if (!existsSync(bundlePath)) {
+		adminLogger.error(
+			{ bundlePath, cwd, adminJsSkipBundle: process.env.ADMIN_JS_SKIP_BUNDLE ?? null },
+			'[admin-bundle] components.bundle.js is MISSING at runtime. Custom components (Dashboard, TopBar, filters, actions) will fall back to defaults. Fix: set the Render Build Command to `npm run render:build` so the bundle is generated before the service starts.',
+		);
+		return;
+	}
+	const stats = statSync(bundlePath);
+	if (stats.size < 100_000) {
+		adminLogger.error(
+			{ bundlePath, sizeBytes: stats.size, cwd },
+			'[admin-bundle] components.bundle.js exists but is suspiciously small; the bundler likely aborted. Custom components will not render.',
+		);
+		return;
+	}
+	adminLogger.info(
+		{ bundlePath, sizeBytes: stats.size, adminJsSkipBundle: process.env.ADMIN_JS_SKIP_BUNDLE ?? null },
+		'[admin-bundle] components.bundle.js OK',
+	);
+};
+
 const start = async () => {
 	if (nodeEnv !== 'production') {
 		await admin.watch();
 	}
+	logBundleStatus();
 	const { default: AdminJSExpress } = await import('@adminjs/express');
 	const app = express();
 	app.disable('x-powered-by');
