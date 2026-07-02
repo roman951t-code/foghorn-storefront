@@ -6,6 +6,12 @@
 const env = process.env as Record<string, string | undefined>;
 env.NODE_ENV ??= 'production';
 
+// ADMIN_JS_SKIP_BUNDLE=true is required at runtime (skip re-bundling on
+// the 512 MB dyno) but it's typically set as a service-wide env var, so
+// it also leaks into the build step. Unsetting it here guarantees the
+// bundler actually runs regardless of Render's env-var configuration.
+delete env.ADMIN_JS_SKIP_BUNDLE;
+
 // Bundling only compiles React components — no DB connection is opened.
 // A stub DATABASE_URL lets prisma.mts's import-time guard pass even when
 // the real value isn't wired into the build environment.
