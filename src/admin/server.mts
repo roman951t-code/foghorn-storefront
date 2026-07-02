@@ -1,7 +1,26 @@
+// Unbuffered stderr diagnostics so Render logs show exactly where startup dies.
+// pino is buffered and may lose the last messages on crash/exit.
+const bootLog = (message: string, extra?: Record<string, unknown>) => {
+	const payload = extra ? ` ${JSON.stringify(extra)}` : '';
+	process.stderr.write(`[admin:boot] ${message}${payload}\n`);
+};
+bootLog('module load: begin');
+
+process.on('uncaughtException', (err) => {
+	bootLog('uncaughtException', { message: (err as Error)?.message, stack: (err as Error)?.stack });
+	process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+	const err = reason as Error;
+	bootLog('unhandledRejection', { message: err?.message ?? String(reason), stack: err?.stack });
+	process.exit(1);
+});
+
 import 'dotenv/config';
 import crypto from 'node:crypto';
 import { existsSync, statSync } from 'node:fs';
 import { resolve as resolvePath } from 'node:path';
+bootLog('module load: imports 1/2 done (crypto, fs, path, dotenv)');
 import {
 	adminHttpLogger,
 	adminLogger,
@@ -10,9 +29,12 @@ import {
 } from './observability.mts';
 import express from 'express';
 import session from 'express-session';
+bootLog('module load: express + session loaded');
 import admin from './admin.mts';
+bootLog('module load: admin.mts loaded');
 import { createAdminSessionStore } from './pg-session-store.mts';
 import { prisma } from './prisma.mts';
+bootLog('module load: prisma + session store loaded');
 import {
 	getAdminApiActionNameFromPath,
 	getAdminApiContextFromPath,
@@ -20,6 +42,7 @@ import {
 } from './server/admin-api-routing.mts';
 import { createFixedWindowRateLimiter } from './server/fixed-window-rate-limiter.mts';
 import { verifyServerFetchUrl } from './utils/server-fetch-safety.mts';
+bootLog('module load: all imports done');
 
 const adminEmail = process.env.ADMINJS_EMAIL;
 const adminPassword = process.env.ADMINJS_PASSWORD;
@@ -402,11 +425,14 @@ const logBundleStatus = () => {
 };
 
 const start = async () => {
+	bootLog('start(): entered');
 	if (nodeEnv !== 'production') {
 		await admin.watch();
 	}
 	logBundleStatus();
+	bootLog('start(): importing @adminjs/express');
 	const { default: AdminJSExpress } = await import('@adminjs/express');
+	bootLog('start(): @adminjs/express loaded');
 	const app = express();
 	app.disable('x-powered-by');
 	app.use(adminHttpLogger);
@@ -429,12 +455,14 @@ const start = async () => {
 	}
 	adminThumbRateLimiter.ensureCleanupLoop();
 	adminApiRateLimiter.ensureCleanupLoop();
+	bootLog('start(): creating session store');
 	const sessionStore = createAdminSessionStore({
 		connectionString: databaseUrl,
 		tableName: sessionTable,
 		defaultTtlSeconds: sessionTtlSeconds,
 		cleanupIntervalSeconds: sessionCleanupIntervalSeconds,
 	});
+	bootLog('start(): session store created');
 	const adminSessionOptions = {
 		resave: false,
 		saveUninitialized: false,
@@ -468,6 +496,7 @@ const start = async () => {
 		undefined,
 		adminSessionOptions,
 	);
+	bootLog('start(): AdminJSExpress.buildAuthenticatedRouter returned');
 
 	app.use(express.static('public'));
 
@@ -477,7 +506,9 @@ const start = async () => {
 	const storeAppOriginUrl = storeAppUrl ? new URL(storeAppUrl) : null;
 	if (nodeEnv === 'production') {
 		if (storeAppOriginUrl) {
+			bootLog('start(): verifying store app url', { url: storeAppOriginUrl.origin });
 			const storeUrlSafety = await verifyServerFetchUrl(storeAppOriginUrl);
+			bootLog('start(): store app url verified', { ok: storeUrlSafety.ok });
 			if (!storeUrlSafety.ok) {
 				throw new Error(
 					`ADMIN_THUMBNAIL_APP_URL/NEXT_PUBLIC_APP_URL is not safe for server-side fetches: ${storeUrlSafety.reason}`,
@@ -766,7 +797,9 @@ const start = async () => {
 	app.use(admin.options.rootPath, gatedRouter);
 	setupAdminErrorTracking(app);
 
+	bootLog('start(): calling app.listen', { port: adminPort });
 	app.listen(adminPort, () => {
+		bootLog('start(): listening', { port: adminPort, rootPath: admin.options.rootPath });
 		adminLogger.info(
 			{ port: adminPort, rootPath: admin.options.rootPath },
 			`AdminJS available at http://localhost:${adminPort}${admin.options.rootPath}`,
@@ -774,7 +807,12 @@ const start = async () => {
 	});
 };
 
+bootLog('module load: end, calling start()');
 start().catch((error) => {
+	bootLog('start() rejected', {
+		message: (error as Error)?.message ?? String(error),
+		stack: (error as Error)?.stack,
+	});
 	adminLogger.fatal({ err: error }, 'Failed to start AdminJS server');
 	captureAdminException(error, { area: 'admin-startup' });
 	process.exit(1);
