@@ -34,6 +34,7 @@
 		"perf:load": "tsx scripts/load-test.ts",
 		"admin:dev": "node --import tsx/esm -e \"process.env.NODE_ENV='development'; import('./src/admin/server.mts')\"",
 		"admin:start": "node --import tsx/esm -e \"process.env.NODE_ENV='production'; import('./src/admin/server.mts')\"",
+		"admin:bundle": "NODE_ENV=production node --max-old-space-size=2048 --import tsx/esm scripts/admin-prebundle.mts",
 		"seed:content": "node scripts/seed-content-pages.cjs"
 	},
 	"dependencies": {
