@@ -12,13 +12,15 @@ env.NODE_ENV ??= 'production';
 // bundler actually runs regardless of Render's env-var configuration.
 delete env.ADMIN_JS_SKIP_BUNDLE;
 
-// Render honors .gitignore when packaging build output for the runtime
-// container, so anything under a gitignored path (like our default
-// `.adminjs/`) gets dropped between build and deploy. `public/` is
-// always preserved (Next.js / express.static both rely on it), so we
-// force the bundle to land there instead. Runtime must set the same
-// value BEFORE importing AdminJS so the router points here too.
-env.ADMIN_JS_TMP_DIR = 'public/.adminjs';
+// CRITICAL: the output dir must NOT contain any segment starting with a
+// dot. AdminJS serves components.bundle.js via Express res.sendFile, which
+// delegates to the `send` library with its default dotfiles:'ignore' —
+// that returns a hard 404 for ANY path containing a dot-segment (checked
+// per-segment on the resolved absolute path). AdminJS's own default
+// `.adminjs` therefore 404s in production. A dot-free directory fixes it.
+// Runtime must set the SAME value before importing AdminJS so the router's
+// COMPONENTS_OUTPUT_PATH points here too.
+env.ADMIN_JS_TMP_DIR = 'adminjs-bundle';
 
 // Bundling only compiles React components — no DB connection is opened.
 // A stub DATABASE_URL lets prisma.mts's import-time guard pass even when
