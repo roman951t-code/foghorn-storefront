@@ -36,9 +36,11 @@ Set in **GitLab → Settings → CI/CD → Variables**. Mark production secrets 
 1. **Supabase**: create project, copy the connection string (Session mode, port 5432) as `DATABASE_URL`.
 2. **Vercel**: import this repo, set all vars from `docs/env.storefront.example`. Note the project ID for the deploy hook.
 3. **Render**: create a Web Service.
-   - Build command: `npm install --legacy-peer-deps`
+   - Build command: `npm run render:build` (installs deps incl. devDependencies,
+     then pre-bundles AdminJS components — see `docs/cicd-pipeline.md` for why
+     a plain `npm install` OOMs the free tier)
    - Start command: `npm run admin:start`
-   - Set all vars from `docs/env.admin.example`.
+   - Set all vars from `docs/env.admin.example`, plus `ADMIN_JS_SKIP_BUNDLE=true`.
 4. **GitLab CI/CD variables**: add `DATABASE_URL`, `VERCEL_DEPLOY_HOOK_URL`, `RENDER_DEPLOY_HOOK_URL`, `NEXT_PUBLIC_APP_URL`, `ADMINJS_PUBLIC_URL` (all Protected).
 5. Push to `main`. Pipeline runs lint + test + build automatically.
 6. Click **migrate:production** in the pipeline to apply the initial Prisma migrations.
@@ -95,7 +97,7 @@ The `smoke:production` job hits these endpoints and expects the listed status co
 | `GET /` | 200 |
 | `GET /sign-in` | 200 |
 | `GET /api/cache/revalidate/windows` (no auth) | 401 / 403 |
-| `GET /api/stripe/webhook` | 404 / 405 |
+| `GET /api/payments/stripe/webhook` | 404 / 405 |
 | `GET $ADMINJS_PUBLIC_URL` | 200 |
 
 Run the smoke test manually at any time:
