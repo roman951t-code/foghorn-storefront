@@ -8,7 +8,9 @@ failed pipeline run with no other context. If you are an AI agent reading this
 because a pipeline failed, jump straight to **"Error message → fix" quick reference**
 near the bottom before reading anything else.
 
-Companion docs: [`docs/deploy.md`](./deploy.md) (shorter operational runbook),
+Companion docs: [`docs/universal-app-doc.md`](./universal-app-doc.md) §4 (condensed version of this
+same knowledge, woven into the full application architecture — good starting point for "how does the
+whole system work" rather than "why did this specific pipeline step fail"),
 [`docs/env.admin.example`](./env.admin.example), [`docs/env.storefront.example`](./env.storefront.example).
 
 ---
