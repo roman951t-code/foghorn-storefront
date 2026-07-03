@@ -133,7 +133,9 @@ deploy:storefront:
     name: production
     url: $NEXT_PUBLIC_APP_URL
   before_script:
-    - apk add --no-cache curl
+    # bash is required: the deploy/smoke scripts declare #!/usr/bin/env bash and
+    # use `set -o pipefail`, which node:22-alpine's default sh (busybox ash) lacks.
+    - apk add --no-cache curl bash
   script:
     - bash scripts/deploy-vercel.sh
   needs:
@@ -148,7 +150,9 @@ deploy:admin:
     name: production/admin
     url: $ADMINJS_PUBLIC_URL
   before_script:
-    - apk add --no-cache curl
+    # bash is required: the deploy/smoke scripts declare #!/usr/bin/env bash and
+    # use `set -o pipefail`, which node:22-alpine's default sh (busybox ash) lacks.
+    - apk add --no-cache curl bash
   script:
     - bash scripts/deploy-render.sh
   needs:
@@ -160,7 +164,9 @@ deploy:admin:
 smoke:production:
   stage: deploy
   before_script:
-    - apk add --no-cache curl
+    # bash is required: the deploy/smoke scripts declare #!/usr/bin/env bash and
+    # use `set -o pipefail`, which node:22-alpine's default sh (busybox ash) lacks.
+    - apk add --no-cache curl bash
   script:
     - bash scripts/smoke-test.sh
   needs:
