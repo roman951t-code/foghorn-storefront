@@ -7,6 +7,7 @@ import { IoMdPhonePortrait } from 'react-icons/io';
 import { signIn } from '@/lib/auth-client';
 import PhoneSignIn from './PhoneSignIn';
 import EmailSignIn from './EmailSignIn';
+import { showToaster } from '@/utils/toast';
 
 interface Props {
 	i18nData: I18nData;
@@ -22,10 +23,13 @@ export default function Login({ i18nData, moveToSignup }: Props) {
 	const handleGoogleLogin = async () => {
 		const url = new URL(window.location.href);
 		url.searchParams.set('auth', 'google');
-		await signIn.social({
+		const { error } = await signIn.social({
 			provider: 'google',
 			callbackURL: url.toString(),
 		});
+		if (error) {
+			showToaster('error', error.message || i18nData.userLoginFail);
+		}
 	};
 
 	return (

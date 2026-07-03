@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, HStack } from '@chakra-ui/react';
-import type { ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { useTranslations } from 'next-intl';
 import {
 	DrawerActionTrigger,
@@ -16,6 +16,7 @@ import {
 import CatalogDrawer from '@/components/layout/sidebar/CatalogDrawer';
 import { TbCategory2 } from 'react-icons/tb';
 import { PrimaryButton } from './ActionButton';
+import { usePathname } from '@/i18n/routing';
 
 interface Props {
 	fullText: boolean;
@@ -36,9 +37,24 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 		</PrimaryButton>
 	);
 
+	const [open, setOpen] = useState(false);
+	const pathname = usePathname();
+
+	// CatalogBtn lives in the persistent header/sidebar layout, so it never
+	// unmounts on navigation. Force-close on route change so a link clicked
+	// inside the drawer (which navigates away) can't leave it stuck open.
+	useEffect(() => {
+		setOpen(false);
+	}, [pathname]);
+
 	return (
 		<HStack wrap='wrap'>
-			<DrawerRoot size='full' placement='top'>
+			<DrawerRoot
+				size='full'
+				placement='top'
+				open={open}
+				onOpenChange={(e) => setOpen(e.open)}
+			>
 				<DrawerBackdrop />
 				<DrawerTrigger asChild>{triggerElement}</DrawerTrigger>
 				<DrawerContent

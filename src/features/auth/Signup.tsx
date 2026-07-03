@@ -7,6 +7,7 @@ import { IoMdArrowBack, IoMdPhonePortrait } from 'react-icons/io';
 import { Link } from '@/i18n/routing';
 import { signIn } from '@/lib/auth-client';
 import { TertiaryButton } from '@/components/ui/buttons/ActionButton';
+import { showToaster } from '@/utils/toast';
 import PhoneSignUp from './PhoneSignUp';
 import EmailSignUp from './EmailSignUp';
 
@@ -66,9 +67,12 @@ export default function Signup({ i18nData, backToLogin }: Props) {
 					disabled={!termsAccepted}
 					gap='2.5'
 					onClick={async () => {
-						await signIn.social({
+						const { error } = await signIn.social({
 							provider: 'google',
 						});
+						if (error) {
+							showToaster('error', error.message || i18nData.userRegisterFail);
+						}
 					}}
 				>
 					<Icon size='md'>

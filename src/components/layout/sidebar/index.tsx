@@ -11,8 +11,8 @@ import {
 	DrawerRoot,
 	DrawerTrigger,
 } from '@/components/ui/chakra/drawer';
-import { useState } from 'react';
-import { Link } from '@/i18n/routing';
+import { useEffect, useState } from 'react';
+import { Link, usePathname } from '@/i18n/routing';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import MediaContacts from '@/components/ui/links/MediaContacts';
 import Image from 'next/image';
@@ -38,12 +38,21 @@ export default function SidePanel() {
 	const [open, setOpen] = useState(false);
 	const [authOpen, setAuthOpen] = useState(false);
 	const { session } = useSession();
+	const pathname = usePathname();
 
 	const onClose = () => setOpen(false);
 	const onAuthOpen = () => {
 		setAuthOpen(true);
 		onClose();
 	};
+
+	// Sidebar persists across navigation. Links nested inside it (e.g. the
+	// catalog drawer's category/product links) navigate away without going
+	// through onClose, which left this drawer stuck open on return. Closing
+	// on every route change covers those links too.
+	useEffect(() => {
+		setOpen(false);
+	}, [pathname]);
 
 	return (
 		<>
