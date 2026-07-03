@@ -28,7 +28,9 @@ check() {
   local url="$2"
   local expected_pattern="$3"   # regex matched against HTTP status code
   local http_code
-  http_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 --retry 3 --retry-delay 5 "$url" || echo "000")
+  # -L: follow redirects (e.g. admin panel's "/" -> "/admin" 301) and report
+  # the final page's status, not the redirect hop's.
+  http_code=$(curl -sL -o /dev/null -w "%{http_code}" --max-time 20 --retry 3 --retry-delay 5 "$url" || echo "000")
   if echo "$http_code" | grep -qE "$expected_pattern"; then
     echo "  PASS  $name  →  HTTP $http_code"
   else
@@ -51,7 +53,7 @@ check "Cache revalidate (unauthenticated)" \
   "$STOREFRONT/api/cache/revalidate/windows?lookbackSeconds=60&limit=1"                          "^40[013]$"
 
 # Stripe webhook — only accepts POST; GET should return 405 or 404
-check "Stripe webhook (no POST)"          "$STOREFRONT/api/stripe/webhook"                       "^(405|404|400)$"
+check "Stripe webhook (no POST)"          "$STOREFRONT/api/payments/stripe/webhook"              "^(405|404|400)$"
 
 echo ""
 echo "=== Admin panel: $ADMIN ==="
