@@ -518,6 +518,31 @@ This indicates the project uses a centralized middleware/proxy layer.
 
 ---
 
+### 5.3b Scheduled cache revalidation (time-boundary sweep)
+
+**File:** `src/app/api/cache/revalidate/windows/route.ts`
+
+This is a *different* endpoint from 5.3 — it doesn't take an explicit tag list. Instead, on every call it queries for products/banners/pages whose scheduled boundary (`discountStartAt`, `discountEndAt`, `publishStartAt`, `publishEndAt`, banner `startsAt`/`endsAt`, page `publishedAt`) fell inside a trailing `lookbackSeconds` window, and revalidates the relevant cache tags for anything it finds. This is what makes a scheduled discount or scheduled publish actually go live/end on the storefront without a human clicking anything.
+
+- `POST` or `GET /api/cache/revalidate/windows?lookbackSeconds=N&limit=N&dryRun=true`
+- Same auth as 5.3 (`x-revalidate-secret` / `Bearer`, `CACHE_REVALIDATE_SECRET` or `CRON_SECRET`)
+- `lookbackSeconds` is clamped server-side to **30–3600** regardless of what's passed in the query string — you cannot get a wider window by requesting one.
+
+#### Why this needs frequent invocation, and how that's wired up
+
+The window this endpoint sweeps is only as wide as `lookbackSeconds` (max 3600s = 1 hour). **If it's called less often than that window is wide, boundary events can fall in the gap between two calls and never get picked up** — e.g. calling it once daily with a 3-minute lookback (the original config) only ever covers the last 3 minutes before each midnight run; a discount that started at 2pm would silently not show up as active on the storefront until someone else's mutation happened to revalidate that tag some other way.
+
+Two schedulers call this endpoint, deliberately overlapping:
+
+1. **`vercel.json` cron** — `0 0 * * *` (once daily) with `lookbackSeconds=3600`. Vercel's **Hobby plan caps cron jobs at once per day**, so this cannot be the primary mechanism — it's a coarse safety net that guarantees at least the last hour before each midnight gets swept even if everything else fails.
+2. **`.github/workflows/scheduled-cache-revalidate.yml`** — a GitHub Actions scheduled workflow (`*/5 * * * *`, every 5 minutes) that runs `scripts/revalidate-window-boundaries.ts --lookback=600 --limit=500`. This is the real mechanism: a 600s (10 min) lookback on a 5-minute cadence gives a 2x safety margin against GitHub Actions' own scheduling jitter (scheduled workflows can run a few minutes late under platform load), so no boundary crossing goes unswept.
+
+**Required GitHub repo secrets** (Settings → Secrets and variables → Actions): `NEXT_PUBLIC_APP_URL` (the production storefront URL) and `CACHE_REVALIDATE_SECRET` (same value as the Vercel env var). Without these the workflow runs and fails loudly (script exits non-zero) rather than silently no-oping.
+
+If GitHub Actions scheduling is ever migrated away from (e.g. moving CI off GitHub), replace this workflow with any external scheduler capable of an HTTP call every few minutes — `scripts/revalidate-window-boundaries.ts` is a plain Node script and doesn't care who invokes it.
+
+---
+
 ### 5.4 Payments: Stripe checkout session creation
 
 **File:** `src/app/api/payments/stripe/route.ts`
@@ -872,6 +897,54 @@ The admin file includes:
     - `revalidateStorefrontCacheTags(tags)`
 
 This gives a deterministic and tag-based invalidation system.
+
+### 6.4 Cloudinary (product image storage)
+
+**Files:** `src/admin/utils/cloudinary.mts`, `src/admin/actions/product-csv-actions.mts`
+
+Cloudinary is used by the **admin panel only**, exclusively during **product CSV import**. The storefront never talks to Cloudinary directly — it just renders whatever image URL is stored on the product row (which may or may not be a Cloudinary URL, depending on whether Cloudinary was configured at import time).
+
+#### When uploads happen
+
+- **Not on CI/CD, not on deploy, not on user browsing.** Cloudinary uploads are triggered synchronously inside `uploadProductImageToCloudinary(...)` while an admin is running a CSV import in AdminJS (`src/admin/actions/product-csv-actions.mts:677` and `:1329`).
+- The trigger flow: admin uploads a `products.csv` → admin action reads each row's image URL → if Cloudinary is configured, downloads the image from the source URL and re-uploads it to Cloudinary → stores the resulting `secure_url` on the product row.
+- Category images use the same helper.
+
+#### What gets uploaded, what doesn't
+
+`uploadProductImageToCloudinary` short-circuits (does not upload) when:
+
+- The source URL is empty
+- Cloudinary is not configured (missing env vars — see below)
+- The source URL is a local/relative path (not `data:` or `http(s)://`)
+- The source URL is already a `res.cloudinary.com` URL for the configured cloud (idempotent — a CSV re-import doesn't re-upload the same asset)
+
+When it does upload, it uses a deterministic `public_id` of `<productCode|productSlug>-<assetKey>` under the folder from `CLOUDINARY_UPLOAD_FOLDER` (default: `online-store/products`). `overwrite: true` + `invalidate: true` means a re-import with the same product code replaces the asset and busts Cloudinary's CDN cache.
+
+#### Configuration
+
+Set **one of** these on the AdminJS runtime (Render):
+
+- `CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME` — single-var form Cloudinary's own SDK expects
+- OR the three-var form: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+
+Optional:
+
+- `CLOUDINARY_UPLOAD_FOLDER` (defaults to `online-store/products`)
+
+**Not required on Vercel** — the storefront doesn't use these vars. Setting them on Vercel is harmless but pointless.
+
+#### Verifying it's actually working
+
+There's no automated check. To verify manually:
+
+1. In AdminJS, run a product CSV import with a row whose image URL is an external `https://…` (not already a `res.cloudinary.com/<your-cloud>/…` URL).
+2. After import completes, open that product in AdminJS and inspect its stored image URL. If Cloudinary is configured, it should now be `https://res.cloudinary.com/<cloud>/…`. If it's still the original external URL, Cloudinary was silently disabled (missing env vars) — `uploadProductImageToCloudinary` returns `ok: true, uploaded: false` in that case, so import doesn't fail.
+3. Check the Cloudinary dashboard → Media Library → your upload folder → the new asset should be there.
+
+#### Failure mode
+
+If Cloudinary rejects the upload (rate limit, invalid credentials, unreachable source URL), the helper returns `{ ok: false, error }`. The CSV import logs the failure per row but continues with other rows — the failed row is simply not persisted with a Cloudinary URL. It is **not** a hard fail of the whole import.
 
 ---
 

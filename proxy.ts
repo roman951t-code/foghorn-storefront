@@ -252,11 +252,32 @@ const buildCorsPreflightResponse = (request: NextRequest) => {
 	return response;
 };
 
-const generateCspNonce = () => {
+// The nonce must stay identical for every request/response pair served from
+// a given deployment. Statically-rendered pages (cacheComponents/ISR) embed
+// the nonce in their <script nonce="..."> tags once, at generation time, and
+// are then served straight from cache without re-running this middleware's
+// render path — but middleware itself still runs on *every* request. A fresh
+// random nonce per request would mint a value that never matches what's
+// frozen in the cached HTML, and the browser blocks those inline scripts
+// (nonce mismatch), even though nothing is actually wrong. Deriving the
+// nonce from Vercel's immutable per-deployment commit SHA keeps every
+// request/response pair consistent for as long as this deployment is live,
+// while still rotating on every new deploy.
+const resolveStableCspNonce = () => {
+	const deploymentId = process.env.VERCEL_GIT_COMMIT_SHA;
+	if (deploymentId) {
+		return btoa(deploymentId).replace(/[^A-Za-z0-9+/=]/g, '').slice(0, 32);
+	}
+	// No stable deployment id (e.g. local dev, where there's no CDN/ISR
+	// caching layer to create a mismatch) — a value that's stable for this
+	// module's lifetime is enough.
 	const bytes = new Uint8Array(16);
 	crypto.getRandomValues(bytes);
 	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 };
+
+const CSP_NONCE = resolveStableCspNonce();
+const generateCspNonce = () => CSP_NONCE;
 
 const buildBaseCspDirectives = (nonce: string) => [
 	"default-src 'self'",
@@ -272,13 +293,16 @@ const buildBaseCspDirectives = (nonce: string) => [
 	"base-uri 'self'",
 	"form-action 'self'",
 	"frame-ancestors 'none'",
-	'upgrade-insecure-requests',
 ];
 
-const buildCspPolicy = (nonce: string) => buildBaseCspDirectives(nonce).join('; ');
+const buildCspPolicy = (nonce: string) =>
+	[...buildBaseCspDirectives(nonce), 'upgrade-insecure-requests'].join('; ');
 
 const buildCspReportOnlyPolicy = (nonce: string) =>
 	[
+		// upgrade-insecure-requests has no effect in a report-only policy (the
+		// browser can't enforce it there) and just produces a harmless-but-
+		// noisy console warning, so it's deliberately left out of this variant.
 		...buildBaseCspDirectives(nonce),
 		'report-uri /api/security/csp-report',
 		`report-to ${CSP_REPORT_GROUP}`,

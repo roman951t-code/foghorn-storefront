@@ -2,7 +2,7 @@
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"crons": [
 		{
-			"path": "/api/cache/revalidate/windows?lookbackSeconds=180&limit=500",
+			"path": "/api/cache/revalidate/windows?lookbackSeconds=3600&limit=500",
 			"schedule": "0 0 * * *"
 		}
 	]

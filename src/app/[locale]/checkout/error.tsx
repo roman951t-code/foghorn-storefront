@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 
@@ -10,6 +12,10 @@ type ErrorProps = {
 
 export default function CheckoutError({ error, reset }: ErrorProps) {
 	const t = useTranslations('errors');
+
+	useEffect(() => {
+		Sentry.captureException(error);
+	}, [error]);
 
 	return (
 		<section

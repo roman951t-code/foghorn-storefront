@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 import { GLOBAL_ERROR_MESSAGES } from '@/constants/errors';
 import { DEFAULT_LOCALE, getHtmlLang, isAppLocale, type AppLocale } from '@/constants/locales';
 
@@ -69,6 +70,10 @@ export default function GlobalError({
 	reset: () => void;
 }) {
 	useEffect(() => {
+		// Report to Sentry — Next.js's own error boundaries don't call
+		// captureException automatically, so uncaught client render errors
+		// would otherwise never reach the Sentry dashboard.
+		Sentry.captureException(error);
 		console.error('Global error boundary caught:', error);
 	}, [error]);
 

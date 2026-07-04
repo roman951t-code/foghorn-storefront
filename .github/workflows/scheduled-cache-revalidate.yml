@@ -1,0 +1,41 @@
+name: Scheduled Cache Revalidation
+
+# Vercel Cron on the Hobby plan only supports a once-per-day schedule
+# (see vercel.json), which is far too infrequent for scheduled
+# discounts/publishes to go live/end on time. This workflow calls
+# /api/cache/revalidate/windows every 5 minutes so those boundaries are
+# reflected on the storefront promptly; vercel.json's daily cron stays as a
+# wide-lookback safety net in case this workflow is ever disabled.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: scheduled-cache-revalidate
+  cancel-in-progress: false
+
+jobs:
+  revalidate-windows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Revalidate cache windows
+        env:
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          CACHE_REVALIDATE_SECRET: ${{ secrets.CACHE_REVALIDATE_SECRET }}
+        run: npx tsx scripts/revalidate-window-boundaries.ts --lookback=600 --limit=500
