@@ -29,7 +29,7 @@ even if the user does not mention it in the current message.
 4. **Do not push to any git remote** (`origin`, `github`, or otherwise) unless
    the user explicitly asks for a push. Committing locally is fine when the
    user asks for a commit, but stop there — never `git push`, `git push
-   --force`, or otherwise send commits to a remote on your own initiative.
+--force`, or otherwise send commits to a remote on your own initiative.
 
 5. **Do not create documentation files** (`*.md`, README updates, etc.)
    unless the user explicitly requests them. This file is the exception —
@@ -47,7 +47,7 @@ even if the user does not mention it in the current message.
   mirror (drives Vercel git integration). See `docs/cicd-pipeline.md` §1 for
   the full explanation of why both matter.
 
-## When in doubt
+## When in doubt follow this
 
 Stop and ask the user. A short clarifying question is always cheaper than
 undoing a mistake.
