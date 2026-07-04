@@ -1,6 +1,5 @@
 import 'server-only';
 
-import { env } from '@/config/env';
 import { prisma } from '@/lib/prisma';
 
 const TWILIO_API_BASE = 'https://api.twilio.com/2010-04-01/Accounts';
@@ -36,8 +35,12 @@ const resolveTwilioConfig = () => {
 	};
 };
 
-const isPhoneOtpTestAutofillEnabled = () =>
-	env.NODE_ENV !== 'production' && !resolveTwilioConfig().isConfigured;
+// Demo mode: when no Twilio config is present, we treat the deployment as a
+// demo environment. The generated OTP is returned to the client (via
+// getPhoneOtpCodeForTesting) so it can be displayed and auto-filled — no real
+// SMS is sent. Applies in production too, so the user can present the phone
+// login flow without paying for/configuring Twilio.
+const isPhoneOtpDemoModeEnabled = () => !resolveTwilioConfig().isConfigured;
 
 const extractStoredPhoneOtpCode = (storedValue: string | null | undefined) => {
 	if (typeof storedValue !== 'string') return null;
@@ -50,7 +53,7 @@ const buildTwilioBasicAuthHeader = (accountSid: string, authToken: string) =>
 	`Basic ${Buffer.from(`${accountSid}:${authToken}`, 'utf8').toString('base64')}`;
 
 export async function getPhoneOtpCodeForTesting(phoneNumber: string): Promise<string | undefined> {
-	if (!isPhoneOtpTestAutofillEnabled()) return undefined;
+	if (!isPhoneOtpDemoModeEnabled()) return undefined;
 
 	const verification = await prisma.verification.findFirst({
 		where: { identifier: phoneNumber },
@@ -104,13 +107,12 @@ export async function sendPhoneOtpCode({
 		return;
 	}
 
-	if (env.NODE_ENV !== 'production') {
-		console.info('[auth][phone-otp][dev-only]', {
-			phoneNumber: normalizedToPhone,
-			code,
-		});
-		return;
-	}
-
-	throw new Error('phone_otp_provider_not_configured');
+	// No Twilio → demo mode: skip the real SMS send. The OTP is still stored
+	// in the Verification table (Better Auth does that upstream), and
+	// getPhoneOtpCodeForTesting will surface it to the client so it can be
+	// displayed and auto-filled.
+	console.info('[auth][phone-otp][demo]', {
+		phoneNumber: normalizedToPhone,
+		code,
+	});
 }

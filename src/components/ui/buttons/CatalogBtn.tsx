@@ -43,6 +43,10 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 	// CatalogBtn lives in the persistent header/sidebar layout, so it never
 	// unmounts on navigation. Force-close on route change so a link clicked
 	// inside the drawer (which navigates away) can't leave it stuck open.
+	// The `key={pathname}` also fully remounts the DrawerRoot on every route
+	// change, guaranteeing Ark UI's internal state can't carry an "open"
+	// value across navigations even if the controlled `open` were somehow
+	// out of sync.
 	useEffect(() => {
 		setOpen(false);
 	}, [pathname]);
@@ -50,6 +54,7 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 	return (
 		<HStack wrap='wrap'>
 			<DrawerRoot
+				key={pathname}
 				size='full'
 				placement='top'
 				open={open}

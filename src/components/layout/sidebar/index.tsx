@@ -57,6 +57,7 @@ export default function SidePanel() {
 	return (
 		<>
 			<DrawerRoot
+				key={pathname}
 				placement='start'
 				open={open}
 				onOpenChange={(e) => setOpen(e.open)}
