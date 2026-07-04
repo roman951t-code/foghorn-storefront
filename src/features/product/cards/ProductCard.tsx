@@ -2,7 +2,7 @@
 import { useId, useState } from 'react';
 import { FiHeart, FiShoppingCart } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
-import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link, Icon } from '@chakra-ui/react';
+import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link, Icon, Box } from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { Rating } from '@/components/ui/chakra/rating';
@@ -46,13 +46,9 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 	const ratingId = useId();
 
 	const [isLoading, setIsLoading] = useState(false);
-	const [activePreviewIndex, setActivePreviewIndex] = useState(0);
 	const { productIds, handleAddItem, handleRemoveItem } = useCart();
 	const { ids: wishListIds, handleWishAdd, handleWishRemove } = useWishList();
 	const previewImages = buildProductImageGallery(product.imageUrl, product.images, 3);
-	const maxPreviewIndex = Math.max(0, previewImages.length - 1);
-	const safePreviewIndex = Math.min(Math.max(activePreviewIndex, 0), maxPreviewIndex);
-	const sliderHref = fullSlug === '#' ? '#' : `/products/${fullSlug}?image=${safePreviewIndex + 1}`;
 
 	if (!product) return null;
 
@@ -191,14 +187,13 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 					</IconButton>
 				</Flex>
 
-				<LocaleNavLink href={sliderHref} display='block' aria-label={name}>
+				<Box display='block'>
 					<ProductPreviewSlider
 						images={previewImages}
 						productName={name}
 						imagePriority={imagePriority}
-						onActiveIndexChange={setActivePreviewIndex}
 					/>
-				</LocaleNavLink>
+				</Box>
 
 				<LinkBox mt='1' textAlign='left'>
 					<Card.Title fontWeight='medium' w='100%' as='span'>
