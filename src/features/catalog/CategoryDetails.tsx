@@ -1,10 +1,11 @@
 'use client';
 
-import { Badge, Box, Flex, Heading, Icon, SimpleGrid, Text, Wrap } from '@chakra-ui/react';
+import { Box, Flex, Heading, Icon, Stack, Text } from '@chakra-ui/react';
 import { BsChevronRight } from 'react-icons/bs';
+import { Link } from '@/i18n/routing';
 import { LocaleNavLink, LocaleNavButton } from '@/components/ui/links/LocaleNavLink';
 import PriorityImageWithFallback from '@/components/ui/PriorityImageWithFallback';
-import { CATEGORY_DETAILS_GRID_CSS } from '@/constants/grids';
+import { CATEGORY_DETAILS_COLUMNS_CSS } from '@/constants/grids';
 import type { I18nData } from '@/types/i18n';
 import type { CatalogCategory } from '@/types/product';
 import { useTranslations } from 'next-intl';
@@ -40,7 +41,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 			borderStyle='solid'
 			borderColor='border'
 		>
-			<Flex flex='1' minW={0} direction='row' h='full'>
+			<Flex flex='1' minW={0} direction='row' h='full' gap='0.5'>
 				<Box
 					flex='1'
 					minW={0}
@@ -49,142 +50,112 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					p='4'
 					bgGradient='linear(to-b, rgba(255,255,255,0.04), rgba(255,255,255,0.0))'
 				>
-					<SimpleGrid
-						css={CATEGORY_DETAILS_GRID_CSS}
-						justifyContent='start'
-						gap='4'
-						pr={{ base: 0, lg: '264px' }}
-					>
+					<Box css={CATEGORY_DETAILS_COLUMNS_CSS}>
 						{subcategories.map((subcategory) => {
 							const subImage = resolveSubcategoryImage(
 								subcategory.imageUrl,
 								SUBCATEGORY_PLACEHOLDER_IMAGE,
 							);
-
+							const subcategoryHref = `/products/${category.slug}/${subcategory.slug}`;
+							// `break-inside: avoid` keeps a group's image/title/list together as
+							// one unit inside the CSS multi-column layout above, instead of the
+							// browser splitting it mid-list across two columns.
 							return (
-								<Box
-									key={subcategory.id}
-									w='full'
-									rounded='lg'
-									borderWidth='0.5px'
-									borderStyle='solid'
-									borderColor='border'
-									bg='bg.tertiary'
-									overflow='hidden'
-									transition='all 0.18s ease-in-out'
-									_hover={{
-										boxShadow: {
-											// Chakra's built-in shadow tokens are black-based, which barely
-											// shows up against this card's already-dark bg.tertiary in dark
-											// mode — use a light glow there instead so it's actually visible,
-											// with a higher opacity than light mode's shadow for more presence.
-											base: '0 1px 12px rgba(0, 0, 0, 0.22)',
-											_dark: '0 1px 12px rgba(169, 165, 172, 0.26)',
-										},
-									}}
-								>
-									<Box h='100px' position='relative'>
-										<PriorityImageWithFallback
-											src={subImage}
-											fallbackSrc={SUBCATEGORY_PLACEHOLDER_IMAGE}
-											alt={subcategory.name}
-											sizes='(max-width: 1024px) 100vw, 320px'
-											loading='eager'
-											fetchPriority='high'
-											objectFit='cover'
-										/>
-										<Box
-											position='absolute'
-											inset='0'
-											bgGradient='linear(to-t, rgba(0,0,0,0.62), rgba(0,0,0,0.08) 55%, rgba(0,0,0,0.0))'
-										/>
-									</Box>
+								<Box key={subcategory.id} css={{ breakInside: 'avoid' }} mb='5'>
+									<Flex direction='column' align='flex-start' gap='2.5' mb='2'>
+										<Link href={subcategoryHref}>
+											<Box
+												w='140px'
+												h='90px'
+												flexShrink={0}
+												position='relative'
+												overflow='hidden'
+												rounded='md'
+												borderWidth='0.5px'
+												borderStyle='solid'
+												borderColor='border'
+												transition='border-color 0.15s ease-in-out'
+												_hover={{ borderColor: 'main.secondary' }}
+											>
+												<PriorityImageWithFallback
+													src={subImage}
+													fallbackSrc={SUBCATEGORY_PLACEHOLDER_IMAGE}
+													alt={subcategory.name}
+													sizes='80px'
+													loading='lazy'
+													objectFit='fill'
+												/>
+											</Box>
+										</Link>
 
-									<Box p={4}>
 										<LocaleNavLink
-											href={`/products/${category.slug}/${subcategory.slug}`}
-											fontSize='lg'
-											fontWeight='semibold'
-											variant='plain'
-											color='main'
-											textDecoration='none'
-											textWrap='wrap'
-											wordBreak='break-word'
-											_hover={{ color: 'link' }}
+											href={subcategoryHref}
+											minW={0}
 											display='inline-flex'
 											alignItems='center'
-											gap={2}
+											gap='1'
+											fontSize='15px'
+											fontWeight='bold'
+											textDecoration='none'
+											color='link'
+											_hover={{ transform: 'translateX(2px)', textDecoration: 'underline' }}
 										>
-											<Text as='span' lineClamp={1}>
+											<Text fontSize='md' as='span' lineClamp={1}>
 												{subcategory.name}
 											</Text>
-											<Icon as='span' fontSize='16px' color='gray.500'>
+											<Icon as='span' fontSize='14px' flexShrink={0}>
 												<BsChevronRight />
 											</Icon>
 										</LocaleNavLink>
+									</Flex>
 
-										<Wrap mt={3} gap={4} align='center'>
-											{subcategory.products.length > 0 ? (
-												subcategory.products.map((product) => (
-													<Badge
-														key={product.id}
-														variant='outline'
-														size='md'
-														borderWidth='0.5px'
-														bg='bg.tertiary'
-														px='0'
-														py='1'
-														boxShadow='none'
-														border='none'
-													>
-														<LocaleNavLink
-															href={`/products/${product.fullSlug}`}
-															fontSize={{ base: 'md', md: '15px' }}
-															fontWeight='medium'
-															textWrap='wrap'
-															wordBreak='break-word'
-															textDecorationColor='main'
-															color='main'
-															variant='underline'
-															_hover={{ color: 'link' }}
-															_focusVisible={{
-																outline: '2px solid',
-																outlineColor: 'main.secondary',
-																outlineOffset: '2px',
-															}}
-														>
-															{product.name}
-														</LocaleNavLink>
-													</Badge>
-												))
-											) : (
-												<Text fontSize={{ base: 'md', md: 'sm' }} color='gray.500'>
-													{productsT('productsNotFound')}
-												</Text>
-											)}
+									<Stack gap='1.5' align='flex-start'>
+										{subcategory.products.length > 0 ? (
+											subcategory.products.map((product) => (
+												<LocaleNavLink
+													key={product.id}
+													href={`/products/${product.fullSlug}`}
+													w='full'
+													fontSize='15px'
+													color='main'
+													textDecoration='none'
+													lineClamp={1}
+													_hover={{ color: 'link' }}
+													_focusVisible={{
+														outline: '2px solid',
+														outlineColor: 'main.secondary',
+														outlineOffset: '2px',
+													}}
+												>
+													{product.name}
+												</LocaleNavLink>
+											))
+										) : (
+											<Text fontSize='15px' color='gray.500'>
+												{productsT('productsNotFound')}
+											</Text>
+										)}
 
-											<LocaleNavLink
-												href={`/products/${category.slug}/${subcategory.slug}`}
-												fontSize={{ base: 'md', md: 'sm' }}
-												variant='plain'
-												color='link'
-												mt='1'
-												textDecoration='underline'
-												textUnderlineOffset='4px'
-												_focusVisible={{
-													outline: '2px solid',
-													outlineColor: 'main.secondary',
-													outlineOffset: '2px',
-												}}
-											>
-												{i18nData.seeAll}
-											</LocaleNavLink>
-										</Wrap>
-									</Box>
+										<LocaleNavLink
+											href={subcategoryHref}
+											fontSize='15px'
+											color='link'
+											mt='0.5'
+											textDecoration='underline'
+											textUnderlineOffset='3px'
+											_focusVisible={{
+												outline: '2px solid',
+												outlineColor: 'main.secondary',
+												outlineOffset: '2px',
+											}}
+										>
+											{i18nData.seeAll}
+										</LocaleNavLink>
+									</Stack>
 								</Box>
 							);
 						})}
-					</SimpleGrid>
+					</Box>
 				</Box>
 
 				<Flex
@@ -192,18 +163,31 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					direction='column'
 					align='center'
 					bgColor='catalog.bgCategory'
-					h='full'
-					maxW='380px'
+					h='calc(100% + 16px)'
+					maxW='320px'
 					minW={{ base: '240px', xl: '280px' }}
-					position='absolute'
-					right={0}
+					flexShrink={0}
+					// This used to be `position: absolute; right: 0; top: 0; h: full`,
+					// which — as an absolutely positioned element — sized and
+					// positioned itself against CatalogPanel's outer relative Flex
+					// (the nearest positioned ancestor, two levels up) rather than
+					// this component's own 516px-tall box: flush against that
+					// ancestor's padding *edge* (ignoring its p='2' padding) on top/
+					// right, and 16px taller than its real parent so it reached that
+					// ancestor's own bottom edge (clipped there by this component's
+					// own overflow='hidden', a couple px short of the panel's own
+					// un-clipped height). Now that this is a normal flex child, it's
+					// sized/positioned against its real parent instead; the negative
+					// margins plus the +16px height reproduce those old offsets so the
+					// panel lands in the exact same place.
+					mt='-2'
+					mr='-2'
 					borderWidth='0.5px'
 					borderStyle='solid'
 					borderColor='border'
 					borderRadius='lg'
-					top={0}
-					zIndex={10}
 					p={4}
+					pb='6'
 					hideBelow='lg'
 				>
 					<Heading
@@ -222,11 +206,12 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 						position='relative'
 						w='full'
 						aspectRatio='1'
-						mt={4}
 						overflow='hidden'
 						rounded='lg'
 						borderWidth='0.5px'
 						borderStyle='solid'
+						maxW='240px'
+						ml='-6px'
 						borderColor='border'
 					>
 						<PriorityImageWithFallback

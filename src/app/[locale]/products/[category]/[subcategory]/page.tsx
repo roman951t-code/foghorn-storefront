@@ -245,7 +245,15 @@ export default async function Subcategory({ params, searchParams }: Props) {
 						flexShrink={0}
 						bg='bg.tertiary'
 						minH='800px'
-						rounded='lg'
+						rounded='xl'
+						borderWidth='0.5px'
+						borderStyle='solid'
+						borderColor='border'
+						boxShadow={{
+							base: '0 1px 12px rgba(0, 0, 0, 0.06)',
+							_dark: '0 1px 16px rgba(0, 0, 0, 0.35)',
+						}}
+						overflow='hidden'
 						hideBelow='lg'
 						position='sticky'
 						top='74px'
@@ -253,7 +261,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 						<CatalogBtn fullText />
 						<VStack p='4' justifyContent='flex-start'>
 							<HStack w='full' gapX='4' mt='2' align='center'>
-								<Text fontSize='md' color='main'>
+								<Text fontSize='md' fontWeight='semibold' color='main'>
 									{productsT('totalProducts')}
 								</Text>
 								<CountPill

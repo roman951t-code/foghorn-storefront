@@ -49,7 +49,7 @@ export default async function Footer({ locale }: { locale: AppLocale }) {
 				<Group>
 					<Text color='main.lightOnly'>{t('design')}</Text>
 					<Link
-						href='#'
+						href='https://foghornbay.com/'
 						variant='underline'
 						color='main.secondary'
 						_focusVisible={{

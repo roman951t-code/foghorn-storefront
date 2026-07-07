@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, Suspense } from 'react';
 import { Box, Link } from '@chakra-ui/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
@@ -347,6 +347,16 @@ export default async function Layout({ children, params }: Props) {
 	const htmlLang = getHtmlLang(locale);
 	const cspNonce = getCspNonce();
 
+	// Cache Components requires every `{children}` hand-off along a route's
+	// layout chain to be wrapped in Suspense once *anything* further down the
+	// tree performs an uncached read (headers()/cookies()/redirect()/
+	// notFound()) — a boundary several layouts down (e.g. cabinet/layout.tsx)
+	// is not sufficient on its own. There's currently no supported way to opt
+	// a specific segment out of static prerendering under Cache Components
+	// (no `force-dynamic` equivalent yet), so this wraps the whole shell in
+	// the documented `fallback={null}` workaround. See
+	// https://github.com/vercel/next.js/issues/86670 and
+	// https://github.com/vercel/next.js/issues/86739.
 	return (
 		<html lang={htmlLang} suppressHydrationWarning>
 			<body className={fontVariableClassName} suppressHydrationWarning>
@@ -363,7 +373,9 @@ export default async function Layout({ children, params }: Props) {
 					}}
 				/>
 				<ColorModeProvider>
-					<PrerenderedShell locale={locale}>{children}</PrerenderedShell>
+					<Suspense fallback={null}>
+						<PrerenderedShell locale={locale}>{children}</PrerenderedShell>
+					</Suspense>
 				</ColorModeProvider>
 			</body>
 		</html>

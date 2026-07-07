@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { VStack, Box } from '@chakra-ui/react';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
@@ -13,6 +14,7 @@ import {
 	resolvePerPageParam,
 } from '@/constants/pagination';
 import { LocaleParams } from '@/types/routing';
+import CabinetPageContentSkeleton from '@/components/ui/skeletons/CabinetPageContentSkeleton';
 
 const VIEWED_LIMIT = 32;
 
@@ -23,7 +25,15 @@ type Props = LocaleParams & {
 	}>;
 };
 
-export default async function Reviewed({ params, searchParams }: Props) {
+export default function Reviewed({ params, searchParams }: Props) {
+	return (
+		<Suspense fallback={<CabinetPageContentSkeleton />}>
+			<ReviewedContent params={params} searchParams={searchParams} />
+		</Suspense>
+	);
+}
+
+async function ReviewedContent({ params, searchParams }: Props) {
 	const { locale } = await params;
 	const [genT, productsT] = await Promise.all([
 		getTranslations('common'),

@@ -1,9 +1,11 @@
+import { Suspense } from 'react';
 import { VStack } from '@chakra-ui/react';
 import { getTranslations } from 'next-intl/server';
 import Pagination from '@/components/ui/Pagination';
 import { PRODUCTS_PER_PAGE, resolveOffset, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
 import { getUserOrders } from '@/actions/getUserOrders';
 import UserOrdersList from '../_components/orders/UserOrdersList';
+import CabinetPageContentSkeleton from '@/components/ui/skeletons/CabinetPageContentSkeleton';
 
 type Props = {
 	searchParams?: Promise<{
@@ -14,7 +16,15 @@ type Props = {
 	}>;
 };
 
-export default async function Orders({ searchParams }: Props) {
+export default function Orders({ searchParams }: Props) {
+	return (
+		<Suspense fallback={<CabinetPageContentSkeleton />}>
+			<OrdersContent searchParams={searchParams} />
+		</Suspense>
+	);
+}
+
+async function OrdersContent({ searchParams }: Props) {
 	const ordersT = await getTranslations('orders');
 
 	const params = await searchParams;

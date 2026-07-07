@@ -43,7 +43,7 @@ export default function ProductTabs({
 	const averageRating =
 		reviewCount > 0
 			? effectiveReviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount
-			: product.averageRating ?? 0;
+			: (product.averageRating ?? 0);
 
 	const handleTabChange = (next: ProductTabValue) => {
 		const params = new URLSearchParams(searchParams?.toString());
@@ -111,6 +111,7 @@ export default function ProductTabs({
 				}
 			}}
 			width='full'
+			variant='outline'
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			lazyMount
 			unmountOnExit

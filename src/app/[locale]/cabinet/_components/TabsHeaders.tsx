@@ -21,7 +21,9 @@ export default function TabsList() {
 		>
 			{CABINET_TABS.map((tab) => {
 				const IconComponent = tab.icon;
-				const label = tab.usesName ? session?.user?.name ?? navT(tab.labelKey) : navT(tab.labelKey);
+				const label = tab.usesName
+					? (session?.user?.name ?? navT(tab.labelKey))
+					: navT(tab.labelKey);
 
 				return (
 					<Tabs.Trigger key={tab.value} value={tab.value} {...CABINET_TAB_TRIGGER_PROPS}>

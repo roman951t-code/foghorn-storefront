@@ -16,6 +16,7 @@ import { useCallback } from 'react';
 import { useTrackedNavigation } from '@/hooks/useTrackedNavigation';
 import { localizeUnit } from '@/utils/unitLocalization';
 import { localizeAttributeName } from '@/utils/attributeLocalization';
+import { FILTER_ACCENT } from './FilterSectionHeading';
 
 type Props = {
 	filters: Filter[] | null;
@@ -69,10 +70,11 @@ export default function Filters({ filters }: Props) {
 							value={filter.key}
 							borderWidth='0.5px'
 							borderStyle='solid'
-							borderColor='border'
+							borderColor={selectedCount > 0 ? FILTER_ACCENT : 'border'}
 							rounded='lg'
 							overflow='hidden'
 							bg='bg.tertiary'
+							transition='border-color 0.15s ease-in-out'
 						>
 							<AccordionItemTrigger
 								px={4}
@@ -117,6 +119,9 @@ export default function Filters({ filters }: Props) {
 													borderColor='border'
 													transition='all 0.15s ease-in-out'
 													_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
+													_checked={{
+														borderColor: FILTER_ACCENT,
+													}}
 													fontSize={{ base: 'md', md: 'sm' }}
 													whiteSpace='normal'
 													wordBreak='break-word'

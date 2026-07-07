@@ -1,8 +1,9 @@
 'use client';
 
 import { FiSearch } from 'react-icons/fi';
-import { HStack, Text, Input, Flex, IconButton } from '@chakra-ui/react';
+import { HStack, Input, Flex, IconButton } from '@chakra-ui/react';
 import { Slider } from '@/components/ui/chakra/slider';
+import FilterSectionHeading from './FilterSectionHeading';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -47,16 +48,14 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 
 	return (
 		<>
-			<Text fontSize={{ base: 'md', md: '15px' }} fontWeight='semibold' color='main' mb={4}>
-				{title} ($)
-			</Text>
+			<FilterSectionHeading>{title} ($)</FilterSectionHeading>
 			<Flex justifyContent='space-between' alignItems='center' gap={3} w='100%' minW={0}>
-					<HStack gap={2} flex='1' minW={0}>
-						<Input
-							variant='subtle'
-							fontSize={{ base: 'md', md: '15px' }}
-							color='main'
-							h='40px'
+				<HStack gap={2} flex='1' minW={0}>
+					<Input
+						variant='subtle'
+						fontSize={{ base: 'md', md: '15px' }}
+						color='main'
+						h='40px'
 						flex='1'
 						minW={0}
 						type='number'
@@ -70,11 +69,11 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 						bg='bg.tertiary'
 						borderColor='border'
 					/>
-						<Input
-							variant='subtle'
-							fontSize={{ base: 'md', md: '15px' }}
-							color='main'
-							h='40px'
+					<Input
+						variant='subtle'
+						fontSize={{ base: 'md', md: '15px' }}
+						color='main'
+						h='40px'
 						flex='1'
 						minW={0}
 						type='number'
@@ -109,6 +108,7 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 				size='sm'
 				width='100%'
 				mt={4}
+				colorPalette='gray'
 				min={0}
 				max={Math.max(1, maxPrice.current)}
 				value={[

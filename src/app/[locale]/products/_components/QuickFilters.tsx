@@ -1,11 +1,44 @@
 'use client';
 
-import { Box, Flex, Text, VStack, type RadioGroupValueChangeDetails } from '@chakra-ui/react';
+import { Box, Flex, VStack, type RadioGroupValueChangeDetails } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import PriceSlider from './PriceSlider';
+import FilterSectionHeading, { FILTER_ACCENT } from './FilterSectionHeading';
 import { Radio, RadioGroup } from '@/components/ui/chakra/radio';
 import { useSearchParams } from 'next/navigation';
 import { useTrackedNavigation } from '@/hooks/useTrackedNavigation';
+
+const radioRowStyle = {
+	w: '100%',
+	minW: 0,
+	whiteSpace: 'normal' as const,
+	wordBreak: 'break-word' as const,
+	textAlign: 'start' as const,
+	color: 'main',
+	fontSize: { base: 'md', md: 'sm' },
+	px: 3,
+	py: 2.5,
+	rounded: 'lg',
+	borderWidth: '0.5px',
+	borderStyle: 'solid' as const,
+	borderColor: 'border',
+	transition: 'all 0.15s ease-in-out',
+	_hover: { cursor: 'pointer' as const, bg: 'bgHover.promoCard' },
+	_checked: {
+		borderColor: FILTER_ACCENT,
+	},
+};
+
+const sectionBoxStyle = {
+	rounded: 'lg',
+	bg: 'bg.tertiary',
+	p: 4,
+	w: '100%',
+	minW: 0,
+	borderWidth: '0.5px',
+	borderStyle: 'solid' as const,
+	borderColor: 'border',
+};
 
 export default function QuickFilters({ maxProductPrice }: { maxProductPrice: number }) {
 	const t = useTranslations('products');
@@ -39,19 +72,8 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 
 	return (
 		<Flex flexDirection='column' gap={4} w='100%' minW={0}>
-			<Box
-				rounded='lg'
-				bg='bg.tertiary'
-				p={4}
-				w='100%'
-				minW={0}
-				borderWidth='0.5px'
-				borderStyle='solid'
-				borderColor='border'
-			>
-				<Text fontSize={{ base: 'md', md: 'sm' }} fontWeight='semibold' color='main' mb={3}>
-					{t('sortBy')}
-				</Text>
+			<Box {...sectionBoxStyle}>
+				<FilterSectionHeading>{t('sortBy')}</FilterSectionHeading>
 				<RadioGroup
 					value={searchParams.get('orderBy') ?? null}
 					onValueChange={handleOrderByChange}
@@ -61,83 +83,21 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 					orientation='vertical'
 				>
 					<VStack gap={2} alignItems='stretch'>
-						<Radio
-							w='100%'
-							minW={0}
-							whiteSpace='normal'
-							wordBreak='break-word'
-							textAlign='start'
-							color='main'
-							fontSize={{ base: 'md', md: 'sm' }}
-							value='new'
-							px={3}
-							py={2.5}
-							rounded='lg'
-							borderWidth='0.5px'
-							borderStyle='solid'
-							borderColor='border'
-							transition='all 0.15s ease-in-out'
-							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-						>
+						<Radio {...radioRowStyle} value='new'>
 							{t('new')}
 						</Radio>
-						<Radio
-							w='100%'
-							minW={0}
-							whiteSpace='normal'
-							wordBreak='break-word'
-							textAlign='start'
-							color='main'
-							fontSize={{ base: 'md', md: 'sm' }}
-							value='expensive'
-							px={3}
-							py={2.5}
-							rounded='lg'
-							borderWidth='0.5px'
-							borderStyle='solid'
-							borderColor='border'
-							transition='all 0.15s ease-in-out'
-							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-						>
+						<Radio {...radioRowStyle} value='expensive'>
 							{t('expensiveToCheap')}
 						</Radio>
-						<Radio
-							w='100%'
-							minW={0}
-							whiteSpace='normal'
-							wordBreak='break-word'
-							textAlign='start'
-							color='main'
-							fontSize={{ base: 'md', md: 'sm' }}
-							value='cheap'
-							px={3}
-							py={2.5}
-							rounded='lg'
-							borderWidth='0.5px'
-							borderStyle='solid'
-							borderColor='border'
-							transition='all 0.15s ease-in-out'
-							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-						>
+						<Radio {...radioRowStyle} value='cheap'>
 							{t('cheapToExpensive')}
 						</Radio>
 					</VStack>
 				</RadioGroup>
 			</Box>
 
-			<Box
-				rounded='lg'
-				bg='bg.tertiary'
-				p={4}
-				w='100%'
-				minW={0}
-				borderWidth='0.5px'
-				borderStyle='solid'
-				borderColor='border'
-			>
-				<Text fontSize={{ base: 'md', md: 'sm' }} fontWeight='semibold' color='main' mb={3}>
-					{t('availability')}
-				</Text>
+			<Box {...sectionBoxStyle}>
+				<FilterSectionHeading>{t('availability')}</FilterSectionHeading>
 				<RadioGroup
 					value={
 						searchParams.get('inStock') === 'true'
@@ -153,80 +113,20 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 					orientation='vertical'
 				>
 					<VStack gap={2} alignItems='stretch'>
-						<Radio
-							w='100%'
-							minW={0}
-							whiteSpace='normal'
-							wordBreak='break-word'
-							textAlign='start'
-							color='main'
-							fontSize={{ base: 'md', md: 'sm' }}
-							value='all'
-							px={3}
-							py={2.5}
-							rounded='lg'
-							borderWidth='0.5px'
-							borderStyle='solid'
-							borderColor='border'
-							transition='all 0.15s ease-in-out'
-							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-						>
+						<Radio {...radioRowStyle} value='all'>
 							{t('all')}
 						</Radio>
-						<Radio
-							w='100%'
-							minW={0}
-							whiteSpace='normal'
-							wordBreak='break-word'
-							textAlign='start'
-							color='main'
-							fontSize={{ base: 'md', md: 'sm' }}
-							value='inStock'
-							px={3}
-							py={2.5}
-							rounded='lg'
-							borderWidth='0.5px'
-							borderStyle='solid'
-							borderColor='border'
-							transition='all 0.15s ease-in-out'
-							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-						>
+						<Radio {...radioRowStyle} value='inStock'>
 							{t('productIsPresent')}
 						</Radio>
-						<Radio
-							w='100%'
-							minW={0}
-							whiteSpace='normal'
-							wordBreak='break-word'
-							textAlign='start'
-							color='main'
-							fontSize={{ base: 'md', md: 'sm' }}
-							value='outOfStock'
-							px={3}
-							py={2.5}
-							rounded='lg'
-							borderWidth='0.5px'
-							borderStyle='solid'
-							borderColor='border'
-							transition='all 0.15s ease-in-out'
-							_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
-						>
+						<Radio {...radioRowStyle} value='outOfStock'>
 							{t('productIsOutOfStock')}
 						</Radio>
 					</VStack>
 				</RadioGroup>
 			</Box>
 
-			<Box
-				rounded='lg'
-				bg='bg.tertiary'
-				p={4}
-				w='100%'
-				minW={0}
-				borderWidth='0.5px'
-				borderStyle='solid'
-				borderColor='border'
-			>
+			<Box {...sectionBoxStyle}>
 				<PriceSlider maxProductPrice={maxProductPrice} title={t('price')} />
 			</Box>
 		</Flex>

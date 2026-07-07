@@ -7,8 +7,10 @@ import TabsProvider from './_components/TabsProvider';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { setRequestLocale } from 'next-intl/server';
 import TabsContentRenderer from './_components/TabsContentRenderer';
 import { LocaleParams } from '@/types/routing';
+import type { AppLocale } from '@/constants/locales';
 import CabinetPageSkeleton from '@/components/ui/skeletons/CabinetPageSkeleton';
 
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
@@ -27,7 +29,18 @@ type Props = LocaleParams & { children: ReactNode };
 // prerendering for the whole route (see blocking-route warning). Moving it
 // into its own component wrapped in <Suspense> here contains the dynamic
 // hole to just this subtree.
-async function AuthorizedCabinet({ children }: { children: ReactNode }) {
+//
+// This is also where next-intl's request-scoped locale cache needs to be
+// re-seeded: the root layout's `setRequestLocale` call only covers the
+// static-shell render pass. Once this Suspense boundary defers rendering
+// (because of the `headers()` read above), everything below re-renders in a
+// separate pass that doesn't inherit that cache — so `getTranslations`/
+// `useTranslations` calls deeper in `children` would otherwise fall back to
+// resolving the locale from `headers()` again, which is itself an uncached
+// read outside of this Suspense boundary and reproduces the same error.
+async function AuthorizedCabinet({ children, locale }: { children: ReactNode; locale: AppLocale }) {
+	setRequestLocale(locale);
+
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -48,10 +61,12 @@ async function AuthorizedCabinet({ children }: { children: ReactNode }) {
 	);
 }
 
-export default async function CabinetLayout({ children }: Props) {
+export default async function CabinetLayout({ children, params }: Props) {
+	const { locale } = await params;
+
 	return (
 		<Suspense fallback={<CabinetPageSkeleton />}>
-			<AuthorizedCabinet>{children}</AuthorizedCabinet>
+			<AuthorizedCabinet locale={locale}>{children}</AuthorizedCabinet>
 		</Suspense>
 	);
 }

@@ -8,7 +8,7 @@ type Props = {
 	fallbackSrc: string;
 	alt: string;
 	sizes: string;
-	objectFit?: 'cover' | 'contain';
+	objectFit?: 'cover' | 'contain' | 'fill';
 	loading?: 'eager' | 'lazy';
 	fetchPriority?: 'high' | 'low' | 'auto';
 	priority?: boolean;

@@ -28,7 +28,6 @@ export const CABINET_TAB_ROUTE_SUFFIXES: Record<CabinetTabValue, string> = {
 };
 
 export const CABINET_TAB_TRIGGER_PROPS = {
-	color: 'main',
 	fontWeight: 'medium',
 	fontSize: 'md',
 	display: 'inline-flex',

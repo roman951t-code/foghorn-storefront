@@ -184,6 +184,11 @@ export const enAdminLocale = {
 				password: 'Password',
 			},
 			loginButton: 'Sign in',
+			demoTitle: 'Demo mode',
+			demoDescription:
+				'This is a public demo. The form above is pre-filled with a read-only account so you can explore the admin panel without changing any data.',
+			demoEmailLabel: 'Email',
+			demoPasswordLabel: 'Password',
 		},
 	},
 	actions: {

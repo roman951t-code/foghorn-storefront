@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { VStack } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import PersonalDataForm from './_components/user/PersonalDataForm';
@@ -6,8 +7,17 @@ import {
 	ACCOUNT_AUTH_MESSAGE_KEYS,
 	ACCOUNT_VALIDATION_MESSAGE_KEYS,
 } from '@/data/localeMessages/authMessages';
+import CabinetPageContentSkeleton from '@/components/ui/skeletons/CabinetPageContentSkeleton';
 
 export default function Cabinet() {
+	return (
+		<Suspense fallback={<CabinetPageContentSkeleton />}>
+			<CabinetForm />
+		</Suspense>
+	);
+}
+
+function CabinetForm() {
 	const authT = useTranslations('auth');
 	const validT = useTranslations('validation');
 

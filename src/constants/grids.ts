@@ -113,6 +113,22 @@ export const CABINET_PRODUCTS_GRID_CSS = {
 	},
 } as const;
 
-export const CATEGORY_DETAILS_GRID_CSS = {
-	gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+// The catalog mega-menu's subcategory list sits beside a fixed-ish-width
+// hero panel that only appears from `lg` up (see CategoryDetails.tsx), so
+// the space actually available to this column here is *not* a clean
+// function of viewport width — it shrinks the moment that hero panel
+// appears, then grows again as the viewport keeps widening. Rather than
+// chase that with manual breakpoints (as the grids above do, where it's
+// worth the precision for primary product listings), `column-width` lets
+// the browser fit as many ~240px columns as the *actual* container width
+// allows, so it naturally adapts to that non-monotonic available space
+// without any media queries. `columnCount` just caps it at 3 so it doesn't
+// fragment into a wall of skinny columns on ultra-wide viewports. 240px
+// (not the previous 192px) gives the 80px subcategory thumbnail + title
+// room to breathe, and keeps the product-name list beneath it from feeling
+// cramped now that a subcategory can show up to 10 of them.
+export const CATEGORY_DETAILS_COLUMNS_CSS = {
+	columnWidth: '234px',
+	columnCount: 3,
+	columnGap: '20px',
 } as const;

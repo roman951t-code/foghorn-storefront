@@ -48,7 +48,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 			clearTimeout(hoverTimeout.current);
 			hoverTimeout.current = null;
 		}
-		setActiveCategory(null);
+		// setActiveCategory(null);
 	};
 
 	const activateCategory = (category: CatalogCategory) => {

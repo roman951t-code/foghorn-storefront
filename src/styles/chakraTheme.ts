@@ -202,7 +202,7 @@ const config = defineConfig({
 				link: {
 					DEFAULT: {
 						value: {
-							base: '#3e3c78',
+							base: '#383769',
 							_dark: '{colors.yellow.400}',
 						},
 					},
@@ -468,6 +468,52 @@ const config = defineConfig({
 					},
 				},
 			}),
+			// // Storefront-wide segmented-control look for both tab bars in the
+			// // app (cabinet nav, product detail About/Specs/Reviews) — built on
+			// // chakra's own `enclosed` variant (a padded track + raised selected
+			// // trigger) rather than a hand-rolled one, just re-themed with this
+			// // app's own tokens instead of chakra's generic bg/bg.muted so it
+			// // reads as part of the same design language as the rest of the
+			// // storefront (bg.tertiary panels, 0.5px borders, colorPalette
+			// // accent already used for these two Tabs.Root instances).
+			// tabs: defineSlotRecipe({
+			// 	...chakraDefaultSlotRecipes.tabs,
+			// 	defaultVariants: {
+			// 		...chakraDefaultSlotRecipes.tabs.defaultVariants,
+			// 		variant: 'enclosed',
+			// 	},
+			// 	variants: {
+			// 		...chakraDefaultSlotRecipes.tabs.variants,
+			// 		variant: {
+			// 			...chakraDefaultSlotRecipes.tabs.variants!.variant,
+			// 			enclosed: {
+			// 				...chakraDefaultSlotRecipes.tabs.variants!.variant.enclosed,
+			// 				list: {
+			// 					...chakraDefaultSlotRecipes.tabs.variants!.variant.enclosed.list,
+			// 					bg: 'bg.tertiary',
+			// 					borderWidth: '0.5px',
+			// 					borderStyle: 'solid',
+			// 					borderColor: 'border',
+			// 					borderRadius: 'lg',
+			// 				},
+			// 				trigger: {
+			// 					...chakraDefaultSlotRecipes.tabs.variants!.variant.enclosed.trigger,
+			// 					color: 'fg.muted',
+			// 					borderRadius: 'md',
+			// 					transition: 'all 0.15s ease-in-out',
+			// 					_hover: {
+			// 						color: 'colorPalette.fg',
+			// 					},
+			// 					_selected: {
+			// 						bg: 'colorPalette.subtle',
+			// 						color: 'colorPalette.fg',
+			// 						shadow: 'none',
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// }),
 		},
 	},
 	globalCss: {

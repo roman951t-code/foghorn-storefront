@@ -184,6 +184,11 @@ export const uaAdminLocale = {
 				password: 'Пароль',
 			},
 			loginButton: 'Увійти',
+			demoTitle: 'Демо-режим',
+			demoDescription:
+				'Це публічна демо-версія. Форма вище вже заповнена даними облікового запису лише для перегляду, щоб ви могли ознайомитися з адмінкою без змін даних.',
+			demoEmailLabel: 'Email',
+			demoPasswordLabel: 'Пароль',
 		},
 	},
 	actions: {

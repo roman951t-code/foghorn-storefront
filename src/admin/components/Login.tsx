@@ -33,6 +33,14 @@ const labelStyle = {
 const getMessageText = (message: string, translateMessage: (key: string) => string) =>
 	message.split(' ').length > 1 ? message : translateMessage(message);
 
+// This panel is a public demo, so the login form defaults to the read-only
+// account (not the full-access one) — visitors can sign in with one click
+// and can't change any data. Keep these in sync with the
+// ADMINJS_READONLY_EMAIL / ADMINJS_READONLY_PASSWORD dev defaults in
+// src/admin/server.mts.
+const DEMO_READONLY_EMAIL = 'readonly@mail.com';
+const DEMO_READONLY_PASSWORD = 'test';
+
 export default function Login() {
 	const windowState = window as WindowWithAdminState;
 	const props = windowState.__APP_STATE__;
@@ -40,8 +48,8 @@ export default function Login() {
 	const message = props?.errorMessage ?? undefined;
 	const branding = windowState.REDUX_STATE?.branding ?? {};
 	const { translateComponent, translateMessage } = useTranslation();
-	const [email, setEmail] = useState('test@com');
-	const [password, setPassword] = useState('test');
+	const [email, setEmail] = useState(DEMO_READONLY_EMAIL);
+	const [password, setPassword] = useState(DEMO_READONLY_PASSWORD);
 
 	const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
 		setEmail(event.target.value);
@@ -142,6 +150,16 @@ export default function Login() {
 							{translateComponent('Login.loginButton')}
 						</Button>
 					</Box>
+					<MessageBox message={translateComponent('Login.demoTitle')} variant='info'>
+						<Text mb='default'>{translateComponent('Login.demoDescription')}</Text>
+						<Text>
+							<strong>{translateComponent('Login.demoEmailLabel')}:</strong> {DEMO_READONLY_EMAIL}
+						</Text>
+						<Text>
+							<strong>{translateComponent('Login.demoPasswordLabel')}:</strong>{' '}
+							{DEMO_READONLY_PASSWORD}
+						</Text>
+					</MessageBox>
 				</Box>
 			</Box>
 		</Box>

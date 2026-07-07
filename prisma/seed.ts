@@ -34,6 +34,20 @@ const SEED_SUBCATEGORY_MIN = 1;
 const SEED_SUBCATEGORY_MAX = 3;
 const SEED_PRODUCTS_PER_SUBCATEGORY_MIN = 1;
 const SEED_PRODUCTS_PER_SUBCATEGORY_MAX = 3;
+
+// Per-main-category overrides for categories that need a denser catalog than
+// the default random 1..SEED_SUBCATEGORY_MAX subset / SEED_PRODUCTS_PER_
+// SUBCATEGORY_MIN..MAX range every other category gets. Keyed by main
+// category name; a subcategory-count override always seeds *all* of that
+// category's subcategoriesMap entries deterministically (rather than a
+// random subset), since "generate N subcategories" only makes sense as an
+// exact count when N equals how many candidates are defined for it.
+const SUBCATEGORY_COUNT_OVERRIDES: Record<string, number> = {
+	Cameras: 6,
+};
+const PRODUCTS_PER_SUBCATEGORY_OVERRIDES_BY_MAIN: Record<string, { min: number; max: number }> = {
+	Cameras: { min: 8, max: 10 },
+};
 const SEEDED_IMAGE_SIZE = 1100;
 
 const generateUniqueProductCode = () => {
@@ -79,7 +93,14 @@ const subcategoriesMap: Record<string, string[]> = {
 	Tablets: ['Android Tablets', 'iPads'],
 	'Laptops & PCs': ['Laptops', 'Ultrabooks', 'Gaming Laptops', 'Desktops', 'Monitors'],
 	TVs: ['4K TVs', 'Smart TVs'],
-	Cameras: ['Mirrorless Cameras', 'Action Cameras'],
+	Cameras: [
+		'Mirrorless Cameras',
+		'Action Cameras',
+		'DSLR Cameras',
+		'Compact Cameras',
+		'Instant Cameras',
+		'Camera Drones',
+	],
 	Audio: ['Headphones', 'Speakers', 'Soundbars'],
 	Gaming: ['Consoles', 'Controllers', 'VR Headsets'],
 	Accessories: ['Chargers', 'Cables', 'Cases'],
@@ -120,6 +141,10 @@ const subcategoryUkMap: Record<string, string> = {
 	'Smart TVs': 'Смарт-телевізори',
 	'Mirrorless Cameras': 'Бездзеркальні камери',
 	'Action Cameras': 'Екшн-камери',
+	'DSLR Cameras': 'Дзеркальні камери',
+	'Compact Cameras': 'Компактні камери',
+	'Instant Cameras': 'Камери миттєвого друку',
+	'Camera Drones': 'Дрони з камерою',
 	Headphones: 'Навушники',
 	Speakers: 'Колонки',
 	Soundbars: 'Саундбари',
@@ -156,6 +181,10 @@ const productModelsBySubcategory: Record<string, string[]> = {
 	'Smart TVs': ['Smart HomeView', 'Smart Stream', 'Smart Horizon', 'Smart Vision'],
 	'Mirrorless Cameras': ['Lumina Mirrorless', 'Focus Mirrorless', 'Optic Pro', 'Frame X'],
 	'Action Cameras': ['Adventure Cam', 'Trail Cam', 'Motion Cam', 'Summit Cam'],
+	'DSLR Cameras': ['DSLR Vision', 'DSLR Pro', 'DSLR Max', 'DSLR Elite'],
+	'Compact Cameras': ['Compact Snap', 'Compact Pro', 'Compact Air', 'Compact Studio'],
+	'Instant Cameras': ['Instant Snap', 'Instant Pro', 'Instant Mini', 'Instant Studio'],
+	'Camera Drones': ['Drone Vision', 'Drone Pro', 'Drone Air', 'Drone Max'],
 	Headphones: ['Sound Wave', 'Quiet Studio', 'Bass Flow', 'Audio Pro'],
 	Speakers: ['Pulse Speaker', 'Home Speaker', 'Arena Speaker', 'Echo Speaker'],
 	Soundbars: ['Cinema Bar', 'Sound Bar Pro', 'Theater Bar', 'Studio Bar'],
@@ -219,6 +248,10 @@ const subcategoryImageKeywords: Record<string, string> = {
 	'Smart TVs': 'smart-tv',
 	'Mirrorless Cameras': 'mirrorless-camera',
 	'Action Cameras': 'action-camera',
+	'DSLR Cameras': 'dslr-camera',
+	'Compact Cameras': 'compact-camera',
+	'Instant Cameras': 'instant-camera',
+	'Camera Drones': 'camera-drone',
 	Chargers: 'device-charger',
 	Cables: 'charging-cable',
 	Headphones: 'headphones',
@@ -1221,6 +1254,11 @@ async function main() {
 	const pickSeedSubcategories = (main: string) => {
 		const candidates = subcategoriesMap[main] ?? [];
 		if (candidates.length === 0) return [];
+		const override = SUBCATEGORY_COUNT_OVERRIDES[main];
+		if (override !== undefined) {
+			const count = Math.min(override, candidates.length);
+			return faker.helpers.arrayElements(candidates, count);
+		}
 		const maxCount = Math.min(SEED_SUBCATEGORY_MAX, candidates.length);
 		const count = faker.number.int({ min: SEED_SUBCATEGORY_MIN, max: maxCount });
 		return faker.helpers.arrayElements(candidates, count);
@@ -1253,9 +1291,13 @@ async function main() {
 				await ensureAttributeSetForCategory(subcategory.id, main);
 				if (!SHOULD_GENERATE_SEED_PRODUCTS) continue;
 
-				const count = faker.number.int({
+				const productCountRange = PRODUCTS_PER_SUBCATEGORY_OVERRIDES_BY_MAIN[main] ?? {
 					min: SEED_PRODUCTS_PER_SUBCATEGORY_MIN,
 					max: SEED_PRODUCTS_PER_SUBCATEGORY_MAX,
+				};
+				const count = faker.number.int({
+					min: productCountRange.min,
+					max: productCountRange.max,
 				});
 				for (let i = 0; i < count; i++) {
 					const productSeed = `${main}-${sub}-${i}-${nanoid()}`;
@@ -1374,11 +1416,14 @@ async function main() {
 			);
 		}
 		const mainWithTooManySubcategories = seededMainCategoryRows
-			.filter((category) => category._count.children > SEED_SUBCATEGORY_MAX)
+			.filter((category) => {
+				const max = SUBCATEGORY_COUNT_OVERRIDES[category.name] ?? SEED_SUBCATEGORY_MAX;
+				return category._count.children > max;
+			})
 			.map((category) => category.name);
 		if (mainWithTooManySubcategories.length > 0) {
 			throw new Error(
-				`Each main category must have at most ${SEED_SUBCATEGORY_MAX} subcategories. Too many for: ${mainWithTooManySubcategories.join(
+				`Each main category must have at most its allotted number of subcategories (default ${SEED_SUBCATEGORY_MAX}, or its override in SUBCATEGORY_COUNT_OVERRIDES). Too many for: ${mainWithTooManySubcategories.join(
 					', ',
 				)}`,
 			);
@@ -1387,6 +1432,14 @@ async function main() {
 		const expectedSubcategoryNames = Array.from(
 			new Set(Array.from(generatedSubcategoriesByMain.values()).flat()),
 		);
+		const subcategoryMaxProductsByName = new Map<string, number>();
+		for (const [main, subs] of generatedSubcategoriesByMain.entries()) {
+			const max =
+				PRODUCTS_PER_SUBCATEGORY_OVERRIDES_BY_MAIN[main]?.max ?? SEED_PRODUCTS_PER_SUBCATEGORY_MAX;
+			for (const sub of subs) {
+				subcategoryMaxProductsByName.set(sub, max);
+			}
+		}
 		const seededSubcategoryRows = await prisma.productCategory.findMany({
 			where: { parentId: { not: null }, name: { in: expectedSubcategoryNames } },
 			select: {
@@ -1415,11 +1468,16 @@ async function main() {
 				);
 			}
 			const subcategoriesWithTooManyProducts = seededSubcategoryRows
-				.filter((subcategory) => subcategory._count.products > SEED_PRODUCTS_PER_SUBCATEGORY_MAX)
+				.filter((subcategory) => {
+					const max =
+						subcategoryMaxProductsByName.get(subcategory.name) ??
+						SEED_PRODUCTS_PER_SUBCATEGORY_MAX;
+					return subcategory._count.products > max;
+				})
 				.map((subcategory) => subcategory.name);
 			if (subcategoriesWithTooManyProducts.length > 0) {
 				throw new Error(
-					`Each subcategory must have at most ${SEED_PRODUCTS_PER_SUBCATEGORY_MAX} products. Too many for: ${subcategoriesWithTooManyProducts.join(
+					`Each subcategory must have at most its allotted number of products (default ${SEED_PRODUCTS_PER_SUBCATEGORY_MAX}, or its main category's override in PRODUCTS_PER_SUBCATEGORY_OVERRIDES_BY_MAIN). Too many for: ${subcategoriesWithTooManyProducts.join(
 						', ',
 					)}`,
 				);

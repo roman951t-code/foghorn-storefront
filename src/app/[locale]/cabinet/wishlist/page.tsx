@@ -1,7 +1,9 @@
+import { Suspense } from 'react';
 import WishList from '../_components/wishlist/WishList';
 import WishlistPagination from '../_components/wishlist/WishlistPagination';
 import { PRODUCTS_PER_PAGE, resolvePageParam, resolvePerPageParam } from '@/constants/pagination';
 import { getTranslations } from 'next-intl/server';
+import CabinetPageContentSkeleton from '@/components/ui/skeletons/CabinetPageContentSkeleton';
 
 type Props = {
 	searchParams?: Promise<{
@@ -10,7 +12,15 @@ type Props = {
 	}>;
 };
 
-export default async function Wishlist({ searchParams }: Props) {
+export default function Wishlist({ searchParams }: Props) {
+	return (
+		<Suspense fallback={<CabinetPageContentSkeleton />}>
+			<WishlistContent searchParams={searchParams} />
+		</Suspense>
+	);
+}
+
+async function WishlistContent({ searchParams }: Props) {
 	const [prodT, genT, wishT] = await Promise.all([
 		getTranslations('products'),
 		getTranslations('common'),

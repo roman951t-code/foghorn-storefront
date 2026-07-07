@@ -56,7 +56,7 @@ export async function getCatalog(locale: string = DEFAULT_LOCALE) {
 						},
 						where: { imageUrl: { not: null }, AND: [getPublishedProductWhere()] },
 						orderBy: { createdAt: 'desc' },
-						take: 5,
+						take: 10,
 					},
 				},
 			},
