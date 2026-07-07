@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
-import { Link, usePathname, useRouter } from '@/i18n/routing';
+import { Link, usePathname } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
+import { useTrackedNavigation } from '@/hooks/useTrackedNavigation';
+import LinkPendingReporter from '@/components/ui/nav/LinkPendingReporter';
 import {
 	ButtonGroup,
 	HStack,
@@ -32,7 +34,7 @@ export default function Pagination({
 	pageSizeParam = 'perPage',
 }: PaginationProps) {
 	const t = useTranslations('pagination');
-	const router = useRouter();
+	const { push } = useTrackedNavigation();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const [_, startTransition] = useTransition();
@@ -65,7 +67,7 @@ export default function Pagination({
 		);
 		const targetPage = Math.min(safePage, nextTotalPages);
 		startTransition(() => {
-			router.push(buildUrl(targetPage, normalized), { scroll: false });
+			push(buildUrl(targetPage, normalized), { scroll: false });
 		});
 	};
 
@@ -130,6 +132,7 @@ export default function Pagination({
 							</IconButton>
 						) : (
 							<Link href={prevHref} prefetch scroll={false}>
+								<LinkPendingReporter />
 								<IconButton as='span' aria-label='Previous' {...navButtonStyles}>
 									<LuChevronLeft />
 								</IconButton>
@@ -146,6 +149,7 @@ export default function Pagination({
 										prefetch
 										scroll={false}
 									>
+										<LinkPendingReporter />
 										<IconButton
 											as='span'
 											rounded='full'
@@ -188,6 +192,7 @@ export default function Pagination({
 							</IconButton>
 						) : (
 							<Link href={nextHref} prefetch scroll={false}>
+								<LinkPendingReporter />
 								<IconButton as='span' aria-label='Next' {...navButtonStyles}>
 									<LuChevronRight />
 								</IconButton>

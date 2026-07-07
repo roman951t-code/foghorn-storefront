@@ -3,6 +3,7 @@ import Breadcrumbs from '@/components/ui/links/Breadcrumbs';
 import { Heading, Stack } from '@chakra-ui/react';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { cacheLife } from 'next/cache';
 import { getCategoryBySlug } from '@/actions/products/getCategoryBySlug';
 import CategoryCards from './_components/CategoryCards';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
@@ -18,6 +19,9 @@ import { getCategoryStaticParams } from '@/actions/products/getCatalogStaticPara
 export const generateStaticParams = getCategoryStaticParams;
 
 export async function generateMetadata({ params }: CategoryParams): Promise<Metadata> {
+	'use cache';
+	cacheLife('hours');
+
 	const { category: categorySlug, locale } = ensureParams(categoryParamsSchema, await params);
 	const category = await getCategoryBySlug(categorySlug, locale);
 
@@ -26,7 +30,7 @@ export async function generateMetadata({ params }: CategoryParams): Promise<Meta
 	}
 	const categoryName = category.name;
 
-	const pagesT = await getTranslations('pages');
+	const pagesT = await getTranslations({ locale, namespace: 'pages' });
 	const title = pagesT('metadata.category', { category: categoryName });
 	const description = pagesT('metadata.categoryDescription', { category: categoryName });
 	const categoryImage =
@@ -99,7 +103,7 @@ export default async function CategoryPage({ params }: CategoryParams) {
 						{category.name}
 					</Heading>
 
-					<CategoryCards category={category} />
+					<CategoryCards category={category} locale={locale} />
 				</Stack>
 			</Stack>
 		</>

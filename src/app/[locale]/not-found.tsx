@@ -1,5 +1,13 @@
+import type { Metadata } from 'next';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
+
+// Prevent Google from indexing 404 responses as thin content. Also skips
+// following links from a not-found body — those links are just the "back to
+// home" affordance, which is already discoverable elsewhere.
+export const metadata: Metadata = {
+	robots: { index: false, follow: false },
+};
 
 export default function NotFoundPage() {
 	const t = useTranslations('pages');

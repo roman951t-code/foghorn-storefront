@@ -160,19 +160,15 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 								onClick={() => activateCategory(category)}
 								onFocus={() => activateCategory(category)}
 							>
-								<HStack gap={3} minW={0}>
+								<HStack gap={2.5} minW={0}>
 									<Box
-										w='3px'
-										h='20px'
+										w='4px'
+										h='22px'
 										rounded='lg'
-										bg={isHighlighted ? 'main.secondary' : 'transparent'}
+										bg={isHighlighted ? { base: 'orange.400', _dark: 'yellow.400' } : 'transparent'}
 										transition='background 0.16s ease-in-out'
 									/>
-									<Text
-										fontSize='md'
-										fontWeight={isHighlighted ? 'semibold' : 'medium'}
-										lineClamp={1}
-									>
+									<Text fontSize='md' fontWeight='semibold' lineClamp={1}>
 										{category.name}
 									</Text>
 								</HStack>

@@ -4,8 +4,14 @@ import { Wrap } from '@chakra-ui/react';
 import { resolveSubcategoryImage } from '@/utils/categoryImages';
 import { getTranslations } from 'next-intl/server';
 
-export default async function CategoryCards({ category }: { category: CatalogCategory }) {
-	const productsT = await getTranslations('products');
+export default async function CategoryCards({
+	category,
+	locale,
+}: {
+	category: CatalogCategory;
+	locale: string;
+}) {
+	const productsT = await getTranslations({ locale, namespace: 'products' });
 	const seeProductsLabel = productsT('seeProducts');
 
 	return (

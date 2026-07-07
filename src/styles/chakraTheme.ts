@@ -69,6 +69,11 @@ const config = defineConfig({
 		},
 		breakpoints: {
 			xs: '430px',
+			// Matches PRODUCTS_GRID_CSS's own 1-col -> 2-col threshold
+			// (src/constants/grids.ts) so ProductCard's mobile-vs-grid text/
+			// control sizing switches at the exact same width the grid stops
+			// rendering a full-width single card.
+			cardSm: '532px',
 			sm: '536px',
 			md: '768px',
 			lg: '960px',

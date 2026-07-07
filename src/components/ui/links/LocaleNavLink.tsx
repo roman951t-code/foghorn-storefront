@@ -6,6 +6,7 @@ import {
 import { Link } from '@/i18n/routing';
 import type { ReactNode } from 'react';
 import { PrimaryButton, SecondaryButton } from '../buttons/ActionButton';
+import LinkPendingReporter from '../nav/LinkPendingReporter';
 
 type LocaleLinkProps = Omit<ChakraLinkProps, 'href'> & {
 	href: string;
@@ -20,6 +21,7 @@ type LocaleButtonLinkProps = ButtonProps & {
 export function LocaleSearchLink({ href, children, ...props }: LocaleLinkProps) {
 	return (
 		<Link href={href}>
+			<LinkPendingReporter />
 			<ChakraLink
 				as='span'
 				transition='all .15s ease-in-out'
@@ -41,6 +43,7 @@ export function LocaleSearchLink({ href, children, ...props }: LocaleLinkProps) 
 export function LocaleNavLink({ href, children, ...props }: LocaleLinkProps) {
 	return (
 		<Link href={href}>
+			<LinkPendingReporter />
 			<ChakraLink
 				as='span'
 				fontSize={{ base: 'md', md: '14px' }}
@@ -63,6 +66,7 @@ export function LocaleNavLink({ href, children, ...props }: LocaleLinkProps) {
 export function LocaleNavButton({ href, children, ...props }: LocaleButtonLinkProps) {
 	return (
 		<Link href={href}>
+			<LinkPendingReporter />
 			<PrimaryButton {...props}>{children}</PrimaryButton>
 		</Link>
 	);
@@ -71,6 +75,7 @@ export function LocaleNavButton({ href, children, ...props }: LocaleButtonLinkPr
 export function LocaleNavSecButton({ href, children, ...props }: LocaleButtonLinkProps) {
 	return (
 		<Link href={href}>
+			<LinkPendingReporter />
 			<SecondaryButton {...props}>{children}</SecondaryButton>
 		</Link>
 	);

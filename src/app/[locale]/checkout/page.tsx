@@ -2,7 +2,7 @@ import { Flex, Group, Box, Heading } from '@chakra-ui/react';
 import CheckoutSteps from './_components/CheckoutSteps';
 import OrderInfo from './_components/OrderInfo';
 import { type Metadata } from 'next';
-import { getLocalizedMetadata } from '@/utils/i18nUtils';
+import { getLocalizedMetadata } from '@/utils/i18nServerUtils';
 import { getTranslations } from 'next-intl/server';
 import { LocaleParams } from '@/types/routing';
 import { getEnabledStorefrontForms } from '@/actions/storefront/getEnabledStorefrontForms';
@@ -17,8 +17,9 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 	});
 }
 
-export default async function Checkout() {
-	const productsT = await getTranslations('products');
+export default async function Checkout({ params }: LocaleParams) {
+	const { locale } = await params;
+	const productsT = await getTranslations({ locale, namespace: 'products' });
 	const checkoutForms = await getEnabledStorefrontForms(StorefrontFormPlacement.CHECKOUT);
 
 	return (

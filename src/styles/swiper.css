@@ -53,24 +53,67 @@
 }
 
 .productsSlider .productPreviewSwiper {
-	--product-preview-arrow-side-offset: 18%;
+	--product-preview-arrow-side-offset: 8px;
+	/* The arrow color itself is set imperatively in ProductPreviewSlider.tsx
+	   (onSwiper, inline style on the nav DOM nodes) — something else in this
+	   app's global CSS beats --swiper-navigation-color here in dark mode
+	   (confirmed even with a plain !important color rule), so this variable
+	   is kept only as a best-effort declarative fallback. White-on-black so
+	   the arrows read the same way over any photo in both color themes. */
+	--swiper-navigation-color: #fff;
+	/* Swiper centers the button via `top: 50%; margin-top: -(size/2)`, so
+	   this must match the actual width/height set below or centering drifts. */
+	--swiper-navigation-size: 30px;
 }
 .productsSlider .productPreviewSwiper .swiper-button-prev {
 	right: initial;
 	left: var(--product-preview-arrow-side-offset);
+	/* .productsSlider .swiper-button-prev (above) sets top: -30px for the
+	   *outer* row carousel's arrows, but that selector also matches these
+	   nested per-card preview arrows since they sit inside a .productsSlider
+	   ancestor too. Override back to vertically centered here. */
+	top: 90%;
 }
 .productsSlider .productPreviewSwiper .swiper-button-next {
 	right: var(--product-preview-arrow-side-offset);
 	left: initial;
+	top: 90%;
+}
+
+.productsSlider .productPreviewSwiper .swiper-button-prev,
+.productsSlider .productPreviewSwiper .swiper-button-next {
+	background: rgba(0, 0, 0, 0.6);
+	border-radius: 100%;
+	width: 28px;
+	height: 28px;
 }
 
 .productsSlider .productPreviewSwiper .swiper-button-prev svg {
-	height: 22;
-	width: 22;
+	height: 18px;
+	width: 18px;
 }
 .productsSlider .productPreviewSwiper .swiper-button-next svg {
-	height: 22;
-	width: 22;
+	height: 18px;
+	width: 18px;
+}
+
+/* Bigger, easier-to-tap arrows once a card is full-width (no room for a
+   second card in the row) — matches PRODUCTS_GRID_CSS/ProductCard's own
+   `cardSm` mobile breakpoint (theme.breakpoints, chakraTheme.ts: 533px). */
+@media (max-width: 532px) {
+	.productsSlider .productPreviewSwiper {
+		--swiper-navigation-size: 38px;
+	}
+	.productsSlider .productPreviewSwiper .swiper-button-prev,
+	.productsSlider .productPreviewSwiper .swiper-button-next {
+		width: 38px;
+		height: 38px;
+	}
+	.productsSlider .productPreviewSwiper .swiper-button-prev svg,
+	.productsSlider .productPreviewSwiper .swiper-button-next svg {
+		height: 24px;
+		width: 24px;
+	}
 }
 
 /* THUMBS SLIDER SWIPER */
@@ -124,5 +167,15 @@
 }
 
 .imageModalSwiper.swiper-grab-cursor .swiper-slide:active {
+	cursor: grabbing;
+}
+
+.productPreviewSwiper.swiper-grab-cursor,
+.productPreviewSwiper.swiper-grab-cursor .swiper-slide {
+	cursor: grab;
+}
+
+.productPreviewSwiper.swiper-grab-cursor:active,
+.productPreviewSwiper.swiper-grab-cursor .swiper-slide:active {
 	cursor: grabbing;
 }

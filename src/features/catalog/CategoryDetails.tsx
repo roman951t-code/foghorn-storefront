@@ -58,7 +58,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 						{subcategories.map((subcategory) => {
 							const subImage = resolveSubcategoryImage(
 								subcategory.imageUrl,
-								SUBCATEGORY_PLACEHOLDER_IMAGE
+								SUBCATEGORY_PLACEHOLDER_IMAGE,
 							);
 
 							return (
@@ -72,7 +72,16 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 									bg='bg.tertiary'
 									overflow='hidden'
 									transition='all 0.18s ease-in-out'
-									_hover={{ transform: 'translateY(-1px)', borderColor: 'main.secondary' }}
+									_hover={{
+										boxShadow: {
+											// Chakra's built-in shadow tokens are black-based, which barely
+											// shows up against this card's already-dark bg.tertiary in dark
+											// mode — use a light glow there instead so it's actually visible,
+											// with a higher opacity than light mode's shadow for more presence.
+											base: '0 1px 12px rgba(0, 0, 0, 0.22)',
+											_dark: '0 1px 12px rgba(169, 165, 172, 0.26)',
+										},
+									}}
 								>
 									<Box h='100px' position='relative'>
 										<PriorityImageWithFallback

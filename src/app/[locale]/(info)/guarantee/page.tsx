@@ -1,7 +1,7 @@
 import { Stack, Heading, Text } from '@chakra-ui/react';
 import guaranteesData from '@/data/staticPages/guarantees';
 import { type Metadata } from 'next';
-import { getLocalizedMetadata } from '@/utils/i18nUtils';
+import { getLocalizedMetadata } from '@/utils/i18nServerUtils';
 import { getTranslations } from 'next-intl/server';
 import { LocaleParams } from '@/types/routing';
 import { getPageBySlug } from '@/actions/content/getPageBySlug';
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 
 export default async function Guarantees({ params }: LocaleParams) {
 	const { locale } = await params;
-	const navigationT = await getTranslations('navigation');
+	const navigationT = await getTranslations({ locale, namespace: 'navigation' });
 	const page = await getPageBySlug('guarantee', locale);
 	const pageTitle = page?.title?.trim() || navigationT('sidebar.guarantee');
 	const content = page?.content ?? guaranteesData.content;

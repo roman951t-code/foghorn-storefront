@@ -339,14 +339,24 @@ export const useCartStore = createBoundedStore<CartStore>((set, get) => ({
 				return { success: false };
 			}
 
-			// If server created/updated a different cartItem.id, fetch fresh lines.
-			const fresh = await fetchCartFromApi();
-			if (fresh?.success) {
-				set({
-					cartData: { items: fresh.items },
-					productIds: uniqueProductIds(fresh.items),
-					isHydrated: true,
-				});
+			// Patch in the server's real cartItem id (and authoritative quantity)
+			// for this line instead of refetching the whole cart — the optimistic
+			// lineId above is a client-side placeholder that later remove/update-
+			// quantity calls can't look up on the server.
+			const serverItem = res.items?.find(
+				(i) => i.productId === productId && i.variantId === effectiveVariantId,
+			);
+			if (serverItem) {
+				set((state) => ({
+					cartData: {
+						...state.cartData,
+						items: state.cartData.items.map((i) =>
+							i.productId === productId && i.variantId === effectiveVariantId
+								? { ...i, lineId: serverItem.id, quantity: serverItem.quantity }
+								: i,
+						),
+					},
+				}));
 			}
 
 			return { success: true };

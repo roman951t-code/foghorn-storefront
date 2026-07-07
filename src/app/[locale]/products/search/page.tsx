@@ -48,8 +48,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const { searchQuery, tag } = resolvedSearch;
 	const { locale } = await params;
 	const [productsT, pagesT] = await Promise.all([
-		getTranslations('products'),
-		getTranslations('pages'),
+		getTranslations({ locale, namespace: 'products' }),
+		getTranslations({ locale, namespace: 'pages' }),
 	]);
 	const title = productsT('searchQueryResults', {
 		searchQuery: tag ? productsT(tag) : searchQuery || '',
@@ -104,8 +104,8 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 	} = searchData;
 
 	const [productsT, navigationT] = await Promise.all([
-		getTranslations('products'),
-		getTranslations('navigation'),
+		getTranslations({ locale, namespace: 'products' }),
+		getTranslations({ locale, namespace: 'navigation' }),
 	]);
 
 	const page = resolvePageParam(pageParam);

@@ -1,7 +1,7 @@
 import { Stack, Heading, Text } from '@chakra-ui/react';
 import privacyPolicy from '@/data/staticPages/privacyPolicy';
 import { type Metadata } from 'next';
-import { getLocalizedMetadata } from '@/utils/i18nUtils';
+import { getLocalizedMetadata } from '@/utils/i18nServerUtils';
 import { getTranslations } from 'next-intl/server';
 import { LocaleParams } from '@/types/routing';
 import { getPageBySlug } from '@/actions/content/getPageBySlug';
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 
 export default async function PrivacyPolicyPage({ params }: LocaleParams) {
 	const { locale } = await params;
-	const navigationT = await getTranslations('navigation');
+	const navigationT = await getTranslations({ locale, namespace: 'navigation' });
 	const page = await getPageBySlug('privacy-policy', locale);
 	const pageTitle = page?.title?.trim() || navigationT('sidebar.privacyPolicy');
 	const content = page?.content ?? privacyPolicy.content;

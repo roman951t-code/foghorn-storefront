@@ -108,8 +108,10 @@ export async function hydrateGuestWishlistItems(ids: string[]): Promise<Subcateg
 					.join(' / ')
 			: '';
 
+		const { variants: _variants, ...productWithoutVariants } = product;
+
 		return {
-			...product,
+			...productWithoutVariants,
 			basePrice,
 			discountPrice,
 			defaultVariant: defaultVariant

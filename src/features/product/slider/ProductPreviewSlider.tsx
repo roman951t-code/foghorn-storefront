@@ -8,6 +8,20 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 
 import { PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
+import { PRODUCTS_GRID_CARD_MAX_WIDTH_PX } from '@/constants/grids';
+
+// This slider renders inside every product card, including the widest one
+// (PRODUCTS_GRID_CSS's card band and the matching ProductsSlider phone
+// layout), so these hints have to match those cards' actual rendered width
+// or the browser fetches a too-small srcset candidate and upscales (blurs)
+// it. Below `cardSm` (533px) the card is full-width (see PRODUCTS_GRID_CSS's
+// single-column tier and ProductsSlider's uncapped phone width), so the
+// image is ~100vw minus the page's 24px side margin. Above that, column
+// count varies by page/breakpoint (2 to 4 columns depending on grid and
+// sidebar state — see grids.ts), so 48vw/32vw are deliberately generous
+// upper-bound estimates rather than an exact per-tier match: over-fetching
+// a bit is harmless, under-fetching blurs the image.
+const PRODUCT_IMAGE_SIZES = `(max-width: 532px) calc(100vw - 24px), (max-width: 1096px) 48vw, (max-width: 1344px) 32vw, (max-width: 1360px) ${PRODUCTS_GRID_CARD_MAX_WIDTH_PX}px, ${PRODUCTS_GRID_CARD_MAX_WIDTH_PX}px`;
 
 type ProductPreviewSliderProps = {
 	images: string[];
@@ -48,14 +62,30 @@ function ProductPreviewSwiper({
 	};
 	const altText = productName ? `${productName} photo` : 'Product photo';
 
+	// Something in the page's global CSS cascade sets `color` on these arrows
+	// with `!important` (confirmed: a plain, non-important inline style still
+	// lost to it), so the fix has to fight back with `!important` too rather
+	// than relying on swiper.css's --swiper-navigation-color variable. White
+	// icons on the dark, semi-opaque circle from swiper.css so they read the
+	// same way over any photo, in both light and dark theme.
+	const paintNavArrowsWhite = (swiper: { navigation?: { nextEl?: HTMLElement; prevEl?: HTMLElement } }) => {
+		const { nextEl, prevEl } = swiper.navigation ?? {};
+		nextEl?.style.setProperty('color', '#fff', 'important');
+		prevEl?.style.setProperty('color', '#fff', 'important');
+	};
+
 	return (
 		<Swiper
 			navigation
 			loop
+			grabCursor
 			modules={[Navigation]}
 			className='productPreviewSwiper'
 			style={{ width: '100%', height: '100%' }}
-			onSwiper={(swiper) => onActiveIndexChange?.(swiper.realIndex ?? 0)}
+			onSwiper={(swiper) => {
+				onActiveIndexChange?.(swiper.realIndex ?? 0);
+				paintNavArrowsWhite(swiper);
+			}}
 			onSlideChange={(swiper) => onActiveIndexChange?.(swiper.realIndex ?? 0)}
 		>
 			{previewImages.map((src, i) => {
@@ -70,19 +100,16 @@ function ProductPreviewSwiper({
 								outlineColor: 'main.secondary',
 								outlineOffset: '2px',
 							}}
-							border='none'
-							borderRadius='sm'
 							overflow='hidden'
 							display='block'
 							w='full'
 							h='full'
-							bg='white'
 						>
 							<Image
 								loading={shouldPrioritize ? 'eager' : 'lazy'}
 								src={resolvedSrc}
-								width={240}
-								height={220}
+								width={480}
+								height={440}
 								alt={altText}
 								onError={markImageFailed(i)}
 								priority={shouldPrioritize}
@@ -90,9 +117,9 @@ function ProductPreviewSwiper({
 								style={{
 									width: '100%',
 									height: '100%',
-									objectFit: 'contain',
+									objectFit: 'cover',
 								}}
-								sizes='(max-width: 560px) 60vw, (max-width: 800px) 32vw, (max-width: 1080px) 22vw, (max-width: 1360px) 160px, 148px'
+								sizes={PRODUCT_IMAGE_SIZES}
 							/>
 						</Box>
 					</SwiperSlide>
@@ -114,13 +141,7 @@ export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 	const shouldPrioritize = props.imagePriority ?? false;
 
 	return (
-		<Box
-			position='relative'
-			w={{ base: 'min(60vw, 196px)', sm: '164px', md: '156px', xl: '148px' }}
-			aspectRatio='1 / 1'
-			display='block'
-			mx='auto'
-		>
+		<Box position='relative' w='full' aspectRatio='240 / 220' display='block'>
 			<Box
 				as='div'
 				_focusVisible={{
@@ -128,21 +149,15 @@ export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 					outlineColor: 'main.secondary',
 					outlineOffset: '2px',
 				}}
-				borderWidth='0.5px'
-				borderStyle='solid'
-				borderColor='border'
-				borderRadius='sm'
-				overflow='hidden'
 				display='block'
 				w='full'
 				h='full'
-				bg='white'
 				aria-hidden='true'
 			>
 				<Image
 					src={firstPreview}
-					width={240}
-					height={220}
+					width={480}
+					height={440}
 					alt={altText}
 					priority={shouldPrioritize}
 					loading={shouldPrioritize ? 'eager' : 'lazy'}
@@ -150,9 +165,9 @@ export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 					style={{
 						width: '100%',
 						height: '100%',
-						objectFit: 'contain',
+						objectFit: 'cover',
 					}}
-					sizes='(max-width: 560px) 60vw, (max-width: 800px) 32vw, (max-width: 1080px) 22vw, (max-width: 1360px) 160px, 148px'
+					sizes={PRODUCT_IMAGE_SIZES}
 				/>
 			</Box>
 			<Box position='absolute' inset='0' zIndex={1}>

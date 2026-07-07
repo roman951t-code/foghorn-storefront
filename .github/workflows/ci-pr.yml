@@ -3,8 +3,9 @@ name: CI PR Checks
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-  push:
-    branches: [main]
+  # Pushes to main are handled by deploy-production.yml, which runs the same
+  # validate steps before triggering deploys. Running both here would just
+  # duplicate work and burn CI minutes.
 
 concurrency:
   group: ci-pr-${{ github.ref }}

@@ -94,14 +94,11 @@ function PromoCardSlide({
 			bg='bg.tertiary'
 			borderWidth='0.5px'
 			borderStyle='solid'
-			borderColor={{ base: 'border', _dark: 'border' }}
 			borderRadius='lg'
 			height='516px'
 			width='100%'
 			overflow='hidden'
-			boxShadow='none'
 			transition='border-color 0.2s ease-in-out'
-			_hover={{ borderColor: 'main.secondary' }}
 			role='group'
 			title={promo.text}
 		>
@@ -154,7 +151,7 @@ function PromoSlider({ promos }: PromoProps) {
 
 	return (
 		<Swiper
-			spaceBetween={6}
+			spaceBetween={10}
 			breakpoints={promoBreakpoints}
 			slidesPerView={1}
 			modules={[Autoplay, Mousewheel]}

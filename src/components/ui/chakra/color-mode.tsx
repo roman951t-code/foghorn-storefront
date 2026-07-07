@@ -4,6 +4,7 @@ import type { IconButtonProps } from '@chakra-ui/react';
 import { IconButton } from '@chakra-ui/react';
 import * as React from 'react';
 import { LuMoon, LuSun } from 'react-icons/lu';
+import { THEME_STORAGE_KEY as STORAGE_KEY } from '@/constants/theme';
 
 type ColorMode = 'light' | 'dark';
 type ColorModePreference = ColorMode | 'system';
@@ -18,7 +19,6 @@ interface ColorModeContextValue {
 	setColorMode: (theme: ColorModePreference) => void;
 }
 
-const STORAGE_KEY = 'theme';
 const ColorModeContext = React.createContext<ColorModeContextValue | null>(null);
 
 function getSystemColorMode(): ColorMode {
@@ -44,8 +44,16 @@ function getStoredPreference(defaultTheme: ColorModePreference): ColorModePrefer
 }
 
 export function ColorModeProvider({ children, defaultTheme = 'system' }: ColorModeProviderProps) {
-	const [preference, setPreference] = React.useState<ColorModePreference>(defaultTheme);
-	const [colorMode, setResolvedColorMode] = React.useState<ColorMode>('light');
+	// Lazy initializers: on the client these read the same storage the
+	// no-flash inline script (see layout.tsx) already used to set the class
+	// before paint, so this state matches the DOM from the first render
+	// instead of starting at 'light' and correcting itself post-mount.
+	const [preference, setPreference] = React.useState<ColorModePreference>(() =>
+		typeof window === 'undefined' ? defaultTheme : getStoredPreference(defaultTheme),
+	);
+	const [colorMode, setResolvedColorMode] = React.useState<ColorMode>(() =>
+		typeof window === 'undefined' ? 'light' : resolveColorMode(getStoredPreference(defaultTheme)),
+	);
 
 	React.useEffect(() => {
 		const storedPreference = getStoredPreference(defaultTheme);

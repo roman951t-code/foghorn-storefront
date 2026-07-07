@@ -1,5 +1,6 @@
-import { Box, Stack, Flex } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
+import { Suspense } from 'react';
+import { Box, Stack, Flex, Skeleton } from '@chakra-ui/react';
+import { getTranslations } from 'next-intl/server';
 import Sidebar from '../sidebar';
 import LocaleSwitcher from './LocaleSwitcher';
 import SearchInput from './SearchInput';
@@ -8,11 +9,18 @@ import UserActions from './UserActions';
 import Logo from './Logo';
 import { ColorModeButton } from '@/components/ui/chakra/color-mode';
 import { Toaster } from '@/components/ui/chakra/toaster';
+import type { AppLocale } from '@/constants/locales';
 
-export default function Header() {
-	const commonT = useTranslations('common');
-	const navT = useTranslations('navigation');
-	const prodT = useTranslations('products');
+// Takes `locale` as a prop rather than using next-intl's implicit
+// `useTranslations` (which resolves locale from request headers). Under
+// Cache Components, that implicit locale read counts as runtime data
+// access and opts the whole layout out of prerendering.
+export default async function Header({ locale }: { locale: AppLocale }) {
+	const [commonT, navT, prodT] = await Promise.all([
+		getTranslations({ locale, namespace: 'common' }),
+		getTranslations({ locale, namespace: 'navigation' }),
+		getTranslations({ locale, namespace: 'products' }),
+	]);
 
 	return (
 		<Box
@@ -54,8 +62,16 @@ export default function Header() {
 						categories={prodT('categories')}
 					/>
 					<Flex align='center' gap={4}>
-						<UserActions />
-						<LocaleSwitcher />
+						<Suspense
+							fallback={<Skeleton height='40px' width='96px' rounded='md' />}
+						>
+							<UserActions />
+						</Suspense>
+						<Suspense
+							fallback={<Skeleton height='36px' width='110px' rounded='sm' />}
+						>
+							<LocaleSwitcher />
+						</Suspense>
 						<ColorModeButton />
 					</Flex>
 				</Flex>

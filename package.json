@@ -9,7 +9,8 @@
 		"dev": "next dev",
 		"build": "npx prisma db seed && next build",
 		"start": "next start",
-		"postinstall": "prisma generate",
+		"postinstall": "prisma generate && npm run chakra:typegen",
+		"chakra:typegen": "chakra typegen ./src/styles/chakraTheme.ts",
 		"predev": "npm run db:generate",
 		"start:local:build": "npm run build && npm run start",
 		"preview:mobile": "node scripts/preview-mobile.cjs",
@@ -87,6 +88,7 @@
 		"zustand": "^5.0.13"
 	},
 	"devDependencies": {
+		"@chakra-ui/cli": "^3.36.0",
 		"@faker-js/faker": "^10.4.0",
 		"@types/express": "^5.0.6",
 		"@types/express-session": "^1.19.0",

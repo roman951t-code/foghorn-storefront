@@ -1,5 +1,5 @@
-import { Loading as PageLoading } from '@/components/ui/Skeleton';
+import CheckoutPageSkeleton from '@/components/ui/skeletons/CheckoutPageSkeleton';
 
 export default function Loading() {
-	return <PageLoading />;
+	return <CheckoutPageSkeleton />;
 }

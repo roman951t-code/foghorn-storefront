@@ -1,4 +1,4 @@
-import { Heading, Flex, FlexProps } from '@chakra-ui/react';
+import { Heading, Flex, FlexProps, Box } from '@chakra-ui/react';
 import ProductsSlider from '@/features/product/slider/ProductsSlider';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { getProductsByTag } from '@/actions/products/getProductsByTag';
@@ -46,17 +46,25 @@ export default async function ProductsSection({
 
 	return (
 		<Flex gap={6} direction='column' mt={28} {...restProps}>
-			<Heading fontWeight='medium'>
+			<Heading fontWeight='bold' display='flex' alignItems='center' gap='3'>
+				<Box
+					w='4px'
+					h='28px'
+					flexShrink={0}
+					rounded='full'
+					bg={{ base: 'orange.400', _dark: 'yellow.400' }}
+					mt='-1'
+				/>
 				<LocaleNavLink
 					href={href ?? `/products/search/?tag=${tag}`}
-					fontSize='24px'
-					variant='underline'
-					textUnderlineOffset='12px'
+					fontSize={{ base: '22px', md: '28px' }}
+					fontWeight='semibold'
+					letterSpacing='tight'
+					variant='plain'
 					textWrap='wrap'
 					wordBreak='break-all'
 					_hover={{
-						textDecorationColor: { base: 'orange', _dark: 'yellow' },
-						textDecorationThickness: '2px',
+						transform: 'translateX(2px)',
 					}}
 				>
 					{title}

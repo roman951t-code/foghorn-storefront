@@ -1,5 +1,5 @@
-import { Loading as PageLoading } from '@/components/ui/Skeleton';
+import CategoryPageSkeleton from '@/components/ui/skeletons/CategoryPageSkeleton';
 
 export default function Loading() {
-	return <PageLoading />;
+	return <CategoryPageSkeleton />;
 }

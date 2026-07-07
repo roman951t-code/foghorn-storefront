@@ -5,7 +5,9 @@ import { Metadata } from 'next';
 import { getProductBySlugCached } from '@/actions/products/getProductBySlug';
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
+import { cacheLife } from 'next/cache';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
+import type { AppLocale } from '@/constants/locales';
 import Script from 'next/script';
 import { ProductParams } from '@/types/routing';
 import { ensureParams } from '@/utils/validateParams';
@@ -29,6 +31,11 @@ export const generateStaticParams = getProductStaticParams;
 
 type Props = ProductParams & { searchParams: { tab?: string; image?: string } };
 
+// Two-layer generateMetadata: the outer body reads runtime data (`searchParams`)
+// and passes only the discrete values the cached inner helper needs. Awaiting
+// `searchParams` inside a `'use cache'` scope is a hard error under Cache
+// Components; extracting the value first sidesteps that while still caching
+// the assembled Metadata object per (slug, locale, tab).
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
 	const {
 		product: productSlug,
@@ -37,6 +44,32 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 		locale,
 	} = ensureParams(productParamsSchema, await params);
 	const resolvedSearch = ensureParams(productSearchParamsSchema, await searchParams);
+	const tab = resolvedSearch?.tab ?? null;
+
+	return buildProductMetadata({
+		productSlug,
+		category,
+		subcategory,
+		locale,
+		tab,
+	});
+}
+
+async function buildProductMetadata({
+	productSlug,
+	category,
+	subcategory,
+	locale,
+	tab,
+}: {
+	productSlug: string;
+	category: string;
+	subcategory: string;
+	locale: string;
+	tab: string | null;
+}): Promise<Metadata> {
+	'use cache';
+	cacheLife('hours');
 
 	const productData = await getProductBySlugCached(productSlug, locale);
 	if (!productData) notFound();
@@ -46,7 +79,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 		return url.startsWith('http') ? url : absoluteUrl(url);
 	};
 
-	const pagesT = await getTranslations('pages');
+	const pagesT = await getTranslations({ locale, namespace: 'pages' });
 	const defaultTitle = pagesT('metadata.product', { product: productData.name });
 	const defaultDescription = pagesT('metadata.productDescription', {
 		product: productData.name,
@@ -55,10 +88,10 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 	const title = productData.metaTitle ?? defaultTitle;
 	const description = productData.metaDescription ?? defaultDescription;
 	const alternates = buildLanguageAlternates(
-		locale,
+		locale as AppLocale,
 		`/products/${category}/${subcategory}/${productSlug}`,
 		{
-			...(resolvedSearch?.tab ? { tab: resolvedSearch.tab } : {}),
+			...(tab ? { tab } : {}),
 		},
 	);
 	const canonical = toAbsolute(productData.canonicalUrl) ?? alternates?.canonical;
@@ -103,7 +136,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 	const cspNonce = headersList.get('x-csp-nonce') ?? undefined;
 	const [productData, productsT, pagesT, subcategoryProductsData] = await Promise.all([
 		getProductBySlugCached(product, locale),
-		getTranslations('products'),
+		getTranslations({ locale, namespace: 'products' }),
 		getTranslations({ locale, namespace: 'pages' }),
 		getProductsBySubcategorySlug(
 			subcategory,

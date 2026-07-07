@@ -23,8 +23,10 @@ import CollapsibleLinks from './CollapsibleLinks';
 import { DeleteAccount } from './DeleteAccount';
 import { ASSET_IMAGES } from '@/constants/assets';
 
+// logoBig.webp's real dimensions are 210x40 (5.25:1); at height 36 that's
+// width 189, not 170 — see src/components/layout/header/Logo.tsx.
 const logoHeight = 36;
-const logoWidth = 170;
+const logoWidth = 189;
 
 function Logo({ onClick }: { onClick?: () => void }) {
 	return (

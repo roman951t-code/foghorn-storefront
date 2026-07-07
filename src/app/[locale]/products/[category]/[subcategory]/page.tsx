@@ -22,12 +22,14 @@ import {
 } from '@/constants/pagination';
 import { SUBCATEGORY_FILTER_EXCLUDED_KEYS } from '@/constants/products';
 import { absoluteUrl, buildLanguageAlternates, localizePath } from '@/utils/seo';
+import type { AppLocale } from '@/constants/locales';
 import Script from 'next/script';
 import { ProductFiltersSearchParams, SubcategoryParams } from '@/types/routing';
 import { ensureParams } from '@/utils/validateParams';
 import { subcategoryParamsSchema } from 'validationSchemas/productParamsSchemas';
 import CountPill from '@/components/ui/CountPill';
 import { headers } from 'next/headers';
+import { cacheLife } from 'next/cache';
 import { getSubcategoryStaticParams } from '@/actions/products/getCatalogStaticParams';
 
 // Route intent: SSR per filter params; product and filter data stay cached in tagged actions.
@@ -37,18 +39,15 @@ type Props = SubcategoryParams & {
 	searchParams: ProductFiltersSearchParams;
 };
 
+// Two-layer generateMetadata: the outer body reads runtime `searchParams`
+// (illegal inside a 'use cache' scope) and forwards only the two derived
+// values the cached inner helper needs — whether any indexable filter is set
+// and the current page number. The inner helper caches per (slug, locale,
+// canonicalPage, hasFilteringParams).
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
 	const { category, subcategory, locale } = ensureParams(subcategoryParamsSchema, await params);
 	const resolvedSearch = await searchParams;
 
-	const subcategoryData = await getSubcategoryNameBySlug(subcategory, locale);
-	if (!subcategoryData) notFound();
-
-	const pagesT = await getTranslations('pages');
-	const title = pagesT('metadata.category', { category: subcategoryData.subcategoryName });
-	const description = pagesT('metadata.categoryDescription', {
-		category: subcategoryData.subcategoryName,
-	});
 	const hasFilteringParams = Object.entries(resolvedSearch ?? {}).some(([key, value]) => {
 		if (key === 'page' || key === 'perPage') return false;
 		if (Array.isArray(value)) return value.some(Boolean);
@@ -58,10 +57,45 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 		Array.isArray(resolvedSearch?.page) ? resolvedSearch.page[0] : (resolvedSearch?.page ?? '1'),
 		10,
 	);
-	const canonicalSearchParams =
-		Number.isFinite(parsedPage) && parsedPage > 1 ? { page: `${parsedPage}` } : undefined;
-	const alternates = buildLanguageAlternates(
+	const canonicalPage = Number.isFinite(parsedPage) && parsedPage > 1 ? parsedPage : null;
+
+	return buildSubcategoryMetadata({
+		category,
+		subcategory,
 		locale,
+		hasFilteringParams,
+		canonicalPage,
+	});
+}
+
+async function buildSubcategoryMetadata({
+	category,
+	subcategory,
+	locale,
+	hasFilteringParams,
+	canonicalPage,
+}: {
+	category: string;
+	subcategory: string;
+	locale: string;
+	hasFilteringParams: boolean;
+	canonicalPage: number | null;
+}): Promise<Metadata> {
+	'use cache';
+	cacheLife('hours');
+
+	const subcategoryData = await getSubcategoryNameBySlug(subcategory, locale);
+	if (!subcategoryData) notFound();
+
+	const pagesT = await getTranslations({ locale, namespace: 'pages' });
+	const title = pagesT('metadata.category', { category: subcategoryData.subcategoryName });
+	const description = pagesT('metadata.categoryDescription', {
+		category: subcategoryData.subcategoryName,
+	});
+	const canonicalSearchParams =
+		canonicalPage != null ? { page: `${canonicalPage}` } : undefined;
+	const alternates = buildLanguageAlternates(
+		locale as AppLocale,
 		`/products/${category}/${subcategory}`,
 		canonicalSearchParams,
 	);
@@ -99,8 +133,8 @@ export default async function Subcategory({ params, searchParams }: Props) {
 	const offset = resolveOffset(page, pageSize);
 
 	const [productsT, navigationT, pagesT] = await Promise.all([
-		getTranslations('products'),
-		getTranslations('navigation'),
+		getTranslations({ locale, namespace: 'products' }),
+		getTranslations({ locale, namespace: 'navigation' }),
 		getTranslations({ locale, namespace: 'pages' }),
 	]);
 	const homeLabel = pagesT('main.title');

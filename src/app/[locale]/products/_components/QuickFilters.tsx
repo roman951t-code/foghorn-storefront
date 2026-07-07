@@ -4,11 +4,12 @@ import { Box, Flex, Text, VStack, type RadioGroupValueChangeDetails } from '@cha
 import { useTranslations } from 'next-intl';
 import PriceSlider from './PriceSlider';
 import { Radio, RadioGroup } from '@/components/ui/chakra/radio';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useTrackedNavigation } from '@/hooks/useTrackedNavigation';
 
 export default function QuickFilters({ maxProductPrice }: { maxProductPrice: number }) {
 	const t = useTranslations('products');
-	const router = useRouter();
+	const { push } = useTrackedNavigation();
 	const searchParams = useSearchParams();
 
 	const updateParams = (key: string, value?: string) => {
@@ -18,7 +19,7 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 		} else {
 			params.delete(key);
 		}
-		router.push(`?${params.toString()}`, { scroll: false });
+		push(`?${params.toString()}`, { scroll: false });
 	};
 
 	const handleOrderByChange = (e: RadioGroupValueChangeDetails) => {

@@ -94,6 +94,7 @@ export async function addToCart(item: AddToCartItem | AddToCartItem[]) {
 			);
 
 			let added = 0;
+			const updatedItems: { id: string; productId: string; variantId: string | null; quantity: number }[] = [];
 
 			for (const it of uniqueItems) {
 				const product = productMap.get(it.productId);
@@ -136,6 +137,12 @@ export async function addToCart(item: AddToCartItem | AddToCartItem[]) {
 						...existing,
 						quantity: nextQty,
 					});
+					updatedItems.push({
+						id: existing.id,
+						productId: it.productId,
+						variantId: effectiveVariantId,
+						quantity: nextQty,
+					});
 				} else {
 					const created = await tx.cartItem.create({
 						data: {
@@ -151,15 +158,23 @@ export async function addToCart(item: AddToCartItem | AddToCartItem[]) {
 						variantId: effectiveVariantId,
 						quantity: nextQty,
 					});
+					updatedItems.push({
+						id: created.id,
+						productId: it.productId,
+						variantId: effectiveVariantId,
+						quantity: nextQty,
+					});
 				}
 
 				added += 1;
 			}
 
-			return added > 0;
+			return { added, updatedItems };
 		});
 
-		return result ? { success: true } : { success: false, message: cartT('cartUpdateFailed') };
+		return result.added > 0
+			? { success: true, items: result.updatedItems }
+			: { success: false, message: cartT('cartUpdateFailed') };
 	} catch (error) {
 		return { success: false, message: cartT('cartUpdateFailed') };
 	}

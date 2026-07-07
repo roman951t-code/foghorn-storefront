@@ -3,7 +3,8 @@ import CatalogPanel from '@/features/catalog/CatalogPanel';
 import ProductsSection from '@/features/catalog/ProductsSection';
 import SubscribeSection from '@/components/ui/sections/SubscribeSection';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
-import { extractI18nData, getLocalizedMetadata } from '@/utils/i18nUtils';
+import { extractI18nData } from '@/utils/i18nUtils';
+import { getLocalizedMetadata } from '@/utils/i18nServerUtils';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import {
@@ -24,10 +25,10 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 export default async function Main({ params }: LocaleParams) {
 	const { locale } = await params;
 	const [genT, prodT, authT, validT, promoCards] = await Promise.all([
-		getTranslations('common'),
-		getTranslations('products'),
-		getTranslations('auth'),
-		getTranslations('validation'),
+		getTranslations({ locale, namespace: 'common' }),
+		getTranslations({ locale, namespace: 'products' }),
+		getTranslations({ locale, namespace: 'auth' }),
+		getTranslations({ locale, namespace: 'validation' }),
 		getPromoCards('promo', locale),
 	]);
 

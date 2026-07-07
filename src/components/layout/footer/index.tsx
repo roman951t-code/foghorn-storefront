@@ -1,9 +1,14 @@
 import { Box, Flex, Text, Link, Group } from '@chakra-ui/react';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import MediaContacts from '@/components/ui/links/MediaContacts';
+import type { AppLocale } from '@/constants/locales';
 
-export default function Footer() {
-	const t = useTranslations('common');
+// Takes `locale` as a prop rather than using next-intl's implicit
+// `useTranslations` (which resolves locale from request headers). Under
+// Cache Components, that implicit locale read counts as runtime data
+// access and opts the whole layout out of prerendering.
+export default async function Footer({ locale }: { locale: AppLocale }) {
+	const t = await getTranslations({ locale, namespace: 'common' });
 
 	return (
 		<Box

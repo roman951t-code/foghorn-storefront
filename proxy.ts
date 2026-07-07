@@ -279,16 +279,34 @@ const resolveStableCspNonce = () => {
 const CSP_NONCE = resolveStableCspNonce();
 const generateCspNonce = () => CSP_NONCE;
 
+// Google's recommended CSP3 hardening template. The trick is that CSP3-aware
+// browsers ignore host-list sources ('self', https:, etc.) inside script-src
+// as soon as they see 'strict-dynamic' — they will only trust the nonced
+// bootstrap script and scripts it (transitively) loads. Older browsers that
+// don't understand 'strict-dynamic' fall back to the legacy sources
+// ('unsafe-inline' + https:), so the policy still ships something usable.
+// See https://web.dev/articles/strict-csp.
+//
+// 'unsafe-eval' is required because Sentry's browser SDK uses new Function()
+// (Session Replay's CSS-to-matcher compiler, and some source-map parsing).
+// Restricting to 'wasm-unsafe-eval' is not enough — the replay build fires
+// eval-style code even when replay itself is off. Removing 'unsafe-eval'
+// would silently break error/replay reporting in production.
+//
+// The Sentry ingest hostname is wildcarded (*.sentry.io covers every region:
+// standard, .de, .us, ...) so a Sentry project region change never breaks
+// error reporting.
 const buildBaseCspDirectives = (nonce: string) => [
 	"default-src 'self'",
-	`script-src 'self' 'nonce-${nonce}' https://js.stripe.com`,
+	`script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval' https: https://js.stripe.com`,
 	"script-src-attr 'none'",
-	`style-src 'self' 'nonce-${nonce}' https:`,
+	`style-src 'self' 'nonce-${nonce}' https: 'unsafe-inline'`,
 	"style-src-attr 'unsafe-inline'",
 	"img-src 'self' data: blob: https:",
 	"font-src 'self' data:",
-	"connect-src 'self' https://api.stripe.com",
+	"connect-src 'self' https://api.stripe.com https://*.sentry.io",
 	"frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+	"worker-src 'self' blob:",
 	"object-src 'none'",
 	"base-uri 'self'",
 	"form-action 'self'",
@@ -354,10 +372,105 @@ const applyCspHeaders = (response: NextResponse, cspContext: CspContext | null) 
 	return response;
 };
 
-// Unified middleware: locale routing + CSRF guard for API mutations
+// Path fragments that identify common vulnerability scanners (Nikto, Nessus,
+// Nuclei, wpscan, various sec-list mass probes). None of these are legitimate
+// URLs in a Next.js + Prisma app, so short-circuiting to a 404 here saves an
+// RSC render/DB lookup and denies the scanner useful signal about what stack
+// we're running. Match is case-insensitive and matches any URL that CONTAINS
+// the fragment (path OR query), so `?file=.env` is also caught.
+const EXPLOIT_PROBE_FRAGMENTS: readonly string[] = [
+	'/.env',
+	'/.git/',
+	'/.svn/',
+	'/.DS_Store',
+	'/wp-admin',
+	'/wp-login',
+	'/wp-content',
+	'/wp-includes',
+	'/xmlrpc.php',
+	'/phpmyadmin',
+	'/phpinfo',
+	'/pma/',
+	'/sqlmanager',
+	'/admin.php',
+	'/administrator/',
+	'/vendor/phpunit',
+	'/.aws/',
+	'/.docker/',
+	'/.ssh/',
+	'/config.json',
+	'/composer.json',
+	'/composer.lock',
+	'/backup.sql',
+	'/backup.zip',
+	'/database.sql',
+	'/dump.sql',
+	'.env.production',
+	'.env.local',
+	'/actuator/',
+	'/api/v1/env',
+	'/api/v1/secrets',
+];
+
+const isExploitProbePath = (pathname: string, search: string) => {
+	const haystack = (pathname + search).toLowerCase();
+	for (const fragment of EXPLOIT_PROBE_FRAGMENTS) {
+		if (haystack.includes(fragment)) return true;
+	}
+	// Path traversal attempts, including percent-encoded ones, on any route.
+	if (haystack.includes('..%2f') || haystack.includes('%2e%2e/') || haystack.includes('/../')) {
+		return true;
+	}
+	return false;
+};
+
+// Upper bound for the length of the URL + query string. Real storefront URLs
+// (including deeply-filtered category listings) never approach this — buffer
+// overflow / ReDoS probes routinely do.
+const MAX_URL_LENGTH = 4096;
+// Upper bound for the declared request body size. Next.js has its own default
+// (~4 MB) but declaring an explicit ceiling short-circuits obvious garbage
+// before it even reaches the route handler.
+const MAX_REQUEST_BODY_BYTES = 4 * 1024 * 1024;
+
+// Unified middleware: locale routing + CSRF guard for API mutations, plus a
+// small code-level WAF layer sitting above Vercel/Render's platform-level
+// DDoS protection. See docs/universal-app-doc.md for the full rationale.
 export default async function middleware(request: NextRequest) {
 	const { pathname, search } = request.nextUrl;
 	const cspContext = pathname.startsWith('/api') ? null : buildCspContext(request);
+
+	// Fast 404 for vulnerability-scanner probes. Placed before host allowlist so
+	// the scanner never learns whether its Host header matched — same 404 for
+	// wrong host or probe URL, no fingerprinting signal.
+	if (isExploitProbePath(pathname, search)) {
+		return new NextResponse('Not Found', {
+			status: 404,
+			headers: { 'Cache-Control': 'no-store' },
+		});
+	}
+
+	// Absurdly long URL — reject before any downstream regex/router work.
+	if (request.nextUrl.href.length > MAX_URL_LENGTH) {
+		return new NextResponse('URI Too Long', {
+			status: 414,
+			headers: { 'Cache-Control': 'no-store' },
+		});
+	}
+
+	// Declared body over the ceiling — no route in this app expects this much.
+	// The Stripe webhook posts JSON well under 100 KB; catalog imports go
+	// through the AdminJS host, not this middleware.
+	const contentLengthHeader = request.headers.get('content-length');
+	if (contentLengthHeader) {
+		const declaredLength = Number.parseInt(contentLengthHeader, 10);
+		if (Number.isFinite(declaredLength) && declaredLength > MAX_REQUEST_BODY_BYTES) {
+			return new NextResponse('Payload Too Large', {
+				status: 413,
+				headers: { 'Cache-Control': 'no-store' },
+			});
+		}
+	}
 
 	if (
 		env.NODE_ENV === 'production' &&

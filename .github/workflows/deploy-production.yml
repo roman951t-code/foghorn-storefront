@@ -1,0 +1,171 @@
+name: Deploy Production
+
+# Full CI + CD for pushes to main. Replaces the GitLab pipeline defined in
+# .gitlab-ci.yml. To get a single Vercel deploy per push, disable Vercel's git
+# integration for the production branch (Settings → Git → Production Branch →
+# change to a non-existent branch) so this workflow's deploy-hook call is the
+# only trigger.
+#
+# Job graph:
+#   validate  (lint + test + build against a real Postgres service)
+#     └── migrate  (applies Prisma migrations to the real prod DB)
+#           ├── deploy-storefront  (POSTs to Vercel deploy hook)
+#           ├── deploy-admin       (POSTs to Render deploy hook)
+#           └── smoke              (waits for both deploys, curls live URLs)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ci_build_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ci_build_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/ci_build_db
+      NEXT_PUBLIC_APP_URL: https://store.example.com
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+      NEXT_PUBLIC_SENTRY_DSN: ''
+      NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE: '0'
+      NEXT_PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE: '0'
+      NEXT_PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE: '0'
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      BETTER_AUTH_SECRET: ci_auth_secret_placeholder_32chars_abc
+      ENCRYPTION_KEY: '0000000000000000000000000000000000000000000000000000000000000000'
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+      RESEND_API_KEY: ci_placeholder
+      EMAIL_FROM: Online Store <no-reply@example.com>
+      CACHE_REVALIDATE_SECRET: ci_cache_secret_1234567890abcdef
+      CRON_SECRET: ci_cron_secret_1234567890abcdef
+      UPSTASH_REDIS_REST_URL: https://placeholder.upstash.io
+      UPSTASH_REDIS_REST_TOKEN: ci_placeholder
+      CSP_REPORT_ONLY: 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps --include=dev
+
+      - name: Apply migrations to CI database
+        run: npm run db:migrate:deploy
+
+      - name: Lint + typecheck
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build (same command Vercel runs)
+        run: npm run build
+
+  migrate:
+    runs-on: ubuntu-latest
+    needs: validate
+    timeout-minutes: 10
+    # Use GitHub Environments to add a required-reviewer gate here if you
+    # want prod schema changes to require a manual approval click; without
+    # one configured this job runs automatically after validate passes.
+    environment:
+      name: production
+    env:
+      NODE_ENV: production
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps --include=dev
+
+      - name: Apply Prisma migrations to production database
+        run: npm run db:migrate:deploy
+
+  deploy-storefront:
+    runs-on: ubuntu-latest
+    needs: migrate
+    timeout-minutes: 5
+    environment:
+      name: production
+      url: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+    env:
+      VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trigger Vercel deploy
+        run: bash scripts/deploy-vercel.sh
+
+  deploy-admin:
+    runs-on: ubuntu-latest
+    needs: migrate
+    timeout-minutes: 5
+    environment:
+      name: production
+      url: ${{ secrets.ADMINJS_PUBLIC_URL }}
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trigger Render deploy
+        run: bash scripts/deploy-render.sh
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: [deploy-storefront, deploy-admin]
+    timeout-minutes: 10
+    # allow_failure equivalent — smoke failures are informational, not a gate.
+    continue-on-error: true
+    env:
+      NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+      ADMINJS_PUBLIC_URL: ${{ secrets.ADMINJS_PUBLIC_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run smoke test
+        run: bash scripts/smoke-test.sh

@@ -2,7 +2,18 @@
 import { useId, useState } from 'react';
 import { FiHeart, FiShoppingCart } from 'react-icons/fi';
 import { useTranslations } from 'next-intl';
-import { IconButton, Text, Flex, HStack, Card, Badge, LinkBox, Link, Icon, Box } from '@chakra-ui/react';
+import {
+	IconButton,
+	Text,
+	Flex,
+	HStack,
+	Card,
+	Badge,
+	LinkBox,
+	Link,
+	Icon,
+	Box,
+} from '@chakra-ui/react';
 import ProductPreviewSlider from '../slider/ProductPreviewSlider';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { Rating } from '@/components/ui/chakra/rating';
@@ -13,7 +24,6 @@ import { useWishList } from '@/hooks/useWishList';
 import { SubcategoryProduct } from '@/types/product';
 import { buildProductImageGallery } from '@/utils/productImages';
 import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
-import { BsBagCheck, BsBagHeart } from 'react-icons/bs';
 
 export type CardProduct = SubcategoryProduct & {
 	imageUrl?: string | null;
@@ -29,6 +39,36 @@ type Props = {
 	product: CardProduct;
 	imagePriority?: boolean;
 };
+
+// Floating action button over the product image: white icon on a dark,
+// translucent circle by default so it reads over any photo, switching to a
+// solid colored circle once the product is in that state (in cart / wished).
+function ImageActionButton({
+	active,
+	activeColor,
+	...rest
+}: {
+	active: boolean;
+	activeColor: string;
+} & Omit<React.ComponentProps<typeof IconButton>, 'variant' | 'colorPalette'>) {
+	return (
+		<IconButton
+			variant='plain'
+			// Bigger on phones (44px, the standard minimum touch-target size)
+			// where this card fills the full screen width; back to the more
+			// compact 40px once a multi-column grid has room constraints.
+			size={{ base: 'lg', cardSm: 'md' }}
+			rounded='full'
+			zIndex={2}
+			bg={active ? activeColor : 'blackAlpha.600'}
+			color='white'
+			backdropFilter='blur(8px)'
+			transition='all 0.2s ease-in-out'
+			_hover={{ bg: active ? activeColor : 'blackAlpha.700' }}
+			{...rest}
+		/>
+	);
+}
 
 export default function ProductCard({ product, imagePriority = false }: Props) {
 	const t = useTranslations('products');
@@ -57,8 +97,8 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 	const cartButtonLabel = !isInStock
 		? `${t('productIsOutOfStock')}: ${name}`
 		: isInCart
-		? `${cartT('removeFromCart')}: ${name}`
-		: `${cartT('addToCart')}: ${name}`;
+			? `${cartT('removeFromCart')}: ${name}`
+			: `${cartT('addToCart')}: ${name}`;
 	const wishlistButtonLabel = isInWishlist
 		? `${wishT('removeFromWishlist')}: ${name}`
 		: `${wishT('addToWishlist')}: ${name}`;
@@ -124,84 +164,103 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 			colorPalette={{ base: 'orange', _dark: 'yellow' }}
 			w='full'
 			h='full'
-			minW='204px'
-			borderWidth='0.5px'
+			borderWidth='1px'
 			borderStyle='solid'
 			borderColor='border'
-			rounded='md'
+			rounded='xl'
 			overflow='hidden'
-			bg={isInStock ? 'bg.tertiary' : 'gray.100/10'}
-			opacity={isInStock ? '1' : '.9'}
-			transition='all 0.25s ease-in-out'
+			bg='bg.tertiary'
+			transition='box-shadow 0.2s ease-in-out'
 			_hover={{
-				borderColor: { base: 'orange', _dark: 'yellow' },
-				boxShadow: 'md',
+				boxShadow: {
+					// Chakra's built-in shadow tokens are black-based, which barely
+					// shows up against this card's already-dark bg.tertiary in dark
+					// mode — use a light glow there instead so it's actually visible,
+					// with a higher opacity than light mode's shadow for more presence.
+					base: '0 1px 22px rgba(0, 0, 0, 0.22)',
+					_dark: '0 1px 26px rgba(177, 175, 179, 0.26)',
+				},
 			}}
 		>
+			{/* Full-bleed image with floating actions/nav — the title link below
+			    is the only thing that navigates, matching the earlier fix that
+			    stopped image clicks from also opening the product. */}
+			<Box position='relative' w='full'>
+				<ProductPreviewSlider
+					images={previewImages}
+					productName={name}
+					imagePriority={imagePriority}
+				/>
+
+				<ImageActionButton
+					active={isInCart}
+					activeColor='green.600'
+					loading={isLoading}
+					onClick={isInCart ? removeFromCart : addToCart}
+					aria-label={cartButtonLabel}
+					aria-pressed={isInCart}
+					disabled={!isInStock}
+					position='absolute'
+					top='2'
+					left='2'
+				>
+					<Icon size={{ base: 'lg', cardSm: 'md' }} aria-hidden='true'>
+						<FiShoppingCart />
+					</Icon>
+				</ImageActionButton>
+
+				<ImageActionButton
+					active={isInWishlist}
+					activeColor='red.500'
+					onClick={isInWishlist ? removeFromWishList : addToWishList}
+					aria-label={wishlistButtonLabel}
+					aria-pressed={isInWishlist}
+					position='absolute'
+					top='2'
+					right='2'
+				>
+					<Icon size={{ base: 'lg', cardSm: 'md' }} aria-hidden='true'>
+						<FiHeart />
+					</Icon>
+				</ImageActionButton>
+
+				{!isInStock && (
+					<Flex
+						position='absolute'
+						inset='0'
+						zIndex={1}
+						align='center'
+						justify='center'
+						bg='blackAlpha.600'
+					>
+						<Badge
+							variant='solid'
+							bg='gray.800'
+							color='white'
+							rounded='full'
+							px='3'
+							fontWeight='semibold'
+						>
+							{t('productIsOutOfStock')}
+						</Badge>
+					</Flex>
+				)}
+			</Box>
+
 			<Flex
 				direction='column'
-				gap={2}
-				p={{ base: 3, md: 2.5 }}
-				h='full'
+				gap='2'
+				p={{ base: 4, cardSm: 2.5 }}
+				flex='1'
 				justifyContent='space-between'
 			>
-				<Flex align='center' justifyContent='space-between'>
-					<IconButton
-						loading={isLoading}
-						onClick={isInCart ? removeFromCart : addToCart}
-						aria-label={cartButtonLabel}
-						aria-pressed={isInCart}
-						variant='ghost'
-						disabled={!isInStock}
-						rounded='md'
-						colorPalette='green'
-						color={{ base: 'colorPalette.600', _dark: 'colorPalette.400' }}
-						transition='all 0.2s ease-in-out'
-						_hover={{
-							bg: 'colorPalette.600',
-							color: 'main.lightOnly',
-						}}
-					>
-						<Icon size='md' aria-hidden='true'>
-							{isInCart ? <BsBagCheck /> : <FiShoppingCart />}
-						</Icon>
-					</IconButton>
-
-					<IconButton
-						onClick={isInWishlist ? removeFromWishList : addToWishList}
-						aria-label={wishlistButtonLabel}
-						aria-pressed={isInWishlist}
-						variant='ghost'
-						rounded='md'
-						colorPalette='red'
-						color='colorPalette.400'
-						transition='all 0.2s ease-in-out'
-						_hover={{
-							bg: 'colorPalette.400',
-							color: 'main.lightOnly',
-						}}
-					>
-						<Icon size='md' aria-hidden='true'>
-							{isInWishlist ? <BsBagHeart /> : <FiHeart />}
-						</Icon>
-					</IconButton>
-				</Flex>
-
-				<Box display='block'>
-					<ProductPreviewSlider
-						images={previewImages}
-						productName={name}
-						imagePriority={imagePriority}
-					/>
-				</Box>
-
-				<LinkBox mt='1' textAlign='left'>
-					<Card.Title fontWeight='medium' w='100%' as='span'>
+				<LinkBox>
+					<Card.Title fontWeight='semibold' w='100%' as='span'>
 						<LocaleNavLink
 							href={`/products/${fullSlug}`}
 							textDecorationColor='main'
 							color='main'
-							fontSize={{ base: 'md', lg: '15px' }}
+							fontSize={{ base: '18px', cardSm: '16px' }}
 							lineHeight='1.35'
 							display='-webkit-box'
 							overflow='hidden'
@@ -213,57 +272,53 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 						>
 							{name}
 						</LocaleNavLink>
-
-						{!isInStock && (
-							<Text color='main' fontSize='md' mt='2'>
-								{t('productIsOutOfStock')}
-							</Text>
-						)}
 					</Card.Title>
+				</LinkBox>
 
+				<Flex align='baseline' justify='space-between' gap='2' wrap='wrap'>
 					<Text
 						color='main'
-						fontSize={{ base: 'lg', lg: 'sm' }}
-						fontWeight='medium'
-						mt='1.5'
+						fontSize={{ base: '22px', cardSm: '20px' }}
+						fontWeight='semibold'
 						textWrap='wrap'
 						textAlign='left'
 					>
 						{formatUsdPrice(displayPrice)}
-						{discount > 0 && (
-							<Text
-								as='span'
-								pl='2'
-								color='main'
-								fontSize={{ base: 'md', md: 'sm' }}
-								textDecoration='line-through'
-							>
-								{formatUsdPrice(basePrice)}
-								<Badge
-									variant='solid'
-									color='black'
-									bg='main.secondary'
-									fontWeight='medium'
-									ml='8px'
-								>
-									-{formatUsdPrice(discount)}
-								</Badge>
-							</Text>
-						)}
 					</Text>
-				</LinkBox>
+					{discount > 0 && (
+						<Text
+							color='main'
+							fontSize={{ base: '17px', cardSm: '16px' }}
+							textDecoration='line-through'
+							textAlign='right'
+						>
+							{formatUsdPrice(basePrice)}
+							<Badge
+								as='span'
+								variant='solid'
+								color='black'
+								bg='main.secondary'
+								fontWeight='medium'
+								textDecoration='none'
+								ml='8px'
+							>
+								-{formatUsdPrice(discount)}
+							</Badge>
+						</Text>
+					)}
+				</Flex>
 
-				<HStack gap='2' mt='1' justifyContent='flex-start' flexWrap='wrap'>
+				<HStack gap='2' justifyContent='flex-start' flexWrap='wrap'>
 					<Rating
 						id={`product-card-rating-${product.id}-${ratingId}`}
 						readOnly
-						size='xs'
+						size={{ base: 'sm', cardSm: 'xs' }}
 						defaultValue={product.averageRating ?? 0}
 					/>
 					<Link
 						href={`/products/${fullSlug}/?tab=feedback`}
 						variant='underline'
-						fontSize={{ base: 'md', md: 'sm' }}
+						fontSize={{ base: '16px', cardSm: '15px' }}
 						aria-label={`${t('feedback')} (${product.reviewCount ?? 0}) — ${name}`}
 						color='main'
 						_focusVisible={{

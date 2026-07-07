@@ -1,7 +1,8 @@
 'use client';
 import { HStack, Tag, Wrap } from '@chakra-ui/react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useTrackedNavigation } from '@/hooks/useTrackedNavigation';
 import { FILTER_TAG_EXCLUDED_KEYS } from '@/constants/products';
 import type { Filter } from '@/types/product';
 import { localizeUnit } from '@/utils/unitLocalization';
@@ -14,7 +15,7 @@ type Props = {
 
 export default function FiltersTags({ filters }: Props) {
 	const searchParams = useSearchParams();
-	const router = useRouter();
+	const { push } = useTrackedNavigation();
 	const t = useTranslations('products');
 	const locale = useLocale();
 
@@ -42,7 +43,7 @@ export default function FiltersTags({ filters }: Props) {
 			params.delete(key);
 		}
 
-		router.push(`?${params.toString()}`);
+		push(`?${params.toString()}`);
 	};
 
 	let orderBy = t('new');
@@ -76,7 +77,7 @@ export default function FiltersTags({ filters }: Props) {
 		const params = new URLSearchParams(searchParams.toString());
 		params.delete('min');
 		params.delete('max');
-		router.push(`?${params.toString()}`);
+		push(`?${params.toString()}`);
 	};
 
 	return (

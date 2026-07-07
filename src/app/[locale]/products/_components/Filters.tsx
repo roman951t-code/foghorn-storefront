@@ -11,8 +11,9 @@ import { Filter } from '@/types/product';
 import CountPill from '@/components/ui/CountPill';
 import { Box, CheckboxGroup, Fieldset, HStack, Text } from '@chakra-ui/react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
+import { useTrackedNavigation } from '@/hooks/useTrackedNavigation';
 import { localizeUnit } from '@/utils/unitLocalization';
 import { localizeAttributeName } from '@/utils/attributeLocalization';
 
@@ -21,7 +22,7 @@ type Props = {
 };
 
 export default function Filters({ filters }: Props) {
-	const router = useRouter();
+	const { push } = useTrackedNavigation();
 	const searchParams = useSearchParams();
 	const t = useTranslations('products');
 	const locale = useLocale();
@@ -34,9 +35,9 @@ export default function Filters({ filters }: Props) {
 
 			values.forEach((value) => params.append(key, value));
 
-			router.push(`?${params.toString()}`, { scroll: false });
+			push(`?${params.toString()}`, { scroll: false });
 		},
-		[router, searchParams],
+		[push, searchParams],
 	);
 
 	if (!filters || filters.length === 0) {

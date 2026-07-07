@@ -42,6 +42,13 @@ export function AppStoreHydrator({
 	const mergeGuestWish = useWishListStore((state) => state.mergeGuestWishlistIntoServer);
 
 	const prevLoggedInRef = useRef<boolean | null>(null);
+	// GuestShell always passes empty cart/wishlist props (real data comes
+	// from fetchServerCart/fetchServerWish below), and router.refresh() after
+	// merge/fetch re-renders it with new-but-still-empty prop objects. Without
+	// this guard, the seed effects below would fire again on that refresh and
+	// wipe the real, just-fetched cart/wishlist back to empty.
+	const didInitCartRef = useRef(false);
+	const didInitWishRef = useRef(false);
 	const sessionContext = useOptionalSession();
 	const session = sessionContext?.session;
 	const currentUserId = session?.user?.id ?? null;
@@ -87,8 +94,9 @@ export function AppStoreHydrator({
 
 	// Cart init + login flag
 	useLayoutEffect(() => {
-		if (!resolvedIsLoggedIn) return;
+		if (!resolvedIsLoggedIn || didInitCartRef.current) return;
 
+		didInitCartRef.current = true;
 		const ids = cartProductIds?.success ? (cartProductIds.productIds ?? []) : [];
 		setCartInitial(cartData, ids);
 	}, [cartData, cartProductIds, resolvedIsLoggedIn, setCartInitial]);
@@ -99,8 +107,9 @@ export function AppStoreHydrator({
 
 	// Wishlist init + login flag
 	useLayoutEffect(() => {
-		if (!resolvedIsLoggedIn) return;
+		if (!resolvedIsLoggedIn || didInitWishRef.current) return;
 
+		didInitWishRef.current = true;
 		const ids = wishListIds?.success ? (wishListIds.productIds ?? []) : [];
 		setWishInitial(wishListData, ids);
 	}, [resolvedIsLoggedIn, setWishInitial, wishListData, wishListIds]);
@@ -148,6 +157,8 @@ export function AppStoreHydrator({
 					router.refresh();
 				});
 		} else if (wasLogged && !resolvedIsLoggedIn) {
+			didInitCartRef.current = false;
+			didInitWishRef.current = false;
 			hydrateGuestCart();
 			hydrateGuestWish();
 		}
@@ -176,6 +187,8 @@ export function AppStoreHydrator({
 		}
 
 		if (!currentUserId && prevUserId) {
+			didInitCartRef.current = false;
+			didInitWishRef.current = false;
 			setCartLoggedIn(false);
 			setWishLoggedIn(false);
 			hydrateGuestCart();
