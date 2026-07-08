@@ -23,15 +23,21 @@ import CollapsibleLinks from './CollapsibleLinks';
 import { DeleteAccount } from './DeleteAccount';
 import { ASSET_IMAGES } from '@/constants/assets';
 
-// logoBig.webp's real dimensions are 210x40 (5.25:1); at height 36 that's
-// width 189, not 170 — see src/components/layout/header/Logo.tsx.
+// Each variant's width is derived from its own real pixel dimensions at a
+// fixed 36px height — see src/components/layout/header/Logo.tsx for why
+// that's not shared across variants, and why the light/dark swap is done
+// with _dark instead of a JS color-mode check.
 const logoHeight = 36;
-const logoWidth = 189;
 
 function Logo({ onClick }: { onClick?: () => void }) {
 	return (
 		<Link href='/' onClick={onClick}>
-			<Image src={ASSET_IMAGES.logoBig} width={logoWidth} height={logoHeight} alt='logo' />
+			<Box _dark={{ display: 'none' }}>
+				<Image src={ASSET_IMAGES.logoBigLight} width={208} height={logoHeight} alt='logo' />
+			</Box>
+			<Box display='none' _dark={{ display: 'block' }}>
+				<Image src={ASSET_IMAGES.logoBigDark} width={208} height={logoHeight} alt='logo' />
+			</Box>
 		</Link>
 	);
 }
@@ -93,7 +99,7 @@ export default function SidePanel() {
 					<Box flex='1' overflowY='auto' display='flex' flexDirection='column' height='100dvh'>
 						<Box
 							px={6}
-							my={4}
+							my={6}
 							h='100%'
 							overflowY='auto'
 							display='flex'
@@ -114,11 +120,7 @@ export default function SidePanel() {
 								userName={session?.user?.name ?? undefined}
 							/>
 
-							{session?.session && (
-								<Box mt='auto'>
-									<DeleteAccount onCloseAction={onClose} />
-								</Box>
-							)}
+							{session?.session && <DeleteAccount onCloseAction={onClose} />}
 						</Box>
 
 						<DrawerFooter bg='bg.secondary' mt='auto'>

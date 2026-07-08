@@ -32,7 +32,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 		<Flex
 			flex='1'
 			minW={0}
-			h='516px'
+			h='572px'
 			bg='bg.tertiary'
 			overflow='hidden'
 			rounded='lg'
@@ -65,7 +65,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 									<Flex direction='column' align='flex-start' gap='2.5' mb='2'>
 										<Link href={subcategoryHref}>
 											<Box
-												w='140px'
+												w='132px'
 												h='90px'
 												flexShrink={0}
 												position='relative'
@@ -171,7 +171,7 @@ export default function CategoryDetails({ category, i18nData }: Props) {
 					// which — as an absolutely positioned element — sized and
 					// positioned itself against CatalogPanel's outer relative Flex
 					// (the nearest positioned ancestor, two levels up) rather than
-					// this component's own 516px-tall box: flush against that
+					// this component's own 572px-tall box: flush against that
 					// ancestor's padding *edge* (ignoring its p='2' padding) on top/
 					// right, and 16px taller than its real parent so it reached that
 					// ancestor's own bottom edge (clipped there by this component's

@@ -1,4 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#111827"/>
-  <path d="M20 22h24v4H20zM20 30h24v4H20zM20 38h14v4H20z" fill="#F9FAFB"/>
+  <defs>
+    <linearGradient id="bg" x1="4" y1="2" x2="60" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#272838"/>
+      <stop offset="1" stop-color="#12131d"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
+
+  <path class="beam" d="M36 18 L60 5 L60 31 Z" fill="#ffb020"/>
+
+  <path d="M26 50 L29 18 L35 18 L38 50 Z" fill="#f5f7fa"/>
+  <rect x="25" y="13" width="14" height="8" rx="1.5" fill="#f5f7fa"/>
+  <path d="M23.5 13 L32 4 L40.5 13 Z" fill="#f5f7fa"/>
+
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .beam { fill: #2fd6d6; }
+    }
+  </style>
 </svg>

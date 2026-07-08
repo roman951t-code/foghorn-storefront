@@ -35,9 +35,9 @@ export default function manifest(): MetadataRoute.Manifest {
 				purpose: 'any',
 			},
 			{
-				src: '/assets/images/logoBig.webp',
-				sizes: 'any',
-				type: 'image/webp',
+				src: '/apple-touch-icon.png',
+				sizes: '180x180',
+				type: 'image/png',
 				purpose: 'any',
 			},
 		],

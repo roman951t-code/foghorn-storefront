@@ -83,6 +83,8 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 	const name = product.name ?? '';
 	const isInStock = product.inStock ?? false;
 	const discount = hasDiscount ? rawDiscount : 0;
+	const reviewCount = product.reviewCount ?? 0;
+	const hasReviews = reviewCount > 0;
 	const ratingId = useId();
 
 	const [isLoading, setIsLoading] = useState(false);
@@ -308,7 +310,7 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 					)}
 				</Flex>
 
-				<HStack gap='2' justifyContent='flex-start' flexWrap='wrap'>
+				<HStack mt='1.5' gap='2' justifyContent='flex-start' flexWrap='wrap'>
 					<Rating
 						id={`product-card-rating-${product.id}-${ratingId}`}
 						readOnly
@@ -318,8 +320,12 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 					<Link
 						href={`/products/${fullSlug}/?tab=feedback`}
 						variant='underline'
-						fontSize={{ base: '16px', cardSm: '15px' }}
-						aria-label={`${t('feedback')} (${product.reviewCount ?? 0}) — ${name}`}
+						fontSize='15px'
+						aria-label={
+							hasReviews
+								? `${t('feedback')} (${reviewCount}) — ${name}`
+								: `${t('leaveReview')} — ${name}`
+						}
 						color='main'
 						_focusVisible={{
 							outline: '2px solid',
@@ -327,7 +333,7 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 							outlineOffset: '2px',
 						}}
 					>
-						{t('feedback')} ({product.reviewCount ?? 0})
+						{hasReviews ? `${t('feedback')} (${reviewCount})` : t('leaveReview')}
 					</Link>
 				</HStack>
 			</Flex>

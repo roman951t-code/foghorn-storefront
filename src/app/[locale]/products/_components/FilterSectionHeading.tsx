@@ -1,7 +1,7 @@
 import { Box, HStack, Text } from '@chakra-ui/react';
 import type { ReactNode } from 'react';
 
-export const FILTER_ACCENT = { base: 'orange.400', _dark: 'yellow.400' };
+export const FILTER_ACCENT = { base: 'gray.800', _dark: 'white' };
 
 // Small "eyebrow" heading — a colored accent bar + bold label — reused for
 // every filter-sidebar section (sort, availability, price) so they read as
@@ -12,10 +12,10 @@ export const FILTER_ACCENT = { base: 'orange.400', _dark: 'yellow.400' };
 export default function FilterSectionHeading({ children }: { children: ReactNode }) {
 	return (
 		<HStack gap={2} mb={3}>
-			<Box w='4px' h='16px' rounded='full' bg={FILTER_ACCENT} />
+			<Box w='4px' h='16px' rounded='full' bg='orange.400' />
 			<Text
 				fontSize='xs'
-				fontWeight='bold'
+				fontWeight='semibold'
 				letterSpacing='wide'
 				textTransform='uppercase'
 				color='main'

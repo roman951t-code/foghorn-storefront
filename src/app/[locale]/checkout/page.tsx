@@ -1,4 +1,5 @@
-import { Flex, Group, Box, Heading } from '@chakra-ui/react';
+import { Flex, Group, Box } from '@chakra-ui/react';
+import PageHeading from '@/components/ui/PageHeading';
 import CheckoutSteps from './_components/CheckoutSteps';
 import OrderInfo from './_components/OrderInfo';
 import { type Metadata } from 'next';
@@ -24,9 +25,7 @@ export default async function Checkout({ params }: LocaleParams) {
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<Heading as='h1' size='2xl' fontWeight='medium'>
-				{productsT('orderProcessing')}
-			</Heading>
+			<PageHeading size='2xl'>{productsT('orderProcessing')}</PageHeading>
 			<Group justifyContent='space-between' align='flex-start' gapX='4'>
 				<Box as='section' flex='1'>
 					<CheckoutSteps />

@@ -95,7 +95,7 @@ function PromoCardSlide({
 			borderWidth='0.5px'
 			borderStyle='solid'
 			borderRadius='lg'
-			height='516px'
+			height='572px'
 			width='100%'
 			overflow='hidden'
 			transition='border-color 0.2s ease-in-out'

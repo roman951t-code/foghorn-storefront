@@ -18,6 +18,7 @@ export default function TabsList() {
 			flexWrap='wrap'
 			justifyContent='center'
 			w='full'
+			colorPalette='gray'
 		>
 			{CABINET_TABS.map((tab) => {
 				const IconComponent = tab.icon;

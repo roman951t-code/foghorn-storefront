@@ -105,6 +105,7 @@ export default function AboutTab({
 		unitDiscountPrice != null ? roundPrice(Math.max(0, unitBasePrice - unitDiscountPrice)) : 0;
 
 	const galleryImages = buildProductImageGallery(product.imageUrl, product.images, 4);
+	const hasReviews = reviewCount > 0;
 
 	const paymentOptions: DetailOption[] = [
 		{ key: 'paypal', label: checkoutT('payment.paypal'), icon: <RiPaypalFill /> },
@@ -140,7 +141,7 @@ export default function AboutTab({
 						initialIndex={initialImageIndex}
 					/>
 				</Box>
-				<VStack gap='2' alignItems='flex-start'>
+				<VStack w='full' gap='2' alignItems='flex-start'>
 					<Heading as='h1' size={{ base: '2xl', sm: '3xl' }} fontWeight='medium'>
 						{product.name}
 					</Heading>
@@ -186,50 +187,30 @@ export default function AboutTab({
 							onChange={(id) => setSelectedVariantId(id)}
 						/>
 					)}
-					<Flex flexWrap='wrap' alignItems='center' gap='4' my='3'>
-						{selectedInStock ? (
-							<AddToCartButton
-								i18nData={cartI18nData}
-								product={product}
-								variantId={selectedVariant?.id ?? null}
-							/>
-						) : (
-							<LocaleNavButton
-								href={`/products/${category}/${subcategory}?search=similar`}
-								w='200px'
-							>
-								<Icon size='lg'>
-									<MdOutlineManageSearch />
-								</Icon>
-								{prodT('lookSimilar')}
-							</LocaleNavButton>
-						)}
-
-						<Box as='span' fontSize='2xl' fontWeight='semibold'>
-							{formatUsdPrice(unitEffectivePrice)}
-							{discount > 0 && (
-								<Badge colorPalette='gray'>
-									<Box
-										as='span'
-										color='main'
-										fontSize={{ base: 'md', md: 'sm' }}
-										textDecoration='line-through'
+					<HStack mt='4' alignItems='center' fontSize='2xl' fontWeight='semibold'>
+						{formatUsdPrice(unitEffectivePrice)}
+						{discount > 0 && (
+							<Badge colorPalette='gray' bg='transparent' mt='1'>
+								<Box
+									as='span'
+									color='main'
+									fontSize={{ base: 'md', md: 'sm' }}
+									textDecoration='line-through'
+								>
+									{formatUsdPrice(unitBasePrice)}
+									<Badge
+										variant='solid'
+										fontWeight='medium'
+										color='black'
+										bg='main.secondary'
+										marginLeft='12px'
 									>
-										{formatUsdPrice(unitBasePrice)}
-										<Badge
-											variant='solid'
-											fontWeight='medium'
-											color='black'
-											bg='main.secondary'
-											marginLeft='12px'
-										>
-											-{formatUsdPrice(discount)}
-										</Badge>
-									</Box>
-								</Badge>
-							)}
-						</Box>
-					</Flex>
+										-{formatUsdPrice(discount)}
+									</Badge>
+								</Box>
+							</Badge>
+						)}
+					</HStack>
 
 					<HStack gap='4'>
 						<Rating
@@ -258,9 +239,29 @@ export default function AboutTab({
 								}
 							}}
 						>
-							{prodT('feedback')} ({reviewCount})
+							{hasReviews ? `${prodT('feedback')} (${reviewCount})` : prodT('leaveReview')}
 						</Link>
 					</HStack>
+					<Box mt='4'>
+						{selectedInStock ? (
+							<AddToCartButton
+								i18nData={cartI18nData}
+								product={product}
+								variantId={selectedVariant?.id ?? null}
+							/>
+						) : (
+							<LocaleNavButton
+								href={`/products/${category}/${subcategory}?search=similar`}
+								w='200px'
+							>
+								<Icon size='lg'>
+									<MdOutlineManageSearch />
+								</Icon>
+								{prodT('lookSimilar')}
+							</LocaleNavButton>
+						)}
+					</Box>
+
 					<ProductDetails
 						paymentTitle={prodT('payment')}
 						shipmentTitle={prodT('shipment')}

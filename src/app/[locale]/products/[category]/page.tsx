@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Breadcrumbs from '@/components/ui/links/Breadcrumbs';
-import { Heading, Stack } from '@chakra-ui/react';
+import PageHeading from '@/components/ui/PageHeading';
+import { Stack } from '@chakra-ui/react';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { cacheLife } from 'next/cache';
@@ -99,9 +100,7 @@ export default async function CategoryPage({ params }: CategoryParams) {
 				<Breadcrumbs categoryName={category?.name} categorySlug={category?.slug} />
 
 				<Stack gapY='8'>
-					<Heading as='h1' size='3xl' fontWeight='medium'>
-						{category.name}
-					</Heading>
+					<PageHeading size='3xl'>{category.name}</PageHeading>
 
 					<CategoryCards category={category} locale={locale} />
 				</Stack>

@@ -48,7 +48,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 			clearTimeout(hoverTimeout.current);
 			hoverTimeout.current = null;
 		}
-		// setActiveCategory(null);
+		setActiveCategory(null);
 	};
 
 	const activateCategory = (category: CatalogCategory) => {
@@ -81,7 +81,7 @@ export default function CatalogPanel({ i18nData, promoCards }: Props) {
 			<VStack
 				minW='280px'
 				w='280px'
-				h='516px'
+				h='572px'
 				align='stretch'
 				gap={1}
 				rounded='lg'

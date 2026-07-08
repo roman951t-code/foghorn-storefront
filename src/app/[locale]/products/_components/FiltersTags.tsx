@@ -9,6 +9,26 @@ import { localizeUnit } from '@/utils/unitLocalization';
 import { formatUsdPrice } from '@/utils/priceFormatting';
 import { localizeAttributeName } from '@/utils/attributeLocalization';
 
+// Active filters read as accent-tinted "chips" — the same accent border/bg
+// treatment a checked row gets in the filters sidebar (QuickFilters.tsx,
+// Filters.tsx) — so a tag here visually reads as "this came from a filter
+// you set," and closing it maps back to unchecking that same control.
+const chipStyle = {
+	variant: 'solid' as const,
+	size: 'lg' as const,
+	fontWeight: 'medium',
+	rounded: 'full',
+	bg: 'bg.tertiary',
+	color: 'main',
+	transition: 'all .15s ease-in-out',
+	px: '4',
+	py: '1.5',
+	borderWidth: '0.5px',
+	borderStyle: 'solid' as const,
+	borderColor: 'orange.400',
+	_hover: { cursor: 'pointer' as const, bg: 'bgHover.promoCard' },
+};
+
 type Props = {
 	filters?: Filter[] | null;
 };
@@ -67,10 +87,7 @@ export default function FiltersTags({ filters }: Props) {
 		const labels = new Map<string, string>();
 		filter.values.forEach((val) => labels.set(val.value, val.label));
 		valueLabelByKey.set(filter.key, labels);
-		unitByKey.set(
-			filter.key,
-			filter.key === 'brand' ? null : localizeUnit(filter.unit, locale)
-		);
+		unitByKey.set(filter.key, filter.key === 'brand' ? null : localizeUnit(filter.unit, locale));
 	});
 
 	const clearFilters = () => {
@@ -84,22 +101,8 @@ export default function FiltersTags({ filters }: Props) {
 		<Wrap gap='4'>
 			<HStack wrap='wrap' gap='3'>
 				{isPriceRangeSet && (
-					<Tag.Root
-						variant='solid'
-						size='lg'
-						fontWeight='medium'
-						bg='bg.tertiary'
-						color='main'
-						transition='all .15s ease-in-out'
-						px='4'
-						py='1.5'
-						borderWidth='0.5px'
-						borderStyle='solid'
-						borderColor='border'
-					>
-						<Tag.Label>
-							{`${toPriceTag(minPrice)} – ${toPriceTag(maxPrice)}`}
-						</Tag.Label>
+					<Tag.Root {...chipStyle}>
+						<Tag.Label>{`${toPriceTag(minPrice)} – ${toPriceTag(maxPrice)}`}</Tag.Label>
 						<Tag.EndElement onClick={clearFilters}>
 							<Tag.CloseTrigger cursor='pointer' aria-label={t('clearFilters')} />
 						</Tag.EndElement>
@@ -107,19 +110,7 @@ export default function FiltersTags({ filters }: Props) {
 				)}
 
 				{inStockFilter && (
-					<Tag.Root
-						variant='solid'
-						size='lg'
-						fontWeight='medium'
-						bg='bg.tertiary'
-						color='main'
-						transition='all .15s ease-in-out'
-						px='4'
-						py='1.5'
-						borderWidth='0.5px'
-						borderStyle='solid'
-						borderColor='border'
-					>
+					<Tag.Root {...chipStyle}>
 						<Tag.Label>
 							{inStockFilter === 'true' ? t('productIsPresent') : t('productIsOutOfStock')}
 						</Tag.Label>
@@ -133,19 +124,7 @@ export default function FiltersTags({ filters }: Props) {
 				)}
 
 				{orderByFilter && (
-					<Tag.Root
-						variant='solid'
-						size='lg'
-						fontWeight='medium'
-						bg='bg.tertiary'
-						color='main'
-						transition='all .15s ease-in-out'
-						px='4'
-						py='1.5'
-						borderWidth='0.5px'
-						borderStyle='solid'
-						borderColor='border'
-					>
+					<Tag.Root {...chipStyle}>
 						<Tag.Label>{orderBy}</Tag.Label>
 						<Tag.EndElement onClick={() => clearParam('orderBy')}>
 							<Tag.CloseTrigger cursor='pointer' aria-label={t('clearFilters')} />
@@ -154,23 +133,9 @@ export default function FiltersTags({ filters }: Props) {
 				)}
 
 				{dynamicFilters.map(({ key, value }) => (
-					<Tag.Root
-						key={`${key}-${value}`}
-						variant='solid'
-						size='lg'
-						fontWeight='medium'
-						bg='bg.tertiary'
-						color='main'
-						transition='all .15s ease-in-out'
-						px='4'
-						py='1.5'
-						borderWidth='0.5px'
-						borderStyle='solid'
-						borderColor='border'
-					>
+					<Tag.Root key={`${key}-${value}`} {...chipStyle}>
 						<Tag.Label>
-							{filterLabelByKey.get(key) ?? key}:{' '}
-							{valueLabelByKey.get(key)?.get(value) ?? value}
+							{filterLabelByKey.get(key) ?? key}: {valueLabelByKey.get(key)?.get(value) ?? value}
 							{unitByKey.get(key) ? ` ${unitByKey.get(key)}` : ''}
 						</Tag.Label>
 						<Tag.EndElement onClick={() => clearParam(key, value)}>

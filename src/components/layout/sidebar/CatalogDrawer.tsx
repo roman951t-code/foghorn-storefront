@@ -11,8 +11,8 @@ import {
 	Box,
 	VStack,
 	Heading,
-	Wrap,
-	Badge,
+	Flex,
+	Stack,
 	HStack,
 	Text,
 	SimpleGrid,
@@ -21,6 +21,7 @@ import {
 } from '@chakra-ui/react';
 import { DrawerActionTrigger } from '@/components/ui/chakra/drawer';
 import { LocaleNavLink, LocaleNavSecButton } from '@/components/ui/links/LocaleNavLink';
+import { Link } from '@/i18n/routing';
 import { useCatalog } from '@/providers/CatalogProvider';
 import { BsChevronRight } from 'react-icons/bs';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
@@ -33,11 +34,21 @@ import {
 	resolveSubcategoryImage,
 } from '@/utils/categoryImages';
 
+// Fixed px, not a percentage: the image sits inside a Link whose only content
+// is next/image's absolutely-positioned `fill` <img>, which contributes no
+// intrinsic size. A percentage width can't resolve on a flex item sized by
+// shrink-to-fit (any align other than 'stretch'), so it collapses to ~0 —
+// matching this to the item's own flex-basis below still reads as "fills the
+// item" while staying a length the shrink-to-fit algorithm can use.
+const MOBILE_SUBCATEGORY_ITEM_WIDTH_PX = 200;
+
 export default function CatalogDrawer() {
 	const t = useTranslations('common');
 	const productsT = useTranslations('products');
 	const { categories } = useCatalog();
-	const categoriesWithChildren = categories.filter((category) => (category.children?.length ?? 0) > 0);
+	const categoriesWithChildren = categories.filter(
+		(category) => (category.children?.length ?? 0) > 0,
+	);
 
 	const [openValues, setOpenValues] = useState<string[]>([]);
 
@@ -124,8 +135,7 @@ export default function CatalogDrawer() {
 						>
 							<AccordionItemTrigger
 								cursor='pointer'
-								px={{ base: 3, md: 4 }}
-								py={{ base: 4, md: 6 }}
+								p='3.5'
 								bg='bg.tertiary'
 								transition='all 0.18s ease-in-out'
 								_hover={{ bg: 'bgHover.promoCard' }}
@@ -166,13 +176,25 @@ export default function CatalogDrawer() {
 												</Text>
 												<CountPill value={subCount} px='2' py='1' labelProps={{ fontSize: 'md' }} />
 											</HStack>
-											<Text fontSize='md' opacity={0.75} wordBreak='break-word' textAlign='center' title={subPreview}>
+											<Text
+												fontSize='md'
+												opacity={0.75}
+												wordBreak='break-word'
+												textAlign='center'
+												title={subPreview}
+											>
 												{subPreview}
 											</Text>
 										</VStack>
 									</VStack>
 
-									<HStack display={{ base: 'none', sm: 'flex' }} gap={3} minW={0} align='center' flex='1'>
+									<HStack
+										display={{ base: 'none', sm: 'flex' }}
+										gap={3}
+										minW={0}
+										align='center'
+										flex='1'
+									>
 										<Box
 											boxSize='88px'
 											rounded='lg'
@@ -227,125 +249,129 @@ export default function CatalogDrawer() {
 								pb={{ base: 6, md: 8 }}
 								pt={{ base: 3, md: 4 }}
 							>
-								<SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap={5} w='full'>
+								<SimpleGrid
+									columns={{ md: 3, xl: 4 }}
+									display={{ base: 'flex', md: 'grid' }}
+									flexWrap='wrap'
+									justifyContent={{ base: 'center', md: 'flex-start' }}
+									gapX='6'
+									gapY='8'
+									w='full'
+								>
 									{category.children?.map((subcategory) => {
 										const subImage = resolveSubcategoryImage(
 											subcategory.imageUrl,
-											SUBCATEGORY_PLACEHOLDER_IMAGE
+											SUBCATEGORY_PLACEHOLDER_IMAGE,
 										);
+										const subcategoryHref = `/products/${category.slug}/${subcategory.slug}`;
 										return (
 											<Box
 												key={subcategory.id}
-												rounded='lg'
-												borderWidth='0.5px'
-												borderStyle='solid'
-												borderColor='border'
-												bg='bg.tertiary'
-												overflow='hidden'
-												transition='all 0.18s ease-in-out'
-												_hover={{ transform: 'translateY(-1px)', borderColor: 'main.secondary' }}
+												flex={{ base: `0 1 ${MOBILE_SUBCATEGORY_ITEM_WIDTH_PX}px`, md: '1' }}
 											>
-												<Box
-													h={{ base: '120px', md: '160px' }}
-													position='relative'
+												<Flex
+													direction='column'
+													align={{ base: 'center', md: 'flex-start' }}
+													gap='2.5'
+													mb='2'
 												>
-													<PriorityImageWithFallback
-														src={subImage}
-														fallbackSrc={SUBCATEGORY_PLACEHOLDER_IMAGE}
-														alt={subcategory.name}
-														sizes='(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw'
-														loading='eager'
-														fetchPriority='high'
-														objectFit='cover'
-													/>
-													<Box
-														position='absolute'
-														inset='0'
-														bgGradient='linear(to-t, rgba(0,0,0,0.62), rgba(0,0,0,0.0))'
-													/>
-												</Box>
+													<DrawerActionTrigger asChild>
+														<Link href={subcategoryHref}>
+															<Box
+																w={{ base: `${MOBILE_SUBCATEGORY_ITEM_WIDTH_PX}px`, md: '140px' }}
+																h='90px'
+																flexShrink={0}
+																position='relative'
+																overflow='hidden'
+																rounded='md'
+																borderWidth='0.5px'
+																borderStyle='solid'
+																borderColor='border'
+																transition='border-color 0.15s ease-in-out'
+																_hover={{ borderColor: 'main.secondary' }}
+															>
+																<PriorityImageWithFallback
+																	src={subImage}
+																	fallbackSrc={SUBCATEGORY_PLACEHOLDER_IMAGE}
+																	alt={subcategory.name}
+																	sizes={`(max-width: 767px) ${MOBILE_SUBCATEGORY_ITEM_WIDTH_PX}px, 140px`}
+																	loading='eager'
+																	fetchPriority='high'
+																	objectFit='fill'
+																/>
+															</Box>
+														</Link>
+													</DrawerActionTrigger>
 
-												<Box p={4}>
 													<DrawerActionTrigger asChild>
 														<LocaleNavLink
-															href={`/products/${category.slug}/${subcategory.slug}`}
-															fontSize='lg'
-															fontWeight='semibold'
-															variant='plain'
-															color='main'
-															textDecoration='none'
-															textWrap='wrap'
-															wordBreak='break-word'
-															_hover={{ color: 'link' }}
+															href={subcategoryHref}
+															minW={0}
 															display='inline-flex'
 															alignItems='center'
-															gap={2}
+															gap='1'
+															fontSize={{ base: '16px', md: '15px' }}
+															fontWeight='bold'
+															textDecoration='none'
+															my='1.5'
+															color='link'
+															_hover={{ transform: 'translateX(2px)', textDecoration: 'underline' }}
 														>
-															<Text as='span' lineClamp={2}>
+															<Text fontSize={{ base: 'lg', md: 'md' }} as='span'>
 																{subcategory.name}
 															</Text>
-															<Icon as='span' fontSize='16px' color='gray.500'>
+															<Icon as='span' fontSize='14px' flexShrink={0}>
 																<BsChevronRight />
 															</Icon>
 														</LocaleNavLink>
 													</DrawerActionTrigger>
+												</Flex>
 
-													<Wrap mt={3} gap={3} align='center'>
-														{subcategory.products.length > 0 ? (
-															subcategory.products.map((product) => (
-																<Badge
-																	key={product.id}
-																	variant='outline'
-																	size='md'
-																	borderWidth='0.5px'
-																	bg='bg.tertiary'
-																	px='0'
-																	py='1'
-																	boxShadow='none'
-																	border='none'
+												<Stack gap='2' align='flex-start'>
+													{subcategory.products.length > 0 ? (
+														subcategory.products.map((product) => (
+															<DrawerActionTrigger asChild key={product.id}>
+																<LocaleNavLink
+																	href={`/products/${product.fullSlug}`}
+																	w='full'
+																	fontSize='15px'
+																	color='main'
+																	textDecoration='none'
+																	_hover={{ color: 'link' }}
+																	_focusVisible={{
+																		outline: '2px solid',
+																		outlineColor: 'main.secondary',
+																		outlineOffset: '2px',
+																	}}
 																>
-																	<DrawerActionTrigger asChild>
-																		<LocaleNavLink
-																			href={`/products/${product.fullSlug}`}
-																			fontSize={{ base: 'md', md: '15px' }}
-																			fontWeight='medium'
-																			textWrap='wrap'
-																			wordBreak='break-word'
-																			textDecorationColor='main'
-																			color='main'
-																			variant='underline'
-																			_hover={{ color: 'link' }}
-																			_focusVisible={{
-																				outline: '2px solid',
-																				outlineColor: 'main.secondary',
-																				outlineOffset: '2px',
-																			}}
-																		>
-																			{product.name}
-																		</LocaleNavLink>
-																	</DrawerActionTrigger>
-																</Badge>
-															))
-														) : (
-															<Text fontSize={{ base: 'md', md: 'sm' }} color='gray.500'>
-																{productsT('productsNotFound')}
-															</Text>
-														)}
+																	{product.name}
+																</LocaleNavLink>
+															</DrawerActionTrigger>
+														))
+													) : (
+														<Text fontSize='15px' color='gray.500'>
+															{productsT('productsNotFound')}
+														</Text>
+													)}
 
-														<DrawerActionTrigger asChild>
-															<LocaleNavLink
-																href={`/products/${category.slug}/${subcategory.slug}`}
-																fontSize={{ base: 'md', md: 'sm' }}
-																variant='plain'
-																color='link'
-																textDecoration='underline'
-																textUnderlineOffset='4px'
-															>
-																{t('seeAll')}
-															</LocaleNavLink>
-														</DrawerActionTrigger>
-													</Wrap>
-												</Box>
+													<DrawerActionTrigger asChild>
+														<LocaleNavLink
+															href={subcategoryHref}
+															fontSize={{ base: 'md', md: '15px' }}
+															color='link'
+															mt='0.5'
+															textDecoration='underline'
+															textUnderlineOffset='3px'
+															_focusVisible={{
+																outline: '2px solid',
+																outlineColor: 'main.secondary',
+																outlineOffset: '2px',
+															}}
+														>
+															{t('seeAll')}
+														</LocaleNavLink>
+													</DrawerActionTrigger>
+												</Stack>
 											</Box>
 										);
 									})}

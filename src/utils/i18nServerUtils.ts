@@ -58,7 +58,7 @@ export async function getLocalizedMetadata(
 
 	const title = pagesT(`metadata.${pageKey}.title`);
 	const description = pagesT(`metadata.${pageKey}.description`);
-	const defaultOgImage = absoluteUrl('/assets/images/logoBig.webp');
+	const defaultOgImage = absoluteUrl('/assets/images/logoBig.png');
 
 	const alternates =
 		options?.pathname && locale

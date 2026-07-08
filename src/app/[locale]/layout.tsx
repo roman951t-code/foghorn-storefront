@@ -21,7 +21,12 @@ import { THEME_STORAGE_KEY } from '@/constants/theme';
 import { getCatalog } from '@/actions/products/getCatalog';
 import { fontVariableClassName } from '@/lib/fonts';
 import { AppStoreHydrator } from '@/providers/AppStoreHydrator';
-import { getHtmlLang, isAppLocale, LOCALE_TO_HTML_LANG, LOCALE_TO_INTL_MAP } from '@/constants/locales';
+import {
+	getHtmlLang,
+	isAppLocale,
+	LOCALE_TO_HTML_LANG,
+	LOCALE_TO_INTL_MAP,
+} from '@/constants/locales';
 import type { AppLocale } from '@/constants/locales';
 import type { Metadata, Viewport } from 'next';
 import { APP_URL, absoluteUrl, localizePath } from '@/utils/seo';
@@ -102,11 +107,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 			},
 		},
 		icons: {
-			icon: [
-				{ url: '/favicon.svg', type: 'image/svg+xml' },
-				{ url: '/assets/images/logoSmall.webp', type: 'image/webp' },
-			],
-			apple: [{ url: '/assets/images/logoSmall.webp', type: 'image/webp' }],
+			icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+			apple: [{ url: '/apple-touch-icon.png', type: 'image/png' }],
 		},
 		openGraph: {
 			siteName: 'Online Store',
@@ -119,7 +121,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 				'Shop electronics, home goods, and everyday essentials online with secure checkout, fast delivery across Ukraine, warranty support, and fresh product deals.',
 			images: [
 				{
-					url: '/assets/images/logoBig.webp',
+					url: '/assets/images/logoBig.png',
 					width: 1200,
 					height: 630,
 					alt: 'Online Store',
@@ -131,7 +133,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 			title: 'Online Store | Electronics, Home Goods and Everyday Essentials',
 			description:
 				'Shop electronics, home goods, and everyday essentials online with secure checkout, fast delivery across Ukraine, warranty support, and fresh product deals.',
-			images: ['/assets/images/logoBig.webp'],
+			images: ['/assets/images/logoBig.png'],
 		},
 	};
 }
@@ -290,7 +292,7 @@ async function PrerenderedShell({ children, locale }: { children: ReactNode; loc
 				'@id': `${APP_URL}/#organization`,
 				name: 'Online Store',
 				url: APP_URL,
-				logo: `${APP_URL}/assets/images/logoBig.webp`,
+				logo: `${APP_URL}/assets/images/logoBig.png`,
 				sameAs: [] as string[],
 			},
 			{

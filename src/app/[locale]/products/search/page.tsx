@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { Flex, Heading, Box, Group, VStack, Text, HStack } from '@chakra-ui/react';
+import PageHeading from '@/components/ui/PageHeading';
+import { Flex, Box, Group, VStack, Text, HStack } from '@chakra-ui/react';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import QuickFilters from '../_components/QuickFilters';
 import Filters from '../_components/Filters';
@@ -62,11 +63,11 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 		popular: '/assets/images/carousel1.webp',
 		new: '/assets/images/carousel2.webp',
 		discount: '/assets/images/carousel3.webp',
-		viewed: '/assets/images/logoSmall.webp',
+		viewed: '/assets/images/logoSmall.png',
 	};
 	const ogImagePath = tag
-		? (tagImageMap[tag] ?? '/assets/images/logoBig.webp')
-		: '/assets/images/logoBig.webp';
+		? (tagImageMap[tag] ?? '/assets/images/logoBig.png')
+		: '/assets/images/logoBig.png';
 	const ogImage = absoluteUrl(ogImagePath);
 
 	return {
@@ -212,11 +213,11 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<Heading as='h1' size='2xl' fontWeight='medium'>
+			<PageHeading size='2xl'>
 				{productsT('searchQueryResults', {
 					searchQuery: tag ? productsT(tag) : searchQuery || '',
 				})}
-			</Heading>
+			</PageHeading>
 
 			<Flex hideFrom='lg' justifyContent='flex-end'>
 				<FiltersSidebar

@@ -53,22 +53,26 @@ export function useTrackedNavigation() {
 
 	const push = useCallback(
 		(href: string, options?: TransitionOptions) => {
-			start();
-			setIsPending(true);
-			setPendingTargetKey(normalizeTargetKey(href));
+			if (!isSamePageHref(href, pathname)) {
+				start();
+				setIsPending(true);
+				setPendingTargetKey(normalizeTargetKey(href));
+			}
 			router.push(href, options);
 		},
-		[router, start],
+		[router, start, pathname],
 	);
 
 	const replace = useCallback(
 		(href: string, options?: TransitionOptions) => {
-			start();
-			setIsPending(true);
-			setPendingTargetKey(normalizeTargetKey(href));
+			if (!isSamePageHref(href, pathname)) {
+				start();
+				setIsPending(true);
+				setPendingTargetKey(normalizeTargetKey(href));
+			}
 			router.replace(href, options);
 		},
-		[router, start],
+		[router, start, pathname],
 	);
 
 	return { push, replace, isPending };
@@ -80,5 +84,21 @@ const normalizeTargetKey = (href: string) => {
 		return `${url.pathname}?${url.search.replace(/^\?/, '')}`;
 	} catch {
 		return href;
+	}
+};
+
+// A bare `?...` href (every filter/sort/pagination call site passes one)
+// always targets the current route — only the search params change, so the
+// user never actually leaves the page. Showing the top progress bar for
+// those reads as a bug (a "still on the same page" flash), so we only track
+// — and thus only show the bar for — hrefs that resolve to a *different*
+// pathname than the one we're already on.
+const isSamePageHref = (href: string, pathname: string) => {
+	if (href.startsWith('?')) return true;
+	try {
+		const url = new URL(href, 'https://example.com');
+		return url.pathname === pathname;
+	} catch {
+		return false;
 	}
 };

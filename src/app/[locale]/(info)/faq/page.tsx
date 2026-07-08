@@ -1,4 +1,5 @@
 import { Stack, List, Heading, Text } from '@chakra-ui/react';
+import PageHeading from '@/components/ui/PageHeading';
 import faqData from '@/data/staticPages/faq';
 import { type Metadata } from 'next';
 import Script from 'next/script';
@@ -50,9 +51,7 @@ export default async function FAQ({ params }: LocaleParams) {
 					{JSON.stringify(faqJsonLd)}
 				</Script>
 			) : null}
-			<Heading as='h1' size='3xl' fontWeight='medium' w='100%'>
-				{pageTitle}
-			</Heading>
+			<PageHeading size='3xl' w='100%'>{pageTitle}</PageHeading>
 
 			{faqs.length > 0 ? (
 				<List.Root gap='6' pl='4'>

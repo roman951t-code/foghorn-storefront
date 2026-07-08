@@ -8,19 +8,33 @@ import { ASSET_IMAGES } from '@/constants/assets';
 // real viewport during SSR/first paint, so it fell back to the desktop
 // logo image, then swapped to the small one after hydration on mobile — a
 // visible resize. CSS picks the right one from the first paint, no
-// post-hydration swap.
+// post-hydration swap. The light/dark variant is picked the same way, via
+// _dark, since the color-mode class is also applied pre-paint (see
+// ColorModeProvider) — a JS check would only know the stored preference
+// after hydration, causing the same kind of flash.
 //
-// logoBig.webp's real dimensions are 210x40 (5.25:1). At the header's fixed
-// 36px row height that's 189x36 — not 170x36, which is a slightly different
-// ratio and was making next/image warn about a distorted aspect ratio.
+// Each variant's width is derived from its own real pixel dimensions at a
+// fixed 42px height, not reused across variants — they aren't identical
+// aspect ratios, and an off-ratio width/height pair makes next/image warn
+// about a distorted image.
 export default function Logo() {
 	return (
 		<Link href='/' aria-label='Go to homepage'>
 			<Box hideFrom='md'>
-				<Image src={ASSET_IMAGES.logoSmall} alt='logo' width={36} height={36} priority />
+				<Box _dark={{ display: 'none' }}>
+					<Image src={ASSET_IMAGES.logoSmallDark} alt='logo' width={48} height={48} priority />
+				</Box>
+				<Box display='none' _dark={{ display: 'block' }}>
+					<Image src={ASSET_IMAGES.logoSmallLight} alt='logo' width={48} height={48} priority />
+				</Box>
 			</Box>
 			<Box hideBelow='md'>
-				<Image src={ASSET_IMAGES.logoBig} alt='logo' width={189} height={36} priority />
+				<Box _dark={{ display: 'none' }}>
+					<Image src={ASSET_IMAGES.logoBigDark} alt='logo' width={208} height={50} priority />
+				</Box>
+				<Box display='none' _dark={{ display: 'block' }}>
+					<Image src={ASSET_IMAGES.logoBigLight} alt='logo' width={208} height={50} priority />
+				</Box>
 			</Box>
 		</Link>
 	);

@@ -4,32 +4,23 @@ import { BreadcrumbLink, BreadcrumbRoot } from '@/components/ui/chakra/breadcrum
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import { LocaleNavLink } from './LocaleNavLink';
 import { Button } from '@chakra-ui/react';
+import { TbCategory2 } from 'react-icons/tb';
 import { useTranslations } from 'next-intl';
 
+// Lightweight text-link crumbs (no per-crumb border/bg pill) — modern
+// breadcrumbs read as a plain trail, not a row of buttons. Only the current
+// (final) crumb gets real visual weight, via bold + the accent color.
 function CustomBreadcrumbLink({ href, children }: { href: string; children: React.ReactNode }) {
 	return (
 		<LocaleNavLink
 			href={href}
 			wordBreak='break-word'
-			fontSize={{ base: 'md', md: '15px' }}
+			fontSize={{ base: 'md', md: '16px' }}
+			fontWeight='medium'
+			color='main'
 			textDecoration='none'
-			display='inline-flex'
-			alignItems='center'
-			h='30px'
-			px='3'
-			py='1'
-			rounded='lg'
-			borderWidth='0.5px'
-			borderStyle='solid'
-			borderColor='border'
-			bg='bg.tertiary'
-			transition='all .15s ease-in-out'
-			_hover={{
-				color: 'link',
-				cursor: 'pointer',
-				bg: 'bgHover.promoCard',
-				borderColor: 'border.button',
-			}}
+			transition='color .15s ease-in-out'
+			_hover={{ color: 'link', cursor: 'pointer', textDecoration: 'underline' }}
 			_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 		>
 			{children}
@@ -42,8 +33,9 @@ function BreadcrumbCurrentLink({ children }: { children: React.ReactNode }) {
 		<BreadcrumbLink
 			wordBreak='break-word'
 			cursor='default'
-			fontWeight='medium'
-			fontSize={{ base: 'md', md: '15px' }}
+			fontWeight='semibold'
+			color='main'
+			fontSize={{ base: 'md', md: '16px' }}
 			textDecoration='none'
 			_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 		>
@@ -86,6 +78,7 @@ export default function Breadcrumbs({
 					<Button
 						size='sm'
 						variant='outline'
+						gap='1.5'
 						borderWidth='0.5px'
 						bg='bg.tertiary'
 						boxShadow='none'
@@ -94,13 +87,14 @@ export default function Breadcrumbs({
 						aria-label='Open catalog'
 						height='30px'
 						minW='auto'
-						rounded='md'
-						fontSize={{ base: 'md', md: '15px' }}
+						rounded='full'
+						fontSize={{ base: 'md', md: '16px' }}
 						fontWeight='medium'
+						transition='all .15s ease-in-out'
 						_hover={{
 							color: 'link',
 							bg: 'bgHover.promoCard',
-							borderColor: 'border.button',
+							borderColor: 'main',
 						}}
 						_focusVisible={{
 							outline: '2px solid',
@@ -108,6 +102,7 @@ export default function Breadcrumbs({
 							outlineOffset: '2px',
 						}}
 					>
+						<TbCategory2 />
 						{t('catalog')}
 					</Button>
 				}

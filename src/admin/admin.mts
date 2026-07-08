@@ -29,7 +29,7 @@ const admin = new AdminJS({
 		localeDetection: true,
 	},
 	branding: {
-		favicon: '/favicon.svg',
+		favicon: '/favicon-admin.png',
 	},
 	resources,
 });

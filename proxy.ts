@@ -279,13 +279,24 @@ const resolveStableCspNonce = () => {
 const CSP_NONCE = resolveStableCspNonce();
 const generateCspNonce = () => CSP_NONCE;
 
-// Google's recommended CSP3 hardening template. The trick is that CSP3-aware
-// browsers ignore host-list sources ('self', https:, etc.) inside script-src
-// as soon as they see 'strict-dynamic' — they will only trust the nonced
-// bootstrap script and scripts it (transitively) loads. Older browsers that
-// don't understand 'strict-dynamic' fall back to the legacy sources
-// ('unsafe-inline' + https:), so the policy still ships something usable.
-// See https://web.dev/articles/strict-csp.
+// NOT using a nonce (or 'strict-dynamic', which is only meaningful alongside
+// one) in script-src/style-src here — this app statically prerenders most
+// pages via Cache Components/PPR, and per Next.js's own docs a nonce can only
+// be injected into Next's *own* internal scripts (RSC streaming helpers like
+// `$RC`, framework hydration code, etc.) during a genuine per-request dynamic
+// render; build-time-generated HTML has no request to read a nonce from. A
+// nonce present in script-src (even one this app's own explicit <Script>
+// tags do carry, via getCspNonce()) makes browsers ignore 'unsafe-inline'
+// for *every* inline script, including Next's un-nonced ones — which is
+// exactly what caused the "$RC is not defined" / blocked-script errors in
+// production. Dropping the nonce restores 'unsafe-inline' as a real fallback
+// so Next's internal scripts run on statically-rendered pages. See
+// https://nextjs.org/docs/app/guides/content-security-policy#static-vs-dynamic-rendering-with-csp
+// ("Without Nonces" section) — this is the officially documented approach
+// for apps using static generation. Trade-off: any inline script can now run
+// (weaker XSS defense-in-depth than a working nonce would give); the other
+// directives below (self-only default-src, object-src none, frame-ancestors
+// none, an explicit script/style host allowlist) still hold.
 //
 // 'unsafe-eval' is required because Sentry's browser SDK uses new Function()
 // (Session Replay's CSS-to-matcher compiler, and some source-map parsing).
@@ -296,11 +307,11 @@ const generateCspNonce = () => CSP_NONCE;
 // The Sentry ingest hostname is wildcarded (*.sentry.io covers every region:
 // standard, .de, .us, ...) so a Sentry project region change never breaks
 // error reporting.
-const buildBaseCspDirectives = (nonce: string) => [
+const buildBaseCspDirectives = () => [
 	"default-src 'self'",
-	`script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval' https: https://js.stripe.com`,
+	"script-src 'self' 'unsafe-inline' 'unsafe-eval' https: https://js.stripe.com",
 	"script-src-attr 'none'",
-	`style-src 'self' 'nonce-${nonce}' https: 'unsafe-inline'`,
+	"style-src 'self' https: 'unsafe-inline'",
 	"style-src-attr 'unsafe-inline'",
 	"img-src 'self' data: blob: https:",
 	"font-src 'self' data:",
@@ -313,23 +324,26 @@ const buildBaseCspDirectives = (nonce: string) => [
 	"frame-ancestors 'none'",
 ];
 
-const buildCspPolicy = (nonce: string) =>
-	[...buildBaseCspDirectives(nonce), 'upgrade-insecure-requests'].join('; ');
+const buildCspPolicy = () => [...buildBaseCspDirectives(), 'upgrade-insecure-requests'].join('; ');
 
-const buildCspReportOnlyPolicy = (nonce: string) =>
+const buildCspReportOnlyPolicy = () =>
 	[
 		// upgrade-insecure-requests has no effect in a report-only policy (the
 		// browser can't enforce it there) and just produces a harmless-but-
 		// noisy console warning, so it's deliberately left out of this variant.
-		...buildBaseCspDirectives(nonce),
+		...buildBaseCspDirectives(),
 		'report-uri /api/security/csp-report',
 		`report-to ${CSP_REPORT_GROUP}`,
 	].join('; ');
 
 const buildCspContext = (request: NextRequest): CspContext | null => {
 	if (!CSP_ENABLED) return null;
+	// Still generated and exposed via the x-csp-nonce header — some pages
+	// (product/category listings, FAQ) read it via headers() to nonce their
+	// own explicit JSON-LD <Script> tags. It's just no longer part of the CSP
+	// policy's script-src/style-src themselves (see buildBaseCspDirectives).
 	const nonce = generateCspNonce();
-	const policy = CSP_ENFORCEMENT_ENABLED ? buildCspPolicy(nonce) : null;
+	const policy = CSP_ENFORCEMENT_ENABLED ? buildCspPolicy() : null;
 	const requestHeaders = new Headers(request.headers);
 	if (policy) {
 		requestHeaders.set('content-security-policy', policy);
@@ -337,7 +351,7 @@ const buildCspContext = (request: NextRequest): CspContext | null => {
 	requestHeaders.set('x-csp-nonce', nonce);
 	return {
 		policy,
-		reportOnlyPolicy: CSP_REPORT_ONLY_ENABLED ? buildCspReportOnlyPolicy(nonce) : null,
+		reportOnlyPolicy: CSP_REPORT_ONLY_ENABLED ? buildCspReportOnlyPolicy() : null,
 		reportEndpointUrl: new URL('/api/security/csp-report', request.url).toString(),
 		requestHeaders,
 	};

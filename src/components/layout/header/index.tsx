@@ -30,12 +30,12 @@ export default async function Header({ locale }: { locale: AppLocale }) {
 			top='0'
 			zIndex='1000'
 			px={2}
-			py={2}
+			py={2.5}
 			borderBottomWidth='0.5px'
 			borderBottomStyle='solid'
 			borderBottomColor={{ base: 'gray.100', _dark: 'gray.600' }}
 		>
-			<Stack gap='0'>
+			<Stack gap='1'>
 				<Flex
 					justify='space-between'
 					align='center'
@@ -43,13 +43,13 @@ export default async function Header({ locale }: { locale: AppLocale }) {
 					width='100%'
 					maxWidth='1444px'
 					pt='4px'
-					pb='8px'
+					pb={{ base: '8px', lg: 0 }}
 					minH={{ base: 'auto', lg: '52px' }}
 					maxH={{ base: 'initial', lg: '52px' }}
 				>
 					<Flex align='center' gap={4}>
 						<Sidebar />
-						<Box hideBelow='xs'>
+						<Box hideBelow='xs' mx='3'>
 							<Logo />
 						</Box>
 					</Flex>
@@ -62,14 +62,10 @@ export default async function Header({ locale }: { locale: AppLocale }) {
 						categories={prodT('categories')}
 					/>
 					<Flex align='center' gap={4}>
-						<Suspense
-							fallback={<Skeleton height='40px' width='96px' rounded='md' />}
-						>
+						<Suspense fallback={<Skeleton height='40px' width='96px' rounded='md' />}>
 							<UserActions />
 						</Suspense>
-						<Suspense
-							fallback={<Skeleton height='36px' width='110px' rounded='sm' />}
-						>
+						<Suspense fallback={<Skeleton height='36px' width='110px' rounded='sm' />}>
 							<LocaleSwitcher />
 						</Suspense>
 						<ColorModeButton />

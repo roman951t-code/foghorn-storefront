@@ -2,16 +2,15 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Product } from '@/types/product';
-import { Tabs } from '@chakra-ui/react';
+import { Icon, Tabs } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import dynamic from 'next/dynamic';
+import { FiInfo, FiList, FiMessageSquare } from 'react-icons/fi';
 import type { Review } from '@/types/product';
 import { useReviewStore } from '@/stores/reviewStore';
 import { isProductTabValue, type ProductTabValue } from '@/constants/products';
-
-const AboutTab = dynamic(() => import('./about/AboutTab'));
-const CharacteristicsTab = dynamic(() => import('./CharacteristicsTab'));
-const FeedbackTab = dynamic(() => import('./FeedbackTab'));
+import AboutTab from './about/AboutTab';
+import CharacteristicsTab from './CharacteristicsTab';
+import FeedbackTab from './FeedbackTab';
 
 interface Props {
 	category: string;
@@ -87,16 +86,19 @@ export default function ProductTabs({
 			title: prodT('about'),
 			value: 'about' as const,
 			content: aboutContent,
+			icon: FiInfo,
 		},
 		{
 			title: prodT('characteristics'),
 			value: 'characteristics' as const,
 			content: characteristicsContent,
+			icon: FiList,
 		},
 		{
 			title: prodT('feedback'),
 			value: 'feedback' as const,
 			content: feedbackContent,
+			icon: FiMessageSquare,
 		},
 	];
 
@@ -112,7 +114,7 @@ export default function ProductTabs({
 			}}
 			width='full'
 			variant='outline'
-			colorPalette={{ base: 'orange', _dark: 'yellow' }}
+			colorPalette={{ base: 'gray', _dark: 'yellow' }}
 			lazyMount
 			unmountOnExit
 			fitted
@@ -125,6 +127,7 @@ export default function ProductTabs({
 						fontSize={{ base: 'lg', md: 'md' }}
 						fontWeight='medium'
 					>
+						<Icon as={item.icon} fontSize={{ base: 'lg', md: 'md' }} />
 						{item.title}
 					</Tabs.Trigger>
 				))}

@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import Breadcrumbs from '@/components/ui/links/Breadcrumbs';
+import PageHeading from '@/components/ui/PageHeading';
 import ProductsGrid from '../../_components/ProductsGrid';
-import { Flex, Heading, Box, Group, VStack, Text, Separator, HStack } from '@chakra-ui/react';
+import { Flex, Box, Group, VStack, Text, Separator, HStack } from '@chakra-ui/react';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import QuickFilters from '../../_components/QuickFilters';
 import Filters from '../../_components/Filters';
@@ -92,14 +93,13 @@ async function buildSubcategoryMetadata({
 	const description = pagesT('metadata.categoryDescription', {
 		category: subcategoryData.subcategoryName,
 	});
-	const canonicalSearchParams =
-		canonicalPage != null ? { page: `${canonicalPage}` } : undefined;
+	const canonicalSearchParams = canonicalPage != null ? { page: `${canonicalPage}` } : undefined;
 	const alternates = buildLanguageAlternates(
 		locale as AppLocale,
 		`/products/${category}/${subcategory}`,
 		canonicalSearchParams,
 	);
-	const ogImage = absoluteUrl('/assets/images/logoBig.webp');
+	const ogImage = absoluteUrl('/assets/images/logoBig.png');
 
 	return {
 		title,
@@ -223,9 +223,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 				categoryName={subcategoryData.categoryName}
 				subcategoryName={subcategoryData.subcategoryName}
 			/>
-			<Heading as='h1' size='2xl' fontWeight='medium'>
-				{subcategoryData.subcategoryName}
-			</Heading>
+			<PageHeading size='2xl'>{subcategoryData.subcategoryName}</PageHeading>
 			{!isSimilarSearchMode ? (
 				<Flex hideFrom='lg' justifyContent='flex-end'>
 					<FiltersSidebar

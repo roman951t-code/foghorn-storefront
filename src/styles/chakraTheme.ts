@@ -126,6 +126,7 @@ const config = defineConfig({
 					},
 					secondary: {
 						value: {
+							// base: 'linear-gradient(229deg, rgb(74 73 100) 0%, rgb(71 104 125) 50%, rgb(83 82 109) 100%)',
 							base: 'linear-gradient(36deg, rgba(91,90,129,1) 0%, rgb(70, 108, 134) 50%, rgba(91,90,129,1) 100%)',
 							_dark: '#272838',
 						},
@@ -468,52 +469,6 @@ const config = defineConfig({
 					},
 				},
 			}),
-			// // Storefront-wide segmented-control look for both tab bars in the
-			// // app (cabinet nav, product detail About/Specs/Reviews) — built on
-			// // chakra's own `enclosed` variant (a padded track + raised selected
-			// // trigger) rather than a hand-rolled one, just re-themed with this
-			// // app's own tokens instead of chakra's generic bg/bg.muted so it
-			// // reads as part of the same design language as the rest of the
-			// // storefront (bg.tertiary panels, 0.5px borders, colorPalette
-			// // accent already used for these two Tabs.Root instances).
-			// tabs: defineSlotRecipe({
-			// 	...chakraDefaultSlotRecipes.tabs,
-			// 	defaultVariants: {
-			// 		...chakraDefaultSlotRecipes.tabs.defaultVariants,
-			// 		variant: 'enclosed',
-			// 	},
-			// 	variants: {
-			// 		...chakraDefaultSlotRecipes.tabs.variants,
-			// 		variant: {
-			// 			...chakraDefaultSlotRecipes.tabs.variants!.variant,
-			// 			enclosed: {
-			// 				...chakraDefaultSlotRecipes.tabs.variants!.variant.enclosed,
-			// 				list: {
-			// 					...chakraDefaultSlotRecipes.tabs.variants!.variant.enclosed.list,
-			// 					bg: 'bg.tertiary',
-			// 					borderWidth: '0.5px',
-			// 					borderStyle: 'solid',
-			// 					borderColor: 'border',
-			// 					borderRadius: 'lg',
-			// 				},
-			// 				trigger: {
-			// 					...chakraDefaultSlotRecipes.tabs.variants!.variant.enclosed.trigger,
-			// 					color: 'fg.muted',
-			// 					borderRadius: 'md',
-			// 					transition: 'all 0.15s ease-in-out',
-			// 					_hover: {
-			// 						color: 'colorPalette.fg',
-			// 					},
-			// 					_selected: {
-			// 						bg: 'colorPalette.subtle',
-			// 						color: 'colorPalette.fg',
-			// 						shadow: 'none',
-			// 					},
-			// 				},
-			// 			},
-			// 		},
-			// 	},
-			// }),
 		},
 	},
 	globalCss: {
@@ -610,13 +565,10 @@ const config = defineConfig({
 		'.ReactModal__Content': {
 			backgroundColor: 'var(--chakra-colors-bg-tertiary) !important',
 		},
-		// '.chakra-radio-group__item > span:first-of-type:not(.chakra-radio-group__itemText)[data-state="unchecked"]':
-		// 	{
-		// 		color: 'var(--chakra-colors-fg) !important',
-		// 	},
-		// '.chakra-checkbox__control[data-state="unchecked"]': {
-		// 	color: 'var(--chakra-colors-fg) !important',
-		// },
+		'.chakra-tabs__trigger:is([aria-selected=true], [data-selected])': {
+			'--mix-tabActiveBg': 'color-mix(in srgb, var(--chakra-colors-bg-tertiary) 60%, transparent)',
+			backgroundColor: 'var(--mix-tabActiveBg) !important',
+		},
 		'.thumbsSlider .swiper-pagination-bullet, .thumbsSlider-pagination .swiper-pagination-bullet': {
 			width: '20px !important',
 			height: '20px !important',
