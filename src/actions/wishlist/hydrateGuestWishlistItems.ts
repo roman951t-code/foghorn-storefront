@@ -10,6 +10,8 @@ import {
 	getEffectiveVariantDiscountPrice,
 } from '@/utils/discountSchedule';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
+import { getRequestLocale } from '@/utils/i18nServerUtils';
 
 const MAX_GUEST_WISHLIST_ITEMS = 100;
 
@@ -26,6 +28,7 @@ export async function hydrateGuestWishlistItems(ids: string[]): Promise<Subcateg
 	const normalizedIds = normalizeIds(ids);
 	if (normalizedIds.length === 0) return [];
 
+	const locale = await getRequestLocale();
 	const products = await prisma.product.findMany({
 		where: { id: { in: normalizedIds }, AND: [getPublishedProductWhere()] },
 		select: {
@@ -94,19 +97,15 @@ export async function hydrateGuestWishlistItems(ids: string[]): Promise<Subcateg
 					product.discountStartAt ?? null,
 					product.discountEndAt ?? null,
 				);
-		const variantLabel = defaultVariant?.attributes?.length
-			? defaultVariant.attributes
-					.map((attributeValue) => {
-						const name = attributeValue.attribute.name?.trim?.() ?? '';
-						const valueWithUnit = [attributeValue.value, attributeValue.attribute.unit]
-							.filter(Boolean)
-							.join(' ')
-							.trim();
-						if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-						return name || valueWithUnit;
-					})
-					.join(' / ')
-			: '';
+		const variantLabel =
+			buildLocalizedVariantLabel(
+				defaultVariant?.attributes?.map((attributeValue) => ({
+					name: attributeValue.attribute.name,
+					value: attributeValue.value,
+					unit: attributeValue.attribute.unit,
+				})),
+				locale
+			) ?? '';
 
 		const { variants: _variants, ...productWithoutVariants } = product;
 

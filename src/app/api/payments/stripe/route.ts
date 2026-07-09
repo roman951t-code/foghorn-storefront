@@ -12,6 +12,7 @@ import { STORE_CURRENCY_CODE_LOWER } from '@/config/currency';
 import { isProductPublished } from '@/utils/publishSchedule';
 import { getEffectiveVariantDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
 import type Stripe from 'stripe';
 import { getCouponDiscountPreview } from '@/lib/coupons';
 import { recordApi5xxEvent } from '@/lib/opsMonitoring';
@@ -21,6 +22,7 @@ import {
 	SHIPPING_ADDRESS_FIELD_LIMITS,
 } from '@/utils/shippingAddress';
 import { asErrorDetails, resolveSafeRedirectUrl } from './route-utils';
+import { MAX_ITEM_QUANTITY } from '@/constants/cart';
 
 export const maxDuration = 60;
 
@@ -181,7 +183,7 @@ export async function POST(req: NextRequest) {
 				z.object({
 					productId: z.string().min(1, 'productId_required'),
 					variantId: z.string().nullable(),
-					quantity: z.number().int().positive().max(99, 'quantity_too_high'),
+					quantity: z.number().int().positive().max(MAX_ITEM_QUANTITY, 'quantity_too_high'),
 				}),
 			)
 			.min(1, 'items_required')
@@ -354,8 +356,10 @@ export async function POST(req: NextRequest) {
 					return null;
 				}
 
+				// A requested-but-missing variantId still falls through to the
+				// product's default variant, same as no variantId at all.
 				const variant =
-					(item.variantId ? (variantById.get(item.variantId) ?? null) : null) ??
+					(item.variantId ? variantById.get(item.variantId) : undefined) ??
 					defaultVariantByProduct.get(item.productId) ??
 					null;
 				if (!variant || variant.productId !== item.productId) return null;
@@ -380,16 +384,10 @@ export async function POST(req: NextRequest) {
 				const translation = pickLocalizedTranslation(product.translations, locale);
 				const displayProductName = translation?.name ?? product.name;
 
-				const variantLabel = variant.attributes?.length
-					? variant.attributes
-							.map((a) => {
-								const name = a.attribute.name?.trim?.() ?? '';
-								const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
-								if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-								return name || valueWithUnit;
-							})
-							.join(' / ')
-					: null;
+				const variantLabel = buildLocalizedVariantLabel(
+					variant.attributes?.map((a) => ({ name: a.attribute.name, value: a.value, unit: a.attribute.unit })),
+					locale
+				);
 
 				return {
 					metadata: {

@@ -9,6 +9,8 @@ import {
 	getEffectiveVariantDiscountPrice,
 } from '@/utils/discountSchedule';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
+import { getRequestLocale } from '@/utils/i18nServerUtils';
 
 export async function GET() {
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -19,6 +21,7 @@ export async function GET() {
 	}
 
 	try {
+		const locale = await getRequestLocale();
 		const now = new Date();
 		const wishlist = await prisma.wishlist.findMany({
 			where: {
@@ -94,16 +97,15 @@ export async function GET() {
 							product.discountStartAt ?? null,
 							product.discountEndAt ?? null,
 						);
-				const variantLabel = defaultVariant?.attributes?.length
-					? defaultVariant.attributes
-							.map((a) => {
-								const name = a.attribute.name?.trim?.() ?? '';
-								const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
-								if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-								return name || valueWithUnit;
-							})
-							.join(' / ')
-					: '';
+				const variantLabel =
+					buildLocalizedVariantLabel(
+						defaultVariant?.attributes?.map((a) => ({
+							name: a.attribute.name,
+							value: a.value,
+							unit: a.attribute.unit,
+						})),
+						locale
+					) ?? '';
 
 				return {
 					...product,

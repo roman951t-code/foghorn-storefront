@@ -4,6 +4,8 @@ import { Wrap } from '@chakra-ui/react';
 import { resolveSubcategoryImage } from '@/utils/categoryImages';
 import { getTranslations } from 'next-intl/server';
 
+const ABOVE_THE_FOLD_CATEGORY_COUNT = 4;
+
 export default async function CategoryCards({
 	category,
 	locale,
@@ -16,7 +18,7 @@ export default async function CategoryCards({
 
 	return (
 		<Wrap gapX='4' gapY='8'>
-			{category?.children.map((sub) => (
+			{category?.children.map((sub, index) => (
 				<CategoryCard
 					key={sub.id}
 					title={sub.name}
@@ -27,6 +29,7 @@ export default async function CategoryCards({
 					}))}
 					viewAllHref={`/products/${category.slug}/${sub.slug}`}
 					seeProductsLabel={seeProductsLabel}
+					imagePriority={index < ABOVE_THE_FOLD_CATEGORY_COUNT}
 				/>
 			))}
 		</Wrap>

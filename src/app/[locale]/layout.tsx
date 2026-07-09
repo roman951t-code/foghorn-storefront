@@ -209,7 +209,7 @@ async function VisibleShell({
 				{skipToMainLabel}
 			</Link>
 			<Header locale={locale} />
-			<Box as='main' id='main-content' w='full' maxW='1444px' flex='1' mx='auto'>
+			<Box as='main' id='main-content' w='full' maxW='1512px' flex='1' mx='auto'>
 				{children}
 				<ToTop />
 			</Box>

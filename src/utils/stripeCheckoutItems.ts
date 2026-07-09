@@ -6,7 +6,7 @@ type StripeCheckoutOrderItemPayload = {
 	quantity: number;
 };
 
-const normalizeMetadataString = (value: unknown, maxLen: number) => {
+export const normalizeMetadataString = (value: unknown, maxLen: number) => {
 	if (typeof value !== 'string') return null;
 	const trimmed = value.trim();
 	if (!trimmed) return null;

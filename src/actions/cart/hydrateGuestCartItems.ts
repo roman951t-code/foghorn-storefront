@@ -10,9 +10,11 @@ import {
 } from '@/utils/discountSchedule';
 import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
+import { getRequestLocale } from '@/utils/i18nServerUtils';
+import { MAX_ITEM_QUANTITY } from '@/constants/cart';
 
 const MAX_GUEST_CART_ITEMS = 100;
-const MAX_ITEM_QUANTITY = 99;
 
 type GuestCartItemInput = {
 	productId: string;
@@ -53,6 +55,7 @@ export async function hydrateGuestCartItems(items: GuestCartItemInput[]): Promis
 	const normalizedItems = normalizeItems(Array.isArray(items) ? items : []);
 	if (normalizedItems.length === 0) return [];
 
+	const locale = await getRequestLocale();
 	const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)));
 	const variantIds = Array.from(
 		new Set(
@@ -133,19 +136,14 @@ export async function hydrateGuestCartItems(items: GuestCartItemInput[]): Promis
 					product.discountStartAt ?? null,
 					product.discountEndAt ?? null,
 				);
-		const variantLabel = variant?.attributes?.length
-			? variant.attributes
-					.map((attributeValue) => {
-						const name = attributeValue.attribute.name?.trim?.() ?? '';
-						const valueWithUnit = [attributeValue.value, attributeValue.attribute.unit]
-							.filter(Boolean)
-							.join(' ')
-							.trim();
-						if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-						return name || valueWithUnit;
-					})
-					.join(' / ')
-			: null;
+		const variantLabel = buildLocalizedVariantLabel(
+			variant?.attributes?.map((attributeValue) => ({
+				name: attributeValue.attribute.name,
+				value: attributeValue.value,
+				unit: attributeValue.attribute.unit,
+			})),
+			locale,
+		);
 		const stock = variant?.stock ?? product.stock ?? null;
 		const stockCap =
 			typeof stock === 'number' && Number.isFinite(stock) ? Math.max(0, stock) : null;

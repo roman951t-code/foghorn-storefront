@@ -3,9 +3,23 @@ import 'server-only';
 import { type Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { cacheLife } from 'next/cache';
-import { resolveAppLocale, isAppLocale, type AppLocale } from '@/constants/locales';
+import { cookies } from 'next/headers';
+import { DEFAULT_LOCALE, resolveAppLocale, isAppLocale, type AppLocale } from '@/constants/locales';
 import { CLIENT_MESSAGE_NAMESPACES, loadLocaleMessages } from '@/i18n/messages';
 import { buildLanguageAlternates, type AlternateSearchParams, absoluteUrl } from './seo';
+
+// Must match next-intl's default `localeCookie` name (see src/i18n/routing.ts,
+// which doesn't override it). For API routes and server actions invoked
+// outside a `[locale]` page render — where next-intl's request-scoped
+// `setRequestLocale` cache was never populated — this is the only reliable
+// way to recover "what locale is this visitor actually using."
+const LOCALE_COOKIE_NAME = 'NEXT_LOCALE';
+
+export async function getRequestLocale(): Promise<AppLocale> {
+	const cookieStore = await cookies();
+	const raw = cookieStore.get(LOCALE_COOKIE_NAME)?.value;
+	return raw && isAppLocale(raw) ? raw : DEFAULT_LOCALE;
+}
 
 // Server-only helpers. Kept in a separate module from `i18nUtils.ts` because
 // `getLocalizedMetadata` uses `'use cache'`, and Next.js refuses to bundle any

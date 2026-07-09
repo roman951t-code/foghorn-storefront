@@ -10,9 +10,9 @@ import { updateCartItemQuantity } from '@/actions/cart/updateCartItemQuantity';
 import type { CartData, CartProduct } from '@/types/cart';
 import type { Product, SubcategoryProduct } from '@/types/product';
 import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
+import { MAX_ITEM_QUANTITY } from '@/constants/cart';
 
 const LOCAL_STORAGE_KEY = 'guest_cart';
-const MAX_ITEM_QUANTITY = 99;
 
 type GuestCartStorageItem = {
 	productId: string;

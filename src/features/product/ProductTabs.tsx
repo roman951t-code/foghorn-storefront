@@ -1,16 +1,33 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Product } from '@/types/product';
-import { Icon, Tabs } from '@chakra-ui/react';
+import { Box, Icon, Tabs } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
 import { FiInfo, FiList, FiMessageSquare } from 'react-icons/fi';
 import type { Review } from '@/types/product';
 import { useReviewStore } from '@/stores/reviewStore';
 import { isProductTabValue, type ProductTabValue } from '@/constants/products';
-import AboutTab from './about/AboutTab';
-import CharacteristicsTab from './CharacteristicsTab';
-import FeedbackTab from './FeedbackTab';
+import { LoadingSkeleton } from '@/components/ui/Skeleton';
+
+function TabLoadingFallback() {
+	return (
+		<Box mt='4'>
+			<LoadingSkeleton />
+		</Box>
+	);
+}
+
+// ssr stays on (the next/dynamic default) rather than ssr:false like most
+// other lazy-loaded pieces in this codebase, because AboutTab carries the
+// page's primary SEO content and a direct ?tab=feedback deep link (see
+// AboutTab's share-link) needs FeedbackTab's reviews to be crawlable too.
+const AboutTab = dynamic(() => import('./about/AboutTab'), { loading: () => <TabLoadingFallback /> });
+const CharacteristicsTab = dynamic(() => import('./CharacteristicsTab'), {
+	loading: () => <TabLoadingFallback />,
+});
+const FeedbackTab = dynamic(() => import('./FeedbackTab'), { loading: () => <TabLoadingFallback /> });
 
 interface Props {
 	category: string;

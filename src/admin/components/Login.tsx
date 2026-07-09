@@ -1,5 +1,16 @@
 import { useTranslation } from 'adminjs';
-import { Box, Button, FormGroup, H2, H5, Illustration, Input, Label, MessageBox, Text } from '@adminjs/design-system';
+import {
+	Box,
+	Button,
+	FormGroup,
+	H2,
+	H5,
+	Illustration,
+	Input,
+	Label,
+	MessageBox,
+	Text,
+} from '@adminjs/design-system';
 import { useState, type ChangeEvent } from 'react';
 
 type LoginState = {
@@ -39,7 +50,7 @@ const getMessageText = (message: string, translateMessage: (key: string) => stri
 // ADMINJS_READONLY_EMAIL / ADMINJS_READONLY_PASSWORD dev defaults in
 // src/admin/server.mts.
 const DEMO_READONLY_EMAIL = 'readonly@mail.com';
-const DEMO_READONLY_PASSWORD = 'test';
+const DEMO_READONLY_PASSWORD = 'aLv7b0Q963WpBWB7gYPA';
 
 export default function Login() {
 	const windowState = window as WindowWithAdminState;
@@ -96,16 +107,17 @@ export default function Login() {
 						<Text color='grey60'>{translateComponent('Login.supportText')}</Text>
 					</Box>
 				</Box>
-				<Box as='form' action={action} method='POST' style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+				<Box
+					as='form'
+					action={action}
+					method='POST'
+					style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+				>
 					<H5 marginBottom='lg'>
 						{branding?.logo ? (
-							<img
-								src={branding.logo}
-								alt={branding.companyName}
-								style={{ maxWidth: 200 }}
-							/>
+							<img src={branding.logo} alt={branding.companyName} style={{ maxWidth: 200 }} />
 						) : (
-							branding?.companyName ?? 'Admin'
+							(branding?.companyName ?? 'Admin')
 						)}
 					</H5>
 					{message ? (
@@ -151,11 +163,13 @@ export default function Login() {
 						</Button>
 					</Box>
 					<MessageBox message={translateComponent('Login.demoTitle')} variant='info'>
-						<Text mb='default'>{translateComponent('Login.demoDescription')}</Text>
-						<Text>
+						<Text mb='default' style={{ fontSize: '16px' }}>
+							{translateComponent('Login.demoDescription')}
+						</Text>
+						<Text style={{ lineHeight: '14px', fontSize: '16px' }}>
 							<strong>{translateComponent('Login.demoEmailLabel')}:</strong> {DEMO_READONLY_EMAIL}
 						</Text>
-						<Text>
+						<Text style={{ lineHeight: '14px', fontSize: '16px' }}>
 							<strong>{translateComponent('Login.demoPasswordLabel')}:</strong>{' '}
 							{DEMO_READONLY_PASSWORD}
 						</Text>

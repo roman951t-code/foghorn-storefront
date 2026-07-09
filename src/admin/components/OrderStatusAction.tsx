@@ -9,11 +9,15 @@ type StatusOption = { value: OrderStatus; label: string };
 const api = new ApiClient();
 
 const statuses: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED'];
+// Mirrors the server's ORDER_STATUS_TRANSITIONS in order-actions.mts —
+// DELIVERED has no entry so RETURNED never appears as a selectable option
+// here; that transition only happens through the dedicated "Process
+// Return" action, which handles the refund and inventory restock.
 const statusTransitions: Record<OrderStatus, readonly OrderStatus[]> = {
 	PENDING: ['PAID', 'CANCELLED'],
 	PAID: ['SHIPPED', 'CANCELLED'],
 	SHIPPED: ['DELIVERED', 'CANCELLED'],
-	DELIVERED: ['RETURNED'],
+	DELIVERED: [],
 	CANCELLED: [],
 	RETURNED: [],
 };

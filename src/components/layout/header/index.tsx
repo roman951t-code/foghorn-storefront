@@ -41,9 +41,9 @@ export default async function Header({ locale }: { locale: AppLocale }) {
 					align='center'
 					mx='auto'
 					width='100%'
-					maxWidth='1444px'
+					maxWidth='1512px'
 					pt='4px'
-					pb={{ base: '8px', lg: 0 }}
+					pb={{ base: '8px', lg: '2px' }}
 					minH={{ base: 'auto', lg: '52px' }}
 					maxH={{ base: 'initial', lg: '52px' }}
 				>
@@ -78,7 +78,7 @@ export default async function Header({ locale }: { locale: AppLocale }) {
 					align='center'
 					mx='auto'
 					width='100%'
-					maxWidth='1444px'
+					maxWidth='1512px'
 					gap={{ base: 0, sm: 4 }}
 					minH='48px'
 				>

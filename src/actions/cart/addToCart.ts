@@ -7,8 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { isProductPublished } from '@/utils/publishSchedule';
-
-const MAX_ITEM_QUANTITY = 99;
+import { MAX_ITEM_QUANTITY } from '@/constants/cart';
 
 type AddToCartItem = { productId: string; variantId: string | null };
 

@@ -8,8 +8,7 @@ import { auth } from '@/lib/auth';
 import type { CartProduct } from '@/types/cart';
 import { isProductPublished } from '@/utils/publishSchedule';
 import { getCartItems } from './cart/getCartItems';
-
-const MAX_ITEM_QUANTITY = 99;
+import { MAX_ITEM_QUANTITY } from '@/constants/cart';
 
 type RepeatOrderResult =
 	| { success: true; items: CartProduct[] }

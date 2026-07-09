@@ -9,6 +9,7 @@ import QuickFilters from '../../_components/QuickFilters';
 import Filters from '../../_components/Filters';
 import FiltersSidebar from '../../_components/FiltersSidebar';
 import FiltersTags from '../../_components/FiltersTags';
+import { FilterTransitionProvider } from '../../_components/FilterTransition';
 import { getProductsBySubcategorySlug } from '@/actions/products/getProductsBySubcategorySlug';
 import { Metadata } from 'next';
 import Pagination from '@/components/ui/Pagination';
@@ -223,75 +224,77 @@ export default async function Subcategory({ params, searchParams }: Props) {
 				categoryName={subcategoryData.categoryName}
 				subcategoryName={subcategoryData.subcategoryName}
 			/>
-			<PageHeading size='2xl'>{subcategoryData.subcategoryName}</PageHeading>
-			{!isSimilarSearchMode ? (
-				<Flex hideFrom='lg' justifyContent='flex-end'>
-					<FiltersSidebar
-						filters={subcategoryFilters}
-						maxProductPrice={subcategoryData.maxProductPrice}
-						btnText={navigationT('sidebar.filters')}
-					/>
-				</Flex>
-			) : null}
-			{!isSimilarSearchMode ? <FiltersTags filters={subcategoryFilters} /> : null}
-
-			<Group justifyContent='space-between' align='flex-start' gap='3'>
+			<PageHeading size='3xl'>{subcategoryData.subcategoryName}</PageHeading>
+			<FilterTransitionProvider>
 				{!isSimilarSearchMode ? (
-					<Box
-						as='aside'
-						w='304px'
-						flexShrink={0}
-						bg='bg.tertiary'
-						minH='800px'
-						rounded='xl'
-						borderWidth='0.5px'
-						borderStyle='solid'
-						borderColor='border'
-						boxShadow={{
-							base: '0 1px 12px rgba(0, 0, 0, 0.06)',
-							_dark: '0 1px 16px rgba(0, 0, 0, 0.35)',
-						}}
-						overflow='hidden'
-						hideBelow='lg'
-						position='sticky'
-						top='74px'
-					>
-						<CatalogBtn fullText />
-						<VStack p='4' justifyContent='flex-start'>
-							<HStack w='full' gapX='4' mt='2' align='center'>
-								<Text fontSize='md' fontWeight='semibold' color='main'>
-									{productsT('totalProducts')}
-								</Text>
-								<CountPill
-									value={subcategoryData?.totalCount ?? 0}
-									px='2'
-									py='1'
-									labelProps={{ fontSize: 'sm' }}
-								/>
-							</HStack>
-							<Separator color='border' w='full' my='2' />
-							<QuickFilters maxProductPrice={subcategoryData.maxProductPrice} />
-							<Filters filters={subcategoryFilters} />
-						</VStack>
-					</Box>
-				) : null}
-
-				<Box as='section' w='100%' flex='1' minW={0}>
-					<ProductsGrid
-						products={subcategoryData.products}
-						notFound={productsT('productsNotFound')}
-						limit={pageSize}
-					/>
-					{(subcategoryData?.totalCount ?? 0) > 0 && (
-						<Pagination
-							currentPage={page}
-							totalItems={subcategoryData?.totalCount || 0}
-							pageSize={pageSize}
-							baseRoute={`/products/${category}/${subcategory}`}
+					<Flex hideFrom='lg' justifyContent='flex-end'>
+						<FiltersSidebar
+							filters={subcategoryFilters}
+							maxProductPrice={subcategoryData.maxProductPrice}
+							btnText={navigationT('sidebar.filters')}
 						/>
-					)}
-				</Box>
-			</Group>
+					</Flex>
+				) : null}
+				{!isSimilarSearchMode ? <FiltersTags filters={subcategoryFilters} /> : null}
+
+				<Group justifyContent='space-between' align='flex-start' gap='3'>
+					{!isSimilarSearchMode ? (
+						<Box
+							as='aside'
+							w='304px'
+							flexShrink={0}
+							bg='bg.tertiary'
+							minH='800px'
+							rounded='xl'
+							borderWidth='0.5px'
+							borderStyle='solid'
+							borderColor='border'
+							boxShadow={{
+								base: '0 1px 12px rgba(0, 0, 0, 0.06)',
+								_dark: '0 1px 16px rgba(0, 0, 0, 0.35)',
+							}}
+							overflow='hidden'
+							hideBelow='lg'
+							position='sticky'
+							top='74px'
+						>
+							<CatalogBtn fullText />
+							<VStack p='4' justifyContent='flex-start'>
+								<HStack w='full' gapX='4' mt='2' align='center'>
+									<Text fontSize='md' fontWeight='semibold' color='main'>
+										{productsT('totalProducts')}
+									</Text>
+									<CountPill
+										value={subcategoryData?.totalCount ?? 0}
+										px='2'
+										py='1'
+										labelProps={{ fontSize: 'sm' }}
+									/>
+								</HStack>
+								<Separator color='border' w='full' my='2' />
+								<QuickFilters maxProductPrice={subcategoryData.maxProductPrice} />
+								<Filters filters={subcategoryFilters} />
+							</VStack>
+						</Box>
+					) : null}
+
+					<Box as='section' w='100%' flex='1' minW={0}>
+						<ProductsGrid
+							products={subcategoryData.products}
+							notFound={productsT('productsNotFound')}
+							limit={pageSize}
+						/>
+						{(subcategoryData?.totalCount ?? 0) > 0 && (
+							<Pagination
+								currentPage={page}
+								totalItems={subcategoryData?.totalCount || 0}
+								pageSize={pageSize}
+								baseRoute={`/products/${category}/${subcategory}`}
+							/>
+						)}
+					</Box>
+				</Group>
+			</FilterTransitionProvider>
 
 			<ViewedProductsSection title={productsT('viewed')} tag='viewed' locale={locale} />
 		</Flex>

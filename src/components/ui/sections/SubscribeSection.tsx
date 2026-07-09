@@ -157,7 +157,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 									{...register('email')}
 									maxLength={MAX_CHARACTERS}
 									rounded='lg'
-									variant='outline'
+									variant='subtle'
 									borderColor='border'
 									_focus={{ borderColor: 'main.secondary' }}
 									type='email'

@@ -14,6 +14,8 @@ import {
 } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
+import { localizeAttributeName } from '@/utils/attributeLocalization';
+import { localizeUnit } from '@/utils/unitLocalization';
 import {
 	PRODUCT_DETAIL_CACHE_TAG,
 	PRODUCT_LIST_CACHE_TAG,
@@ -216,8 +218,8 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 		),
 		images,
 		attributes: mergedAttributes.map((a) => ({
-			name: a.name,
-			unit: a.unit,
+			name: localizeAttributeName(a.name, locale),
+			unit: localizeUnit(a.unit, locale),
 			value: a.value,
 		})),
 		variants: product.variants.map((v) => ({
@@ -235,8 +237,8 @@ async function fetchProductBySlug(slug: string, locale: string = DEFAULT_LOCALE)
 			}),
 			attributes: v.attributes.map((a) => ({
 				attributeId: a.attribute.id,
-				name: a.attribute.name,
-				unit: a.attribute.unit,
+				name: localizeAttributeName(a.attribute.name, locale),
+				unit: localizeUnit(a.attribute.unit, locale),
 				value: a.value,
 			})),
 		})),

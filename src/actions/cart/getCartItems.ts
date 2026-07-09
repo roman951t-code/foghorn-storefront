@@ -5,6 +5,8 @@ import 'server-only';
 import { prisma } from '@/lib/prisma';
 import { getEffectiveVariantDiscountPrice } from '@/utils/discountSchedule';
 import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
+import { getRequestLocale } from '@/utils/i18nServerUtils';
 
 export async function getCartItems(userId: string) {
 	if (!userId) {
@@ -12,6 +14,7 @@ export async function getCartItems(userId: string) {
 	}
 
 	try {
+		const locale = await getRequestLocale();
 		const cart = await prisma.cart.findUnique({
 			where: { userId },
 			include: {
@@ -73,17 +76,14 @@ export async function getCartItems(userId: string) {
 					productDiscountEndAt: item.product.discountEndAt ?? null,
 				});
 
-				const variantLabel =
-					item.variant?.attributes?.length
-						? item.variant.attributes
-								.map((a) => {
-									const name = a.attribute.name?.trim?.() ?? '';
-									const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
-									if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-									return name || valueWithUnit;
-								})
-								.join(' / ')
-						: null;
+				const variantLabel = buildLocalizedVariantLabel(
+					item.variant?.attributes?.map((a) => ({
+						name: a.attribute.name,
+						value: a.value,
+						unit: a.attribute.unit,
+					})),
+					locale
+				);
 
 				return {
 					lineId: item.id,

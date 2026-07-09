@@ -1,7 +1,8 @@
 import 'server-only';
 
-import type { DiscountType } from '@prisma/client';
+import type { DiscountType, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { roundPrice, toNumber } from '@/utils/priceFormatting';
 
 type CouponWithPromotion = {
 	id: string;
@@ -21,18 +22,6 @@ type CouponWithPromotion = {
 		endsAt: Date | null;
 		minOrderTotal: any | null;
 	};
-};
-
-const roundCurrency = (value: number) => Math.round(value * 100) / 100;
-
-const toNumber = (value: unknown): number => {
-	if (typeof value === 'number') return value;
-	if (typeof value === 'bigint') return Number(value);
-	if (typeof value === 'string') return Number(value);
-	if (value && typeof value === 'object' && 'toNumber' in value && typeof (value as any).toNumber === 'function') {
-		return (value as any).toNumber();
-	}
-	return Number(value);
 };
 
 export type CouponDiscountPreview = {
@@ -109,7 +98,7 @@ export async function getCouponDiscountPreview(
 		promo.discountType === 'PERCENT'
 			? subtotal * Math.max(0, discountValue) / 100
 			: Math.max(0, discountValue);
-	const amount = roundCurrency(Math.max(0, Math.min(subtotal, rawAmount)));
+	const amount = roundPrice(Math.max(0, Math.min(subtotal, rawAmount)));
 	if (amount <= 0) return { ok: false, error: 'discount_zero' };
 
 	return {
@@ -125,4 +114,22 @@ export async function getCouponDiscountPreview(
 		},
 		maxRedemptions: coupon.maxRedemptions ?? null,
 	};
+}
+
+// Redemption count has a race between the availability check in
+// getCouponDiscountPreview() and the order transaction that calls this, so
+// re-guard atomically here via a conditional updateMany instead of trusting
+// the earlier preview.
+export async function incrementCouponRedemptionWithGuard(
+	tx: Prisma.TransactionClient,
+	{ couponId, maxRedemptions }: { couponId: string; maxRedemptions: number | null }
+): Promise<boolean> {
+	const updated = await tx.coupon.updateMany({
+		where:
+			maxRedemptions != null
+				? { id: couponId, redemptionCount: { lt: maxRedemptions } }
+				: { id: couponId },
+		data: { redemptionCount: { increment: 1 } },
+	});
+	return updated.count > 0;
 }

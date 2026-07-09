@@ -4,37 +4,18 @@ import 'server-only';
 
 import type { OrderItem, UserOrder } from '@/types/order';
 import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
-
-const toNumber = (value: unknown): number => {
-	if (typeof value === 'number') return value;
-	if (typeof value === 'bigint') return Number(value);
-	if (typeof value === 'string') return Number(value);
-	if (value && typeof value === 'object' && 'toNumber' in value && typeof (value as any).toNumber === 'function') {
-		return (value as any).toNumber();
-	}
-	return Number(value);
-};
-
-const roundCurrency = (value: number) => Math.round(value * 100) / 100;
-const buildVariantLabel = (attributes: any[] | undefined | null): string | null => {
-	if (!Array.isArray(attributes) || attributes.length === 0) return null;
-	const label = attributes
-		.map((a) => {
-			const name = String(a.attribute?.name ?? '').trim();
-			const valueWithUnit = [a.value, a.attribute?.unit].filter(Boolean).join(' ').trim();
-			if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-			return name || valueWithUnit;
-		})
-		.join(' / ')
-		.trim();
-	return label || null;
-};
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
+import { roundPrice, toNumber } from '@/utils/priceFormatting';
 
 const resolveDisplayVariantLabel = (
 	snapshotVariantLabel: unknown,
-	attributes: any[] | undefined | null
+	attributes: any[] | undefined | null,
+	locale: string | null | undefined
 ): string | null => {
-	const fallbackLabel = buildVariantLabel(attributes);
+	const fallbackLabel = buildLocalizedVariantLabel(
+		attributes?.map((a) => ({ name: a.attribute?.name, value: a.value, unit: a.attribute?.unit })),
+		locale
+	);
 	if (typeof snapshotVariantLabel !== 'string') return fallbackLabel;
 
 	const snapshotLabel = snapshotVariantLabel.trim();
@@ -44,14 +25,14 @@ const resolveDisplayVariantLabel = (
 	return fallbackLabel ?? snapshotLabel;
 };
 
-export async function normalizeOrder(order: any): Promise<UserOrder> {
+export async function normalizeOrder(order: any, locale?: string | null): Promise<UserOrder> {
 	const items: OrderItem[] =
 		order?.items?.map((item: any) => ({
 			id: item.id,
 			productId: item.productId,
 			variantId: item.variant?.id ?? item.variantId ?? null,
 			sku: item.snapshotVariantSku ?? item.variant?.sku ?? null,
-			variantLabel: resolveDisplayVariantLabel(item.snapshotVariantLabel, item.variant?.attributes),
+			variantLabel: resolveDisplayVariantLabel(item.snapshotVariantLabel, item.variant?.attributes, locale),
 			quantity: item.quantity,
 			baseUnitPrice: item.baseUnitPrice != null ? toNumber(item.baseUnitPrice) : null,
 			unitPrice: Number(item.unitPrice ?? 0),
@@ -67,7 +48,7 @@ export async function normalizeOrder(order: any): Promise<UserOrder> {
 			},
 		})) ?? [];
 
-	const itemDiscountTotal = roundCurrency(
+	const itemDiscountTotal = roundPrice(
 		items.reduce((sum, item) => {
 			const baseUnit = item.baseUnitPrice != null ? item.baseUnitPrice : item.unitPrice;
 			const unitDiscount = Math.max(0, (baseUnit ?? 0) - (item.unitPrice ?? 0));
@@ -81,11 +62,11 @@ export async function normalizeOrder(order: any): Promise<UserOrder> {
 			? order.orderDiscounts
 			: [];
 
-	const promoDiscountTotal = roundCurrency(
+	const promoDiscountTotal = roundPrice(
 		discountRows.reduce((sum: number, d: any) => sum + toNumber(d?.amount ?? 0), 0)
 	);
 
-	const totalDiscount = roundCurrency(itemDiscountTotal + promoDiscountTotal);
+	const totalDiscount = roundPrice(itemDiscountTotal + promoDiscountTotal);
 	const shippingAddressDetails = {
 		country: order?.shippingCountry ?? null,
 		region: order?.shippingRegion ?? null,

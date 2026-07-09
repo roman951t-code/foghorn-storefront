@@ -14,10 +14,11 @@ import { normalizeOrder } from '../orderUtils';
 import { isProductPublished } from '@/utils/publishSchedule';
 import { getEffectiveVariantDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
-import { getCouponDiscountPreview } from '@/lib/coupons';
+import { getCouponDiscountPreview, incrementCouponRedemptionWithGuard } from '@/lib/coupons';
 import type { AppSessionUser } from '@/types/session';
 import {
 	getMissingRequiredShippingAddressFields,
@@ -26,13 +27,15 @@ import {
 } from '@/utils/shippingAddress';
 import {
 	listStripeCheckoutSessionLineItems,
+	normalizeMetadataString,
 	parseLegacyStripeCheckoutItemsMetadata,
 	parseStripeCheckoutLineItemMetadata,
 } from '@/utils/stripeCheckoutItems';
+import { MAX_ITEM_QUANTITY } from '@/constants/cart';
+import { roundPrice } from '@/utils/priceFormatting';
+import { buildCustomerName } from '@/utils/customerName';
 
 type Result = { success: true; order?: UserOrder } | { success: false; message: string };
-
-const MAX_ITEM_QUANTITY = 99;
 
 type FinalizeMode = 'user' | 'system';
 
@@ -66,56 +69,6 @@ const stripeOrderInclude = {
 		},
 	},
 } satisfies Prisma.OrderInclude;
-
-const normalizeMetadataString = (value: unknown, maxLen: number) => {
-	if (typeof value !== 'string') return null;
-	const trimmed = value.trim();
-	if (!trimmed) return null;
-	if (trimmed.length > maxLen) return trimmed.slice(0, maxLen);
-	return trimmed;
-};
-
-const buildVariantLabel = (
-	attributes:
-		| {
-				attribute: { name: string; unit: string | null };
-				value: string;
-		  }[]
-		| undefined
-		| null,
-) => {
-	if (!attributes?.length) return null;
-	const label = attributes
-		.map((a) => {
-			const name = a.attribute.name?.trim?.() ?? '';
-			const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
-			if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-			return name || valueWithUnit;
-		})
-		.join(' / ')
-		.trim();
-	return label || null;
-};
-
-const incrementCouponRedemptionWithGuard = async (
-	tx: Prisma.TransactionClient,
-	{
-		couponId,
-		maxRedemptions,
-	}: {
-		couponId: string;
-		maxRedemptions: number | null;
-	},
-) => {
-	const updated = await tx.coupon.updateMany({
-		where:
-			maxRedemptions != null
-				? { id: couponId, redemptionCount: { lt: maxRedemptions } }
-				: { id: couponId },
-		data: { redemptionCount: { increment: 1 } },
-	});
-	return updated.count > 0;
-};
 
 const isRenderPhaseCacheMutationError = (error: unknown): boolean => {
 	if (!(error instanceof Error)) return false;
@@ -382,7 +335,6 @@ async function finalizeStripeOrderInternal(
 		if (!defaultVariantByProduct.has(v.productId)) defaultVariantByProduct.set(v.productId, v);
 	}
 
-	const toCurrency = (value: number) => Math.round(value * 100) / 100;
 	const unavailable: string[] = [];
 	const orderItems = itemsPayload
 		.map((item) => {
@@ -396,8 +348,10 @@ async function finalizeStripeOrderInternal(
 				return null;
 			}
 
+			// A requested-but-missing variantId still falls through to the
+			// product's default variant, same as no variantId at all.
 			const variant =
-				(item.variantId ? (variantById.get(item.variantId) ?? null) : null) ??
+				(item.variantId ? variantById.get(item.variantId) : undefined) ??
 				defaultVariantByProduct.get(item.productId) ??
 				null;
 			if (!variant || variant.productId !== item.productId) {
@@ -425,9 +379,9 @@ async function finalizeStripeOrderInternal(
 					productDiscountEndAt: product.discountEndAt ?? null,
 				}) ?? variantBase;
 
-			const baseUnitPrice = toCurrency(Number(variantBase));
-			const unitPrice = toCurrency(Number(effectiveVariantPrice));
-			const price = toCurrency(unitPrice * requestedQty);
+			const baseUnitPrice = roundPrice(Number(variantBase));
+			const unitPrice = roundPrice(Number(effectiveVariantPrice));
+			const price = roundPrice(unitPrice * requestedQty);
 			const translation = pickLocalizedTranslation(product.translations, checkoutLocale);
 			return {
 				productId: item.productId,
@@ -438,7 +392,10 @@ async function finalizeStripeOrderInternal(
 				price,
 				snapshotLocale: checkoutLocale,
 				snapshotProductName: translation?.name ?? product.name,
-				snapshotVariantLabel: buildVariantLabel(variant.attributes),
+				snapshotVariantLabel: buildLocalizedVariantLabel(
+					variant.attributes.map((a) => ({ name: a.attribute.name, value: a.value, unit: a.attribute.unit })),
+					checkoutLocale
+				),
 				snapshotVariantSku: variant.sku ?? null,
 			};
 		})
@@ -463,7 +420,7 @@ async function finalizeStripeOrderInternal(
 		return { success: false, message: 'invalid_items' };
 	}
 
-	const calculatedTotal = toCurrency(orderItems.reduce((acc, item) => acc + item.price, 0));
+	const calculatedTotal = roundPrice(orderItems.reduce((acc, item) => acc + item.price, 0));
 	const amountSubtotal = checkoutSession.amount_subtotal
 		? checkoutSession.amount_subtotal / 100
 		: null;
@@ -476,7 +433,7 @@ async function finalizeStripeOrderInternal(
 		return { success: false, message: 'invalid_subtotal' };
 	}
 
-	const expectedTotal = toCurrency(Math.max(0, calculatedTotal - amountDiscount));
+	const expectedTotal = roundPrice(Math.max(0, calculatedTotal - amountDiscount));
 	if (amountTotal === null || Math.abs(expectedTotal - amountTotal) > 0.01) {
 		return { success: false, message: 'invalid_total' };
 	}
@@ -497,17 +454,6 @@ async function finalizeStripeOrderInternal(
 			? await getCouponDiscountPreview(couponCode, calculatedTotal).catch(() => null)
 			: null;
 
-	const buildCustomerName = (first: string | null | undefined, last: string | null | undefined) => {
-		const firstTrimmed = (first ?? '').trim();
-		const lastTrimmed = (last ?? '').trim();
-		if (!firstTrimmed && !lastTrimmed) return null;
-		if (!lastTrimmed) return firstTrimmed || null;
-		if (!firstTrimmed) return lastTrimmed || null;
-		if (firstTrimmed.toLocaleLowerCase().includes(lastTrimmed.toLocaleLowerCase())) {
-			return firstTrimmed;
-		}
-		return `${firstTrimmed} ${lastTrimmed}`;
-	};
 	const contactName = userSnapshot.name ?? null;
 	const contactLastName = userSnapshot.lastName ?? null;
 	const customerName = buildCustomerName(contactName, contactLastName);
@@ -678,7 +624,7 @@ async function finalizeStripeOrderInternal(
 		return { success: false, message: 'order-create-failed' };
 	}
 
-	const normalized = await normalizeOrder(order);
+	const normalized = await normalizeOrder(order, checkoutLocale);
 	await revalidateProductCacheTags(uniqueIds);
 
 	await sendOrderConfirmationEmail({

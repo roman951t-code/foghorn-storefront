@@ -8,6 +8,7 @@ type CategoryCardProps = {
 	products: { name: string; href: string }[];
 	viewAllHref: string;
 	seeProductsLabel: string;
+	imagePriority?: boolean;
 };
 
 export default function CategoryCard({
@@ -16,6 +17,7 @@ export default function CategoryCard({
 	products,
 	viewAllHref,
 	seeProductsLabel,
+	imagePriority = false,
 }: CategoryCardProps) {
 	return (
 		<Card.Root
@@ -95,7 +97,7 @@ export default function CategoryCard({
 				borderStyle='solid'
 				borderColor='border'
 			>
-				<CategoryCardImage src={imageUrl} alt={title} />
+				<CategoryCardImage src={imageUrl} alt={title} priority={imagePriority} />
 			</Box>
 		</Card.Root>
 	);

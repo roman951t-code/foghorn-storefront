@@ -7,8 +7,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 import { isProductPublished } from '@/utils/publishSchedule';
-
-const MAX_ITEM_QUANTITY = 99;
+import { MAX_ITEM_QUANTITY } from '@/constants/cart';
 
 export async function mergeCartData(
 	localItems: { productId: string; variantId: string | null; quantity: number }[]

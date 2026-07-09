@@ -3,6 +3,8 @@ import type { useTranslations } from 'next-intl';
 
 type Translator = ReturnType<typeof useTranslations>;
 
+export const MAX_ITEM_QUANTITY = 99;
+
 const CART_MESSAGE_KEYS = ['cart', 'emptyCart', 'emptyCartDescr', 'cartRemoveFailed'] as const;
 const CART_NAV_MESSAGE_KEYS = ['order'] as const;
 const CART_PRODUCT_MESSAGE_KEYS = ['totalAmount', 'numOfProducts'] as const;

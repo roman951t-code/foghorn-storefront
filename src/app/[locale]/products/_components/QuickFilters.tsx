@@ -7,6 +7,7 @@ import FilterSectionHeading, { FILTER_ACCENT } from './FilterSectionHeading';
 import { Radio, RadioGroup } from '@/components/ui/chakra/radio';
 import { useSearchParams } from 'next/navigation';
 import { useTrackedNavigation } from '@/hooks/useTrackedNavigation';
+import { useFilterTransition } from './FilterTransition';
 
 const radioRowStyle = {
 	w: '100%',
@@ -43,6 +44,7 @@ const sectionBoxStyle = {
 export default function QuickFilters({ maxProductPrice }: { maxProductPrice: number }) {
 	const t = useTranslations('products');
 	const { push } = useTrackedNavigation();
+	const { startTransition } = useFilterTransition();
 	const searchParams = useSearchParams();
 
 	const updateParams = (key: string, value?: string) => {
@@ -52,7 +54,9 @@ export default function QuickFilters({ maxProductPrice }: { maxProductPrice: num
 		} else {
 			params.delete(key);
 		}
-		push(`?${params.toString()}`, { scroll: false });
+		startTransition(() => {
+			push(`?${params.toString()}`, { scroll: false });
+		});
 	};
 
 	const handleOrderByChange = (e: RadioGroupValueChangeDetails) => {

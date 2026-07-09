@@ -17,6 +17,7 @@ import { useTrackedNavigation } from '@/hooks/useTrackedNavigation';
 import { localizeUnit } from '@/utils/unitLocalization';
 import { localizeAttributeName } from '@/utils/attributeLocalization';
 import { FILTER_ACCENT } from './FilterSectionHeading';
+import { useFilterTransition } from './FilterTransition';
 
 type Props = {
 	filters: Filter[] | null;
@@ -24,6 +25,7 @@ type Props = {
 
 export default function Filters({ filters }: Props) {
 	const { push } = useTrackedNavigation();
+	const { startTransition } = useFilterTransition();
 	const searchParams = useSearchParams();
 	const t = useTranslations('products');
 	const locale = useLocale();
@@ -36,9 +38,11 @@ export default function Filters({ filters }: Props) {
 
 			values.forEach((value) => params.append(key, value));
 
-			push(`?${params.toString()}`, { scroll: false });
+			startTransition(() => {
+				push(`?${params.toString()}`, { scroll: false });
+			});
 		},
-		[push, searchParams],
+		[push, searchParams, startTransition],
 	);
 
 	if (!filters || filters.length === 0) {
@@ -86,7 +90,7 @@ export default function Filters({ filters }: Props) {
 								_hover={{ bg: 'bgHover.promoCard' }}
 							>
 								<HStack justify='space-between' w='full' minW={0}>
-									<Text lineClamp={1} fontSize={{ base: 'md', md: 'sm' }}>
+									<Text lineClamp={1} fontSize={{ base: 'md', md: 'sm' }} fontWeight='600'>
 										{filterLabelWithUnit}
 									</Text>
 									{selectedCount > 0 ? (
@@ -122,7 +126,7 @@ export default function Filters({ filters }: Props) {
 													_checked={{
 														borderColor: FILTER_ACCENT,
 													}}
-													fontSize={{ base: 'md', md: 'sm' }}
+													fontSize={{ base: 'lg', md: 'md' }}
 													whiteSpace='normal'
 													wordBreak='break-word'
 												>

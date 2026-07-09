@@ -11,11 +11,18 @@ const stripe =
 
 const INVENTORY_RESTOCKED_NOTE = 'Inventory restocked';
 const RETURNABLE_ORDER_STATUSES: readonly OrderStatus[] = ['DELIVERED'];
+// DELIVERED has no entry here (unlike the other statuses' generic
+// transitions) because DELIVERED -> RETURNED must only happen through
+// processReturn, which handles the Stripe refund and inventory restock.
+// Letting the generic setStatus action reach RETURNED would flip the
+// status without any of that, and since processReturn is only visible for
+// DELIVERED orders, the order would then be permanently stuck with no
+// refund and no UI path left to fix it.
 const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
 	PENDING: ['PAID', 'CANCELLED'],
 	PAID: ['SHIPPED', 'CANCELLED'],
 	SHIPPED: ['DELIVERED', 'CANCELLED'],
-	DELIVERED: ['RETURNED'],
+	DELIVERED: [],
 	CANCELLED: [],
 	RETURNED: [],
 };

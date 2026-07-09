@@ -33,7 +33,7 @@ const PRODUCTS_GRID_CARD_MINMAX = `minmax(${PRODUCTS_GRID_CARD_MIN_WIDTH_PX}px, 
 //     not quite enough room, and the grid compresses the gap to fit instead
 //     of respecting it (confirmed empirically: at exactly the unbuffered
 //     3-column threshold, the gap shrank from 8px to 5px).
-//   - the storefront's own 1444px content cap (Header's <main maxW="1444px">)
+//   - the storefront's own 1512px content cap (Header's <main maxW="1512px">)
 //
 // PRODUCTS_GRID_CSS (category/subcategory/search listing pages) additionally
 // loses a 304px filters sidebar + 12px gap once the sidebar appears at the
@@ -86,10 +86,10 @@ export const PRODUCTS_GRID_CSS = {
 // `breakpoints` only redefines xs/sm/md/lg/xl and never touches '2xl'),
 // which is exactly the point where these pages' own outer margin (mx)
 // drops from 12px to 0, so the grid's available width becomes a *fixed*
-// 1444px (the storefront's content cap) for any viewport from there up —
+// 1512px (the storefront's content cap) for any viewport from there up —
 // it can never grow further. 6 columns at the normal 246-271px band would
-// need up to 1516px, more than that fixed 1444px allows, so this tier uses
-// its own smaller band sized to fill exactly 1444px (6*234 + 5*8 = 1444).
+// need up to 1516px, more than that fixed 1512px allows, so this tier uses
+// its own smaller band sized to fill exactly 1512px (6*234 + 5*8 = 1444).
 // The 1556px threshold (1536 + the same 20px scrollbar buffer as above)
 // guards against firing before the mx:0 margin change has actually landed.
 const SIX_COLUMN_MINMAX = 'minmax(220px, 234px)';

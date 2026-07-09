@@ -32,11 +32,8 @@ const logoHeight = 36;
 function Logo({ onClick }: { onClick?: () => void }) {
 	return (
 		<Link href='/' onClick={onClick}>
-			<Box _dark={{ display: 'none' }}>
-				<Image src={ASSET_IMAGES.logoBigLight} width={208} height={logoHeight} alt='logo' />
-			</Box>
-			<Box display='none' _dark={{ display: 'block' }}>
-				<Image src={ASSET_IMAGES.logoBigDark} width={208} height={logoHeight} alt='logo' />
+			<Box>
+				<Image src={ASSET_IMAGES.logoBig} width={208} height={logoHeight} alt='logo' />
 			</Box>
 		</Link>
 	);

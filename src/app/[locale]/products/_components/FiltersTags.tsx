@@ -8,6 +8,7 @@ import type { Filter } from '@/types/product';
 import { localizeUnit } from '@/utils/unitLocalization';
 import { formatUsdPrice } from '@/utils/priceFormatting';
 import { localizeAttributeName } from '@/utils/attributeLocalization';
+import { useFilterTransition } from './FilterTransition';
 
 // Active filters read as accent-tinted "chips" — the same accent border/bg
 // treatment a checked row gets in the filters sidebar (QuickFilters.tsx,
@@ -36,6 +37,7 @@ type Props = {
 export default function FiltersTags({ filters }: Props) {
 	const searchParams = useSearchParams();
 	const { push } = useTrackedNavigation();
+	const { startTransition } = useFilterTransition();
 	const t = useTranslations('products');
 	const locale = useLocale();
 
@@ -63,7 +65,9 @@ export default function FiltersTags({ filters }: Props) {
 			params.delete(key);
 		}
 
-		push(`?${params.toString()}`);
+		startTransition(() => {
+			push(`?${params.toString()}`);
+		});
 	};
 
 	let orderBy = t('new');
@@ -94,7 +98,9 @@ export default function FiltersTags({ filters }: Props) {
 		const params = new URLSearchParams(searchParams.toString());
 		params.delete('min');
 		params.delete('max');
-		push(`?${params.toString()}`);
+		startTransition(() => {
+			push(`?${params.toString()}`);
+		});
 	};
 
 	return (

@@ -16,6 +16,7 @@ import {
 	resolveProductPrimaryImageFromGallery,
 } from '@/utils/productImages';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
 
 function mapRecentlyViewedProducts(
 	viewed: { product: any }[],
@@ -92,14 +93,15 @@ function mapRecentlyViewedProducts(
 							productDiscountEndAt: p.discountEndAt ?? null,
 						}),
 						stock: p.variants[0].stock,
-						label: (p.variants[0].attributes ?? [])
-							.map((a: any) => {
-								const name = String(a.attribute?.name ?? '').trim();
-								const valueWithUnit = [a.value, a.attribute?.unit].filter(Boolean).join(' ').trim();
-								if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-								return name || valueWithUnit;
-							})
-							.join(' / '),
+						label:
+							buildLocalizedVariantLabel(
+								(p.variants[0].attributes ?? []).map((a: any) => ({
+									name: a.attribute?.name,
+									value: a.value,
+									unit: a.attribute?.unit,
+								})),
+								locale
+							) ?? '',
 					}
 				: undefined,
 		} as SubcategoryProduct;

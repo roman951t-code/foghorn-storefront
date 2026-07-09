@@ -10,7 +10,7 @@ export const productsBreakpoints = {
 	1306: { slidesPerView: 5, spaceBetween: PRODUCT_CARD_HORIZONTAL_GAP_PX },
 	// See CABINET_PRODUCTS_GRID_CSS's 6th tier comment in grids.ts — this is
 	// the '2xl' breakpoint (1536px) plus the usual scrollbar buffer, past
-	// which the container is a fixed 1444px and 6 columns fit exactly.
+	// which the container is a fixed 1512px and 6 columns fit exactly.
 	1556: { slidesPerView: 6, spaceBetween: PRODUCT_CARD_HORIZONTAL_GAP_PX },
 };
 

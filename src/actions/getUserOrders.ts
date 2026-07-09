@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { normalizeOrder } from './orderUtils';
 import type { UserOrder } from '@/types/order';
 import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
+import { getRequestLocale } from '@/utils/i18nServerUtils';
 
 export async function getUserOrders(limit: number, offset = 0): Promise<{
 	items: UserOrder[];
@@ -98,6 +99,7 @@ export async function getUserOrders(limit: number, offset = 0): Promise<{
 		}),
 	]);
 
-	const normalizedItems = await Promise.all(orders.map((order) => normalizeOrder(order)));
+	const locale = await getRequestLocale();
+	const normalizedItems = await Promise.all(orders.map((order) => normalizeOrder(order, locale)));
 	return { items: normalizedItems, totalCount };
 }

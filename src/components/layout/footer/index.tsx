@@ -27,7 +27,7 @@ export default async function Footer({ locale }: { locale: AppLocale }) {
 				justify={'center'}
 				ml='-8px'
 				width='100%'
-				maxW='1444px'
+				maxW='1512px'
 			>
 				<MediaContacts />
 			</Flex>
@@ -38,7 +38,7 @@ export default async function Footer({ locale }: { locale: AppLocale }) {
 				minHeight='60px'
 				width='100%'
 				flexWrap='wrap'
-				maxW='1444px'
+				maxW='1512px'
 				my={{ base: 4, sm: 0 }}
 				gap={2}
 			>
@@ -51,10 +51,10 @@ export default async function Footer({ locale }: { locale: AppLocale }) {
 					<Link
 						href='https://foghornbay.com/'
 						variant='underline'
-						color='main.secondary'
+						color='main.accent'
 						_focusVisible={{
 							outline: '2px solid',
-							outlineColor: 'main.secondary',
+							outlineColor: 'main.accent',
 							outlineOffset: '2px',
 						}}
 					>

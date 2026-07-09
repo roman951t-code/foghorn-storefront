@@ -6,6 +6,7 @@ import QuickFilters from '../_components/QuickFilters';
 import Filters from '../_components/Filters';
 import FiltersSidebar from '../_components/FiltersSidebar';
 import FiltersTags from '../_components/FiltersTags';
+import { FilterTransitionProvider } from '../_components/FilterTransition';
 import ViewedProductsSection from '@/features/catalog/ViewedProductsSection';
 import ProductsGrid from '../_components/ProductsGrid';
 import Pagination from '@/components/ui/Pagination';
@@ -213,67 +214,69 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<PageHeading size='2xl'>
+			<PageHeading size='3xl'>
 				{productsT('searchQueryResults', {
 					searchQuery: tag ? productsT(tag) : searchQuery || '',
 				})}
 			</PageHeading>
 
-			<Flex hideFrom='lg' justifyContent='flex-end'>
-				<FiltersSidebar
-					filters={filters}
-					maxProductPrice={maxProductPrice}
-					btnText={navigationT('sidebar.filters')}
-				/>
-			</Flex>
-
-			<FiltersTags filters={filters} />
-
-			<Group justifyContent='space-between' align='flex-start' gap='3'>
-				<Box
-					as='aside'
-					w='304px'
-					flexShrink={0}
-					bg='bg.tertiary'
-					minH='800px'
-					rounded='lg'
-					hideBelow='lg'
-					position='sticky'
-					top='74px'
-				>
-					<CatalogBtn fullText />
-
-					<VStack p='4' justifyContent='flex-start'>
-						<HStack w='full' gapX='4' mt='2' align='center'>
-							<Text fontSize='md' color='main'>
-								{productsT('totalProducts')}
-							</Text>
-							<CountPill value={totalCount ?? 0} labelProps={{ fontSize: 'sm' }} />
-						</HStack>
-
-						<SearchCategories data={subcategories} allCategories={productsT('allCategories')} />
-
-						<QuickFilters maxProductPrice={maxProductPrice} />
-						<Filters filters={filters} />
-					</VStack>
-				</Box>
-
-				<Box as='section' w='100%' flex='1' minW={0}>
-					<ProductsGrid
-						products={products}
-						notFound={productsT('productsNotFound')}
-						limit={pageSize}
+			<FilterTransitionProvider>
+				<Flex hideFrom='lg' justifyContent='flex-end'>
+					<FiltersSidebar
+						filters={filters}
+						maxProductPrice={maxProductPrice}
+						btnText={navigationT('sidebar.filters')}
 					/>
-					{(totalCount ?? 0) > 0 && (
-						<Pagination
-							currentPage={page}
-							totalItems={totalCount}
-							pageSize={pageSize}
-							baseRoute='/products/search/'
+				</Flex>
+
+				<FiltersTags filters={filters} />
+
+				<Group justifyContent='space-between' align='flex-start' gap='3'>
+					<Box
+						as='aside'
+						w='304px'
+						flexShrink={0}
+						bg='bg.tertiary'
+						minH='800px'
+						rounded='lg'
+						hideBelow='lg'
+						position='sticky'
+						top='74px'
+					>
+						<CatalogBtn fullText />
+
+						<VStack p='4' justifyContent='flex-start'>
+							<HStack w='full' gapX='4' mt='2' align='center'>
+								<Text fontSize='md' color='main'>
+									{productsT('totalProducts')}
+								</Text>
+								<CountPill value={totalCount ?? 0} labelProps={{ fontSize: 'sm' }} />
+							</HStack>
+
+							<SearchCategories data={subcategories} allCategories={productsT('allCategories')} />
+
+							<QuickFilters maxProductPrice={maxProductPrice} />
+							<Filters filters={filters} />
+						</VStack>
+					</Box>
+
+					<Box as='section' w='100%' flex='1' minW={0}>
+						<ProductsGrid
+							products={products}
+							notFound={productsT('productsNotFound')}
+							limit={pageSize}
 						/>
-					)}
-				</Box>
-			</Group>
+						{(totalCount ?? 0) > 0 && (
+							<Pagination
+								currentPage={page}
+								totalItems={totalCount}
+								pageSize={pageSize}
+								baseRoute='/products/search/'
+							/>
+						)}
+					</Box>
+				</Group>
+			</FilterTransitionProvider>
 
 			<ViewedProductsSection title={productsT('viewed')} tag='viewed' locale={locale} />
 		</Flex>

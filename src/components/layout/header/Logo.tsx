@@ -21,19 +21,13 @@ export default function Logo() {
 	return (
 		<Link href='/' aria-label='Go to homepage'>
 			<Box hideFrom='md'>
-				<Box _dark={{ display: 'none' }}>
-					<Image src={ASSET_IMAGES.logoSmallDark} alt='logo' width={48} height={48} priority />
-				</Box>
-				<Box display='none' _dark={{ display: 'block' }}>
-					<Image src={ASSET_IMAGES.logoSmallLight} alt='logo' width={48} height={48} priority />
+				<Box>
+					<Image src={ASSET_IMAGES.logoSmall} alt='logo' width={48} height={48} priority />
 				</Box>
 			</Box>
 			<Box hideBelow='md'>
-				<Box _dark={{ display: 'none' }}>
-					<Image src={ASSET_IMAGES.logoBigDark} alt='logo' width={208} height={50} priority />
-				</Box>
-				<Box display='none' _dark={{ display: 'block' }}>
-					<Image src={ASSET_IMAGES.logoBigLight} alt='logo' width={208} height={50} priority />
+				<Box>
+					<Image src={ASSET_IMAGES.logoBig} alt='logo' width={208} height={50} priority />
 				</Box>
 			</Box>
 		</Link>

@@ -70,7 +70,7 @@ export default function CatalogBtn({ hideBelow, hideFrom, fullText, trigger }: P
 					bg='bg.tertiary'
 					rounded='lg'
 				>
-					<DrawerBody maxW='1444px' margin='auto' w='full' pt={{ base: '6', md: '7' }} pb='4'>
+					<DrawerBody maxW='1512px' margin='auto' w='full' pt={{ base: '6', md: '7' }} pb='4'>
 						<CatalogDrawer />
 					</DrawerBody>
 					<DrawerFooter>

@@ -25,7 +25,10 @@ import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFall
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { getMaxEffectiveProductPrice } from '@/utils/maxEffectiveProductPrice';
-import { getAttributeNameCandidatesForFilterKey } from '@/utils/attributeLocalization';
+import {
+	buildLocalizedVariantLabel,
+	getAttributeNameCandidatesForFilterKey,
+} from '@/utils/attributeLocalization';
 
 export async function getProductsByTag<T extends boolean>(
 	tag: string,
@@ -324,14 +327,15 @@ export async function getProductsByTag<T extends boolean>(
 						price: product.variants[0].price.toNumber(),
 						discountPrice: product.discountPrice != null ? Number(product.discountPrice) : null,
 						stock: product.variants[0].stock,
-						label: product.variants[0].attributes
-							.map((a) => {
-								const name = a.attribute.name?.trim?.() ?? '';
-								const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
-								if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-								return name || valueWithUnit;
-							})
-							.join(' / '),
+						label:
+							buildLocalizedVariantLabel(
+								product.variants[0].attributes.map((a) => ({
+									name: a.attribute.name,
+									value: a.value,
+									unit: a.attribute.unit,
+								})),
+								locale
+							) ?? '',
 				  }
 				: undefined,
 			averageRating: Number(product.averageRating ?? 0),

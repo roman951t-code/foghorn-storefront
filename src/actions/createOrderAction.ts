@@ -12,17 +12,21 @@ import { prisma } from '@/lib/prisma';
 import { getEffectiveVariantDiscountPrice } from '@/utils/discountSchedule';
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { isProductPublished } from '@/utils/publishSchedule';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
 import { normalizeOrder } from './orderUtils';
 import type { UserOrder } from '@/types/order';
 import { sendOrderConfirmationEmail } from '@/lib/orderEmails';
 import { PRODUCT_LIST_CACHE_TAG, productCacheTagById } from '@/constants/products';
-import { getCouponDiscountPreview } from '@/lib/coupons';
+import { getCouponDiscountPreview, incrementCouponRedemptionWithGuard } from '@/lib/coupons';
 import {
 	getMissingRequiredShippingAddressFields,
 	normalizeShippingAddress,
 	SHIPPING_ADDRESS_FIELD_LIMITS,
 	type ShippingAddressInput,
 } from '@/utils/shippingAddress';
+import { roundPrice } from '@/utils/priceFormatting';
+import { buildCustomerName } from '@/utils/customerName';
+import { MAX_ITEM_QUANTITY } from '@/constants/cart';
 
 type CreateOrderItemPayload = { productId: string; variantId: string | null; quantity: number };
 
@@ -45,7 +49,7 @@ const CreateOrderSchema = z.object({
 			z.object({
 				productId: z.string().min(1, 'productId_required'),
 				variantId: z.string().nullable(),
-				quantity: z.number().int().positive().max(99, 'quantity_too_high'),
+				quantity: z.number().int().positive().max(MAX_ITEM_QUANTITY, 'quantity_too_high'),
 			})
 		)
 		.min(1, 'items_required'),
@@ -67,28 +71,6 @@ const CreateOrderSchema = z.object({
 	couponCode: z.string().optional(),
 	locale: z.string().trim().toLowerCase().max(16).optional(),
 });
-
-const buildVariantLabel = (
-	attributes:
-		| {
-				attribute: { name: string; unit: string | null };
-				value: string;
-		  }[]
-		| undefined
-		| null
-) => {
-	if (!attributes?.length) return null;
-	const label = attributes
-		.map((a) => {
-			const name = a.attribute.name?.trim?.() ?? '';
-			const valueWithUnit = [a.value, a.attribute.unit].filter(Boolean).join(' ').trim();
-			if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
-			return name || valueWithUnit;
-		})
-		.join(' / ')
-		.trim();
-	return label || null;
-};
 
 export async function createOrderAction(
 	_: unknown,
@@ -146,8 +128,6 @@ export async function createOrderAction(
 
 	const productMap = new Map(products.map((p) => [p.id, p]));
 	const unavailable: string[] = [];
-
-	const toCurrency = (value: number) => Math.round(value * 100) / 100;
 
 	const uniqueVariantIds = Array.from(
 		new Set(items.map((i) => i.variantId).filter((v): v is string => !!v))
@@ -219,9 +199,12 @@ export async function createOrderAction(
 				return null;
 			}
 
+			// A requested-but-missing variantId still falls through to the
+			// product's default variant, same as no variantId at all.
 			const variant =
-				(item.variantId ? variantById.get(item.variantId) ?? null : null) ??
-				(defaultVariantByProduct.get(item.productId) ?? null);
+				(item.variantId ? variantById.get(item.variantId) : undefined) ??
+				defaultVariantByProduct.get(item.productId) ??
+				null;
 			if (!variant || variant.productId !== item.productId) {
 				unavailable.push(item.productId);
 				return null;
@@ -246,10 +229,10 @@ export async function createOrderAction(
 					productDiscountEndAt: product.discountEndAt ?? null,
 				}) ?? variantBasePrice;
 
-			const baseUnitPrice = toCurrency(Number(variantBasePrice));
-			const unitPrice = toCurrency(Number(effectiveVariantPrice));
+			const baseUnitPrice = roundPrice(Number(variantBasePrice));
+			const unitPrice = roundPrice(Number(effectiveVariantPrice));
 			const quantity = Math.max(1, item.quantity);
-			const price = toCurrency(unitPrice * quantity);
+			const price = roundPrice(unitPrice * quantity);
 			const translation = pickLocalizedTranslation(product.translations, locale);
 			return {
 				productId: item.productId,
@@ -260,7 +243,10 @@ export async function createOrderAction(
 				price,
 				snapshotLocale: locale,
 				snapshotProductName: translation?.name ?? product.name,
-				snapshotVariantLabel: buildVariantLabel(variant.attributes),
+				snapshotVariantLabel: buildLocalizedVariantLabel(
+					variant.attributes.map((a) => ({ name: a.attribute.name, value: a.value, unit: a.attribute.unit })),
+					locale
+				),
 				snapshotVariantSku: variant.sku ?? null,
 			};
 		})
@@ -282,7 +268,7 @@ export async function createOrderAction(
 	}
 
 	const total = orderItems.reduce((acc, item) => acc + item.price, 0);
-	const roundedTotal = Math.round(total * 100) / 100;
+	const roundedTotal = roundPrice(total);
 	const couponCode = parsed.data.couponCode?.trim() || null;
 	const shippingAddress = normalizeShippingAddress(parsed.data.shippingAddress);
 	const couponDiscountRes =
@@ -292,23 +278,12 @@ export async function createOrderAction(
 	}
 	const couponDiscountAmount =
 		couponDiscountRes && couponDiscountRes.ok ? couponDiscountRes.preview.amount : 0;
-	const finalTotal = Math.round(Math.max(0, roundedTotal - couponDiscountAmount) * 100) / 100;
+	const finalTotal = roundPrice(Math.max(0, roundedTotal - couponDiscountAmount));
 	const missingShippingFields = getMissingRequiredShippingAddressFields(parsed.data.shippingAddress);
 	if (missingShippingFields.length > 0) {
 		return { success: false, message: 'shipping-address-required' };
 	}
 
-	const buildCustomerName = (first: string | null | undefined, last: string | null | undefined) => {
-		const firstTrimmed = (first ?? '').trim();
-		const lastTrimmed = (last ?? '').trim();
-		if (!firstTrimmed && !lastTrimmed) return null;
-		if (!lastTrimmed) return firstTrimmed || null;
-		if (!firstTrimmed) return lastTrimmed || null;
-		if (firstTrimmed.toLocaleLowerCase().includes(lastTrimmed.toLocaleLowerCase())) {
-			return firstTrimmed;
-		}
-		return `${firstTrimmed} ${lastTrimmed}`;
-	};
 	const contactName = session.user?.name ?? null;
 	const contactLastName = session.user?.lastName ?? null;
 	const customerName = buildCustomerName(contactName, contactLastName);
@@ -415,15 +390,11 @@ export async function createOrderAction(
 			});
 
 			if (couponDiscountRes && couponDiscountRes.ok) {
-				const maxRedemptions = couponDiscountRes.maxRedemptions;
-				const updated = await tx.coupon.updateMany({
-					where:
-						maxRedemptions != null
-							? { id: couponDiscountRes.preview.couponId, redemptionCount: { lt: maxRedemptions } }
-							: { id: couponDiscountRes.preview.couponId },
-					data: { redemptionCount: { increment: 1 } },
+				const didIncrement = await incrementCouponRedemptionWithGuard(tx, {
+					couponId: couponDiscountRes.preview.couponId,
+					maxRedemptions: couponDiscountRes.maxRedemptions,
 				});
-				if (updated.count === 0) {
+				if (!didIncrement) {
 					throw new Error('coupon-maxed');
 				}
 
@@ -447,7 +418,7 @@ export async function createOrderAction(
 			return newOrder;
 		});
 
-		const normalized = await normalizeOrder(order);
+		const normalized = await normalizeOrder(order, locale);
 
 		const productTags = uniqueIds.map((id) => productCacheTagById(id));
 		await Promise.all(productTags.map((tag) => updateTag(tag)));

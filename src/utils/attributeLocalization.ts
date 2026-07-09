@@ -1,3 +1,5 @@
+import { localizeUnit } from './unitLocalization';
+
 type LocalizedToken = {
 	en: string;
 	uk: string;
@@ -49,7 +51,7 @@ const ATTRIBUTE_NAME_TOKENS: LocalizedToken[] = [
 	{
 		en: 'RAM',
 		uk: "Оперативна пам'ять",
-		aliases: ['ram', 'оперативна памʼять', "оперативна пам'ять"],
+		aliases: ['ram', 'оперативна памʼять', "оперативна пам'ять", 'озп'],
 	},
 	{
 		en: 'Diagonal',
@@ -64,16 +66,7 @@ const ATTRIBUTE_NAME_TOKENS: LocalizedToken[] = [
 	{ en: 'Weight', uk: 'Вага', aliases: ['weight', 'вага'] },
 ];
 
-const ATTRIBUTE_UNIT_TOKENS: LocalizedToken[] = [
-	{ en: 'GB', uk: 'ГБ', aliases: ['gb', 'гб'] },
-	{ en: 'MB', uk: 'МБ', aliases: ['mb', 'мб'] },
-	{ en: 'TB', uk: 'ТБ', aliases: ['tb', 'тб'] },
-	{ en: 'Hz', uk: 'Гц', aliases: ['hz', 'гц'] },
-	{ en: 'inch', uk: 'дюйм', aliases: ['inch', 'in', 'дюйм', 'дюймів', 'дюйма', '"'] },
-];
-
 const ATTRIBUTE_NAME_LOOKUP = createLookup(ATTRIBUTE_NAME_TOKENS);
-const ATTRIBUTE_UNIT_LOOKUP = createLookup(ATTRIBUTE_UNIT_TOKENS);
 
 const localizeToken = (
 	value: string,
@@ -109,11 +102,6 @@ export function getAttributeNameCandidatesForFilterKey(filterKey: string) {
 	return Array.from(new Set([token.en, token.uk, filterKey].filter(Boolean)));
 }
 
-function localizeAttributeUnit(unit: string | null | undefined, locale?: string | null) {
-	if (!unit) return unit ?? null;
-	return localizeToken(unit, locale, ATTRIBUTE_UNIT_LOOKUP);
-}
-
 type VariantLabelPart = {
 	name?: string | null;
 	value?: string | null;
@@ -129,7 +117,7 @@ export function buildLocalizedVariantLabel(
 		.map((part) => {
 			const name = part.name ? localizeAttributeName(part.name, locale).trim() : '';
 			const value = (part.value ?? '').trim();
-			const unit = part.unit ? localizeAttributeUnit(part.unit, locale)?.trim() ?? '' : '';
+			const unit = part.unit ? (localizeUnit(part.unit, locale) ?? '').trim() : '';
 			const valueWithUnit = [value, unit].filter(Boolean).join(' ').trim();
 			if (name && valueWithUnit) return `${name}: ${valueWithUnit}`;
 			return name || valueWithUnit;

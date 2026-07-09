@@ -82,10 +82,11 @@
 
 .productsSlider .productPreviewSwiper .swiper-button-prev,
 .productsSlider .productPreviewSwiper .swiper-button-next {
-	background: rgba(0, 0, 0, 0.6);
+	background: rgba(0, 0, 0, 0.75);
 	border-radius: 100%;
-	width: 28px;
-	height: 28px;
+	border: 1px solid rgba(233, 231, 231, 0.7);
+	width: 30px;
+	height: 30px;
 }
 
 .productsSlider .productPreviewSwiper .swiper-button-prev svg {

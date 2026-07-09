@@ -1,34 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import PriorityImageWithFallback from '@/components/ui/PriorityImageWithFallback';
 import { SUBCATEGORY_PLACEHOLDER_IMAGE } from '@/utils/categoryImages';
 
 type Props = {
 	src: string;
 	alt: string;
+	priority?: boolean;
 };
 
-export default function CategoryCardImage({ src, alt }: Props) {
-	const [resolvedImageUrl, setResolvedImageUrl] = useState(src);
-
-	useEffect(() => {
-		setResolvedImageUrl(src);
-	}, [src]);
-
+export default function CategoryCardImage({ src, alt, priority = false }: Props) {
 	return (
-		<Image
-			src={resolvedImageUrl}
+		<PriorityImageWithFallback
+			src={src}
+			fallbackSrc={SUBCATEGORY_PLACEHOLDER_IMAGE}
 			alt={alt}
-			fill
 			sizes='(min-width: 30em) 316px, 100vw'
-			loading='lazy'
-			style={{ objectFit: 'cover' }}
-			onError={() => {
-				if (resolvedImageUrl !== SUBCATEGORY_PLACEHOLDER_IMAGE) {
-					setResolvedImageUrl(SUBCATEGORY_PLACEHOLDER_IMAGE);
-				}
-			}}
+			objectFit='cover'
+			loading={priority ? 'eager' : 'lazy'}
+			fetchPriority={priority ? 'high' : 'auto'}
+			priority={priority}
 		/>
 	);
 }

@@ -6,6 +6,7 @@ import { Slider } from '@/components/ui/chakra/slider';
 import FilterSectionHeading from './FilterSectionHeading';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useFilterTransition } from './FilterTransition';
 
 interface Props {
 	title: string;
@@ -14,6 +15,7 @@ interface Props {
 
 export default function PriceSlider({ title, maxProductPrice }: Props) {
 	const router = useRouter();
+	const { startTransition } = useFilterTransition();
 	const searchParams = useSearchParams();
 
 	const maxPrice = useRef(Math.ceil(maxProductPrice));
@@ -31,7 +33,9 @@ export default function PriceSlider({ title, maxProductPrice }: Props) {
 		const params = new URLSearchParams(searchParams.toString());
 		params.set('min', values[0].toString());
 		params.set('max', values[1].toString());
-		router.push(`?${params.toString()}`);
+		startTransition(() => {
+			router.push(`?${params.toString()}`);
+		});
 	};
 
 	const handleMinChange = (val: string) => {
