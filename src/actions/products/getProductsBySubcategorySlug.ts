@@ -142,7 +142,6 @@ export async function getProductsBySubcategorySlug(
 	'use cache';
 	cacheLife('hours');
 	cacheTag(PRODUCT_LIST_CACHE_TAG, PRODUCT_CATEGORY_CACHE_TAG);
-	await new Promise((r) => setTimeout(r, 4000)); // TEMP-DEBUG-DELAY
 
 	const safeLimit = Math.min(MAX_PRODUCTS_PER_PAGE, Math.max(1, Math.floor(limit || 1)));
 	const safeOffset = Math.max(0, Math.floor(offset || 0));

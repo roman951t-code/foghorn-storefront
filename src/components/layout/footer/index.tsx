@@ -51,7 +51,7 @@ export default async function Footer({ locale }: { locale: AppLocale }) {
 					<Link
 						href='https://foghornbay.com/'
 						variant='underline'
-						color='main.accent'
+						color='main.secondary'
 						_focusVisible={{
 							outline: '2px solid',
 							outlineColor: 'main.accent',
