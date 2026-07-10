@@ -184,24 +184,35 @@ contract GitLab's `allow_failure: true` had.
 
 ---
 
-## 4. Required GitHub Actions secrets (GitLab no longer needs any)
+## 4. Required GitHub Actions secrets + variables (GitLab no longer needs any)
 
 `.gitlab-ci.yml`'s jobs are validate-only now and use inline placeholder values —
-no GitLab CI/CD Variables are required anymore. Everything real lives in
-**GitHub → Settings → Secrets and variables → Actions**, scoped to a GitHub
-**Environment** named `production` (Settings → Environments → New environment →
-name it `production`, then add secrets under *that*, not as plain repository
-secrets). This is the GitHub equivalent of GitLab's "Protected variable" — it
-restricts the secret to jobs that declare `environment: { name: production }`,
-which every job below already does.
+no GitLab CI/CD Variables are required anymore. Everything real lives on a
+GitHub **Environment** named `production` (Settings → Environments → New
+environment → name it `production`), which every real job below declares via
+`environment: { name: production }` — the GitHub equivalent of GitLab's
+"Protected variable" scoping.
 
-| Secret | Used by | Notes |
-|---|---|---|
-| `DATABASE_URL` | `migrate` | Real Supabase connection string. Only this job sees the real one — `validate` defines its own throwaway `DATABASE_URL` inline in its `env:` block. |
-| `VERCEL_DEPLOY_HOOK_URL` | `deploy-storefront` | Vercel → Project → Settings → Git → Deploy Hooks — the same hook GitLab used to call. |
-| `RENDER_DEPLOY_HOOK_URL` | `deploy-admin` | Render → Service → Settings → Deploy Hook — the same hook GitLab used to call. |
-| `NEXT_PUBLIC_APP_URL` | `deploy-storefront` (environment URL), `smoke` | e.g. `https://shop.foghornbay.com` (no trailing slash) |
-| `ADMINJS_PUBLIC_URL` | `deploy-admin` (environment URL), `smoke` | Bare domain or `/admin` path both work — `smoke-test.sh`'s `check()` follows redirects (`curl -L`) |
+**They are split across two different GitHub stores, and the split is not
+optional — it's a real GitHub Actions syntax rule, not a style choice:**
+
+| Name | Store | Used by | Notes |
+|---|---|---|---|
+| `DATABASE_URL` | **Secret** | `migrate` | Real Supabase connection string. Only this job sees the real one — `validate` defines its own throwaway `DATABASE_URL` inline. |
+| `VERCEL_DEPLOY_HOOK_URL` | **Secret** | `deploy-storefront` | Vercel → Project → Settings → Git → Deploy Hooks — the same hook GitLab used to call. |
+| `RENDER_DEPLOY_HOOK_URL` | **Secret** | `deploy-admin` | Render → Service → Settings → Deploy Hook — the same hook GitLab used to call. |
+| `NEXT_PUBLIC_APP_URL` | **Variable** | `deploy-storefront` (environment URL), `smoke` | e.g. `https://shop.foghornbay.com` (no trailing slash) — public URL, not sensitive |
+| `ADMINJS_PUBLIC_URL` | **Variable** | `deploy-admin` (environment URL), `smoke` | Bare domain or `/admin` path both work — `smoke-test.sh`'s `check()` follows redirects (`curl -L`) — public URL, not sensitive |
+
+**Why `NEXT_PUBLIC_APP_URL`/`ADMINJS_PUBLIC_URL` must be Variables (`vars.*`), not
+Secrets:** `deploy-storefront`/`deploy-admin` show these as the job's
+`environment.url` (the clickable link in GitHub's deployment UI), and
+`environment.url` only supports the `vars`/`github`/`needs`/`inputs`/`strategy`/
+`matrix` contexts — **not** `secrets`. Referencing `secrets.NEXT_PUBLIC_APP_URL`
+(or any secret) there makes the *entire workflow file* fail to parse with
+`Unrecognized named-value: 'secrets'`, blocking every job, not just the one
+using it — see §7. Putting them in Environment *Variables* instead of *Secrets*
+is also more correct anyway: they're public URLs, not credentials.
 
 If `NEXT_PUBLIC_APP_URL` / `ADMINJS_PUBLIC_URL` aren't set, `smoke-test.sh` exits 1
 immediately with `ERROR: ... is not set.` before making any HTTP calls — same
@@ -401,6 +412,7 @@ building this pipeline, in the order encountered.
 | `/bin/sh: eval: line N: bash: not found` | *(historical)* GitLab `deploy:*`/`smoke:production`, before the GitHub Actions cutover | `node:22-alpine`'s default shell is busybox `ash`, not `bash`; the deploy/smoke scripts declare `#!/usr/bin/env bash` and use `set -o pipefail` (not POSIX-sh compatible) | `apk add --no-cache curl bash` in `before_script`. Moot on GitHub Actions' `ubuntu-latest` runners, which ship real `bash` by default — only matters if these scripts ever run under Alpine/`ash` again |
 | smoke test FAIL: `Stripe webhook (no POST) → HTTP 500 (expected 405/404/400)` | `smoke` job (GitLab's old `smoke:production`, now GitHub Actions' `smoke`) | The test hit `/api/stripe/webhook`, but the real route is `/api/payments/stripe/webhook` — the wrong (nonexistent) path fell through to something that 500s instead of 404ing | Fixed the URL in `scripts/smoke-test.sh` to the real path; the real route only exports `POST` so a `GET` there correctly gets Next.js's automatic `405` |
 | smoke test FAIL: `Admin login page → HTTP 301 (expected 200)` | `smoke` job (GitLab's old `smoke:production`, now GitHub Actions' `smoke`) | `ADMINJS_PUBLIC_URL` points at the bare domain, which we ourselves 301-redirect to `/admin` (§ "Cannot GET /" row above); `curl` doesn't follow redirects by default | Added `-L` to the `curl` call in `smoke-test.sh`'s shared `check()` helper so it follows redirects and checks the *final* page's status |
+| `Invalid workflow file ... Unrecognized named-value: 'secrets'. Located at position 1 within expression: secrets.NEXT_PUBLIC_APP_URL` (or `ADMINJS_PUBLIC_URL`) | GitHub Actions workflow parse, before any job runs (`deploy-production.yml`) | `jobs.<id>.environment.url` only allows the `vars`/`github`/`needs`/`inputs`/`strategy`/`matrix` contexts — `secrets` isn't one of them. A single bad reference fails the *whole file's* validation, blocking every job | Use `vars.NEXT_PUBLIC_APP_URL`/`vars.ADMINJS_PUBLIC_URL` there instead, and store those two as GitHub Environment **Variables**, not Secrets (§4) — they're public URLs anyway |
 
 ---
 

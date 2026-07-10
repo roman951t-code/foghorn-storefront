@@ -244,19 +244,25 @@ run (`migrate` is a safe no-op even if it re-runs too — there's nothing pendin
 8. *(Optional)* Push to `origin` (GitLab) too if you still want its secondary validate-only check —
    nothing in steps 1–7 depends on it.
 
-### 4.5 Required GitHub Actions secrets (reference table; GitLab needs none anymore)
+### 4.5 Required GitHub Actions secrets + variables (reference table; GitLab needs none anymore)
 
-Scope all of these to a GitHub **Environment** named `production` (Settings → Environments), not plain
-repository secrets — that's the GitHub equivalent of GitLab's "Protected" variable, restricting the
-secret to jobs that declare `environment: { name: production }`.
+Scope all of these to a GitHub **Environment** named `production` (Settings → Environments) — that's
+the GitHub equivalent of GitLab's "Protected" variable, restricting them to jobs that declare
+`environment: { name: production }`. They split across two different stores, and it's not optional:
 
-| Secret | Used by | Notes |
-|---|---|---|
-| `DATABASE_URL` | `migrate` | Real Supabase connection string. `validate` defines its own throwaway `DATABASE_URL` inline — this is the only job that sees the real one. |
-| `VERCEL_DEPLOY_HOOK_URL` | `deploy-storefront` | Vercel → Project → Settings → Git → Deploy Hooks |
-| `RENDER_DEPLOY_HOOK_URL` | `deploy-admin` | Render → Service → Settings → Deploy Hook |
-| `NEXT_PUBLIC_APP_URL` | `deploy-storefront` (environment URL), `smoke` | e.g. `https://shop.foghornbay.com` (no trailing slash) |
-| `ADMINJS_PUBLIC_URL` | `deploy-admin` (environment URL), `smoke` | Bare domain or `/admin` path both work — `smoke-test.sh` follows redirects |
+| Name | Store | Used by | Notes |
+|---|---|---|---|
+| `DATABASE_URL` | Secret | `migrate` | Real Supabase connection string. `validate` defines its own throwaway `DATABASE_URL` inline — this is the only job that sees the real one. |
+| `VERCEL_DEPLOY_HOOK_URL` | Secret | `deploy-storefront` | Vercel → Project → Settings → Git → Deploy Hooks |
+| `RENDER_DEPLOY_HOOK_URL` | Secret | `deploy-admin` | Render → Service → Settings → Deploy Hook |
+| `NEXT_PUBLIC_APP_URL` | **Variable** | `deploy-storefront` (environment URL), `smoke` | e.g. `https://shop.foghornbay.com` (no trailing slash) |
+| `ADMINJS_PUBLIC_URL` | **Variable** | `deploy-admin` (environment URL), `smoke` | Bare domain or `/admin` path both work — `smoke-test.sh` follows redirects |
+
+The last two **must** be Variables (`vars.*`), not Secrets: `deploy-storefront`/`deploy-admin` use them
+as the job's `environment.url`, and that field only supports `vars`/`github`/`needs`/`inputs`/
+`strategy`/`matrix` — never `secrets`. Putting a `secrets.*` reference there fails the whole workflow
+file's parse step with `Unrecognized named-value: 'secrets'`, before any job runs. See
+`docs/cicd-pipeline.md` §4/§7 for the full story.
 
 If `NEXT_PUBLIC_APP_URL`/`ADMINJS_PUBLIC_URL` are unset, `smoke-test.sh` exits 1 immediately with a clear
 `ERROR: ... is not set.` — there's nothing else to debug if you see exactly that message.

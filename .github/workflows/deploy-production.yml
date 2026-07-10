@@ -139,7 +139,12 @@ jobs:
     timeout-minutes: 5
     environment:
       name: production
-      url: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+      # environment.url only allows the `vars`/`github`/`needs` contexts, not
+      # `secrets` — GitHub rejects the whole workflow file at parse time
+      # otherwise ("Unrecognized named-value: 'secrets'"). NEXT_PUBLIC_APP_URL
+      # is a public URL anyway, so it belongs in Environment *Variables*, not
+      # Secrets — see docs/cicd-pipeline.md §4.
+      url: ${{ vars.NEXT_PUBLIC_APP_URL }}
     env:
       VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
 
@@ -156,7 +161,9 @@ jobs:
     timeout-minutes: 5
     environment:
       name: production
-      url: ${{ secrets.ADMINJS_PUBLIC_URL }}
+      # Same environment.url restriction as deploy-storefront above — must be
+      # `vars`, not `secrets`.
+      url: ${{ vars.ADMINJS_PUBLIC_URL }}
     env:
       RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
@@ -176,8 +183,8 @@ jobs:
     environment:
       name: production
     env:
-      NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
-      ADMINJS_PUBLIC_URL: ${{ secrets.ADMINJS_PUBLIC_URL }}
+      NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+      ADMINJS_PUBLIC_URL: ${{ vars.ADMINJS_PUBLIC_URL }}
 
     steps:
       - name: Checkout
