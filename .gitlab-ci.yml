@@ -1,12 +1,15 @@
 # GitLab CI/CD — online-store
+# Validation only. Production deploys (DB migration + Vercel/Render deploy
+# hooks) moved to GitHub Actions (.github/workflows/deploy-production.yml),
+# which is now the canonical CD pipeline — see docs/cicd-pipeline.md §1.
+# This file no longer deploys anything: it's a secondary lint/test/build
+# check, safe to keep running (or stop pushing to GitLab entirely) without
+# affecting production.
 # Stages run in order; jobs within a stage run in parallel.
-# Protected CI/CD variables (Settings → CI/CD → Variables) supply production secrets.
 
 stages:
   - validate
   - security
-  - migrate
-  - deploy
 
 # ─── Shared defaults ──────────────────────────────────────────────────────────
 default:
@@ -102,77 +105,3 @@ npm-audit:
   allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
-# ─── Stage: migrate (main only, manual gate) ──────────────────────────────────
-# Click this job to apply pending Prisma migrations to the production database.
-# DATABASE_URL must be set as a Protected CI/CD variable in GitLab settings.
-# Safe to run when there are no pending migrations — it will be a no-op.
-
-migrate:production:
-  stage: migrate
-  environment:
-    name: production
-  variables:
-    NODE_ENV: production
-    # DATABASE_URL → Protected CI/CD variable (Settings → CI/CD → Variables)
-  script:
-    - npm run db:migrate:deploy
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: manual
-  allow_failure: false
-
-# ─── Stage: deploy (main only, runs after migrate completes) ──────────────────
-# VERCEL_DEPLOY_HOOK_URL and RENDER_DEPLOY_HOOK_URL must be set as
-# Protected CI/CD variables. Both jobs trigger async deploys; smoke-test
-# polls the live endpoints after they finish.
-
-deploy:storefront:
-  stage: deploy
-  environment:
-    name: production
-    url: $NEXT_PUBLIC_APP_URL
-  before_script:
-    # bash is required: the deploy/smoke scripts declare #!/usr/bin/env bash and
-    # use `set -o pipefail`, which node:22-alpine's default sh (busybox ash) lacks.
-    - apk add --no-cache curl bash
-  script:
-    - bash scripts/deploy-vercel.sh
-  needs:
-    - migrate:production
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: on_success
-
-deploy:admin:
-  stage: deploy
-  environment:
-    name: production/admin
-    url: $ADMINJS_PUBLIC_URL
-  before_script:
-    # bash is required: the deploy/smoke scripts declare #!/usr/bin/env bash and
-    # use `set -o pipefail`, which node:22-alpine's default sh (busybox ash) lacks.
-    - apk add --no-cache curl bash
-  script:
-    - bash scripts/deploy-render.sh
-  needs:
-    - migrate:production
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: on_success
-
-smoke:production:
-  stage: deploy
-  before_script:
-    # bash is required: the deploy/smoke scripts declare #!/usr/bin/env bash and
-    # use `set -o pipefail`, which node:22-alpine's default sh (busybox ash) lacks.
-    - apk add --no-cache curl bash
-  script:
-    - bash scripts/smoke-test.sh
-  needs:
-    - deploy:storefront
-    - deploy:admin
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: on_success
-  allow_failure: true

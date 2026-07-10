@@ -1,10 +1,24 @@
 name: Deploy Production
 
-# Full CI + CD for pushes to main. Replaces the GitLab pipeline defined in
-# .gitlab-ci.yml. To get a single Vercel deploy per push, disable Vercel's git
-# integration for the production branch (Settings → Git → Production Branch →
-# change to a non-existent branch) so this workflow's deploy-hook call is the
-# only trigger.
+# Canonical CI + CD for pushes to main. Replaces .gitlab-ci.yml's old
+# migrate/deploy stages — .gitlab-ci.yml is now validate-only (lint/test/build
+# checks), kept as an optional secondary check, not a deploy trigger.
+#
+# Both Vercel and Render deploys below go through deploy hooks — the same
+# mechanism .gitlab-ci.yml used to use (scripts/deploy-vercel.sh,
+# scripts/deploy-render.sh) — not `vercel pull`/`vercel build --prebuilt`.
+# This lets Vercel/Render keep building on their own infra exactly as before;
+# only who triggers the hook changes.
+#
+# Two things outside this file make this the *only* trigger per push, instead
+# of one of several competing ones:
+#   1. vercel.json sets git.deploymentEnabled.main = false, so a GitHub push no
+#      longer makes Vercel auto-deploy on its own — only the deploy-storefront
+#      job's hook call below does.
+#   2. Render's Git source must be repointed from GitLab to this GitHub repo
+#      (Render dashboard → service → Settings → Git), with Render's own
+#      "Auto-Deploy" setting turned OFF, so deploy-admin's hook call is
+#      Render's only trigger too. See docs/cicd-pipeline.md §1.
 #
 # Job graph:
 #   validate  (lint + test + build against a real Postgres service)
@@ -159,6 +173,8 @@ jobs:
     timeout-minutes: 10
     # allow_failure equivalent — smoke failures are informational, not a gate.
     continue-on-error: true
+    environment:
+      name: production
     env:
       NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
       ADMINJS_PUBLIC_URL: ${{ secrets.ADMINJS_PUBLIC_URL }}

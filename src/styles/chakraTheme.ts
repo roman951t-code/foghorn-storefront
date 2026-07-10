@@ -188,7 +188,7 @@ const config = defineConfig({
 				border: {
 					DEFAULT: {
 						value: {
-							_light: '{colors.gray.300}',
+							_light: '{colors.gray.400}',
 							_dark: '{colors.gray.500}',
 						},
 					},

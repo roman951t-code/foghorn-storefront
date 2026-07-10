@@ -152,8 +152,8 @@ export default function SearchInput({
 				<Combobox.Control roundedLeft='md' fontSize='md' minW='284px'>
 					<Combobox.Input
 						ref={inputRef}
-						borderColor='border'
-						_focus={{ borderColor: 'main.secondary' }}
+						borderColor='gray.200'
+						_focus={{ borderColor: { base: 'gray.200', _dark: 'yellow.500' } }}
 						placeholder={placeholder}
 						aria-label={placeholder}
 						fontSize='15px'

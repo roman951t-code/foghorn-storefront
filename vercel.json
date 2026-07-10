@@ -1,5 +1,10 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"git": {
+		"deploymentEnabled": {
+			"main": false
+		}
+	},
 	"crons": [
 		{
 			"path": "/api/cache/revalidate/windows?lookbackSeconds=3600&limit=500",

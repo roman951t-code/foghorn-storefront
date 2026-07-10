@@ -38,14 +38,21 @@ even if the user does not mention it in the current message.
 ## Repo-specific context
 
 - This is a Next.js storefront + AdminJS admin panel monorepo.
-- Storefront deploys to **Vercel** (via GitHub git integration and a GitLab
-  CI deploy hook).
-- Admin deploys to **Render** (via a GitLab CI deploy hook).
-- CI/CD lives in `.gitlab-ci.yml`; canonical architecture doc is
-  `docs/cicd-pipeline.md` and `docs/universal-app-doc.md`.
-- Two git remotes: `origin` = GitLab (primary, drives CI/CD), `github` =
-  mirror (drives Vercel git integration). See `docs/cicd-pipeline.md` §1 for
-  the full explanation of why both matter.
+- Storefront deploys to **Vercel**, admin deploys to **Render** — both
+  triggered by **GitHub Actions** (`.github/workflows/deploy-production.yml`)
+  via deploy hooks, after CI (lint/test/build + Prisma migration) passes.
+- Vercel's own git-integration auto-deploy is disabled for `main`
+  (`vercel.json`'s `git.deploymentEnabled`); Render's Git source is GitHub
+  (not GitLab), with Render's own Auto-Deploy setting off — GitHub Actions'
+  deploy hook calls are meant to be the *only* trigger for either platform.
+- CI/CD lives in `.github/workflows/deploy-production.yml` (canonical,
+  deploys) and `.gitlab-ci.yml` (validate-only, optional, no deploy stage).
+  Canonical architecture doc is `docs/cicd-pipeline.md` and
+  `docs/universal-app-doc.md`.
+- Two git remotes: `github` = primary (drives CI/CD + both deploys), `origin`
+  = GitLab (optional secondary validate check only). This is the reverse of
+  how it used to work — see `docs/cicd-pipeline.md` §1 for the full
+  explanation.
 
 ## When in doubt follow this
 

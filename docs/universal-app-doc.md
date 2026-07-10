@@ -21,9 +21,11 @@
 
 This repository contains a production-focused ecommerce system implemented as:
 
-- **Storefront (Next.js App Router)** deployed to **Vercel**, sourced from the **GitHub** mirror.
+- **Storefront (Next.js App Router)** deployed to **Vercel**, triggered by **GitHub Actions**
+  (`.github/workflows/deploy-production.yml`) after CI passes.
 - **AdminJS admin panel (AdminJS + Express)** running as a **separate Node/Express server runtime**,
-  deployed to **Render**, sourced from **GitLab**, and triggered by a **GitLab CI/CD pipeline**.
+  deployed to **Render**, sourced from **GitHub**, and triggered by the same **GitHub Actions**
+  workflow.
 - Both runtimes share **one Supabase Postgres database** via Prisma, but are otherwise fully independent
   processes with independent env vars, independent scaling, and independent deploy triggers.
 
@@ -38,19 +40,25 @@ This repository contains a production-focused ecommerce system implemented as:
 - Storefront: `http://localhost:3000`
 - AdminJS: `http://localhost:3001/admin` (default; depends on env)
 
-### The two-remote git setup (do not skip this)
+### The two-remote git setup (legacy — GitLab is now optional)
 
 ```
 $ git remote -v
-github  https://github.com/roman951t-code/foghorn-storefront.git (fetch/push)  → watched by Vercel
-origin  git@gitlab.com:foghorn_studio-group/store.git (fetch/push)             → watched by GitLab CI, which deploys Render
+github  https://github.com/roman951t-code/foghorn-storefront.git (fetch/push)  → canonical: GitHub Actions deploys both Vercel + Render from here
+origin  git@gitlab.com:foghorn_studio-group/store.git (fetch/push)             → optional: validate-only pipeline, no deploy path
 ```
 
-A bare `git push` only pushes to whichever remote the branch tracks (typically `github`) — it will
-**not** trigger the GitLab pipeline and will **not** redeploy the admin panel. Always push both:
+This used to be reversed — GitLab drove CI/CD and a bare push (which only reaches `github`, the tracked
+upstream) would silently skip it. **That's flipped now**: `github` is canonical, so a bare `git push`
+deploys both runtimes end to end. Pushing to `origin` (GitLab) is optional, useful only for its
+secondary lint/build check:
 ```bash
-git push && git push origin main
+git push               # sufficient for deployment
+git push origin main   # optional, GitLab validate-only check
 ```
+See [`docs/cicd-pipeline.md`](./cicd-pipeline.md) §1 for the two settings (`vercel.json`'s
+`git.deploymentEnabled`, Render's Git-source repoint) that make GitHub Actions the *only* deploy trigger
+instead of one of several competing ones.
 
 ---
 
@@ -86,8 +94,9 @@ git push && git push origin main
 - **Database**: Supabase Postgres (shared by both runtimes; see §4.9's TLS/pooler notes — connecting to
   it incorrectly from raw `pg.Pool` code is a recurring failure mode)
 - **Media**: Cloudinary
-- **CI/CD**: GitLab CI (`.gitlab-ci.yml`) — validates every push, gates production deploys behind a
-  manual migration step, then triggers Vercel + Render deploy hooks
+- **CI/CD**: GitHub Actions (`.github/workflows/deploy-production.yml`) — validates every push to
+  `main`, applies Prisma migrations, then triggers Vercel + Render deploy hooks. GitLab CI
+  (`.gitlab-ci.yml`) still runs a validate-only check if you push there, but no longer deploys anything.
 
 ---
 
@@ -135,8 +144,10 @@ git push && git push origin main
 
 ### CI/CD & deployment
 
-- `.gitlab-ci.yml` — the full pipeline definition (stages: validate → security → migrate → deploy); see §4
-- `scripts/deploy-vercel.sh`, `scripts/deploy-render.sh` — one-shot deploy-hook triggers, run from GitLab CI
+- `.github/workflows/deploy-production.yml` — the canonical CD pipeline (stages: validate → migrate →
+  deploy-storefront/deploy-admin → smoke); see §4
+- `.gitlab-ci.yml` — validate-only pipeline (lint-and-test, build-check, npm-audit); optional, no deploy stage
+- `scripts/deploy-vercel.sh`, `scripts/deploy-render.sh` — one-shot deploy-hook triggers, run from GitHub Actions
 - `scripts/smoke-test.sh` — post-deploy live endpoint checks
 - `scripts/admin-prebundle.mts` — pre-bundles AdminJS components during the Render **build** step (see §4.9)
 - `docs/cicd-pipeline.md` — the exhaustive CI/CD reference (see this file's intro)
@@ -154,8 +165,8 @@ here is a **real failure that happened**, not a theoretical concern.
 
 | Service | Platform | Entry point | Triggered from |
 |---------|----------|--------------|-----------------|
-| Storefront | Vercel | `npm run build` → `npm start` | GitHub push (Vercel watches GitHub directly) |
-| Admin panel | Render | `npm run admin:start` | GitLab CI `deploy:admin` job → Render deploy hook |
+| Storefront | Vercel | `npm run build` → `npm start` | GitHub Actions `deploy-storefront` job → Vercel deploy hook |
+| Admin panel | Render | `npm run admin:start` | GitHub Actions `deploy-admin` job → Render deploy hook |
 | Database | Supabase (Postgres) | — | shared by both services |
 | Media | Cloudinary | — | |
 | Email | Resend | — | |
@@ -164,6 +175,25 @@ here is a **real failure that happened**, not a theoretical concern.
 
 ### 4.2 Pipeline stage/job graph
 
+**Canonical (GitHub Actions, `.github/workflows/deploy-production.yml`)** — runs on every push to `main`
+on GitHub:
+
+```
+push to GitHub main (or workflow_dispatch)
+  │
+  └─ validate (lint + test + build; ephemeral Postgres service — the EXACT command Vercel runs)
+       └─ migrate            (applies Prisma migrations to the real prod DB; no manual gate by default)
+            ├─ deploy-storefront   (needs: migrate) → hits Vercel deploy hook, returns immediately
+            ├─ deploy-admin        (needs: migrate) → hits Render deploy hook, returns immediately
+            └─ smoke               (needs: both deploys; continue-on-error: true) → sleeps 90s, then curls live URLs
+```
+
+`deploy-storefront`/`deploy-admin` only trigger the deploy hook — they do **not** wait for Vercel/Render
+to actually finish building. Real build logs live on the Vercel/Render dashboards, not in GitHub Actions.
+
+**Optional (GitLab CI, `.gitlab-ci.yml`)** — validate-only, no deploy stage, safe to ignore or keep as a
+secondary check:
+
 ```
 push to GitLab main (or open an MR)
   │
@@ -171,38 +201,28 @@ push to GitLab main (or open an MR)
   │    ├─ lint-and-test   (ephemeral Postgres service; npm run lint && npm test)
   │    └─ build-check     (ephemeral Postgres service; npm run build — the EXACT command Vercel runs)
   │
-  ├─ security (MR only, automatic)
-  │    └─ npm-audit       (allow_failure: true — informational only)
-  │
-  ├─ migrate (main branch only, MANUAL CLICK REQUIRED)
-  │    └─ migrate:production   (applies Prisma migrations to the real prod DB; allow_failure: false)
-  │
-  └─ deploy (main branch only, automatic once migrate:production succeeds)
-       ├─ deploy:storefront    (needs: migrate:production) → hits Vercel deploy hook, returns immediately
-       ├─ deploy:admin         (needs: migrate:production) → hits Render deploy hook, returns immediately
-       └─ smoke:production     (needs: both deploys; allow_failure: true) → sleeps 90s, then curls live URLs
+  └─ security (MR only, automatic)
+       └─ npm-audit       (allow_failure: true — informational only)
 ```
-
-`deploy:storefront`/`deploy:admin` only trigger the deploy hook — they do **not** wait for Vercel/Render
-to actually finish building. Real build logs live on the Vercel/Render dashboards, not in GitLab.
 
 ### 4.3 Running the pipeline (human)
 
-**GitLab UI**: CI/CD → Pipelines → Run pipeline → branch `main` → Run pipeline. Once `validate` passes,
-**click `migrate:production` manually** (Pipeline → Jobs) — this is the only gate before a real deploy.
-Everything after that runs automatically.
+It runs automatically on every push to `main` on GitHub — no manual step required. To re-run without a
+new push, use **GitHub → Actions → Deploy Production → Run workflow** (`workflow_dispatch`), or re-run
+individual failed jobs from a past run's page.
 
-**Re-deploying without a schema change**: find the existing pipeline → Jobs → re-run
-`deploy:storefront` / `deploy:admin` directly (no need to re-click `migrate:production`; it's a safe
-no-op even if you do).
+**Re-deploying without a schema change**: re-run just `deploy-storefront` / `deploy-admin` from a past
+run (`migrate` is a safe no-op even if it re-runs too — there's nothing pending to apply).
 
 ### 4.4 First-time setup checklist
 
 1. **Supabase**: create project, copy the connection string (Session/Transaction pooler, port 5432 or
    6543) as `DATABASE_URL`.
 2. **Vercel**: import the **GitHub** repo, set all vars from `docs/env.storefront.example`. Note the
-   project ID for the deploy hook.
-3. **Render**: create a Web Service from the **GitLab** repo.
+   project ID for the deploy hook. Add `git.deploymentEnabled.main = false` to `vercel.json` (already
+   done in this repo) so Vercel's own auto-deploy-on-push doesn't run alongside the deploy-hook trigger
+   below.
+3. **Render**: create a Web Service from the **GitHub** repo (not GitLab).
    - Build command: `npm run render:build` — **not** a plain `npm install`. This installs
      devDependencies (needed because `prisma`/`tsx` live there) and pre-bundles AdminJS's components
      (needed to avoid an OOM crash — full explanation in §4.9).
@@ -210,21 +230,33 @@ no-op even if you do).
    - Env vars: everything in `docs/env.admin.example`, **plus** `ADMIN_JS_SKIP_BUNDLE=true` and
      `ADMIN_JS_TMP_DIR=adminjs-bundle` (both required, both easy to forget, both silently break the
      admin UI if missing — see §4.9).
-4. **GitLab CI/CD variables** (Settings → CI/CD → Variables, mark Protected + Masked): `DATABASE_URL`,
-   `VERCEL_DEPLOY_HOOK_URL`, `RENDER_DEPLOY_HOOK_URL`, `NEXT_PUBLIC_APP_URL`, `ADMINJS_PUBLIC_URL`.
-5. Push to `main` on **both** remotes. Pipeline runs lint + test + build automatically.
-6. Click **migrate:production** to apply the initial Prisma migrations.
-7. `deploy:storefront` and `deploy:admin` run automatically after migrate succeeds.
+   - Turn **Auto-Deploy off** (Settings → Build & Deploy) — the GitHub Actions `deploy-admin` job is
+     meant to be the only trigger; leaving Auto-Deploy on double-builds on every push, the same failure
+     mode as the Vercel duplicate-deploy bug this setup avoids.
+4. **GitHub Environment + secrets**: Settings → Environments → New environment → name it `production`;
+   then Settings → Secrets and variables → Actions to add secrets scoped to that environment:
+   `DATABASE_URL`, `VERCEL_DEPLOY_HOOK_URL`, `RENDER_DEPLOY_HOOK_URL`, `NEXT_PUBLIC_APP_URL`,
+   `ADMINJS_PUBLIC_URL`.
+5. Push to `main` on GitHub. The workflow runs `validate` (lint + test + build) automatically.
+6. `migrate` applies the initial Prisma migrations automatically — no manual click by default in this
+   setup (see `docs/cicd-pipeline.md` §2 if you want to add one back).
+7. `deploy-storefront` and `deploy-admin` run automatically after `migrate` succeeds.
+8. *(Optional)* Push to `origin` (GitLab) too if you still want its secondary validate-only check —
+   nothing in steps 1–7 depends on it.
 
-### 4.5 Required GitLab CI/CD variables (reference table)
+### 4.5 Required GitHub Actions secrets (reference table; GitLab needs none anymore)
 
-| Variable | Used by | Protected? | Notes |
-|---|---|---|---|
-| `DATABASE_URL` | `migrate:production` | ✅ | Real Supabase connection string. Every *other* job defines its own throwaway/placeholder `DATABASE_URL` in its own `variables:` block — this is the only job that sees the real one. |
-| `VERCEL_DEPLOY_HOOK_URL` | `deploy:storefront` | ✅ | Vercel → Project → Settings → Git → Deploy Hooks |
-| `RENDER_DEPLOY_HOOK_URL` | `deploy:admin` | ✅ | Render → Service → Settings → Deploy Hook |
-| `NEXT_PUBLIC_APP_URL` | `smoke:production` | recommended | e.g. `https://shop.foghornbay.com` (no trailing slash) |
-| `ADMINJS_PUBLIC_URL` | `smoke:production` | recommended | Bare domain or `/admin` path both work — `smoke-test.sh` follows redirects |
+Scope all of these to a GitHub **Environment** named `production` (Settings → Environments), not plain
+repository secrets — that's the GitHub equivalent of GitLab's "Protected" variable, restricting the
+secret to jobs that declare `environment: { name: production }`.
+
+| Secret | Used by | Notes |
+|---|---|---|
+| `DATABASE_URL` | `migrate` | Real Supabase connection string. `validate` defines its own throwaway `DATABASE_URL` inline — this is the only job that sees the real one. |
+| `VERCEL_DEPLOY_HOOK_URL` | `deploy-storefront` | Vercel → Project → Settings → Git → Deploy Hooks |
+| `RENDER_DEPLOY_HOOK_URL` | `deploy-admin` | Render → Service → Settings → Deploy Hook |
+| `NEXT_PUBLIC_APP_URL` | `deploy-storefront` (environment URL), `smoke` | e.g. `https://shop.foghornbay.com` (no trailing slash) |
+| `ADMINJS_PUBLIC_URL` | `deploy-admin` (environment URL), `smoke` | Bare domain or `/admin` path both work — `smoke-test.sh` follows redirects |
 
 If `NEXT_PUBLIC_APP_URL`/`ADMINJS_PUBLIC_URL` are unset, `smoke-test.sh` exits 1 immediately with a clear
 `ERROR: ... is not set.` — there's nothing else to debug if you see exactly that message.
@@ -370,15 +402,17 @@ Match the error text before doing any original investigation.
 | `FATAL ERROR: Ineffective mark-compacts near heap limit` | Render build/runtime | AdminJS bundles ~48 components with Rollup at runtime by default; OOMs on 512MB free tier | Pre-bundle during build (`render:build`), set `ADMIN_JS_SKIP_BUNDLE=true` at runtime (§4.9) |
 | `[admin:bundle] FAILED — expected .../bundle.js to exist` | Render build | `ADMIN_JS_SKIP_BUNDLE=true` leaked from Render's env into the build step too, so bundling no-oped | Pre-bundle script `delete`s the var from its own env first (§4.9) |
 | Dashboard generic + `Component "X" has not been bundled`, despite `[admin:bundle] OK` in build logs | Render runtime | Bundle exists but its directory has a dot segment (`.adminjs` or `public/.adminjs`) — `send`'s dotfile check 404s it unconditionally | Point `ADMIN_JS_TMP_DIR` at a dot-free dir (`adminjs-bundle`), identically at build and runtime (§4.9 — the big one) |
-| `/bin/sh: eval: line N: bash: not found` | GitLab `deploy:*`/`smoke:production` | `node:22-alpine`'s default shell is busybox `ash`; deploy/smoke scripts need real `bash` (`set -o pipefail`) | `apk add --no-cache curl bash` in `before_script`, not just `curl` |
+| `/bin/sh: eval: line N: bash: not found` | *(historical)* GitLab `deploy:*`/`smoke:production`, before the GitHub Actions cutover | `node:22-alpine`'s default shell is busybox `ash`; deploy/smoke scripts need real `bash` (`set -o pipefail`) | `apk add --no-cache curl bash` in `before_script`. Moot on GitHub Actions' `ubuntu-latest` runners, which ship real `bash` by default |
 | smoke-test FAIL: webhook → HTTP 500 (expected 405/404/400) | `smoke:production` | Test hit `/api/stripe/webhook` (wrong, nonexistent); real route is `/api/payments/stripe/webhook` | Fixed the URL in `scripts/smoke-test.sh` |
 | smoke-test FAIL: admin login → HTTP 301 (expected 200) | `smoke:production` | `ADMINJS_PUBLIC_URL` hits our own `/` → `/admin` redirect; `curl` doesn't follow redirects by default | Added `-L` to `smoke-test.sh`'s `check()` helper |
 
 ### 4.12 Debugging checklist + local reproduction recipe
 
 1. Match the error text against §4.11 first.
-2. Identify which platform is actually failing — a GitLab pipeline failure is unrelated to a Vercel
-   build failure even though both come from the same repo push.
+2. Identify which platform is actually failing — a GitHub Actions pipeline failure (the canonical CD
+   path), a GitLab pipeline failure (validate-only, never blocks production), and a Vercel/Render build
+   or runtime failure are all different logs and different root-cause spaces, even though they can all
+   stem from the same repo push.
 3. **Prefer local reproduction over iterating on real deploys**, especially for AdminJS/Render issues —
    every fix in §4.9 was proven locally before being declared fixed:
    ```bash
@@ -401,18 +435,21 @@ Match the error text before doing any original investigation.
    the real endpoint, check the real file on disk, read the actual library source
    (`node_modules/adminjs/lib/...`, `node_modules/send/index.js`) instead of trusting assumptions about
    framework behavior.
-5. Check `git log origin/main` vs `git log github/main` if "what I pushed" and "what deployed" seem out
-   of sync (§1).
-6. `build-check` failing in GitLab is a leading indicator for Vercel, since it runs the literal same
-   `npm run build` command — fix it there first.
+5. GitHub is canonical now (§1) — if "what I pushed" and "what deployed" seem out of sync, check that
+   the push actually reached GitHub, and that Render's Git source is pointed at GitHub rather than a
+   stale GitLab connection. `git log origin/main` vs `git log github/main` only matters if you still
+   care about GitLab's optional validate-only check.
+6. `validate`'s build step failing (GitHub Actions or GitLab) is a leading indicator for Vercel, since
+   it runs the literal same `npm run build` command — fix it there first.
 
 ### 4.13 Known inconsistency (not yet broken, worth knowing)
 
 `.nvmrc` pins Node **20** (`package.json`'s `engines.node` is `>=20.9.0`), but GitLab CI's
-`default.image` is `node:22-alpine`. Render honors `.nvmrc` (Node 20); GitLab CI uses whatever `image:`
-says (Node 22), ignoring `.nvmrc`. Both currently work since nothing depends on a specific Node major
-version, but this is where a future "works in CI, breaks on Render" (or vice versa) report will
-originate if a dependency ever becomes version-sensitive.
+`default.image` is `node:22-alpine` and GitHub Actions' `actions/setup-node@v4` steps pin
+`node-version: 22`. Render honors `.nvmrc` (Node 20); neither CI system reads `.nvmrc`, both use Node
+22. All three currently work since nothing depends on a specific Node major version, but this is where
+a future "works in CI, breaks on Render" (or vice versa) report will originate if a dependency ever
+becomes version-sensitive.
 
 ---
 
@@ -1057,17 +1094,19 @@ Optional admin-related operational envs:
 
 ### 8.4 Push to production (full CI/CD flow)
 
-1. Push a commit to **both** git remotes (`git push && git push origin main`) — GitHub for Vercel,
-   GitLab for the CI pipeline that deploys Render.
-2. GitLab `validate` stage runs automatically: `lint-and-test` + `build-check` in parallel.
-3. If on `main`, `migrate:production` appears and waits for a manual click.
-4. A human clicks `migrate:production` → Prisma applies any pending migrations to the real DB.
-5. `deploy:storefront` and `deploy:admin` fire automatically → Vercel and Render deploy hooks are hit.
-6. Vercel builds independently (`npm run build` — seeds the DB, then builds Next.js) and goes live.
-7. Render builds independently (`npm run render:build` — installs deps, pre-bundles AdminJS) and starts
+1. Push a commit to GitHub (`git push` — the tracked upstream). GitHub Actions'
+   `deploy-production.yml` picks it up automatically; also pushing to GitLab (`origin`) is optional
+   (§1).
+2. `validate` runs automatically: lint + typecheck + test + build (the same `npm run build` Vercel
+   runs), against an ephemeral Postgres service.
+3. `migrate` runs automatically once `validate` passes → Prisma applies any pending migrations to the
+   real DB. No manual click by default in this setup.
+4. `deploy-storefront` and `deploy-admin` fire automatically → Vercel and Render deploy hooks are hit.
+5. Vercel builds independently (`npm run build` — seeds the DB, then builds Next.js) and goes live.
+6. Render builds independently (`npm run render:build` — installs deps, pre-bundles AdminJS) and starts
    the admin server (`npm run admin:start`).
-8. `smoke:production` waits 90s, then curls both live services to confirm they're actually responding
-   correctly (§4.8).
+7. `smoke` waits 90s, then curls both live services to confirm they're actually responding correctly
+   (§4.8).
 
 ---
 
@@ -1095,8 +1134,11 @@ Optional admin-related operational envs:
 
 - **Every Vercel deploy re-seeds the production database** (§4.10) — this is intentional while the
   store uses fake/demo data, but must change before real customer data goes in.
-- **A bare `git push` does not redeploy the admin panel** — Render is driven by the GitLab pipeline, and
-  a bare push typically only reaches GitHub. Always `git push && git push origin main` (§1).
+- **A bare `git push` now redeploys both the storefront and the admin panel** — GitHub Actions is the
+  canonical trigger for both (§1). What matters now isn't which remote you pushed to, but whether
+  Render's Git source (Render dashboard → Settings → Git) is actually pointed at GitHub — if it's still
+  pointed at GitLab, `deploy-admin`'s hook call builds whatever's on GitLab, which can silently drift
+  from what you just pushed to GitHub.
 - **`ADMIN_JS_TMP_DIR` must never be changed back to a dot-prefixed path** (`.adminjs`,
   `public/.adminjs`) — this single setting is responsible for the majority of AdminJS-on-Render
   debugging time to date (§4.9).
@@ -1177,7 +1219,8 @@ They share the same local Postgres via `DATABASE_URL` in `.env`.
 
 ### CI/CD & deployment
 
-- `.gitlab-ci.yml` — full pipeline definition (§4)
+- `.github/workflows/deploy-production.yml` — canonical CD pipeline definition (§4)
+- `.gitlab-ci.yml` — validate-only pipeline, optional (§4)
 - `scripts/admin-prebundle.mts` — pre-bundles AdminJS components at Render build time (§4.9)
 - `scripts/deploy-vercel.sh` / `scripts/deploy-render.sh` — deploy-hook triggers
 - `scripts/smoke-test.sh` — post-deploy endpoint checks (§4.8)
@@ -1232,10 +1275,11 @@ broken deploy, or a "the admin panel looks wrong" report, and you have no other 
 
 1. **Read §4.11 (error message → fix table) first.** Most failures you'll encounter here are variations
    on something already solved. Grep the exact error text before theorizing.
-2. **Distinguish the failing surface before investigating**: GitLab CI pipeline failure, Vercel build
-   failure, and Render runtime failure are three different logs, three different root-cause spaces, and
-   only loosely related by sharing a codebase. Don't cross-apply a GitLab fix to a Vercel symptom or
-   vice versa without checking the assumption holds.
+2. **Distinguish the failing surface before investigating**: GitHub Actions pipeline failure (canonical
+   CD), GitLab CI pipeline failure (validate-only, never blocks production), Vercel build failure, and
+   Render runtime failure are four different logs, four different root-cause spaces, only loosely
+   related by sharing a codebase. Don't cross-apply a fix from one to a symptom on another without
+   checking the assumption holds.
 3. **For anything AdminJS/Render-shaped, reproduce locally before iterating on real deploys.** The
    recipe in §4.12 takes about 30 seconds and lets you `curl` the exact failing endpoint directly,
    instead of waiting on a multi-minute Render deploy cycle per guess.
@@ -1246,9 +1290,9 @@ broken deploy, or a "the admin panel looks wrong" report, and you have no other 
    reproducing the exact 404 locally with a minimal Express server. When in doubt, read the library
    source and prove behavior with a throwaway script rather than reasoning from framework documentation
    or intuition alone.
-5. **Remember the dual-remote git setup** (§1) — if you push a fix and the user reports "still broken,"
-   check whether the push actually reached GitLab (`origin`), not just GitHub (`github`), before
-   assuming your fix was wrong.
+5. **Remember GitHub is canonical now, not GitLab** (§1) — if you push a fix and the user reports "still
+   broken," check whether the push actually reached GitHub, and whether Render's Git source is actually
+   pointed at GitHub rather than a stale GitLab connection, before assuming your fix was wrong.
 6. **When you fix something in `.gitlab-ci.yml`, `scripts/*.sh`, or `src/admin/`, check whether
    `docs/cicd-pipeline.md` and this file's §4 need a matching update.** Both documents are meant to stay
    accurate as a debugging aid for the *next* agent — stale docs that contradict the current code are
