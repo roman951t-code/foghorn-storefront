@@ -7,7 +7,17 @@ set -euo pipefail
 : "${RENDER_DEPLOY_HOOK_URL:?RENDER_DEPLOY_HOOK_URL is not set. Add it as a protected CI/CD variable in GitLab.}"
 
 echo "Triggering Render deployment (AdminJS)..."
-response=$(curl -sf -X POST "$RENDER_DEPLOY_HOOK_URL")
+response_file=$(mktemp)
+http_status=$(curl -s -o "$response_file" -w '%{http_code}' -X POST "$RENDER_DEPLOY_HOOK_URL")
+response=$(cat "$response_file")
+rm -f "$response_file"
+
+if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+  echo "Render deploy hook returned HTTP $http_status:"
+  echo "$response"
+  exit 1
+fi
+
 echo "$response"
 
 deploy_id=$(echo "$response" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4 || true)

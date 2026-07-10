@@ -7,7 +7,17 @@ set -euo pipefail
 : "${VERCEL_DEPLOY_HOOK_URL:?VERCEL_DEPLOY_HOOK_URL is not set. Add it as a protected CI/CD variable in GitLab.}"
 
 echo "Triggering Vercel deployment..."
-response=$(curl -sf -X POST "$VERCEL_DEPLOY_HOOK_URL")
+response_file=$(mktemp)
+http_status=$(curl -s -o "$response_file" -w '%{http_code}' -X POST "$VERCEL_DEPLOY_HOOK_URL")
+response=$(cat "$response_file")
+rm -f "$response_file"
+
+if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+  echo "Vercel deploy hook returned HTTP $http_status:"
+  echo "$response"
+  exit 1
+fi
+
 echo "$response"
 
 # Extract the Vercel job URL from the response if present
