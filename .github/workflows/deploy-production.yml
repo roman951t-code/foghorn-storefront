@@ -40,6 +40,16 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Runs inside a container (not directly on the runner VM) so the postgres
+    # service below is reachable by its service name over the Docker network,
+    # same model GitLab CI's services/alias uses. Without this, the service is
+    # only reachable via localhost/127.0.0.1 on the runner host — which
+    # src/config/env.ts's production-safety check (isLocalDatabaseUrl) rejects
+    # outright once NODE_ENV=production is set below to mirror Vercel's real
+    # build. That check is intentional (catches a real prod-pointed-at-local-DB
+    # misconfig) — don't work around it by loosening env.ts; fix the network
+    # path instead.
+    container: node:22
 
     services:
       postgres:
@@ -58,7 +68,7 @@ jobs:
 
     env:
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/ci_build_db
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ci_build_db
       NEXT_PUBLIC_APP_URL: https://store.example.com
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
       NEXT_PUBLIC_SENTRY_DSN: ''
