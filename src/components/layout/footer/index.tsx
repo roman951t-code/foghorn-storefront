@@ -43,7 +43,7 @@ export default async function Footer({ locale }: { locale: AppLocale }) {
 				gap={2}
 			>
 				<Text mr={{ base: '12px', md: '0' }} color='main.lightOnly'>
-					© 2026 Prosperity.com
+					© 2026 shop.foghornbay.com/
 				</Text>
 				<MediaContacts hideBelow='md' />
 				<Group>

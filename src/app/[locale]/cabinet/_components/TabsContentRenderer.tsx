@@ -14,7 +14,7 @@ export default function TabsContentRenderer({ children }: { children: ReactNode 
 	const currentTab: CabinetTabValue = isCabinetTabValue(segmentValue) ? segmentValue : 'cabinet';
 
 	return (
-		<Tabs.Content value={currentTab} colorPalette='gray' w='full' flex='1' minW='0'>
+		<Tabs.Content value={currentTab} w='full' flex='1' minW='0'>
 			{children}
 		</Tabs.Content>
 	);

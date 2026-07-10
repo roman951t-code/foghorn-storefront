@@ -16,9 +16,9 @@ type Props = HeadingProps & {
 // active category in CatalogPanel and the filter-sidebar section headings.
 export default function PageHeading({ size = '3xl', children, ...rest }: Props) {
 	return (
-		<HStack gap={3} align='center' w={rest.w}>
+		<HStack gap={3} align='center' w={rest.w} {...rest}>
 			<Box w='5px' h={BAR_HEIGHT[size]} rounded='full' bg={ACCENT} flexShrink={0} />
-			<Heading as='h1' size={size} fontWeight='semibold' {...rest}>
+			<Heading as='h1' size={size} fontWeight='semibold'>
 				{children}
 			</Heading>
 		</HStack>

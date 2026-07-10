@@ -102,6 +102,29 @@ export default function Filters({ filters }: Props) {
 								</HStack>
 							</AccordionItemTrigger>
 							<AccordionItemContent px={4} pb={4}>
+								<Checkbox
+									checked={selectedCount === 0}
+									onCheckedChange={(details) => {
+										if (details.checked === true) {
+											updateParams(filter.key, []);
+										}
+									}}
+									mb={2}
+									w='100%'
+									minW={0}
+									px={3}
+									py={2}
+									rounded='lg'
+									borderWidth='0.5px'
+									borderStyle='solid'
+									borderColor='border'
+									transition='all 0.15s ease-in-out'
+									_hover={{ cursor: 'pointer', bg: 'bgHover.promoCard' }}
+									_checked={{ borderColor: FILTER_ACCENT }}
+									fontSize={{ base: 'lg', md: 'md' }}
+								>
+									{t('all')}
+								</Checkbox>
 								<Fieldset.Root>
 									<CheckboxGroup
 										value={selectedValues}

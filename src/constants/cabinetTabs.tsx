@@ -28,10 +28,12 @@ export const CABINET_TAB_ROUTE_SUFFIXES: Record<CabinetTabValue, string> = {
 };
 
 export const CABINET_TAB_TRIGGER_PROPS = {
-	fontWeight: 'medium',
-	fontSize: 'md',
 	display: 'inline-flex',
 	gap: 2,
-	flex: '0 1 auto',
+	// Never shrink — overflow is handled by the list wrapping to a new row
+	// (flexWrap='wrap' in TabsHeaders), not by squeezing a pill until its
+	// label wraps mid-word.
+	flex: '0 0 auto',
 	justifyContent: 'center',
+	fontSize: '17px',
 };

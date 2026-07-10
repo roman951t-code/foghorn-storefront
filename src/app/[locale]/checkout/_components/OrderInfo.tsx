@@ -10,9 +10,10 @@ import { useSession } from '@/providers/SessionProvider';
 import { useCheckoutStore } from '@/stores/checkoutStore';
 import { useCartStore } from '@/stores/cartStore';
 import { createOrderAction } from '@/actions/createOrderAction';
-import { useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { showToaster } from '@/utils/toast';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
+import { useNavProgressStore } from '@/stores/navProgressStore';
 import CouponField from '@/components/ui/inputs/CouponField';
 import CheckoutConsents from './CheckoutConsents';
 import type { StorefrontFormPublic } from '@/actions/storefront/getEnabledStorefrontForms';
@@ -36,8 +37,24 @@ export default function OrderInfo({
 	const shippingAddress = useCheckoutStore((state) => state.shippingAddress);
 	const consents = useCheckoutStore((state) => state.consents);
 	const [isSubmitting, startTransition] = useTransition();
+	const [isRedirecting, setIsRedirecting] = useState(false);
 	const router = useRouter();
-	const isLoading = isSubmitting;
+	const isLoading = isSubmitting || isRedirecting;
+
+	const startNavProgress = useNavProgressStore((state) => state.start);
+	const finishNavProgress = useNavProgressStore((state) => state.finish);
+
+	// This component unmounts as soon as the /cabinet/orders route swaps in,
+	// so we can't rely on watching pathname (useTrackedNavigation's approach)
+	// to know when to call finish() — that effect would never get a chance to
+	// run. Tying finish() to unmount via cleanup guarantees it always fires.
+	useEffect(() => {
+		if (!isRedirecting) return;
+		startNavProgress();
+		return () => {
+			finishNavProgress();
+		};
+	}, [isRedirecting, startNavProgress, finishNavProgress]);
 
 	const isAuthorized = !!session?.session;
 	const user = session?.user;
@@ -45,7 +62,11 @@ export default function OrderInfo({
 	const t = useTranslations('products');
 	const commonT = useTranslations('common');
 	const { cartData } = useCart();
-	const cartItems = cartData.items;
+	// Freeze the last real cart snapshot once the order is confirmed so this
+	// panel keeps showing it instead of flashing "0 items" while the redirect
+	// to /cabinet/orders is still in flight.
+	const confirmedItemsRef = useRef<typeof cartData.items | null>(null);
+	const cartItems = confirmedItemsRef.current ?? cartData.items;
 	const { totalCount, baseTotal, discountedTotal, discountTotal } = calculateCartTotals(cartItems);
 	const formatMoney = (value: number) =>
 		formatCurrencyPrice(value, {
@@ -106,36 +127,38 @@ export default function OrderInfo({
 		const rawCouponCode = useCheckoutStore.getState().appliedCoupon?.code ?? '';
 		const couponCode = rawCouponCode.trim() ? rawCouponCode.trim() : undefined;
 
-		startTransition(() => {
-			(async () => {
-				const result = await createOrderAction(null, {
-					items: orderItems,
-					paymentMethod,
-					shipmentMethod,
-					shippingAddress,
-					couponCode,
-					locale,
-				});
+		startTransition(async () => {
+			const result = await createOrderAction(null, {
+				items: orderItems,
+				paymentMethod,
+				shipmentMethod,
+				shippingAddress,
+				couponCode,
+				locale,
+			});
 
-				if (result?.success) {
-					showToaster('success', checkoutT('orderCreated'));
-					useCartStore.getState().setCartItems([]);
-					await refresh();
-					useCheckoutStore.getState().clearCoupon();
-					useCheckoutStore.getState().resetConsents();
-					router.push('/cabinet/orders');
-				} else {
-					if (result?.message === 'unauthorized') {
-						await handleUnauthorizedSession();
-						return;
-					}
-					if (result?.message === 'shipping-address-required') {
-						showToaster('error', checkoutT('shippingAddressRequired'));
-						return;
-					}
-					showToaster('error', checkoutT('orderCreateFail'));
+			if (result?.success) {
+				// Snapshot before clearing so the summary panel doesn't flash
+				// empty while it's still mounted waiting for the redirect.
+				confirmedItemsRef.current = cartItems;
+				showToaster('success', checkoutT('orderCreated'));
+				setIsRedirecting(true);
+				router.push('/cabinet/orders');
+				useCartStore.getState().setCartItems([]);
+				useCheckoutStore.getState().clearCoupon();
+				useCheckoutStore.getState().resetConsents();
+				void refresh();
+			} else {
+				if (result?.message === 'unauthorized') {
+					await handleUnauthorizedSession();
+					return;
 				}
-			})();
+				if (result?.message === 'shipping-address-required') {
+					showToaster('error', checkoutT('shippingAddressRequired'));
+					return;
+				}
+				showToaster('error', checkoutT('orderCreateFail'));
+			}
 		});
 	};
 

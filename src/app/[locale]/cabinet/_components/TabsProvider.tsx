@@ -31,7 +31,7 @@ export default function TabsProvider({ children }: { children: ReactNode }) {
 			value={currentValue}
 			onValueChange={(e) => handleValueChange(e.value)}
 			orientation='horizontal'
-			variant='outline'
+			variant='line'
 			width='full'
 			fitted
 		>

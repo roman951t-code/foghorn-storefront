@@ -20,10 +20,7 @@ import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import { getMaxEffectiveProductPrice } from '@/utils/maxEffectiveProductPrice';
 import { MAX_PRODUCTS_PER_PAGE } from '@/constants/pagination';
 import { getPaginatedIdsByEffectivePriceSort } from '@/utils/effectivePriceSorting';
-import {
-	buildLocalizedVariantLabel,
-	getAttributeNameCandidatesForFilterKey,
-} from '@/utils/attributeLocalization';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
 
 export async function getProductsBySearchQuery(
 	searchQuery: string,
@@ -73,7 +70,9 @@ export async function getProductsBySearchQuery(
 	const dynamicConditions = attributeFilters.map(([key, values]) => ({
 		attributes: {
 			some: {
-				attribute: { name: { in: getAttributeNameCandidatesForFilterKey(key) } },
+				// key is the attribute's id — see getProductsBySubcategorySlug.ts
+				// for why matching on a localized name guess was the bug.
+				attributeId: key,
 				value: { in: values.flat() },
 			},
 		},

@@ -149,7 +149,7 @@ export default function PhoneSignIn({ i18nData, disabled }: PhoneAuthProps) {
 						</Fieldset.HelperText>
 
 						<Fieldset.Content>
-							<Alert.Root status='info' variant='subtle' mt='2'>
+							<Alert.Root status='info' bg='bg.primary' variant='subtle' mt='2'>
 								<Alert.Indicator />
 								<Stack gap='1'>
 									<Alert.Title>{i18nData.phoneCodeInfoTitle}</Alert.Title>

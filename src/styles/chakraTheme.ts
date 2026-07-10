@@ -6,16 +6,20 @@ import {
 	defineSlotRecipe,
 } from '@chakra-ui/react';
 
+// Border + focus colors standardized on SubscribeSection's input
+// (src/components/ui/sections/SubscribeSection.tsx) so every input-like
+// control looks the same app-wide. SearchInput is unaffected — it sets its
+// own inline borderColor/_focus, which take precedence over these defaults.
 const storefrontInputFocusStyles = {
 	borderWidth: '0.5px',
 	borderStyle: 'solid',
-	borderColor: 'main.secondary',
+	borderColor: { base: 'black', _dark: 'yellow.500' },
 	outline: 'none',
 	boxShadow: 'none',
 } as const;
 
 const storefrontFlushedInputFocusStyles = {
-	borderColor: 'main.secondary',
+	borderColor: { base: 'black', _dark: 'yellow.500' },
 	outline: 'none',
 	boxShadow: 'none',
 } as const;
@@ -126,8 +130,7 @@ const config = defineConfig({
 					},
 					secondary: {
 						value: {
-							// base: 'linear-gradient(229deg, rgb(74 73 100) 0%, rgb(71 104 125) 50%, rgb(83 82 109) 100%)',
-							base: 'linear-gradient(36deg, rgba(91,90,129,1) 0%, rgb(70, 108, 134) 50%, rgba(91,90,129,1) 100%)',
+							base: 'linear-gradient(229deg, rgb(74 73 100) 0%, rgb(71 104 125) 50%, rgb(83 82 109) 100%)',
 							_dark: '#272838',
 						},
 					},
@@ -188,7 +191,7 @@ const config = defineConfig({
 				border: {
 					DEFAULT: {
 						value: {
-							_light: '{colors.gray.400}',
+							_light: '{colors.gray.300}',
 							_dark: '{colors.gray.500}',
 						},
 					},
@@ -226,7 +229,7 @@ const config = defineConfig({
 							bg: { base: 'transparent', _dark: 'bg.muted' },
 							borderWidth: '0.5px',
 							borderStyle: 'solid',
-							borderColor: 'border.button',
+							borderColor: { base: 'gray.500', _dark: 'gray.400' },
 							focusVisibleRing: 'none',
 							_focus: storefrontInputFocusStyles,
 							_focusVisible: storefrontInputFocusStyles,
@@ -255,7 +258,7 @@ const config = defineConfig({
 							bg: { base: 'transparent', _dark: 'bg.muted' },
 							borderWidth: '0.5px',
 							borderStyle: 'solid',
-							borderColor: 'border.button',
+							borderColor: { base: 'gray.500', _dark: 'gray.400' },
 							focusVisibleRing: 'none',
 							_focus: storefrontInputFocusStyles,
 							_focusVisible: storefrontInputFocusStyles,
@@ -356,7 +359,7 @@ const config = defineConfig({
 								bg: { base: 'transparent', _dark: 'bg.muted' },
 								borderWidth: '0.5px',
 								borderStyle: 'solid',
-								borderColor: 'border.button',
+								borderColor: { base: 'gray.500', _dark: 'gray.400' },
 								focusVisibleRing: 'none',
 								_focus: storefrontInputFocusStyles,
 								_focusVisible: storefrontInputFocusStyles,
@@ -390,7 +393,7 @@ const config = defineConfig({
 								...chakraDefaultSlotRecipes.numberInput.variants!.variant.subtle.input,
 								borderWidth: '0.5px',
 								borderStyle: 'solid',
-								borderColor: 'border.button',
+								borderColor: { base: 'gray.500', _dark: 'gray.400' },
 								focusVisibleRing: 'none',
 								_focus: storefrontInputFocusStyles,
 								_focusVisible: storefrontInputFocusStyles,
@@ -425,7 +428,7 @@ const config = defineConfig({
 								bg: { base: 'transparent', _dark: 'bg.muted' },
 								borderWidth: '0.5px',
 								borderStyle: 'solid',
-								borderColor: 'border.button',
+								borderColor: { base: 'gray.500', _dark: 'gray.400' },
 								focusVisibleRing: 'none',
 								_focus: storefrontInputFocusStyles,
 								_focusVisible: storefrontInputFocusStyles,
@@ -460,7 +463,7 @@ const config = defineConfig({
 								bg: { base: 'transparent', _dark: 'bg.muted' },
 								borderWidth: '0.5px',
 								borderStyle: 'solid',
-								borderColor: 'border.button',
+								borderColor: { base: 'gray.500', _dark: 'gray.400' },
 								focusVisibleRing: 'none',
 								_focus: storefrontInputFocusStyles,
 								_focusVisible: storefrontInputFocusStyles,
@@ -564,10 +567,6 @@ const config = defineConfig({
 		},
 		'.ReactModal__Content': {
 			backgroundColor: 'var(--chakra-colors-bg-tertiary) !important',
-		},
-		'.chakra-tabs__trigger:is([aria-selected=true], [data-selected])': {
-			'--mix-tabActiveBg': 'color-mix(in srgb, var(--chakra-colors-bg-tertiary) 60%, transparent)',
-			backgroundColor: 'var(--mix-tabActiveBg) !important',
 		},
 		'.thumbsSlider .swiper-pagination-bullet, .thumbsSlider-pagination .swiper-pagination-bullet': {
 			width: '20px !important',

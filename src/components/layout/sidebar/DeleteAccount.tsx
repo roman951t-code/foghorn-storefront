@@ -55,7 +55,7 @@ export function DeleteAccount({ onCloseAction }: Props) {
 			ids={DELETE_ACCOUNT_DIALOG_IDS}
 		>
 			<Dialog.Trigger asChild>
-				<AlertButton mt='8' w='full' color='main' variant='outline'>
+				<AlertButton m='auto' mb='4' w='full' color='main' variant='outline'>
 					{authT('deleteAccount')}
 				</AlertButton>
 			</Dialog.Trigger>

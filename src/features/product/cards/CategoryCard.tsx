@@ -1,4 +1,4 @@
-import { Card, Badge, VStack, Flex, Box } from '@chakra-ui/react';
+import { Card, Wrap, Box } from '@chakra-ui/react';
 import { LocaleNavButton, LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import CategoryCardImage from './CategoryCardImage';
 
@@ -21,49 +21,49 @@ export default function CategoryCard({
 }: CategoryCardProps) {
 	return (
 		<Card.Root
-			variant='outline'
-			maxW={{ base: '100%', sm: '316px' }}
-			minW='270px'
-			flex='1'
-			size='sm'
-			overflow='hidden'
-			borderWidth='0.5px'
+			w='full'
+			h='full'
+			borderWidth='1px'
 			borderStyle='solid'
 			borderColor='border'
+			rounded='xl'
+			overflow='hidden'
 			bg='bg.tertiary'
-			transition='all 0.25s ease-in-out'
+			transition='box-shadow 0.2s ease-in-out'
 			_hover={{
-				borderColor: 'border',
+				boxShadow: {
+					// Same mode-aware glow as ProductCard's hover treatment, kept
+					// consistent app-wide.
+					base: '0 1px 22px rgba(0, 0, 0, 0.22)',
+					_dark: '0 1px 26px rgba(177, 175, 179, 0.26)',
+				},
 			}}
 		>
-			<Card.Body gap='2'>
-				<Card.Title as='h2' fontWeight='medium' textStyle='2xl' textAlign='center'>
+			<Box position='relative' w='full' aspectRatio={316 / 186}>
+				<CategoryCardImage src={imageUrl} alt={title} priority={imagePriority} />
+			</Box>
+
+			<Card.Body gap='3' p={{ base: 4, cardSm: 5 }}>
+				<Card.Title as='h2' fontWeight='semibold' textStyle='xl' color='main'>
 					{title}
 				</Card.Title>
 
-				<VStack my='6' overflowY='auto' justifyContent='center' gap={4}>
-					{products.map((product, index) => (
-						<Badge
-							key={index}
-							variant='outline'
-							size='md'
-							borderWidth='0.5px'
-							bg='bg.tertiary'
-							px='1.5'
-							py='1'
-							boxShadow='none'
-							border='none'
-						>
+				{products.length > 0 && (
+					<Wrap gap='2'>
+						{products.map((product, index) => (
 							<LocaleNavLink
+								key={index}
 								href={product.href}
-								fontSize='md'
+								fontSize='sm'
 								fontWeight='medium'
+								bg='bgHover.promoCard'
+								color='main'
+								px='2.5'
+								py='1'
+								rounded='full'
 								textWrap='wrap'
 								wordBreak='break-word'
-								textDecorationColor='main'
-								color='main'
-								variant='underline'
-								_hover={{ color: 'link' }}
+								_hover={{ color: 'link', bg: 'bgHover.DEFAULT' }}
 								_focusVisible={{
 									outline: '2px solid',
 									outlineColor: 'main.secondary',
@@ -72,33 +72,14 @@ export default function CategoryCard({
 							>
 								{product.name}
 							</LocaleNavLink>
-						</Badge>
-					))}
-				</VStack>
-			</Card.Body>
+						))}
+					</Wrap>
+				)}
 
-			<Flex justifyContent='center'>
-				<LocaleNavButton
-					href={viewAllHref}
-					minW='200px'
-					aria-label={`${seeProductsLabel} ${title}`}
-				>
+				<LocaleNavButton href={viewAllHref} mt='2' w='full' aria-label={`${seeProductsLabel} ${title}`}>
 					{seeProductsLabel}
 				</LocaleNavButton>
-			</Flex>
-
-			<Box
-				position='relative'
-				w='full'
-				aspectRatio={316 / 186}
-				mt='28px'
-				overflow='hidden'
-				borderWidth='0.5px'
-				borderStyle='solid'
-				borderColor='border'
-			>
-				<CategoryCardImage src={imageUrl} alt={title} priority={imagePriority} />
-			</Box>
+			</Card.Body>
 		</Card.Root>
 	);
 }

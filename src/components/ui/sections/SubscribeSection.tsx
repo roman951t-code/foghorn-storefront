@@ -126,21 +126,36 @@ export default function SubscribeSection({ i18nData }: Props) {
 	return (
 		<Flex
 			mt={24}
+			position='relative'
 			bg='bg.tertiary'
 			borderWidth='0.5px'
 			borderStyle='solid'
 			borderColor='border'
-			p={4}
-			rounded='lg'
+			rounded='xl'
+			overflow='hidden'
+			p={{ base: 5, md: 6 }}
 			gapX='8'
 			gapY='4'
 			flexWrap='wrap'
 			alignItems='center'
 			justifyContent={{ base: 'center', '2xl': 'space-between' }}
 		>
-			<Heading color='main' fontWeight='medium' size='lg' minW='260px'>
-				{isUserSubscribed ? i18nData.subscribed : i18nData.subscribeInfo}
-			</Heading>
+			<Flex alignItems='center' gap='4' minW='260px'>
+				<Flex
+					shrink={0}
+					alignItems='center'
+					justifyContent='center'
+					boxSize='48px'
+					rounded='full'
+					bg='main.secondary'
+					color='black'
+				>
+					<IoMailOutline size={22} />
+				</Flex>
+				<Heading color='main' fontWeight='medium' size='lg'>
+					{isUserSubscribed ? i18nData.subscribed : i18nData.subscribeInfo}
+				</Heading>
+			</Flex>
 
 			{!isEmailVerified && (
 				<form onSubmit={handleSubmit(onSubmit)} style={{ width: 'auto' }}>
@@ -158,7 +173,7 @@ export default function SubscribeSection({ i18nData }: Props) {
 									maxLength={MAX_CHARACTERS}
 									rounded='lg'
 									variant='subtle'
-									borderColor={{ base: 'gray.500', _dark: 'gray.200' }}
+									borderColor={{ base: 'gray.500', _dark: 'gray.400' }}
 									_focus={{ borderColor: { base: 'black', _dark: 'yellow.500' } }}
 									type='email'
 									fontSize='15px'

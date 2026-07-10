@@ -187,14 +187,15 @@ export default function AboutTab({
 							onChange={(id) => setSelectedVariantId(id)}
 						/>
 					)}
-					<HStack mt='4' alignItems='center' fontSize='2xl' fontWeight='semibold'>
+					<HStack mt='4' alignItems='center' fontSize='3xl' fontWeight='semibold'>
 						{formatUsdPrice(unitEffectivePrice)}
 						{discount > 0 && (
 							<Badge colorPalette='gray' bg='transparent' mt='1'>
 								<Box
 									as='span'
+									fontWeight='medium'
 									color='main'
-									fontSize={{ base: 'md', md: 'sm' }}
+									fontSize='md'
 									textDecoration='line-through'
 								>
 									{formatUsdPrice(unitBasePrice)}
@@ -277,7 +278,7 @@ export default function AboutTab({
 					<Heading size='md'>{prodT('description')}</Heading>
 				</Card.Header>
 				<Card.Body>
-					<Text fontSize='sm' whiteSpace='pre-line'>
+					<Text fontSize='15px' whiteSpace='pre-line'>
 						{product.description?.trim() || prodT('descriptionText')}
 					</Text>
 				</Card.Body>

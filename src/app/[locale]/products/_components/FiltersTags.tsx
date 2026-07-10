@@ -26,7 +26,7 @@ const chipStyle = {
 	py: '1.5',
 	borderWidth: '0.5px',
 	borderStyle: 'solid' as const,
-	borderColor: 'orange.400',
+	borderColor: 'border',
 	_hover: { cursor: 'pointer' as const, bg: 'bgHover.promoCard' },
 };
 

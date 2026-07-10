@@ -25,9 +25,9 @@ export default async function Header({ locale }: { locale: AppLocale }) {
 	return (
 		<Box
 			as='header'
-			bg='bg.secondary'
 			position='sticky'
 			top='0'
+			bg='bg.secondary'
 			zIndex='1000'
 			px={2}
 			py={2.5}

@@ -34,11 +34,6 @@ const createLookup = (tokens: LocalizedToken[]) => {
 	return lookup;
 };
 
-const toAsciiSlug = (value: string) =>
-	normalizeToken(value)
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-+|-+$/g, '');
-
 const ATTRIBUTE_NAME_TOKENS: LocalizedToken[] = [
 	{ en: 'Model', uk: 'Модель', aliases: ['model', 'модель'] },
 	{ en: 'Size', uk: 'Розмір', aliases: ['size', 'розмір'] },
@@ -82,24 +77,6 @@ const localizeToken = (
 
 export function localizeAttributeName(name: string, locale?: string | null) {
 	return localizeToken(name, locale, ATTRIBUTE_NAME_LOOKUP);
-}
-
-export function toAttributeFilterKey(name: string, _attributeId?: string) {
-	const englishName = localizeAttributeName(name, 'en');
-	const slug = toAsciiSlug(englishName);
-	if (slug) return slug;
-	const trimmedName = name.trim();
-	return trimmedName || 'attribute';
-}
-
-export function getAttributeNameCandidatesForFilterKey(filterKey: string) {
-	const normalized = normalizeToken(filterKey);
-	const directToken = ATTRIBUTE_NAME_LOOKUP.get(normalized);
-	const token =
-		directToken ??
-		ATTRIBUTE_NAME_TOKENS.find((item) => toAsciiSlug(item.en) === toAsciiSlug(filterKey));
-	if (!token) return [filterKey];
-	return Array.from(new Set([token.en, token.uk, filterKey].filter(Boolean)));
 }
 
 type VariantLabelPart = {

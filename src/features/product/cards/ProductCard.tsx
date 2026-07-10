@@ -19,8 +19,8 @@ import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { Rating } from '@/components/ui/chakra/rating';
 import { showToaster } from '@/utils/toast';
 import { toasterMessages } from '@/data/toasterMessages';
-import { useCart } from '@/hooks/useCart';
-import { useWishList } from '@/hooks/useWishList';
+import { useCartActions, useIsProductInCart } from '@/hooks/useCart';
+import { useIsProductInWishlist, useWishListActions } from '@/hooks/useWishList';
 import { SubcategoryProduct } from '@/types/product';
 import { buildProductImageGallery } from '@/utils/productImages';
 import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
@@ -70,40 +70,32 @@ function ImageActionButton({
 	);
 }
 
-export default function ProductCard({ product, imagePriority = false }: Props) {
+// Isolated so its own isLoading toggle, and the re-render this product's
+// in-cart boolean triggers, only touch this small button — not ProductCard's
+// image slider/rating/price. useIsProductInCart selects just this product's
+// membership, instead of the whole productIds array useCart() returns, so
+// this only re-renders when ITS OWN boolean flips, not on every cart
+// mutation for any product — see useIsProductInCart's own comment for why
+// that distinction matters when 16-50 of these are mounted in a grid.
+function ProductCardCartButton({
+	product,
+	isInStock,
+}: {
+	product: CardProduct;
+	isInStock: boolean;
+}) {
 	const t = useTranslations('products');
 	const cartT = useTranslations('cart');
-	const wishT = useTranslations('wishlist');
-	const basePrice = roundPrice(product.basePrice ?? 0);
-	const discountPrice = product.discountPrice != null ? roundPrice(product.discountPrice) : null;
-	const rawDiscount = discountPrice != null ? roundPrice(basePrice - discountPrice) : 0;
-	const hasDiscount = rawDiscount > 0;
-	const displayPrice = hasDiscount && discountPrice != null ? discountPrice : basePrice;
-	const fullSlug = product.fullSlug ?? '#';
-	const name = product.name ?? '';
-	const isInStock = product.inStock ?? false;
-	const discount = hasDiscount ? rawDiscount : 0;
-	const reviewCount = product.reviewCount ?? 0;
-	const hasReviews = reviewCount > 0;
-	const ratingId = useId();
-
 	const [isLoading, setIsLoading] = useState(false);
-	const { productIds, handleAddItem, handleRemoveItem } = useCart();
-	const { ids: wishListIds, handleWishAdd, handleWishRemove } = useWishList();
-	const previewImages = buildProductImageGallery(product.imageUrl, product.images, 3);
+	const isInCart = useIsProductInCart(product.id);
+	const { handleAddItem, handleRemoveItem } = useCartActions();
+	const name = product.name ?? '';
 
-	if (!product) return null;
-
-	const isInCart = productIds.includes(product?.id);
-	const isInWishlist = wishListIds.includes(product?.id);
 	const cartButtonLabel = !isInStock
 		? `${t('productIsOutOfStock')}: ${name}`
 		: isInCart
 			? `${cartT('removeFromCart')}: ${name}`
 			: `${cartT('addToCart')}: ${name}`;
-	const wishlistButtonLabel = isInWishlist
-		? `${wishT('removeFromWishlist')}: ${name}`
-		: `${wishT('addToWishlist')}: ${name}`;
 
 	const addToCart = async () => {
 		setIsLoading(true);
@@ -137,6 +129,39 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 		}
 	};
 
+	return (
+		<ImageActionButton
+			active={isInCart}
+			activeColor='green.600'
+			loading={isLoading}
+			onClick={isInCart ? removeFromCart : addToCart}
+			aria-label={cartButtonLabel}
+			aria-pressed={isInCart}
+			disabled={!isInStock}
+			position='absolute'
+			top='2'
+			left='2'
+		>
+			<Icon size={{ base: 'lg', cardSm: 'md' }} aria-hidden='true'>
+				<FiShoppingCart />
+			</Icon>
+		</ImageActionButton>
+	);
+}
+
+// Isolated for the same reason as ProductCardCartButton above:
+// useIsProductInWishlist selects just this product's membership, so toggling
+// one card's wishlist heart doesn't re-render every other mounted card.
+function ProductCardWishlistButton({ product }: { product: CardProduct }) {
+	const wishT = useTranslations('wishlist');
+	const isInWishlist = useIsProductInWishlist(product.id);
+	const { handleWishAdd, handleWishRemove } = useWishListActions();
+	const name = product.name ?? '';
+
+	const wishlistButtonLabel = isInWishlist
+		? `${wishT('removeFromWishlist')}: ${name}`
+		: `${wishT('addToWishlist')}: ${name}`;
+
 	const addToWishList = async () => {
 		try {
 			const result = await handleWishAdd(product);
@@ -160,6 +185,43 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 			showToaster('error', toasterMessages.wishlistUpdateFailed(wishT));
 		}
 	};
+
+	return (
+		<ImageActionButton
+			active={isInWishlist}
+			activeColor='red.500'
+			onClick={isInWishlist ? removeFromWishList : addToWishList}
+			aria-label={wishlistButtonLabel}
+			aria-pressed={isInWishlist}
+			position='absolute'
+			top='2'
+			right='2'
+		>
+			<Icon size={{ base: 'lg', cardSm: 'md' }} aria-hidden='true'>
+				<FiHeart />
+			</Icon>
+		</ImageActionButton>
+	);
+}
+
+export default function ProductCard({ product, imagePriority = false }: Props) {
+	const t = useTranslations('products');
+	const basePrice = roundPrice(product.basePrice ?? 0);
+	const discountPrice = product.discountPrice != null ? roundPrice(product.discountPrice) : null;
+	const rawDiscount = discountPrice != null ? roundPrice(basePrice - discountPrice) : 0;
+	const hasDiscount = rawDiscount > 0;
+	const displayPrice = hasDiscount && discountPrice != null ? discountPrice : basePrice;
+	const fullSlug = product.fullSlug ?? '#';
+	const name = product.name ?? '';
+	const isInStock = product.inStock ?? false;
+	const discount = hasDiscount ? rawDiscount : 0;
+	const reviewCount = product.reviewCount ?? 0;
+	const hasReviews = reviewCount > 0;
+	const ratingId = useId();
+
+	const previewImages = buildProductImageGallery(product.imageUrl, product.images, 3);
+
+	if (!product) return null;
 
 	return (
 		<Card.Root
@@ -194,37 +256,9 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 					imagePriority={imagePriority}
 				/>
 
-				<ImageActionButton
-					active={isInCart}
-					activeColor='green.600'
-					loading={isLoading}
-					onClick={isInCart ? removeFromCart : addToCart}
-					aria-label={cartButtonLabel}
-					aria-pressed={isInCart}
-					disabled={!isInStock}
-					position='absolute'
-					top='2'
-					left='2'
-				>
-					<Icon size={{ base: 'lg', cardSm: 'md' }} aria-hidden='true'>
-						<FiShoppingCart />
-					</Icon>
-				</ImageActionButton>
+				<ProductCardCartButton product={product} isInStock={isInStock} />
 
-				<ImageActionButton
-					active={isInWishlist}
-					activeColor='red.500'
-					onClick={isInWishlist ? removeFromWishList : addToWishList}
-					aria-label={wishlistButtonLabel}
-					aria-pressed={isInWishlist}
-					position='absolute'
-					top='2'
-					right='2'
-				>
-					<Icon size={{ base: 'lg', cardSm: 'md' }} aria-hidden='true'>
-						<FiHeart />
-					</Icon>
-				</ImageActionButton>
+				<ProductCardWishlistButton product={product} />
 
 				{!isInStock && (
 					<Flex

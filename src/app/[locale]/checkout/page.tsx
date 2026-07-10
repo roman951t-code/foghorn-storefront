@@ -25,7 +25,9 @@ export default async function Checkout({ params }: LocaleParams) {
 
 	return (
 		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
-			<PageHeading size='2xl'>{productsT('orderProcessing')}</PageHeading>
+			<PageHeading mt='2' size='3xl'>
+				{productsT('orderProcessing')}
+			</PageHeading>
 			<Group justifyContent='space-between' align='flex-start' gapX='4'>
 				<Box as='section' flex='1'>
 					<CheckoutSteps />

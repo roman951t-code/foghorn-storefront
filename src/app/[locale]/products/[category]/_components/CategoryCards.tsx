@@ -1,6 +1,6 @@
 import CategoryCard from '@/features/product/cards/CategoryCard';
 import type { CatalogCategory } from '@/types/product';
-import { Wrap } from '@chakra-ui/react';
+import { Grid } from '@chakra-ui/react';
 import { resolveSubcategoryImage } from '@/utils/categoryImages';
 import { getTranslations } from 'next-intl/server';
 
@@ -17,7 +17,15 @@ export default async function CategoryCards({
 	const seeProductsLabel = productsT('seeProducts');
 
 	return (
-		<Wrap gapX='4' gapY='8'>
+		<Grid
+			templateColumns={{
+				base: 'repeat(1, 1fr)',
+				cardSm: 'repeat(2, 1fr)',
+				md: 'repeat(3, 1fr)',
+				xl: 'repeat(4, 1fr)',
+			}}
+			gap='6'
+		>
 			{category?.children.map((sub, index) => (
 				<CategoryCard
 					key={sub.id}
@@ -32,6 +40,6 @@ export default async function CategoryCards({
 					imagePriority={index < ABOVE_THE_FOLD_CATEGORY_COUNT}
 				/>
 			))}
-		</Wrap>
+		</Grid>
 	);
 }

@@ -76,7 +76,9 @@ export default function ProductDetails({
 					<Heading size='md'>{guaranteeTitle}</Heading>
 				</Card.Header>
 				<Card.Body fontSize='sm'>
-					<Text whiteSpace='pre-line'>{guaranteeText}</Text>
+					<Text fontSize='15px' whiteSpace='pre-line'>
+						{guaranteeText}
+					</Text>
 				</Card.Body>
 			</Card.Root>
 		</Stack>

@@ -26,13 +26,7 @@ export function LogoutSection({ onClose }: LogoutProps) {
 		router.replace('/');
 	};
 
-	return (
-		<Card.Root size='sm' bg='bg.tertiary' borderColor='border'>
-			<Card.Body gap={3}>
-				<TertiaryButton onClick={handleLogout}>{authT('logOut')}</TertiaryButton>
-			</Card.Body>
-		</Card.Root>
-	);
+	return <TertiaryButton onClick={handleLogout}>{authT('logOut')}</TertiaryButton>;
 }
 
 interface Props {

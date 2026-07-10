@@ -18,7 +18,6 @@ export default function TabsList() {
 			flexWrap='wrap'
 			justifyContent='center'
 			w='full'
-			colorPalette='gray'
 		>
 			{CABINET_TABS.map((tab) => {
 				const IconComponent = tab.icon;
@@ -27,8 +26,13 @@ export default function TabsList() {
 					: navT(tab.labelKey);
 
 				return (
-					<Tabs.Trigger key={tab.value} value={tab.value} {...CABINET_TAB_TRIGGER_PROPS}>
-						<Icon as={IconComponent} size='md' />
+					<Tabs.Trigger
+						key={tab.value}
+						value={tab.value}
+						_hover={{ color: 'main', transition: '0.3s ease all' }}
+						{...CABINET_TAB_TRIGGER_PROPS}
+					>
+						<Icon as={IconComponent} fontSize='md' />
 						{label}
 					</Tabs.Trigger>
 				);

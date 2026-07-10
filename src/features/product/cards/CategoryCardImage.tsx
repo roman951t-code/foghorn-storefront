@@ -15,7 +15,9 @@ export default function CategoryCardImage({ src, alt, priority = false }: Props)
 			src={src}
 			fallbackSrc={SUBCATEGORY_PLACEHOLDER_IMAGE}
 			alt={alt}
-			sizes='(min-width: 30em) 316px, 100vw'
+			// Matches CategoryCards.tsx's grid column counts (1/2/3/4 at
+			// base/cardSm/md/xl) instead of the old fixed-width Wrap layout.
+			sizes='(min-width: 1200px) 25vw, (min-width: 768px) 33vw, (min-width: 532px) 50vw, 100vw'
 			objectFit='cover'
 			loading={priority ? 'eager' : 'lazy'}
 			fetchPriority={priority ? 'high' : 'auto'}

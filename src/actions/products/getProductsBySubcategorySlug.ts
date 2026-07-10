@@ -20,10 +20,7 @@ import { getPaginatedIdsByEffectivePriceSort } from '@/utils/effectivePriceSorti
 import { getLocaleFallbacks, pickLocalizedTranslation } from '@/utils/localeFallback';
 import { getPublishedProductWhere } from '@/utils/publishSchedule';
 import { getMaxEffectiveProductPrice } from '@/utils/maxEffectiveProductPrice';
-import {
-	buildLocalizedVariantLabel,
-	getAttributeNameCandidatesForFilterKey,
-} from '@/utils/attributeLocalization';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
 import {
 	PRODUCT_CATEGORY_CACHE_TAG,
 	PRODUCT_LIST_CACHE_TAG,
@@ -198,7 +195,11 @@ export async function getProductsBySubcategorySlug(
 	const dynamicConditions = attributeFilters.map(([key, values]) => ({
 		attributes: {
 			some: {
-				attribute: { name: { in: getAttributeNameCandidatesForFilterKey(key) } },
+				// key is the attribute's id (see getProductsFilters.ts) — matching
+				// on it directly instead of a localized name guess is the fix for
+				// the empty-results bug (real attribute names like "Памʼять" or
+				// abbreviated ones like "ОЗП" never matched the guessed candidates).
+				attributeId: key,
 				value: { in: values.flat() },
 			},
 		},
