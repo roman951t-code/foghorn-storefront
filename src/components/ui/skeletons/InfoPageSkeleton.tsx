@@ -6,7 +6,7 @@ import { Box, Flex, Skeleton, SkeletonText } from '@chakra-ui/react';
 // H1 → optional intro → paragraphs of text.
 export default function InfoPageSkeleton() {
 	return (
-		<Flex mx={{ base: '12px', '2xl': 0 }} direction='column' gap={5} maxW='4xl'>
+		<Flex mx={{ base: '18px', '2xl': 0 }} direction='column' gap={5} maxW='4xl'>
 			<Skeleton height='38px' width='60%' rounded='md' />
 			<Skeleton height='16px' width='80%' rounded='md' />
 

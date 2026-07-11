@@ -23,7 +23,7 @@ function ProductRowSkeleton() {
 // sliders (popular/new/discount/promotional) → subscribe section.
 export default function HomePageSkeleton() {
 	return (
-		<Flex mx={{ base: '12px', '2xl': 0 }} direction='column'>
+		<Flex mx={{ base: '18px', '2xl': 0 }} direction='column'>
 			<Skeleton height={{ base: '220px', md: '360px' }} rounded='xl' />
 
 			<ProductRowSkeleton />

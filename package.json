@@ -37,7 +37,8 @@
 		"admin:start": "node --import tsx/esm -e \"process.env.NODE_ENV='production'; process.env.ADMIN_JS_TMP_DIR='adminjs-bundle'; process.stderr.write('[admin:start] node -e begin\\n'); import('./src/admin/server.mts').catch(e=>{process.stderr.write('[admin:start] server.mts import failed: '+(e&&e.stack||e)+'\\n');process.exit(1);})\"",
 		"admin:bundle": "NODE_ENV=production node --max-old-space-size=2048 --import tsx/esm scripts/admin-prebundle.mts",
 		"render:build": "npm install --legacy-peer-deps --include=dev && npm run admin:bundle",
-		"seed:content": "node scripts/seed-content-pages.cjs"
+		"seed:content": "node scripts/seed-content-pages.cjs",
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"@adminjs/design-system": "^4.1.1",
@@ -98,6 +99,7 @@
 		"@types/react-dom": "^19.2.3",
 		"eslint": "^9.39.4",
 		"eslint-config-next": "16.2.6",
+		"husky": "^9.1.7",
 		"prisma": "^7.8.0",
 		"ts-node": "^10.9.2",
 		"tsx": "4.22.2",

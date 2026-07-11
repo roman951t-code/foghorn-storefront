@@ -7,6 +7,7 @@ export default [
 	{
 		ignores: [
 			'.adminjs/**',
+			'adminjs-bundle/**',
 			'src/generated/**',
 			'coverage/**',
 			'public/adminjs-readonly.js',

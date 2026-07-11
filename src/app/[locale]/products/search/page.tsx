@@ -213,7 +213,7 @@ export default async function SearchProducts({ params, searchParams }: Props) {
 				: await buildSearchResponse();
 
 	return (
-		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
+		<Flex mx={{ base: '18px', '2xl': 0 }} gap={8} direction='column'>
 			<PageHeading size='3xl'>
 				{productsT('searchQueryResults', {
 					searchQuery: tag ? productsT(tag) : searchQuery || '',

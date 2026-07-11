@@ -24,7 +24,7 @@ export default async function Checkout({ params }: LocaleParams) {
 	const checkoutForms = await getEnabledStorefrontForms(StorefrontFormPlacement.CHECKOUT);
 
 	return (
-		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
+		<Flex mx={{ base: '18px', '2xl': 0 }} gap={8} direction='column'>
 			<PageHeading mt='2' size='3xl'>
 				{productsT('orderProcessing')}
 			</PageHeading>

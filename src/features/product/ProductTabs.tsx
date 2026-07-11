@@ -155,18 +155,16 @@ export default function ProductTabs({
 			// "about" no longer re-initializes ProductThumbsSlider's Swiper
 			// instances from scratch every time.
 			lazyMount
-			// Evenly-split edge-to-edge only once there's room for the longest
-			// label ("Характеристики") at full size without wrapping; below
-			// that, tabs keep their natural width and the row scrolls instead.
-			fitted={{ base: false, sm: true }}
 		>
-			<Tabs.List mb='4' overflowX={{ base: 'auto', sm: 'visible' }}>
+			<Tabs.List mb='4' flexWrap='wrap' justifyContent='space-around'>
 				{items.map((item, index) => (
 					<Tabs.Trigger
 						key={index}
 						value={item.value}
 						fontSize='17px'
-						_hover={{ color: 'main', transition: '0.3s ease all' }}
+						opacity='.85'
+						color='main'
+						_hover={{ opacity: 1, transition: '0.3s ease all' }}
 					>
 						<Icon as={item.icon} fontSize='md' />
 						{item.title}

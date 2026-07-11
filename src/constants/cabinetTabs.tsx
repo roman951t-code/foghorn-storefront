@@ -30,6 +30,9 @@ export const CABINET_TAB_ROUTE_SUFFIXES: Record<CabinetTabValue, string> = {
 export const CABINET_TAB_TRIGGER_PROPS = {
 	display: 'inline-flex',
 	gap: 2,
+	color: 'main',
+	opacity: '0.85',
+
 	// Never shrink — overflow is handled by the list wrapping to a new row
 	// (flexWrap='wrap' in TabsHeaders), not by squeezing a pill until its
 	// label wraps mid-word.

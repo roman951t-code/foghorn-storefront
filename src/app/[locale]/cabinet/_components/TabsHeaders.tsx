@@ -9,16 +9,7 @@ export default function TabsList() {
 	const { session } = useSession();
 
 	return (
-		<Tabs.List
-			mt='4'
-			mb='4'
-			gapX='4'
-			rowGap='3'
-			hideBelow='xs'
-			flexWrap='wrap'
-			justifyContent='center'
-			w='full'
-		>
+		<Tabs.List mt='4' mb='4' gapX='4' rowGap='3' flexWrap='wrap' justifyContent='center' w='full'>
 			{CABINET_TABS.map((tab) => {
 				const IconComponent = tab.icon;
 				const label = tab.usesName
@@ -29,7 +20,7 @@ export default function TabsList() {
 					<Tabs.Trigger
 						key={tab.value}
 						value={tab.value}
-						_hover={{ color: 'main', transition: '0.3s ease all' }}
+						_hover={{ opacity: 1, transition: '0.3s ease all' }}
 						{...CABINET_TAB_TRIGGER_PROPS}
 					>
 						<Icon as={IconComponent} fontSize='md' />

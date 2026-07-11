@@ -214,7 +214,7 @@ export default async function Subcategory({ params, searchParams }: Props) {
 	};
 
 	return (
-		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
+		<Flex mx={{ base: '18px', '2xl': 0 }} gap={8} direction='column'>
 			<Script id='subcategory-breadcrumbs-schema' nonce={cspNonce} type='application/ld+json'>
 				{JSON.stringify(breadcrumbsJsonLd)}
 			</Script>

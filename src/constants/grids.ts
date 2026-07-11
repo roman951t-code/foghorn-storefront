@@ -81,34 +81,41 @@ export const PRODUCTS_GRID_CSS = {
 	},
 } as const;
 
-// This grid's 6th tier is a special case: it only turns on at the '2xl'
-// breakpoint (1536px — still Chakra's default, since this theme's custom
-// `breakpoints` only redefines xs/sm/md/lg/xl and never touches '2xl'),
-// which is exactly the point where these pages' own outer margin (mx)
-// drops from 12px to 0, so the grid's available width becomes a *fixed*
-// 1512px (the storefront's content cap) for any viewport from there up —
-// it can never grow further. 6 columns at the normal 246-271px band would
-// need up to 1516px, more than that fixed 1512px allows, so this tier uses
-// its own smaller band sized to fill exactly 1512px (6*234 + 5*8 = 1444).
-// The 1556px threshold (1536 + the same 20px scrollbar buffer as above)
-// guards against firing before the mx:0 margin change has actually landed.
+// Unlike PRODUCTS_GRID_CSS, the cabinet page (wishlist/reviewed tabs) has a
+// *constant* 32px total side margin at every breakpoint — cabinet/layout.tsx
+// wraps everything in a plain `Flex px='4'`, not a responsive `mx` that
+// drops to 0 at '2xl' — so there's no margin-change discontinuity to work
+// around here. Every threshold below is just the same math as
+// PRODUCTS_GRID_CSS: N*MIN + (N-1)*gap, plus this page's 32px margin, plus
+// the same 20px scrollbar-safety buffer explained above PRODUCTS_GRID_CSS
+// (the old thresholds here predate that fix and were never recomputed —
+// several were tight enough to compress the gap under a real scrollbar).
+//
+// The 6th tier still needs its own smaller band: even at this grid's
+// absolute width ceiling (the storefront's 1512px content cap minus this
+// page's 32px margin = 1480px), 6 columns at the normal 246-271px band
+// would need up to 1516px — more than fits — so it uses a smaller minmax
+// sized to fit within that 1480px ceiling (6*234 + 5*8 = 1444).
 const SIX_COLUMN_MINMAX = 'minmax(220px, 234px)';
 
 export const CABINET_PRODUCTS_GRID_CSS = {
-	gridTemplateColumns: `repeat(1, ${CARD_MINMAX})`,
-	'@media (min-width: 532px)': {
+	// Single card fills the full row (same reasoning as PRODUCTS_GRID_CSS's
+	// base tier) instead of sitting at a fixed 246-271px width with blank
+	// space beside it.
+	gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+	'@media (min-width: 552px)': {
 		gridTemplateColumns: `repeat(2, ${CARD_MINMAX})`,
 	},
-	'@media (min-width: 798px)': {
+	'@media (min-width: 806px)': {
 		gridTemplateColumns: `repeat(3, ${CARD_MINMAX})`,
 	},
-	'@media (min-width: 1052px)': {
+	'@media (min-width: 1060px)': {
 		gridTemplateColumns: `repeat(4, ${CARD_MINMAX})`,
 	},
-	'@media (min-width: 1306px)': {
+	'@media (min-width: 1314px)': {
 		gridTemplateColumns: `repeat(5, ${CARD_MINMAX})`,
 	},
-	'@media (min-width: 1556px)': {
+	'@media (min-width: 1412px)': {
 		gridTemplateColumns: `repeat(6, ${SIX_COLUMN_MINMAX})`,
 	},
 } as const;

@@ -6,7 +6,7 @@ const BAR_HEIGHT: Record<string, string> = {
 	'3xl': '32px',
 };
 
-type Props = HeadingProps & {
+type Props = Omit<HeadingProps, 'direction'> & {
 	size?: '2xl' | '3xl';
 };
 

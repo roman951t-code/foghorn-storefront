@@ -284,7 +284,7 @@ export default async function ProductDetail({ params, searchParams }: Props) {
 			</Script>
 			<ProductPersonalization productId={productData.id} reviews={productData.reviews} />
 
-			<Flex mx={{ base: '12px', '2xl': 0 }} gap={4} direction='column'>
+			<Flex mx={{ base: '18px', '2xl': 0 }} gap={4} direction='column'>
 				<Breadcrumbs
 					categorySlug={category}
 					subcategorySlug={subcategory}

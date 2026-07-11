@@ -1,20 +1,12 @@
 'use client';
 
-import {
-	Box,
-	Flex,
-	HStack,
-	Skeleton,
-	SkeletonText,
-	SkeletonCircle,
-	Stack,
-} from '@chakra-ui/react';
+import { Box, Flex, HStack, Skeleton, SkeletonText, SkeletonCircle, Stack } from '@chakra-ui/react';
 
 // Shape mirrors [locale]/products/[category]/[subcategory]/[product]/page.tsx:
 // breadcrumbs → tabs → 2-column (gallery + info panel) → description → related.
 export default function ProductDetailPageSkeleton() {
 	return (
-		<Flex mx={{ base: '12px', '2xl': 0 }} gap={6} direction='column'>
+		<Flex mx={{ base: '18px', '2xl': 0 }} gap={6} direction='column'>
 			<Flex gap={2} align='center'>
 				<Skeleton height='22px' width='60px' rounded='md' />
 				<Skeleton height='22px' width='140px' rounded='md' />
@@ -30,11 +22,7 @@ export default function ProductDetailPageSkeleton() {
 
 			<Flex gap={6} direction={{ base: 'column', lg: 'row' }}>
 				<Stack flex='1' minW={0} gap={3}>
-					<Skeleton
-						w='100%'
-						h={{ base: '320px', md: '440px', xl: '520px' }}
-						rounded='md'
-					/>
+					<Skeleton w='100%' h={{ base: '320px', md: '440px', xl: '520px' }} rounded='md' />
 					<HStack gap={2}>
 						{Array.from({ length: 4 }).map((_, index) => (
 							<Skeleton key={index} boxSize={{ base: '60px', md: '80px' }} rounded='md' />
@@ -60,12 +48,7 @@ export default function ProductDetailPageSkeleton() {
 						<Skeleton height='14px' width='60px' rounded='md' />
 						<HStack gap={2}>
 							{Array.from({ length: 3 }).map((_, index) => (
-								<Skeleton
-									key={index}
-									height='36px'
-									width='56px'
-									rounded='md'
-								/>
+								<Skeleton key={index} height='36px' width='56px' rounded='md' />
 							))}
 						</HStack>
 					</Stack>

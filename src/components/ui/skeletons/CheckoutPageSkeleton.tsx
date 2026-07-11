@@ -6,7 +6,7 @@ import { Box, Flex, Group, HStack, Skeleton, Stack } from '@chakra-ui/react';
 // H1 → left checkout steps column + right sticky order-info aside.
 export default function CheckoutPageSkeleton() {
 	return (
-		<Flex mx={{ base: '12px', '2xl': 0 }} gap={8} direction='column'>
+		<Flex mx={{ base: '18px', '2xl': 0 }} gap={8} direction='column'>
 			<Skeleton height='38px' width={{ base: '65%', md: '360px' }} rounded='md' />
 
 			<Group justifyContent='space-between' align='flex-start' gapX='4'>

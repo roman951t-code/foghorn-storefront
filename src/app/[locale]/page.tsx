@@ -41,7 +41,7 @@ export default async function Main({ params }: LocaleParams) {
 	};
 
 	return (
-		<Flex mx={{ base: '12px', '2xl': 0 }} direction='column'>
+		<Flex mx={{ base: '18px', '2xl': 0 }} direction='column'>
 			<Box hideFrom='sm' mb='24px'>
 				<CatalogBtn fullText />
 			</Box>
