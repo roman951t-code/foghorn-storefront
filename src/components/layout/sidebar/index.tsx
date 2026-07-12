@@ -33,7 +33,7 @@ function Logo({ onClick }: { onClick?: () => void }) {
 	return (
 		<Link href='/' onClick={onClick}>
 			<Box>
-				<Image src={ASSET_IMAGES.logoBig} width={208} height={logoHeight} alt='logo' />
+				<Image src={ASSET_IMAGES.logoBig} width={210} height={logoHeight} alt='logo' />
 			</Box>
 		</Link>
 	);

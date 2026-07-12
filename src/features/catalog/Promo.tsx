@@ -2,8 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { Box, Flex, HStack, Text, VStack, useBreakpointValue } from '@chakra-ui/react';
-import { LoadingPromoSkeleton } from '@/components/ui/Skeleton';
+import { Box, Flex, Text, VStack } from '@chakra-ui/react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Mousewheel } from 'swiper/modules';
 import { Link } from '@/i18n/routing';
@@ -12,17 +11,27 @@ import { promoBreakpoints } from '@/data/breakpoints';
 import { useRef } from 'react';
 import { SecondaryButton } from '@/components/ui/buttons/ActionButton';
 
-function PromoSkeletonFallback() {
-	const skeletonCount = useBreakpointValue({ base: 1, sm: 2, md: 1, lg: 2 }) ?? 4;
+// Matches this slider's own container width, not a naive full-viewport vw:
+// the promo panel sits next to CatalogPanel's 280px sidebar (+12px gap, from
+// `md` up) inside <main maxW="1512px"> and page.tsx's mx (18px each side
+// below `2xl`, see layout.tsx/page.tsx). Plain vw fractions (the previous
+// version of this string) ignore both the sidebar and the 1512px cap, so
+// they overshoot badly at wide viewports — measured ~50% wasted bytes on
+// the hero image at a 1350px viewport. Each bucket below subtracts those
+// fixed costs (divided by slidesPerView for the multi-slide ones), same
+// breakpoints as `promoBreakpoints`, plus a small buffer on top of the exact
+// math so a slightly-off measurement still over-fetches rather than
+// under-fetches (over-fetching is harmless; under-fetching blurs the image —
+// see PRODUCT_IMAGE_SIZES's own comment in ProductPreviewSlider.tsx for the
+// same reasoning). Last bucket is a flat px value, not vw, since the 1512px
+// cap makes the container width constant past that point.
+const PROMO_IMAGE_SIZES =
+	'(max-width: 689px) calc(100vw - 32px), (max-width: 767px) calc(50vw - 11px), (max-width: 1099px) calc(100vw - 324px), (max-width: 1563px) calc(50vw - 160px), 420px';
 
-	return (
-		<HStack gap='4' mt='8' overflowX='auto' overflowY='hidden' w='100%'>
-			{Array.from({ length: skeletonCount }).map((_, i) => (
-				<LoadingPromoSkeleton key={i} />
-			))}
-		</HStack>
-	);
-}
+// Stable, non-reactive stand-in for PromoCardSlide's isDraggingRef when it's
+// rendered as the static (non-Swiper) first-slide fallback below — nothing
+// ever mutates it there, since there's no drag gesture without Swiper mounted.
+const STATIC_DRAG_REF = { current: false };
 
 type PromoProps = {
 	promos?: PromoCard[];
@@ -118,7 +127,7 @@ function PromoCardSlide({
 						loading={imagePriority ? 'eager' : 'lazy'}
 						fetchPriority={imagePriority ? 'high' : 'auto'}
 						quality={68}
-						sizes='(max-width: 689px) 100vw, (max-width: 767px) 50vw, (max-width: 1099px) 100vw, (max-width: 1563px) 50vw, 33vw'
+						sizes={PROMO_IMAGE_SIZES}
 						style={{ objectFit: 'cover' }}
 					/>
 				) : null}
@@ -190,10 +199,41 @@ function PromoSlider({ promos }: PromoProps) {
 }
 
 const DynamicPromoSlider = dynamic<PromoProps>(() => Promise.resolve(PromoSlider), {
+	// No loading UI: the static first slide rendered below already fills this
+	// space (server-rendered, so it's in the initial HTML), and it's visually
+	// identical to Swiper's own first slide — showing a skeleton on top of it
+	// would just flicker (real image → gray box → real image) for no benefit.
 	ssr: false,
-	loading: () => <PromoSkeletonFallback />,
+	loading: () => null,
 });
 
 export default function Promo({ promos }: PromoProps) {
-	return <DynamicPromoSlider promos={promos} />;
+	const cards = promos && promos.length > 0 ? promos : PROMO_CARDS;
+	const [firstCard] = cards;
+
+	return (
+		// flex='1' matches .promoSlider's own CSS rule (swiper.css) — this Box
+		// now takes over as the flex child CatalogPanel's row sizes next to the
+		// 280px sidebar, since the Swiper root (still using that class below)
+		// isn't the outermost element here anymore.
+		<Box position='relative' flex='1'>
+			{/* Server-rendered stand-in for Swiper's first slide (Swiper itself
+			    is client-only below — see DynamicPromoSlider's comment). Without
+			    this, the LCP hero image doesn't exist in the initial HTML at all:
+			    the browser can't discover or paint it until React hydrates and
+			    Swiper mounts, which measured as ~53% of this element's LCP time
+			    being pure render delay. `inert` + aria-hidden take it out of the
+			    accessibility tree and tab order once Swiper's real (identical)
+			    first slide is layered on top, so there's exactly one reachable
+			    "Shop now" link, not two. */}
+			{firstCard ? (
+				<Box aria-hidden='true' inert>
+					<PromoCardSlide promo={firstCard} imagePriority isDraggingRef={STATIC_DRAG_REF} />
+				</Box>
+			) : null}
+			<Box position='absolute' inset='0'>
+				<DynamicPromoSlider promos={promos} />
+			</Box>
+		</Box>
+	);
 }

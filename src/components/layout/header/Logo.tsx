@@ -14,20 +14,21 @@ import { ASSET_IMAGES } from '@/constants/assets';
 // after hydration, causing the same kind of flash.
 //
 // Each variant's width is derived from its own real pixel dimensions at a
-// fixed 42px height, not reused across variants — they aren't identical
-// aspect ratios, and an off-ratio width/height pair makes next/image warn
-// about a distorted image.
+// fixed height, not reused across variants — they aren't identical aspect
+// ratios, and an off-ratio width/height pair makes next/image warn about a
+// distorted image (logo_small.png is 92x88, logo_big.png is 380x83 —
+// neither is square/round-numbered, so the width below isn't either).
 export default function Logo() {
 	return (
 		<Link href='/' aria-label='Go to homepage'>
 			<Box hideFrom='md'>
 				<Box>
-					<Image src={ASSET_IMAGES.logoSmall} alt='logo' width={48} height={48} priority />
+					<Image src={ASSET_IMAGES.logoSmall} alt='logo' width={50} height={48} priority />
 				</Box>
 			</Box>
 			<Box hideBelow='md'>
 				<Box>
-					<Image src={ASSET_IMAGES.logoBig} alt='logo' width={208} height={50} priority />
+					<Image src={ASSET_IMAGES.logoBig} alt='logo' width={210} height={50} priority />
 				</Box>
 			</Box>
 		</Link>

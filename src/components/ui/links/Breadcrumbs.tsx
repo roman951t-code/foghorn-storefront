@@ -1,6 +1,9 @@
 'use client';
 
-import { BreadcrumbLink, BreadcrumbRoot } from '@/components/ui/chakra/breadcrumb';
+import {
+	BreadcrumbCurrentLink as ChakraBreadcrumbCurrentLink,
+	BreadcrumbRoot,
+} from '@/components/ui/chakra/breadcrumb';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import { LocaleNavLink } from './LocaleNavLink';
 import { Button } from '@chakra-ui/react';
@@ -28,19 +31,22 @@ function CustomBreadcrumbLink({ href, children }: { href: string; children: Reac
 	);
 }
 
+// Renders as a <span> (Breadcrumb.CurrentLink), not an <a> — this crumb is
+// the current page, so it isn't a link at all. An anchor with no href here
+// used to trip Lighthouse's crawlable-anchors audit and was never actually
+// keyboard-focusable or navigable anyway.
 function BreadcrumbCurrentLink({ children }: { children: React.ReactNode }) {
 	return (
-		<BreadcrumbLink
+		<ChakraBreadcrumbCurrentLink
 			wordBreak='break-word'
 			cursor='default'
 			fontWeight='semibold'
 			color='main'
 			fontSize={{ base: 'md', md: '16px' }}
 			textDecoration='none'
-			_focusVisible={{ outline: '2px solid', outlineColor: 'main.secondary', outlineOffset: '2px' }}
 		>
 			{children}
-		</BreadcrumbLink>
+		</ChakraBreadcrumbCurrentLink>
 	);
 }
 
@@ -84,7 +90,6 @@ export default function Breadcrumbs({
 						boxShadow='none'
 						px='3'
 						borderColor='border'
-						aria-label='Open catalog'
 						height='30px'
 						minW='auto'
 						rounded='full'
