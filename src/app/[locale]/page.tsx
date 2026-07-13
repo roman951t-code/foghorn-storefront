@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Flex, Box } from '@chakra-ui/react';
 import CatalogPanel from '@/features/catalog/CatalogPanel';
 import ProductsSection from '@/features/catalog/ProductsSection';
@@ -50,7 +51,15 @@ export default async function Main({ params }: LocaleParams) {
 			<ProductsSection title={prodT('new')} tag='new' />
 			<ProductsSection title={prodT('discount')} tag='discount' />
 			<ProductsSection title={prodT('promotional')} tag='promotional' />
-			<ViewedProductsSection title={prodT('viewed')} tag='viewed' />
+			{/* Own Suspense boundary: this section reads the session (uncached,
+			    per-request) while every ProductsSection above is `'use cache'`.
+			    Without a local boundary here, that one dynamic read bubbles up to
+			    the root layout's <Suspense fallback={null}> and blanks the whole
+			    page on every homepage visit until it resolves — not just this
+			    section. */}
+			<Suspense fallback={null}>
+				<ViewedProductsSection title={prodT('viewed')} tag='viewed' />
+			</Suspense>
 
 			<SubscribeSection i18nData={subscribeI18nData} />
 		</Flex>

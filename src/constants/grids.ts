@@ -1,17 +1,9 @@
 export const PRODUCT_CARD_HORIZONTAL_GAP_PX = 8;
 export const PRODUCT_CARD_HORIZONTAL_GAP = `${PRODUCT_CARD_HORIZONTAL_GAP_PX}px`;
 
-// Card width band. Max is min + 10%.
-export const PRODUCT_CARD_MIN_WIDTH_PX = 246;
-export const PRODUCT_CARD_MAX_WIDTH_PX = 271;
-const CARD_MINMAX = `minmax(${PRODUCT_CARD_MIN_WIDTH_PX}px, ${PRODUCT_CARD_MAX_WIDTH_PX}px)`;
-
-// Separate width band for PRODUCTS_GRID_CSS only (category/subcategory/
-// search listing pages), decoupled from the shared CARD_MINMAX band used by
-// CABINET_PRODUCTS_GRID_CSS (that one's intentionally left alone).
-// ProductsSlider (the homepage/viewed-products swiper) reuses this same
-// band and its `cardSm` breakpoint (theme.breakpoints, chakraTheme.ts) so
-// both places render identically-sized cards. ProductPreviewSlider's
+// Shared card width band: every grid (PRODUCTS_GRID_CSS, CABINET_PRODUCTS_GRID_CSS,
+// and ProductsSlider via its `cardSm` breakpoint in chakraTheme.ts) renders
+// cards in this band so they're sized identically everywhere. ProductPreviewSlider's
 // `sizes` attribute reads PRODUCTS_GRID_CARD_MAX_WIDTH_PX too, so the
 // largest rendered card still gets a sharp (non-upscaled) image.
 export const PRODUCTS_GRID_CARD_MIN_WIDTH_PX = 240;
@@ -91,29 +83,42 @@ export const PRODUCTS_GRID_CSS = {
 // (the old thresholds here predate that fix and were never recomputed —
 // several were tight enough to compress the gap under a real scrollbar).
 //
+// Columns 2-5 use PRODUCTS_GRID_CARD_MINMAX (240-300px), the same band as
+// PRODUCTS_GRID_CSS, instead of the narrower 246-271px CARD_MINMAX — this
+// grid used to cap out 29px earlier than the subcategory grid at the same
+// column count, so at in-between viewport widths (past this grid's cap but
+// short of the next column tier) it visibly left more of the container
+// unused than the subcategory grid did (confirmed empirically: 148px/977px
+// idle at the 3-column tier's 1024px width, vs 49px/657px for
+// PRODUCTS_GRID_CSS's 2-column tier at that same width — roughly double the
+// proportion). The breakpoint thresholds themselves are untouched: a lower
+// band max never causes overflow (minmax's max is a ceiling, not a forced
+// size), and the band's slightly lower min (240 vs 246) only adds slack to
+// each tier's fit, never removes it.
+//
 // The 6th tier still needs its own smaller band: even at this grid's
 // absolute width ceiling (the storefront's 1512px content cap minus this
-// page's 32px margin = 1480px), 6 columns at the normal 246-271px band
-// would need up to 1516px — more than fits — so it uses a smaller minmax
-// sized to fit within that 1480px ceiling (6*234 + 5*8 = 1444).
+// page's 32px margin = 1480px), 6 columns at the 240-300px band would need
+// up to 1840px — more than fits — so it uses a smaller minmax sized to fit
+// within that 1480px ceiling (6*234 + 5*8 = 1444).
 const SIX_COLUMN_MINMAX = 'minmax(220px, 234px)';
 
 export const CABINET_PRODUCTS_GRID_CSS = {
 	// Single card fills the full row (same reasoning as PRODUCTS_GRID_CSS's
-	// base tier) instead of sitting at a fixed 246-271px width with blank
-	// space beside it.
+	// base tier) instead of sitting at a fixed-width band with blank space
+	// beside it.
 	gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
 	'@media (min-width: 552px)': {
-		gridTemplateColumns: `repeat(2, ${CARD_MINMAX})`,
+		gridTemplateColumns: `repeat(2, ${PRODUCTS_GRID_CARD_MINMAX})`,
 	},
 	'@media (min-width: 806px)': {
-		gridTemplateColumns: `repeat(3, ${CARD_MINMAX})`,
+		gridTemplateColumns: `repeat(3, ${PRODUCTS_GRID_CARD_MINMAX})`,
 	},
 	'@media (min-width: 1060px)': {
-		gridTemplateColumns: `repeat(4, ${CARD_MINMAX})`,
+		gridTemplateColumns: `repeat(4, ${PRODUCTS_GRID_CARD_MINMAX})`,
 	},
 	'@media (min-width: 1314px)': {
-		gridTemplateColumns: `repeat(5, ${CARD_MINMAX})`,
+		gridTemplateColumns: `repeat(5, ${PRODUCTS_GRID_CARD_MINMAX})`,
 	},
 	'@media (min-width: 1412px)': {
 		gridTemplateColumns: `repeat(6, ${SIX_COLUMN_MINMAX})`,

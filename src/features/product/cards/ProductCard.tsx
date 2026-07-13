@@ -292,22 +292,33 @@ export default function ProductCard({ product, imagePriority = false }: Props) {
 			>
 				<LinkBox>
 					<Card.Title fontWeight='semibold' w='100%' as='span'>
-						<LocaleNavLink
-							href={`/products/${fullSlug}`}
-							textDecorationColor='main'
-							color='main'
-							fontSize={{ base: '18px', cardSm: '16px' }}
-							lineHeight='1.35'
+						{/* The clamp box wraps the link (not the other way round) so the
+						    -webkit-box block sits directly inside the block-level title
+						    span instead of nested inside the link's inline <a> — WebKit's
+						    legacy -webkit-box layout mis-centers when it's the one nested
+						    inside an inline ancestor (see CartOrderCard.tsx for the same
+						    pattern). */}
+						<Text
+							as='span'
 							display='-webkit-box'
 							overflow='hidden'
+							textAlign='left'
 							css={{
 								WebkitLineClamp: 2,
 								WebkitBoxOrient: 'vertical',
 							}}
-							variant='underline'
 						>
-							{name}
-						</LocaleNavLink>
+							<LocaleNavLink
+								href={`/products/${fullSlug}`}
+								textDecorationColor='main'
+								color='main'
+								fontSize={{ base: '18px', cardSm: '16px' }}
+								lineHeight='1.35'
+								variant='underline'
+							>
+								{name}
+							</LocaleNavLink>
+						</Text>
 					</Card.Title>
 				</LinkBox>
 

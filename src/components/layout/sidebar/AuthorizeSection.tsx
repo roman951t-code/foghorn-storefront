@@ -42,7 +42,7 @@ export function AuthorizeSection({ onAuthOpen }: Props) {
 			<Card.Body gap={3}>
 				<TertiaryButton onClick={onAuthOpen}>{authT('authorize')}</TertiaryButton>
 
-				<Card.Description color='main' fontSize={{ base: 'md', md: 'xs' }} textAlign='center'>
+				<Card.Description color='main' fontSize={{ base: 'md', md: 'xs' }}>
 					{navT('sidebar.authorizeDetails')}
 				</Card.Description>
 			</Card.Body>

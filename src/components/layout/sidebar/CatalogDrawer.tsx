@@ -18,6 +18,7 @@ import {
 	SimpleGrid,
 	Skeleton,
 	Icon,
+	Wrap,
 } from '@chakra-ui/react';
 import { DrawerActionTrigger } from '@/components/ui/chakra/drawer';
 import { LocaleNavLink, LocaleNavSecButton } from '@/components/ui/links/LocaleNavLink';
@@ -329,25 +330,37 @@ export default function CatalogDrawer() {
 
 												<Stack gap='2' align='flex-start'>
 													{subcategory.products.length > 0 ? (
-														subcategory.products.map((product) => (
-															<DrawerActionTrigger asChild key={product.id}>
-																<LocaleNavLink
-																	href={`/products/${product.fullSlug}`}
-																	w='full'
-																	fontSize='15px'
-																	color='main'
-																	textDecoration='none'
-																	_hover={{ color: 'link' }}
-																	_focusVisible={{
-																		outline: '2px solid',
-																		outlineColor: 'main.secondary',
-																		outlineOffset: '2px',
-																	}}
-																>
-																	{product.name}
-																</LocaleNavLink>
-															</DrawerActionTrigger>
-														))
+														// Same pill styling/padding as CategoryCard.tsx's product
+														// chips (the category page's subcategory list) so this
+														// modal's list matches it instead of rendering as plain
+														// one-per-line text links.
+														<Wrap gap='2'>
+															{subcategory.products.map((product) => (
+																<DrawerActionTrigger asChild key={product.id}>
+																	<LocaleNavLink
+																		href={`/products/${product.fullSlug}`}
+																		fontSize='sm'
+																		fontWeight='medium'
+																		bg='bgHover.promoCard'
+																		color='main'
+																		px='2.5'
+																		py='1'
+																		rounded='full'
+																		textWrap='wrap'
+																		wordBreak='break-word'
+																		textDecoration='none'
+																		_hover={{ color: 'link', bg: 'bgHover.DEFAULT' }}
+																		_focusVisible={{
+																			outline: '2px solid',
+																			outlineColor: 'main.secondary',
+																			outlineOffset: '2px',
+																		}}
+																	>
+																		{product.name}
+																	</LocaleNavLink>
+																</DrawerActionTrigger>
+															))}
+														</Wrap>
 													) : (
 														<Text fontSize='15px' color='gray.500'>
 															{productsT('productsNotFound')}

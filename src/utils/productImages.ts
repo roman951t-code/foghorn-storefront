@@ -1,6 +1,7 @@
 const SQUARE_FULL = 1100;
-// Card thumbnails render up to PRODUCT_CARD_MAX_WIDTH_PX (271px) wide; on a
-// 2x/retina screen that needs a ~542px source or it visibly upscales/blurs.
+// Card thumbnails render up to PRODUCTS_GRID_CARD_MAX_WIDTH_PX (src/constants/grids.ts)
+// wide; on a 2x/retina screen that needs a source at least double that or it
+// visibly upscales/blurs.
 const SQUARE_PREVIEW = 540;
 export const PRODUCT_PLACEHOLDER_IMAGE = '/assets/images/product-placeholder.svg';
 

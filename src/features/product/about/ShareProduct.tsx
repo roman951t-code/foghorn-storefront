@@ -24,6 +24,7 @@ export default function ShareProduct({ i18nData }: Props) {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const [fullUrl, setFullUrl] = useState('');
+	const [open, setOpen] = useState(false);
 	const productTitle = (i18nData.productTitle ?? '').trim();
 	const searchParamsString = searchParams.toString();
 
@@ -70,7 +71,12 @@ export default function ShareProduct({ i18nData }: Props) {
 	const isShareReady = fullUrl.length > 0;
 
 	return (
-		<HoverCard.Root size='sm' openDelay={300}>
+		<HoverCard.Root
+			size='sm'
+			openDelay={300}
+			open={open}
+			onOpenChange={(e) => setOpen(e.open)}
+		>
 			<HoverCard.Trigger asChild>
 				<IconButton
 					aria-label='Share'
@@ -83,6 +89,7 @@ export default function ShareProduct({ i18nData }: Props) {
 						bg: 'colorPalette.600',
 						color: 'main.lightOnly',
 					}}
+					onClick={() => setOpen((prev) => !prev)}
 				>
 					<FaShare />
 				</IconButton>

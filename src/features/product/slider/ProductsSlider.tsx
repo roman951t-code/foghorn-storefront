@@ -26,7 +26,7 @@ function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
 			navigation={hasMultipleProducts}
 			breakpoints={productsBreakpoints}
 			slidesPerView={1}
-			slidesPerGroup={hasMultipleProducts ? 2 : 1}
+			slidesPerGroup={1}
 			spaceBetween={PRODUCT_CARD_HORIZONTAL_GAP_PX}
 			modules={[Navigation]}
 			className='productsSlider'

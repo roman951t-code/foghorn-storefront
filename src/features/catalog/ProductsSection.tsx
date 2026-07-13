@@ -45,7 +45,7 @@ export default async function ProductsSection({
 	if (!visibleProducts.length) return null;
 
 	return (
-		<Flex gap={6} direction='column' mt={28} {...restProps}>
+		<Flex gap={6} direction='column' mt={{ base: 12, md: 28 }} {...restProps}>
 			<Heading fontWeight='bold' display='flex' alignItems='center' gap='3'>
 				<Box
 					w='4px'
