@@ -8,6 +8,7 @@ interface Props {
 	tag?: string;
 	limit?: number;
 	locale?: string;
+	lazyMount?: boolean;
 }
 
 export default async function ViewedProductsSection({
@@ -15,6 +16,7 @@ export default async function ViewedProductsSection({
 	tag = 'viewed',
 	limit,
 	locale,
+	lazyMount,
 }: Props) {
 	const session = await auth.api.getSession({ headers: await headers() });
 	const userId = session?.user?.id;
@@ -31,6 +33,7 @@ export default async function ViewedProductsSection({
 			products={inStockViewedProducts}
 			limit={limit}
 			locale={locale}
+			lazyMount={lazyMount}
 		/>
 	);
 }

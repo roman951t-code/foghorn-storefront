@@ -112,6 +112,18 @@ export default withSentryConfig(nextConfig, {
 	silent: !enableSentryDebug,
 	debug: enableSentryDebug,
 	telemetry: false,
+	// `webpack.treeshake` (below) only takes effect on webpack builds, but this
+	// project builds with Turbopack (see next.config.ts's own build output /
+	// the SDK's own type docs: "If you build Next.js with turbopack, ... build-time
+	// instrumentation" under `webpack` no longer applies) — so it was silently a
+	// no-op. `bundleSizeOptimizations` is the bundler-agnostic equivalent.
+	// Only `excludeDebugStatements` is enabled: `excludeTracing` would strip the
+	// tracing code this app actively uses (NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,
+	// default 0.02), and the `excludeReplay*` flags only matter once
+	// `replayIntegration` is actually added, which it isn't here.
+	bundleSizeOptimizations: {
+		excludeDebugStatements: true,
+	},
 	webpack: {
 		treeshake: {
 			removeDebugLogging: true,

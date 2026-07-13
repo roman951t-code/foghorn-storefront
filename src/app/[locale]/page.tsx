@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { Flex, Box } from '@chakra-ui/react';
 import CatalogPanel from '@/features/catalog/CatalogPanel';
 import ProductsSection from '@/features/catalog/ProductsSection';
-import SubscribeSection from '@/components/ui/sections/SubscribeSection';
+import SubscribeSection from '@/components/ui/sections/SubscribeSectionLazy';
 import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
 import { extractI18nData } from '@/utils/i18nUtils';
 import { getLocalizedMetadata } from '@/utils/i18nServerUtils';
@@ -47,10 +47,17 @@ export default async function Main({ params }: LocaleParams) {
 				<CatalogBtn fullText />
 			</Box>
 			<CatalogPanel i18nData={i18nData} promoCards={promoCards} />
+			{/* Popular products is the first slider below the fold-adjacent promo
+			    panel, so it mounts eagerly like before. Everything past it gets
+			    lazyMount: the homepage stacks up to 6 Swiper instances, and
+			    mounting them all at once was PageSpeed Insights' "forced reflow"
+			    diagnostic — each one measures/writes slide widths in the same
+			    burst. Deferring the ones that are actually off-screen on load
+			    spreads that work out instead of front-loading all of it. */}
 			<ProductsSection title={prodT('popular')} tag='popular' locale={locale} />
-			<ProductsSection title={prodT('new')} tag='new' />
-			<ProductsSection title={prodT('discount')} tag='discount' />
-			<ProductsSection title={prodT('promotional')} tag='promotional' />
+			<ProductsSection title={prodT('new')} tag='new' lazyMount />
+			<ProductsSection title={prodT('discount')} tag='discount' lazyMount />
+			<ProductsSection title={prodT('promotional')} tag='promotional' lazyMount />
 			{/* Own Suspense boundary: this section reads the session (uncached,
 			    per-request) while every ProductsSection above is `'use cache'`.
 			    Without a local boundary here, that one dynamic read bubbles up to
@@ -58,9 +65,18 @@ export default async function Main({ params }: LocaleParams) {
 			    page on every homepage visit until it resolves — not just this
 			    section. */}
 			<Suspense fallback={null}>
-				<ViewedProductsSection title={prodT('viewed')} tag='viewed' />
+				<ViewedProductsSection title={prodT('viewed')} tag='viewed' lazyMount />
 			</Suspense>
 
+			{/* Lazy (SubscribeSectionLazy, not the plain component): this was the
+			    only *statically*-imported consumer of react-hook-form/zod on this
+			    route. Auth's own dynamic import (DynamicAuth.tsx) wasn't enough on
+			    its own — as long as something eager on the page still needed
+			    zod/react-hook-form, the bundler kept grouping every module using
+			    them, Auth's schemas included, into one chunk that loaded eagerly
+			    regardless. Removing the last eager consumer let that shared chunk
+			    go fully lazy too (confirmed via build output + a local production
+			    server's network log). */}
 			<SubscribeSection i18nData={subscribeI18nData} />
 		</Flex>
 	);

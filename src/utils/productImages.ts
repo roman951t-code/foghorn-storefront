@@ -1,8 +1,13 @@
 const SQUARE_FULL = 1100;
-// Card thumbnails render up to PRODUCTS_GRID_CARD_MAX_WIDTH_PX (src/constants/grids.ts)
-// wide; on a 2x/retina screen that needs a source at least double that or it
-// visibly upscales/blurs.
-const SQUARE_PREVIEW = 540;
+// Card thumbnails render up to PRODUCTS_GRID_CARD_MAX_WIDTH_PX (300px,
+// src/constants/grids.ts) wide; on a 2x/retina screen that needs a source at
+// least double that (600px) or it visibly upscales/blurs. 640 is both >600
+// and one of next.config.ts's own `images.deviceSizes` buckets, so
+// next/image's optimizer can serve this source directly instead of
+// upscaling a smaller source past its native resolution to hit that bucket
+// (confirmed via PageSpeed Insights: at the old 540px value, next/image was
+// requesting a 750px output from this exact source, i.e. upscaling).
+const SQUARE_PREVIEW = 640;
 export const PRODUCT_PLACEHOLDER_IMAGE = '/assets/images/product-placeholder.svg';
 
 const normalizeImageUrl = (value?: string | null): string | null => {

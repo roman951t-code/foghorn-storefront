@@ -6,7 +6,7 @@ import { Box, IconButton } from '@chakra-ui/react';
 import Favourite from './Favourite';
 import { useTranslations } from 'next-intl';
 import UpdateEmailModal from '@/features/auth/UpdateEmailModal';
-import Auth from '@/features/auth/Auth';
+import Auth from '@/features/auth/DynamicAuth';
 import { getCartModalI18nData } from '@/constants/cart';
 import CartModalLazy from './CartModalLazy';
 

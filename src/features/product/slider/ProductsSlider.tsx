@@ -9,11 +9,21 @@ import { SubcategoryProduct } from '@/types/product';
 import { productsBreakpoints } from '@/data/breakpoints';
 import { PRODUCT_CARD_HORIZONTAL_GAP_PX, PRODUCTS_GRID_CARD_MAX_WIDTH_PX } from '@/constants/grids';
 import ProductCardsSkeletonGrid from '@/components/ui/ProductCardsSkeletonGrid';
+import { useInViewport } from '@/hooks/useInViewport';
 
 const MAX_VISIBLE_PRODUCT_SLIDES = 6;
 
 type Props = {
 	products?: SubcategoryProduct[] | null;
+	// When true, Swiper doesn't mount until this slider scrolls near the
+	// viewport. The homepage stacks up to 6 of these sections; mounting them
+	// all at once means 6 Swiper instances measuring/writing slide widths in
+	// the same burst, which is what PageSpeed Insights' "forced reflow"
+	// diagnostic was flagging. Opt-in (not the default) because it delays a
+	// section's first paint until it's scrolled near — wrong choice for a
+	// slider that's already at/near the fold on load (see page.tsx for which
+	// sections pass this).
+	lazyMount?: boolean;
 };
 
 function ProductsSwiper({ products }: { products: SubcategoryProduct[] }) {
@@ -66,6 +76,16 @@ const DynamicProductsSwiper = dynamic(() => Promise.resolve(ProductsSwiper), {
 	loading: () => <ProductCardsSkeletonGrid />,
 });
 
-export default function ProductsSlider({ products }: Props) {
+export default function ProductsSlider({ products, lazyMount = false }: Props) {
+	const { ref, isInViewport } = useInViewport<HTMLDivElement>();
+
+	if (lazyMount && !isInViewport) {
+		return (
+			<Box ref={ref}>
+				<ProductCardsSkeletonGrid />
+			</Box>
+		);
+	}
+
 	return <DynamicProductsSwiper products={products ?? []} />;
 }

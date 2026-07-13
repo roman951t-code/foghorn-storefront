@@ -11,6 +11,7 @@ interface Props extends FlexProps {
 	limit?: number;
 	locale?: string;
 	href?: string;
+	lazyMount?: boolean;
 }
 
 export const DEFAULT_PRODUCTS_SECTION_LIMIT = 10;
@@ -22,6 +23,7 @@ export default async function ProductsSection({
 	limit = DEFAULT_PRODUCTS_SECTION_LIMIT,
 	locale,
 	href,
+	lazyMount,
 	...restProps
 }: Props) {
 	const { products = [] } = providedProducts
@@ -70,7 +72,7 @@ export default async function ProductsSection({
 					{title}
 				</LocaleNavLink>
 			</Heading>
-			<ProductsSlider products={visibleProducts} />
+			<ProductsSlider products={visibleProducts} lazyMount={lazyMount} />
 		</Flex>
 	);
 }

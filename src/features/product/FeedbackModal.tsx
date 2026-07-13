@@ -5,7 +5,7 @@ import CenteredModal from '@/components/ui/dialogs/CenteredModal';
 import { Controller, useForm } from 'react-hook-form';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/buttons/ActionButton';
 import { useMemo, useRef, useState } from 'react';
-import Auth from '@/features/auth/Auth';
+import Auth from '@/features/auth/DynamicAuth';
 import { useSession } from '@/providers/SessionProvider';
 import { createFeedbackSchema, FeedbackSchema } from 'validationSchemas/feedbackSchema';
 import { zodResolver } from '@hookform/resolvers/zod';

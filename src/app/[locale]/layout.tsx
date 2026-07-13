@@ -361,6 +361,21 @@ export default async function Layout({ children, params }: Props) {
 	// https://github.com/vercel/next.js/issues/86739.
 	return (
 		<html lang={htmlLang} suppressHydrationWarning>
+			{/* Next.js hoists <link> tags rendered anywhere in the tree into
+			    <head> automatically — placed here so it applies across every
+			    route, not just the homepage. Warms the connection to the
+			    product-image CDN before the HTML/CSS is parsed far enough to
+			    discover the first <img> pointing there, instead of paying full
+			    DNS+TCP+TLS setup at the point the image is first requested
+			    (PSI's network-dependency-tree audit flagged this as missing).
+			    fastly.picsum.photos and picsum.photos are the two hosts the
+			    current (seed/demo) product images actually resolve through;
+			    the other `images.remotePatterns` hosts in next.config.ts
+			    (cloudinary, unsplash, loremflickr) aren't in active use, so
+			    preconnecting them too would just spend a connection for
+			    nothing. */}
+			<link rel='preconnect' href='https://picsum.photos' />
+			<link rel='preconnect' href='https://fastly.picsum.photos' />
 			<body className={fontVariableClassName} suppressHydrationWarning>
 				{/* Sets the light/dark class on <html> before the body paints, so the
 				    page never flashes the wrong theme on reload. A plain <script> (not
