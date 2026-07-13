@@ -27,7 +27,12 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # --legacy-peer-deps: AdminJS's design-system/prisma packages pin peer
+        # ranges (react@^18, @prisma/client@^5||^6) that conflict with this
+        # app's react@19/@prisma/client@7 — same reason deploy-production.yml
+        # needs it. Without the flag, npm ci fails to resolve peers and this
+        # job never gets past dependency install (was failing on every run).
+        run: npm ci --legacy-peer-deps
 
       - name: Run npm audit (high+)
         run: npm audit --audit-level=high

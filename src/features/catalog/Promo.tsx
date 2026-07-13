@@ -33,6 +33,23 @@ const PROMO_IMAGE_SIZES =
 // ever mutates it there, since there's no drag gesture without Swiper mounted.
 const STATIC_DRAG_REF = { current: false };
 
+// Mirrors promoBreakpoints' own column counts (1/2/1/2/3) so the static SSR
+// fallback card is already the width it's about to become before the real
+// Swiper mounts. Without this, the fallback is always 100% wide — at any
+// viewport where Swiper shows more than one slide per view (every tier here
+// except the 768-1099px dip), the first card visibly reshapes from full-width
+// down to its real ~50%/~33% share the moment hydration completes, and a
+// second (previously nonexistent) card pops in beside it. Same breakpoints
+// as PROMO_IMAGE_SIZES below, and the same 10px gap the Swiper itself uses
+// (spaceBetween={10} on PromoSlider).
+const STATIC_PROMO_CARD_WIDTH_CSS = {
+	width: '100%',
+	'@media (min-width: 690px)': { width: 'calc(50% - 5px)' },
+	'@media (min-width: 768px)': { width: '100%' },
+	'@media (min-width: 1100px)': { width: 'calc(50% - 5px)' },
+	'@media (min-width: 1564px)': { width: 'calc(33.333% - 6.666px)' },
+} as const;
+
 type PromoProps = {
 	promos?: PromoCard[];
 };
@@ -227,7 +244,7 @@ export default function Promo({ promos }: PromoProps) {
 			    first slide is layered on top, so there's exactly one reachable
 			    "Shop now" link, not two. */}
 			{firstCard ? (
-				<Box aria-hidden='true' inert>
+				<Box aria-hidden='true' inert css={STATIC_PROMO_CARD_WIDTH_CSS}>
 					<PromoCardSlide promo={firstCard} imagePriority isDraggingRef={STATIC_DRAG_REF} />
 				</Box>
 			) : null}

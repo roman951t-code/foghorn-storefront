@@ -52,7 +52,13 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # --legacy-peer-deps: see deploy-production.yml — AdminJS's peer
+        # ranges conflict with this app's react/@prisma/client versions.
+        # --include=dev: NODE_ENV=production (set above) makes npm ci skip
+        # devDependencies by default, but lint/test/build below all need them
+        # (tsc, eslint, vitest/jest, etc.) — same reason deploy-production.yml
+        # passes it too.
+        run: npm ci --legacy-peer-deps --include=dev
 
       - name: Apply database migrations
         run: npm run db:migrate:deploy

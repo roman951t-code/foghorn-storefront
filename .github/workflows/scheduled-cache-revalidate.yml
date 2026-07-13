@@ -32,7 +32,11 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # --legacy-peer-deps: see deploy-production.yml / security-audit.yml —
+        # AdminJS's peer ranges conflict with this app's react/@prisma/client
+        # versions. Without the flag, npm ci fails and this job never reaches
+        # the actual revalidation call (was failing on every 5-minute run).
+        run: npm ci --legacy-peer-deps
 
       - name: Revalidate cache windows
         env:
