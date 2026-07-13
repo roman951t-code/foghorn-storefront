@@ -65,7 +65,7 @@
 		"express": "5.2.1",
 		"express-formidable": "1.2.0",
 		"express-session": "1.19.0",
-		"helmet": "^8.1.0",
+		"helmet": "^8.3.0",
 		"i18next": "^22.5.1",
 		"nanoid": "^5.1.11",
 		"next": "^16.2.6",
