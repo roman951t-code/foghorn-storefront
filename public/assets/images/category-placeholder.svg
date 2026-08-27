@@ -1,0 +1,19 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="category-bg" x1="0" y1="0" x2="1200" y2="1200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F2F7F1"/>
+      <stop offset="1" stop-color="#D8E8D5"/>
+    </linearGradient>
+    <linearGradient id="category-card" x1="220" y1="220" x2="980" y2="980" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#ECF5EA" stop-opacity="0.96"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1200" fill="url(#category-bg)"/>
+  <rect x="220" y="220" width="760" height="760" rx="64" fill="url(#category-card)" stroke="#B8D3B5" stroke-width="10"/>
+  <rect x="300" y="340" width="600" height="400" rx="34" fill="#E4F0E2" stroke="#C9DEC7" stroke-width="8"/>
+  <path d="M380 500H560L620 560H820V730H380V500Z" fill="#A9CAA6"/>
+  <path d="M380 575H820" stroke="#8FB98C" stroke-width="14" stroke-linecap="round"/>
+  <rect x="320" y="790" width="560" height="26" rx="13" fill="#BDD8BA"/>
+  <rect x="320" y="852" width="430" height="26" rx="13" fill="#D1E5CF"/>
+</svg>

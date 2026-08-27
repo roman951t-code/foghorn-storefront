@@ -1,0 +1,43 @@
+'use server';
+
+import 'server-only';
+
+import * as Sentry from '@sentry/nextjs';
+import { headers } from 'next/headers';
+import { prisma } from '@/lib/prisma';
+import { getTranslations } from 'next-intl/server';
+import { auth } from '@/lib/auth';
+
+export async function clearCart() {
+	const cartT = await getTranslations('cart');
+
+	const session = await auth.api.getSession({ headers: await headers() });
+	const userId = session?.user?.id;
+
+	if (!userId) {
+		return { guest: true };
+	}
+
+	try {
+		const cart = await prisma.cart.findUnique({
+			where: { userId },
+			include: { items: true },
+		});
+
+		if (!cart) {
+			return { success: false, message: cartT('cartNotFound') };
+		}
+
+		await prisma.cartItem.deleteMany({
+			where: { cartId: cart.id },
+		});
+
+		return { success: true };
+	} catch (error) {
+		Sentry.captureException(error, { tags: { cartAction: 'clear-cart' } });
+		return {
+			success: false,
+			message: cartT('cartUpdateFailed'),
+		};
+	}
+}

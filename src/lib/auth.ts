@@ -1,0 +1,303 @@
+import { betterAuth } from 'better-auth';
+import { nextCookies } from 'better-auth/next-js';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { getTranslations } from 'next-intl/server';
+import { phoneNumber, emailOTP, customSession } from 'better-auth/plugins';
+import { prisma } from './prisma';
+import { DEFAULT_FROM, renderEmailTemplate, resendClient } from '@/lib/emailTemplates';
+import { APP_URL, env } from '@/config/env';
+import { sendPhoneOtpCode } from '@/lib/phoneOtp';
+import { isRestrictedUserAdminStatus } from '@/lib/userAdminStatus';
+import { betterAuthRateLimitStorage } from '@/lib/betterAuthRateLimitStorage';
+
+const PHONE_AUTH_TEMP_EMAIL_PATTERN = /^\d+@mail$/i;
+
+const isPhoneAuthTempEmail = (email: string | null | undefined): email is string =>
+	typeof email === 'string' && PHONE_AUTH_TEMP_EMAIL_PATTERN.test(email.trim());
+
+const sanitizeSessionEmail = (email: string | null | undefined): string | null => {
+	if (typeof email !== 'string') return null;
+	const trimmed = email.trim();
+	if (!trimmed || isPhoneAuthTempEmail(trimmed)) return null;
+	return trimmed;
+};
+
+const resolveDefaultNotificationMethod = (path: string | undefined) =>
+	path?.includes('/phone-number/verify') ? 'phone' : 'email';
+
+const isLocalNetworkPreview = ['1', 'true', 'yes', 'on'].includes(
+	env.LOCAL_NETWORK_PREVIEW?.trim().toLowerCase() ?? '',
+);
+const useSecureAuthCookies = env.NODE_ENV === 'production' && !isLocalNetworkPreview;
+
+export const auth = betterAuth({
+	baseURL: APP_URL,
+	emailVerification: {
+		// Signup is OTP-verified in our custom flow before signUpEmail is called.
+		// Keep Better Auth from sending another verification message on sign-up.
+		sendOnSignUp: false,
+	},
+	user: {
+		changeEmail: {
+			enabled: true,
+		},
+		deleteUser: {
+			enabled: false,
+		},
+	},
+	database: prismaAdapter(prisma, {
+		provider: 'postgresql',
+	}),
+	databaseHooks: {
+		user: {
+			create: {
+				async before(user, context) {
+					if (user.notificationMethod === 'email' || user.notificationMethod === 'phone') return;
+					return {
+						data: {
+							...user,
+							notificationMethod: resolveDefaultNotificationMethod(context?.path),
+						},
+					};
+				},
+			},
+		},
+		session: {
+			create: {
+				async before(session) {
+					const userId = typeof session.userId === 'string' ? session.userId : null;
+					if (!userId) return;
+
+					const user = await prisma.user.findUnique({
+						where: { id: userId },
+						select: { adminStatus: true },
+					});
+
+					if (!user || !isRestrictedUserAdminStatus(user.adminStatus)) return;
+					return false;
+				},
+			},
+		},
+	},
+	session: {
+		expiresIn: 60 * 60 * 24 * 7,
+		updateAge: 60 * 60 * 24,
+		// Keep revocations effective immediately across storefront and server actions.
+		cookieCache: {
+			enabled: false,
+		},
+	},
+	// Backs better-auth's own built-in rate limiter (sign-in/sign-up/OTP
+	// send+verify/password-reset — see getDefaultSpecialRules in
+	// better-auth/dist/api/rate-limiter) with the app's existing Upstash
+	// Redis, instead of the in-memory Map it falls back to otherwise. That
+	// in-memory fallback is per-process, so on Vercel's serverless model it
+	// resets on every cold start and isn't shared across instances — this is
+	// what actually gates OTP *verification* attempts (not just send), which
+	// src/lib/rateLimit.ts's app-level limiters don't cover since the
+	// verify-side endpoints are hit directly by the client's better-auth SDK
+	// calls, not through a custom server action. `enabled` isn't set here —
+	// better-auth already defaults it to `true` in production.
+	rateLimit: {
+		customStorage: betterAuthRateLimitStorage,
+	},
+	advanced: {
+		useSecureCookies: useSecureAuthCookies,
+		defaultCookieAttributes: {
+			sameSite: 'lax',
+			secure: useSecureAuthCookies,
+			httpOnly: true,
+			path: '/',
+		},
+	},
+	emailAndPassword: {
+		enabled: true,
+		requireEmailVerification: true,
+		// Kills every other active session (email link, email OTP, and phone
+		// OTP reset paths all check this same flag — see better-auth's
+		// password.mjs/email-otp/routes.mjs/phone-number/routes.mjs) the moment
+		// a password reset completes, so a stolen session cookie doesn't
+		// survive the user's own recovery attempt.
+		revokeSessionsOnPasswordReset: true,
+		sendResetPassword: async ({ user, url }) => {
+			const [authT, emailsT] = await Promise.all([
+				getTranslations('auth'),
+				getTranslations('emails'),
+			]);
+
+			const recipientName = user?.name || user.email || emailsT('defaultRecipient');
+			const emailContent = renderEmailTemplate({
+				subject: authT('resetPass'),
+				title: authT('resetPass'),
+				salutation: `${emailsT('greeting')} ${recipientName},`,
+				intro: [emailsT('resetPassIntro')],
+				cta: { label: authT('resetPassAction'), url },
+				outro: [emailsT('ignoreIfNotYou'), emailsT('help')],
+				footer: emailsT('signature'),
+				brandName: emailsT('brandName'),
+			});
+
+			await resendClient.emails.send({
+				from: DEFAULT_FROM,
+				to: [user.email],
+				subject: emailContent.subject,
+				html: emailContent.html,
+				text: emailContent.text,
+			});
+		},
+	},
+	socialProviders: {
+		google: {
+			prompt: 'select_account',
+			clientId: env.GOOGLE_CLIENT_ID as string,
+			clientSecret: env.GOOGLE_CLIENT_SECRET as string,
+		},
+	},
+	plugins: [
+		phoneNumber({
+			sendOTP: async ({ phoneNumber, code }) => {
+				await sendPhoneOtpCode({ phoneNumber, code });
+			},
+			requireVerification: true,
+			callbackOnVerification: async ({ user, phoneNumber }) => {
+				const expectedTempEmail = `${phoneNumber.replace(/\D/g, '')}@mail`;
+				if (user.email?.trim().toLowerCase() !== expectedTempEmail) return;
+				await prisma.user.update({
+					where: { id: user.id },
+					data: {
+						email: null,
+						emailVerified: false,
+					},
+				});
+			},
+			signUpOnVerification: {
+				getTempEmail: (phoneNumber) => {
+					return `${phoneNumber.replace(/\D/g, '')}@mail`;
+				},
+				getTempName: (phoneNumber) => {
+					return phoneNumber;
+				},
+			},
+		}),
+		emailOTP({
+			overrideDefaultEmailVerification: true,
+			async sendVerificationOTP({ email, otp, type }, ctx) {
+				const [authT, emailsT] = await Promise.all([
+					getTranslations('auth'),
+					getTranslations('emails'),
+				]);
+
+				if (type === 'sign-in') {
+					return;
+				}
+
+				// In custom signup flow, email was already OTP-verified before signUpEmail is called.
+				// Suppress Better Auth's automatic verification OTP for /sign-up/email to avoid duplicate emails.
+				const requestPath = (() => {
+					const rawPath = ctx?.path;
+					if (typeof rawPath === 'string' && rawPath.length > 0) return rawPath;
+					const requestUrl = ctx?.request?.url;
+					if (!requestUrl) return '';
+					try {
+						return new URL(requestUrl).pathname;
+					} catch {
+						return '';
+					}
+				})();
+				const isEmailSignUpRequest = requestPath.includes('/sign-up/email');
+				const isEmailSignInRequest = requestPath.includes('/sign-in/email');
+
+				if (type === 'email-verification' && isEmailSignUpRequest) {
+					return;
+				}
+
+				// Our storefront signup flow verifies email with a custom OTP before account creation.
+				// Suppress Better Auth verification OTP on email/password sign-in to avoid redundant emails.
+				if (type === 'email-verification' && isEmailSignInRequest) {
+					return;
+				}
+
+				const isEmailVerification = type === 'email-verification';
+				const subject = isEmailVerification ? authT('verifyEmail') : authT('resetPass');
+				const intro = isEmailVerification ? emailsT('otpVerifyIntro') : emailsT('otpResetIntro');
+				const recipientName = email || emailsT('defaultRecipient');
+
+				const emailContent = renderEmailTemplate({
+					subject,
+					title: subject,
+					salutation: `${emailsT('greeting')} ${recipientName},`,
+					intro: [intro],
+					detailRows: [{ label: emailsT('otpCodeLabel'), value: otp }],
+					outro: [emailsT('otpExpires'), emailsT('ignoreIfNotYou')],
+					footer: emailsT('signature'),
+					brandName: emailsT('brandName'),
+				});
+
+				await resendClient.emails.send({
+					from: DEFAULT_FROM,
+					to: [email],
+					subject: emailContent.subject,
+					html: emailContent.html,
+					text: emailContent.text,
+				});
+			},
+		}),
+		customSession(async ({ user, session }) => {
+			const sessionEmail = sanitizeSessionEmail(user.email);
+
+			const dbUserPromise = prisma.user.findUnique({
+				where: {
+					id: user.id,
+				},
+				select: {
+					phoneNumber: true,
+					phoneNumberVerified: true,
+					lastName: true,
+					middleName: true,
+					notificationMethod: true,
+					shippingCountry: true,
+					shippingRegion: true,
+					shippingCity: true,
+					shippingPostalCode: true,
+					shippingAddressLine1: true,
+					shippingAddressLine2: true,
+				},
+			});
+
+			const socialAccountPromise = prisma.account.findFirst({
+				where: { userId: user.id, providerId: 'google' },
+				select: { id: true },
+			});
+
+			const newsletterSubscriptionPromise = sessionEmail
+				? prisma.newsletterSubscription.findFirst({
+						where: {
+							email: {
+								equals: sessionEmail,
+								mode: 'insensitive',
+							},
+						},
+						select: { id: true },
+					})
+				: Promise.resolve(null);
+
+			const [dbUser, socialAccount, newsletterSubscription] = await Promise.all([
+				dbUserPromise,
+				socialAccountPromise,
+				newsletterSubscriptionPromise,
+			]);
+
+			return {
+				user: {
+					...user,
+					email: sessionEmail,
+					...dbUser,
+					subscribed: Boolean(newsletterSubscription),
+					isGoogleUser: !!socialAccount,
+				},
+				session,
+			};
+		}),
+		nextCookies(),
+	],
+});

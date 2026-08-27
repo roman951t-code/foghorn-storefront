@@ -1,0 +1,188 @@
+'use client';
+import { Card, DataList, Flex, HStack, IconButton, Separator, Stack, Text } from '@chakra-ui/react';
+import { Rating } from '@/components/ui/chakra/rating';
+import { Tooltip } from '@/components/ui/tooltip';
+import DateWithLocale from '@/components/ui/DateWithLocale';
+import { useReviews, useInitReviews } from '@/hooks/useReviews';
+import type { Review } from '@/types/product';
+import { useTranslations } from 'next-intl';
+import FeedbackModal from './FeedbackModal';
+import { FiTrash2 } from 'react-icons/fi';
+import { useSession } from '@/providers/SessionProvider';
+import { showToaster } from '@/utils/toast';
+import { toasterMessages } from '@/data/toasterMessages';
+import CountPill from '@/components/ui/CountPill';
+
+type Props = {
+	deleteReviewFail: string;
+	productId: string;
+	reviews: Review[];
+};
+
+export default function FeedbackTab({ deleteReviewFail, productId, reviews }: Props) {
+	useInitReviews(productId, reviews);
+	const { reviews: storeReviews, handleRemoveAction } = useReviews();
+	const { session } = useSession();
+	const prodT = useTranslations('products');
+
+	const userReview = session?.user?.id ? storeReviews.find((r) => r.isMine) : undefined;
+
+	const reviewCount = storeReviews.length;
+	const effectiveAverageRating =
+		reviewCount > 0 ? storeReviews.reduce((acc, r) => acc + (r.rating ?? 0), 0) / reviewCount : 0;
+
+	const onRemoveFeedback = async () => {
+		try {
+			const { success } = await handleRemoveAction();
+
+			if (!success) {
+				showToaster('error', toasterMessages.reviewDeleteFailed(deleteReviewFail));
+			}
+		} catch {
+			showToaster('error', toasterMessages.reviewDeleteFailed(deleteReviewFail));
+		}
+	};
+
+	return (
+		<Stack gap='4' colorPalette='gray'>
+			<Card.Root
+				size='sm'
+				minWidth='200px'
+				w='100%'
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor='border'
+				bg='bg.tertiary'
+				overflow='hidden'
+			>
+				<Card.Body p={{ base: '3', sm: '4' }}>
+					<Flex justifyContent='space-between' alignItems='center' gap='3' flexWrap='wrap'>
+						<Stack gap='2' minW={{ base: '100%', sm: '280px' }}>
+							<HStack gap='2' flexWrap='wrap'>
+								<Text fontWeight='semibold' color='main'>
+									{prodT('feedback')}
+								</Text>
+								<CountPill value={reviewCount} />
+							</HStack>
+
+							{reviewCount > 0 ? (
+								<HStack gap='2.5' alignItems='center' flexWrap='wrap'>
+									<Tooltip
+										content={`${effectiveAverageRating.toFixed(2)}`}
+										contentProps={{ color: 'black', bg: 'bg.accent' }}
+										positioning={{ placement: 'right-end' }}
+										openDelay={100}
+										closeDelay={100}
+									>
+										<HStack gap='2.5' cursor='pointer'>
+											<Text fontSize='2xl' fontWeight='bold' color='main' lineHeight='1'>
+												{effectiveAverageRating.toFixed(1)}
+											</Text>
+											<Rating
+												size='sm'
+												colorPalette={{ base: 'orange', _dark: 'yellow' }}
+												readOnly
+												allowHalf
+												value={effectiveAverageRating}
+											/>
+										</HStack>
+									</Tooltip>
+								</HStack>
+							) : (
+								<Text fontSize={{ base: 'md', md: 'sm' }} color='fg.muted'>
+									{prodT('feedbackAbsent')}
+								</Text>
+							)}
+						</Stack>
+
+						<FeedbackModal productId={productId} initialReviews={userReview ? [userReview] : []} />
+					</Flex>
+				</Card.Body>
+			</Card.Root>
+
+			{storeReviews.map((review) => (
+				<Card.Root
+					key={review.id}
+					size='sm'
+					minWidth='200px'
+					w='full'
+					borderWidth='0.5px'
+					borderStyle='solid'
+					borderColor='border'
+					bg='bg.tertiary'
+				>
+					<Card.Header p='4' pb='2'>
+						<Flex justifyContent='space-between' alignItems='flex-start' gap='3'>
+							<Stack gap='1'>
+								<Text fontWeight='semibold' fontSize='md' color='main'>
+									{`${review.user.name} ${review.user.lastName ?? ''}`}
+								</Text>
+								<Rating
+									colorPalette={{ base: 'orange', _dark: 'yellow' }}
+									readOnly
+									allowHalf
+									size='sm'
+									value={review.rating}
+								/>
+							</Stack>
+
+							<DateWithLocale date={review.createdAt} />
+						</Flex>
+					</Card.Header>
+					<Separator color='border' />
+					<Card.Body color='main' flexDirection='row' p='4' pt='3' gap='3'>
+						<DataList.Root flex='1'>
+							{review.advantages && (
+								<DataList.Item gap='1.5'>
+									<DataList.ItemLabel fontSize='sm' fontWeight='semibold' color='main'>
+										{prodT('advantages')}
+									</DataList.ItemLabel>
+									<DataList.ItemValue fontSize='sm' wordBreak='break-word'>
+										{review.advantages}
+									</DataList.ItemValue>
+								</DataList.Item>
+							)}
+							{review.disadvantages && (
+								<DataList.Item gap='1.5'>
+									<DataList.ItemLabel fontSize='sm' fontWeight='semibold' color='main'>
+										{prodT('disAdvantages')}
+									</DataList.ItemLabel>
+									<DataList.ItemValue fontSize='sm' wordBreak='break-word'>
+										{review.disadvantages}
+									</DataList.ItemValue>
+								</DataList.Item>
+							)}
+							<DataList.Item gap='1.5'>
+								<DataList.ItemLabel fontSize='sm' fontWeight='semibold' color='main'>
+									{prodT('comment')}
+								</DataList.ItemLabel>
+								<DataList.ItemValue fontSize='sm' wordBreak='break-word'>
+									{review.comment}
+								</DataList.ItemValue>
+							</DataList.Item>
+						</DataList.Root>
+
+						{review.isMine && (
+							<IconButton
+								onClick={onRemoveFeedback}
+								alignSelf='flex-end'
+								justifySelf='flex-end'
+								aria-label='Delete review'
+								variant='ghost'
+								rounded='md'
+								color='main.disabled'
+								transition='all 0.2s ease-in-out'
+								_hover={{
+									bg: 'colorPalette.500',
+									color: 'main.lightOnly',
+								}}
+							>
+								<FiTrash2 />
+							</IconButton>
+						)}
+					</Card.Body>
+				</Card.Root>
+			))}
+		</Stack>
+	);
+}

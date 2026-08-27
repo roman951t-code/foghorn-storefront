@@ -1,0 +1,15 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"regions": ["dub1"],
+	"git": {
+		"deploymentEnabled": {
+			"main": false
+		}
+	},
+	"crons": [
+		{
+			"path": "/api/cache/revalidate/windows?lookbackSeconds=3600&limit=500",
+			"schedule": "0 0 * * *"
+		}
+	]
+}

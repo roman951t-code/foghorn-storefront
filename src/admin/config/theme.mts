@@ -1,0 +1,65 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import type { ThemeConfig } from 'adminjs';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const themeAssetsDir = path.join(__dirname, '..', 'themes', 'chakra-like');
+
+export const chakraTheme: ThemeConfig = {
+	id: 'chakra-like',
+	name: 'Chakra',
+	bundlePath: path.join(themeAssetsDir, 'theme.bundle.js'),
+	stylePath: path.join(themeAssetsDir, 'style.css'),
+	overrides: {
+		font: '"Open Sans", "Roboto", "Noto Sans", system-ui, sans-serif',
+		colors: {
+			primary100: '#2B6CB0',
+			primary80: '#3182CE',
+			primary60: '#63B3ED',
+			primary40: '#90CDF4',
+			primary20: '#BEE3F8',
+			accent: '#2D3748',
+			text: '#1A202C',
+			border: '#E2E8F0',
+			grey100: '#171923',
+			grey80: '#2D3748',
+			grey60: '#4A5568',
+			grey40: '#CBD5E0',
+			grey20: '#F7FAFC',
+			white: '#FFFFFF',
+			black: '#000000',
+			bg: '#F7FAFC',
+			filterBg: '#EDF2F7',
+			container: '#FFFFFF',
+			sidebar: '#FFFFFF',
+			inputBorder: '#CBD5E0',
+			separator: '#E2E8F0',
+			highlight: '#EDF2F7',
+			love: '#3182CE',
+			errorDark: '#C53030',
+			error: '#E53E3E',
+			errorLight: '#FED7D7',
+			successDark: '#2F855A',
+			success: '#38A169',
+			successLight: '#C6F6D5',
+			warningDark: '#C05621',
+			warning: '#DD6B20',
+			warningLight: '#FEEBC8',
+			infoDark: '#2C5282',
+			info: '#3182CE',
+			infoLight: '#BEE3F8',
+		},
+		fontSizes: {
+			xs: '15px',
+			sm: '15px',
+			default: '16px',
+			md: '16px',
+			lg: '18px',
+			xl: '20px',
+			h4: '26px',
+			h3: '30px',
+			h2: '34px',
+			h1: '42px',
+		},
+	},
+};

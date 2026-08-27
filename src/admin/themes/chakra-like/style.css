@@ -1,0 +1,458 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
+
+:root {
+	--admin-font-stack: 'Open Sans', 'Roboto', 'Noto Sans', system-ui, sans-serif;
+}
+
+body,
+#app {
+	font-family: var(--admin-font-stack);
+}
+
+#app {
+	min-width: 764px;
+}
+
+/* Enforce the admin minimum font size floor for third-party controls. */
+#app .react-datepicker {
+	font-size: 15px !important;
+}
+
+#app .adminjs_DatePicker .react-datepicker-wrapper,
+#app .adminjs_DatePicker .react-datepicker-wrapper input {
+	font-size: 15px !important;
+}
+
+#app .react-datepicker__close-icon::after {
+	font-size: 15px !important;
+}
+
+#app .adminjs_Checkbox,
+#app .adminjs_Checkbox * {
+	font-size: 15px !important;
+}
+
+#app :is(
+		[style*='font-size:12px'],
+		[style*='font-size: 12px'],
+		[style*='font-size:13px'],
+		[style*='font-size: 13px'],
+		[style*='font-size:14px'],
+		[style*='font-size: 14px'],
+		[style*='font-size:0.8rem'],
+		[style*='font-size: 0.8rem'],
+		[style*='font-size:0.944rem'],
+		[style*='font-size: 0.944rem'],
+		[style*='font-size:75%'],
+		[style*='font-size: 75%'],
+		[style*='font-size:85%'],
+		[style*='font-size: 85%']
+	) {
+	font-size: 15px !important;
+}
+
+#app svg text {
+	font-size: 15px !important;
+}
+
+#app .form-control,
+#app .invalid-number-message,
+#app .special-label,
+#app .country-list,
+#app .country-list * {
+	font-size: 15px !important;
+}
+
+/* AdminJS rich-text helpers can downscale to 75%-85%; keep the global minimum. */
+#app [data-css='app-content'] :is(code, sup, sub, small) {
+	font-size: 15px !important;
+}
+
+.admin-login-page .adminjs_Label {
+	font-size:15px !important;
+}
+
+.admin-login-page input,
+.admin-login-page .adminjs_Input {
+	font-size:15px !important;
+}
+
+.adminjs_Label {
+	font-size:15px !important;
+}
+
+.admin-property-description {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	margin-left: 8px;
+	color: #2b6cb0;
+	cursor: help;
+}
+
+.admin-property-description::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: calc(100% + 3px);
+	transform: translateY(-50%);
+	border-width: 6px;
+	border-style: solid;
+	border-color: transparent rgba(15, 23, 42, 0.95) transparent transparent;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	z-index: 1000;
+	transition: opacity 0.14s ease;
+}
+
+.admin-property-description::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	top: 50%;
+	left: calc(100% + 15px);
+	transform: translateY(-50%);
+	min-width: 200px;
+	max-width: 320px;
+	padding: 8px 10px;
+	border-radius: 8px;
+	background: rgba(15, 23, 42, 0.95);
+	color: #f8fafc;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.35;
+	white-space: normal;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	z-index: 1000;
+	box-shadow: 0 12px 24px rgba(2, 6, 23, 0.28);
+	transition: opacity 0.14s ease;
+}
+
+.admin-property-description:hover::before,
+.admin-property-description:hover::after,
+.admin-property-description:focus-visible::before,
+.admin-property-description:focus-visible::after {
+	opacity: 1;
+	visibility: visible;
+}
+
+.admin-filter-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 99;
+	background: rgba(15, 23, 42, 0.35);
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+.adminjs_Badge {
+	background: rgb(255, 255, 255) !important;
+	border-color: rgb(148, 147, 147) !important;
+	color: #01130b !important;
+}
+
+.admin-card--kpis .adminjs_Text,
+.admin-card--financial .adminjs_Text {
+	font-size: 16px !important;
+}
+
+.admin-card--financial .adminjs_Badge {
+	font-size: 16px !important;
+}
+
+.admin-home-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: 16px;
+	padding: 8px 14px;
+	border-radius: 999px;
+	border: 1px solid rgba(43, 108, 176, 0.2);
+	box-shadow: 0 8px 16px rgba(190, 205, 221, 0.14);
+	color: #1a202c;
+	font-weight: 600;
+	text-decoration: none;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-menu-toggle-button {
+	color: #000000 !important;
+}
+
+.admin-menu-toggle-button .adminjs_Icon svg {
+	fill: #000000 !important;
+	stroke: #000000 !important;
+}
+
+.admin-user-menu-trigger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	color: #0f172a !important;
+	margin-right: 16px;
+	max-width: 360px;
+}
+
+.admin-user-menu-email {
+	display: inline-flex;
+	align-items: center;
+	max-width: 220px;
+	line-height: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.admin-user-menu-trigger .adminjs_Icon {
+	display: inline-flex;
+	align-items: center;
+}
+
+.admin-user-menu-trigger .adminjs_Icon svg {
+	display: block;
+	width: 16px;
+	height: 16px;
+}
+
+.admin-user-menu-logout-item .adminjs_Icon {
+	margin-right: 8px;
+}
+
+.admin-user-menu-logout-item .adminjs_Icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+.admin-home-link:hover {
+	box-shadow: 0 8px 16px rgba(132, 156, 183, 0.14);
+}
+
+.admin-home-link .adminjs_Icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+/* Storefront-like link styling across AdminJS (including table links). */
+[data-css='app-content']
+	a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+		.adminjs_DropDownItem
+	) {
+	color: #0f172a;
+	font-weight: 500;
+	text-decoration-line: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 4px;
+	text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+	transition: color 0.15s ease-in-out, text-decoration-color 0.15s ease-in-out;
+}
+
+[data-css='app-content']
+	a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+		.adminjs_DropDownItem
+	):hover {
+	color: #3e3c78;
+	text-decoration-color: color-mix(in srgb, #3e3c78 55%, transparent);
+}
+
+[data-css='app-content']
+	a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+		.adminjs_DropDownItem
+	):focus-visible {
+	outline: 2px solid color-mix(in srgb, #3e3c78 35%, transparent);
+	outline-offset: 2px;
+	border-radius: 6px;
+}
+
+@supports selector(:has(*)) {
+	[data-css='app-content']
+		a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+			.adminjs_DropDownItem
+		):not(:has(.adminjs_Button)):not(:has(.adminjs_ButtonGroupItem)):not(
+			:is(table.adminjs_Table *)
+		) {
+		/* Covered by the non-:has selector above (kept for older theme consistency). */
+		color: #0f172a;
+	}
+
+	[data-css='app-content']
+		a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+			.adminjs_DropDownItem
+		):not(:has(.adminjs_Button)):not(:has(.adminjs_ButtonGroupItem)):hover {
+		color: #3e3c78;
+	}
+
+	[data-css='app-content']
+		a:not(.admin-home-link):not(.adminjs_Button):not(.adminjs_ButtonGroupItem):not(
+			.adminjs_DropDownItem
+		):not(:has(.adminjs_Button)):not(:has(.adminjs_ButtonGroupItem)):focus-visible {
+		outline: 2px solid color-mix(in srgb, #3e3c78 35%, transparent);
+		outline-offset: 2px;
+		border-radius: 6px;
+	}
+}
+table.adminjs_Table {
+	margin-top: 38px;
+}
+
+[data-css$='table-caption'] {
+	display: block;
+	position: sticky;
+	left: 0;
+	right: 0;
+	width: 100%;
+	min-width: 100%;
+	padding: 8px 12px;
+	background: #ffffff;
+	box-sizing: border-box;
+	z-index: 1;
+}
+
+[data-css$='table'] {
+	min-width: 100%;
+	width: max-content;
+}
+
+[data-css$='table-wrapper'] {
+	overflow-x: auto;
+	min-height: 500px;
+	width: 100%;
+}
+
+[data-css$='table-wrapper'] table {
+	min-width: 100%;
+	width: max-content;
+}
+
+.adminjs_ActionHeader > .adminjs_Box:last-child {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.adminjs_Box > .adminjs_Label {
+	margin-bottom: 12px;
+}
+
+@supports selector(:has(*)) {
+	.adminjs_ActionHeader .adminjs_Box:has(> .adminjs_ButtonGroupItem) {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 18px 12px;
+		margin-top: 6px;
+		margin-bottom: 12px;
+	}
+
+	.adminjs_ActionHeader .adminjs_Box:has(> .adminjs_ButtonGroupItem) > .adminjs_ButtonGroupItem {
+		margin-right: 0;
+	}
+}
+
+@media (max-width: 768px) {
+	[data-css='app-content'] {
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.admin-locale-switcher {
+		display: none !important;
+	}
+}
+
+button[data-css$='filter-drawer-button-apply'] {
+	border-color: white !important;
+	background: #facc15 !important;
+	color: black !important;
+}
+
+button[data-css$='filter-drawer-button-apply']:hover {
+	background: #eab308 !important;
+}
+
+button[data-css='Product-new-drawer-submit'],
+button[data-css='Product-edit-drawer-submit'] {
+	border-color: white !important;
+	background: #facc15 !important;
+	color: black !important;
+}
+
+button[data-css='Product-new-drawer-submit']:hover,
+button[data-css='Product-edit-drawer-submit']:hover {
+	background: #eab308 !important;
+}
+
+button[type='submit'].adminjs_Button,
+button[type='submit'].adminjs_Button--primary,
+button[type='submit'].adminjs_Button--contained,
+button[data-css$='-submit'],
+button[data-css$='-save'],
+button[data-css$='-save-button'] {
+	border-color: white !important;
+	background: #facc15 !important;
+	color: black !important;
+}
+
+button[type='submit'].adminjs_Button:hover,
+button[type='submit'].adminjs_Button--primary:hover,
+button[type='submit'].adminjs_Button--contained:hover,
+button[data-css$='-submit']:hover,
+button[data-css$='-save']:hover,
+button[data-css$='-save-button']:hover {
+	background: #eab308 !important;
+}
+
+[data-css='Product-deleteProduct-button'] {
+	background: transparent !important;
+	color: #ef4444 !important;
+}
+
+[data-css='Product-deleteProduct-button']:hover {
+	color: #dc2626 !important;
+}
+
+[data-css='Order-deleteOrder-button'] {
+	color: #ef4444 !important;
+	background: transparent !important;
+}
+
+[data-css='Order-deleteOrder-button']:hover {
+	color: #dc2626 !important;
+}
+
+[data-css='User-deleteUser-button'] {
+	color: #ef4444 !important;
+	background: transparent !important;
+}
+
+[data-css='User-deleteUser-button']:hover {
+	color: #dc2626 !important;
+}
+
+button[data-css='Order-exportOrdersCsv-button'] {
+	padding-top: 12px !important;
+	padding-bottom: 12px !important;
+}
+
+a.adminjs_ButtonGroupItem {
+	padding: 8px 14px !important;
+}
+
+[data-css='topbar'] a.adminjs_DropDownItem {
+	border-bottom: none !important;
+	box-shadow: none !important;
+	font-weight: inherit !important;
+	text-decoration: none !important;
+}
+
+a.adminjs_DropDownItem,
+a.adminjs_DropDownItem:hover,
+a.adminjs_DropDownItem:focus,
+a.adminjs_DropDownItem:focus-visible {
+	border-bottom: none !important;
+	box-shadow: none !important;
+	font-weight: inherit !important;
+	text-decoration: none !important;
+}

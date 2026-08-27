@@ -1,0 +1,196 @@
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import { Box, Button, Flex, Text, VStack, HStack, Icon, Skeleton } from '@chakra-ui/react';
+import { BsChevronRight } from 'react-icons/bs';
+import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
+import CategoryDetails from './CategoryDetails';
+import Promo from './Promo';
+import type { I18nData } from '@/types/i18n';
+import { useCatalog } from '@/providers/CatalogProvider';
+import type { CatalogCategory } from '@/types/product';
+import type { PromoCard } from '@/data/navigation/promoCards';
+
+interface Props {
+	i18nData: I18nData;
+	promoCards?: PromoCard[];
+}
+
+export default function CatalogPanel({ i18nData, promoCards }: Props) {
+	const { categories } = useCatalog();
+	const TARGET_CATEGORIES = 9;
+	const categoriesWithChildren = categories.filter(
+		(category) => (category.children?.length ?? 0) > 0,
+	);
+	const panelCategories = categoriesWithChildren.slice(0, TARGET_CATEGORIES);
+	const uiCategories =
+		categories.length === 0
+			? Array.from({ length: TARGET_CATEGORIES }, () => null)
+			: panelCategories;
+
+	const [activeCategory, setActiveCategory] = useState<CatalogCategory | null>(null);
+	const [hoveredCategoryId, setHoveredCategoryId] = useState<string | null>(null);
+	const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+
+	const handleMouseEnter = (category: CatalogCategory) => {
+		setHoveredCategoryId(category.id);
+		if (hoverTimeout.current) {
+			clearTimeout(hoverTimeout.current);
+		}
+		hoverTimeout.current = setTimeout(() => {
+			setActiveCategory(category);
+		}, 160);
+	};
+
+	const handleMouseLeave = () => {
+		setHoveredCategoryId(null);
+		if (hoverTimeout.current) {
+			clearTimeout(hoverTimeout.current);
+			hoverTimeout.current = null;
+		}
+		setActiveCategory(null);
+	};
+
+	const activateCategory = (category: CatalogCategory) => {
+		if (hoverTimeout.current) {
+			clearTimeout(hoverTimeout.current);
+			hoverTimeout.current = null;
+		}
+		setHoveredCategoryId(category.id);
+		setActiveCategory(category);
+	};
+
+	useEffect(() => {
+		return () => {
+			if (hoverTimeout.current) {
+				clearTimeout(hoverTimeout.current);
+			}
+		};
+	}, []);
+
+	return (
+		<Flex
+			position='relative'
+			rounded='lg'
+			gap={3}
+			onMouseLeave={handleMouseLeave}
+			minH='472px'
+			bg='bg.tertiary'
+			p={2}
+		>
+			<VStack
+				minW='280px'
+				w='280px'
+				h='572px'
+				align='stretch'
+				gap={1}
+				rounded='lg'
+				hideBelow='md'
+				overflow='hidden'
+				borderWidth='0.5px'
+				borderStyle='solid'
+				borderColor={{ base: 'border', _dark: 'border' }}
+				bg='bg.tertiary'
+			>
+				<Box position='sticky' top={0} zIndex={1} bg='bg.tertiary' p={2}>
+					<CatalogBtn fullText />
+				</Box>
+
+				<VStack align='stretch' gap={1} pb={2} px={2} flex='1' minH={0}>
+					{uiCategories.map((category, index) => {
+						if (!category) {
+							return (
+								<HStack
+									key={`category-skeleton-${index}`}
+									align='center'
+									justify='space-between'
+									px={3}
+									py={2.5}
+									h='52px'
+									rounded='lg'
+									bg={index % 2 === 0 ? 'catalog.bgEven' : 'catalog.bgOdd'}
+								>
+									<Skeleton height='18px' width='70%' borderRadius='lg' />
+									<Skeleton height='18px' width='18px' borderRadius='full' />
+								</HStack>
+							);
+						}
+
+						const isHighlighted =
+							hoveredCategoryId === category.id || activeCategory?.id === category.id;
+
+						return (
+							<Button
+								type='button'
+								key={category.id}
+								variant='plain'
+								display='flex'
+								justifyContent='space-between'
+								alignItems='center'
+								textAlign='left'
+								px={3}
+								py={2.5}
+								h='52px'
+								w='full'
+								rounded='lg'
+								bg={
+									isHighlighted
+										? 'bgHover.promoCard'
+										: index % 2 === 0
+											? 'catalog.bgEven'
+											: 'catalog.bgOdd'
+								}
+								borderWidth='0.5px'
+								borderStyle='solid'
+								borderColor={isHighlighted ? 'border' : 'transparent'}
+								transition='all 0.15s ease-in-out'
+								aria-pressed={activeCategory?.id === category.id}
+								_hover={{
+									cursor: 'pointer',
+									bg: 'bgHover.promoCard',
+									transform: 'translateX(2px)',
+								}}
+								_active={{ bg: 'bgHover.promoCard' }}
+								_focusVisible={{
+									outline: '2px solid',
+									outlineColor: 'main.secondary',
+									outlineOffset: '2px',
+								}}
+								onMouseEnter={() => handleMouseEnter(category)}
+								onClick={() => activateCategory(category)}
+								onFocus={() => activateCategory(category)}
+							>
+								<HStack gap={2.5} minW={0}>
+									<Box
+										w='4px'
+										h='22px'
+										rounded='lg'
+										bg={isHighlighted ? { base: 'orange.400', _dark: 'yellow.400' } : 'transparent'}
+										transition='background 0.16s ease-in-out'
+									/>
+									<Text fontSize='md' fontWeight='semibold' lineClamp={1}>
+										{category.name}
+									</Text>
+								</HStack>
+
+								<Icon
+									fontSize='16px'
+									color={isHighlighted ? 'main' : 'gray.500'}
+									transition='transform 0.15s ease-in-out'
+									transform={isHighlighted ? 'translateX(2px)' : 'none'}
+								>
+									<BsChevronRight />
+								</Icon>
+							</Button>
+						);
+					})}
+				</VStack>
+			</VStack>
+
+			{!activeCategory && <Promo promos={promoCards} />}
+			{activeCategory && (
+				<CategoryDetails key={activeCategory.id} category={activeCategory} i18nData={i18nData} />
+			)}
+		</Flex>
+	);
+}

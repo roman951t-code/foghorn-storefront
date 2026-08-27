@@ -1,0 +1,115 @@
+import * as Sentry from '@sentry/nextjs';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { headers } from 'next/headers';
+import { jsonNoStore } from '@/lib/response';
+import { getEffectiveVariantDiscountPrice } from '@/utils/discountSchedule';
+import { resolveProductPrimaryImageFromGallery } from '@/utils/productImages';
+import { buildLocalizedVariantLabel } from '@/utils/attributeLocalization';
+import { getRequestLocale } from '@/utils/i18nServerUtils';
+
+export async function GET() {
+	const session = await auth.api.getSession({ headers: await headers() });
+	const userId = session?.user?.id;
+
+	if (!userId) {
+		return jsonNoStore({ success: false, items: [] }, { status: 401 });
+	}
+
+	try {
+		const locale = await getRequestLocale();
+		const cart = await prisma.cart.findUnique({
+			where: { userId },
+			include: {
+				items: {
+					include: {
+						product: {
+							select: {
+								id: true,
+								name: true,
+								fullSlug: true,
+								imageUrl: true,
+								stock: true,
+								productImages: {
+									select: { url: true, sortOrder: true, createdAt: true },
+									orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+									take: 1,
+								},
+								basePrice: true,
+								discountPrice: true,
+								discountStartAt: true,
+								discountEndAt: true,
+							},
+						},
+						variant: {
+							select: {
+								id: true,
+								sku: true,
+								price: true,
+								discountPrice: true,
+								discountStartAt: true,
+								discountEndAt: true,
+								stock: true,
+								attributes: {
+									select: {
+										attribute: { select: { name: true, unit: true } },
+										value: true,
+									},
+									orderBy: { attribute: { name: 'asc' } },
+								},
+							},
+						},
+					},
+				},
+			},
+		});
+
+		const reshapedItems =
+			cart?.items.map((item) => {
+				const productBasePrice = item.product.basePrice?.toNumber?.() ?? 0;
+				const variantBasePrice = item.variant?.price?.toNumber?.() ?? productBasePrice;
+				const variantDiscountPrice = getEffectiveVariantDiscountPrice({
+					variantBasePrice,
+					variantDiscountPrice: item.variant?.discountPrice?.toNumber?.() ?? null,
+					variantDiscountStartAt: item.variant?.discountStartAt ?? null,
+					variantDiscountEndAt: item.variant?.discountEndAt ?? null,
+					productBasePrice,
+					productDiscountPrice: item.product.discountPrice?.toNumber?.() ?? null,
+					productDiscountStartAt: item.product.discountStartAt ?? null,
+					productDiscountEndAt: item.product.discountEndAt ?? null,
+				});
+
+				const variantLabel = buildLocalizedVariantLabel(
+					item.variant?.attributes?.map((a) => ({
+						name: a.attribute.name,
+						value: a.value,
+						unit: a.attribute.unit,
+					})),
+					locale,
+				);
+
+				return {
+					lineId: item.id,
+					productId: item.product.id,
+					variantId: item.variant?.id ?? item.variantId ?? null,
+					availableStock: item.variant?.stock ?? item.product.stock ?? null,
+					sku: item.variant?.sku ?? null,
+					variantLabel,
+					quantity: item.quantity,
+					basePrice: variantBasePrice,
+					discountPrice: variantDiscountPrice,
+					name: item.product.name,
+					fullSlug: item.product.fullSlug,
+					imageUrl: resolveProductPrimaryImageFromGallery(
+						item.product.imageUrl,
+						item.product.productImages.map((image) => image.url),
+					),
+				};
+			}) ?? [];
+
+		return jsonNoStore({ success: true, items: reshapedItems });
+	} catch (error) {
+		Sentry.captureException(error);
+		return jsonNoStore({ success: false, items: [] }, { status: 500 });
+	}
+}
