@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # Smoke test: verify critical endpoints on the live production services.
 # Requires: NEXT_PUBLIC_APP_URL and ADMINJS_PUBLIC_URL set as CI/CD variables.
-# Exits non-zero if any check fails. Set allow_failure: true in CI if you want
-# the pipeline to continue regardless of smoke-test outcome.
+# Exits non-zero if a check still fails after its bounded retry window.
 set -euo pipefail
 
 STOREFRONT="${NEXT_PUBLIC_APP_URL:-}"
 ADMIN="${ADMINJS_PUBLIC_URL:-}"
 WAIT_SECONDS="${SMOKE_WAIT_SECONDS:-90}"  # seconds to wait for deploys to propagate
+REQUEST_TIMEOUT_SECONDS="${SMOKE_REQUEST_TIMEOUT_SECONDS:-20}"
+RETRY_DELAY_SECONDS="${SMOKE_RETRY_DELAY_SECONDS:-5}"
+RETRY_WINDOW_SECONDS="${SMOKE_RETRY_WINDOW_SECONDS:-60}"
+ADMIN_RETRY_WINDOW_SECONDS="${SMOKE_ADMIN_RETRY_WINDOW_SECONDS:-180}"
 
 if [ -z "$STOREFRONT" ]; then
   echo "ERROR: NEXT_PUBLIC_APP_URL is not set." >&2
@@ -27,16 +30,36 @@ check() {
   local name="$1"
   local url="$2"
   local expected_pattern="$3"   # regex matched against HTTP status code
+  local retry_window="${4:-$RETRY_WINDOW_SECONDS}"
   local http_code
-  # -L: follow redirects (e.g. admin panel's "/" -> "/admin" 301) and report
-  # the final page's status, not the redirect hop's.
-  http_code=$(curl -sL -o /dev/null -w "%{http_code}" --max-time 20 --retry 3 --retry-delay 5 "$url" || echo "000")
-  if echo "$http_code" | grep -qE "$expected_pattern"; then
-    echo "  PASS  $name  →  HTTP $http_code"
-  else
-    echo "  FAIL  $name  →  HTTP $http_code (expected $expected_pattern)  $url" >&2
-    FAILED=1
-  fi
+  local deadline=$((SECONDS + retry_window))
+  local attempt=1
+
+  while true; do
+    # -L follows redirects (for example, admin "/" -> "/admin/login").
+    # An explicit loop is used instead of curl --retry because curl does not
+    # retry timeouts unless --retry-all-errors is also supplied. Render's free
+    # tier can take longer than one request timeout to wake after being idle.
+    if ! http_code=$(curl -sS -L -o /dev/null -w "%{http_code}" \
+      --connect-timeout 10 --max-time "$REQUEST_TIMEOUT_SECONDS" "$url"); then
+      http_code="000"
+    fi
+
+    if echo "$http_code" | grep -qE "$expected_pattern"; then
+      echo "  PASS  $name  →  HTTP $http_code (attempt $attempt)"
+      return
+    fi
+
+    if [ "$SECONDS" -ge "$deadline" ]; then
+      echo "  FAIL  $name  →  HTTP $http_code (expected $expected_pattern after ${retry_window}s)  $url" >&2
+      FAILED=1
+      return
+    fi
+
+    echo "  WAIT  $name  →  HTTP $http_code; retrying in ${RETRY_DELAY_SECONDS}s..."
+    sleep "$RETRY_DELAY_SECONDS"
+    attempt=$((attempt + 1))
+  done
 }
 
 echo ""
@@ -61,7 +84,7 @@ echo ""
 echo "=== Admin panel: $ADMIN ==="
 
 # Admin login page — must return 200
-check "Admin login page"                  "$ADMIN"                                               "^200$"
+check "Admin login page"                  "$ADMIN"                                               "^200$" "$ADMIN_RETRY_WINDOW_SECONDS"
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then

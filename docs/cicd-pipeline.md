@@ -96,13 +96,14 @@ Key structural facts:
   their own infrastructure afterward.
 - **`smoke` runs after both deploys are *triggered*, not after they're *live***
   — this is why `scripts/smoke-test.sh` starts with `sleep
-  ${SMOKE_WAIT_SECONDS:-90}` before checking anything. If Vercel/Render take
-  longer than 90s to actually go live, smoke checks can false-fail on a
-  stale/mid-deploy response. Re-run the job manually if that happens rather than
-  assuming the code is broken.
-- **`smoke` has `continue-on-error: true`** (GitHub's equivalent of GitLab's
-  `allow_failure: true`) — a smoke-test failure doesn't fail the workflow run;
-  it's a signal to check manually, not a gate.
+  ${SMOKE_WAIT_SECONDS:-90}` before checking anything, then retries each
+  endpoint inside a bounded window. The admin gets a longer window (180s by
+  default) because Render may need a cold start after an idle period.
+- **`smoke` is a verification gate, not a deployment job.** It does not attach
+  the `production` GitHub Environment, so it cannot create a misleading
+  production Deployment record of its own. The two deploy jobs pass their
+  public target URLs to it through job outputs. A real failure after all retries
+  fails the workflow.
 - **`concurrency: { group: deploy-production, cancel-in-progress: false }`** —
   a second push while a run is still in flight queues instead of cancelling it,
   which matters because cancelling mid-`migrate` would be dangerous.
@@ -177,10 +178,12 @@ entirely — check the **Vercel dashboard** or **Render dashboard** directly for
 real build logs.
 
 ### `smoke` *(GitHub Actions)*
-Waits `SMOKE_WAIT_SECONDS` (default 90s), then curls 5 endpoints (3 storefront, 1
-webhook, 1 admin) and checks status codes. See [`scripts/smoke-test.sh`](../scripts/smoke-test.sh)
-for the exact list. `continue-on-error: true` — same "informational, not a gate"
-contract GitLab's `allow_failure: true` had.
+Waits `SMOKE_WAIT_SECONDS` (default 90s), then curls 5 endpoints (3 storefront,
+1 webhook, 1 admin) and checks status codes. Failed requests are retried for 60s
+by default; the Render-hosted admin gets 180s so an idle free-tier instance can
+wake up. See [`scripts/smoke-test.sh`](../scripts/smoke-test.sh) for the exact
+list and tuning variables. This job is a gate but deliberately has no GitHub
+Environment, because a verification check must not create a Deployment record.
 
 ---
 
@@ -412,6 +415,7 @@ building this pipeline, in the order encountered.
 | `/bin/sh: eval: line N: bash: not found` | *(historical)* GitLab `deploy:*`/`smoke:production`, before the GitHub Actions cutover | `node:22-alpine`'s default shell is busybox `ash`, not `bash`; the deploy/smoke scripts declare `#!/usr/bin/env bash` and use `set -o pipefail` (not POSIX-sh compatible) | `apk add --no-cache curl bash` in `before_script`. Moot on GitHub Actions' `ubuntu-latest` runners, which ship real `bash` by default — only matters if these scripts ever run under Alpine/`ash` again |
 | smoke test FAIL: `Stripe webhook (no POST) → HTTP 500 (expected 405/404/400)` | `smoke` job (GitLab's old `smoke:production`, now GitHub Actions' `smoke`) | The test hit `/api/stripe/webhook`, but the real route is `/api/payments/stripe/webhook` — the wrong (nonexistent) path fell through to something that 500s instead of 404ing | Fixed the URL in `scripts/smoke-test.sh` to the real path; the real route only exports `POST` so a `GET` there correctly gets Next.js's automatic `405` |
 | smoke test FAIL: `Admin login page → HTTP 301 (expected 200)` | `smoke` job (GitLab's old `smoke:production`, now GitHub Actions' `smoke`) | `ADMINJS_PUBLIC_URL` points at the bare domain, which we ourselves 301-redirect to `/admin` (§ "Cannot GET /" row above); `curl` doesn't follow redirects by default | Added `-L` to the `curl` call in `smoke-test.sh`'s shared `check()` helper so it follows redirects and checks the *final* page's status |
+| smoke test FAIL: `Admin login page → HTTP 000` after the admin has been idle | GitHub Actions `smoke` job | Render's sleeping instance did not return bytes within curl's 20s request timeout; plain `curl --retry` does not retry timeouts without extra flags, so the first wake-up request failed the check | `smoke-test.sh` now retries explicitly for a bounded window (180s for admin). The smoke job is also detached from the `production` Environment so verification failures cannot masquerade as failed deployments |
 | `Invalid workflow file ... Unrecognized named-value: 'secrets'. Located at position 1 within expression: secrets.NEXT_PUBLIC_APP_URL` (or `ADMINJS_PUBLIC_URL`) | GitHub Actions workflow parse, before any job runs (`deploy-production.yml`) | `jobs.<id>.environment.url` only allows the `vars`/`github`/`needs`/`inputs`/`strategy`/`matrix` contexts — `secrets` isn't one of them. A single bad reference fails the *whole file's* validation, blocking every job | Use `vars.NEXT_PUBLIC_APP_URL`/`vars.ADMINJS_PUBLIC_URL` there instead, and store those two as GitHub Environment **Variables**, not Secrets (§4) — they're public URLs anyway |
 | `Invalid environment variables { DATABASE_URL: [ 'DATABASE_URL must not point to localhost in production' ] }` during `npm run build`'s seed step | GitHub Actions `validate` job | `src/config/env.ts`'s `isLocalDatabaseUrl()` does a literal hostname check (`localhost`/`127.0.0.1`/`[::1]`) and blocks it whenever `NODE_ENV=production` (set here to mirror Vercel's real build) — a real safety guard, not a bug. GitHub Actions `services:` containers are only reachable via `127.0.0.1` when the job runs directly on the runner VM; GitLab's equivalent job never hit this because its services get a DNS alias (`postgres`) instead | Add `container: node:22` to the `validate` job so the `postgres` service is reachable by its service name over the Docker network (same model GitLab uses), and point `DATABASE_URL` at `postgres:5432` instead of `127.0.0.1:5432`. Don't loosen `env.ts`'s check — it's catching a real class of misconfiguration |
 

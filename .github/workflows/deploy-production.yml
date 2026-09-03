@@ -25,7 +25,8 @@ name: Deploy Production
 #     └── migrate  (applies Prisma migrations to the real prod DB)
 #           ├── deploy-storefront  (POSTs to Vercel deploy hook)
 #           ├── deploy-admin       (POSTs to Render deploy hook)
-#           └── smoke              (waits for both deploys, curls live URLs)
+#           └── smoke              (waits for both deploys, curls live URLs;
+#                                  it is a verification job, not a deployment)
 
 on:
   push:
@@ -91,10 +92,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -129,10 +130,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -147,6 +148,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: migrate
     timeout-minutes: 5
+    outputs:
+      storefront_url: ${{ steps.target.outputs.url }}
     environment:
       name: production
       # environment.url only allows the `vars`/`github`/`needs` contexts, not
@@ -160,7 +163,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+
+      - name: Export storefront URL for smoke tests
+        id: target
+        env:
+          DEPLOYMENT_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+        run: echo "url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
 
       - name: Trigger Vercel deploy
         run: bash scripts/deploy-vercel.sh
@@ -169,6 +178,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: migrate
     timeout-minutes: 5
+    outputs:
+      admin_url: ${{ steps.target.outputs.url }}
     environment:
       name: production
       # Same environment.url restriction as deploy-storefront above — must be
@@ -179,7 +190,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+
+      - name: Export admin URL for smoke tests
+        id: target
+        env:
+          DEPLOYMENT_URL: ${{ vars.ADMINJS_PUBLIC_URL }}
+        run: echo "url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
 
       - name: Trigger Render deploy
         run: bash scripts/deploy-render.sh
@@ -188,17 +205,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: [deploy-storefront, deploy-admin]
     timeout-minutes: 10
-    # allow_failure equivalent — smoke failures are informational, not a gate.
-    continue-on-error: true
-    environment:
-      name: production
+    # Do not attach the production Environment here. Verification jobs with an
+    # environment create their own GitHub Deployment record, so a transient
+    # cold-start timeout used to appear as a failed production deployment even
+    # though both real deploy jobs had succeeded.
     env:
-      NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
-      ADMINJS_PUBLIC_URL: ${{ vars.ADMINJS_PUBLIC_URL }}
+      NEXT_PUBLIC_APP_URL: ${{ needs.deploy-storefront.outputs.storefront_url }}
+      ADMINJS_PUBLIC_URL: ${{ needs.deploy-admin.outputs.admin_url }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Run smoke test
         run: bash scripts/smoke-test.sh

@@ -185,7 +185,7 @@ push to GitHub main (or workflow_dispatch)
        └─ migrate            (applies Prisma migrations to the real prod DB; no manual gate by default)
             ├─ deploy-storefront   (needs: migrate) → hits Vercel deploy hook, returns immediately
             ├─ deploy-admin        (needs: migrate) → hits Render deploy hook, returns immediately
-            └─ smoke               (needs: both deploys; continue-on-error: true) → sleeps 90s, then curls live URLs
+            └─ smoke               (needs: both deploys; verification gate) → sleeps 90s, then retries live URLs
 ```
 
 `deploy-storefront`/`deploy-admin` only trigger the deploy hook — they do **not** wait for Vercel/Render
@@ -289,14 +289,17 @@ Commit the generated file in `prisma/migrations/` as part of your MR.
 
 ### 4.8 Smoke test reference
 
-`smoke:production` hits these endpoints (`scripts/smoke-test.sh`) and expects the listed status codes.
-`allow_failure: true` — a failure here is a signal to check manually, not a hard pipeline gate.
+The `smoke` job hits these endpoints (`scripts/smoke-test.sh`) and expects the
+listed status codes. Requests use bounded retries (60s normally, 180s for the
+Render admin's cold start); a failure after the retry window fails the pipeline.
+The job does not declare a GitHub Environment, so it does not create a separate
+production Deployment record.
 
 | Endpoint | Expected |
 |---|---|
 | `GET /` (storefront) | 200 |
-| `GET /sign-in` | 200 |
-| `GET /api/cache/revalidate/windows` (no auth) | 401 / 403 |
+| `GET /api/auth/get-session` | 200 |
+| `GET /api/cache/revalidate/windows` (no auth) | 400 / 401 / 403 |
 | `GET /api/payments/stripe/webhook` (no POST body) | 404 / 405 — route only exports `POST`, so Next.js auto-405s any other method |
 | `GET $ADMINJS_PUBLIC_URL` | 200 (redirects are followed via `curl -L`) |
 
@@ -1131,8 +1134,8 @@ Optional admin-related operational envs:
 5. Vercel builds independently (`npm run build` — seeds the DB, then builds Next.js) and goes live.
 6. Render builds independently (`npm run render:build` — installs deps, pre-bundles AdminJS) and starts
    the admin server (`npm run admin:start`).
-7. `smoke` waits 90s, then curls both live services to confirm they're actually responding correctly
-   (§4.8).
+7. `smoke` waits 90s, then retries both live services within bounded windows to
+   confirm they're actually responding correctly (§4.8).
 
 ---
 
