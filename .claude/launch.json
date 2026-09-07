@@ -1,0 +1,32 @@
+{
+	"version": "0.0.1",
+	"configurations": [
+		{
+			"name": "web",
+			"runtimeExecutable": "npm",
+			"runtimeArgs": ["run", "dev"],
+			"port": 3000,
+			"autoPort": true
+		},
+		{
+			"name": "admin",
+			"runtimeExecutable": "npm",
+			"runtimeArgs": ["run", "admin:dev"],
+			"port": 3001
+		},
+		{
+			"name": "web-prod",
+			"runtimeExecutable": "npm",
+			"runtimeArgs": ["run", "start"],
+			"port": 3000,
+			"autoPort": true
+		},
+		{
+			"name": "landing",
+			"runtimeExecutable": "bash",
+			"runtimeArgs": ["-c", "cd '/Users/romanonyshchenko/Desktop/transf land' && npm run dev"],
+			"port": 3000,
+			"autoPort": true
+		}
+	]
+}

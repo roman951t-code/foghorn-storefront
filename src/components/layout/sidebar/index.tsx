@@ -1,0 +1,152 @@
+'use client';
+
+import { Box, IconButton } from '@chakra-ui/react';
+import { FiMenu } from 'react-icons/fi';
+import {
+	DrawerBackdrop,
+	DrawerCloseTrigger,
+	DrawerContent,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerRoot,
+	DrawerTrigger,
+} from '@/components/ui/chakra/drawer';
+import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/routing';
+import CatalogBtn from '@/components/ui/buttons/CatalogBtn';
+import MediaContacts from '@/components/ui/links/MediaContacts';
+import Image from 'next/image';
+import Auth from '@/features/auth/DynamicAuth';
+import { useSession } from '@/providers/SessionProvider';
+import { AuthorizeSection, LogoutSection } from './AuthorizeSection';
+import CollapsibleLinks from './CollapsibleLinks';
+import { DeleteAccount } from './DeleteAccount';
+import { ASSET_IMAGES } from '@/constants/assets';
+
+// Each variant's width is derived from its own real pixel dimensions at a
+// fixed 36px height — see src/components/layout/header/Logo.tsx for why
+// that's not shared across variants, and why the light/dark swap is done
+// with _dark instead of a JS color-mode check.
+const logoHeight = 36;
+
+function Logo({ onClick }: { onClick?: () => void }) {
+	return (
+		<Link href='/' onClick={onClick}>
+			<Box>
+				<Image src={ASSET_IMAGES.logoBig} width={210} height={logoHeight} alt='logo' />
+			</Box>
+		</Link>
+	);
+}
+
+export default function SidePanel() {
+	const [open, setOpen] = useState(false);
+	const [authOpen, setAuthOpen] = useState(false);
+	const { session } = useSession();
+	const pathname = usePathname();
+	const t = useTranslations('common.socialLinks');
+	const socialLinksI18nData = {
+		facebook: t('facebook'),
+		instagram: t('instagram'),
+		viber: t('viber'),
+		telegram: t('telegram'),
+		email: t('email'),
+	};
+
+	const onClose = () => setOpen(false);
+	const onAuthOpen = () => {
+		setAuthOpen(true);
+		onClose();
+	};
+
+	// Sidebar persists across navigation. Links nested inside it (e.g. the
+	// catalog drawer's category/product links) navigate away without going
+	// through onClose, which left this drawer stuck open on return. Closing
+	// on every route change covers those links too.
+	useEffect(() => {
+		setOpen(false);
+	}, [pathname]);
+
+	return (
+		<>
+			<DrawerRoot
+				key={pathname}
+				placement='start'
+				open={open}
+				onOpenChange={(e) => setOpen(e.open)}
+				closeOnInteractOutside={true}
+			>
+				<DrawerBackdrop />
+				<DrawerTrigger asChild>
+					<IconButton
+						aria-label='Menu'
+						color='main.lightOnly'
+						variant='ghost'
+						size='md'
+						rounded='md'
+						bg='transparent'
+						_hover={{
+							bg: 'transparent',
+							borderWidth: '0.5px',
+							borderStyle: 'solid',
+							borderColor: 'main.lightOnly',
+						}}
+					>
+						<FiMenu />
+					</IconButton>
+				</DrawerTrigger>
+
+				<DrawerContent bg='bg.tertiary' minWidth='320px' display='flex' flexDirection='column'>
+					<DrawerHeader bg='bg.secondary'>
+						<Logo onClick={onClose} />
+					</DrawerHeader>
+
+					<Box flex='1' overflowY='auto' display='flex' flexDirection='column' height='100dvh'>
+						<Box
+							px={6}
+							my={6}
+							h='100%'
+							overflowY='auto'
+							display='flex'
+							flexDirection='column'
+							gapY='8'
+						>
+							<CatalogBtn fullText />
+
+							{session?.session ? (
+								<LogoutSection onClose={onClose} />
+							) : (
+								<AuthorizeSection onAuthOpen={onAuthOpen} />
+							)}
+
+							<CollapsibleLinks
+								onClose={onClose}
+								isAuthorized={!!session?.session}
+								userName={session?.user?.name ?? undefined}
+							/>
+
+							{session?.session && <DeleteAccount onCloseAction={onClose} />}
+						</Box>
+
+						<DrawerFooter bg='bg.secondary' mt='auto'>
+							<MediaContacts i18nData={socialLinksI18nData} />
+						</DrawerFooter>
+					</Box>
+
+					<DrawerCloseTrigger
+						color='main.lightOnly'
+						_hover={{
+							bg: 'transparent',
+							borderWidth: '0.5px',
+							borderStyle: 'solid',
+							borderColor: 'main.lightOnly',
+						}}
+					/>
+				</DrawerContent>
+			</DrawerRoot>
+
+			<Auth isOpen={authOpen} setIsOpen={setAuthOpen} />
+		</>
+	);
+}
