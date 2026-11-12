@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
+import Image from '@/components/ui/ProductImage';
 import { Box, Flex, Text, VStack } from '@chakra-ui/react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Mousewheel } from 'swiper/modules';

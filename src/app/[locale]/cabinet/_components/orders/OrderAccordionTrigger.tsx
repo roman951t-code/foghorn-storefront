@@ -10,7 +10,7 @@ import {
 	Text,
 	VStack,
 } from '@chakra-ui/react';
-import Image from 'next/image';
+import Image from '@/components/ui/ProductImage';
 import { useTranslations } from 'next-intl';
 import DateWithLocale from '@/components/ui/DateWithLocale';
 import CountPill from '@/components/ui/CountPill';
@@ -18,7 +18,6 @@ import {
 	resolveProductPrimaryImage,
 	toPreviewImage,
 } from '@/utils/productImages';
-import { shouldBypassImageOptimization } from '@/utils/imageOptimization';
 import { formatUsdPrice } from '@/utils/priceFormatting';
 import type { OrderDetailTag, UserOrder } from '@/types/order';
 
@@ -92,7 +91,6 @@ export function OrderAccordionTrigger({ order, totalItems, thumbItems, orderDeta
 									width={114}
 									height={114}
 									src={previewImage}
-									unoptimized={shouldBypassImageOptimization(previewImage)}
 									alt={item.product.name}
 									style={{
 										objectFit: 'cover',

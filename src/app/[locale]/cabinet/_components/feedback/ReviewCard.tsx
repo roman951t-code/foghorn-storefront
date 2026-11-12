@@ -13,7 +13,7 @@ import {
 	Stack,
 	Text,
 } from '@chakra-ui/react';
-import Image from 'next/image';
+import Image from '@/components/ui/ProductImage';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { useMemo } from 'react';
 import { Rating } from '@/components/ui/chakra/rating';
@@ -25,7 +25,6 @@ import {
 	resolveProductPrimaryImage,
 	toPreviewImage,
 } from '@/utils/productImages';
-import { shouldBypassImageOptimization } from '@/utils/imageOptimization';
 import { formatUsdPrice } from '@/utils/priceFormatting';
 
 type Props = {
@@ -72,7 +71,6 @@ export function ReviewCard({ product, review, price, pending, onRemoveAction }: 
 									fill
 									sizes='(max-width: 479px) 136px, 114px'
 									src={previewImage}
-									unoptimized={shouldBypassImageOptimization(previewImage)}
 									alt={product.name ?? ''}
 									style={{
 										objectFit: 'contain',

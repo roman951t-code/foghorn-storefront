@@ -9,8 +9,7 @@ import {
 } from '@/components/ui/chakra/dialog';
 import { IMAGE_MODAL_DIALOG_IDS } from '@/constants/dialogs';
 import { PRODUCT_PLACEHOLDER_IMAGE } from '@/utils/productImages';
-import { shouldBypassImageOptimization } from '@/utils/imageOptimization';
-import Image from 'next/image';
+import Image from '@/components/ui/ProductImage';
 import { Keyboard, Navigation, A11y } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -72,7 +71,6 @@ export default function ImageModal({ images, initialIndex, productName, resetMod
 									<Box position='relative' width='100%' height={{ base: '72vh', md: '84vh' }}>
 										<Image
 											src={src}
-											unoptimized={shouldBypassImageOptimization(src)}
 											alt={`${accessibleName} expanded image ${index + 1}`}
 											fill
 											priority={index === safeInitialIndex}

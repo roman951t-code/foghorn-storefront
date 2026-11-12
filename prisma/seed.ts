@@ -1,5 +1,6 @@
 import { Prisma, OrderStatus, StorefrontFormPlacement } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { getDemoImage, getDemoGallery, isLegacyDemoImage, resolveDemoImage } from '@/utils/demoImages';
 import { computeProductEffectivePrice } from '@/utils/productEffectivePrice';
 import { faker } from '@faker-js/faker';
 import slugify from 'slugify';
@@ -49,7 +50,6 @@ const SUBCATEGORY_COUNT_OVERRIDES: Record<string, number> = {
 const PRODUCTS_PER_SUBCATEGORY_OVERRIDES_BY_MAIN: Record<string, { min: number; max: number }> = {
 	Cameras: { min: 8, max: 10 },
 };
-const SEEDED_IMAGE_SIZE = 1100;
 
 const generateUniqueProductCode = () => {
 	let attempts = 0;
@@ -63,19 +63,6 @@ const generateUniqueProductCode = () => {
 	}
 	throw new Error('Failed to generate a unique productCode during seeding.');
 };
-
-const fallbackProductImages = [
-	'/assets/images/temp/1Big.webp',
-	'/assets/images/temp/2Big.webp',
-	'/assets/images/temp/3Big.webp',
-	'/assets/images/temp/4Big.webp',
-];
-
-const fallbackCategoryImages = [
-	'/assets/images/temp/2Big.webp',
-	'/assets/images/temp/3Big.webp',
-	'/assets/images/temp/4Big.webp',
-];
 
 const mainCategories = [
 	'Smartphones',
@@ -271,122 +258,24 @@ function stablePick<T>(items: T[], seed: string) {
 	return items[hash % items.length];
 }
 
-function buildKeywordImage(keyword: string, width: number, height: number, seed: string) {
-	const normalizedKeyword = encodeURIComponent(keyword.toLowerCase().replace(/\s+/g, '-'));
-	return `https://picsum.photos/seed/${normalizedKeyword}-${seed}/${width}/${height}`;
+function buildKeywordImage(keyword: string, seed: string) {
+	return getDemoImage(`${keyword}-${seed}`);
 }
 
-const updatePicsumVariantPath = (url: URL, variantIndex: number) => {
-	const segments = url.pathname.split('/').filter(Boolean);
-	const seedIndex = segments.findIndex((segment) => segment === 'seed');
-	if (seedIndex !== -1 && segments.length >= seedIndex + 4) {
-		const baseSeed = segments[seedIndex + 1] ?? 'product';
-		segments[seedIndex + 1] = `${baseSeed}-${variantIndex}`;
-		segments[seedIndex + 2] = String(SEEDED_IMAGE_SIZE);
-		segments[seedIndex + 3] = String(SEEDED_IMAGE_SIZE);
-		url.pathname = '/' + segments.join('/');
-		url.search = '';
-		return;
-	}
-	url.searchParams.set('variant', String(variantIndex));
-};
+const resolveSeedImageUrl = (url?: string | null): string | null =>
+	url ? resolveDemoImage(url.trim()) : null;
 
-const updateLoremFlickrVariantPath = (url: URL, variantIndex: number) => {
-	const segments = url.pathname.split('/').filter(Boolean);
-	if (segments.length >= 2 && /^\d+$/.test(segments[0]) && /^\d+$/.test(segments[1])) {
-		segments[0] = String(SEEDED_IMAGE_SIZE);
-		segments[1] = String(SEEDED_IMAGE_SIZE);
-		url.pathname = '/' + segments.join('/');
-	}
-	url.searchParams.set('lock', String(variantIndex));
-};
-
-const resizeSeedImageUrl = (url?: string | null): string | null => {
-	if (!url) return url ?? null;
-	const normalizedUrl = url.trim();
-	if (!normalizedUrl) return normalizedUrl;
-
-	try {
-		const parsed = new URL(normalizedUrl);
-		const targetSize = String(SEEDED_IMAGE_SIZE);
-
-		if (parsed.hostname.includes('picsum.photos')) {
-			const segments = parsed.pathname.split('/').filter(Boolean);
-			const seedIndex = segments.findIndex((segment) => segment === 'seed');
-			if (seedIndex !== -1 && segments.length >= seedIndex + 4) {
-				if (segments[seedIndex + 2] === targetSize && segments[seedIndex + 3] === targetSize) {
-					return normalizedUrl;
-				}
-				segments[seedIndex + 2] = targetSize;
-				segments[seedIndex + 3] = targetSize;
-				parsed.pathname = '/' + segments.join('/');
-				parsed.search = '';
-				return parsed.toString();
-			}
-			return normalizedUrl;
-		}
-
-		if (parsed.hostname.includes('loremflickr.com')) {
-			const segments = parsed.pathname.split('/').filter(Boolean);
-			if (segments.length >= 2 && /^\d+$/.test(segments[0]) && /^\d+$/.test(segments[1])) {
-				if (segments[0] === targetSize && segments[1] === targetSize) return normalizedUrl;
-				segments[0] = targetSize;
-				segments[1] = targetSize;
-				parsed.pathname = '/' + segments.join('/');
-				return parsed.toString();
-			}
-			return normalizedUrl;
-		}
-
-		return normalizedUrl;
-	} catch {
-		return normalizedUrl;
-	}
-};
-
-const toVariantImageUrl = (primaryUrl: string, variantIndex: number) => {
-	try {
-		const parsed = new URL(primaryUrl);
-		if (parsed.hostname.includes('picsum.photos')) {
-			updatePicsumVariantPath(parsed, variantIndex);
-		} else if (parsed.hostname.includes('loremflickr.com')) {
-			updateLoremFlickrVariantPath(parsed, variantIndex);
-		} else {
-			parsed.searchParams.set('variant', String(variantIndex));
-		}
-		return parsed.toString();
-	} catch {
-		const separator = primaryUrl.includes('?') ? '&' : '?';
-		return `${primaryUrl}${separator}variant=${variantIndex}`;
-	}
-};
-
-const buildSeedProductGallery = (primaryUrl: string, extraImages = 3) => {
-	const normalizedPrimary = primaryUrl.trim();
-	if (!normalizedPrimary) return [];
-	const urls: string[] = [normalizedPrimary];
-	for (let i = 1; i <= extraImages; i += 1) {
-		const variantUrl = toVariantImageUrl(normalizedPrimary, i);
-		if (!urls.includes(variantUrl)) urls.push(variantUrl);
-	}
-	return urls;
-};
+const buildSeedProductGallery = (primaryUrl: string, extraImages = 3) =>
+	getDemoGallery(primaryUrl.trim(), extraImages + 1);
 
 const getCategoryImage = (name: string) => {
 	const keyword = categoryImageKeywords[name] ?? subcategoryImageKeywords[name] ?? 'tech-gadgets';
-	const seed = createSlug(name);
-	return (
-		buildKeywordImage(keyword, SEEDED_IMAGE_SIZE, SEEDED_IMAGE_SIZE, seed) ||
-		stablePick(fallbackCategoryImages, seed)
-	);
+	return buildKeywordImage(keyword, createSlug(name));
 };
 
 const getSubcategoryImage = (sub: string, seed: string) => {
 	const keyword = subcategoryImageKeywords[sub] ?? categoryImageKeywords[sub] ?? 'tech-gadgets';
-	return (
-		buildKeywordImage(keyword, SEEDED_IMAGE_SIZE, SEEDED_IMAGE_SIZE, seed) ||
-		stablePick(fallbackProductImages, seed)
-	);
+	return buildKeywordImage(keyword, seed);
 };
 
 const buildSemanticProductName = (brandName: string, subcategoryName: string, seed: string) => {
@@ -488,13 +377,7 @@ const buildVariantTemplates = (category: string): VariantTemplate[] => {
 };
 
 function needsImageReplacement(url?: string | null) {
-	if (!url) return true;
-	try {
-		const hostname = new URL(url).hostname;
-		return !(hostname.includes('picsum.photos') || hostname.includes('loremflickr.com'));
-	} catch {
-		return true;
-	}
+	return !url?.trim() || isLegacyDemoImage(url.trim());
 }
 
 function getLocalizedCategoryName(name: string, locale: SupportedLocale) {
@@ -1095,7 +978,7 @@ async function main() {
 	const brands = await Promise.all(
 		brandNames.map(async (name) => {
 			const slug = createSlug(name);
-			const logoUrl = buildKeywordImage('brand-logo', 160, 160, slug);
+			const logoUrl = buildKeywordImage('brand-logo', slug);
 			return prisma.brand.upsert({
 				where: { slug },
 				update: { name, logoUrl },
@@ -1500,12 +1383,12 @@ async function main() {
 		});
 
 		for (const cat of categoriesNeedingImages) {
-			const resizedImage = resizeSeedImageUrl(cat.imageUrl);
+			const resolvedImage = resolveSeedImageUrl(cat.imageUrl);
 			const newImage = needsImageReplacement(cat.imageUrl)
 				? cat.parentId
 					? getSubcategoryImage(cat.name, cat.slug)
 					: getCategoryImage(cat.name)
-				: resizedImage;
+				: resolvedImage;
 			if (!newImage || newImage === cat.imageUrl) continue;
 			await prisma.productCategory.update({
 				where: { id: cat.id },
@@ -1527,10 +1410,10 @@ async function main() {
 			subcategoryImageKeywords[product.subcategoryName] ??
 			categoryImageKeywords[product.categoryName] ??
 			'tech-gadgets';
-		const resizedImage = resizeSeedImageUrl(product.imageUrl);
+		const resolvedImage = resolveSeedImageUrl(product.imageUrl);
 		const newImage = needsImageReplacement(product.imageUrl)
-			? buildKeywordImage(keyword, SEEDED_IMAGE_SIZE, SEEDED_IMAGE_SIZE, seed)
-			: resizedImage;
+			? buildKeywordImage(keyword, seed)
+			: resolvedImage;
 		if (!newImage || newImage === product.imageUrl) continue;
 		await prisma.product.update({
 			where: { id: product.id },
@@ -1545,11 +1428,11 @@ async function main() {
 	});
 
 	for (const image of productGalleryImages) {
-		const resizedImage = resizeSeedImageUrl(image.url);
-		if (!resizedImage || resizedImage === image.url) continue;
+		const resolvedImage = resolveSeedImageUrl(image.url);
+		if (!resolvedImage || resolvedImage === image.url) continue;
 		await prisma.productImage.update({
 			where: { id: image.id },
-			data: { url: resizedImage },
+			data: { url: resolvedImage },
 		});
 	}
 
@@ -1619,8 +1502,7 @@ async function main() {
 		{
 			legacyTitle: 'Laptop Deals Week',
 			linkUrl: '/products/search/?tag=discount',
-			imageUrl:
-				'https://fastly.picsum.photos/id/1018/900/900.jpg?hmac=ZOttfaRw0v1KBhmRxLeyN9z1fFAy8uTspj_HcCDbxcU',
+			imageUrl: '/products/demo/tech-desk.webp',
 			placement: 'promo',
 			locales: {
 				uk: {
@@ -1638,8 +1520,7 @@ async function main() {
 		{
 			legacyTitle: 'New Arrivals',
 			linkUrl: '/products/search/?tag=new',
-			imageUrl:
-				'https://fastly.picsum.photos/id/573/900/900.jpg?hmac=om04nEh5ahI6QHbnsxmzH5HwwZpl9xVa4KOMt4hReuk',
+			imageUrl: '/products/demo/audio-desk.webp',
 			placement: 'promo',
 			locales: {
 				uk: {
@@ -1657,8 +1538,7 @@ async function main() {
 		{
 			legacyTitle: 'Popular Right Now',
 			linkUrl: '/products/search/?tag=popular',
-			imageUrl:
-				'https://fastly.picsum.photos/id/522/900/900.jpg?hmac=WkjG1wM-inQRZ2Jw8HHWtvQeNdal69KOh84yuTX02Iw',
+			imageUrl: '/products/demo/camera-desk.webp',
 			placement: 'promo',
 			locales: {
 				uk: {

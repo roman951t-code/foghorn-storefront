@@ -3,12 +3,11 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { Box } from '@chakra-ui/react';
-import Image from 'next/image';
+import Image from '@/components/ui/ProductImage';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 
 import { PRODUCT_PLACEHOLDER_IMAGE, toPreviewImage } from '@/utils/productImages';
-import { shouldBypassImageOptimization } from '@/utils/imageOptimization';
 import { PRODUCTS_GRID_CARD_MAX_WIDTH_PX } from '@/constants/grids';
 
 // This slider renders inside every product card, including the widest one
@@ -118,7 +117,6 @@ function ProductPreviewSwiper({
 							<Image
 								loading={shouldPrioritize ? 'eager' : 'lazy'}
 								src={resolvedSrc}
-								unoptimized={shouldBypassImageOptimization(resolvedSrc)}
 								width={480}
 								height={440}
 								alt={altText}
@@ -167,7 +165,6 @@ export default function ProductPreviewSlider(props: ProductPreviewSliderProps) {
 			>
 				<Image
 					src={firstPreview}
-					unoptimized={shouldBypassImageOptimization(firstPreview)}
 					width={480}
 					height={440}
 					alt={altText}

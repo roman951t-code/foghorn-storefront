@@ -1,6 +1,6 @@
 import { FiTrash2 } from 'react-icons/fi';
 import { Badge, Box, Card, Flex, HStack, IconButton, Text, VStack } from '@chakra-ui/react';
-import Image from 'next/image';
+import Image from '@/components/ui/ProductImage';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { StepperInput } from '@/components/ui/chakra/stepper-input';
 import { useCart } from '@/hooks/useCart';
@@ -9,7 +9,6 @@ import { toasterMessages } from '@/data/toasterMessages';
 import { I18nData } from '@/types/i18n';
 import { CartProduct } from '@/types/cart';
 import { resolveProductPrimaryImage } from '@/utils/productImages';
-import { shouldBypassImageOptimization } from '@/utils/imageOptimization';
 import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 
 interface Props {
@@ -95,7 +94,6 @@ export default function CartOrderCard({ product, i18nData, onNavigate }: Props) 
 					>
 						<Image
 							src={previewImage}
-							unoptimized={shouldBypassImageOptimization(previewImage)}
 							alt={product.name}
 							fill
 							sizes='(max-width: 479px) 136px, 114px'

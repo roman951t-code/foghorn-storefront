@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { resolveDemoImage } from '@/utils/demoImages';
 import { shouldBypassImageOptimization } from '@/utils/imageOptimization';
 
 type Props = {
@@ -25,10 +26,10 @@ export default function PriorityImageWithFallback({
 	fetchPriority,
 	priority = false,
 }: Props) {
-	const [resolvedSrc, setResolvedSrc] = useState(src);
+	const [resolvedSrc, setResolvedSrc] = useState(resolveDemoImage(src));
 
 	useEffect(() => {
-		setResolvedSrc(src);
+		setResolvedSrc(resolveDemoImage(src));
 	}, [src]);
 
 	return (

@@ -1,7 +1,7 @@
 'use client';
 
 import { Accordion, Card, Flex, Stack, Text, Box } from '@chakra-ui/react';
-import Image from 'next/image';
+import Image from '@/components/ui/ProductImage';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { useMemo } from 'react';
 import FeedbackModal from '@/features/product/FeedbackModal';
@@ -10,7 +10,6 @@ import {
 	resolveProductPrimaryImage,
 	toPreviewImage,
 } from '@/utils/productImages';
-import { shouldBypassImageOptimization } from '@/utils/imageOptimization';
 import { formatUsdPrice } from '@/utils/priceFormatting';
 
 type Props = {
@@ -53,7 +52,6 @@ export function EmptyReviewCard({ product, price, onAddAction }: Props) {
 								fill
 								sizes='(max-width: 479px) 136px, 114px'
 								src={previewImage}
-								unoptimized={shouldBypassImageOptimization(previewImage)}
 								alt={product.name ?? ''}
 								style={{
 									objectFit: 'contain',

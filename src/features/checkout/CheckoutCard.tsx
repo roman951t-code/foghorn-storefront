@@ -1,10 +1,9 @@
 import { Text, VStack, Card, Badge, Separator, Flex, Group, Stat, Box } from '@chakra-ui/react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
+import Image from '@/components/ui/ProductImage';
 import { LocaleNavLink } from '@/components/ui/links/LocaleNavLink';
 import { CartProduct } from '@/types/cart';
 import { resolveProductPrimaryImage } from '@/utils/productImages';
-import { shouldBypassImageOptimization } from '@/utils/imageOptimization';
 import { formatUsdPrice, roundPrice } from '@/utils/priceFormatting';
 
 type CheckoutCardProps = {
@@ -52,7 +51,6 @@ export function SidebarCheckoutCard({ product, showSeparator = true }: CheckoutC
 								fill
 								sizes='(max-width: 479px) 136px, 114px'
 								src={getImage(product.imageUrl)}
-								unoptimized={shouldBypassImageOptimization(getImage(product.imageUrl))}
 								alt={product.name}
 								style={{
 									objectFit: 'contain',
@@ -180,7 +178,6 @@ export function FullCheckoutCard({ product, showSeparator = true }: CheckoutCard
 									fill
 									sizes='(max-width: 479px) 136px, 114px'
 									src={getImage(product.imageUrl)}
-									unoptimized={shouldBypassImageOptimization(getImage(product.imageUrl))}
 									alt={product.name}
 									style={{
 										objectFit: 'contain',

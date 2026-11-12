@@ -11,11 +11,10 @@ import {
 	resolveProductPrimaryImage,
 	toPreviewImage,
 } from '@/utils/productImages';
-import { shouldBypassImageOptimization } from '@/utils/imageOptimization';
 import { repeatOrderAction } from '@/actions/repeatOrderAction';
 import { useCartStore } from '@/stores/cartStore';
 import { showToaster } from '@/utils/toast';
-import Image from 'next/image';
+import Image from '@/components/ui/ProductImage';
 import type { UserOrder } from '@/types/order';
 import { deleteOrderAction } from '@/actions/deleteOrderAction';
 import { isCustomerOrderCancellable, isCustomerOrderDeletable } from '@/utils/orderStatusPolicy';
@@ -196,7 +195,6 @@ export function OrderAccordionContent({ order, onOrderMutated }: Props) {
 												fill
 												sizes='(max-width: 479px) 136px, 114px'
 												src={previewImage}
-												unoptimized={shouldBypassImageOptimization(previewImage)}
 												alt={item.product.name}
 												style={{
 													objectFit: 'contain',

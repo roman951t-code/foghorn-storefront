@@ -3,12 +3,11 @@
 import dynamic from 'next/dynamic';
 import { Box, HStack, Skeleton, useBreakpointValue } from '@chakra-ui/react';
 import { KeyboardEvent, useEffect, useState } from 'react';
-import Image from 'next/image';
+import Image from '@/components/ui/ProductImage';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode, Navigation, Thumbs, Pagination, A11y, Keyboard } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import { PRODUCT_PLACEHOLDER_IMAGE } from '@/utils/productImages';
-import { shouldBypassImageOptimization } from '@/utils/imageOptimization';
 import 'swiper/css/free-mode';
 import 'swiper/css/thumbs';
 import 'swiper/css/pagination';
@@ -182,7 +181,6 @@ function ThumbsSliderInternal({ images, productName, initialIndex = 0 }: Product
 							>
 								<Image
 									src={src}
-									unoptimized={shouldBypassImageOptimization(src)}
 									alt={`${accessibleName} photo ${index + 1}`}
 									onError={markImageFailed(index)}
 									fill
@@ -245,7 +243,6 @@ function ThumbsSliderInternal({ images, productName, initialIndex = 0 }: Product
 							>
 								<Image
 									src={src}
-									unoptimized={shouldBypassImageOptimization(src)}
 									alt={`${accessibleName} thumbnail ${index + 1}`}
 									onError={markImageFailed(index)}
 									fill

@@ -1,23 +1,21 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { DEMO_IMAGES } from './demoImages';
 import { shouldBypassImageOptimization } from './imageOptimization';
+import { toPreviewImage } from './productImages';
 
-test('bypasses optimization for Picsum images', () => {
-	assert.equal(
-		shouldBypassImageOptimization('https://picsum.photos/seed/product/1100/1100'),
-		true,
-	);
-	assert.equal(
-		shouldBypassImageOptimization('https://fastly.picsum.photos/id/1/1100/1100.jpg'),
-		true,
-	);
+test('serves precompressed demo photos and previews without Vercel transformations', () => {
+	for (const src of DEMO_IMAGES) {
+		assert.equal(shouldBypassImageOptimization(src), true);
+		assert.equal(shouldBypassImageOptimization(toPreviewImage(src)), true);
+	}
 });
 
-test('keeps optimization enabled for other image sources', () => {
-	assert.equal(
-		shouldBypassImageOptimization('https://res.cloudinary.com/demo/image/upload/product.jpg'),
-		false,
-	);
-	assert.equal(shouldBypassImageOptimization('/assets/images/product-placeholder.svg'), false);
-	assert.equal(shouldBypassImageOptimization('https://notpicsum.photos/product.jpg'), false);
+test('keeps optimization enabled for custom image sources', () => {
+	for (const src of [
+		'https://res.cloudinary.com/demo/image/upload/product.jpg',
+		'/uploads/product.jpg',
+		'/products/demo/custom.webp',
+		'/assets/images/product-placeholder.svg',
+	]) assert.equal(shouldBypassImageOptimization(src), false);
 });

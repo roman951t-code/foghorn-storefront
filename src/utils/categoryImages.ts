@@ -1,7 +1,9 @@
+import { resolveDemoImage } from './demoImages';
+
 const normalizeImageUrl = (value?: string | null): string | null => {
 	if (typeof value !== 'string') return null;
 	const trimmed = value.trim();
-	return trimmed.length > 0 ? trimmed : null;
+	return trimmed.length > 0 ? resolveDemoImage(trimmed) : null;
 };
 
 export const CATEGORY_PLACEHOLDER_IMAGE = '/assets/images/category-placeholder.svg';
