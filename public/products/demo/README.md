@@ -13,6 +13,20 @@ Photo credits (downloaded November 12, 2026; [Unsplash License](https://unsplash
 - `audio-desk`: [Jaimy de Hon](https://unsplash.com/photos/tDVdy6ku378)
 - `camera-desk`: [Miguel A Amutio](https://unsplash.com/photos/Fqj1Zbu0CqE)
 
+Additional colorful product photos (downloaded November 13, 2026, under the same
+Unsplash License):
+
+- `laptop-color`: [Fujiphilm](https://unsplash.com/photos/jGNabhDfoZI)
+- `smartphone-gradient`: [Georgiy Lyamin](https://unsplash.com/photos/xQ3xDkWyjBs)
+- `tablet-orange`: [Drum Pads 24](https://unsplash.com/photos/_ipIXpMMdsI)
+- `keyboard-pink`: [Hillary Black](https://unsplash.com/photos/kFAECCSp7G8)
+- `mouse-color`: [Brian Miner](https://unsplash.com/photos/x8yVFdU3JrI)
+- `headphones-yellow`: [C D-X](https://unsplash.com/photos/oBI4NBP2Lhg)
+- `controller-neon`: [Luis Villasmil](https://unsplash.com/photos/ITFwHdPEED0)
+
+The collection contains ten photos. Demo selection uses the whole collection;
+generated galleries remain capped at the caller's requested image count.
+
 Deployment does not require a database migration or reseed. Existing persisted
 Picsum/LoremFlickr URLs are resolved when read or displayed. New seed data uses
 local paths and preserves custom image URLs. The existing local SVG placeholder

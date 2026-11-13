@@ -3,6 +3,13 @@ export const DEMO_IMAGES = [
 	'/products/demo/tech-desk.webp',
 	'/products/demo/audio-desk.webp',
 	'/products/demo/camera-desk.webp',
+	'/products/demo/laptop-color.webp',
+	'/products/demo/smartphone-gradient.webp',
+	'/products/demo/tablet-orange.webp',
+	'/products/demo/keyboard-pink.webp',
+	'/products/demo/mouse-color.webp',
+	'/products/demo/headphones-yellow.webp',
+	'/products/demo/controller-neon.webp',
 ] as const;
 
 export function isLegacyDemoImage(src: string): boolean {

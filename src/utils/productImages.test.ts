@@ -55,7 +55,7 @@ test('persisted galleries retain order and deduplicate resolved demo images', ()
 });
 
 test('demo primary generates bounded local gallery and supports single-image requests', () => {
-	assert.equal(buildProductImageGallery(DEMO_IMAGES[0]).length, DEMO_IMAGES.length);
+	assert.equal(buildProductImageGallery(DEMO_IMAGES[0]).length, Math.min(4, DEMO_IMAGES.length));
 	assert.deepEqual(buildProductImageGallery(DEMO_IMAGES[1], [], 1), [DEMO_IMAGES[1]]);
 	assert.equal(buildProductImageGallery(DEMO_IMAGES[0], [], 99).length, DEMO_IMAGES.length);
 });
