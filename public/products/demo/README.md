@@ -23,8 +23,19 @@ Unsplash License):
 - `mouse-color`: [Brian Miner](https://unsplash.com/photos/x8yVFdU3JrI)
 - `headphones-yellow`: [C D-X](https://unsplash.com/photos/oBI4NBP2Lhg)
 - `controller-neon`: [Luis Villasmil](https://unsplash.com/photos/ITFwHdPEED0)
+- `desktop-rgb`: [Andrey Matveev](https://unsplash.com/photos/MKSOFj9PsKA)
+- `smartwatch-apps`: [Simon Daoudi](https://unsplash.com/photos/2wFoa040m8g)
+- `speaker-blue`: [Sujith R](https://unsplash.com/photos/xWw4BJmfB5Y)
+- `camera-yellow`: [Kirill Fokin](https://unsplash.com/photos/oOuJagHgj2U)
+- `earbuds-wireless`: [Daniel Romero](https://unsplash.com/photos/y84Zn8TEySI)
+- `smartphone-yellow`: [Daniel Romero](https://unsplash.com/photos/KeOUN9KaQAI)
+- `accessories-color`: [Andrey Matveev](https://unsplash.com/photos/bxKb7H98v4o)
+- `tablet-green`: [Victor Carvalho](https://unsplash.com/photos/QmVxgYIzXkc)
+- `smartphone-coral`: [Andrey Matveev](https://unsplash.com/photos/hjYLhuPUO7Y)
+- `console-yellow`: [Spencer](https://unsplash.com/photos/GvmWrvzWMLU)
 
-The collection contains ten photos. Demo selection uses the whole collection;
+The collection contains twenty photos, shared by product, category, and
+subcategory demo image selection. Demo selection uses the whole collection;
 generated galleries remain capped at the caller's requested image count.
 
 Deployment does not require a database migration or reseed. Existing persisted

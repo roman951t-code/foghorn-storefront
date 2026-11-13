@@ -10,6 +10,16 @@ export const DEMO_IMAGES = [
 	'/products/demo/mouse-color.webp',
 	'/products/demo/headphones-yellow.webp',
 	'/products/demo/controller-neon.webp',
+	'/products/demo/desktop-rgb.webp',
+	'/products/demo/smartwatch-apps.webp',
+	'/products/demo/speaker-blue.webp',
+	'/products/demo/camera-yellow.webp',
+	'/products/demo/earbuds-wireless.webp',
+	'/products/demo/smartphone-yellow.webp',
+	'/products/demo/accessories-color.webp',
+	'/products/demo/tablet-green.webp',
+	'/products/demo/smartphone-coral.webp',
+	'/products/demo/console-yellow.webp',
 ] as const;
 
 export function isLegacyDemoImage(src: string): boolean {
